@@ -1,0 +1,18 @@
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+
+1 TYPELIB "win32\\trigger.tlb"
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define PROJECTNAME "cvstools"
+#define PROJECTDESCRIPTION "cvsnt hepler application API"
+#define PROJECTFILENAME "cvstools.dll"
+#include "..\windows-NT\VersionInfoCommon.rc2"

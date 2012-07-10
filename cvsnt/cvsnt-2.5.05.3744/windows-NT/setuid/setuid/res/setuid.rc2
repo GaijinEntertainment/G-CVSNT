@@ -1,0 +1,64 @@
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define PROJECTNAME "setuid"
+#define PROJECTDESCRIPTION "Setuid Lsa Helper DLL"
+#define PROJECTFILENAME "setuid.dll"
+#define SETUID_FILEVERSION 2,1,3,0
+#define SETUID_FILEVERSON_STRING "2.1.3.0"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION SETUID_FILEVERSION
+ PRODUCTVERSION CVSNT_PRODUCTVERSION
+ FILEFLAGSMASK VS_FFI_FILEFLAGSMASK
+ FILEFLAGS CVSNT_PATCHED_FLAG | CVSNT_SPECIAL_BUILD_FLAG | CVSNT_PRIVATE_BUILD_FLAG | CVSNT_DEBUG_FLAG
+#ifdef _UNICODE
+ FILEOS VOS_NT
+#else
+ FILEOS VOS__WINDOWS32
+#endif
+ FILETYPE VFT_APP
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "040904b0"
+        BEGIN
+            VALUE "Comments", "cvsnt " CVSNT_PRODUCTVERSION_STRING ", \r\n"
+                              "Copyright (C) 2004,2005 Tony Hoyle and March Hare Software Ltd.\r\n"
+                              "Licensed under GNU General Public License version 2.0\0"
+            VALUE "CompanyName", "March-Hare Software Ltd\0"
+            VALUE "FileDescription", PROJECTDESCRIPTION "\0"
+            VALUE "FileVersion", PROJECTFILENAME " " SETUID_FILEVERSON_STRING "\0"
+            VALUE "InternalName", PROJECTNAME "\0"
+            VALUE "LegalCopyright", "Copyright (C) 2004,2005 Tony Hoyle and March-Hare Software Ltd\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", PROJECTFILENAME "\0"
+            VALUE "PrivateBuild", CVSNT_PRIVATE_BUILD "\0"
+            VALUE "ProductName", "cvsnt\0"
+            VALUE "ProductVersion", "cvsnt " CVSNT_PRODUCTVERSION_STRING "\0"
+            VALUE "SpecialBuild", CVSNT_SPECIAL_BUILD "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x409, 1200
+    END
+END
+
+// End of version info resource
+

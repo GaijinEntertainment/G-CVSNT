@@ -1,0 +1,91 @@
+Publicity ideas
+---------------
+
+Encourage people to make links from their project page, company page or
+personal homepage to TortoiseCVS.  Create a page explaining how to do
+this, preferably with button graphics, and chunks of HTML to paste in.
+Link to this from pages where keen people are likely to be - both on the
+website and in the help.  (Or more controversially, in the app, say
+at the bottom of the progress dialog once or twice).
+
+Scour abiword mailing list for ideas
+Post to the mailing list using their style, it's fantastic.
+http://www.abisource.com/mailinglists/abiword-dev/02/May/0542.html
+
+Tell people who've had SSH/CVS problems the good news, and get them
+to update their sites:
+	http://www.savagesoftware.com.au/DelphiGamer/showarticles.php?articleid=6&page=1
+	http://sourceforge.net/docman/display_doc.php?docid=8000&group_id=2271
+There are no doubt far more than that. (search for TortoiseCVS and SSH
+or CVS Windows SSH or suchlike)
+
+Email Windows open source projects that use CVS (search for WinCVS to
+find them) and suggest they try TortoiseCVS.  Is this too cheeky? :)
+Examples places are...
+	WinMerge
+	pygame
+	jazilla
+	jakarta
+
+Specifically promote use of TortoiseCVS by itself on one machine with
+local protocol on these sites.  Write a doc about that on the web
+site.  Need history browsing locally to be stable first, really.
+
+Tucows -- sumitted TortoiseCVS 1.0.0, 11th August 2002.  Takes 11 days.
+	   -- rejected with 11 points (need 25 for 3-cows, 34 for 5-cows)
+		   Reviewer's Checklist: 9
+		   Documentation and Help: 1
+		   Customer Support: 1
+		   Bonus Points: 0
+		   Total = 11
+	   -- action is to resubmit after fixing the points, you can 
+	      get a list from the tucows Author Resource centre.  Lots of
+		  it is professionalisation of the website, docs, making
+		  help more prominent, and being picky about the uninstaller
+		  and so on.
+           -- Torsten, 29 Jan 2005: The EULA for registering at Tucows states
+ 	      "[...] COPYRIGHT.  You warrant and represent that you are the sole author of
+	       the Software; that you are the sole owner of the copyright and of all
+	       rights in and to the Software; [..."
+	      IMO, this is not compatible with any piece of software with more than one contributor.
+
+ZDNet / CNET / download.com -- submitted TortoiseCVS 1.0.0, 11th August
+	2002.  Takes 6-8 weeks.
+	-- 28th August, reject as download link isn't direct to the actual
+	file.  They actually host downloads by the looks of it.  Could
+	resubmit with a link directly to a SourceForge file, but I don't
+	really much feel like it.
+	
+Ongoing - started to happen
+---------------------------
+
+get people to do some publicity for me
+	-- wxWidgets list?
+
+
+davecentral.com -- submitted TortoiseCVS 1.0.0, 11th August 2002
+
+Finished
+--------
+
+Release version 1.0 for buzz 
+	-- updated website front page
+
+Get a link from the CVSNT page to tortoisecvs.org
+	-- emailed webmaster on 18 August
+	-- link is now there
+
+Submit document to SourceForge self-docs project "Using TortoiseCVS
+with SourceForge" to go next to the WinCVS ones.  Wow people with
+its simplicity. -- submitted, follow up to make sure it is posted
+                -- WinCVS documentation is now deprecated by SF,
+		   TortoiseCVS is the first listed Windows CVS client
+
+Take out Google adverts (on words like CVS, Windows, WinCVS etc.)
+	-- starting doing this for fun really, it's quite addictive
+       playing with the wording (late August)
+	-- finished, results posted to TortoiseCVS mailing list
+
+Link to http://www.tortoisecvs.org/faq.html#cvsinit now on front page
+
+

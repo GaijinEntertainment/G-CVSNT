@@ -1,0 +1,652 @@
+<!-- ====== Advanced Usage of TortoiseCVS ====================================== -->
+
+<chapter id="advanced">
+  <title id="advanced-title">Advanced Usage of TortoiseCVS</title>
+
+    <!-- ====== Make New Module ================================================ -->
+
+    <section id="advanced.newmodule">
+      <title id="advanced.newmodule-title">Creating a New Repository or Module</title>
+      <para>
+        Typically a System Administrator will setup the CVS repository on a remote server. 
+	TortoiseCVS, however, can configure repositories and modules either locally or remotely
+	(if you have the correct permissions).
+      </para>
+      <para>
+        To create a new repository and/or module prepare the folders and files
+      locally as a new sandbox. Right-click on the top level folder for your
+      new module or repository and choose the <guimenuitem>CVS &rarr; Make New
+      Module...</guimenuitem> menu item. The <link linkend="dialogs.newmodule"
+      endterm="dialogs.newmodule-title"/> will be displayed. Enter the details
+      for the new or existing CVS repository as you would for a <link
+      linkend="basic.checkout"><emphasis>Checkout</emphasis></link>. Click
+      <guibutton>OK</guibutton> to create the new module. 
+      </para>
+      <figure>
+        <title>Make New Module Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0019.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Make New Module Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        If you are using the <literal>:local:</literal> protocol, and the CVS repository does not exist,
+	you will be presented with the following question:
+      </para>
+      <figure>
+        <title>Make New Repository Question</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0020.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Make New Module Question</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        To create the new repository enable the checkbox <guilabel>Initialise a new repository here</guilabel> and click
+      <guibutton>OK</guibutton>. If you have the right permissions on the remote server TortoiseCVS will setup the new
+      repository.
+      </para>
+      <para>
+        Once TortoiseCVS has either created a new or connected an existing CVS repository the new module will be created. By default TortoiseCVS uses the name of the selected folder for the new module's name, but you can change this by modifying the <guilabel>Module</guilabel> textbox.
+      </para>
+    </section>
+
+    <!-- ====== CVS Watch & Edit =============================================== -->
+
+    <section id="advanced.cvswatch">
+      <title id="advanced.cvswatch-title">Watch, Edit and Unedit</title>
+      <para>
+        CVS can also follow the semantics of <emphasis>Lock/Unlock</emphasis>
+	that most version control systems use, although CVS calls it
+	<emphasis>Edit/Unedit</emphasis>. This feature, however, is not
+	enabled in CVS by default so before you can begin you need to enable
+	<emphasis>Watch</emphasis>.
+      </para>
+      <para>
+        You can enable Watch using TortoiseCVS when you <link
+      linkend="advanced.newmodule"><emphasis>Make a New
+      Module</emphasis></link> by enabling the checkbox <guilabel>Check files
+      read-only</guilabel> (on the <guilabel>Options</guilabel> tab). If you wish to enable watch on an existing module,
+      you will need run the following command (using the Command Prompt) on
+      the top level of the module: 
+      <programlisting>
+         cvs watch on
+      </programlisting>
+      </para>
+      <para>
+      Once Watch is enabled, when performing
+      <link linkend="basic.checkout"><emphasis>Checkout</emphasis></link>
+      or
+      <link linkend="basic.update"><emphasis>Update</emphasis></link>
+      the working files will be created as read-only. To change one or more files, select
+      the directory, file or files that you want to modify, right-click on the
+      selection, and choose the <guimenuitem>CVS Edit</guimenuitem> menu item. This
+      command works slightly different depending on whether the file is text
+      or binary. For binary files (such as <filename>.doc</filename>), TortoiseCVS performs an
+      <emphasis>Update</emphasis> on the file and then checks if another user
+      is already editing the file. If this is the case, you will not be
+      allowed to edit it. For text files (such as <filename>.txt</filename> or
+      <filename>.cpp</filename>), you may work on the file even if another
+      user is already working on it; in this case, TortoiseCVS will notify you of that fact.
+      </para>
+      <para>
+      When you are done working on the file or files,
+      <link linkend="basic.commit"><emphasis>Commit</emphasis></link> them as you
+      would normally. If, however, you decide that you do not want to make
+      changes select the file or files: Right-click on this selection and
+      choose the <guimenuitem>CVS &rarr; Unedit</guimenuitem> menu
+      item. TortoiseCVS will ask you if you want to revert the file to the
+      original version (thus losing your changes).
+      </para>
+      <para>
+      If you would like to see which files are currently being edited and by
+      whom, right-click anywhere in Windows Explorer and choose the
+      <guimenuitem>CVS &rarr; Show edited files</guimenuitem> menu item. 
+      </para>
+    </section>
+
+    <!-- ====== Tagging ======================================================== -->
+
+    <section id="advanced.tagging">
+      <title id="advanced.tagging-title">Tagging and Labeling</title>
+      <para>
+        At a given stage of development, giving one or more files a common
+      label that refers to their revisions, is known as tagging those
+      files. Tagging is typically used on entire modules, so that the current
+      state of the module can be reconstructed in the future. This kind of
+      tagging should always be done on project deliverables, and before
+      starting major changes. 
+      </para>
+      <para>
+        To tag one or more files or directories with a label, select the
+      directory, file or files that you want to tag. Right-click the mouse
+      button on the selection, and choose the <guimenuitem>CVS &rarr;
+      Tag...</guimenuitem> menu item. 
+      </para>
+      <figure>
+        <title>Tag Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0012.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Tag Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        You will then be presented with the <link linkend="dialogs.tags"
+      endterm="dialogs.tags-title"/>. Here you can enter a label in the
+      <guilabel>Tag</guilabel> field. CVS is quite restrictive when it comes
+      to what characters a tag may contain. A tag must start with a letter,
+      and may contain letters, digits, "-" (dash) and "_" (underscore)
+      only. In particular, this means no dots, and no spaces. If you want to
+      include version numbers in a tag, replace the dots with dashes. Two tag
+      names are reserved, as they have special meaning in CVS: "HEAD" refers
+      to the most recent version available in the repository, while "BASE" is
+      the revision you last checked out into the local directory. 
+      </para>
+      <para>
+        Once the label has been entered, press the <guibutton>OK</guibutton> button. Unlike most CVS operations, the tag is immediately applied to the repository, and no commit is required.
+      </para>
+      <para>
+        For more information see <link linkend="ref.tags" endterm="ref.tags-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Reverting ====================================================== -->
+
+    <section id="advanced.reverting">
+      <title id="advanced.reverting-title">Reverting to an Older Version of a File</title>
+      <para>
+        Developers occasionally need to undo changes that have already been checked in.  Going back to a specific file revision in TortoiseCVS is easy:
+        <orderedlist>
+          <listitem>
+	    <para>
+              Right-click on the file and select <guimenuitem>CVS &rarr; History</guimenuitem> to bring up the <link linkend="dialogs.history" endterm="dialogs.history-title" />.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Right-click on the revision you need and choose the "Save this revision as..." option.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      When the Save As dialog appears, do not click the "Save" button; instead, double-click on the file's name in the directory listing.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Answer "Yes" when TortoiseCVS prompts you to overwrite the file.
+	    </para>
+	  </listitem>
+	</orderedlist>
+      </para>
+    </section>
+
+    <!-- ====== Renaming ====================================================== -->
+
+    <section id="advanced.renaming">
+      <title id="advanced.renaming-title">Renaming or Moving a File</title>
+      <para>
+        Sometimes a file may have been added to CVS with the wrong name or in the wrong location. 
+	Recent revisions of <ulink url="http://www.cvsnt.org/wiki">CVSNT</ulink>
+	support renaming. If your CVS server does not, you will have to copy the file to the new name and
+	perform a CVS Add and a CVS Remove followed by a CVS Commit.
+      </para>
+      <para>
+        If your CVS server does support renaming, renaming a file is simple:
+        <orderedlist>
+          <listitem>
+	    <para>
+              Right-click on the file and select <guimenuitem>CVS &rarr; Rename</guimenuitem> to bring
+	      up the <link linkend="dialogs.rename" endterm="dialogs.rename-title" />.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Enter the name you want the file to have (if you want to move the file, enter the desired relative
+	      path to the file).
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Click <guilabel>OK</guilabel>.
+	    </para>
+	  </listitem>
+	</orderedlist>
+      </para>
+    </section>
+
+    <!-- ====== Branching And Merging ========================================== -->
+
+    <section id="advanced.branching">
+      <title id="advanced.branching-title">Branching And Merging</title>
+      <para>
+        One of the features of version control systems, is the ability to
+      isolate changes onto a separate line of development. This line is known
+      as a <emphasis>Branch</emphasis>. 
+      </para>
+      <para>
+        Branching is useful to control changes during the lifecycle of a
+      software project. For example, suppose you have made the first release
+      of your software project version 1.0. You now begin adding new features
+      in preparation for your next major release 2.0. Between your initial
+      release and the new version it is discovered that there are bugs in the
+      software. The current revision of the source code is in a state of flux
+      and is not expected to be stable for at least another month and
+      therefore there is no way to make a bugfix release based on the newest
+      sources. 
+      </para>
+      <para>
+      Instead of attempting to make the fix to the current version, or the
+      <emphasis>HEAD</emphasis> branch, you would create a branch on the
+      revision trees for all the files that made up release 1.0. You can then
+      make modifications to the branch without disturbing the head
+      branch. When the modifications are finished you can either incorporate
+      them on the head branch or leave them on the release 1.0 branch. 
+      </para>
+
+      <section id="advanced.branching.creating">
+        <title id="advanced.branching.creating-title">Creating a Branch</title>
+      <para>
+        To create a branch, select the directory or files that you want to
+      branch. Right-click the on the selection, and choose <guimenuitem>CVS
+      &rarr; Branch...</guimenuitem> from the context-menu. 
+      </para>
+      <figure>
+        <title>Branch Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0013.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Branch Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        You will then be presented with the <link linkend="dialogs.branch"
+      endterm="dialogs.branch-title"/>. Here you can enter a label in
+      the <guilabel>Branch</guilabel> field. The same name restrictions that
+      apply to <link
+      linkend="advanced.tagging"><emphasis>Tags</emphasis></link>, apply to
+      branches as well. Once you have entered the desired branch name click
+      the <guibutton>OK</guibutton>. Unlike most CVS operations, the branch is
+      immediately applied to the repository, and no commit is required. The
+      branch, however, is only applied on the repository. To start working on
+      the newly created branch  <link
+      linkend="advanced.branching.selecting">select the branch to work
+      on</link>. 
+      </para>
+      </section>
+
+      <section id="advanced.branching.selecting">
+        <title id="advanced.branching.selecting-title">Selecting a Branch to Work On</title>
+      <para>
+        To start working on a branch instead of the default development line,
+      you have to bind your local copy to the branch. This is needed to make
+      sure that actions such as updates, commits etc. work on the branch
+      rather than on the main line of development. 
+      </para>
+      <para>
+        To move your local copy to another branch, select the top level folder
+      of the project. You can also select the exact folders and files that are
+      part of the desired branch if you know this information. Right-click the
+      on the selection, and choose <guimenuitem>CVS &rarr; Update
+      Special...</guimenuitem>.
+      </para>
+      <figure>
+        <title>Update Special Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0014.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Update Special Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        You will then be presented with the <link
+      linkend="dialogs.updatespecial"
+      endterm="dialogs.updatespecial-title"/>. Here you can enter the
+      branch name in the <guilabel>Get Tag/Branch/Revision</guilabel> field
+      you wish to select. Click the <guibutton>OK</guibutton> button, and
+      TortoiseCVS will now do the necessary updates to move your working copy
+      to the desired branch. The updating may also include adding or removing
+      files depending on the state of the branch. 
+      </para>
+      <para>
+        TortoiseCVS puts what is known as sticky tags on the files that are
+      affected by the branch. To remove the sticky tags you must <link
+      linkend="advanced.branching.head">go back to the head branch</link>. 
+      </para>
+      </section>
+
+      <section id="advanced.branching.merging">
+        <title id="advanced.branching.merging-title">Merging from a Branch</title>
+      <para>
+        When you are satisfied with the changes you have done on a branch, you
+      may want those changes to be available on the head branch of
+      development. Incorporating changes from one branch to another, is known
+      as merging. 
+      </para>
+      <para>
+      To merge from a branch, move your local copy to the branch you want to
+      merge the changes into. See <link linkend="advanced.branching.selecting"
+      endterm="advanced.branching.selecting-title"/> or <link
+      linkend="advanced.branching.head"
+      endterm="advanced.branching.head-title"/>. Select the top level
+      folder of the project. You can also select the exact folders and files
+      that are part of the desired branch if you know this
+      information. Right-click the on the selection, and choose
+      <guimenuitem>CVS &rarr; Merge...</guimenuitem>. 
+      </para>
+      <figure>
+        <title>Merge Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0015.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Merge Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      You will then be presented with the <link linkend="dialogs.merge"
+      endterm="dialogs.merge-title"/>. Here you can enter the branch
+      name in the <guilabel>Branch to merge from</guilabel> field you wish to
+      merge. Click the <guibutton>OK</guibutton> button, and TortoiseCVS will
+      now merged the branch specified into your local copy. Your changes will
+      not be made on the server repository, until you commit your changes. 
+      </para>
+      <para>
+      The merge given above will try to merge changes from the start of the
+      branch. If you do the operation a second time (to merge changes done to
+      the branch after the last merge), merging from the start of the branch
+      is not what you want, and it will most likely get you into trouble. To
+      get around this problem, you should give the branch a new tag after
+      every merge, and use the new tag when naming the branch for subsequent
+      merges. 
+      </para>
+      <para id="advanced.branching.merging.mergepoints" xreflabel="Mergepoints">
+      <emphasis>Note: </emphasis>The above paragraph only applies for standard
+      Unix CVS (aka cvshome.org CVS). If your server runs CVSNT, you can take
+      advantage of a special feature known as <emphasis>merge
+      points</emphasis>. This means that CVS keeps track of your last merge,
+      so that you can effortlessly merge from the same branch repeatedly.
+      For more information on this feature, see <ulink
+      url="http://www.cvsnt.org/wiki/MergePoint">the CVSNT Wiki page</ulink> and
+      the <xref linkend="resources.cvsnt-manual"/>.
+      </para>
+      </section>
+
+      <section id="advanced.branching.head">
+        <title id="advanced.branching.head-title">Going Back to the Head Branch</title>
+        <para>
+          If you want to stop working on a branch and move your local copy
+        back to the main line of development, you have to make TortoiseCVS
+        remove all sticky tags. 
+        </para>
+        <para>
+          To remove the sticky tags, and thus update your local copy to the
+        main development line, select the top level folder of the project. You
+        can also select the exact folders and files that are part of the
+        desired branch if you know this information. Right-click the on the
+        selection, and choose <guimenuitem>CVS &rarr; Update
+        Special...</guimenuitem>. 
+        </para>
+        <para>
+          You will then be presented with the <link
+        linkend="dialogs.updatespecial"
+        endterm="dialogs.updatespecial-title"/>. Select the
+        <guilabel>Return to main (HEAD) branch</guilabel> checkbox and click
+        the <guibutton>OK</guibutton> button. TortoiseCVS will now do the
+        necessary updates to move your working copy back to the head branch. 
+        </para>
+      </section>
+    </section>
+
+    <!-- ====== Binary And Unicode Detection =================================== -->
+
+    <section id="advanced.binary">
+      <title id="advanced.binary-title">Binary and Unicode Detection</title>
+      <para>
+        TortoiseCVS tries to automatically detect the type of file you are
+      adding to CVS. It can detect whether the file is
+      <emphasis>Text/ASCII</emphasis>, <emphasis>Text/Unicode</emphasis>, or
+      <emphasis>Binary</emphasis>. TortoiseCVS first checks the file extension
+      to determine whether the file is Binary or Text. For example
+      <filename>.doc</filename> and <filename>.exe</filename>, are always assumed to be
+      Binary while other extensions, such as <filename>.cpp</filename> and
+      <filename>.txt</filename>, are always assumed to be text. TortoiseCVS does
+      this using a built-in list of Binary and Text extensions which includes
+      most the common file extensions. To customize this list, you can copy
+      the file <filename>TortoiseCVS.FileTypes</filename> from the TortoiseCVS
+      installation directory to your HOME directory and edit it for your
+      needs. 
+      </para>
+      <para>
+        By default TortoiseCVS will also examine the first 4000 bytes of a
+      file to determine the type. This is used in cases where the file
+      extension is not known. These first few bytes are also used to determine
+      whether the file is Text/ASCII or Text/Unicode. 
+      </para>
+      <para>
+        TortoiseCVS also provides a sophisticated plugin mechanisim that you
+      can implement a DLL to perform the file type detection. The details of
+      this plugin interface is also available in the
+      <filename>FileTypes.config</filename>. 
+      </para>
+      <para>
+        In all cases, the <link linkend="dialogs.add"
+      endterm="dialogs.add-title"/> presents the files you are about to
+      add their file types, so that you have a chance to correct the choices
+      made. 
+      </para>
+    </section>
+
+    <!-- ====== History ======================================================= -->
+
+    <section id="advanced.history">
+      <title id="advanced.history-title">File Revision History</title>
+      <para>
+        TortoiseCVS provides two methods of reviewing and working with the
+      history of a file. The first is via the <link linkend="dialogs.history"
+      endterm="dialogs.history-title"/>. 
+      </para>  
+      <section id="advanced.history.history">
+      <title id="advanced.history.history-title">History Dialog</title>
+      <para>      
+      You can view a file's history by selecting it and right-clicking <guimenuitem>CVS &rarr;
+      History</guimenuitem>. 
+      </para>  
+      <figure>
+        <title>History Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0033.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>History Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        The History Dialog will show a log of the revisions, tags, and
+      branches for the selected file. It will also offer you the opportunity,
+      by right-clicking on a specific revision, tag, or branch, to
+      <emphasis>diff</emphasis>, <emphasis>save</emphasis> the revision
+      locally, or <emphasis>update</emphasis> with sticky tags (an advanced
+      CVS concept; usually, the <emphasis>save</emphasis> option is preferable
+      to a sticky <emphasis>update</emphasis>).  Unless the file is an executable,
+      you can also select <emphasis>view</emphasis> to view that revision using 
+      the default application for the file type in question.
+      You can also edit any current
+      or previous commit message by clicking on a revision and typing into the
+      text area at the bottom of the window.
+      </para>
+      <para>
+      When you click on a revision, detailed information on that revision is shown
+      at the top of the dialog. This includes the file format (text, binary, etc.) and the
+      keyword expansion mode. With older CVS servers, this information will be the same
+      for every revision of a file, but newer servers allow it to be set specifically
+      for each revision.
+      </para>
+      <para>
+      The current <emphasis>filename</emphasis> is also shown; if the file has been renamed
+      at some point, you can see what its name has been for each revision.
+      </para>
+      <para>
+      To simplify the view, you can deselect the <guilabel>Show Tags</guilabel> checkbox.
+      When you do this, only branches are shown in the dialog.
+      </para>
+      </section>
+      <section id="advanced.history.graph">
+      <title id="advanced.history.graph-title">Revision Graph Dialog</title>
+      <para>
+        TortoiseCVS also provides a <link linkend="dialogs.revision"
+      endterm="dialogs.revision-title"/> to graphically show you the
+      history of a file. You can view a file's revision graph by selecting it
+      and right-clicking <guimenuitem>CVS &rarr; Revision Graph</guimenuitem>.
+      </para>
+      <figure>
+        <title>Revision Graph Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0034.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Revision Graph Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Like the History Dialog, the Revision Graph Dialog will allow you to
+      see the details for and perform CVS operations on any revision, tag, or
+      branch.
+      </para>
+      <para>
+      Revisions where a file has been removed are indicated by a red outline.
+      </para>
+      <para>
+      If your CVS server runs CVSNT, you will also be able to see which merge
+      operations have been performed on the file: A purple arrow is drawn from
+      the source revision to the destination revision 
+      (see <xref linkend="advanced.branching.merging.mergepoints"/>).
+      </para>
+      </section>
+    </section>
+
+    <!-- ====== Web Log ======================================================== -->
+
+    <section id="advanced.weblog">
+      <title id="advanced.weblog-title">Web Log</title>
+      <para>
+      Web Log offers much of the same functionality as the <link
+      linkend="advanced.history">History and Revision Graph dialogs</link>.
+      One important difference is that Web Log is not part of TortoiseCVS
+      itself, but depends on special software that may be installed on
+      the CVS server you use. Two popular packages for providing Web Log
+      functionality are <application>ViewCVS</application> and
+      <application>CVSweb</application> &mdash; ask your CVS administrator if one
+      of these is available.
+      </para>
+      <para>
+      To view the Web Log, you open a special URL using a web browser.
+      TortoiseCVS knows the most common URLs in use for this and can in most
+      cases detect the correct one automatically<footnote>
+      <para>
+      For details about the automatic URL detection, see 
+      <link linkend="cmd.weblog" endterm="cmd.weblog-title"/>.
+      </para>
+      </footnote>. If your configuration is
+      nonstandard, you may have to enter the URL manually the first time -
+      next time TortoiseCVS will remember it.
+      </para>
+      <para>
+      You can view Web Log for a file or folder by selecting it and right-clicking
+      <guimenuitem>CVS &rarr; Web Log</guimenuitem>.
+      If TortoiseCVS fails to detect the URL, the dialog below will appear.
+      </para>
+      <figure>
+        <title>Web Log Configuration Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0040.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Web Log Configuration Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      Enter the correct URL and click OK. If the URL of the Web Log server has
+      changed, you may have to tell TortoiseCVS to perform the automatic scan again.
+      </para>
+      <para>
+      You can also force this dialog to appear by holding down the <keycap>Ctrl</keycap>
+       key while clicking on <guimenuitem>Web Log</guimenuitem>. This is useful if your
+        Web Log server has been moved to another machine. 
+      </para>
+    </section>
+
+
+    <!-- ====== Make Patch ==================================================== -->
+
+    <section id="advanced.patch">
+      <title id="advanced.patch-title">Making a Patch File</title>
+      <para>
+      Often you might have read access to a CVS repository or
+      module, but not write access. Open source projects typically work this
+      way to maintain quality control for all contributions to a project. The
+      easiest and most reliable way to contribute changes to these projects is
+      by creating a <emphasis>Patch File</emphasis> to submit to them. 
+      </para>
+      <para>
+      In TortoiseCVS this is done by selecting the folders with
+      changes that you wish to include in the patch file. Right-click on your
+      selections and choose <guimenuitem>CVS &rarr; Make Patch...</guimenuitem> from
+      the context menu. TortoiseCVS determines which files have been modified and lists
+      them in the Make Patch dialog:
+      </para>
+      <figure>
+        <title>Make Patch Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/patchdialog.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Make Patch Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      If you want to exclude some files from your patch, simply deselect them in the dialog.
+      </para>
+      <para>
+      Sometimes your contribution involves adding new files which are not yet
+      in CVS. TortoiseCVS cannot guess that you would like these to be
+      included in the patch, but in the Make Patch dialog you can click the
+      <guibutton>Add files...</guibutton> button to bring up the familiar Add dialog. Here
+      you can select files to be included in the patch.
+      </para>
+      <para>
+      When you are satisfied with your selection, click <guibutton>OK</guibutton>. 
+      You will then be prompted with a Save dialog to
+      indicate where to save your patch file. Finally, TortoiseCVS will open
+      the new patch file in Notepad, where you can validate your changes.
+      </para>
+    </section>
+
+</chapter>

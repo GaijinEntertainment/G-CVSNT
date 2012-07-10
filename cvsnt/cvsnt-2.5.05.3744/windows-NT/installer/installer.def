@@ -1,0 +1,9 @@
+LIBRARY	installer
+
+EXPORTS
+CustomActionInstall
+CustomActionUninstall
+CustomActionCheck
+CustomActionEmail
+CustomActionSerial
+CustomWelcome

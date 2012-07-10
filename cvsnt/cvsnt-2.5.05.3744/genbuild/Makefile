@@ -1,0 +1,2 @@
+genbuild: genbuild.cpp
+

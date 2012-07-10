@@ -1,0 +1,116 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Manufacturer="March Hare Software" Id="*" Language="1033" Codepage="65001" Name="CVS Suite Server $(var.CVSNT_VERSION) Trial Version" Version="$(var.CVSNT_VERSION)" UpgradeCode="F221CBC9-2DCD-439E-8244-AD1B2017817A">
+        <Package Keywords="CVS,CVSNT,Installer,Version Control,VSS" Description="CVS Suite server components" Comments="This package is Copyright 2005 March Hare Software Ltd.  CVSNT Support And Training available From March Hare Software.  See http://www.march-hare.com/cvspro.  Workspace Manager and Release Manager are Copyright March Hare Software Ltd.  CVSNT, WinMerge and TortoiseCVS are licensed under the GNU General Public License." Manufacturer="March Hare Software" InstallerVersion="200" Languages="1033" Compressed="yes" SummaryCodepage="1252" />
+        <Upgrade Id="F221CBC9-2DCD-439E-8244-AD1B2017817A">
+            <UpgradeVersion MigrateFeatures="yes" Maximum="$(var.CVSNT_VERSION)" IncludeMaximum="yes" Property="UCF221CBC92DCD439E8244AD1B2017817A" />
+        </Upgrade>
+
+        <Condition Message="This Product requires at least a Pentium Pro">Intel &gt; 5</Condition>
+        <Condition Message="This Product does not run on Windows 95 or Windows 98">not Version9X</Condition>
+        <Condition Message="This Product requires at least NT4 Service Pack 6">WindowsBuild &lt;&gt; 1381 or ServicePackLevel &gt;= 6</Condition>
+
+        <Media Id="1" EmbedCab="yes" CompressionLevel="high" Cabinet="cvsnt.cab" />
+        <Media Id="5" EmbedCab="yes" CompressionLevel="high" Cabinet="marchhar.cab" />
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="SystemFolder" />
+            <Directory Id="System64Folder" />
+            <Directory Id="WindowsFolder" />
+            <Directory Id="ProgramMenuFolder" />
+            <Directory Id="CommonFilesFolder">
+                <Directory Id="MarchHare" ShortName="MarchH~1.ar" Name="March Hare Software Ltd">
+                    <Directory Id="COMMON_INSTALLDIR" />
+                </Directory>
+            </Directory>
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="CVSNT_BASEDIR" ShortName="CVSSUI~1" Name="CVS Suite">
+                    <Directory Id="WinCvsDir" Name="WinCvs">
+                        <Directory Id="WINCVS_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="WinMergeDir" Name="WinMerge">
+                        <Directory Id="WINMERGE_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="TortoiseDir" ShortName="TORTOI~1" Name="TortoiseCVS">
+                        <Directory Id="TORTOISECVS_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="CvsntDir" ShortName="CVSNTT~1" Name="CVSNT Tools">
+                        <Directory Id="CVSNT_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="SuiteTools" ShortName="SUITET~1" Name="Suite Tools">
+                        <Directory Id="TOOLS_INSTALLDIR" />
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+
+        <DirectoryRef Id="ProgramMenuFolder">
+            <Directory Id="CvsntStartMenuFolder" ShortName="CVSSUI~1" Name="CVS Suite">
+                <Component Id="CvsntStartMenuFolder" Guid="7CF530AD-2263-4e6c-AF9C-409D9EB780A1" DiskId="1">
+                    <RemoveFolder Id="CvsntStartMenuFolder" On="uninstall" />
+                </Component>
+                <Directory Id="CvsntDocumentationFolder" ShortName="DOCUME~1" Name="Documentation">
+                    <Component Id="CvsntDocumentationFolder" Guid="46C5E98E-4F21-4bf6-AF60-9D14D0D38F31" DiskId="1">
+                        <RemoveFolder Id="CvsntDocumentationFolder" On="uninstall" />
+                    </Component>
+                </Directory>
+            </Directory>
+        </DirectoryRef>
+
+        <FragmentRef Id="cvsnt" />
+        <FragmentRef Id="server" />
+        <FragmentRef Id="unison" />
+        <FragmentRef Id="wait4cvs" />
+
+        <UIRef Id="standard-ui" />
+
+        <AdminExecuteSequence />
+        <InstallExecuteSequence>
+            <Custom Action="RegisterInstall" Sequence="6101">$CommandLineFiles &gt; 2</Custom>
+            <Custom Action="RegisterUninstall" Sequence="6102">$CommandLineFiles = 2</Custom>
+            <StopServices>Privileged</StopServices>
+            <RemoveExistingProducts Before="InstallInitialize" />
+            <Custom Action="RunPostinst" After="InstallFinalize">&amp;ServerComponents=3</Custom>
+            <StartServices>Privileged</StartServices>
+
+            <RegisterTypeLibraries>Privileged</RegisterTypeLibraries>
+            <BindImage />
+            <ScheduleReboot Sequence="1550">$ServiceSysFiles=3 Or $ServiceSysFiles=2</ScheduleReboot>
+        </InstallExecuteSequence>
+
+        <Property Id="CVSNT_INSTALLTYPE">servertrial</Property>
+        <Property Id="SERVER">1</Property>
+        <Property Id="ARPHELPLINK">http://march-hare.com/cvsnt/</Property>
+        <Property Id="ARPCONTACT">U.S. and Canada: 1-800-653-1501. UK (Toll Free): 0800 376 0404. From elsewhere, call +44 (0) 20 7692 0712</Property>
+        <Property Id="ARPVersion">$(var.CVSNT_VERSION)</Property>
+        <Property Id="ARPPublisher"> March Hare Software Ltd.</Property>
+        <Property Id="ARPREADME">file://[TARGETDIR]\\relnotes.rtf</Property>
+        <Property Id="ARPURLINFOABOUT">http://march-hare.com/cvsnt/</Property>
+        <Property Id="ARPURLUPDATEINFO">http://march-hare.com/cvsnt/</Property>
+        <Property Id="ARPCOMMENTS">installation path = [TARGETDIR]</Property>
+        <Property Id="ARPDISPLAYNAME">CVS Suite Trial $(var.CVSNT_VERSION) ([TARGETDIR])</Property>
+
+        <CustomAction Id="SetARPREADME" Property="ARPREADME" Value="file://[TARGETDIR]\\relnotes.rtf" Execute="firstSequence" />
+        <CustomAction Id="SetARPCOMMENTS" Property="ARPCOMMENTS" Value="installation path = [TARGETDIR]" Execute="firstSequence" />
+        <CustomAction Id="SetARPDISPLAYNAME" Property="ARPDISPLAYNAME" Value="CVS Suite Trial $(var.CVSNT_VERSION) ([TARGETDIR])" Execute="firstSequence" />
+
+        <InstallUISequence>
+            <Custom Action="SetARPREADME" Before="CostFinalize">ARPREADME=""</Custom>
+            <Custom Action="SetARPCOMMENTS" Before="CostFinalize">ARPCOMMENTS=""</Custom>
+            <Custom Action="SetARPDISPLAYNAME" Before="CostFinalize">ARPDISPLAYNAME=""</Custom>
+        </InstallUISequence>
+
+        <InstallExecuteSequence>
+            <Custom Action="SetARPREADME" Before="CostFinalize">ARPREADME=""</Custom>
+            <Custom Action="SetARPCOMMENTS" Before="CostFinalize">ARPCOMMENTS=""</Custom>
+            <Custom Action="SetARPDISPLAYNAME" Before="CostFinalize">ARPDISPLAYNAME=""</Custom>
+        </InstallExecuteSequence>
+
+        <Binary Id="dlgbmp" SourceFile="Binary\dlgbmp-suite.bmp" />
+        <Binary Id="LICENSE" SourceFile="combined-license.rtf" />
+        <Binary Id="Installer" SourceFile="$(var.CVSNT_BASE)\installer.dll" />
+        <CustomAction Id="RegisterInstall" BinaryKey="Installer" DllEntry="CustomActionInstall" Impersonate="yes" />
+        <CustomAction Id="RegisterUninstall" BinaryKey="Installer" DllEntry="CustomActionUninstall" Impersonate="yes" />
+    </Product>
+</Wix>

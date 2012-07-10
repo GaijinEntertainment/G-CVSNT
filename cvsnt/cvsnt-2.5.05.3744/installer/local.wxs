@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="utf-8"?><Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="server">
+
+        <CustomAction Id="RunGenkey" Impersonate="yes" FileKey="genkey.exe" ExeCommand="&quot;[CVSNT_INSTALLDIR]cvsnt-default.pem&quot;" Execute="immediate" />
+        <CustomAction Id="RunPostinst" Impersonate="yes" FileKey="postinst.exe" ExeCommand="" Execute="immediate" />
+
+        <DirectoryRef Id="SystemFolder" FileSource="$(var.CVSNT_BASE)\">
+            <Component Id="OldCvsnt_Cleanup" Guid="8f20c064-5277-43ae-a365-e49c7a3b551d" DiskId="1">
+                <RemoveFile Id="cvsnt.cpl_sys" On="install" Name="cvsnt.cpl" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="CvsntStuff" FileSource="$(var.CVSNT_BASE)\">
+            <Directory Id="CvsntTriggerStuff" Name="triggers">
+                <Component Id="DefaultTrigger" Guid="BB650A8A-1D5D-48d4-8443-AA0D1D68D318" DiskId="1">
+                    <File Id="default_trigger.dll" Name="info.dll" />
+                </Component>
+                <Component Id="ScriptTrigger" Guid="4C06AFF8-5B9F-42aa-B64C-914962807A58" DiskId="1">
+                    <File Id="script_trigger.dll" Name="script.dll">
+                        <TypeLib Id="DDF02ADA-D57C-48C7-B099-75ED3ABD845C" MajorVersion="1" Language="0" />
+                    </File>
+                </Component>
+            </Directory>
+            <Component Id="CommandLineServerFiles" Guid="32baa066-a64a-46ba-9274-7912dbff7bf9" DiskId="1">
+                <File Id="postinst.exe" Name="postinst.exe" />
+                <File Id="genkey.exe" Name="genkey.exe" />
+            </Component>
+            <Directory Id="CvsntXdiffStuff" Name="xdiff" FileSource="$(var.CVSNT_BASE)\xdiff\">
+                <Component Id="ext_xdiff" Guid="D89436EF-1912-4bf8-B52D-30EF52A12773" DiskId="1">
+                    <File Id="ext_xdiff.dll" Name="ext.dll" />
+                </Component>
+            </Directory>
+            <Component Id="RCSFiles" Guid="DD66FFBB-19D6-48EB-8860-6F1254EE5489" DiskId="1">
+                <File Id="rlog.exe" Name="rlog.exe" />
+                <File Id="rlog.dll" Name="rlog.dll" />
+                <File Id="rcsdiff.exe" Name="rcsdiff.exe" />
+                <File Id="rcsdiff.dll" Name="rcsdiff.dll" />
+                <File Id="co.exe" Name="co.exe" />
+                <File Id="co.dll" Name="co.dll" />
+            </Component>
+            <Directory Id="CvsntProtoStuff" Name="protocols" FileSource="$(var.CVSNT_BASE)\protocols\">
+                <Component Id="Enum" Guid="B8538524-CF3A-4abb-B0EC-92D99E841B25" DiskId="1">
+                    <File Id="enum_protocol.dll" Name="enum.dll" />
+                </Component>
+            </Directory>
+            <Component Id="SServer_Registry" Guid="1b58b18d-c07f-4807-b0ad-4cc888731b7c" DiskId="1">
+                <Condition>SSERVERKEYS=0 And &amp;ServerComponents=3 and $SServer_Registry=3</Condition>
+                <RegistryValue Id="CertificateFile" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="CertificateFile" Type="string" Value="[CVSNT_INSTALLDIR]cvsnt-default.pem" />
+                <RegistryValue Id="PrivateKeyFile" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="PrivateKeyFile" Type="string" Value="[CVSNT_INSTALLDIR]cvsnt-default.pem" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="CvsntProtoFolder" FileSource="$(var.CVSNT_BASE)\protocols\">
+        </DirectoryRef>
+
+        <FeatureRef Id="Cvsnt">
+                <FeatureRef Id="Protocols">
+	            <Feature Id="Enum" Title="Enum" Description="CVSNT Remote enumeration protocol" AllowAdvertise="no" Level="3">
+        	        <ComponentRef Id="Enum" />
+	            </Feature>
+                </FeatureRef>
+            <Feature Id="ServerComponents" Title="CVSNT Server" Description="CVSNT Server components" AllowAdvertise="no" Level="3">
+                <Condition Level="0">(Not Privileged) Or (SERVER=0)</Condition>
+                <Condition Level="4">SERVER=3</Condition>
+                <ComponentRef Id="OldCvsnt_Cleanup" />
+                <ComponentRef Id="CommandLineServerFiles" />
+                <ComponentRef Id="CommandLineLock" />
+                <ComponentRef Id="DefaultTrigger" />
+                <ComponentRef Id="SServer_Registry" />
+                <ComponentRef Id="CvsntStartMenuFolder" />
+
+                <Feature Id="Triggers" Title="Extension libraries" Description="Server extension libraries" AllowAdvertise="no" Level="3">
+                    <Feature Id="ScriptTrigger" Title="ActiveScript support" Description="ActiveScript scripting support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="ScriptTrigger" />
+                    </Feature>
+                </Feature>
+
+                <Feature Id="Xdiff" Title="Xdiff handlers" Description="Handlers for cvs xdiff command" AllowAdvertise="no" Level="3">
+                    <Condition Level="0">(Not Privileged) Or (SERVER=0)</Condition>
+                    <Condition Level="4">SERVER=3</Condition>
+                    <Feature Id="Ext_xdiff" Title="ext" Description="xdiff using external commands" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="ext_xdiff" />
+                    </Feature>
+                </Feature>
+            </Feature>
+            <Feature Id="RCSWrappers" Title="RCS Wrappers" Description="Wrappers to allow some applications to treat CVSNT repositories as RCS files" AllowAdvertise="no" Level="4">
+                <Condition Level="0">SERVER=0</Condition>
+                <Condition Level="4">SERVER=3</Condition>
+                <ComponentRef Id="RCSFiles" />
+            </Feature>
+        </FeatureRef>
+
+        <Icon Id="cvsnt.exe" SourceFile="$(var.CVSNT_BASE)\cvsntcpl.dll" />
+
+        <Property Id="SSERVERKEYS" Value="0">
+            <RegistrySearch Id="SSKeysExist" Root="HKLM" Key="SOFTWARE\CVS\PServer" Name="PrivateKeyFile" Type="raw" />
+        </Property>
+
+        <InstallExecuteSequence>
+            <Custom Action="RunGenkey" After="RunPostinst">&amp;ServerComponents=3 and $SServer_Registry=3</Custom>
+        </InstallExecuteSequence>
+
+    </Fragment>
+</Wix>

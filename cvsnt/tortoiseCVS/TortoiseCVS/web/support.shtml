@@ -1,0 +1,28 @@
+<!--#set var="title" value="Support" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Support</h2>
+<p>
+<h3>Learning about TortoiseCVS</h3>
+
+<p>To learn how to use CVS or to find out how to perform a particular
+task read the <a href="UserGuide_en.chm">TortoiseCVS User's Guide</a>. The guide is also available offline in the <a href="help.html">help file</a> that is distributed with TortoiseCVS.<br>
+<br>
+<h3>Getting help with TortoiseCVS</h3>
+
+<p>If you have a problem or a specific issue using TortoiseCVS, make sure to check the technical <a href="faq.shtml">FAQ</a>. If you still cannot find the answers you need ask the mailing list first. The mailing list is frequented by both TortoiseCVS developers and TortoiseCVS power users and is usually the quickest place to get answers.
+
+<h3>Mailing List</h3>
+
+<p>You can subscribe to the <a href="http://sourceforge.net/mail/?group_id=48103">TortoiseCVS mailing list</a>
+at SourceForge. The traffic is small; only about 5 to 10 messages a day. We talk about bugs, help solve problems and plan new developments for TortoiseCVS. There is also a message archive on the web site.
+
+<h3>Bug Reporting</h3>
+
+<p>If you think you have found a bug, or have a suggestion to make TortoiseCVS better, we would appreciate you submit it to the <a href="http://sourceforge.net/tracker/?group_id=48103">bug & feature trackers</a> on the SourceForge project. Please check if your bug or feature suggestion is already there, and add comments to it if you have any more information. Feel free to add new bugs!<br>
+
+<h3>For Chinese Users</h3>
+
+If you speak Chinese, you might be interested in this <a href="http://www.tortoisecvs.org.cn/">Chinese blog</a> about TortoiseCVS.
+
+<!--#include virtual="wrapper_end.shtml" -->

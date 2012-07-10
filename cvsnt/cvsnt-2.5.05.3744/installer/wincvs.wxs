@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="wincvs">
+
+        <DirectoryRef Id="CvsntStartMenuFolder">
+            <Directory Id="WincvsStartMenuFolder" Name="WinCvs" SourceName=".">
+                <Component Id="WincvsStartMenuDoc" Guid="9927C44B-4BDB-498a-AFF9-4852CF074991">
+                    <RegistryValue Id="WincvsMenuDocInstalled" Root="HKMU" Key="Software\Cvsgui\WinCVS\Msi" Name="MenuDoc" Type="string" Value="1" KeyPath="yes" />
+                    <CreateFolder />
+                    <RemoveFolder Id="WincvsStartMenuRemove" On="uninstall" />
+                </Component>
+                <Directory Id="WincvsStartMenuGuiFolder" Name="Web" SourceName=".">
+                    <Component Id="WincvsStartMenuGuiDoc" Guid="EADC5F87-60DC-432b-BD01-AC653A9C5CC8">
+                        <RegistryValue Id="WincvsStartMenuGuiDoc" Root="HKCU" Key="Software\Cvsgui\WinCVS\Msi" Name="WincvsStartMenuGuiDoc" Type="string" Value="1" KeyPath="yes" />
+                        <CreateFolder />
+                        <RemoveFolder Id="WincvsStartMenuGuiRemove" On="uninstall" />
+                        <Shortcut Id="cvsgui.url" Name="CvsGui" Target="[CVSGUI]" />
+                        <Shortcut Id="guimail.url" Name="CvsGui mailing list" Target="[GUIMAIL]" />
+                        <Shortcut Id="guiproj.url" Name="CvsGui project page" Target="[GUIPROJ]" />
+                        <Shortcut Id="guifaq.url" Name="CvsGui FAQ" Target="[GUIFAQ]" />
+                    </Component>
+                </Directory>
+            </Directory>
+        </DirectoryRef>
+        <DirectoryRef Id="WINCVS_INSTALLDIR" FileSource="$(var.WINCVS_BASE)\">
+                <Directory Id="WinCvsCvsnt" Name="cvsnt" FileSource="$(var.CVSNT_BASE)">
+                    <Component Id="CvsguiSim" Guid="4B8E987F-EF66-4bbd-8846-492B8EC6C92C" DiskId="4">
+                        <File Id="wcvs.exe" Name="cvs.exe" Source="$(var.CVSNT_BASE)\simcvs.exe" />
+                    </Component>
+                </Directory>
+                <Component Id="CvsguiFiles" Guid="A632C394-90BE-4eea-BBF7-1EFDFB638A51" DiskId="2">
+		    <RegistryValue Id="keyCvsguiFiles" Root="HKCU" Key="Software\Cvsgui\WinCVS\Msi" Name="keyCvsguiFiles" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="wincvs.exe" Name="wincvs.exe" Source="$(var.WINCVS_BASE)\WinCVS_Bound.exe">
+                        <Shortcut Id="wincvs.exe" Advertise="no" Name="WinCvs" Directory="WincvsStartMenuFolder" />
+                    </File>
+                    <File Id="ChangeLog" Name="ChangeLog" />
+                    <File Id="wcCOPYING" Name="Copying" />
+                    <File Id="INSTALL" Name="INSTALL" />
+                    <File Id="INSTALL.txt" Name="INSTALL.txt" />
+                    <File Id="tips.txt" Name="tips.txt" />
+                    <File Id="CJ609Lib.dll" Name="CJ609Lib.dll" />
+                </Component>
+                <Component Id="CvsguiWincvsHlp" Guid="D1D4C80C-418A-48b1-9803-7C5278F24116" DiskId="2">
+		    <RegistryValue Id="keyCvsguiWincvsHlp" Root="HKCU" Key="Software\Cvsgui\WinCVS\Msi" Name="CvsguiWincvsHlp" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="wincvs.chm" Name="wincvs.chm">
+                        <Shortcut Id="wincvs.chm" Advertise="no" Name="WinCvs Help" Directory="WincvsStartMenuFolder" />
+                    </File>
+                </Component>
+                <Directory Id="Macros" Name="Macros">
+                    <Component Id="Macros" DiskId="2" Guid="76FE3A79-C86B-4732-87BA-0A5370F86C03">
+                        <File Id="file13" Name="AddDelIgnore.py" />
+                        <File Id="file14" Name="AddRootModule.py" />
+                        <File Id="file15" Name="Bonsai.py" />
+                        <File Id="file16" Name="BrowseRepoTk.py" />
+                        <File Id="file17" Name="ChangeRepo.py" />
+                        <File Id="file18" Name="ChangeRoot.py" />
+                        <File Id="file19" Name="ChangeSubstModeTk.py" />
+                        <File Id="file20" Name="Cleanup.py" />
+                        <File Id="file21" Name="CleanupMissing.py" />
+                        <File Id="file22" Name="CmdHere.py" />
+                        <File Id="file23" Name="ConflictScanner.py" />
+                        <File Id="file24" Name="CopyToBranch.py" />
+                        <File Id="file25" Name="CopyToHeadVersion.py" />
+                        <File Id="file26" Name="cvs2cl.py" />
+                        <File Id="file27" Name="CvsVersion.py" />
+                        <File Id="file28" Name="CvsView.py" />
+                        <File Id="file29" Name="EditFileTypeAssoc.py" />
+                        <File Id="file30" Name="ExtDiffFiles.py" />
+                        <File Id="file31" Name="ExtendedAddTk.py" />
+                        <File Id="file32" Name="FastSearch.py" />
+                        <File Id="file33" Name="FixDST.py" />
+                        <File Id="file34" Name="ListModules.py" />
+                        <File Id="file35" Name="ListTags.py" />
+                        <File Id="file36" Name="MoveBranchPointToHead.py" />
+                        <File Id="file37" Name="Override2ndPartyAdd.py" />
+                        <File Id="file38" Name="RecursiveAddTk.py" />
+                        <File Id="file39" Name="ResurrectFile.py" />
+                        <File Id="file40" Name="RListModule.py" />
+                        <File Id="file41" Name="SearchLogComments.py" />
+                        <File Id="file42" Name="ShowLogEntry.py" />
+                        <File Id="file43" Name="TagAndUpdate.py" />
+                        <File Id="file44" Name="TemplateMacro.py" />
+                        <File Id="file45" Name="TemplateMacroTk.py" />
+                        <File Id="file46" Name="test.py" />
+                        <File Id="file47" Name="ZipSelected.py" />
+                    </Component>
+                </Directory>
+                <Directory Id="PythonLib" Name="PythonLib">
+                    <Directory Id="PyCvsgui" Name="cvsgui">
+                        <Component Id="PythonLib" DiskId="2" Guid="EAB11562-7CE9-4c72-9A1A-ADF708DD24E8">
+                            <File Id="file50" Name=".cvsignore" />
+                            <File Id="file51" Name="App.py" />
+                            <File Id="file52" Name="CmdUI.py" />
+                            <File Id="file53" Name="ColorConsole.py" />
+                            <File Id="file54" Name="Cvs.py" />
+                            <File Id="file55" Name="CvsEntry.py" />
+                            <File Id="file56" Name="CvsLog.py" />
+                            <File Id="file57" Name="Macro.py" />
+                            <File Id="file58" Name="MacroRegistry.py" />
+                            <File Id="file59" Name="MacroUtils.py" />
+                            <File Id="file61" Name="MenuMgr.py" />
+                            <File Id="file62" Name="Persistent.py" />
+                            <File Id="file63" Name="SafeTk.py" />
+                            <File Id="file64" Name="Shell.py" />
+                            <File Id="file65" Name="__init__.py" />
+                        </Component>
+                    </Directory>
+                </Directory>
+        </DirectoryRef>
+
+        <Feature Id="Wincvs" Title="WinCvs" Description="WinCvs graphical frontend" Display="expand" AllowAdvertise="no" Level="3">
+            <Condition Level="0">WINCVS=0</Condition>
+            <ComponentRef Id="WincvsStartMenuDoc" />
+            <ComponentRef Id="WincvsStartMenuGuiDoc" />
+            <ComponentRef Id="CvsntStartMenuFolder" />
+            <ComponentRef Id="CvsguiFiles" />
+            <ComponentRef Id="CvsguiSim" />
+            <ComponentRef Id="CvsguiWincvsHlp" />
+            <Feature Id="PythonMacros" Title="Python Macros" Description="Extension macros to perform advanced options" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="Macros" />
+                <ComponentRef Id="PythonLib" />
+            </Feature>
+        </Feature>
+
+        <Property Id="CVSGUI"><![CDATA[http://cvsgui.sourceforge.net/]]></Property>
+        <Property Id="GUIMAIL"><![CDATA[http://groups.yahoo.com/subscribe/cvsgui]]></Property>
+        <Property Id="GUIPROJ"><![CDATA[http://sourceforge.net/projects/cvsgui/]]></Property>
+        <Property Id="GUIFAQ"><![CDATA[http://cvsgui.sf.net/newfaq.htm]]></Property>
+    </Fragment>
+</Wix>

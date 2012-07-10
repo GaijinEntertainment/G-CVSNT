@@ -1,0 +1,10 @@
+<!--#set var="title" value="Change Log" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Change Log</h2>
+
+<p><pre>
+<!--#include virtual="ChangeLog.txt" -->
+</pre>
+
+<!--#include virtual="wrapper_end.shtml" -->

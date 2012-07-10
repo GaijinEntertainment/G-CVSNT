@@ -1,0 +1,6 @@
+<!--#set var="title" value="Release Notes for version 1.10.0" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<!--#include virtual="releasenotes-1-12-0.html" -->
+
+<!--#include virtual="wrapper_end.shtml" -->

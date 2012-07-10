@@ -1,0 +1,6 @@
+<!--#set var="title" value="FAQ" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<!--#include virtual="faq.html" -->
+
+<!--#include virtual="wrapper_end.shtml" -->

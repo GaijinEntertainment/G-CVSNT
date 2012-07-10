@@ -1,0 +1,13 @@
+Release Debug
+*.plg
+*.~*
+*.suo
+*.ncb
+*.pdb
+debug
+Unicode\ Debug
+release
+udebug
+x64
+*.user
+ReleaseD

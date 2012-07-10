@@ -1,0 +1,120 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "TortoiseActRes.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winresrc.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,12,5,6
+ PRODUCTVERSION 1,12,5,6
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "www.tortoisecvs.org\0"
+            VALUE "FileDescription", "TortoiseAct\0"
+            VALUE "FileVersion", "1.12.5.6\0"
+            VALUE "InternalName", "TortoiseAct\0"
+            VALUE "LegalCopyright", "Copyright © 2003\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "TortoiseAct.exe\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "TortoiseCVS TortoiseAct\0"
+            VALUE "ProductVersion", "1.12.5.6\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+
+#endif    // !_MAC
+
+// Low in the alphabet so it is the first icon
+A_TORTOISE              ICON                    "../Icons/Tortoise.ico"
+
+IDI_TYPEREV             ICON    DISCARDABLE     "../Icons/TortoiseTinyRev.ico"
+IDI_TYPESYM             ICON    DISCARDABLE     "../icons/TortoiseTinySym.ico"
+IDI_TYPEBRA             ICON    DISCARDABLE     "../icons/TortoiseTinyBra.ico"
+
+BMP_CHARLIE		BITMAP  "../../web/charlie.bmp"
+BMP_CHARLIE_MASK	BITMAP  "../../web/charliemask.bmp"
+
+IDD_XFILEDIALOG DIALOG DISCARDABLE  0, 0, 360, 20
+STYLE DS_3DLOOK | DS_CONTROL | WS_CHILD | WS_VISIBLE | WS_CLIPSIBLINGS
+FONT 8, "MS Sans Serif"
+BEGIN
+    LTEXT	"filelist", IDC_FILE_LIST_LABEL, 6, 1, 50, 16
+    EDITTEXT	IDC_FILE_LIST, 54, 0, 155, 12
+    PUSHBUTTON  "browse",IDC_ADD_FILE,221,0,49,14, WS_TABSTOP | WS_GROUP
+END
+
+// You should add the WX include directory to your compiler's include
+// directory path (Tools|Options|Directories in Visual C++).
+// The path to add will be something like
+// "c:\program files\wx2\include".
+#include <wx/msw/wx.rc>
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "TortoiseActRes.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""winresrc.h""\r\n"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+

@@ -1,0 +1,600 @@
+// Microsoft Visual C++ generated resource script.
+//
+#include "resource.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "afxres.h"
+
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.K.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENG)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_UK
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE 
+BEGIN
+    "resource.h\0"
+END
+
+2 TEXTINCLUDE 
+BEGIN
+    "#include ""afxres.h""\r\n"
+    "\0"
+END
+
+3 TEXTINCLUDE 
+BEGIN
+    "#define _AFX_NO_SPLITTER_RESOURCES\r\n"
+    "#define _AFX_NO_OLE_RESOURCES\r\n"
+    "#define _AFX_NO_TRACKER_RESOURCES\r\n"
+    "#define _AFX_NO_PROPERTY_RESOURCES\r\n"
+    "\r\n"
+    "#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)\r\n"
+    "#ifdef _WIN32\r\n"
+    "LANGUAGE 9, 1\r\n"
+    "#pragma code_page(1252)\r\n"
+    "#endif //_WIN32\r\n"
+    "#include ""../version_no.h""  // master version number defs\r\n"
+    "#include ""../version_fu.h""  // version number macros\r\n"
+    "#include ""res\\cvsntcpl.rc2""  // non-Microsoft Visual C++ edited resources\r\n"
+    "#include ""afxres.rc""         // Standard components\r\n"
+    "#endif\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+// +000000000000000000000000000000000000000000000000000000000000000000000000000
+//
+// This is the new advert dialog - encourage community participation 
+//
+
+IDD_FREEDIALOG DIALOGEX 0, 0, 380, 206
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | WS_CAPTION | WS_SYSMENU
+EXSTYLE WS_EX_TOPMOST
+CAPTION "Support those that write Free Software"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "OK",IDOK,7,187,50,14
+    LTEXT           "Free Software is not about price, but about the freedom that the license grants you.",IDC_STATIC,13,5,282,12
+    LTEXT           "We recommend that EACH person in your team or organisation pay your share of the ",IDC_STATIC,11,30,274,10
+    LTEXT           "cost of developing CVSNT using one of these methods:",IDC_STATIC,11,39,181,11
+    CONTROL         "Purchase CVS Suite 2009 (CVSNT 2.8)",IDC_FREEOPT1,
+                    "Button",BS_AUTORADIOBUTTON,15,58,134,10
+    LTEXT           "the QA tested and commercially supported release that includes the high-performance CVS Suite Server, Defect Tracking Integration with Bugzilla, Mantis or Jira and over 380 bug fixes for $133.",IDC_STATIC,27,71,320,19
+    CONTROL         "Purchase CM Suite (EVS / CVSNT 3.1)",IDC_FREEOPT2,"Button",BS_AUTORADIOBUTTON,14,95,133,10
+    LTEXT           "a single repository server that works with Subversion, CVS, CVSNT, Web, Web Folders and TeamSystem clients for $401",IDC_STATIC,27,108,228,19
+    CONTROL         "Contribute more than 40 hours of documentation or coding fixes to the cvsnt-dev newsgroup forum",IDC_FREEOPT3,
+                    "Button",BS_AUTORADIOBUTTON,15,130,350,10
+    LTEXT           "If you use CVSNT as a part of a paying job and fail to pay your share of the development costs using one of the",IDC_STATIC,6,150,364,10
+    LTEXT           "above methods then someone else has to pay your share which is very unfair and also likely to result in a future with far less innovation in the development of free software.",IDC_STATIC,5,158,366,18
+    CONTROL         "<a href=""http://www.ohloh.net/p/cvsnt"">$ 9,895,730</a>",IDC_SYSLINK1,
+                    "SysLink",WS_TABSTOP,286,30,41,13
+    CONTROL         "<a href=""http://www.gnu.org/philosophy/free-sw.html"">http://www.gnu.org/philosophy/free-sw.html</a>",IDC_SYSLINK2,
+                    "SysLink",WS_TABSTOP,13,13,162,9
+    CONTROL         "<a href=""http://store.march-hare.com/s.nl/sc.2/category.2/.f"">Buy</a>",IDC_SYSLINK3,
+                    "SysLink",WS_TABSTOP,154,57,16,11
+    CONTROL         "<a href=""http://march-hare.com/cvspro/?lang=EN#downcvsnt"">Try</a>",IDC_SYSLINK6,
+                    "SysLink",WS_TABSTOP,174,57,19,10
+    CONTROL         "<a href=""http://march-hare.com/cvsnt/en.asp"">More info</a>",IDC_SYSLINK4,
+                    "SysLink",WS_TABSTOP,194,57,35,9
+    CONTROL         "<a href=""http://march-hare.com/cvspro/?lang=EN#downcmserver"">Try</a>",IDC_SYSLINK5,
+                    "SysLink",WS_TABSTOP,154,94,19,10
+END
+
+
+
+// +111111111111111111111111111111111111111111111111111111111111111111111111111
+//
+// This is the new front page front 
+//
+
+IDD_PAGE1 DIALOGEX 0, 0, 409, 209
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Server information"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    GROUPBOX        "Server Information",IDC_STATIC,7,49,394,55
+    LTEXT           "CVSNT Version",IDC_STATIC,17,64,50,8
+    LTEXT           "Registration Number",IDC_STATIC,17,75,65,8
+    LTEXT           "Host Operating System",IDC_STATIC,17,86,73,8
+    GROUPBOX        "Statistics",IDC_STATIC,7,106,394,74
+    LTEXT           "Uptime",IDC_STATIC,17,118,23,9
+    LTEXT           "Number of users",IDC_STATIC,17,130,52,8
+    LTEXT           "Max. Number of simultaneous users",IDC_STATIC,17,152,
+                    112,8
+    LTEXT           "Average time per user",IDC_STATIC,17,163,70,8
+    CONTROL         "Send weeky statistical summary to March Hare",
+                    IDC_CHECK1,"Button",BS_AUTOCHECKBOX | WS_TABSTOP,7,189,
+                    163,10
+    PUSHBUTTON      "What's this?",IDC_BUTTON1,185,187,50,14
+    LTEXT           "1.1.1.1",IDC_CVSNTVERSION,127,64,243,8
+    LTEXT           "9999",IDC_REGISTRATION,127,75,243,8
+    LTEXT           "Altair OS 1.0",IDC_HOSTOS,127,86,243,8
+    LTEXT           "1 billion years",IDC_UPTIME,148,119,174,8
+    LTEXT           "200,000,000",IDC_USERS,148,130,174,8
+    LTEXT           "3",IDC_SIMULTANEOUSUSERS,148,152,174,8
+    LTEXT           "1:40:33:15",IDC_TIMEPERUSER,148,163,174,8
+    PUSHBUTTON      "",IDC_LOGO,23,8,363,35,BS_BITMAP | NOT WS_TABSTOP,
+                    WS_EX_TRANSPARENT | WS_EX_STATICEDGE
+    LTEXT           "Number of sessions",IDC_STATIC,17,141,62,8
+    LTEXT           "12313",IDC_SESSIONCOUNT,148,141,253,8
+END
+
+// +222222222222222222222222222222222222222222222222222222222222222222222222222
+//
+// ABOUT
+//
+
+IDD_PAGE4 DIALOGEX 0, 0, 409, 209
+STYLE DS_SETFONT | DS_MODALFRAME | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "About"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CTEXT           "Static",IDC_VERSION,7,8,394,9,SS_NOPREFIX
+    PUSHBUTTON      "",IDC_LOGO,20,20,363,35,BS_BITMAP | NOT WS_TABSTOP,
+                    WS_EX_TRANSPARENT | WS_EX_STATICEDGE
+    CTEXT           "CVSNT (C) 1999-2007 Tony Hoyle, March Hare Software, and others.\n\nCommercial support and training provided by March Hare software Ltd. see http://www.march-hare.com/cvspro for details.\n\nCVSNT comes with ABSOLUTELY NO WARRANTY -  for details type 'cvs -v'",
+                    IDC_COPYING,7,63,394,46,SS_NOPREFIX | SS_NOTIFY
+    GROUPBOX        "Services",IDC_STATIC,47,153,314,48
+    LTEXT           "Low Performance Service",IDC_STATIC,59,166,131,8
+    CTEXT           "Static",IDC_STATUS,161,166,103,8
+    PUSHBUTTON      "&Start",IDC_START,289,163,29,14
+    PUSHBUTTON      "S&top",IDC_STOP,321,163,29,14
+    LTEXT           "CVSNT Lock Service",IDC_STATIC,59,182,69,8
+    CTEXT           "Static",IDC_STATUS2,161,182,103,8
+    PUSHBUTTON      "&Start",IDC_START2,289,180,29,14
+    PUSHBUTTON      "S&top",IDC_STOP2,321,180,29,14
+END
+
+IDD_NEWROOT DIALOGEX 0, 0, 284, 193
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "Repository Settings"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Type",IDC_STATIC,23,8,17,8
+    COMBOBOX        IDC_TYPE,49,7,223,47,CBS_DROPDOWNLIST | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Location",IDC_STATIC,14,25,28,8
+    EDITTEXT        IDC_ROOT,49,23,196,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_SELECT,250,23,22,14
+    LTEXT           "Name",IDC_STATIC,21,42,20,8
+    EDITTEXT        IDC_NAME,49,40,223,14,ES_AUTOHSCROLL
+    LTEXT           "Description",IDC_STATIC,7,59,36,8
+    EDITTEXT        IDC_DESCRIPTION,49,57,223,14,ES_AUTOHSCROLL
+    CONTROL         "Publish Repository",IDC_PUBLISH,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,49,75,74,10
+    CONTROL         "Default Repository",IDC_DEFAULT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,49,86,76,8
+    CONTROL         "Online",IDC_ONLINE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,167,75,36,10
+    CONTROL         "Read/Write",IDC_READWRITE,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,167,86,53,10
+    GROUPBOX        "Remote server details",IDC_REMOTEGROUP,47,98,230,68
+    LTEXT           "Server",IDC_SERVERTEXT,69,113,22,8
+    EDITTEXT        IDC_SERVER,95,110,166,14,ES_AUTOHSCROLL
+    LTEXT           "Repository",IDC_REPOSITORYTEXT,57,130,34,8
+    EDITTEXT        IDC_REPOSITORY,95,127,166,14,ES_AUTOHSCROLL
+    LTEXT           "Passphrase",IDC_PASSPHRASETEXT,53,147,38,8
+    EDITTEXT        IDC_PASSPHRASE,95,144,167,14,ES_PASSWORD | 
+                    ES_AUTOHSCROLL
+    DEFPUSHBUTTON   "OK",IDOK,90,172,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,142,172,50,14
+END
+
+IDD_PAGE2 DIALOGEX 0, 0, 409, 209
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Server Settings"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Run as user",IDC_STATIC,29,9,39,8
+    COMBOBOX        IDC_RUNASUSER,75,7,192,121,CBS_DROPDOWN | WS_VSCROLL | 
+                    WS_TABSTOP
+    LTEXT           "Default domain",IDC_STATIC,21,25,48,8
+    COMBOBOX        IDC_DEFAULTDOMAIN,75,23,192,54,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Temporary Directory",IDC_STATIC,7,42,64,8
+    EDITTEXT        IDC_EDIT1,75,39,192,14,ES_AUTOHSCROLL | ES_READONLY
+    PUSHBUTTON      "...",IDC_CHANGETEMP,270,38,20,14
+    LTEXT           "CVS server port",IDC_STATIC,20,64,50,8
+    EDITTEXT        IDC_PSERVERPORT,75,61,40,14,ES_AUTOHSCROLL
+    CONTROL         "Spin1",IDC_SPIN1,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,114,60,11,14
+    LTEXT           "Lock Server",IDC_STATIC,27,80,40,8
+    EDITTEXT        IDC_LOCKSERVER,75,78,76,14,ES_AUTOHSCROLL
+    EDITTEXT        IDC_LOCKSERVERPORT,153,78,40,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | 
+                    UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
+                    UDS_NOTHOUSANDS,193,78,11,14
+    LTEXT           "Encryption",IDC_STATIC,31,103,34,8
+    COMBOBOX        IDC_ENCRYPTION,76,100,103,54,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Compression",IDC_STATIC,31,119,41,8
+    COMBOBOX        IDC_COMPRESSION,76,116,103,60,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+    LTEXT           "Anonymous User",IDC_STATIC,15,139,54,8
+    EDITTEXT        IDC_ANONUSER,76,136,194,14,ES_AUTOHSCROLL
+END
+
+IDD_PAGE3 DIALOGEX 0, 0, 409, 207
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Repository configuration"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    LTEXT           "Server Name",IDC_STATIC,7,4,42,8
+    EDITTEXT        IDC_SERVERNAME,63,2,179,14,ES_AUTOHSCROLL
+    CONTROL         "",IDC_ROOTLIST,"SysListView32",LVS_REPORT | 
+                    LVS_SINGLESEL | LVS_ALIGNLEFT | WS_BORDER | WS_TABSTOP,7,
+                    16,395,165,WS_EX_STATICEDGE
+    PUSHBUTTON      "&Add",IDC_ADDROOT,127,186,50,14
+    PUSHBUTTON      "&Delete",IDC_DELETEROOT,179,186,50,14
+    PUSHBUTTON      "&Edit",IDC_EDITROOT,231,186,50,14
+END
+
+IDD_PAGE5 DIALOGEX 0, 0, 409, 209
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Compatibility Options"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CTEXT           "Set these flags to emulate behaviour of older servers, or for compatibility with legacy clients.",
+                    IDC_STATIC,7,8,394,11
+    GROUPBOX        "CVSNT Clients",IDC_STATIC,23,21,178,64
+    CONTROL         "Respond as cvs 1.11.2 to version request",
+                    IDC_OLDVERSION_CVSNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,41,34,147,12
+    CONTROL         "Emulate '-n checkout' bug",IDC_OLDCHECKOUT_CVSNT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,41,46,98,10
+    CONTROL         "Hide extended log/status information",
+                    IDC_HIDESTATUS_CVSNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,41,57,131,10
+    CONTROL         "Ignore client-side force -k options",
+                    IDC_IGNOREWRAPPERS_CVSNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,41,69,120,10
+    GROUPBOX        "Non-CVSNT Clients",IDC_STATIC,207,21,178,64
+    CONTROL         "Respond as cvs 1.11.2 to version request",
+                    IDC_OLDVERSION_NONCVSNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,225,34,147,12
+    CONTROL         "Emulate '-n checkout' bug",IDC_OLDCHECKOUT_NONCVSNT,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,225,46,98,10
+    CONTROL         "Hide extended log/status information",
+                    IDC_HIDESTATUS_NONCVSNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,225,57,131,10
+    CONTROL         "Ignore client-side force -k options",
+                    IDC_IGNOREWRAPPERS_NONCVSNT,"Button",BS_AUTOCHECKBOX | 
+                    WS_TABSTOP,225,69,120,10
+    LTEXT           "Clients allowed to connect:",IDC_STATIC,9,94,86,8
+    COMBOBOX        IDC_ALLOWEDCLIENTS,102,91,157,82,CBS_DROPDOWNLIST | 
+                    CBS_SORT | WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_PAGE6 DIALOGEX 0, 0, 409, 209
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Advanced"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "Don't resolve client names",IDC_NOREVERSEDNS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,7,99,10
+    CONTROL         "Lockserver listens locally only",IDC_LOCKSERVERLOCAL,
+                    "Button",BS_AUTOCHECKBOX | WS_TABSTOP,13,19,109,10
+    CONTROL         "Allow clients to trace server",IDC_ALLOWTRACE,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,31,102,10
+    CONTROL         "Unicode server",IDC_UNICODESERVER,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP | WS_DISABLED ,13,41,64,10
+    CONTROL         "All users are read only",IDC_READONLY,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,53,85,10
+    CONTROL         "Allow remote init commands",IDC_REMOTEINIT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,65,103,10
+    CONTROL         "Atomic Checkouts",IDC_ATOMICCHECKOUTS,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,77,73,10
+    CONTROL         "Global Scripts",IDC_GLOBALSCRIPT,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,89,73,10
+    CONTROL         "Enable replication server",IDC_REPLICATION,"Button",
+                    BS_AUTOCHECKBOX | WS_TABSTOP,13,112,93,10
+    LTEXT           "Port",IDC_REPLICATIONPORT_TEXT,26,126,14,8
+    EDITTEXT        IDC_REPLICATIONPORT,45,123,40,14,ES_AUTOHSCROLL
+    LTEXT           "Zeroconf publication type:",IDC_STATIC,13,154,83,8
+    COMBOBOX        IDC_ZEROCONF,102,152,103,106,CBS_DROPDOWNLIST | 
+                    WS_VSCROLL | WS_TABSTOP
+END
+
+IDD_MAINFRAME DIALOGEX 0, 0, 490, 209
+STYLE DS_SETFONT | DS_FIXEDSYS | DS_CENTER | WS_MINIMIZEBOX | WS_MAXIMIZEBOX | 
+    WS_POPUP | WS_CAPTION | WS_SYSMENU | WS_THICKFRAME
+EXSTYLE WS_EX_APPWINDOW
+CAPTION "CVSNT Control Panel"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+END
+
+IDD_PAGE7 DIALOGEX 0, 0, 409, 209
+STYLE DS_SETFONT | WS_CHILD | WS_DISABLED | WS_CAPTION
+CAPTION "Plugins"
+FONT 8, "MS Sans Serif", 0, 0, 0x0
+BEGIN
+    CONTROL         "",IDC_LIST1,"SysListView32",LVS_REPORT | LVS_ALIGNLEFT | 
+                    WS_BORDER | WS_TABSTOP,7,7,395,175
+    PUSHBUTTON      "&Configure",IDC_BUTTON1,179,188,50,14
+END
+
+IDD_DIALOG1 DIALOGEX 0, 0, 325, 119
+STYLE DS_SETFONT | DS_MODALFRAME | DS_FIXEDSYS | DS_CENTER | WS_POPUP | 
+    WS_CAPTION | WS_SYSMENU
+CAPTION "CVSNT Usage Statistics"
+FONT 8, "MS Shell Dlg", 400, 0, 0x1
+BEGIN
+    DEFPUSHBUTTON   "&OK",IDOK,111,98,50,14
+    PUSHBUTTON      "&Cancel",IDCANCEL,165,98,50,14
+    LTEXT           "xx",IDC_MESSAGE,7,7,311,83,SS_NOPREFIX
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO 
+BEGIN
+    IDD_PAGE1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 401
+        TOPMARGIN, 8
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_NEWROOT, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 277
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 186
+    END
+
+    IDD_PAGE2, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 402
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_PAGE3, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 402
+        TOPMARGIN, 2
+        BOTTOMMARGIN, 200
+    END
+
+    IDD_PAGE5, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 401
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_PAGE6, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 402
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_MAINFRAME, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 483
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_PAGE7, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 402
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_PAGE4, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 401
+        TOPMARGIN, 8
+        BOTTOMMARGIN, 202
+    END
+
+    IDD_DIALOG1, DIALOG
+    BEGIN
+        LEFTMARGIN, 7
+        RIGHTMARGIN, 318
+        TOPMARGIN, 7
+        BOTTOMMARGIN, 112
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_ICON1               ICON                    "icon1.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog Info
+//
+
+IDD_PAGE2 DLGINIT
+BEGIN
+    IDC_RUNASUSER, 0x403, 9, 0
+0x704f, 0x6974, 0x6e6f, 0x6c61, "\000" 
+    IDC_RUNASUSER, 0x403, 24, 0
+0x7541, 0x6874, 0x6e65, 0x6974, 0x6163, 0x6974, 0x6e6f, 0x5220, 0x7165, 
+0x6975, 0x6572, 0x0064, 
+    IDC_RUNASUSER, 0x403, 20, 0
+0x6e45, 0x7263, 0x7079, 0x6974, 0x6e6f, 0x5220, 0x7165, 0x6975, 0x6572, 
+0x0064, 
+    IDC_DEFAULTDOMAIN, 0x403, 9, 0
+0x704f, 0x6974, 0x6e6f, 0x6c61, "\000" 
+    IDC_DEFAULTDOMAIN, 0x403, 24, 0
+0x7541, 0x6874, 0x6e65, 0x6974, 0x6163, 0x6974, 0x6e6f, 0x5220, 0x7165, 
+0x6975, 0x6572, 0x0064, 
+    IDC_DEFAULTDOMAIN, 0x403, 20, 0
+0x6e45, 0x7263, 0x7079, 0x6974, 0x6e6f, 0x5220, 0x7165, 0x6975, 0x6572, 
+0x0064, 
+    IDC_ENCRYPTION, 0x403, 9, 0
+0x704f, 0x6974, 0x6e6f, 0x6c61, "\000" 
+    IDC_ENCRYPTION, 0x403, 24, 0
+0x7541, 0x6874, 0x6e65, 0x6974, 0x6163, 0x6974, 0x6e6f, 0x5220, 0x7165, 
+0x6975, 0x6572, 0x0064, 
+    IDC_ENCRYPTION, 0x403, 20, 0
+0x6e45, 0x7263, 0x7079, 0x6974, 0x6e6f, 0x5220, 0x7165, 0x6975, 0x6572, 
+0x0064, 
+    IDC_COMPRESSION, 0x403, 9, 0
+0x704f, 0x6974, 0x6e6f, 0x6c61, "\000" 
+    IDC_COMPRESSION, 0x403, 9, 0
+0x6552, 0x7571, 0x7269, 0x6465, "\000" 
+    0
+END
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Bitmap
+//
+
+IDB_BITMAP1             BITMAP                  "mhlogo_plus_cvsnt.bmp"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// String Table
+//
+
+STRINGTABLE 
+BEGIN
+    IDS_NAME                "CVSNT Server"
+    IDS_DESCRIPTION         "Configure the CVS NT Service"
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_ADDROOT             "Make a repository available to the server."
+    IDC_DELETEROOT          "Remove a repository from the list."
+    IDC_ROOTLIST            "List of available repository roots.  The first column is the name of the repository as seen by clients.  The second column is the actual location of the root on the server machine."
+    IDC_NOREVERSEDNS        "Do not lookup reverse DNS for clients.\n\nIf you are experiencing long (>10sec) delays in accessing the server this may be due to a broken DNS setup.  Setting this option can work as a temporary fix until the local DNS is repaired."
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_LOCKSERVERLOCAL     "Normally only the local CVS server needs to access to lock server.  Disable this if you need applications on other machines to be able to directly access the lockserver."
+    IDC_LOCKSERVER          "Machine that lockserver resides on.  Normally same machine as CVS server ('localhost')"
+    IDC_ALLOWTRACE          "Allow clients to use the -t (trace) option.  This may reveal more information about your server to hackers, so should normally be off."
+    IDC_CASESENSITIVE       "Make the server behave in a case sensitive manner.\nUnix CVS servers and clients are case sensitive, so if you have Unix clients this may be required.\nThis option requires an external driver available from March-Hare software."
+    IDC_UNICODESERVER       "Run the server in Unicode using UTF8 across the protocol.  This may break scripts that depend on the server running as ANSI, so use with care."
+    IDC_READONLY            "Make the entire server read-only, which prevents modification even by administrators."
+    IDC_REMOTEINIT          "Allow server administrators to run 'cvs init' commands remotely."
+    IDC_ENABLEZEROCONF      "Publish server details over zeroconf.  Enabled by default."
+    IDC_ATOMICCHECKOUTS     "Ensure that users checking out get a consistent sandbox on busy servers.  This option has a measurable performance penalty so is not enabled by default."
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_EDIT1               "Directory that CVS uses for its temporary files.  This directory should have read/write access for all users that need CVS access, plus LocalSystem."
+    IDC_PSERVERPORT         "Port that CVS service listens on.  Normally 2401."
+    IDC_LOCKSERVERPORT      "Port that lock server listens on.  Normally 2402."
+    IDC_ENCRYPTION          "Encryption settings\n\nOptional (Default) - Allow clients to connect without encryption.\nRequest Authentication - Request that clients use authenticated packets if available.\nRequest Encryption - Request that clients use encrypted packets if available\nRequire Authentication - Require that clients use authenticated or encrypted packets.\nRequire encryption - Require that clients use encrypted packets."
+    IDC_DEFAULTDOMAIN       "Default domain that server is a member of."
+    IDC_COMPRESSION         "Compression settings\n\nOptional (Default) - Allow clients to use compressed packets\nRequest Compression - Request that clients use compression when available.\nRequire Compression - Require that clients use compression."
+    IDC_RUNASUSER           "You can execute the server either as the client user, or as a specific fixed user."
+    IDC_COPYING             "This program is distributed under the terms of the GNU GPL.  CVSNT Copyright (C) 1999-2004 March Hare Software Ltd.\nContains portions Copyright (C) 1989-2001 Free Software Foundation.  Putty implementation Copyright 1997-2004 Simon Tatham. "
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_LEGACY              "Non-cvsnt clients, such as cvshome.org cvs and eclipse"
+    IDC_CVSNT               "CVSNT compatible clients, such as WinCVS, TortoiseCVS, and others using the CVSNT client software."
+    IDC_OLDVERSION_NONCVSNT "Return cvs 1.11.2 as the server version to clients.  Some clients require this to behave correctly."
+    IDC_SERVERNAME          "Published name of server"
+    IDC_ANONUSER            "Name of a read-only user that requires no password, for anonymous logins"
+    IDC_HIDESTATUS_NONCVSNT "Hide extended status and log information.  This includes information about mergepoints and commit identifiers."
+    IDC_SMTPINTERNAL        "Use internal SMTP client to send email"
+    IDC_IGNOREWRAPPERS_NONCVSNT 
+                            "Ignore forced -k and -W options in import and add"
+    IDC_SMTPEXTERNAL        "Use external program that takes formatted email as input and destination users as arguments"
+    IDC_OLDVERSION_CVSNT    "Return cvs 1.11.2 as the server version to clients.  Some clients require this to behave correctly."
+    IDC_OLDCHECKOUT_CVSNT   "Implement old buggy checkout -n behaviour that doesn't support subdirectories.   Some older clients relied on the behaviour this prior to the implementation of the ls command."
+END
+
+STRINGTABLE 
+BEGIN
+    IDC_HIDESTATUS_CVSNT    "Hide extended status and log information.  This includes information about mergepoints and commit identifiers."
+    IDC_OLDCHECKOUT_OLDCVSNT 
+                            "Implement old buggy checkout -n behaviour that doesn't support subdirectories.   Some older clients relied on the behaviour this prior to the implementation of the ls command."
+    IDC_IGNOREWRAPPERS_CVSNT 
+                            "Ignore forced -k and -W options in import and add"
+    IDC_GLOBALSCRIPT        "Enable ActiveScript extension plugin to use server-wide scripts."
+    IDC_REPLICATION         "Enable the replication server (unison)"
+END
+
+#endif    // English (U.K.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+#define _AFX_NO_SPLITTER_RESOURCES
+#define _AFX_NO_OLE_RESOURCES
+#define _AFX_NO_TRACKER_RESOURCES
+#define _AFX_NO_PROPERTY_RESOURCES
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE 9, 1
+#pragma code_page(1252)
+#endif //_WIN32
+#include "../version_no.h"  // master version number defs
+#include "../version_fu.h"  // version number macros
+#include "res\cvsntcpl.rc2"  // non-Microsoft Visual C++ edited resources
+#include "afxres.rc"         // Standard components
+#endif
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

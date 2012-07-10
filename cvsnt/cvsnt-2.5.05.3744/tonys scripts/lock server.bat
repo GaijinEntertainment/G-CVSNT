@@ -1,0 +1,1 @@
+d:\cvsbin\cvslock -test

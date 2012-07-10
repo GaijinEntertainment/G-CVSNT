@@ -1,0 +1,20 @@
+#!/bin/bash
+
+# Build .mo files from .po and copy to TortoiseCVS install directory
+
+TortoiseDir=$(regtool get '\machine\Software\TortoiseCVS\RootDir' 2> NUL:) || True
+
+echo -n "Building .mo files:   "
+for lang in `ls *.po | sed -e s/\.po//g`
+do
+    echo -n $lang " "
+    msgfmt -o $lang.mo $lang.po
+done
+echo
+echo -n "Installing .mo files: "
+for lang in `ls *.po | sed -e s/\.po//g`
+do
+    echo -n $lang " "
+    cp $lang.mo "$TortoiseDir/locale/$lang/TortoiseCVS.mo"
+done
+echo

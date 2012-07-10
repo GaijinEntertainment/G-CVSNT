@@ -1,0 +1,36 @@
+/*
+	CVSNT Helper application API
+    Copyright (C) 2004-5 Tony Hoyle and March-Hare Software Ltd
+
+    This library is free software; you can redistribute it and/or
+    modify it under the terms of the GNU Lesser General Public
+    License version 2.1 as published by the Free Software Foundation.
+
+    This library is distributed in the hope that it will be useful,
+    but WITHOUT ANY WARRANTY; without even the implied warranty of
+    MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+    Lesser General Public License for more details.
+
+    You should have received a copy of the GNU Lesser General Public
+    License along with this library; if not, write to the Free Software
+    Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
+*/
+#ifndef SCRAMBLE__H
+#define SCRAMBLE__H
+
+class CScramble
+{
+public:
+	CVSTOOLS_EXPORT CScramble() { }
+	CVSTOOLS_EXPORT virtual ~CScramble() { }
+
+	CVSTOOLS_EXPORT const char *Scramble(const char *plaintext);
+	CVSTOOLS_EXPORT const char *Unscramble(const char *cypher);
+
+protected:
+	cvs::string m_scramble;
+	static const unsigned char m_lookup[256];
+};
+
+#endif
+

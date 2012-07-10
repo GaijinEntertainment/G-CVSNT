@@ -1,0 +1,191 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="cvsnt">
+
+        <Property Id="CVSNT_BASEDIR">
+            <RegistrySearch Id="gFindBaseDir" Root="HKLM" Key="Software\Cvs\PServer" Name="InstallBase" Type="raw" />
+            <RegistrySearch Id="lFindBaseDir" Root="HKCU" Key="Software\Cvsnt\PServer" Name="InstallBase" Type="raw" />
+        </Property>
+        <DirectoryRef Id="COMMON_INSTALLDIR" FileSource="$(var.SYSFILES)\">
+            <Component Id="Iconv" Guid="41AEC57F-C919-41A7-9911-4620E9396583" DiskId="1">
+                <File Id="charset.dll" Name="libcharset-1.9.1.dll" />
+                <File Id="iconv.dll" Name="libiconv-1.9.1.dll" />
+            </Component>
+            <Component Id="Libxml" Guid="0118ABDD-33EE-4cad-B014-E5BDAD865062" DiskId="1">
+                <File Id="libxml2cvsnt.dll" Name="libxml2-2.7.3.dll" />
+            </Component>
+            <Component Id="Pcre" Guid="B957EAE3-A508-4a28-8E00-17B0EB70BE14" DiskId="1">
+                <File Id="libpcre.dll" Name="libpcre-7.9.dll" />
+                <File Id="libpcreposix.dll" Name="libpcreposix-7.9.dll" />
+            </Component>
+            <Component Id="Zlib" Guid="5BC7A245-069E-4279-A08B-7EE899C8E780" DiskId="1">
+                <File Id="zlib.dll.dll" Name="zlib1.2.3.dll" />
+	    </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="CVSNT_INSTALLDIR" FileSource="$(var.CVSNT_BASE)\">
+            <Directory Id="CvsntStuff" Name=".">
+                <Component Id="Cvsapi" Guid="3DEB8A4B-B506-4a48-96A2-9EC10962D401" DiskId="1">
+                    <File Id="cvsapi.dll" Name="cvsapi.dll" />
+                    <File Id="mdnsclient.dll" Name="mdnsclient.dll" />
+                </Component>
+                <Component Id="Cvstools" Guid="A32017D5-C544-4df5-AECF-1B0CA2500AE3" DiskId="1">
+                    <File Id="cvstools.dll" Name="cvstools.dll" KeyPath="yes">
+                        <TypeLib Id="2BDF7A65-0BFE-4b1a-9205-9AB900C7D0DA" Language="0" MajorVersion="1" />
+                    </File>
+                </Component>
+                <Component Id="Documentation" Guid="FC974E48-971D-49EE-B2CF-151B92DE30A5" DiskId="1">
+                    <File Id="COPYING" Name="COPYING" />
+<!--                    <File Id="cvs.chm" Name="cvs.chm">
+                        <Shortcut Id="cvs.chm" Advertise="no" Name="CVSNT Manual.lnk" Directory="CvsntDocumentationFolder" /> 
+                    </File> -->
+                </Component>
+                <Component Id="ReleaseNotes" Guid="BD093E95-5823-4313-937D-A12CFA39A2FF" DiskId="1">
+		    <RegistryValue Id="keyReleaseNotes" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="ReleaseNotes" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="relnotes.rtf" Name="relnotes.rtf">
+                        <Shortcut Id="relnotes.lnk" Advertise="no" Name="Release notes.lnk" Directory="CvsntDocumentationFolder" />
+                    </File>
+                </Component>
+                <Component Id="CommandLineFiles" Guid="E6BDBDE2-55EC-496c-9C0A-DDCA577BC2CF" DiskId="1">
+                    <File Id="cvs.exe" Name="cvs.exe" />
+                    <File Id="cvs.dll" Name="cvs.dll" />
+                    <File Id="cvsdiag.exe" Name="cvsdiag.exe" />
+                    <File Id="extnt.exe" Name="extnt.exe" />
+                    <File Id="extnt.dll" Name="extnt.dll" />
+                    <Environment Id="SetPath" Name="Path" Action="set" Part="last" Value="[CVSNT_INSTALLDIR]" />
+                </Component>
+                <Component Id="CommandLineIniFiles" Guid="81446A48-4FB4-4C15-9ED3-D21C4557FDA8" NeverOverwrite="yes" DiskId="1">
+                    <File Id="extnt.ini" Name="extnt.ini" KeyPath="yes" />
+                    <File Id="protocol_map.ini" Name="protocol_map.ini" />
+                </Component>
+                <Component Id="CommandLineLock" Guid="C5E7B7C6-4FCD-4f44-8245-BD95AB1F1498" DiskId="1">
+                    <File Id="cvslock.exe" Name="cvslock.exe" />
+                    <File Id="cvslock.dll" Name="cvslock.dll" />
+                </Component>
+                <Directory Id="CvsntProtoFolder" Name="protocols">
+                    <Component Id="PServer" Guid="33E45A18-1891-42b7-9339-7052E4297C65" DiskId="1">
+                        <File Id="pserver_protocol.dll" Name="pserver.dll" />
+                    </Component>
+                    <Component Id="SServer" Guid="14382272-091D-43bb-8766-5EC67676BF7D" DiskId="1">
+                        <File Id="sserver_protocol.dll" Name="sserver.dll" />
+                    </Component>
+                    <Component Id="GServer" Guid="940D540B-6967-4136-9185-35D8B3D8C8E6" DiskId="1">
+                        <File Id="gserver_protocol.dll" Name="gserver.dll" />
+                    </Component>
+                    <Component Id="RServer" Guid="F49EF116-EC09-4b7f-A5B4-2EB131BD527E" DiskId="1">
+                        <File Id="server_protocol.dll" Name="server.dll" />
+                    </Component>
+                    <Component Id="Ext" Guid="17C896CE-C639-43bc-B171-4BAA0EA79172" DiskId="1">
+                        <File Id="ext_protocol.dll" Name="ext.dll" />
+                    </Component>
+                    <Component Id="Ssh" Guid="2A885DC9-08B0-4ce0-B68B-7AB3DBCDD756" DiskId="1">
+                        <File Id="ssh_protocol.dll" Name="ssh.dll" />
+                    </Component>
+                    <Component Id="Sspi" Guid="4702FCF5-169D-448c-BFED-1F586F9A049D" DiskId="1">
+                        <File Id="sspi_protocol.dll" Name="sspi.dll" />
+                    </Component>
+                    <Component Id="Fork" Guid="0561B14F-5B17-4e30-86E3-F3FB9017A114" DiskId="1">
+                        <File Id="fork_protocol.dll" Name="fork.dll" />
+                    </Component>
+                </Directory>
+                <Directory Id="CvsntMdnsStuff" Name="mdns">
+                    <Component Id="AppleMdns" Guid="b9e5ff07-933e-43d6-bcd4-992791455d0f" DiskId="1">
+                        <File Id="apple.dll" Name="apple.dll" />
+                    </Component>
+                    <Component Id="MiniMdns" Guid="33b2faba-d6bb-4ea9-9a06-b7cf34e9f5e1" DiskId="1">
+                        <File Id="mini.dll" Name="mini.dll" />
+                    </Component>
+                </Directory>
+                <Component Id="SshPlink" Guid="f80e5626-c96b-4fa1-873d-b7b18218547d" DiskId="1">
+                    <File Id="ssh_plink.dll" Name="plink.dll" />
+                </Component>
+                <Component Id="CvsntStartMenuDoc" Guid="398ACBE2-6BF2-4532-B9D8-41E598F58005" DiskId="1">
+		    <RegistryValue Id="keyCvsntStartMenuDoc" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsntStartMenuDoc" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="marchhare.url" Name="march-hare.url" Source="./march-hare.url">
+                        <Shortcut Id="cvsntpro.lnk" Advertise="no" Name="CVSNT Professional Support And Training.lnk" Directory="CvsntDocumentationFolder" />
+                    </File>
+                    <File Id="cvsntwiki.url" Name="cvsnt-wiki.url" Source="./cvsnt-wiki.url">
+                        <Shortcut Id="cvsntope.lnk" Advertise="no" Name="CVSNT Opensource Support.lnk" Directory="CvsntDocumentationFolder" />
+                    </File>
+	            <File Id="twitter.url" Name="twitter.url" Source="./twitter.url">
+    	                <Shortcut Id="twitter.lnk" Advertise="no" Directory="CvsntDocumentationFolder" Name="CVS Suite on Twitter.lnk" Icon="twitter.ico" >
+    	                  <Icon Id="twitter.ico" SourceFile="./Binary/twitter.ico" />
+    	                </Shortcut>
+	            </File>
+	            <File Id="facebook.url" Name="facebook.url" Source="./facebook.url">
+    	                <Shortcut Id="facebook.lnk" Advertise="no" Directory="CvsntDocumentationFolder" Name="CVS Suite on Facebook.lnk" Icon="facebook.ico" >
+    	                  <Icon Id="facebook.ico" SourceFile="./Binary/facebook.ico" />
+    	                </Shortcut>
+	            </File>
+                </Component>
+                <Component Id="CvsAgent" Guid="a6522da3-a6bf-4080-9eb6-7b65e6b8c1a6" DiskId="1">
+		    <RegistryValue Id="keyCvsAgent" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsAgent" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="cvsagent.exe" Name="cvsagent.exe">
+                        <Shortcut Id="cvsagent.exe" Advertise="no" Name="CVSNT Password Agent.lnk" Directory="CvsntStartMenuFolder" />
+                    </File>
+                </Component>
+            </Directory>
+        </DirectoryRef>
+
+        <Feature Id="Cvsnt" Title="CVSNT" Description="The CVSNT version control system" Display="expand" AllowAdvertise="no" Level="3" ConfigurableDirectory="CVSNT_BASEDIR">
+	    <FeatureRef Id="vc90rt" />
+            <ComponentRef Id="CvsntStartMenuDoc" />
+            <ComponentRef Id="ReleaseNotes" />
+            <ComponentRef Id="CvsntDocumentationFolder" />
+            <ComponentRef Id="CvsntStartMenuFolder" />
+            <ComponentRef Id="Iconv" />
+            <ComponentRef Id="Cvsapi" />
+            <ComponentRef Id="Cvstools" />
+	    <ComponentRef Id="Pcre" />
+	    <ComponentRef Id="Libxml" />
+	    <ComponentRef Id="Zlib" />
+            <ComponentGroupRef Id="CommonFiles" />
+            <ComponentRef Id="CommandLineFiles" />
+            <ComponentRef Id="CommandLineIniFiles" />
+            <ComponentRef Id="CommandLineLock" />
+            <Feature Id="Protocols" Title="Protocols" Description="Client/Server Connection Protocols" AllowAdvertise="no" Level="3">
+                <Feature Id="PServer" Title="PServer" Description=":pserver: protocol" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="PServer" />
+                </Feature>
+                <Feature Id="SServer" Title="SServer" Description=":sserver: protocol" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="SServer" />
+                </Feature>
+                <Feature Id="GServer" Title="GServer" Description=":gserver: protocol" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="GServer" />
+                </Feature>
+                <Feature Id="RServer" Title="Server" Description=":server: protocol" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="RServer" />
+                </Feature>
+                <Feature Id="Sspi" Title="Sspi" Description=":sspi: protocol" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="Sspi" />
+                </Feature>
+                <Feature Id="Ext" Title="Ext" Description=":ext: protocol" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="Ext" />
+                </Feature>
+                <Feature Id="Ssh" Title="Ssh" Description=":ssh: protocol" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="Ssh" />
+                    <ComponentRef Id="SshPlink" />
+                </Feature>
+                <Feature Id="Fork" Title="Fork" Description=":fork: protocol" AllowAdvertise="no" Level="4">
+                    <ComponentRef Id="Fork" />
+                </Feature>
+            </Feature>
+            <Feature Id="Mdns" Title="Mdns handlers" Description="Handlers for zeroconf server discovery" AllowAdvertise="no" Level="3">
+                <Condition Level="4">SERVER=3</Condition>
+                <Feature Id="apple_mdns" Title="apple" Description="Apple Rendezvous client" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="AppleMdns" />
+                </Feature>
+                <Feature Id="mini_mdns" Title="internal" Description="CVSNT internal zeroconf client" AllowAdvertise="no" Level="3">
+                    <ComponentRef Id="MiniMdns" />
+                </Feature>
+            </Feature>
+            <Feature Id="CvsAgent" Title="Cvs Agent" Description="CVS Agent stores passwords securely in memory rather than write them to disk" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="CvsAgent" />
+            </Feature>
+            <Feature Id="Documentation" Title="Documentation" Description="The CVSNT manual" Level="3">
+                <ComponentRef Id="Documentation" />
+                <ComponentRef Id="CvsntDocumentationFolder" />
+            </Feature>
+        </Feature>
+    </Fragment>
+</Wix>

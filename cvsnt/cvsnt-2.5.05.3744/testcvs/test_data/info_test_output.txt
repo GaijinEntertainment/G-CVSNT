@@ -1,0 +1,10 @@
+commitinfo - testcvs /repos/testcvs
+commitinfo - all /repos/testcvs
+Checking in diff_test.txt;
+/repos/testcvs/diff_test.txt,v  <--  diff_test.txt
+new revision: 1.6; previous revision: 1.5
+done
+loginfo - testcvs - testcvs diff_test.txt,1.5,1.6
+loginfo - all
+postcommand - testcvs /repos/testcvs commit
+postcommand - all /repos/testcvs commit

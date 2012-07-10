@@ -1,0 +1,20 @@
+Things to do to TortoiseCVS web site
+------------------------------------
+
+Development page:
+	Describe CVS->Checkout TortoiseCVS/wxWidgets features
+	Describe CVS->Make Patch feature in TortoiseCVS
+	Compiling with latest Win32 headers for shell column stuff
+	Split programmer stuff into separate page, and talk about
+		translation, testing, other ways to help as well?
+
+Make tables always the same width (fixed width on left bar)
+
+All the *.html files are the helped shipped with app, *.shtml
+	are just for the web site.  This feels a bit disordered, but
+	actually works quite well.  Think of a better way that 
+	makes the look and feel of the web site more consistent?
+	Credits and contributors are very similar pages, faq.html could
+	be more prominant on the website support section, as could
+	the guide.html and legal.html pages.
+

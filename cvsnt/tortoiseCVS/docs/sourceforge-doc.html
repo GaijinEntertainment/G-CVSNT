@@ -1,0 +1,157 @@
+<html>
+
+<head> <title>
+TortoiseCVS client installation - easiest SSH integrated into Windows
+</title> <link rel="StyleSheet" href="style.css"> </head>
+
+<body>
+
+<!-- Documentation by Francis Irving, francis@flourish.org -->
+
+<h1>TortoiseCVS client installation - easiest SSH integrated into Windows</h1>
+
+<i>Description:</i> How to get version control directly within Windows
+Explorer, including ready-to-eat SSH.
+
+<h2>TortoiseCVS Client Installation Instructions</h2>
+
+<p>This document provides instructions for installing and using the
+TortoiseCVS CVS client software. These instructions are designed for
+SourceForge.net project developers who are using 32-bit Microsoft
+Windows platform.  It is for developers who would like to work with the
+source code for a project which is hosted on SourceForge.net.  For
+background information you may like to read the other available
+documents about CVS.
+
+<p>TortoiseCVS has advantages over WinCVS for work on SourceForge.  It
+has a clearer interface which is integrated into Windows Explorer.
+WinCVS has a more complex and mature interface.  For more obscure
+commands it may be easier or necessary to use WinCVS.
+
+<p>A particular benefit is that TortoiseCVS has an SSH client built into
+it, without special setup.  Anyone can easily commit code to
+SourceForge.net projects using TortoiseCVS.
+
+<h2>Installing TortoiseCVS</h2>
+
+<ol>
+<li>Go to <a href="http://www.tortoisecvs.org">tortoisecvs.org</a> and
+download version 1.6.14 or a later stable version from the Download page.
+<li>To install, run the executable and follow the instructions.
+<li>Since TortoiseCVS is a shell extension, you need to reboot your
+machine.
+</ol>
+
+<h2>Checking out an existing project</h2>
+
+<p>If you are working on an existing project first you now need to check
+out the code.
+
+<ol>
+<li>Make sure you have made an account on SourceForge.net, and that you
+have been added as a developer to the project you are going to work on.
+A project administrator needs to do this.
+
+<li>In Windows Explorer go to the folder that you would like to check
+the code out into.
+
+<li>Right click and from the context menu choose the command "CVS
+Checkout"; it's next to the tortoise icon.
+
+<li>You will need your user name on SourceForge.net, and the project
+UNIX name.  Fill in the dialog as follows:
+
+<ul>
+<li>Protocol: Secure Shell
+<li>Server: cvs.sourceforge.net
+<li>Directory: /cvsroot/projectname
+<li>Username: username
+</ul>
+
+<li>Click "Fetch List" to get a choice of modules.  You will need to
+enter your password in the dialog at this point.  Then pick the module
+that you would like.
+
+<li>Choose OK.  TortoiseCVS will now check out the code.  You will need
+to enter your password.
+
+<li>You can now alter files and then select "CVS Commit" on the top
+level directory to make your changes in the repository.  For more
+information read the <a
+href="http://www.tortoisecvs.org/guide.html">TortoiseCVS Daily Use
+Guide</a>.
+
+</ol>
+
+<p><b>Get an error?</b>
+If you get an error saying something like "<i>Could not chdir to home
+directory /home/users/r/rd/rdonkin: No such file or directory</i>" then
+you need to log into the server with SSH to force creation of your home
+directory. Do this by connecting to username@cvs.sf.net
+either with <a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/">Putty</a>
+or a command line SSH. 
+
+<h2>Working on a new project</h2>
+
+<p>If you are working on a new project then you first need to create a
+new module in the repository.
+
+<ol>
+<li>Create a directory with the name you would like the module to have.
+<li>Put the files you would like to add in the directory.
+<li>Right click on the directory, and choose Make New Module from the
+CVS submenu.
+<li>Fill in the dialog as described in the previous section.  Note
+that the module name is filled in for you.
+<li>Choose OK.  You will need to enter your password twice, and the 
+module will be made for you.
+<li>Proceed to add files and folders by right clicking on them
+and choosing "CVS Add" or "CVS Add All Recursively" from the context
+menu.
+<li>You can now "CVS Commit" everything, by right clicking on the top
+level folder.
+<li>For more information read the <a
+href="http://www.tortoisecvs.org/guide.html">TortoiseCVS Daily Use
+Guide</a>.
+</ol>
+
+<h2>Tired of entering your password all the time?</h2>
+
+<p>You need to make a public/private key pair. The public key goes on the
+server, and the private key sits on your hard drive. Now, when you
+connect the server can verify who you are because only you have your
+private key.
+
+<p>To further protect your private key it is encrypted on your hard disk
+with a passphrase. You can however choose an empty passphrase, in which
+case you never have to enter a password but anyone with access to your
+computer can access your SSH CVS account. Or you can use an SSH Agent
+(such as Pageant) which will remember your passphrase for the duration
+of one session, so you only have to enter it once.
+
+<p>TortoiseCVS uses a version of Plink as its SSH client.  This means
+you can use PuTTYgen to make a public/private key pair, and you can use
+Pageant to point to where the private key is.  First of all download
+them both from the
+<a
+href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">PuTTY
+website</a>.
+
+<p>For information on how to use them read the
+<a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/docs.html">PuTTY
+documentation</a> on PuTTYgen and Pageant.
+In particular, make sure you read the sections "8.2: Using PuTTYgen,
+the PuTTY key generator" and "9.3.1 Making Pageant automatically load
+keys on startup".
+
+
+<p>After making your public key with PuTTYgen you need to upload it
+using the SourceForge.net web interface. Log into the SourceForge web
+site, and go to your Account Preferences page. Down at the bottom is a
+section "Shell Account Information" with an entry "CVS/SSH Shared
+Authorized Keys". You need to add your public key there. 
+
+</ol>
+
+</body>
+</html>

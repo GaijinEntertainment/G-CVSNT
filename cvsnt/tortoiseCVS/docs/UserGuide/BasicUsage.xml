@@ -1,0 +1,617 @@
+<!-- ====== Basic Usage of TortoiseCVS ========================================= -->
+
+<chapter id="basic">
+  <title id="basic-title">Basic Usage of TortoiseCVS</title>
+
+    <!-- ====== Sandboxes ====================================================== -->
+
+    <section id="basic.sandbox">
+      <title id="basic.sandbox-title">Sandboxes</title>
+      <para>
+        CVS has a unique method of working from most other version control
+      systems in that developers can edit the same files concurrently. First
+      you <link linkend="basic.checkout"><emphasis>Checkout</emphasis></link> a
+      version of the source code from the repository into a local copy on your
+      computer. This local copy is called a <emphasis>sandbox</emphasis>. 
+      </para>
+      <para>
+        You then simply edit the files that you want to change. You can <link
+      linkend="basic.add"><emphasis>Add</emphasis></link> new files or remove
+      files you no longer require. When you're done you <link
+      linkend="basic.commit"><emphasis>Commit</emphasis></link> the changes to
+      the repository. 
+      </para>
+      <para>
+        If someone else has changed the same file while you were working on
+      it, then the commit will fail. You must then <link
+      linkend="basic.update"><emphasis>Update</emphasis></link> all your
+      source code files from the repository. This will automatically merge the
+      other developers changes into your copy of the file. 
+      </para>
+      <para>
+      Sometimes CVS cannot do this automatically, for example if you both
+      changed the same line of code. This is called a <link
+      linkend="basic.conflict"><emphasis>Conflict</emphasis></link>. Conflicts
+      happen much less often than you might expect. CVS puts both versions of
+      the conflicting code in the file, with markings separating them. Then
+      you manually edit the file to resolve the conflict before you can commit
+      the changes.
+      </para>
+      <para>
+      This method of working has lots of advantages. Each developer lives in a
+      sandbox. Changes that another developer makes are isolated from you
+      until you want to check in  your changes. It stops bottlenecks where
+      people cannot do things because someone else  has the file checked
+      out. Any developer can work on files without direct access to the
+      server, they only need to connect to update or commit.
+      </para>
+    </section>
+
+    <!-- ====== Checking out a Module ========================================== -->
+
+    <section id="basic.checkout">
+      <title id="basic.checkout-title">Checking out a Module</title>
+      <para>
+      To obtain a module from the CVS server for the first time is known as a checkout. Checking a module out from
+      the repository creates a local sandbox of the module.
+      </para>
+      <figure>
+        <title>Checkout Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/checkoutdialog.png" format="PNG"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Checkout Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      To perform a checkout, Right-click on the folder where you would like the module placed, and pick
+      <guimenuitem>CVS Checkout...</guimenuitem> from the pop-up menu. The <link linkend="dialogs.checkout"
+      endterm="dialogs.checkout-title"/> will appear with the following fields: 
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <guilabel>Protocol</guilabel> The protocol to use when communicating to the remote CVS repository.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Protocol parameters</guilabel> This field is only enabled for certain protocols, currently
+      <literal>:sserver:</literal> and <literal>:sspi:</literal>. With certain combinations of different CVS client and
+      server versions, or with restrictive firewalls, it may be necessary to enter additional information here in order
+      to be able to connect to the CVS server. Your CVS server administrator will know whether this is necessary.
+          </para>
+          <para>
+	  Note that for the <literal>:ext:</literal> protocol it is not possible to specify additional parameters here;
+	  this is a technical limitation due to the way that <literal>:ext:</literal> is designed. Instead, those
+      parameters can be set in the Preferences dialog, on the <link linkend="dialogs.preferences.tools">Tools</link> tab.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Server</guilabel> The name of the server hosting the remote CVS repository.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Port</guilabel> The port for the remote CVS repository. Not usually required.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Repository Directory</guilabel> The location of the CVS repository on the remote server.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>User name</guilabel> The username of your account for the CVS repository.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>CVSROOT</guilabel> The full connection string, comprised of the above fields. Often you will be given the connection string in this format, in which can just paste it in here.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Module</guilabel> The name of the module you want to checkout. The module name is case sensitive.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        You will need to know this information in advance. Most projects should have some documentation (often online)
+      on how to connect and checkout their modules. Additionally, your software lead, or project manager should be able
+      to provide this information to you.
+      </para>
+      <para>
+      An exception to this is the module name - depending on how your CVS server is setup, you might find the module
+      name in the dropdown after clicking <guilabel>Fetch list...</guilabel> (for details, see 
+      <link linkend="cmd.modulelist" endterm="cmd.modulelist-title"/>).
+      </para>
+      <para>
+        <emphasis role="bold">Note</emphasis>: It is much easier to choose your project checkout settings now than it is
+      to move your project to a different server or protocol later.  For example, if your server offers two different
+      CVS protocols, make sure you pick the one that best suits your needs.
+      </para>
+      <para>
+        A folder named after the module will be created within the folder you checkout to, so you can keep all your
+      checked out modules in the same folder, even if they are for different projects. 
+      </para>
+      <para>
+        For more information see <link linkend="ref.checkout" endterm="ref.checkout-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Windows Explorer and TortoiseCVS =============================== -->
+
+    <section id="basic.winexplorer">
+      <title id="basic.winexplorer-title">Windows Explorer and TortoiseCVS</title>
+      <para>
+        Having checked out a module, we can now <emphasis>explore</emphasis>
+      how TortoiseCVS works with <productname>Windows</productname>. You will
+      notice that your files appear in Windows Explorer with different icon
+      overlays. Additionally, if you are using either <productname>Windows
+      2000</productname> or <productname>Windows XP</productname> you can
+      also see new CVS columns in the <emphasis>Detail View</emphasis> of
+      <productname>Windows Explorer</productname> (see <link linkend="cmd.columns"
+      endterm="cmd.columns-title"/>).
+      </para>
+      <figure>
+        <title>TortoiseCVS and Windows Explorer</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0021.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>TortoiseCVS and Windows Explorer</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        The icon overlays indicate a file or folder's status in CVS. The
+      following figure indicates the corresponding status for each
+      icon<footnote>
+      <para>The above table shows the default icon overlays; TortoiseCVS may be
+      configured to use alternative icon sets &mdash; see 
+      <link linkend="customizing.icons" endterm="customizing.icons-title"/>.
+      </para>
+      </footnote>:
+      </para>
+      <table frame="all">
+      <title>Icon Overlays</title>
+      <tgroup cols="3">
+      <tbody>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0002.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Unmodified Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Unmodified</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              The file or folder is up-to-date with the CVS repository version.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0003.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Modified Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Modified</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              The file or folder has been modified from the current CVS repository version.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0039.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Added Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Added</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              The file or folder has been added to CVS, but not yet committed.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0004.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Conflict Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Conflict</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              The file or folder has a conflict with the current CVS repository version.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0005.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Not In CVS Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Not In CVS</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              The file or folder is not in the CVS repository.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0006.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>CVS Watch Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>CVS Watch</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              The file or folder is controlled under CVS Watch.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0016.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Ignore Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Ignored</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              The file or folder is being ignored by CVS.
+            </para>
+          </entry>
+        </row>
+      </tbody>
+      </tgroup>
+      </table>
+      <para>
+        You interact with TortoiseCVS by right-clicking within Windows Explorer and choosing CVS operations from the context menu. Which files and folders the operation is performed on depends on what you have selected and where you have clicked:
+      </para>
+      <table frame="all">
+      <title>Right-Click Context</title>
+      <tgroup cols="2">
+      <tbody>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0008.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Selected File(s)</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              One or more selected files: The operation is performed on those files.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0009.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Selected Folders(s)</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              One or more selected folders: The operation is performed on these
+	      folders and the files and folders contained within.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0010.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Anywhere in Explorer Pane</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              Anywhere else within the Explorer pane, the operation is performed 
+	      on all files and folders within the view.
+            </para>
+          </entry>
+        </row>
+      </tbody>
+      </tgroup>
+      </table>
+    </section>
+
+    <!-- ====== Total Commander and TortoiseCVS =============================== -->
+
+    <section id="basic.wincommander">
+      <title id="basic.wincommander-title">Total Commander and TortoiseCVS</title>
+      <para>
+      The popular <productname>Total Commander</productname> (previously known
+      as Windows Commander) file manager also
+      works with TortoiseCVS. We recommend that you go into the options menu
+      and configure the right mouse button for Windows standard operation.
+      </para>
+      <para>
+      By default, Total Commander does not display overlay icons and custom columns.
+      You can, however, install the third-party plugin <productname>ShellDetails</productname> from 
+      <ulink url="http://lefteous.totalcmd.net/tc/shelldetails_eng.htm">http://lefteous.totalcmd.net/tc/shelldetails_eng.htm</ulink>
+      to get this feature.
+      </para>
+      <para>
+      You need to tell ShellDetails which folders it should be active for:
+      Open the file: <literal>c:\WINDOWS\ShellDetails.ini</literal> and insert the following two lines, where dir_1 is
+      the location of your sandbox:
+      <programlisting>
+      [Directories]
+      Dir_1=C:\sandbox
+      </programlisting>
+      Finally, inside Total Commander go to
+      <menuchoice><guimenu>Configuration</guimenu><guisubmenu>Options</guisubmenu><guimenuitem>Display</guimenuitem></menuchoice>
+      and select the check box <guilabel>Show overlay icons, e.g. for links</guilabel>.
+      </para>
+    </section>
+
+    <!-- ====== Updating your Sandbox ========================================== -->
+
+    <section id="basic.update">
+      <title id="basic.update-title">Updating your Sandbox</title>
+      <para>
+        Occasionally you may want changes done by others to get incorporated in your local working copy. The process of getting changes from the server to your local copy is known as <link linkend="ref.update">Updating</link>. Updating may be done on single files, a set of selected files, or recursively on entire folder hierarchies. To update, highlight the files and/or folders you want, right-click and select <guimenuitem>CVS Update</guimenuitem>. The <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> will pop up displaying the progress of the update as it runs.
+      </para>
+      <figure>
+        <title>Updating Files and Folders</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0011.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Updating Files and Folders</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Changes done by others will be merged into your files, keeping any
+      changes you may have done to the same files. The repository is
+      <emphasis>not</emphasis> affected by performing an update. 
+      </para>
+      <para>
+        If you receive reports of conflicts during the update, please read
+      <link linkend="basic.conflict" endterm="basic.conflict-title"/>.
+      </para>
+      <para>
+        For more information see <link linkend="ref.update" endterm="ref.update-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Committing your Changes to the Repository ====================== -->
+
+    <section id="basic.commit">
+      <title id="basic.commit-title">Committing your Changes to the Repository</title>
+      <para>
+        Making local modifications available in the repository is known as
+      <emphasis>committing</emphasis> the changes. Before committing, you
+      should do an update to make sure there are no conflicts (see <link
+      linkend="basic.update" endterm="basic.update-title"/>). 
+      </para>
+      <para>
+        To commit your changes start by selecting the file(s) or folder(s) that you want to commit. 
+	Right-click on the selection, and choose the <guimenuitem>CVS Commit...</guimenuitem> menu item.
+      </para>
+      <figure>
+        <title>Commit Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0007.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Commit Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        You will then be presented with the <link linkend="dialogs.commit" endterm="dialogs.commit-title"/> where you
+      can enter a brief summary of what was changed. You can also exclude changed files from the commit by unchecking
+      their checkboxes. Once you are satisfied with what you are committing, click the <guibutton>OK</guibutton> on the
+      dialog to go ahead with the commit operation. 
+      </para>
+      <para>
+      You can easily forget to enter a comment before selecting <guilabel>OK</guilabel>. To prevent this, TortoiseCVS
+      has an option (set in the Preferences dialog, on the <link linkend="dialogs.preferences.policy">Policy</link> tab)
+      that, when enabled, asks for confirmation before committing without a comment.
+      </para>
+      <para>
+        Please note that committing changes will not automatically add new files that you have created to the
+      repository. See <link linkend="basic.add" endterm="basic.add-title"/> on how to add files. 
+      </para>
+      <para>
+        For more information see <link linkend="ref.commit" endterm="ref.commit-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Resolving Conflicts ================= -->
+
+    <section id="basic.conflict">
+      <title id="basic.conflict-title">Resolving Conflicts</title>
+      <para>
+      Sometimes, the CVS server will report a conflict when you update your
+      files from the repository. A conflict occurs when two or more developers
+      have changed the same lines of a file. As CVS knows nothing of your
+      project, it leaves resolving the conflicts to the developers. 
+      </para>
+      <para>
+      Each conflicting file is marked with a "C" in the progress dialog (see 
+      <link linkend="dialogs.progress" endterm="dialogs.progress-title"/>). 
+      When the update is complete, the Resolve Conflicts dialog is shown:
+      </para>
+      <figure>
+        <title>Resolve Conflicts Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0044.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Resolve Conflicts Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      Right-click on the conflicting file(s) and select <guimenuitem>Merge
+      Conflicts...</guimenuitem>. TortoiseCVS will now invoke the merge
+      application that you have selected in
+      <link linkend="dialogs.preferences.tools">Preferences/Tools/Merge application</link>.
+      Resolve each conflict, save the resulting file, and exit the merge
+      application. TortoiseCVS will ask you to confirm that you want to save
+      the result of the merge.
+      </para>
+      <para>
+      You can also bring up this dialog after closing the progress dialog by
+      right-clicking in the sandbox and selecting the 
+      <guimenuitem>CVS &rarr; Resolve Conflicts...</guimenuitem> menu item.
+      </para>
+    </section>
+
+    <!-- ====== Adding Files and Directories to the Repository ================= -->
+
+    <section id="basic.add">
+      <title id="basic.add-title">Adding Files and Directories to the Repository </title>
+      <para>
+        If you have made new files or directories you will notice that they
+      appear with the <emphasis>Not In CVS</emphasis> status icon overlay (see
+      <link linkend="basic.winexplorer"
+      endterm="basic.winexplorer-title"/>). To put new files or folders under
+      CVS control select the item(s) that you want to add, right-click and
+      choose <guimenuitem>CVS Add</guimenuitem> from context menu to schedule
+      the addition. The <link linkend="dialogs.add"
+      endterm="dialogs.add-title"/> is displayed so you can verify the file
+      you are adding.
+      </para>
+      <figure>
+        <title>Add Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0017.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Add Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        You do not need to worry about whether a file is ASCII/Text,
+      Unicode/Text, or Binary as TortoiseCVS automatically detects this. For
+      more on how TortoiseCVS handles this see <link linkend="advanced.binary"
+      endterm="advanced.binary-title"/>. 
+      </para>
+      <para>
+        After an add operation has been performed, the file or files icons appear as "changed". 
+	This is because additions are treated as local changes and are not applied to the repository
+	until you <link linkend="basic.commit"><emphasis>Commit</emphasis></link> them.
+      </para>
+      <para>
+      Additionally, you can add a number of files and folders to CVS using the
+      <guimenuitem>CVS Add Contents...</guimenuitem> command. This operation
+      recursively descends down the folder structure, and displays all unadded
+      files in the Add Dialog. Here you can check and uncheck the files and
+      folders you wish to add to CVS.
+      </para>
+      <figure>
+        <title>Add Contents Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0036.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Add Contents Dialog</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        For more information see <link linkend="ref.add" endterm="ref.add-title"/>.
+      </para>
+    </section>
+</chapter>

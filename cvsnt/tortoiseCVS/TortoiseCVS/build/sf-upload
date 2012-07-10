@@ -1,0 +1,6 @@
+#!/bin/bash
+shopt -s igncr #
+HOST=frs.sourceforge.net
+USER=bullestock
+echo -e "cd uploads\nput $1" > sftpscript
+psftp -b sftpscript $USER@$HOST

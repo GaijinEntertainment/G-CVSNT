@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="vc90rt">
+	<DirectoryRef Id="CVSNT_INSTALLDIR">
+ 	    <Merge Id="ATLVC90" Language="0" SourceFile="$(var.MERGEFILES)\Microsoft_VC90_ATL_x86.msm" DiskId="1" />
+            <Merge Id="CRTVC90" Language="0" SourceFile="$(var.MERGEFILES)\Microsoft_VC90_CRT_x86.msm" DiskId="1" />
+            <Merge Id="MFCVC90" Language="0" SourceFile="$(var.MERGEFILES)\Microsoft_VC90_MFC_x86.msm" DiskId="1" />
+            <Merge Id="MFCLOCVC90" Language="0" SourceFile="$(var.MERGEFILES)\Microsoft_VC90_MFCLOC_x86.msm" DiskId="1" />
+<!-- 
+     According to Wix article, it's not a good idea to merge the policy files:
+       http://wix.sourceforge.net/manual-wix3/install_vcredist.htm
+     but according to the reference in MSDN it is REQUIRED:
+       http://msdn.microsoft.com/en-us/library/ms235317.aspx
+-->
+ 	    <Merge Id="policy_ATLVC90" Language="0" SourceFile="$(var.MERGEFILES)\policy_9_0_Microsoft_VC90_ATL_x86.msm" DiskId="1" />
+            <Merge Id="policy_CRTVC90" Language="0" SourceFile="$(var.MERGEFILES)\policy_9_0_Microsoft_VC90_CRT_x86.msm" DiskId="1" />
+            <Merge Id="policy_MFCVC90" Language="0" SourceFile="$(var.MERGEFILES)\policy_9_0_Microsoft_VC90_MFC_x86.msm" DiskId="1" />
+            <Merge Id="policy_MFCLOCVC90" Language="0" SourceFile="$(var.MERGEFILES)\policy_9_0_Microsoft_VC90_MFCLOC_x86.msm" DiskId="1" />
+	</DirectoryRef>
+	<Feature Id="vc90rt" Display="hidden" Level="3">
+	    <MergeRef Id="ATLVC90" />
+	    <MergeRef Id="CRTVC90" />
+	    <MergeRef Id="MFCVC90" />
+	    <MergeRef Id="MFCLOCVC90" />
+<!-- 
+     According to Wix article, it's not a good idea to merge the policy files:
+       http://wix.sourceforge.net/manual-wix3/install_vcredist.htm
+     but according to the reference in MSDN it is REQUIRED:
+       http://msdn.microsoft.com/en-us/library/ms235317.aspx
+-->
+	    <MergeRef Id="policy_ATLVC90" />
+	    <MergeRef Id="policy_CRTVC90" />
+	    <MergeRef Id="policy_MFCVC90" />
+	    <MergeRef Id="policy_MFCLOCVC90" />
+	</Feature>
+    </Fragment>
+</Wix>
+

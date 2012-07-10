@@ -1,0 +1,77 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="common">
+        <DirectoryRef Id="CVSNT_INSTALLDIR">
+            <Component Id="InstallKeys1" Guid="65E96C09-EA66-47df-AF49-7827C4B561DA" DiskId="1">
+                <Condition>ALLUSERS=1</Condition>
+                <RegistryValue Id="gInstallBase" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="InstallBase" Type="string" Value="[CVSNT_BASEDIR]" KeyPath="yes" />
+                <RegistryValue Id="gInstallPath" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="InstallPath" Type="string" Value="[CVSNT_INSTALLDIR]" />
+                <RegistryValue Id="gMsiProductKey" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="MsiProductKey" Type="string" Value="[ProductCode]" />
+                <RegistryValue Id="gMsiProductName" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="MsiProductName" Type="string" Value="[ProductName]" />
+                <RegistryValue Id="gMsiProductVersion" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="MsiProductVersion" Type="string" Value="[ProductVersion]" />
+                <RegistryValue Id="gSmartPath" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="SearchPath" Type="string" Value="[CVSNT_INSTALLDIR];[COMMON_INSTALLDIR]" />
+                <RegistryValue Id="gBoughtSuite" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="HaveBoughtSuite" Type="string" Value="no" />
+            </Component>
+            <Component Id="InstallKeys3" Guid="34255DBB-E01F-4dec-988C-BE8DC7ECA719" DiskId="1">
+                <Condition>(ALLUSERS=1) and (CVSNT_INSTALLTYPE~="server")</Condition>
+                <RegistryKey   Id="gsKeyMarchHareSoftware" Root="HKLM" Key="SOFTWARE\March Hare Software Ltd" Action="create" >
+                    <RegistryKey   Id="gsKeyMarchHareSoftwareKeys" Key="Keys" Action="create" >
+                        <Permission  User="Everyone" CreateSubkeys="yes" GenericAll="yes" Write="yes" />
+                        <RegistryValue Id="gsKeySerialNo" Name="server" Type="string" Value="[REGISTRATION_SERIAL]" KeyPath="yes" />
+                        <RegistryValue Id="gsKeySerialLast" Name="latest" Type="string" Value="[REGISTRATION_SERIAL]" />
+                    </RegistryKey>
+                </RegistryKey>
+            </Component>
+            <Component Id="InstallKeys5" Guid="DA58DF87-85CE-48b1-ABFB-B6B7A8588227" DiskId="1">
+                <Condition>(ALLUSERS=1) and (CVSNT_INSTALLTYPE~&lt;&gt;"server")</Condition>
+                <RegistryKey   Id="gcKeyMarchHareSoftware" Root="HKLM" Key="SOFTWARE\March Hare Software Ltd" Action="create" >
+                    <RegistryKey   Id="gcKeyMarchHareSoftwareKeys" Key="Keys" Action="create" >
+                        <Permission  User="Everyone" CreateSubkeys="yes" GenericAll="yes" Write="yes" />
+                        <RegistryValue Id="gcKeySerialNo" Name="client" Type="string" Value="[REGISTRATION_SERIAL]" KeyPath="yes" />
+                        <RegistryValue Id="gcKeySerialLast" Name="latest" Type="string" Value="[REGISTRATION_SERIAL]" />
+                    </RegistryKey>
+                </RegistryKey>
+            </Component>
+            <Component Id="InstallKeys2" Guid="D528B48B-E4DC-4766-97E3-8AC9628686A8" DiskId="1">
+                <Condition>ALLUSERS&lt;&gt;1</Condition>
+                <RegistryValue Id="lInstallBase" Root="HKCU" Key="SOFTWARE\Cvsnt\PServer" Name="InstallBase" Type="string" Value="[CVSNT_BASEDIR]" KeyPath="yes" />
+                <RegistryValue Id="lInstallPath" Root="HKCU" Key="SOFTWARE\Cvsnt\PServer" Name="InstallPath" Type="string" Value="[CVSNT_INSTALLDIR]" />
+                <RegistryValue Id="lMsiProductKey" Root="HKCU" Key="SOFTWARE\Cvsnt\PServer" Name="MsiProductKey" Type="string" Value="[ProductCode]" />
+                <RegistryValue Id="lMsiProductName" Root="HKCU" Key="SOFTWARE\Cvsnt\PServer" Name="MsiProductName" Type="string" Value="[ProductName]" />
+                <RegistryValue Id="lMsiProductVersion" Root="HKCU" Key="SOFTWARE\Cvsnt\PServer" Name="MsiProductVersion" Type="string" Value="[ProductVersion]" />
+                <RegistryValue Id="lSmartPath" Root="HKCU" Key="SOFTWARE\Cvsnt\PServer" Name="SearchPath" Type="string" Value="[CVSNT_INSTALLDIR];[COMMON_INSTALLDIR]" />
+                <RegistryValue Id="lBoughtSuite" Root="HKCU" Key="SOFTWARE\Cvsnt\PServer" Name="HaveBoughtSuite" Type="string" Value="no" />
+            </Component>
+            <Component Id="InstallKeys4" Guid="98178AEE-F607-4215-8B6C-3987D08DC79F" DiskId="1">
+                <Condition>(ALLUSERS&lt;&gt;1) AND (CVSNT_INSTALLTYPE~&lt;&gt;"server")</Condition>
+                <RegistryKey   Id="lcKeyMarchHareSoftware" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd" Action="create" >
+                    <RegistryKey   Id="lcKeyMarchHareSoftwareKeys" Key="Keys" Action="create" >
+                        <Permission  User="Everyone" CreateSubkeys="yes" GenericAll="yes" Write="yes" />
+                        <RegistryValue Id="lcKeySerialNo" Name="client" Type="string" Value="[REGISTRATION_SERIAL]" KeyPath="yes" />
+                        <RegistryValue Id="lcKeySerialLast" Name="latest" Type="string" Value="[REGISTRATION_SERIAL]" />
+                    </RegistryKey>
+                </RegistryKey>
+            </Component>
+            <Component Id="InstallKeys6" Guid="9957A576-A8F6-4f54-A3A9-D233DA2F4692" DiskId="1">
+                <Condition>(ALLUSERS&lt;&gt;1) AND (CVSNT_INSTALLTYPE~="server")</Condition>
+                <RegistryKey   Id="lsKeyMarchHareSoftware" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd" Action="create" >
+                    <RegistryKey   Id="lsKeyMarchHareSoftwareKeys" Key="Keys" Action="create" >
+                        <Permission  User="Everyone" CreateSubkeys="yes" GenericAll="yes" Write="yes" />
+                        <RegistryValue Id="lsKeySerialNo" Name="server" Type="string" Value="[REGISTRATION_SERIAL]" KeyPath="yes" />
+                        <RegistryValue Id="lsKeySerialLast" Name="latest" Type="string" Value="[REGISTRATION_SERIAL]" />
+                    </RegistryKey>
+                </RegistryKey>
+            </Component>
+        </DirectoryRef>
+        <ComponentGroup Id="CommonFiles">
+            <ComponentRef Id="InstallKeys1" />
+            <ComponentRef Id="InstallKeys2" />
+            <ComponentRef Id="InstallKeys3" />
+            <ComponentRef Id="InstallKeys4" />
+            <ComponentRef Id="InstallKeys5" />
+            <ComponentRef Id="InstallKeys6" />
+        </ComponentGroup>
+    </Fragment>
+</Wix>
+

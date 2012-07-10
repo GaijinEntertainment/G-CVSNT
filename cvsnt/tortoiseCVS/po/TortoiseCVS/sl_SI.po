@@ -1,0 +1,4392 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: TortoiseCVS\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2009-04-13 16:33+0100\n"
+"Last-Translator: Martin Srebotnjak  <milrs@filmsi.net>\n"
+"Language-Team: Martin Srebotnjak <miles@filmsi.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Slovenian\n"
+"X-Poedit-Country: SLOVENIA\n"
+"X-Poedit-SourceCharset: iso-8859-1\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n%100==4 ? 3 : 0);\n"
+
+#: ContextMenus/DefaultMenus.cpp:43
+msgid "Syntax error"
+msgstr "Skladenjska napaka"
+
+#: ContextMenus/DefaultMenus.cpp:61
+msgid "Unexpected end of file"
+msgstr "Nepričakovani konec datoteke"
+
+#: ContextMenus/DefaultMenus.cpp:187
+#, c-format
+msgid ""
+"Error while parsing config file\n"
+"(\"%s\" line %d): %s"
+msgstr ""
+"Napaka pri razščenjevanju nastavitvene datoteke\n"
+"(\"%s\" v vrstici %d): %s"
+
+#: CVSGlue/CVSAction.cpp:48
+msgid ""
+"Tortoise Tip:  Sometimes you get this error if you have the repository folder wrong in the Checkout dialog.  Make sure you have a slash at the start of the folder name, and that the case and path are correct.  Watch out for spurious trailing characters.\n"
+"\n"
+"Examples are:  \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/cvsgui\""
+msgstr ""
+"Nasvet Tortoise: Včasih se pojavi ta napaka, če imate napačno mapo skladišča v pogovornem oknu Prevzemi.  Preverite, da imate poševnico na začetku imena mape, da se velike/male črke ujemajo in da je pot prava.  Pazite na podtaknjene končne znake.\n"
+"\n"
+"Primeri:  \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/cvsgui\""
+
+#: CVSGlue/CVSAction.cpp:369
+msgid ""
+"Tortoise Tip: Apparently you are using the :local: protocol, and you have an older version of CVSNT installed than the one included with TortoiseCVS. To resolve this problem, do one of the following:\n"
+"1) Don't use :local: - add the repository to your local CVSNT server\n"
+"   (Control Panel/CVS for NT/Repositories) and use a network protocol\n"
+"   (e.g. :pserver: or :sspi:) to access the repository.\n"
+"   This requires a fresh checkout.\n"
+"2) Remove your local CVSNT server installation if you don't need it.\n"
+"3) Update your local CVSNT server installation to the same version included\n"
+"   with TortoiseCVS."
+msgstr ""
+"Nasvet Tortoise: Očitno uporabljate protokol :local: in imate nameščeno starejšo različico CVSNT, kot je priložena TortoiseCVS. Za rešitev težave naredite nekaj od naslednjegai:\n"
+"1) Ne uporabljajte :local: - skladišče dodajte na svoj krajevni strežnik CVSNT\n"
+"   (Control Panel/CVS for NT/Repositories) in uporabite omrežni protokol\n"
+"   (npr. :pserver: ali :sspi:) za dostopanje do skladišča.\n"
+"   To zahteva sveži prevzem.\n"
+"2) Odstranite namestitev svojega krajevnega strežnika CVSNT, če ga ne potrebujete.\n"
+"3) Posodobite namestitev svojega krajevnega strežnika CVSNT na isto različico,\n"
+"   kot je priložena TortoiseCVS."
+
+#: CVSGlue/CVSAction.cpp:404
+msgid "Internal error, CVSAction::DoCommand used twice within same process."
+msgstr "Notranja napaka, v istem procesu dvakrat uporabljen CVSAction::DoCommand."
+
+#: CVSGlue/CVSAction.cpp:522
+#, c-format
+msgid ""
+"In %s: %s\n"
+"CVSROOT=%s"
+msgstr ""
+"V %s: %s\n"
+"CVSROOT=%s"
+
+#: CVSGlue/CVSAction.cpp:554
+#, c-format
+msgid ""
+"Trouble launching the CVS process:\n"
+"%s\n"
+"On folder: %s\n"
+"%s\n"
+"Please check there is a cvs.exe in the same folder as TortoiseCVS or on the path."
+msgstr ""
+"Težava pri zaganjanju procesa CVS:\n"
+"%s\n"
+"Nad mapo: %s\n"
+"%s\n"
+"Preverite, da je cvs.exe v isti mapi kot TortoiseCVS ali znotraj poti."
+
+#: CVSGlue/CVSAction.cpp:607
+msgid "CVS operation aborted by user request"
+msgstr "Operacija CVS je prekinjena na zahtevo uporabnika"
+
+#: CVSGlue/CVSAction.cpp:614
+msgid "Success, CVS operation completed"
+msgstr "Uspeh, operacija CVS dokončana"
+
+#: CVSGlue/CVSAction.cpp:618
+msgid "Error, CVS operation failed"
+msgstr "Napaka, operacija CVS ni uspela"
+
+#: CVSGlue/CVSAction.cpp:659
+msgid "Error, one of the CVS operations failed"
+msgstr "Napaka, ena od operacij CVS ni uspela"
+
+#: CVSGlue/CVSAction.cpp:919
+#, c-format
+msgid ""
+"%s has been modified. Do you want to discard your local changes and revert to the most current version in the repository?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Unedit command (take no action)."
+msgstr ""
+"%s je bil spremenjen. Želite zavreči krajevne spremembe in se vrniti k najsodobnejši različici v skladišču?\n"
+"Izberite \"Da\" za zavrnitev lastnih sprememb ali \"Ne\" za razveljavitev ukaza Odstrani urejanje (ne naredi ničesar)."
+
+#: CVSGlue/CVSAction.cpp:934
+msgid ""
+"You have altered files in this repository. See the main TortoiseCVS dialog for details.\n"
+"Do you want to discard your local changes?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Release command (take no action)."
+msgstr ""
+"Spremenili ste datoteke v tem skladišču. Za podrobnosti si oglejte glavno pogovorno okno TortoiseCVS.\n"
+"Želite zavreči svoje krajevne spremembe?\n"
+"Izberite \"Da\" za opustitev krajevnih sprememb ali \"Ne\" za razveljavitev ukaza Objavi (ničesar ne naredi)."
+
+#: CVSGlue/CVSAction.cpp:959
+#, c-format
+msgid ""
+"The server's host key is not cached in the registry.\n"
+"Key fingerprint: %s\n"
+"If you trust this host, hit \"Yes\" to add the key to the cache.\n"
+"If you want to connect just once, hit \"No\".\n"
+"If you don't trust this host, hit \"Cancel\".\n"
+msgstr ""
+"Ključ gostitelja strežnika ni shranjen v registru.\n"
+"Prstni odtis ključa: %s\n"
+"Če temu gostitelju zaupate, izberite \"Da\" za dodajanje ključa v pomnilnik.\n"
+"Če se želite le enkrat povezati, izberite \"Ne\".\n"
+"Če temu gostitelju ne zaupate, pritisnite \"Prekliči\".\n"
+
+#: CVSGlue/CVSAction.cpp:1499
+msgid "Retrying command with encryption disabled\n"
+msgstr "Ponoven poskus ukaza z onemogočenim šifriranjem\n"
+
+#: CVSGlue/CVSAction.cpp:1512
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s on %s"
+msgstr ""
+"V tej mapi ni skladišča CVS:\n"
+"\n"
+"%s na %s"
+
+#: CVSGlue/CVSAction.cpp:1518
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s"
+msgstr ""
+"V tej mapi ni skladišča CVS:\n"
+"\n"
+"%s"
+
+#: CVSGlue/CVSAction.cpp:1524
+msgid "If this is the wrong folder, correct it and try again. If you want to initialise a new repository with \"cvs init\" then check the box below and TortoiseCVS will try again."
+msgstr "Če je to napačna mapa, jo popravite in poskusite znova. Če želite inicializirati novo skladišče z \"cvs init\", potem označite polje spodaj in TortoiseCVS bo poskusil znova."
+
+#: CVSGlue/CVSAction.cpp:1529
+msgid "&Initialise a new repository here (makes a CVSROOT folder)"
+msgstr "&Inicializiraj novo skladišče tukaj (naredi mapo CVSROOT)"
+
+#: CVSGlue/CvsEntries.cpp:572
+msgid "Ignored Folder"
+msgstr "Prezrta mapa"
+
+#: CVSGlue/CvsEntries.cpp:574
+msgid "Non-CVS Folder"
+msgstr "Mapa, ki ni CVS"
+
+#: CVSGlue/CvsEntries.cpp:576
+#: DialogsWxw/AddFilesDialog.cpp:2244
+#: DialogsWxw/AddFilesDialog.cpp:2284
+#: TortoiseShell/ColumnProvider.cpp:234
+msgid "Folder"
+msgstr "Mapa"
+
+#: CVSGlue/CvsEntries.cpp:610
+#: CVSGlue/CVSStatus.cpp:1649
+msgid "Ignored"
+msgstr "Prezrto"
+
+#: CVSGlue/CvsEntries.cpp:614
+msgid "Non-CVS File"
+msgstr "Datoteka, ki ni CVS"
+
+#: CVSGlue/CvsEntries.cpp:618
+msgid "Conflict"
+msgstr "Spor"
+
+#: CVSGlue/CvsEntries.cpp:622
+#: CVSGlue/CVSStatus.cpp:1519
+msgid "Binary"
+msgstr "Dvojiško"
+
+#: CVSGlue/CvsEntries.cpp:622
+msgid "Mod. Binary"
+msgstr "Spr. dvojiško"
+
+#: CVSGlue/CvsEntries.cpp:626
+#: DialogsWxw/AddFilesDialog.cpp:2302
+#: DialogsWxw/CommitDialog.cpp:958
+#: DialogsWxw/HistoryDialog.cpp:403
+#: DialogsWxw/MakePatchDialog.cpp:540
+#: DialogsWxw/ModuleBasicsPage.cpp:363
+msgid "File"
+msgstr "Datoteka"
+
+#: CVSGlue/CvsEntries.cpp:626
+msgid "Mod. File"
+msgstr "Spr. datoteka"
+
+#: CVSGlue/CVSStatus.cpp:1434
+msgid "Normal"
+msgstr "Običajno"
+
+#: CVSGlue/CVSStatus.cpp:1440
+msgid "Only keyword names"
+msgstr "Le imena ključnih besed"
+
+#: CVSGlue/CVSStatus.cpp:1446
+msgid "Only keyword values"
+msgstr "Le vrednosti ključnih besed"
+
+#: CVSGlue/CVSStatus.cpp:1452
+msgid "Include locker"
+msgstr "Vključi zaklep"
+
+#: CVSGlue/CVSStatus.cpp:1458
+msgid "Disabled"
+msgstr "Onemogočeno"
+
+#: CVSGlue/CVSStatus.cpp:1464
+msgid "None"
+msgstr "Brez"
+
+#: CVSGlue/CVSStatus.cpp:1470
+msgid "Custom"
+msgstr "Po meri ..."
+
+#: CVSGlue/CVSStatus.cpp:1501
+msgid "Unknown"
+msgstr "Neznano"
+
+#: CVSGlue/CVSStatus.cpp:1507
+msgid "Text/ASCII"
+msgstr "Besedilo/ASCII"
+
+#: CVSGlue/CVSStatus.cpp:1513
+msgid "Text/Unicode"
+msgstr "Besedilo/Unicode"
+
+#: CVSGlue/CVSStatus.cpp:1536
+msgid "Binary diff"
+msgstr "Dvojiška razlika"
+
+#: CVSGlue/CVSStatus.cpp:1540
+msgid "Compressed"
+msgstr "Stisnjeno"
+
+#: CVSGlue/CVSStatus.cpp:1544
+msgid "UNIX line endings"
+msgstr "Zaključki vrstice UNIX"
+
+#: CVSGlue/CVSStatus.cpp:1548
+msgid "Static file"
+msgstr "Statična datoteka"
+
+#: CVSGlue/CVSStatus.cpp:1589
+#: CVSGlue/CVSStatus.cpp:1637
+#: DialogsWxw/IconSetDialog.cpp:49
+msgid "Not in CVS"
+msgstr "Ni v CVS"
+
+#: CVSGlue/CVSStatus.cpp:1595
+msgid "Unmodified r/o"
+msgstr "Nespremenjeno s.z.b."
+
+#: CVSGlue/CVSStatus.cpp:1601
+msgid "Unmodified"
+msgstr "Nespremenjeno"
+
+#: CVSGlue/CVSStatus.cpp:1607
+msgid "Edited"
+msgstr "Urejeno"
+
+#: CVSGlue/CVSStatus.cpp:1613
+msgid "Edited r/o"
+msgstr "Urejeno s.z.b."
+
+#: CVSGlue/CVSStatus.cpp:1619
+#: DialogsWxw/IconSetDialog.cpp:46
+msgid "Modified"
+msgstr "Spremenjeno"
+
+#: CVSGlue/CVSStatus.cpp:1625
+#: DialogsWxw/IconSetDialog.cpp:47
+#: TortoiseShell/ColumnProvider.cpp:266
+msgid "Added"
+msgstr "Dodano"
+
+#: CVSGlue/CVSStatus.cpp:1631
+#: DialogsWxw/IconSetDialog.cpp:48
+msgid "Needs merge"
+msgstr "Potrebuje spajanje"
+
+#: CVSGlue/CVSStatus.cpp:1643
+#: DialogsWxw/CheckoutDialog.cpp:150
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102
+#: DialogsWxw/MakeModuleDialog.cpp:66
+#: DialogsWxw/ModuleBasicsPage.cpp:184
+#: DialogsWxw/ModuleBasicsPage.cpp:195
+msgid "Module"
+msgstr "Modul"
+
+#: CVSGlue/CVSStatus.cpp:1655
+msgid "Removed"
+msgstr "Premaknjeno"
+
+#: CVSGlue/CVSStatus.cpp:1661
+msgid "Renamed"
+msgstr "Preimenovano"
+
+#: CVSGlue/CVSStatus.cpp:1667
+msgid "Missing"
+msgstr "Manjkajoče"
+
+#: CVSGlue/ndir.cpp:202
+#, c-format
+msgid "can't open folder `%s'."
+msgstr "ni mogoče odpreti datoteke `%s'."
+
+#: CVSGlue/ndir.cpp:211
+#, c-format
+msgid "done."
+msgstr "opravljeno."
+
+#: DialogsWxw/AboutDialog.cpp:64
+msgid "TortoiseCVS - About"
+msgstr "TortoiseCVS - O programu"
+
+#: DialogsWxw/AboutDialog.cpp:77
+#: DialogsWxw/LoginDialog.cpp:33
+#: DialogsWxw/MessageDialog.cpp:29
+#: TortoiseAct/TortoisePreferences.cpp:87
+#: Utils/LaunchTortoiseAct.cpp:77
+#: Utils/ProcessUtils.cpp:69
+#: Utils/TortoiseException.cpp:30
+#: Utils/TortoiseException.cpp:47
+msgid "TortoiseCVS"
+msgstr "TortoiseCVS"
+
+#: DialogsWxw/AboutDialog.cpp:80
+msgid "DEBUG"
+msgstr "RAZHROŠČI"
+
+#: DialogsWxw/AboutDialog.cpp:83
+msgid "version"
+msgstr "različice"
+
+#: DialogsWxw/AboutDialog.cpp:101
+#: DialogsWxw/AddFilesDialog.cpp:497
+#: DialogsWxw/AnnotateDialog.cpp:218
+#: DialogsWxw/BranchTagDlg.cpp:167
+#: DialogsWxw/CheckoutDialog.cpp:156
+#: DialogsWxw/CheckQueryDlg.cpp:56
+#: DialogsWxw/CommandDialog.cpp:77
+#: DialogsWxw/CommitDialog.cpp:413
+#: DialogsWxw/CreditsDialog.cpp:165
+#: DialogsWxw/EditDialog.cpp:154
+#: DialogsWxw/GraphDialog.cpp:233
+#: DialogsWxw/GraphSettingsDialog.cpp:117
+#: DialogsWxw/HistoryDialog.cpp:537
+#: DialogsWxw/IconSetDialog.cpp:135
+#: DialogsWxw/LogConfigDialog.cpp:124
+#: DialogsWxw/MakeModuleDialog.cpp:92
+#: DialogsWxw/MakePatchDialog.cpp:329
+#: DialogsWxw/MergeDlg.cpp:154
+#: DialogsWxw/PreferencesDialog.cpp:380
+#: DialogsWxw/ProgressDialog.cpp:187
+#: DialogsWxw/ReleaseDialog.cpp:143
+#: DialogsWxw/RenameDialog.cpp:88
+#: DialogsWxw/UpdateDlg.cpp:175
+msgid "OK"
+msgstr "V redu"
+
+#: DialogsWxw/AboutDialog.cpp:108
+msgid "&Credits..."
+msgstr "&Zasluge ..."
+
+#: DialogsWxw/AboutDialog.cpp:126
+#: DialogsWxw/AboutDialog.cpp:168
+#, c-format
+msgid "%s client version"
+msgstr "Različica odjemalca %s"
+
+#: DialogsWxw/AboutDialog.cpp:127
+#: DialogsWxw/AboutDialog.cpp:148
+#: DialogsWxw/AboutDialog.cpp:169
+#: DialogsWxw/CommandDialog.cpp:61
+#: DialogsWxw/CommitDialog.cpp:335
+#: DialogsWxw/CommitDialog.cpp:355
+#: DialogsWxw/CommitDialog.cpp:365
+#: DialogsWxw/CommitDialog.cpp:765
+#: DialogsWxw/CreditsDialog.cpp:136
+#: DialogsWxw/EditDialog.cpp:101
+#: DialogsWxw/EditDialog.cpp:112
+#: DialogsWxw/EditDialog.cpp:127
+#: DialogsWxw/GraphDialog.cpp:396
+#: DialogsWxw/GraphDialog.cpp:404
+#: DialogsWxw/GraphDialog.cpp:414
+#: DialogsWxw/GraphDialog.cpp:424
+#: DialogsWxw/GraphDialog.cpp:435
+#: DialogsWxw/GraphDialog.cpp:444
+#: DialogsWxw/GraphDialog.cpp:520
+#: DialogsWxw/GraphDialog.cpp:527
+#: DialogsWxw/GraphDialog.cpp:535
+#: DialogsWxw/GraphDialog.cpp:543
+#: DialogsWxw/GraphDialog.cpp:551
+#: DialogsWxw/HistoryDialog.cpp:404
+#: DialogsWxw/HistoryDialog.cpp:410
+#: DialogsWxw/HistoryDialog.cpp:415
+#: DialogsWxw/HistoryDialog.cpp:422
+#: DialogsWxw/HistoryDialog.cpp:433
+#: DialogsWxw/HistoryDialog.cpp:439
+#: DialogsWxw/HistoryDialog.cpp:445
+#: DialogsWxw/HistoryDialog.cpp:451
+#: DialogsWxw/HistoryDialog.cpp:479
+#: DialogsWxw/HistoryDialog.cpp:1094
+#: DialogsWxw/IconSetDialog.cpp:119
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102
+#: DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104
+#: DialogsWxw/MakeModuleDialog.cpp:71
+#: DialogsWxw/ModuleBasicsPage.cpp:179
+#: DialogsWxw/ModuleBasicsPage.cpp:180
+#: DialogsWxw/ModuleBasicsPage.cpp:181
+#: DialogsWxw/ModuleBasicsPage.cpp:182
+#: DialogsWxw/ModuleBasicsPage.cpp:183
+#: DialogsWxw/ModuleBasicsPage.cpp:184
+#: DialogsWxw/ModuleBasicsPage.cpp:185
+#: DialogsWxw/ModuleBasicsPage.cpp:186
+#: DialogsWxw/ModuleBasicsPage.cpp:310
+#: DialogsWxw/PreferencesDialog.cpp:461
+#: DialogsWxw/PreferencesDialog.cpp:875
+#: DialogsWxw/RenameDialog.cpp:59
+#: TortoiseShell/PropSheet.cpp:215
+#: TortoiseShell/PropSheet.cpp:218
+#: TortoiseShell/PropSheet.cpp:221
+#: TortoiseShell/PropSheet.cpp:224
+#: TortoiseShell/PropSheet.cpp:227
+#: TortoiseShell/PropSheet.cpp:230
+#: TortoiseShell/PropSheet.cpp:233
+#: TortoiseShell/PropSheet.cpp:236
+#: TortoiseShell/PropSheet.cpp:239
+msgid ":"
+msgstr ":"
+
+#: DialogsWxw/AboutDialog.cpp:147
+#, c-format
+msgid "%s server version"
+msgstr "različica strežnika %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:309
+msgid "Yes"
+msgstr "Da"
+
+#: DialogsWxw/AddFilesDialog.cpp:311
+msgid "No"
+msgstr "Ne"
+
+#: DialogsWxw/AddFilesDialog.cpp:407
+msgid "TortoiseCVS - Add"
+msgstr "TortoiseCVS - Dodaj"
+
+#: DialogsWxw/AddFilesDialog.cpp:442
+msgid "Confirm the files to add."
+msgstr "Potrdi datoteke za dodajanje."
+
+#: DialogsWxw/AddFilesDialog.cpp:444
+msgid "Hint: Right-click to change file format."
+msgstr "Nasvet: desno-kliknite za spremembo vrste datoteke."
+
+#: DialogsWxw/AddFilesDialog.cpp:448
+msgid "Show items in &subfolders"
+msgstr "Pokaži vse v &podmapah"
+
+#: DialogsWxw/AddFilesDialog.cpp:464
+#: DialogsWxw/CommitDialog.cpp:386
+#: DialogsWxw/ConflictListDialog.cpp:123
+#: DialogsWxw/EditorListListCtrl.cpp:38
+#: DialogsWxw/HistoryDialog.cpp:1093
+#: DialogsWxw/MakePatchDialog.cpp:308
+msgid "Filename"
+msgstr "Ime datoteke"
+
+#: DialogsWxw/AddFilesDialog.cpp:465
+msgid "Type"
+msgstr "Vrsta"
+
+#: DialogsWxw/AddFilesDialog.cpp:466
+msgid "Add"
+msgstr "Dodaj"
+
+#: DialogsWxw/AddFilesDialog.cpp:467
+#: DialogsWxw/AddFilesDialog.cpp:2481
+#: DialogsWxw/CommitDialog.cpp:388
+#: DialogsWxw/ConflictListDialog.cpp:124
+msgid "Format"
+msgstr "Oblika"
+
+#: DialogsWxw/AddFilesDialog.cpp:468
+#: DialogsWxw/AddFilesDialog.cpp:2454
+#: DialogsWxw/HistoryDialog.cpp:438
+#: TortoiseShell/PropSheet.cpp:235
+msgid "Keywords"
+msgstr "Ključne besede"
+
+#: DialogsWxw/AddFilesDialog.cpp:499
+#: DialogsWxw/BranchTagDlg.cpp:169
+#: DialogsWxw/CheckoutDialog.cpp:158
+#: DialogsWxw/CommandDialog.cpp:79
+#: DialogsWxw/CommitDialog.cpp:415
+#: DialogsWxw/EditDialog.cpp:156
+#: DialogsWxw/FindDialog.cpp:38
+#: DialogsWxw/GraphSettingsDialog.cpp:119
+#: DialogsWxw/HistoryDialog.cpp:539
+#: DialogsWxw/IconSetDialog.cpp:136
+#: DialogsWxw/LogConfigDialog.cpp:126
+#: DialogsWxw/MakeModuleDialog.cpp:94
+#: DialogsWxw/MakePatchDialog.cpp:331
+#: DialogsWxw/MergeDlg.cpp:156
+#: DialogsWxw/PreferencesDialog.cpp:382
+#: DialogsWxw/ReleaseDialog.cpp:145
+#: DialogsWxw/RenameDialog.cpp:90
+#: DialogsWxw/UpdateDlg.cpp:177
+#: DialogsWxw/YesNoAllDialog.cpp:81
+msgid "Cancel"
+msgstr "Prekliči"
+
+#: DialogsWxw/AddFilesDialog.cpp:577
+#: TortoiseAct/TortoiseAct.cpp:476
+msgid "Could not connect to server"
+msgstr "Povezava s strežnikom ni uspela"
+
+#: DialogsWxw/AddFilesDialog.cpp:834
+#: DialogsWxw/AddFilesDialog.cpp:2509
+#: DialogsWxw/CheckoutDialog.cpp:152
+#: DialogsWxw/HistoryDialog.cpp:444
+#: DialogsWxw/MakeModuleDialog.cpp:80
+msgid "Options"
+msgstr "Možnosti"
+
+#: DialogsWxw/AddFilesDialog.cpp:858
+#: DialogsWxw/CommitDialog.cpp:661
+#: DialogsWxw/ConflictListDialog.cpp:144
+#: DialogsWxw/MakePatchDialog.cpp:431
+#, c-format
+msgid "%d file(s)"
+msgstr "%d datotek(a,e,i)"
+
+#: DialogsWxw/AddFilesDialog.cpp:922
+#: DialogsWxw/AddFilesDialog.cpp:2403
+#: DialogsWxw/CommitDialog.cpp:146
+#: DialogsWxw/MakePatchDialog.cpp:114
+msgid "Check"
+msgstr "Označi"
+
+#: DialogsWxw/AddFilesDialog.cpp:922
+#: DialogsWxw/AddFilesDialog.cpp:2403
+msgid "Check item(s)"
+msgstr "Označi element(e)"
+
+#: DialogsWxw/AddFilesDialog.cpp:924
+#: DialogsWxw/AddFilesDialog.cpp:2405
+#: DialogsWxw/CommitDialog.cpp:147
+#: DialogsWxw/MakePatchDialog.cpp:115
+msgid "Uncheck"
+msgstr "Odznači"
+
+#: DialogsWxw/AddFilesDialog.cpp:924
+#: DialogsWxw/AddFilesDialog.cpp:2405
+msgid "Uncheck item(s)"
+msgstr "Odznači element(e)"
+
+#: DialogsWxw/AddFilesDialog.cpp:926
+#: DialogsWxw/AddFilesDialog.cpp:2407
+msgid "Autoignore"
+msgstr "Samodejno prezri"
+
+#: DialogsWxw/AddFilesDialog.cpp:926
+#: DialogsWxw/AddFilesDialog.cpp:2407
+msgid "Ignore item(s) according to CVS ignore rules"
+msgstr "Prezri element(e) glede na pravila preziranja CVS"
+
+#: DialogsWxw/AddFilesDialog.cpp:932
+#: DialogsWxw/AddFilesDialog.cpp:2415
+msgid "Check recursively"
+msgstr "Označi rekurzivno"
+
+#: DialogsWxw/AddFilesDialog.cpp:933
+#: DialogsWxw/AddFilesDialog.cpp:2416
+msgid "Check item(s) recursively"
+msgstr "Označi element(e) rekurzivno"
+
+#: DialogsWxw/AddFilesDialog.cpp:935
+#: DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck recursively"
+msgstr "Odznači rekurzivno"
+
+#: DialogsWxw/AddFilesDialog.cpp:936
+#: DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck item(s) recursively"
+msgstr "Odznači element(e) rekurzivno"
+
+#: DialogsWxw/AddFilesDialog.cpp:938
+#: DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Autoignore recursively"
+msgstr "Samodejno prezri rekurzivno"
+
+#: DialogsWxw/AddFilesDialog.cpp:939
+#: DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Ignore item(s) recursively according to CVS ignore rules"
+msgstr "Prezri element(e) rekurzivno glede na pravila preziranja v CVS"
+
+#: DialogsWxw/AddFilesDialog.cpp:946
+#: DialogsWxw/AddFilesDialog.cpp:2522
+#: DialogsWxw/CommitDialog.cpp:204
+#: DialogsWxw/ConflictListDialog.cpp:313
+#: DialogsWxw/EditorListListCtrl.cpp:133
+#: DialogsWxw/MakePatchDialog.cpp:142
+msgid "Explorer"
+msgstr "Raziskovalec"
+
+#: DialogsWxw/AddFilesDialog.cpp:1093
+#, c-format
+msgid "Invalid file format: %s"
+msgstr "Neveljaven zapis datoteke: %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:1095
+msgid "Please specify a valid file format for all files you want to add."
+msgstr "Prosimo, navedite veljavno vrsto datoteke za vse datoteke, ki jih želite dodati."
+
+#: DialogsWxw/AddFilesDialog.cpp:2298
+#: DialogsWxw/CommitDialog.cpp:956
+#: DialogsWxw/MakePatchDialog.cpp:536
+#, c-format
+msgid "%s File"
+msgstr "Datoteka %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:2445
+#, c-format
+msgid "Set keyword expansion to %s"
+msgstr "Nastavi razširitev ključnih besed v %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:2469
+#, c-format
+msgid "Set format to %s"
+msgstr "Nastavi zapis na %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect"
+msgstr "Samorazpoznaj"
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect file format"
+msgstr "Samorazpoznaj vrsto datoteke"
+
+#: DialogsWxw/AddFilesDialog.cpp:2500
+#, c-format
+msgid "Set options to %s"
+msgstr "Nastavi možnosti na %s"
+
+#: DialogsWxw/AnnotateDialog.cpp:160
+msgid "TortoiseCVS - Annotate"
+msgstr "TortoiseCVS - Razloži"
+
+#: DialogsWxw/AnnotateDialog.cpp:193
+msgid "Line"
+msgstr "Vrstica"
+
+#: DialogsWxw/AnnotateDialog.cpp:194
+#: DialogsWxw/CheckoutDialog.cpp:151
+#: DialogsWxw/GraphDialog.cpp:395
+#: DialogsWxw/HistoryDialog.cpp:467
+#: DialogsWxw/ModuleBasicsPage.cpp:364
+#: TortoiseShell/PropSheet.cpp:223
+msgid "Revision"
+msgstr "Revizija"
+
+#: DialogsWxw/AnnotateDialog.cpp:195
+#: DialogsWxw/GraphDialog.cpp:413
+#: DialogsWxw/HistoryDialog.cpp:469
+msgid "Author"
+msgstr "Avtor"
+
+#: DialogsWxw/AnnotateDialog.cpp:196
+#: DialogsWxw/EditorListListCtrl.cpp:40
+#: DialogsWxw/GraphDialog.cpp:403
+#: DialogsWxw/HistoryDialog.cpp:468
+#: DialogsWxw/ModuleBasicsPage.cpp:365
+msgid "Date"
+msgstr "Datum"
+
+#: DialogsWxw/AnnotateDialog.cpp:198
+#: DialogsWxw/CommitDialog.cpp:354
+#: DialogsWxw/GraphDialog.cpp:434
+#: DialogsWxw/HistoryDialog.cpp:471
+msgid "Bug Number"
+msgstr "Številka hrošča"
+
+#: DialogsWxw/AnnotateDialog.cpp:200
+msgid "Text"
+msgstr "Besedilo"
+
+#: DialogsWxw/AnnotateDialog.cpp:221
+msgid "&Find"
+msgstr "&Najdi"
+
+#: DialogsWxw/AnnotateDialog.cpp:425
+#: DialogsWxw/AnnotateListCtrl.cpp:218
+msgid "Highlight by Author"
+msgstr "Poudari po avtorju"
+
+#: DialogsWxw/AnnotateDialog.cpp:430
+#: DialogsWxw/AnnotateListCtrl.cpp:220
+msgid "Highlight by Revision"
+msgstr "Poudari po reviziji"
+
+#: DialogsWxw/AnnotateDialog.cpp:435
+#: DialogsWxw/AnnotateListCtrl.cpp:222
+msgid "Highlight by Date"
+msgstr "Poudari po datumu"
+
+#: DialogsWxw/AnnotateDialog.cpp:440
+#: DialogsWxw/AnnotateListCtrl.cpp:224
+msgid "Highlight by Bug Number"
+msgstr "Poudari po številki hrošča"
+
+#: DialogsWxw/AnnotateDialog.cpp:445
+#: DialogsWxw/AnnotateListCtrl.cpp:227
+msgid "Highlight by Age (Fixed)"
+msgstr "Obarvaj po starosti (nespremenjeno)"
+
+#: DialogsWxw/AnnotateDialog.cpp:450
+#: DialogsWxw/AnnotateListCtrl.cpp:229
+msgid "Highlight by Age (Scaled)"
+msgstr "Obarvaj po starosti (stopnjevano)"
+
+#: DialogsWxw/AnnotateDialog.cpp:455
+#: DialogsWxw/AnnotateListCtrl.cpp:214
+msgid "No Highlighting"
+msgstr "Brez poudarjanja"
+
+#: DialogsWxw/AnnotateDialog.cpp:480
+#, c-format
+msgid "Annotate %s"
+msgstr "Razloži %s"
+
+#: DialogsWxw/AnnotateDialog.cpp:529
+#: DialogsWxw/WxwHelpers.cpp:495
+#: TortoiseAct/TortoiseActUtils.cpp:186
+#: TortoiseAct/TortoiseActUtils.cpp:296
+msgid "This file is new and has never been committed to the server or is an empty file on the server."
+msgstr "Datoteka je nova in še ni bila objavljena na strežniku ali pa je prazna datoteka na strežniku."
+
+#: DialogsWxw/AnnotateDialog.cpp:637
+msgid "Continue search from the end of the file?"
+msgstr "Želite nadaljevati iskanje s konca datoteke?"
+
+#: DialogsWxw/AnnotateDialog.cpp:658
+msgid "Continue search from the beginning of the file?"
+msgstr "Želite nadaljevati iskanje z začetka datoteke?"
+
+#: DialogsWxw/AnnotateDialog.cpp:668
+msgid "Search complete"
+msgstr "Iskanje končano"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:202
+#: DialogsWxw/GraphDialog.cpp:894
+#: DialogsWxw/HistoryDialog.cpp:1191
+msgid "&Diff (working file)"
+msgstr "&Razlikuj (delovna datoteka)"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:203
+#: DialogsWxw/GraphDialog.cpp:895
+#: DialogsWxw/HistoryDialog.cpp:1192
+msgid "&View this revision"
+msgstr "&Pokaži to revizijo"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:204
+#: DialogsWxw/GraphDialog.cpp:898
+#: DialogsWxw/HistoryDialog.cpp:1195
+msgid "&Annotate this revision"
+msgstr "&Razloži to revizijo"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:205
+#: DialogsWxw/GraphDialog.cpp:899
+#: DialogsWxw/HistoryDialog.cpp:1196
+msgid "&Get this revision (sticky)"
+msgstr "&Pridobi to revizijo (lepljivo) ..."
+
+#: DialogsWxw/AnnotateListCtrl.cpp:206
+#: DialogsWxw/GraphDialog.cpp:904
+#: DialogsWxw/HistoryDialog.cpp:1201
+msgid "&Save this revision as..."
+msgstr "&Shrani to revizijo kot ..."
+
+#: DialogsWxw/AnnotateListCtrl.cpp:210
+msgid "Show &log messages"
+msgstr "Pokaži &dnevniška sporočila"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:324
+#, c-format
+msgid "Retrieving log messages for %s"
+msgstr "Pridobivanje dnevniških sporočil za %s"
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Tag"
+msgstr "TortoiseCVS - Označi"
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Create Branch"
+msgstr "TortoiseCVS - Ustvari vejo"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "&Tag:"
+msgstr "&Oznaka:"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "New &branch name:"
+msgstr "Ime nove &veje:"
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+msgid "Name of tag"
+msgstr "Ime oznake"
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+msgid "Name of branch"
+msgstr "Ime veje"
+
+#: DialogsWxw/BranchTagDlg.cpp:111
+#: DialogsWxw/RevOptions.cpp:80
+#: DialogsWxw/UpdateDlg.cpp:389
+msgid "&Update list..."
+msgstr "Seznam &posodobljenih ..."
+
+#: DialogsWxw/BranchTagDlg.cpp:112
+#: DialogsWxw/MergeDlg.cpp:113
+#: DialogsWxw/RevOptions.cpp:83
+msgid "&Scan subfolders"
+msgstr "&Preglej podmape"
+
+#: DialogsWxw/BranchTagDlg.cpp:115
+#: DialogsWxw/MergeDlg.cpp:122
+#: DialogsWxw/RevOptions.cpp:94
+#: DialogsWxw/UpdateDlg.cpp:390
+msgid "Retrieves a list of tags and branches from the server, and puts them in the dropdown box"
+msgstr "Pridobi seznam oznak in vej s strežnika in jih postavi v seznamsko polje"
+
+#: DialogsWxw/BranchTagDlg.cpp:124
+msgid "Check that the &files are unmodified"
+msgstr "Preveri, da so &datoteke nespremenjene"
+
+#: DialogsWxw/BranchTagDlg.cpp:126
+msgid "Ensures there are no uncommitted changes before performing the operation"
+msgstr "Zagotovi, da ni neobjavljenih sprememb, pred izvajanjem operacije"
+
+#: DialogsWxw/BranchTagDlg.cpp:133
+msgid "&Create new tag"
+msgstr "&Ustvari novo oznako"
+
+#: DialogsWxw/BranchTagDlg.cpp:134
+msgid "&Move existing tag"
+msgstr "Premakni &obstoječo oznako"
+
+#: DialogsWxw/BranchTagDlg.cpp:135
+msgid "&Delete existing tag"
+msgstr "I&zbriši obstoječo oznako"
+
+#: DialogsWxw/BranchTagDlg.cpp:138
+msgid "The tag will be assigned to the repository versions nearest to your working sources. This happens directly to the repository."
+msgstr "Oznaka bo dodeljena različicam v skladišču, ki so najbolj podobne vašim delovnim virom. To se zgodni neposredno v skladišču."
+
+#: DialogsWxw/BranchTagDlg.cpp:144
+msgid "&Create new branch"
+msgstr "&Ustvari novo vejo"
+
+#: DialogsWxw/BranchTagDlg.cpp:145
+msgid "&Move existing branch"
+msgstr "&Premakni obstoječo vejo"
+
+#: DialogsWxw/BranchTagDlg.cpp:146
+msgid "&Delete existing branch"
+msgstr "I&zbriši obstoječo vejo"
+
+#: DialogsWxw/BranchTagDlg.cpp:150
+msgid "The branch will be applied to the repository versions nearest to your working sources. This happens directly to the repository, leaving your working sources on the original branch."
+msgstr "Veja bo izvedena na različicah v skladišču, ki so najbolj podobne vašim delovnim virom. To se zgodi neposredno v skladišču in pusti vaše delovne vire na izvirni veji."
+
+#: DialogsWxw/BranchTagDlg.cpp:158
+msgid ""
+"Tag and branch names can contain letters, digits, \"-\" (dash) and \"_\" (underscore) only. In particular, this means no dots, and no spaces.\n"
+"They must also start with a letter."
+msgstr ""
+"Imena oznak in vej lahko vsebujejo le črke, številke, \"-\" (pomišljaj) in \"_\" (podčrtaj). To pomeni, da pike in presledki niso dovoljeni.\n"
+"Prav tako se morajo začeti s črko."
+
+#: DialogsWxw/BranchTagDlg.cpp:234
+msgid "No tags found."
+msgstr "Oznak ni mogoče najti."
+
+#: DialogsWxw/CheckoutDialog.cpp:138
+msgid "TortoiseCVS - Checkout Module"
+msgstr "Tortoise CVS - Prevzemi modul"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:62
+msgid "Purpose of checkout"
+msgstr "Namen prevzema"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:65
+msgid "Prevents creation of CVS admin folders"
+msgstr "Prepreči ustvarjanje upravljalskih map CVS"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:67
+msgid "&Checkout - for working on the module"
+msgstr "&Prevzemi - za delo na modulu"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:71
+msgid "&Export - for making a software release"
+msgstr "&Izvozi - za pripravo izdaje programske opreme"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:81
+msgid "Normally TortoiseCVS will checkout files so they can be modified.  If you check this, TortoiseCVS will set the files to read-only and you can use the Edit option to make them changeable."
+msgstr "Običajno TortoiseCVS prevzema datoteke, da jih je mogoče spreminjati.  Če potrdite to možnost, bo TortoiseCVS datoteke označil le za branje, z možnostjo Uredi pa jih naredite spet spremenljive."
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:84
+msgid "Check out read only"
+msgstr "Prevzemi le za branje"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:89
+msgid "Name of folder to create"
+msgstr "Ime mape, ki jo želite ustvariti"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:92
+msgid "Use this name instead of module name for the new folder"
+msgstr "Uporabi to ime namesto imena modula za novo mapo"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:95
+msgid "Use &default folder name"
+msgstr "Uporabi &privzeto ime mape"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:99
+msgid "Use &module name and tag/branch/revision as folder name"
+msgstr "Uporabi ime &modula in oznake/veje/revizije za ime mape"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:100
+msgid "Enter your own &folder name"
+msgstr "Vnesite ime lastne &mape"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:107
+msgid "Custom folder name:"
+msgstr "Ime mape po meri:"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:121
+msgid "Normally, text files checked out on Windows will use CRLF as the line ending. If you check this, TortoiseCVS will use UNIX line endings (LF only)."
+msgstr "Datoteke, prevzete v Windows, uporabljajo običajno za konec vrstic CRLF. Če aktivirate to možnost, bo TortoiseCVS uporabljal konce vrstic UNIX (le LF)."
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:124
+msgid "Use UNIX &line endings"
+msgstr "Uporabi &konce vrstic UNIX"
+
+#: DialogsWxw/CheckQueryDlg.cpp:41
+#: DialogsWxw/HistoryDialog.cpp:1052
+#: DialogsWxw/YesNoDialog.cpp:30
+msgid "TortoiseCVS Question"
+msgstr "Vprašanje TortoiseCVS"
+
+#: DialogsWxw/CommandDialog.cpp:52
+msgid "TortoiseCVS - Command"
+msgstr "TortoiseCVS - Ukaz"
+
+#: DialogsWxw/CommandDialog.cpp:60
+msgid "Command"
+msgstr "Ukaz"
+
+#: DialogsWxw/CommandDialog.cpp:64
+msgid "CVS command"
+msgstr "Ukaz CVS"
+
+#: DialogsWxw/CommitDialog.cpp:148
+#: DialogsWxw/MakePatchDialog.cpp:116
+msgid "&Copy filename(s)"
+msgstr "&Kopiraj imena datotek"
+
+#: DialogsWxw/CommitDialog.cpp:149
+#: DialogsWxw/MakePatchDialog.cpp:117
+msgid "Copy &filename(s) with folders"
+msgstr "Kopiraj &imena datotek z mapami"
+
+#: DialogsWxw/CommitDialog.cpp:153
+msgid "C&ommit selected files..."
+msgstr "&Objavi izbrane datoteke ..."
+
+#: DialogsWxw/CommitDialog.cpp:157
+msgid "Get c&lean copy of selected files"
+msgstr "Dobi &čisto kopijo izbranih datotek"
+
+#: DialogsWxw/CommitDialog.cpp:168
+#: DialogsWxw/ConflictListDialog.cpp:295
+#: DialogsWxw/MakePatchDialog.cpp:128
+msgid "&Diff..."
+msgstr "&Razlikuj ..."
+
+#: DialogsWxw/CommitDialog.cpp:169
+#: DialogsWxw/ConflictListDialog.cpp:296
+#: ../build/TortoiseMenus.config:185
+msgid "H&istory..."
+msgstr "&Zgodov&ina ..."
+
+#: DialogsWxw/CommitDialog.cpp:170
+#: DialogsWxw/ConflictListDialog.cpp:298
+#: TortoiseShell/PropSheet.cpp:242
+#: ../build/TortoiseMenus.config:192
+msgid "Revision &Graph..."
+msgstr "&Graf revizij ..."
+
+#: DialogsWxw/CommitDialog.cpp:183
+msgid "CVS &Web Log..."
+msgstr "&Spletni dnevnik CVS ..."
+
+#: DialogsWxw/CommitDialog.cpp:188
+msgid "R&estore"
+msgstr "&Obnovi"
+
+#: DialogsWxw/CommitDialog.cpp:314
+msgid "TortoiseCVS - Commit"
+msgstr "TortoiseCVS - Objavi"
+
+#: DialogsWxw/CommitDialog.cpp:330
+#: DialogsWxw/ConflictListDialog.cpp:118
+#: DialogsWxw/EditorListDialog.cpp:95
+#: DialogsWxw/MakePatchDialog.cpp:296
+#, c-format
+msgid "Folder: %s"
+msgstr "Mapa: %s"
+
+#: DialogsWxw/CommitDialog.cpp:334
+#: DialogsWxw/EditDialog.cpp:100
+msgid "Comment History"
+msgstr "Zgodovina komentarjev"
+
+#: DialogsWxw/CommitDialog.cpp:339
+#: DialogsWxw/EditDialog.cpp:105
+msgid "Previous comments (use Ctrl-Up and Ctrl-Down in the Comment field to select)"
+msgstr "Prejšnji komentarji (za izbor uporabite Ctrl-navzgor ali Ctrl-navzdol v polju komentarja)"
+
+#: DialogsWxw/CommitDialog.cpp:364
+#: DialogsWxw/EditDialog.cpp:112
+#: DialogsWxw/GraphDialog.cpp:443
+#: DialogsWxw/HistoryDialog.cpp:472
+#: DialogsWxw/HistoryDialog.cpp:478
+#: DialogsWxw/MakeModuleDialog.cpp:70
+msgid "Comment"
+msgstr "Komentar"
+
+#: DialogsWxw/CommitDialog.cpp:387
+#: DialogsWxw/MakePatchDialog.cpp:309
+msgid "Filetype"
+msgstr "Vrsta datoteke"
+
+#: DialogsWxw/CommitDialog.cpp:389
+#: DialogsWxw/ConflictListDialog.cpp:125
+#: DialogsWxw/HistoryDialog.cpp:421
+#: DialogsWxw/MakePatchDialog.cpp:310
+#: TortoiseShell/PropSheet.cpp:214
+msgid "Status"
+msgstr "Stanje"
+
+#: DialogsWxw/CommitDialog.cpp:390
+#: DialogsWxw/EditorListListCtrl.cpp:43
+#: DialogsWxw/ModuleBasicsPage.cpp:310
+msgid "Bug number"
+msgstr "Številka hrošča"
+
+#: DialogsWxw/CommitDialog.cpp:408
+#: DialogsWxw/MakePatchDialog.cpp:324
+msgid "To see the changes you have made, double or right click on the files above."
+msgstr "Za ogled svojih sprememb dvokliknite na zgornje datoteke."
+
+#: DialogsWxw/CommitDialog.cpp:420
+#: DialogsWxw/EditDialog.cpp:108
+msgid "&Wrap lines"
+msgstr "&Prelom vrstice"
+
+#: DialogsWxw/CommitDialog.cpp:424
+#: DialogsWxw/EditDialog.cpp:138
+#: DialogsWxw/ModuleBasicsPage.cpp:316
+msgid "&Use Bug"
+msgstr "&Uporabi hrošča"
+
+#: DialogsWxw/CommitDialog.cpp:429
+msgid "&Mark Bug"
+msgstr "&Označi hrošča"
+
+#: DialogsWxw/CommitDialog.cpp:887
+msgid ""
+"You are attempting to commit but have written no comment.\n"
+"Do you wish to continue to commit without a comment?"
+msgstr ""
+"Želite objaviti hrošča, vendar niste napisali komentarja.\n"
+"Želite nadaljevati z objavo brez komentarja?"
+
+#: DialogsWxw/CommitDialog.cpp:895
+msgid ""
+"You are attempting to commit but have no bug number.\n"
+"Do you wish to continue the commit without the bug number?"
+msgstr ""
+"Želite objaviti hrošča, vendar nimate številke hrošča.\n"
+"Želite nadaljevati z objavo brez številke hrošča?"
+
+#: DialogsWxw/ConflictDialog.cpp:57
+msgid "TortoiseCVS - Merge Conflicts"
+msgstr "TortoiseCVS - Spoji spore"
+
+#: DialogsWxw/ConflictDialog.cpp:362
+msgid "Choose Merge Operation"
+msgstr "Izberite operacijo spajanja"
+
+#: DialogsWxw/ConflictDialog.cpp:371
+msgid "How would you like to merge the conflicts?"
+msgstr "Kako želite spajati spore?"
+
+#: DialogsWxw/ConflictDialog.cpp:375
+msgid "Edit with default text editor"
+msgstr "Uredi v privzetem urejevalniku besedila"
+
+#: DialogsWxw/ConflictDialog.cpp:380
+msgid "Two-way merge"
+msgstr "Dvosmerno spajanje"
+
+#: DialogsWxw/ConflictDialog.cpp:385
+msgid "Three-way merge"
+msgstr "Trosmerno spajanje"
+
+#: DialogsWxw/ConflictDialog.cpp:389
+msgid "Hint: Three-way merges are only possible if your merge application supports them."
+msgstr "Namig: Trosmerno spajanje je možno, le če jih izbrani program spajanja podpira."
+
+#: DialogsWxw/ConflictDialog.cpp:433
+msgid "Perform Direct Merge"
+msgstr "Izvedi neposredno spajanje"
+
+#: DialogsWxw/ConflictDialog.cpp:442
+msgid "TortoiseCVS has created the following temporary merge file:"
+msgstr "TortoiseCVS je ustvaril naslednjo začasno datoteko spajanja:"
+
+#: DialogsWxw/ConflictDialog.cpp:463
+msgid "Perform Two-Way Merge"
+msgstr "Izvedi dvosmerno spajanje"
+
+#: DialogsWxw/ConflictDialog.cpp:472
+#: DialogsWxw/ConflictDialog.cpp:502
+msgid "TortoiseCVS has created the following temporary merge files:"
+msgstr "TortoiseCVS je ustvaril naslednje začasne datoteke spajanja:"
+
+#: DialogsWxw/ConflictDialog.cpp:493
+msgid "Perform Three-Way Merge"
+msgstr "Izvedi trostransko spajanje"
+
+#: DialogsWxw/ConflictListDialog.cpp:84
+msgid "TortoiseCVS - Resolve Conflicts"
+msgstr "TortoiseCVS - Razreši spore"
+
+#: DialogsWxw/ConflictListDialog.cpp:114
+msgid "CVS encountered conflicts when trying to merge your changes in the files below. Please merge your changes manually."
+msgstr "CVS je pri spajanju vaših sprememb naletel na spore v spodaj navedenih datotekah. Prosimo, spojite svoje spremembe ročno."
+
+#: DialogsWxw/ConflictListDialog.cpp:133
+msgid "To resolve the conflicts, double or right click on the files above."
+msgstr "Za razrešitev sporov dvokliknite ali desno-kliknite na zgornje datoteke."
+
+#: DialogsWxw/ConflictListDialog.cpp:138
+#: DialogsWxw/EditorListDialog.cpp:106
+msgid "Close"
+msgstr "Zapri"
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+msgid "&Merge Conflicts..."
+msgstr "&Spoji spore ..."
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+msgid "Merge conflicts manually"
+msgstr "Ročno spoji spore"
+
+#: DialogsWxw/ConflictListDialog.cpp:287
+msgid "&Discard local changes..."
+msgstr "&Opusti krajevne spremembe ..."
+
+#: DialogsWxw/ConflictListDialog.cpp:288
+msgid "Delete file and get a clean copy from CVS..."
+msgstr "Izbriši datoteko in dobi čisto kopijo iz CVS ..."
+
+#: DialogsWxw/ConflictListDialog.cpp:295
+msgid "Show differences to original revision"
+msgstr "Pokaži razlike z izvirno revizijo"
+
+#: DialogsWxw/ConflictListDialog.cpp:297
+msgid "Show history"
+msgstr "Pokaži zgodovino"
+
+#: DialogsWxw/ConflictListDialog.cpp:299
+msgid "Show revision graph"
+msgstr "Pokaži graf revizij"
+
+#: DialogsWxw/CreditsDialog.cpp:46
+msgid "TortoiseCVS - Credits"
+msgstr "TortoiseCVS - Zasluge"
+
+#: DialogsWxw/CreditsDialog.cpp:63
+msgid "Better looking icons"
+msgstr "Olepšane ikone"
+
+#: DialogsWxw/CreditsDialog.cpp:64
+msgid "Persistent dialog size patch, Annotate feature, various bugfixes and improvements"
+msgstr "Vztrajni popravek velikosti pogovornega okna, funkcionalnost označevanja, različni popravki hroščev in izboljšave"
+
+#: DialogsWxw/CreditsDialog.cpp:65
+msgid "Catalan translation"
+msgstr "Katalonski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:66
+msgid "French translation"
+msgstr "Francoski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:67
+msgid "CVS columns in Explorer detailed list view"
+msgstr "Stolpci CVS v podrobnem pogledu v Raziskovalcu"
+
+#: DialogsWxw/CreditsDialog.cpp:68
+msgid "German translation"
+msgstr "Nemški prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:69
+msgid "Branching, tagging and merging, menu config file, various user interface improvements and bug fixes"
+msgstr "Vejanje, označevanje in spajanje, konfiguracijska datoteka menija, različne izboljšave uporabniškega vmesnika in popravki hroščev"
+
+#: DialogsWxw/CreditsDialog.cpp:70
+msgid "64-bit Windows port"
+msgstr "Različica za 64-bitni Windows"
+
+#: DialogsWxw/CreditsDialog.cpp:71
+#: DialogsWxw/CreditsDialog.cpp:74
+#: DialogsWxw/CreditsDialog.cpp:96
+msgid "Spanish translation"
+msgstr "Španski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:72
+msgid "French User Guide"
+msgstr "Francoski up. vodnik"
+
+#: DialogsWxw/CreditsDialog.cpp:73
+msgid "Danish translation"
+msgstr "Danski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:75
+msgid "Norwegian translation"
+msgstr "Norveški prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:76
+msgid "Icons"
+msgstr "Ikone"
+
+#: DialogsWxw/CreditsDialog.cpp:77
+msgid "Win32 native user interface (not used now, but provoked the migration from GTK to wxWindows)"
+msgstr "Uporabniški vmesnik Win32 (ni trenutno v uporabi, vendar je spodbudil prehod iz GTK v wxWindows)"
+
+#: DialogsWxw/CreditsDialog.cpp:78
+msgid "Romanian translation"
+msgstr "Romunski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:79
+msgid "Brazilian Portuguese translation"
+msgstr "Brazilsko-portugalski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:80
+msgid "Project founder (no longer active), original code, Visual C++ and mingw32 compilation"
+msgstr "Osnovalec projekta (nič več aktiven), izvorna koda, prevajanje Visual C++ in mingw32"
+
+#: DialogsWxw/CreditsDialog.cpp:81
+msgid "Dutch translation"
+msgstr "Nizozemski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:82
+msgid "Revision Graph improvements"
+msgstr "Izboljšave grafa revizij"
+
+#: DialogsWxw/CreditsDialog.cpp:83
+msgid "Warn on empty commit comment patch"
+msgstr "Opozorila ob praznem objavljenem komentarju popravka"
+
+#: DialogsWxw/CreditsDialog.cpp:84
+msgid "Improved SSH support"
+msgstr "Izboljšana podpora SSH"
+
+#: DialogsWxw/CreditsDialog.cpp:85
+msgid "Make new module patch"
+msgstr "Ustvari nov popravek modula"
+
+#: DialogsWxw/CreditsDialog.cpp:86
+msgid "Improved treelist control"
+msgstr "Izboljšan nazdor razvejanosti"
+
+#: DialogsWxw/CreditsDialog.cpp:87
+msgid "Georgian translation"
+msgstr "Gruzijski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:88
+msgid "Core developer (no longer active)"
+msgstr "Glavni razvijalec (ni več aktiven)"
+
+#: DialogsWxw/CreditsDialog.cpp:89
+msgid "cvs.exe pipe code prototype, Borland compilation, various bug fixes"
+msgstr "Prototip kode za cev cvs.exe, prevajanje Borland, različni popravki hroščev"
+
+#: DialogsWxw/CreditsDialog.cpp:90
+msgid "Commit dialog patch"
+msgstr "Popravek pogovornega okna objave"
+
+#: DialogsWxw/CreditsDialog.cpp:91
+msgid "Make New Module edit module path patch"
+msgstr "Popravek urejanja poti modula v Naredi nov modul"
+
+#: DialogsWxw/CreditsDialog.cpp:92
+msgid "SSPI encryption patch"
+msgstr "Popravek šifriranja SSPI"
+
+#: DialogsWxw/CreditsDialog.cpp:93
+msgid "CVS property page, context menu"
+msgstr "Stran lastnosti CVS, pojavni meni"
+
+#: DialogsWxw/CreditsDialog.cpp:94
+msgid "Default icons"
+msgstr "Privzete ikone"
+
+#: DialogsWxw/CreditsDialog.cpp:95
+#: DialogsWxw/CreditsDialog.cpp:108
+msgid "Various bug fixing patches"
+msgstr "Razni popravki hroščev"
+
+#: DialogsWxw/CreditsDialog.cpp:97
+msgid "History dialog patch"
+msgstr "Popravek pogovornega okna zgodovine"
+
+#: DialogsWxw/CreditsDialog.cpp:98
+#: DialogsWxw/CreditsDialog.cpp:101
+msgid "Korean translation"
+msgstr "Korejski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:99
+msgid "Polish translation"
+msgstr "Poljski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:100
+msgid "Traditional Chinese translation"
+msgstr "Tradicionalni kitajski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:103
+msgid "Edit options dialog, repository browser, defect tracking integration, 64-bit development platform"
+msgstr "Pogovorno okno urejanja možnosti, skladiščnega brskalnika, integracije sledenja okvaram, 64-bitna razvojna platforma"
+
+#: DialogsWxw/CreditsDialog.cpp:104
+msgid "Project management, User Guide, domain name, various patches"
+msgstr "Vodenje projekta, uporabniški vodnik, ime domene, različni popravki"
+
+#: DialogsWxw/CreditsDialog.cpp:105
+msgid "Slovenian translation"
+msgstr "Slovenski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:106
+msgid "CVS property page improvements"
+msgstr "Izboljšave strani lastnosti CVS"
+
+#: DialogsWxw/CreditsDialog.cpp:107
+msgid "Charlie Vernon Smythe logo and icon"
+msgstr "Logotip in ikona Charlieja Vernona Smytha"
+
+#: DialogsWxw/CreditsDialog.cpp:109
+msgid "Russian program translation"
+msgstr "Ruski prevod programa"
+
+#: DialogsWxw/CreditsDialog.cpp:110
+msgid "Turkish translation"
+msgstr "Turški prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:111
+msgid "rcsinfo patch"
+msgstr "Popravek rcsinfo"
+
+#: DialogsWxw/CreditsDialog.cpp:112
+msgid "Simplified Chinese translation"
+msgstr "Poenostavljeno-kitajski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:113
+msgid "Simplified Chinese User Guide"
+msgstr "Poenostavljeno-kitajski up. vodnik"
+
+#: DialogsWxw/CreditsDialog.cpp:114
+msgid "Automatic use of Unix line endings patch"
+msgstr "Popravek samodejne uporabe končnic vrstic v slogu Unixa"
+
+#: DialogsWxw/CreditsDialog.cpp:115
+msgid "Borland compilation, bug fix, CVS property page improvements"
+msgstr "Prevajanje Borland, odpravljanje hroščev, izboljšave strani lastnosti CVS"
+
+#: DialogsWxw/CreditsDialog.cpp:116
+msgid "mingw32 compilation"
+msgstr "Prevajanje z mingw32"
+
+#: DialogsWxw/CreditsDialog.cpp:117
+msgid "Web site design"
+msgstr "Oblikovanje spetnih strani"
+
+#: DialogsWxw/CreditsDialog.cpp:118
+msgid "Core developer, release manager, documentation"
+msgstr "Glavni razvijalec, vodja izdaj, dokumentacija"
+
+#: DialogsWxw/CreditsDialog.cpp:119
+msgid "Czech translation"
+msgstr "Češki prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:120
+msgid "Russian User Guide"
+msgstr "Ruski up. vodnik"
+
+#: DialogsWxw/CreditsDialog.cpp:121
+msgid "Japanese translation"
+msgstr "Japonski prevod"
+
+#: DialogsWxw/CreditsDialog.cpp:135
+msgid ""
+"People who have contributed to TortoiseCVS\n"
+"(mouse over name to see details)"
+msgstr ""
+"Avtorji prispevkov k TortoiseCVS\n"
+"(za podrobnosti se z miško postavite na ime)"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:55
+msgid "Remove"
+msgstr "Odstrani"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:57
+msgid "Del"
+msgstr "Del"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:62
+msgid "Remove All"
+msgstr "Odstrani vse"
+
+#: DialogsWxw/EditDialog.cpp:89
+msgid "TortoiseCVS - Edit"
+msgstr "TortoiseCVS - Uredi"
+
+#: DialogsWxw/EditDialog.cpp:127
+msgid "Bug &Number"
+msgstr "Številka &hrošča"
+
+#: DialogsWxw/EditDialog.cpp:239
+msgid "You are attempting to edit but have no bug number. Do you wish to continue the edit without the bug number?"
+msgstr "Želite urejati, vendar nimate številke hrošča. Želite nadaljevati z urejanjem brez številke hrošča?"
+
+#: DialogsWxw/EditorListDialog.cpp:66
+msgid "TortoiseCVS - List Editors"
+msgstr "TortoiseCVS - Navedi urednike"
+
+#: DialogsWxw/EditorListDialog.cpp:112
+#, c-format
+msgid "%d edited file(s)"
+msgstr "%d urejenih(e/i/a) datotek(e/i/a)"
+
+#: DialogsWxw/EditorListListCtrl.cpp:39
+msgid "Editors"
+msgstr "Uredniki"
+
+#: DialogsWxw/EditorListListCtrl.cpp:41
+msgid "Host"
+msgstr "Gostitelj"
+
+#: DialogsWxw/EditorListListCtrl.cpp:42
+msgid "Local path"
+msgstr "Krajevna pot"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Undo"
+msgstr "&Razveljavi"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Redo"
+msgstr "&Ponovi"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Cu&t"
+msgstr "&Izreži"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Copy"
+msgstr "&Kopiraj"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Paste"
+msgstr "&Prilepi"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Delete"
+msgstr "&Izbriši"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Select &All"
+msgstr "Izberi &vse"
+
+#: DialogsWxw/FindDialog.cpp:28
+msgid "TortoiseCVS - Find"
+msgstr "TortoiseCVS - Najdi"
+
+#: DialogsWxw/FindDialog.cpp:33
+msgid "Find what: "
+msgstr "Poišči:"
+
+#: DialogsWxw/FindDialog.cpp:36
+msgid "Find Next"
+msgstr "Najdi naslednje"
+
+#: DialogsWxw/FindDialog.cpp:37
+msgid "&Mark All"
+msgstr "Označi &vse"
+
+#: DialogsWxw/FindDialog.cpp:52
+msgid "Match &Case"
+msgstr "Ujemanje &velikih/malih črk"
+
+#: DialogsWxw/FindDialog.cpp:54
+msgid "Search &Up"
+msgstr "Išči navz&gor"
+
+#: DialogsWxw/FindDialog.cpp:56
+msgid "&Wrap Search"
+msgstr "Z iskanjem nadaljuj na &začetku"
+
+#: DialogsWxw/GraphDialog.cpp:108
+#, c-format
+msgid "Revision Graph for %s"
+msgstr "Graf revizij za %s"
+
+#: DialogsWxw/GraphDialog.cpp:178
+#, c-format
+msgid "TortoiseCVS - Revision Graph for %s"
+msgstr "TortoiseCVS - Graf revizij za %s"
+
+#: DialogsWxw/GraphDialog.cpp:212
+#: DialogsWxw/HistoryDialog.cpp:489
+msgid "Show &tags"
+msgstr "Pokaži &oznake"
+
+#: DialogsWxw/GraphDialog.cpp:215
+msgid "&Collapse revisions"
+msgstr "&Zloži revizije"
+
+#: DialogsWxw/GraphDialog.cpp:242
+msgid "Set &Limits..."
+msgstr "Nastavi &meje ..."
+
+#: DialogsWxw/GraphDialog.cpp:423
+msgid "Mergepoint"
+msgstr "Točka spajanja"
+
+#: DialogsWxw/GraphDialog.cpp:519
+msgid "Description"
+msgstr "Opis"
+
+#: DialogsWxw/GraphDialog.cpp:526
+msgid "File Format"
+msgstr "Vrsta datoteke"
+
+#: DialogsWxw/GraphDialog.cpp:534
+msgid "Keyword substitution"
+msgstr "Zamenjava ključne besede"
+
+#: DialogsWxw/GraphDialog.cpp:542
+msgid "Storage options"
+msgstr "Možnosti hrambe"
+
+#: DialogsWxw/GraphDialog.cpp:550
+msgid "Total revisions"
+msgstr "Skupaj revizij"
+
+#: DialogsWxw/GraphDialog.cpp:666
+#, c-format
+msgid "Revision graph for %s"
+msgstr "Graf revizij za %s"
+
+#: DialogsWxw/GraphDialog.cpp:900
+#: DialogsWxw/HistoryDialog.cpp:1197
+msgid "Get &clean copy of this revision (sticky)"
+msgstr "Dobi &čisto kopijo te revizije (lepljivo)"
+
+#: DialogsWxw/GraphDialog.cpp:901
+#: DialogsWxw/HistoryDialog.cpp:1198
+#: ../build/TortoiseMenus.config:304
+msgid "&Tag..."
+msgstr "&Označi ..."
+
+#: DialogsWxw/GraphDialog.cpp:902
+#: DialogsWxw/HistoryDialog.cpp:1199
+#: ../build/TortoiseMenus.config:311
+msgid "&Branch..."
+msgstr "&Razvejaj ..."
+
+#: DialogsWxw/GraphDialog.cpp:909
+#: DialogsWxw/HistoryDialog.cpp:1281
+msgid "&Diff (selected revisions)"
+msgstr "&Razlikuj (izbrane revizije)"
+
+#: DialogsWxw/GraphDialog.cpp:911
+#: DialogsWxw/HistoryDialog.cpp:1283
+msgid "&Merge changes (selected revisions)"
+msgstr "&Spoji spremembe (izbranih revizij)"
+
+#: DialogsWxw/GraphDialog.cpp:913
+#: DialogsWxw/HistoryDialog.cpp:1285
+msgid "&Undo changes (selected revisions)"
+msgstr "&Razveljavi sprememebe (izbranih revizij)"
+
+#: DialogsWxw/GraphDialog.cpp:930
+#: DialogsWxw/HistoryDialog.cpp:1221
+msgid "&Get this branch (sticky)"
+msgstr "&Pridobi to vejo (lepljivo)"
+
+#: DialogsWxw/GraphDialog.cpp:931
+#: DialogsWxw/HistoryDialog.cpp:1222
+msgid "Get &clean copy of this branch (sticky)"
+msgstr "Dobi &čisto kopijo te veje (lepljivo)"
+
+#: DialogsWxw/GraphDialog.cpp:933
+msgid "Always &hide this branch"
+msgstr "Vedno &skrij to vejo"
+
+#: DialogsWxw/GraphDialog.cpp:934
+msgid "&Only show this branch"
+msgstr "Pokaži &le to vejo"
+
+#: DialogsWxw/GraphDialog.cpp:947
+#: DialogsWxw/HistoryDialog.cpp:1235
+msgid "&Return to HEAD branch"
+msgstr "&Vrni se na vejo HEAD"
+
+#: DialogsWxw/GraphDialog.cpp:948
+#: DialogsWxw/HistoryDialog.cpp:1236
+msgid "R&eturn to clean copy of HEAD branch"
+msgstr "V&rni se na čisto kopijo veje HEAD"
+
+#: DialogsWxw/GraphDialog.cpp:950
+msgid "Show &all branches"
+msgstr "Pokaži &vse veje"
+
+#: DialogsWxw/GraphDialog.cpp:964
+msgid "Zoom &in (I)"
+msgstr "Po&večaj (I)"
+
+#: DialogsWxw/GraphDialog.cpp:965
+msgid "Zoom &out (O)"
+msgstr "Po&manjšaj (O)"
+
+#: DialogsWxw/GraphDialog.cpp:967
+msgid "&Save graph as bitmap..."
+msgstr "&Shrani graf kot bitno sliko ..."
+
+#: DialogsWxw/GraphDialog.cpp:1004
+#: DialogsWxw/HistoryDialog.cpp:939
+#: TortoiseAct/TortoiseAct.cpp:1825
+#, c-format
+msgid "Finished tagging in %s"
+msgstr "Označevanje v %s dokončano"
+
+#: DialogsWxw/GraphDialog.cpp:1027
+#: DialogsWxw/GraphDialog.cpp:1083
+#: DialogsWxw/HistoryDialog.cpp:961
+#: DialogsWxw/HistoryDialog.cpp:1017
+#: TortoiseAct/TortoiseAct.cpp:1846
+#: TortoiseAct/TortoiseAct.cpp:1903
+msgid "Internal error: Invalid action"
+msgstr "Notranja napaka: neveljavno dejanje"
+
+#: DialogsWxw/GraphDialog.cpp:1034
+#: DialogsWxw/HistoryDialog.cpp:968
+#: TortoiseAct/TortoiseAct.cpp:1852
+#, c-format
+msgid "Tagging in %s"
+msgstr "Označevanje v %s"
+
+#: DialogsWxw/GraphDialog.cpp:1055
+#: DialogsWxw/HistoryDialog.cpp:989
+#: TortoiseAct/TortoiseAct.cpp:1873
+#, c-format
+msgid "Finished branching in %s"
+msgstr "Vejanje v %s dokončano"
+
+#: DialogsWxw/GraphDialog.cpp:1091
+#: DialogsWxw/HistoryDialog.cpp:1024
+#: TortoiseAct/TortoiseAct.cpp:1909
+#, c-format
+msgid "Branching in %s"
+msgstr "Vejanje v %s"
+
+#: DialogsWxw/GraphDialog.cpp:1189
+#: DialogsWxw/HistoryDialog.cpp:884
+msgid "Retrieving a clean copy deletes your changes."
+msgstr "Pridobivanje čiste kopije izbriše vaše spremembe."
+
+#: DialogsWxw/GraphDialog.cpp:1189
+#: DialogsWxw/HistoryDialog.cpp:884
+msgid "Warning"
+msgstr "Opozorilo"
+
+#: DialogsWxw/GraphDialog.cpp:1217
+msgid "Bitmap files"
+msgstr "Bitne slike"
+
+#: DialogsWxw/GraphDialog.cpp:1219
+msgid "Save Revision Graph"
+msgstr "Shrani graf revizij"
+
+#: DialogsWxw/GraphDialog.cpp:1247
+msgid "Failed to save Revision Graph bitmap"
+msgstr "Shranjevanje bitne slike grafa revizij ni uspelo"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:65
+msgid "TortoiseCVS - Revision Graph Settings"
+msgstr "Tortoise CVS - Nastavitve grafa revizij"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:74
+msgid "&Start date/time:"
+msgstr "Datum/čas &začetka:"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:75
+msgid "Do not show revisions/tags/branches before a specific date."
+msgstr "Ne pokaži revizij/oznak/vej pred določenim datumom."
+
+#: DialogsWxw/GraphSettingsDialog.cpp:77
+#: DialogsWxw/UpdateDlg.cpp:407
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar.\n"
+"e.g.: \"1988-09-24\"  \"yesterday\"  \"24 Sep 20:05\""
+msgstr ""
+"Izberite datum iz koledarja in/alu uredite datum in čas v polju nad koledarjem.\n"
+"Npr.: \"1988-09-24\"  \"včeraj\"  \"24.09. 20:05\""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:96
+msgid "&End date/time:"
+msgstr "Datum/čas &zaključka:"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:97
+msgid "Do not show revisions/tags/branches after a specific date."
+msgstr "Ne pokaži revizij/oznak/vej po določenem datumu."
+
+#: DialogsWxw/HistoryDialog.cpp:100
+#: DialogsWxw/HistoryDialog.cpp:328
+#, c-format
+msgid "History for %s"
+msgstr "Zgodovina za %s"
+
+#: DialogsWxw/HistoryDialog.cpp:170
+#, c-format
+msgid "%d revision(s)"
+msgstr "%d revizij(a,e)"
+
+#: DialogsWxw/HistoryDialog.cpp:371
+#, c-format
+msgid "TortoiseCVS - History for %s"
+msgstr "TortoiseCVS - Zgodovina za %s"
+
+#: DialogsWxw/HistoryDialog.cpp:409
+#: DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/ModuleBasicsPage.cpp:185
+#: TortoiseShell/PropSheet.cpp:217
+msgid "CVSROOT"
+msgstr "CVSROOT"
+
+#: DialogsWxw/HistoryDialog.cpp:414
+msgid "Sticky tag"
+msgstr "Lepljiva oznaka"
+
+#: DialogsWxw/HistoryDialog.cpp:432
+#: TortoiseShell/PropSheet.cpp:232
+msgid "File format"
+msgstr "Vrsta datoteke"
+
+#: DialogsWxw/HistoryDialog.cpp:450
+msgid "Other"
+msgstr "Drugo"
+
+#: DialogsWxw/HistoryDialog.cpp:470
+msgid "Changes"
+msgstr "Spremembe"
+
+#: DialogsWxw/HistoryDialog.cpp:540
+msgid "Apply"
+msgstr "Uporabi"
+
+#: DialogsWxw/HistoryDialog.cpp:719
+msgid "Changing comment"
+msgstr "Spreminjanje komentarja"
+
+#: DialogsWxw/HistoryDialog.cpp:757
+msgid "(None)"
+msgstr "(brez)"
+
+#: DialogsWxw/HistoryDialog.cpp:1050
+#, c-format
+msgid ""
+"You have changed the comment of revision %s.\n"
+"Do you want to save it?"
+msgstr ""
+"Spremenili ste komentar revizije %s.\n"
+"Ga želite shraniti?"
+
+#: DialogsWxw/HistoryDialog.cpp:1205
+msgid "C&opy comment to clipboard"
+msgstr "K&opiraj komentar na odložišče"
+
+#: DialogsWxw/IconSetDialog.cpp:44
+msgid "In CVS"
+msgstr "V CVS"
+
+#: DialogsWxw/IconSetDialog.cpp:45
+msgid "In CVS, read-only"
+msgstr "V CVS, samo za branje"
+
+#: DialogsWxw/IconSetDialog.cpp:50
+msgid "Ignored by CVS"
+msgstr "Prezrto s strani CVS"
+
+#: DialogsWxw/IconSetDialog.cpp:86
+msgid "TortoiseCVS - Icon sets"
+msgstr "TortoiseCVS - Nabori ikon"
+
+#: DialogsWxw/IconSetDialog.cpp:94
+msgid "Please select an icon set to be used as overlay icons:"
+msgstr "Prosimo, izberite nabor ikon, ki bo uporabljen za prepis ikon:"
+
+#: DialogsWxw/IconSetDialog.cpp:107
+msgid "Icon preview:"
+msgstr "Predogled ikon:"
+
+#: DialogsWxw/IconSetDialog.cpp:166
+#: DialogsWxw/PreferencesDialog.cpp:581
+#: DialogsWxw/PreferencesDialog.cpp:789
+msgid "No icons"
+msgstr "Ni ikon"
+
+#: DialogsWxw/LogConfigDialog.cpp:80
+msgid "TortoiseCVS - Web Log Configuration"
+msgstr "TortoiseCVS - Nastavitev spletnega dnevnika"
+
+#: DialogsWxw/LogConfigDialog.cpp:97
+msgid "Web log URL &prefix:"
+msgstr "&Predpona URL spletnega dnevnika:"
+
+#: DialogsWxw/LogConfigDialog.cpp:107
+msgid "&Suffix:"
+msgstr "&Pripona:"
+
+#: DialogsWxw/LogConfigDialog.cpp:116
+msgid "&Plain text log (if your server doesn't support web log)"
+msgstr "Dnevnik z &navadnim besedilom (če strežnik ne podpira spletnega dnevnika)"
+
+#: DialogsWxw/LogConfigDialog.cpp:120
+msgid "&Automatically scan the server for the URL (again)"
+msgstr "&Samodejno preišči strežnik za URL (znova)"
+
+#: DialogsWxw/LoginDialog.cpp:32
+msgid "Password:"
+msgstr "Geslo:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97
+#: DialogsWxw/ModuleBasicsPage.cpp:179
+msgid "Protocol"
+msgstr "Protokol"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98
+#: DialogsWxw/ModuleBasicsPage.cpp:180
+msgid "Protocol parameters"
+msgstr "Parametri protokola"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99
+#: DialogsWxw/ModuleBasicsPage.cpp:181
+msgid "Server"
+msgstr "Strežnik"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100
+#: DialogsWxw/ModuleBasicsPage.cpp:182
+msgid "Repository folder"
+msgstr "Mapa skladišča"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101
+#: DialogsWxw/ModuleBasicsPage.cpp:183
+msgid "User name"
+msgstr "Uporabniško ime"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104
+#: DialogsWxw/ModuleBasicsPage.cpp:186
+msgid "Port"
+msgstr "Vrata"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:108
+#: DialogsWxw/ModuleBasicsPage.cpp:192
+msgid "Previous CVSROOTs"
+msgstr "Prejšnji CVSROOT-i"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:148
+#: DialogsWxw/ModuleBasicsPage.cpp:261
+msgid "Password server (:pserver:)"
+msgstr "Strežnik gesel (:pserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:149
+#: DialogsWxw/ModuleBasicsPage.cpp:262
+msgid "Windows authentication (:sspi:)"
+msgstr "Avtentikacija Windows (:sspi:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:150
+#: DialogsWxw/ModuleBasicsPage.cpp:264
+msgid "Secure shell (:ext:)"
+msgstr "Varna lupina (:ext:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:151
+#: DialogsWxw/ModuleBasicsPage.cpp:266
+msgid "Secure shell (:ssh:)"
+msgstr "Varna lupina (:ssh:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:152
+#: DialogsWxw/ModuleBasicsPage.cpp:267
+msgid "Remote shell (:server:)"
+msgstr "Oddaljena lupina (:server:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:153
+#: DialogsWxw/ModuleBasicsPage.cpp:268
+msgid "Locally mounted folder (:local:)"
+msgstr "Krajevno priklopljena mapa (:local:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:154
+#: DialogsWxw/ModuleBasicsPage.cpp:269
+msgid "Kerberos (:gserver:)"
+msgstr "Kerberos (:gserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:155
+#: DialogsWxw/ModuleBasicsPage.cpp:270
+msgid "SSL (:sserver:)"
+msgstr "SSL (:sserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:156
+msgid "Named pipe (:ntserver:)"
+msgstr "Imenovan cevovod (:ntserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:199
+#: DialogsWxw/ModuleBasicsPage.cpp:346
+msgid "&Fetch list..."
+msgstr "&Pridobi seznam ..."
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:216
+#: DialogsWxw/ModuleBasicsPage.cpp:144
+msgid "How your machine should connect to the CVS repository"
+msgstr "Kako naj se vaš računalnik poveže s skladiščem CVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:217
+#: DialogsWxw/ModuleBasicsPage.cpp:145
+msgid "Parameters associated with this protocol"
+msgstr "Parametri, povezani s tem protokolom"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:218
+#: DialogsWxw/ModuleBasicsPage.cpp:146
+msgid "The computer that the CVS repository is on"
+msgstr "Računalnik, na katerem se nahaja skladišče CVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:219
+#: DialogsWxw/ModuleBasicsPage.cpp:147
+msgid "Location of the repository on the server"
+msgstr "Mesto skladiščenja na strežniku"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:220
+#: DialogsWxw/ModuleBasicsPage.cpp:148
+msgid "The user name that CVS should use"
+msgstr "Uporabniško ime za CVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:221
+msgid "The name of the module"
+msgstr "Ime modula"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:222
+#: DialogsWxw/ModuleBasicsPage.cpp:150
+msgid "Technical details of the CVSROOT which TortoiseCVS is going to use"
+msgstr "Tehnične podrobnosti CVSROOT, ki jih potrebuje TortoiseCVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:223
+#: DialogsWxw/ModuleBasicsPage.cpp:151
+msgid "Retrieves a list of modules from the server, and puts them in the dropdown box"
+msgstr "Pridobi seznam modulov s strežnika in jih postavi v seznamsko polje"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:224
+msgid "The TCP port of your CVS server process"
+msgstr "Vrata TCP za proces vašega strežnika CVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:252
+#: DialogsWxw/ModuleBasicsPage.cpp:417
+msgid "Click here and paste in the CVSROOT"
+msgstr "Kliknite sem in prilepite v CVSROOT"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:488
+#: DialogsWxw/ModuleBasicsPage.cpp:972
+msgid "Module list not available for server"
+msgstr "Seznam modulov za strežnik ni na voljo"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:493
+#: DialogsWxw/ModuleBasicsPage.cpp:977
+msgid ""
+"Ask your administrator to either install a web browser interface on the server (CVSweb or ViewCVS) or add the modules to the CVSROOT/modules file.\n"
+"\n"
+"Meanwhile, you'll have to find the module name elsewhere."
+msgstr ""
+"Prosite upravitelja, da namesti spletni vmesnik na strežnik (CVSweb ali ViewCVS) ali doda module v datoteko CVSROOT/modules.\n"
+"Medtem boste morali poiskati ime modula drugje."
+
+#: DialogsWxw/MakeModuleDialog.cpp:56
+msgid "TortoiseCVS - Make New Module"
+msgstr "TortoiseCVS - Naredi nov modul"
+
+#: DialogsWxw/MakeModuleDialog.cpp:77
+msgid "Check out files read-only"
+msgstr "Prevzemi datoteke le za branje"
+
+#: DialogsWxw/MakeModuleDialog.cpp:79
+msgid "Run 'cvs watch on' on the new module so that files will be checked out read-only"
+msgstr "Na novem modulu poženite 'cvs watch on', tako da bodo nove datoteke prevzete kot 'samo za branje'"
+
+#: DialogsWxw/MakePatchDialog.cpp:240
+msgid "TortoiseCVS - Make Patch"
+msgstr "TortoiseCVS - Naredi popravek"
+
+#: DialogsWxw/MakePatchDialog.cpp:302
+msgid "&Add files..."
+msgstr "&Dodaj datoteke ..."
+
+#: DialogsWxw/MakePatchDialog.cpp:566
+#: TortoiseAct/TortoiseAct.cpp:623
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS."
+msgstr ""
+"Ničesar ni mogoče dodati.\n"
+"\n"
+"Vse datoteke, mape in njihova vsebina, kar ste izbrali, je že v CVS."
+
+#: DialogsWxw/MakePatchDialog.cpp:569
+#: TortoiseAct/TortoiseAct.cpp:626
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS, or are specified in a .cvsignore file."
+msgstr ""
+"Ničesar ni mogoče dodati.\n"
+"\n"
+"Vse datoteke, mape in njihova vsebina, kar ste izbrali, je že v CVS ali pa je navedeno v datoteki .cvsignore."
+
+#: DialogsWxw/MakePatchDialog.cpp:592
+msgid "TortoiseCVS - Add files to patch"
+msgstr "TortoiseCVS - Dodaj datoteke popravku"
+
+#: DialogsWxw/MakePatchDialog.cpp:593
+msgid "Select files to add to the patch"
+msgstr "Izberite datoteke, ki bodo dodane popravku"
+
+#: DialogsWxw/MergeDlg.cpp:75
+msgid "TortoiseCVS - Merge"
+msgstr "TortoiseCVS - Spoji"
+
+#: DialogsWxw/MergeDlg.cpp:88
+msgid "Start:"
+msgstr "Začetek:"
+
+#: DialogsWxw/MergeDlg.cpp:96
+msgid "End:"
+msgstr "Konec:"
+
+#: DialogsWxw/MergeDlg.cpp:105
+#: DialogsWxw/MergeDlg.cpp:106
+msgid "Name of revision/tag/branch to merge into your working folder."
+msgstr "Ime revizije/oznake/veje, ki jo želite spojiti v svojo delovno mapo."
+
+#: DialogsWxw/MergeDlg.cpp:112
+msgid "&Update lists..."
+msgstr "&Posodobi sezname ..."
+
+#: DialogsWxw/MergeDlg.cpp:115
+msgid "Suppress keyword &expansion"
+msgstr "Zatri razširitev &ključnih besed"
+
+#: DialogsWxw/MergeDlg.cpp:125
+msgid "Suppress expansion of keywords to avoid spurious conflicts"
+msgstr "Zatri razširjanje ključnih besed v izogib lažnim sporom"
+
+#: DialogsWxw/MergeDlg.cpp:135
+msgid "Create missing subfolders"
+msgstr "Ustvari manjkajoče podmape"
+
+#: DialogsWxw/MergeDlg.cpp:137
+#: DialogsWxw/UpdateDlg.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:492
+msgid "Create any folders that exist in the repository if they are missing from the working folder."
+msgstr "Ustvari mape, ki obstajajo v skladišču, če jih ni v delovni mapi"
+
+#: DialogsWxw/MergeDlg.cpp:146
+msgid ""
+"The changes between the specified revisions/tags/branches will be merged into your current working sources. If you want to merge an entire branch, enter the branch name in the first edit field and leave the second one blank.\n"
+"The repository is not altered until a commit is performed."
+msgstr ""
+"Spremembe med navedenimi revizijami/oznakami/vejami bodo spojene v trenutne delovne vire. Če želite spojiti celo vejo, vnesite ime veje v prvo polje in pustite drugo polje prazno.\n"
+"Skladišče ostane nespremenjeno do naslednje objave."
+
+#: DialogsWxw/MergeDlg.cpp:163
+msgid "Merge changes between the following branches/tags/revisions:"
+msgstr "Spoji spremembe med naslednjimi vejami/oznakami/revizijami:"
+
+#: DialogsWxw/MergeDlg.cpp:198
+#: DialogsWxw/RevOptions.cpp:203
+#: DialogsWxw/UpdateDlg.cpp:327
+msgid "No tags or branches found."
+msgstr "Ni najdenih oznak ali vej."
+
+#: DialogsWxw/ModuleBasicsPage.cpp:149
+msgid "The name of the module, or full path of any file or folder in the module"
+msgstr "Ime modula ali polna pot do katere koli datoteke ali mape v modulu"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:152
+msgid "The TCP port of your CVS server process (optional)"
+msgstr "Vrata TCP vašega procesa strežnika CVS (dodatno)"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:153
+msgid "Do a CVS Edit on the file/folder after checkout"
+msgstr "Izvedi urejanje CVS na datoteki/mapi po prevzemu"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:154
+msgid "Mark edit with bug number"
+msgstr "Označi urejanje s številko hrošča"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:313
+#: ../build/TortoiseMenus.config:123
+#: ../build/TortoiseMenus.config:213
+#: ../build/TortoiseMenus.config:219
+msgid "&Edit"
+msgstr "&Uredi"
+
+#: DialogsWxw/PreferencesDialog.cpp:167
+#: DialogsWxw/PreferencesDialog.cpp:363
+msgid "TortoiseCVS - Preferences"
+msgstr "TortoiseCVS - Nastavitve"
+
+#: DialogsWxw/PreferencesDialog.cpp:171
+#: DialogsWxw/PreferencesDialog.cpp:376
+msgid "Global"
+msgstr "Univerzalno"
+
+#: DialogsWxw/PreferencesDialog.cpp:343
+msgid ""
+"You have selected a different icon set - it won't take effect until Windows Explorer is restarted.\n"
+"You can log off or reboot the system, or TortoiseCVS can simply restart the Explorer process for you.\n"
+"Do you want to restart the Explorer process?"
+msgstr ""
+"Izbrali ste drug nabor ikon - to ne bo opazno, dokler ponovno ne zaženete Raziskovalca.\n"
+"Lahko se tudi odjavite iz sistema ali ga ponovno zaženete, ali pa lahko TortoiseCVS enostavno ponovno zažene proces Raziskovalca namesto vas.\n"
+"Želite ponovno zagnati proces Raziskovalca?"
+
+#: DialogsWxw/PreferencesDialog.cpp:485
+#: DialogsWxw/PreferencesDialog.cpp:503
+#: DialogsWxw/PreferencesDialog.cpp:587
+msgid "Browse..."
+msgstr "Prebrskaj ..."
+
+#: DialogsWxw/PreferencesDialog.cpp:590
+msgid "Rebuild..."
+msgstr "Ponovno izdelaj ..."
+
+#: DialogsWxw/PreferencesDialog.cpp:603
+msgid "Sample text"
+msgstr "Vzorec besedila"
+
+#: DialogsWxw/PreferencesDialog.cpp:610
+msgid "Select colour..."
+msgstr "Izberi barvo ..."
+
+#: DialogsWxw/PreferencesDialog.cpp:801
+#: TortoiseAct/TortoiseAct.cpp:3352
+msgid "Error rebuilding icons. You may not have the required permissions."
+msgstr "Napaka pri ponovni izdelavi ikon. Nimate potrebnih pravic."
+
+#: DialogsWxw/PreferencesDialog.cpp:812
+msgid "Cache has been cleared"
+msgstr "Medpomnilnik je bil spraznjen"
+
+#: DialogsWxw/PreferencesDialog.cpp:824
+msgid "Ignored files"
+msgstr "Prezrte datoteke"
+
+#: DialogsWxw/PreferencesDialog.cpp:826
+msgid "Per-user list of cvsignore file name patterns"
+msgstr "Seznam vzorcev imen datotek cvsignor glede na uporabnika"
+
+#: DialogsWxw/PreferencesDialog.cpp:834
+msgid "Hint: To reset the list and include all files, enter a single exclamation mark (\"!\")."
+msgstr "Namig: Za ponastavitev seznama in vključitev vseh datotek, vnesite en sam klicaj (\"!\")."
+
+#: DialogsWxw/PreferencesDialog.cpp:840
+msgid "A list of files (or file name patterns like \"*.exe\") that CVS ignores when running certain operations. The entries must be separated by whitespace and are appended to the default built-in ignored list. A single exclamation mark (\"!\") resets the list. For details refer to the original CVS documentation."
+msgstr "Seznam datotek (ali vzorcev imen datotek, kot je \"*.exe\"), ki jih CVS prezre, ko opravlja določene operacije. Vnose mora ločevati presledek in so dodani k privzetemu vgrajenemu seznamu prezrtih. Posamezen klicaj (\"!\") ta seznam ponastavi. Za podrobnosti si oglejte izvorno dokumentacijo CVS."
+
+#: DialogsWxw/PreferencesDialog.cpp:872
+msgid "Scope"
+msgstr "Področno"
+
+#: DialogsWxw/PreferencesDialog.cpp:874
+msgid "Preference &scope"
+msgstr "Po&dročje možnosti"
+
+#: DialogsWxw/PreferencesDialog.cpp:877
+msgid "Whether to set preferences globally or for the current module"
+msgstr "Ali naj nastavitve veljajo za vse ali samo za trenutni modul"
+
+#: DialogsWxw/PreferencesDialog.cpp:881
+msgid "Set global preferences"
+msgstr "Nastavi splošne nastavitve"
+
+#: DialogsWxw/PreferencesDialog.cpp:896
+#: DialogsWxw/PreferencesDialog.cpp:907
+#, c-format
+msgid "PrefControl index %d not found"
+msgstr "Indeksa PrefControl %d ni mogoče najti"
+
+#: DialogsWxw/ProgressDialog.cpp:150
+msgid "TortoiseCVS - Working"
+msgstr "TortoiseCVS - Sredi dela"
+
+#: DialogsWxw/ProgressDialog.cpp:159
+msgid "TortoiseCVS - Finished"
+msgstr "TortoiseCVS - Dokončano"
+
+#: DialogsWxw/ProgressDialog.cpp:180
+msgid "Working..."
+msgstr "Delo poteka ..."
+
+#: DialogsWxw/ProgressDialog.cpp:188
+msgid "Abort"
+msgstr "Prekini"
+
+#: DialogsWxw/ProgressDialog.cpp:205
+msgid "Close on completion"
+msgstr "Zapri ob zaključku"
+
+#: DialogsWxw/ProgressDialog.cpp:542
+msgid "TortoiseCVS - Aborting"
+msgstr "TortoiseCVS - Prekinjanje"
+
+#: DialogsWxw/ProgressDialog.cpp:543
+msgid "Aborting..."
+msgstr "Prekinjanje ..."
+
+#: DialogsWxw/ProgressDialog.cpp:578
+msgid "TortoiseCVS - Aborted"
+msgstr "TortoiseCVS - Prekinjeno"
+
+#: DialogsWxw/ProgressDialog.cpp:579
+msgid "Aborted"
+msgstr "Prekinjeno"
+
+#: DialogsWxw/ProgressDialog.cpp:585
+msgid "Finished"
+msgstr "Dokončano"
+
+#: DialogsWxw/ProgressDialog.cpp:813
+msgid "Output"
+msgstr "Izhod"
+
+#: DialogsWxw/ProgressDialog.cpp:896
+msgid "Copy"
+msgstr "Kopiraj"
+
+#: DialogsWxw/ProgressDialog.cpp:903
+msgid "Select All"
+msgstr "Izberi vse"
+
+#: DialogsWxw/ReleaseDialog.cpp:43
+#: TortoiseAct/TortoiseAct.cpp:4065
+msgid "multiple folders"
+msgstr "več map"
+
+#: DialogsWxw/ReleaseDialog.cpp:44
+#, c-format
+msgid "Finished release in %s"
+msgstr "Dokončano izdaja v %s"
+
+#: DialogsWxw/ReleaseDialog.cpp:76
+#, c-format
+msgid "CVS Release in %s will result in the following potentially destructive changes:"
+msgstr "Izdaja CVS v %s bo imela za posledico naslednje morebitno škodljive spremembe:"
+
+#: DialogsWxw/ReleaseDialog.cpp:79
+#, c-format
+msgid "%d modified file(s)"
+msgstr "%d spremenjenih(e/i/a) datotek(e/i/a)"
+
+#: DialogsWxw/ReleaseDialog.cpp:82
+#, c-format
+msgid "%d newly added file(s) that have not been committed"
+msgstr "%d novo dodanih datotek, ki niso objavljene"
+
+#: DialogsWxw/ReleaseDialog.cpp:86
+#, c-format
+msgid "%d removed file(s) that have not been committed"
+msgstr "%d odstranjenih datotek, ki niso objavljene"
+
+#: DialogsWxw/ReleaseDialog.cpp:90
+#, c-format
+msgid "%d renamed file(s) that have not been committed"
+msgstr "%d preimenovanih datotek, ki niso objavljene"
+
+#: DialogsWxw/ReleaseDialog.cpp:94
+#, c-format
+msgid "%d file(s) that are not under CVS control"
+msgstr "%d datotek(e/i/a), ki niso pod nadzorom CVS"
+
+#: DialogsWxw/ReleaseDialog.cpp:97
+#, c-format
+msgid "%s will be deleted.  Are you sure you want to do this?"
+msgstr "%s bo zbrisana.  Ste prepričani, da to želite storiti?"
+
+#: DialogsWxw/ReleaseDialog.cpp:109
+msgid "Releasing in "
+msgstr "Izdajanje v"
+
+#: DialogsWxw/ReleaseDialog.cpp:122
+msgid "TortoiseCVS - Release"
+msgstr "Tortoise CVS - Izdaj"
+
+#: DialogsWxw/ReleaseDialog.cpp:128
+msgid "Release Options:"
+msgstr "Možnosti izdaje:"
+
+#: DialogsWxw/ReleaseDialog.cpp:133
+msgid "Delete files and folders that are under CVS control (-d)"
+msgstr "Izbriši datoteke in mape, ki so pod nadzorom CVS (-d)"
+
+#: DialogsWxw/ReleaseDialog.cpp:134
+msgid "Delete contents of folders including non-cvs files (-d -f)"
+msgstr "Izbriši vsebino map, vključno z datotekami, ki niso del CVS (-d -f)"
+
+#: DialogsWxw/ReleaseDialog.cpp:135
+msgid "Delete CVS control files only (-e)"
+msgstr "Izbriši le nadzorne datoteke CVS (-e)"
+
+#: DialogsWxw/RenameDialog.cpp:49
+msgid "TortoiseCVS - Rename"
+msgstr "TortoiseCVS - Preimenuj"
+
+#: DialogsWxw/RenameDialog.cpp:59
+#, c-format
+msgid "Rename '%s' to"
+msgstr "Preimenuj '%s' v"
+
+#: DialogsWxw/RevOptions.cpp:65
+msgid "Branch or tag"
+msgstr "Veja ali oznaka"
+
+#: DialogsWxw/RevOptions.cpp:68
+msgid "Use &HEAD branch"
+msgstr "Uporabi vejo &HEAD"
+
+#: DialogsWxw/RevOptions.cpp:71
+msgid "&Choose branch or tag"
+msgstr "&Izberi vejo ali oznako"
+
+#: DialogsWxw/RevOptions.cpp:73
+msgid "Branch or tag name:"
+msgstr "Ime veje ali oznake:"
+
+#: DialogsWxw/RevOptions.cpp:87
+#: TortoiseAct/TortoisePreferences.cpp:503
+msgid "If no matching revision is found, use the most recent one"
+msgstr "Če ni ujemajoče revizije, uporabi najsodobnejšo"
+
+#: DialogsWxw/RevOptions.cpp:89
+#: DialogsWxw/UpdateDlg.cpp:439
+msgid "If you've specified a tag / branch / date, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr "Če ste navedli oznako / vejo / datum in se ta ne ujema z revizijo datoteke, bo CVS pridobil revizijo glave."
+
+#: DialogsWxw/RevOptions.cpp:91
+msgid "Which tag or branch should be retrieved"
+msgstr "Katera oznaka ali veja naj bo prenesena"
+
+#: DialogsWxw/RevOptions.cpp:100
+msgid "Date and time"
+msgstr "Datum in čas"
+
+#: DialogsWxw/RevOptions.cpp:105
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar, e.g.\n"
+"  \"1988-09-24\"\n"
+"  \"yesterday\"\n"
+"  \"24 Sep 20:05\""
+msgstr ""
+"Izberite datum iz koledarja in/alu uredite datum in čas v polju nad koledarjem, npr:\n"
+"  \"1988-09-24\"\n"
+"  \"včeraj\"\n"
+"  \"24.09. 20:05\""
+
+#: DialogsWxw/RevOptions.cpp:109
+msgid "Most &recent files"
+msgstr "&Nazadnje odprte datoteke"
+
+#: DialogsWxw/RevOptions.cpp:111
+msgid "Files at certain &time"
+msgstr "Datoteke ob določenem &času"
+
+#: DialogsWxw/RevOptions.cpp:112
+msgid "Date/time of files to get:"
+msgstr "Datum/čas datotek za pridobivanje:"
+
+#: DialogsWxw/UpdateDlg.cpp:151
+msgid "TortoiseCVS - Update"
+msgstr "TortoiseCVS - Posodobi"
+
+#: DialogsWxw/UpdateDlg.cpp:170
+msgid "Basic"
+msgstr "Osnovno"
+
+#: DialogsWxw/UpdateDlg.cpp:171
+#: TortoiseAct/TortoisePreferences.cpp:45
+#: TortoiseAct/TortoisePreferences.cpp:280
+#: TortoiseAct/TortoisePreferences.cpp:297
+#: TortoiseAct/TortoisePreferences.cpp:304
+#: TortoiseAct/TortoisePreferences.cpp:316
+#: TortoiseAct/TortoisePreferences.cpp:324
+#: TortoiseAct/TortoisePreferences.cpp:332
+#: TortoiseAct/TortoisePreferences.cpp:338
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Advanced"
+msgstr "Napredno"
+
+#: DialogsWxw/UpdateDlg.cpp:370
+msgid "Get &tag/branch/revision:"
+msgstr "Pridobi &oznako/vejo/revizijo:"
+
+#: DialogsWxw/UpdateDlg.cpp:372
+msgid "Switches your working copy to a specific branch/tag/revision. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "Preklopi vašo delovno kopijo na določeno vejo/oznako/revizijo. Privzema lepljivost, tako da bodo vse nadaljnje posodobitve, objave itn. delovale na tej različici."
+
+#: DialogsWxw/UpdateDlg.cpp:383
+msgid "Branch/Tag/Revision specifier"
+msgstr "Določitelj veje/oznake/revizije"
+
+#: DialogsWxw/UpdateDlg.cpp:394
+msgid "Scan subdirs"
+msgstr "Preglej podmape"
+
+#: DialogsWxw/UpdateDlg.cpp:402
+msgid "Get &date/time:"
+msgstr "Pridobi &datum/čas:"
+
+#: DialogsWxw/UpdateDlg.cpp:404
+msgid "Switches your working copy to the latest version before a specific date. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "Preklopi vašo delovno kopijo na zadnjo revizijo pred določenim datumom. Privzema lepljivost, tako da bodo vse naslednje posodobitve, objave itn. delovale na tej različici."
+
+#: DialogsWxw/UpdateDlg.cpp:427
+msgid "&Clean copy - WARNING:  this deletes your changes"
+msgstr "&Čista kopija - OPOZORILO: s tem izbrišete svoje spremembe"
+
+#: DialogsWxw/UpdateDlg.cpp:429
+msgid ""
+"Overwrite any locally modified files during the update.\n"
+"They are backed up to .#file.revision in case you do this by mistake."
+msgstr ""
+"Ob posodobitvi prepiši vse krajevno spremenjene datoteke.\n"
+"Varnostno so skopirane v .#file.revision, če ste to naredili po napaki."
+
+#: DialogsWxw/UpdateDlg.cpp:432
+msgid "Create missing &subfolders"
+msgstr "Ustvari manjkajoče &podmape"
+
+#: DialogsWxw/UpdateDlg.cpp:437
+msgid "If no &matching revision is found, use the most recent one"
+msgstr "Če ni &ujemajoče revizije, uporabi najsodobnejšo"
+
+#: DialogsWxw/UpdateDlg.cpp:462
+msgid "Get &folder:"
+msgstr "Pridobi &mapo:"
+
+#: DialogsWxw/UpdateDlg.cpp:464
+msgid "Perform the update on the specified folder only. Useful for getting a single new folder without getting all other new folders."
+msgstr "Izvedi posodobitev le na navedeni mapi. Uporabno za pridobivanje posamezne nove mape brez vse ostalih novih map."
+
+#: DialogsWxw/UpdateDlg.cpp:476
+msgid "&Simulate update"
+msgstr "&Simuliraj posodobitev"
+
+#: DialogsWxw/UpdateDlg.cpp:477
+msgid "Do not execute anything that will change the disk."
+msgstr "Ne izvedi ničesar, kar bi spremenilo disk."
+
+#: DialogsWxw/UpdateDlg.cpp:479
+msgid "&Prune empty folders"
+msgstr "&Oklesti prazne mape"
+
+#: DialogsWxw/UpdateDlg.cpp:480
+msgid "Delete any folders that do not contain files."
+msgstr "Izbriši vse mape, ki ne vsebujejo datotek."
+
+#: DialogsWxw/UpdateDlg.cpp:482
+msgid "&Recurse"
+msgstr "&Rekurziraj"
+
+#: DialogsWxw/UpdateDlg.cpp:483
+msgid "Update subfolders."
+msgstr "Posodobi podmape."
+
+#: DialogsWxw/YesNoAllDialog.cpp:63
+msgid "TortoiseCVS - Question"
+msgstr "TortoiseCVS - Vprašanje"
+
+#: DialogsWxw/YesNoAllDialog.cpp:75
+msgid "&Yes"
+msgstr "&Da"
+
+#: DialogsWxw/YesNoAllDialog.cpp:77
+msgid "&No"
+msgstr "&Ne"
+
+#: DialogsWxw/YesNoAllDialog.cpp:84
+msgid "Yes to &all"
+msgstr "Da za &vse"
+
+#: DialogsWxw/YesNoAllDialog.cpp:86
+msgid "N&o to all"
+msgstr "&Ne za vse"
+
+#: TortoiseAct/TortoiseAct.cpp:306
+msgid "Unknown verb:"
+msgstr "Neznan glagol:"
+
+#: TortoiseAct/TortoiseAct.cpp:318
+msgid ""
+"Too few arguments passed to TortoiseAct.\n"
+"\n"
+"TortoiseAct is designed to be run by the Explorer extension TrtseShl.dll. You don't need to run it yourself unless you have a special purpose.\n"
+"\n"
+"Command line arguments:\n"
+"TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"
+msgstr ""
+"Premalo posredovanih argumentov za TortoiseAct.\n"
+"\n"
+"TortoiseAct je načrtovan za zaganjanje z razširitvijo Raziskovalca TrtseShl.dll. Ni potrebe, da bi ga zaganjali sami, razen če imate kak poseben namen.\n"
+"\n"
+"Argumenti ukazne vrstice:\n"
+"TortoiseAct cvs-verb [-h ročica] [-f seznam-datotek] [-u URL] [-l datoteke ...]"
+
+#: TortoiseAct/TortoiseAct.cpp:343
+#, c-format
+msgid "Invalid arguments passed to TortoiseAct (expected handle \"-h 0xXXXXXXXX\", got %s)"
+msgstr "TortoiseAct podani neveljavni argumenti (pričakovana ročica \"-h 0xXXXXXXXX\", podano %s)"
+
+#: TortoiseAct/TortoiseAct.cpp:356
+msgid "File containing input filenames not found:"
+msgstr "Datoteke z imeni vhodnih datotek ni mogoče najti:"
+
+#: TortoiseAct/TortoiseAct.cpp:390
+msgid "Empty file list disallowed"
+msgstr "Prazen seznam datotek ni dovoljen"
+
+#: TortoiseAct/TortoiseAct.cpp:468
+#, c-format
+msgid "Finished add in %s"
+msgstr "Dokončano dodajanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:560
+#, c-format
+msgid "Adding in %s"
+msgstr "Dodajanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:646
+msgid "There is nothing to add or commit."
+msgstr "Ničesar ni za dodati ali objaviti."
+
+#: TortoiseAct/TortoiseAct.cpp:704
+#: TortoiseAct/TortoiseAct.cpp:719
+#, c-format
+msgid "Finished adding to .cvsignore in %s"
+msgstr "Dokončano dodajanje v .cvsingnore v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:791
+#: TortoiseAct/TortoiseAct.cpp:896
+#: TortoiseAct/TortoiseAct.cpp:3509
+#, c-format
+msgid "Finished checkout in %s"
+msgstr "Dokončano prevzemanje iz %s"
+
+#: TortoiseAct/TortoiseAct.cpp:805
+#: TortoiseAct/TortoiseAct.cpp:3553
+msgid "No tag specified for Export, using HEAD"
+msgstr "Za izvoz ni določena nobena oznaka, uporabljen bo HEAD"
+
+#: TortoiseAct/TortoiseAct.cpp:852
+#: TortoiseAct/TortoiseAct.cpp:910
+#: TortoiseAct/TortoiseAct.cpp:3551
+#, c-format
+msgid "Checking out in %s"
+msgstr "Prevzemanje iz %s"
+
+#: TortoiseAct/TortoiseAct.cpp:913
+msgid "You can now compile the TortoiseCVS code."
+msgstr "Zdaj lahko prevedete kodo TortoiseCVS."
+
+#: TortoiseAct/TortoiseAct.cpp:915
+msgid "Create a patch file: If you fix some bugs or add some new features, please submit the changes for other users.  Right click on the changed files or folders and choose Make Patch from the CVS submenu."
+msgstr "Ustvari datoteko popravka: Če odpravite kakega hrošča ali dodate nove funkcionalnosti, prosimo, objavite spremembe tudi za druge uporabnike. Desno-kliknite na spremenjene datoteke ali mape in izberite Naredi popravek v podmeniju CVS."
+
+#: TortoiseAct/TortoiseAct.cpp:935
+msgid "You should not create a module in the root folder of a drive."
+msgstr "Modula ne smete ustvariti v korenski mapi pogona."
+
+#: TortoiseAct/TortoiseAct.cpp:959
+#, c-format
+msgid "Finished make new module in %s"
+msgstr "Dokončana izdelava novega modula v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:970
+msgid "Importing"
+msgstr "Uvažanje"
+
+#: TortoiseAct/TortoiseAct.cpp:990
+msgid "Checking out"
+msgstr "Prevzemanje"
+
+#: TortoiseAct/TortoiseAct.cpp:1002
+msgid "Enabling watch"
+msgstr "Omogočanje sledenja"
+
+#: TortoiseAct/TortoiseAct.cpp:1007
+msgid ""
+"Tortoise Tip: The top-level folder has now been created in CVS.\n"
+"To add files and subfolders, invoke the CVS Add Contents command."
+msgstr ""
+"Nasvet Tortoise: Vrhnja mapa je bila ustvarjena v CVS.\n"
+"Za dodajanje map in podmap uporabite ukaz CVS Dodaj vsebino."
+
+#: TortoiseAct/TortoiseAct.cpp:1048
+msgid ""
+"There is nothing to commit.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"Nič ni za objavo.\n"
+"\n"
+"Vse datoteke in mape, ki ste jih izbrali, so nespremenjene od vaše zadnje objave."
+
+#: TortoiseAct/TortoiseAct.cpp:1096
+#, c-format
+msgid "Finished log in %s"
+msgstr "Dokončano beleženje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1118
+#, c-format
+msgid "Logging in %s"
+msgstr "Prijavljanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1173
+#, c-format
+msgid "Are you sure that you want to CVS Remove all files in the folder '%s'?"
+msgstr "Ste prepričani, da želite CVS-odstraniti vse datoteke v mapi '%s'?"
+
+#: TortoiseAct/TortoiseAct.cpp:1176
+#, c-format
+msgid "Are you sure that you want to CVS Remove '%s'?"
+msgstr "Ste prepričani, da želite CVS-odstraniti '%s'?"
+
+#: TortoiseAct/TortoiseAct.cpp:1179
+#, c-format
+msgid "Are you sure that you want to CVS Remove these %d items?"
+msgstr "Ste prepričani, da želite CVS-odstraniti teh %d elementov?"
+
+#: TortoiseAct/TortoiseAct.cpp:1248
+msgid "No files found that could be removed.\n"
+msgstr "Ni datotek, ki bi jih lahko premaknili.\n"
+
+#: TortoiseAct/TortoiseAct.cpp:1249
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, and then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr "Zavedajte se, da CVS ne spremlja map eksplicitno; če želite odstraniti mapo, odstranite datoteke znotraj nje in nato izvedite CVS Posodobi. To zahteva, da je omogočena nastavitev 'Oklesti prazne mape'."
+
+#: TortoiseAct/TortoiseAct.cpp:1257
+#, c-format
+msgid "Finished remove in %s"
+msgstr "Dokončano odstranjevanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1314
+#, c-format
+msgid ""
+"The file\n"
+"\n"
+"%s\n"
+"is modified. Are you sure that you want to remove it and thus lose your changes?"
+msgstr ""
+"Datoteka\n"
+"\n"
+"%s\n"
+"je spremenjena. Ste prepričani, da jo želite odstraniti in tako izgubiti vse svoje spremembe?"
+
+#: TortoiseAct/TortoiseAct.cpp:1321
+#, c-format
+msgid ""
+"The files\n"
+"\n"
+"%s\n"
+"are modified. Are you sure that you want to remove them and thus lose your changes?"
+msgstr ""
+"Datoteke\n"
+"\n"
+"%s\n"
+"so spremenjene. Ste prepričani, da jih želite odstraniti in tako izgubiti vse svoje spremembe?"
+
+#: TortoiseAct/TortoiseAct.cpp:1329
+#: TortoiseAct/TortoiseAct.cpp:2392
+#, c-format
+msgid "Editing in %s"
+msgstr "Urejanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1346
+#, c-format
+msgid "Removing in %s"
+msgstr "Odstranjevanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1364
+#, c-format
+msgid ""
+"Couldn't rename file:\n"
+"%s to %s"
+msgstr ""
+"Napaka pri preimenovanju datoteke:\n"
+"%s v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1399
+#: TortoiseAct/TortoiseAct.cpp:1421
+#, c-format
+msgid ""
+"Couldn't rename file back:\n"
+"%s to %s"
+msgstr ""
+"Datoteke ni mogoče preimenovati nazaj:\n"
+"%s v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1449
+msgid "Couldn't recycle"
+msgstr "Ni mogoče reciklirati"
+
+#: TortoiseAct/TortoiseAct.cpp:1456
+msgid "No removable files found"
+msgstr "Prenosnih datotek ni mogoče najti"
+
+#: TortoiseAct/TortoiseAct.cpp:1478
+msgid ""
+"Tortoise Tip: Any removed files have been moved to the Recycle Bin.\n"
+"To undo the remove: Choose CVS Commit, right-click the file, and click Restore.\n"
+msgstr ""
+"Nasvet Tortoise: Vse odstranjene datoteke so bile premaknjene v Koš.\n"
+"Brisanje lahko razveljavite z: izberite CVS Objavi, desno-kliknite datoteko in kliknite Obnovi.\n"
+
+#: TortoiseAct/TortoiseAct.cpp:1480
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr "Zavedajte se, da CVS ne spremlja map eksplicitno; če želite odstraniti mapo, odstranite datoteke znotraj nje, nato izvedite CVS Posodobi. To zahteva, da je omogočena nastavitev 'Oklesti prazne mape'."
+
+#: TortoiseAct/TortoiseAct.cpp:1511
+msgid "Rename does not currently support moving a file to a different folder"
+msgstr "Preimenovanje trenutno ne podpira premika datoteke v drugo mapo"
+
+#: TortoiseAct/TortoiseAct.cpp:1516
+#, c-format
+msgid "Finished rename in %s"
+msgstr "Dokončano preimenovanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1536
+#, c-format
+msgid "Finished restoring in %s"
+msgstr "Dokončano obnavljanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1579
+#, c-format
+msgid "Restoring in %s"
+msgstr "Obnavljanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1657
+#, c-format
+msgid "Finished update in %s"
+msgstr "Dokončano posodabljanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1711
+#, c-format
+msgid "Updating in %s"
+msgstr "Posodabljanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1765
+#, c-format
+msgid "Finished clean update in %s"
+msgstr "Dokončana čista posodobitev v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1777
+#, c-format
+msgid "Doing clean update in %s"
+msgstr "Poteka čista posodobitev v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1975
+#, c-format
+msgid "Editing before merge in %s"
+msgstr "Urejanje pred spajanjem v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2035
+#, c-format
+msgid "Finished merge in %s"
+msgstr "Dokončano spajanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2054
+#, c-format
+msgid "Merging in %s"
+msgstr "Spajanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2143
+msgid "unknown"
+msgstr "neznano"
+
+#: TortoiseAct/TortoiseAct.cpp:2203
+#: TortoiseAct/TortoiseAct.cpp:3845
+msgid "Failed to reprocess file list"
+msgstr "Seznama datotek ni bilo mogoče ponovno obdelati"
+
+#: TortoiseAct/TortoiseAct.cpp:2207
+#, c-format
+msgid "Finished making patch in %s"
+msgstr "Popravek v %s dokončan"
+
+#: TortoiseAct/TortoiseAct.cpp:2227
+#, c-format
+msgid "Making patch in %s"
+msgstr "Izdelovanje popravka v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2241
+msgid ""
+"There are no patches.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"Ni popravkov.\n"
+"\n"
+"Vse datoteke in mape, ki ste jih izbrali, so nespremenjene od vaše zadnje objave."
+
+#: TortoiseAct/TortoiseAct.cpp:2248
+msgid "Patch files"
+msgstr "Popravi datoteke"
+
+#: TortoiseAct/TortoiseAct.cpp:2250
+msgid "Text files"
+msgstr "Datoteke z besedilom"
+
+#: TortoiseAct/TortoiseAct.cpp:2252
+#: TortoiseAct/TortoiseAct.cpp:3215
+msgid "All files"
+msgstr "Vse datoteke"
+
+#: TortoiseAct/TortoiseAct.cpp:2255
+msgid "Save patch file"
+msgstr "Shrani datoteko popravkov"
+
+#: TortoiseAct/TortoiseAct.cpp:2390
+#, c-format
+msgid "Finished edit in %s"
+msgstr "Dokončano urejanje v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2472
+#, c-format
+msgid "Finished unedit in %s"
+msgstr "Dokončano razveljavljanje urejenega v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2486
+#, c-format
+msgid "Unediting in %s"
+msgstr "Razveljavitev urejanja v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2503
+#, c-format
+msgid "Finished list editors in %s"
+msgstr "Dokončano navajanje urednikov v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2791
+msgid "Merging changes in binary files is not allowed."
+msgstr "Spajanje sprememb v dvojiških datotekah ni dovoljeno."
+
+#: TortoiseAct/TortoiseAct.cpp:2861
+msgid "The selected file doesn't contain any conflict markers"
+msgstr "Izbrana datoteka ne vsebuje označb spora"
+
+#: TortoiseAct/TortoiseAct.cpp:2874
+#, c-format
+msgid ""
+"File containing your changes: %s\n"
+"File containing repository changes: %s\n"
+"Please merge your changes into: %s"
+msgstr ""
+"Datoteka z vašimi spremembami: %s\n"
+"Datoteka s spremembami skladišča: %s\n"
+"Prosimo, spojite svoje spremembe v: %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2910
+#, c-format
+msgid "Do you want to overwrite your working copy of \"%s\" with your merge results in \"%s\"?"
+msgstr "Želite prepisati svojo delovno kopijo \"%s\" z rezultati spajanja v \"%s\"?"
+
+#: TortoiseAct/TortoiseAct.cpp:2913
+msgid "Save merged file"
+msgstr "Shrani spojeno datoteko"
+
+#: TortoiseAct/TortoiseAct.cpp:2924
+#, c-format
+msgid "Failed to overwrite %s"
+msgstr "%s ni mogoče prepisati"
+
+#: TortoiseAct/TortoiseAct.cpp:3214
+msgid "Save file revision"
+msgstr "Shrani revizijo datoteke"
+
+#: TortoiseAct/TortoiseAct.cpp:3315
+msgid "There are no conflicts to resolve"
+msgstr "Ni sporov za razreševanje"
+
+#: TortoiseAct/TortoiseAct.cpp:3425
+#, c-format
+msgid "Finished '%s' in %s"
+msgstr "Dokončano '%s' v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:3451
+msgid "Invalid cvs:// URL"
+msgstr "Neveljaven URL cvs://"
+
+#: TortoiseAct/TortoiseAct.cpp:3461
+msgid "Invalid cvs:// URL: no module specified"
+msgstr "Neveljaven URL cvs:// - modul ni naveden"
+
+#: TortoiseAct/TortoiseAct.cpp:3474
+#, c-format
+msgid "Invalid CVSROOT %s specified in cvs:// URL"
+msgstr "Neveljaven CVSROOT %s, določen v URL-ju cvs://"
+
+#: TortoiseAct/TortoiseAct.cpp:3502
+msgid "Choose destination folder for CVS checkout"
+msgstr "Izberite ciljno mapo za prevzem CVS"
+
+#: TortoiseAct/TortoiseAct.cpp:3503
+msgid "Folders"
+msgstr "Mape"
+
+#: TortoiseAct/TortoiseAct.cpp:3718
+msgid ""
+"The files you want to compare contain characters that cannot be represented in the current codepage.\n"
+"To prevent loss of information, the files will be temporarily converted to UTF-8."
+msgstr ""
+"Datoteki, ki jih želite primerjati, vsebujeta znake, ki jih ni mogoče predstaviti s trenutnim kodnim naborom.\n"
+"Da bi preprečili izgubo podatkov, bosta datoteki začasno pretvorjeni v UTF-8."
+
+#: TortoiseAct/TortoiseAct.cpp:3720
+msgid "UTF-8 conversion"
+msgstr "Pretvorba UTF-8"
+
+#: TortoiseAct/TortoiseAct.cpp:3833
+msgid ""
+"You have tried to commit one or more renamed files without committing all changed\n"
+"(modified, added, or removed) files in the same folder.\n"
+"CVSNT does not currently support this. Please try again."
+msgstr ""
+"Poskušali ste objaviti eno ali več preimenovanih datotek brez objave vse spremenjenih\n"
+"(spremenjenih, dodanih in/ali odstranjenih) datotek iz iste mape.\n"
+"CVSNT trenutno tega ne podpira. Poskusite znova."
+
+#: TortoiseAct/TortoiseAct.cpp:3852
+#, c-format
+msgid "Finished commit in %s"
+msgstr "Dokončana objava v %s"
+
+#: TortoiseAct/TortoiseAct.cpp:3951
+#, c-format
+msgid "Committing in %s"
+msgstr "Objavljanje v %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:45
+msgid "Choose external diff application"
+msgstr "Izberite zunanji program za razlikovanje"
+
+#: TortoiseAct/TortoiseActUtils.cpp:50
+msgid "Choose external merge application"
+msgstr "Izberite zunanji program za spajanje"
+
+#: TortoiseAct/TortoiseActUtils.cpp:74
+#: TortoiseAct/TortoisePreferences.cpp:364
+#: TortoiseAct/TortoisePreferences.cpp:401
+#: TortoiseAct/TortoisePreferences.cpp:439
+#: TortoiseAct/TortoisePreferences.cpp:454
+msgid "Executables"
+msgstr "Izvršilne datoteke"
+
+#: TortoiseAct/TortoiseActUtils.cpp:109
+#: TortoiseAct/TortoiseActUtils.cpp:137
+#, c-format
+msgid "Finished diff in %s"
+msgstr "Dokončano razlikovanje v %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:111
+#: TortoiseAct/TortoiseActUtils.cpp:139
+#, c-format
+msgid "Diffing in %s"
+msgstr "Razlikovanje v %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:246
+#: TortoiseAct/TortoiseActUtils.cpp:248
+#, c-format
+msgid "Viewing %s"
+msgstr "Ogledovanje %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:362
+msgid "Failed to launch external diff application"
+msgstr "Zunanjega programa za razlikovanje ni mogoče zagnati"
+
+#: TortoiseAct/TortoiseActUtils.cpp:414
+msgid "Failed to launch external merge application"
+msgstr "Zunanjega programa za spajanje ni mogoče zagnati"
+
+#: TortoiseAct/TortoisePreferences.cpp:41
+#: TortoiseAct/TortoisePreferences.cpp:177
+#: TortoiseAct/TortoisePreferences.cpp:189
+#: TortoiseAct/TortoisePreferences.cpp:199
+#: TortoiseAct/TortoisePreferences.cpp:214
+#: TortoiseAct/TortoisePreferences.cpp:221
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "Main"
+msgstr "Glavno"
+
+#: TortoiseAct/TortoisePreferences.cpp:42
+#: TortoiseAct/TortoisePreferences.cpp:472
+#: TortoiseAct/TortoisePreferences.cpp:482
+#: TortoiseAct/TortoisePreferences.cpp:490
+#: TortoiseAct/TortoisePreferences.cpp:498
+#: TortoiseAct/TortoisePreferences.cpp:507
+#: TortoiseAct/TortoisePreferences.cpp:523
+#: TortoiseAct/TortoisePreferences.cpp:537
+#: TortoiseAct/TortoisePreferences.cpp:549
+#: TortoiseAct/TortoisePreferences.cpp:560
+#: TortoiseAct/TortoisePreferences.cpp:570
+msgid "Policy"
+msgstr "Politika"
+
+#: TortoiseAct/TortoisePreferences.cpp:43
+#: TortoiseAct/TortoisePreferences.cpp:588
+#: TortoiseAct/TortoisePreferences.cpp:597
+#: TortoiseAct/TortoisePreferences.cpp:606
+msgid "Edit"
+msgstr "Uredi"
+
+#: TortoiseAct/TortoisePreferences.cpp:44
+#: TortoiseAct/TortoisePreferences.cpp:361
+#: TortoiseAct/TortoisePreferences.cpp:368
+#: TortoiseAct/TortoisePreferences.cpp:381
+#: TortoiseAct/TortoisePreferences.cpp:398
+#: TortoiseAct/TortoisePreferences.cpp:404
+#: TortoiseAct/TortoisePreferences.cpp:418
+#: TortoiseAct/TortoisePreferences.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:442
+#: TortoiseAct/TortoisePreferences.cpp:450
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "Tools"
+msgstr "Orodja"
+
+#: TortoiseAct/TortoisePreferences.cpp:46
+#: TortoiseAct/TortoisePreferences.cpp:665
+#: TortoiseAct/TortoisePreferences.cpp:672
+#: TortoiseAct/TortoisePreferences.cpp:679
+#: TortoiseAct/TortoisePreferences.cpp:686
+#: TortoiseAct/TortoisePreferences.cpp:693
+#: TortoiseAct/TortoisePreferences.cpp:700
+#: TortoiseAct/TortoisePreferences.cpp:707
+#: TortoiseAct/TortoisePreferences.cpp:714
+msgid "Appearance"
+msgstr "Izgled"
+
+#: TortoiseAct/TortoisePreferences.cpp:47
+#: TortoiseAct/TortoisePreferences.cpp:725
+#: TortoiseAct/TortoisePreferences.cpp:732
+#: TortoiseAct/TortoisePreferences.cpp:739
+msgid "Cache"
+msgstr "Medpomnilnik"
+
+#: TortoiseAct/TortoisePreferences.cpp:49
+#: TortoiseAct/TortoisePreferences.cpp:620
+#: TortoiseAct/TortoisePreferences.cpp:627
+#: TortoiseAct/TortoisePreferences.cpp:635
+#: TortoiseAct/TortoisePreferences.cpp:646
+#: TortoiseAct/TortoisePreferences.cpp:651
+msgid "Debug"
+msgstr "Razhrošči"
+
+#: TortoiseAct/TortoisePreferences.cpp:85
+msgid "Error"
+msgstr "Napaka"
+
+#: TortoiseAct/TortoisePreferences.cpp:177
+msgid "&Progress dialog"
+msgstr "Okno &napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:178
+msgid "Automatically close the progress window when a command completes successfully.  You can hold Ctrl down while selecting a CVS command, or as one is finishing, to prevent this on a one off basis."
+msgstr "Samodejno zapre okno napredka, ko se ukaz uspešno izvede. Pri izbiranju ali dokončanju ukaza CVS lahko držite pritisnjeno tipko Ctrl, da to za vse preprečite na temelju ene same izvedbe."
+
+#: TortoiseAct/TortoisePreferences.cpp:183
+msgid "Close manually"
+msgstr "Zapri ročno"
+
+#: TortoiseAct/TortoisePreferences.cpp:184
+msgid "Close if no messages"
+msgstr "Zapri, če ni sporočil"
+
+#: TortoiseAct/TortoisePreferences.cpp:185
+msgid "Close if no errors"
+msgstr "Zapri, če ni napak"
+
+#: TortoiseAct/TortoisePreferences.cpp:189
+msgid "Progress &messages"
+msgstr "Sporočila o &napredku"
+
+#: TortoiseAct/TortoisePreferences.cpp:190
+msgid "How detailed CVS is about what it is doing.  Errors are always printed, even at the most silent levels."
+msgstr "Kako podroben je CVS o svojem delovanju. Napake se vedno izpišejo, tudi ob najbolj tihih nastavitvah."
+
+#: TortoiseAct/TortoisePreferences.cpp:193
+msgid "Loud"
+msgstr "Glasno"
+
+#: TortoiseAct/TortoisePreferences.cpp:194
+msgid "Quiet"
+msgstr "Tiho"
+
+#: TortoiseAct/TortoisePreferences.cpp:195
+msgid "Really Quiet"
+msgstr "Resnično tiho"
+
+#: TortoiseAct/TortoisePreferences.cpp:199
+msgid "&Overlay icons"
+msgstr "&Prepiši ikone"
+
+#: TortoiseAct/TortoisePreferences.cpp:200
+msgid "The set of overlay icons TortoiseCVS uses."
+msgstr "Nabor prepisnih ikon, ki ga uporablja TortoiseCVS."
+
+#: TortoiseAct/TortoisePreferences.cpp:201
+msgid "Changes won't take effect until you log off or reboot."
+msgstr "Spremembe bodo vidne po odjavi ali ponovnem zagonu."
+
+#: TortoiseAct/TortoisePreferences.cpp:210
+msgid "Don't change icon."
+msgstr "Ne spremeni ikone."
+
+#: TortoiseAct/TortoisePreferences.cpp:211
+msgid "Change icon when folder contains changed files."
+msgstr "Zamenjaj ikono, ko mapa vsebuje spremenjene datoteke."
+
+#: TortoiseAct/TortoisePreferences.cpp:212
+msgid "Change icon when folder or subfolders contain changed files."
+msgstr "Zamenjaj ikono, ko mapa ali podmape vsebujejo spremenjene datoteke."
+
+#: TortoiseAct/TortoisePreferences.cpp:214
+msgid "Folder overlay icons"
+msgstr "Ikone map za prepis"
+
+#: TortoiseAct/TortoisePreferences.cpp:215
+msgid "Change folder icon when folder or subfolders contain changed files."
+msgstr "Zamenjaj ikono mape, ko mapa ali podmape vsebujejo spremenjene datoteke."
+
+#: TortoiseAct/TortoisePreferences.cpp:221
+msgid "Autoload changed folder icons"
+msgstr "Samonaloži ikone spremenjene mape"
+
+#: TortoiseAct/TortoisePreferences.cpp:222
+msgid ""
+"Enabled: Changed folder icons are updated automatically.\n"
+"Disabled: Changed folder icons are only updated explicitly through the context menu."
+msgstr ""
+"Omogočeno: Ikone spremenjene mape se posodobijo samodejno.\n"
+"Onemogočeno: Ikone spremenjene mape se posodobijo le eksplicitno prek pojavnega menija."
+
+#: TortoiseAct/TortoisePreferences.cpp:225
+msgid "Autoload folder icon overlays"
+msgstr "Samonaloži prepise ikon map"
+
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "L&anguage"
+msgstr "&Jezik"
+
+#: TortoiseAct/TortoisePreferences.cpp:231
+msgid "The language used in TortoiseCVS dialogs and menus."
+msgstr "Jezik, uporabljen v pogovornih oknih in menijih TortoiseCVS."
+
+#: TortoiseAct/TortoisePreferences.cpp:257
+msgid "Windows default"
+msgstr "Privzeto za Windows"
+
+#: TortoiseAct/TortoisePreferences.cpp:278
+msgid "<failed to calculate home folder>"
+msgstr "<neuspešno izračunana domača mapa>"
+
+#: TortoiseAct/TortoisePreferences.cpp:280
+msgid "Home folder"
+msgstr "Domača mapa"
+
+#: TortoiseAct/TortoisePreferences.cpp:281
+msgid ""
+"The home folder is where the global .cvsignore file is stored. SSH connections also expect your .ssh folder with keys and known hosts to be in your home folder.\n"
+"By default, TortoiseCVS works out a home folder for you. It looks for folders in this order:\n"
+" - An environment variable called HOME\n"
+" - WinCVS specified home folder\n"
+" - My Documents.\n"
+"You can turn off this automatic calculation, and instead specify your own custom home folder below.\n"
+"Currently the calculation result is: "
+msgstr ""
+"Domača mapa je tam, kjer je shranjena splošna datoteka .cvsignore. Povezave SSH v njej pričakujejo tudi mapo .ssh s ključi in znanimi gostitelji.\n"
+"Privzeto je, da TortoiseCVS sam izdela domačo mapo za vas. Mape poišče po sledečem vrstnem redu:\n"
+" - Okoljska spremenljivka HOME\n"
+" - Navedena domača mapa WinCVS\n"
+" - Moji dokumenti.\n"
+"Ta samodejni izračun lahko izklopite in namesto tega spodaj navedete želeno domačo mapo.\n"
+"Trenutno je rezultat izračuna: "
+
+#: TortoiseAct/TortoisePreferences.cpp:293
+msgid "Always recalculate &home folder"
+msgstr "Vedno preračunaj &domačo mapo"
+
+#: TortoiseAct/TortoisePreferences.cpp:297
+msgid "Custom home &folder"
+msgstr "Domača &mapa po meri ..."
+
+#: TortoiseAct/TortoisePreferences.cpp:298
+msgid "If you turn off automatic home folder calculation, you can enter an explicit path here."
+msgstr "Če izklopite samodejen izračun domače mape, lahko tukaj vnesete natanko določeno pot."
+
+#: TortoiseAct/TortoisePreferences.cpp:304
+msgid "&Network compression"
+msgstr "&Omrežno stiskanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:305
+msgid "Reduce network load by compressing traffic to and from the CVS server. High levels may be slow to calculate."
+msgstr "Zmanjšate obremenitev omrežja s stiskanjem prometa z in na strežnik CVS. Visoke stopnje so lahko časovno potratne pri izračunu."
+
+#: TortoiseAct/TortoisePreferences.cpp:308
+msgid "0 - None"
+msgstr "0 - brez"
+
+#: TortoiseAct/TortoisePreferences.cpp:309
+msgid "3 - Low"
+msgstr "3 - nizko"
+
+#: TortoiseAct/TortoisePreferences.cpp:310
+msgid "6 - Good"
+msgstr "6 - Dobro"
+
+#: TortoiseAct/TortoisePreferences.cpp:311
+msgid "9 - Best"
+msgstr "9 - najboljše"
+
+#: TortoiseAct/TortoisePreferences.cpp:316
+msgid "&Excluded folders"
+msgstr "&Izključene mape"
+
+#: TortoiseAct/TortoisePreferences.cpp:317
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are disabled."
+msgstr "S podpičji ločen seznam (absolutnih poti) map, za katere so prepisne ikone in pojavni meniji onemogočeni."
+
+#: TortoiseAct/TortoisePreferences.cpp:324
+msgid "&Included folders"
+msgstr "&Vključene mape"
+
+#: TortoiseAct/TortoisePreferences.cpp:325
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are enabled. An empty list enables all folders."
+msgstr "S podpičji ločen seznam (absolutnih poti) map, za katere so prepisne ikone in pojavni meniji onemogočeni. Prazen seznam jih omogoča v vseh mapah."
+
+#: TortoiseAct/TortoisePreferences.cpp:332
+msgid "Menu icons"
+msgstr "Ikone menijev"
+
+#: TortoiseAct/TortoisePreferences.cpp:333
+msgid "Enable/disable"
+msgstr "Omogoči/onemogoči"
+
+#: TortoiseAct/TortoisePreferences.cpp:335
+msgid "Enable menu &icons"
+msgstr "Prikaži menijske &ikone"
+
+#: TortoiseAct/TortoisePreferences.cpp:339
+msgid "Maximum number of tags for graph"
+msgstr "Največje število oznak za graf"
+
+#: TortoiseAct/TortoisePreferences.cpp:340
+msgid "Controls how many tags the graph dialog will display per revision.  Enter -1 to show them all."
+msgstr "Nadzira, koliko oznak bo na revizijo prikazalo pogovorno okno grafa. Vnesite -1 za prikaz vseh."
+
+#: TortoiseAct/TortoisePreferences.cpp:346
+msgid "Autodetect (default to DOS)"
+msgstr "Samozaznaj (privzeto za DOS)"
+
+#: TortoiseAct/TortoisePreferences.cpp:347
+msgid "Autodetect (default to UNIX)"
+msgstr "Samozaznaj (privzeto za UNIX)"
+
+#: TortoiseAct/TortoisePreferences.cpp:348
+msgid "DOS"
+msgstr "DOS"
+
+#: TortoiseAct/TortoisePreferences.cpp:349
+msgid "UNIX"
+msgstr "UNIX"
+
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Sandbox DOS/UNIX"
+msgstr "Peskovnik DOS/UNIX"
+
+#: TortoiseAct/TortoisePreferences.cpp:352
+msgid "Use either LF (UNIX) or CRLF (DOS) line separators in text files."
+msgstr "V datotekah z besedilom uporabite končnice vrstic LF (UNIX) ali CRLF (DOS)."
+
+#: TortoiseAct/TortoisePreferences.cpp:361
+msgid "&Diff application"
+msgstr "Program za &razlikovanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:362
+msgid "Specify the program you use to compare files."
+msgstr "Določite program za primerjanje datotek."
+
+#: TortoiseAct/TortoisePreferences.cpp:368
+msgid "&Two-way diff parameters"
+msgstr "Parametri &dvosmernega razlikovanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:369
+msgid "Parameters for two-way diffs."
+msgstr "Parametri za dvosmerno razlikovanje."
+
+#: TortoiseAct/TortoisePreferences.cpp:371
+#: TortoiseAct/TortoisePreferences.cpp:407
+msgid "The default parameters are:"
+msgstr "Privzeti parametri so:"
+
+#: TortoiseAct/TortoisePreferences.cpp:373
+#: TortoiseAct/TortoisePreferences.cpp:374
+#: TortoiseAct/TortoisePreferences.cpp:387
+#: TortoiseAct/TortoisePreferences.cpp:389
+#: TortoiseAct/TortoisePreferences.cpp:391
+msgid "Name of file selected for diff."
+msgstr "Ime izbrane datoteke za razlikovanje."
+
+#: TortoiseAct/TortoisePreferences.cpp:381
+msgid "T&hree-way diff parameters"
+msgstr "Parametri &trosmernega razlikovanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:382
+msgid "Parameters for three-way diffs."
+msgstr "Parametri za trosmerno razlikovanje."
+
+#: TortoiseAct/TortoisePreferences.cpp:398
+msgid "&Merge application"
+msgstr "Program za &spajanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:399
+msgid "Specify the program you use to merge files."
+msgstr "Navedite program, ki ga želite uporabljati za spajanje datotek."
+
+#: TortoiseAct/TortoisePreferences.cpp:404
+msgid "&Two-way merge parameters"
+msgstr "Parametri &dvosmernega spajanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:405
+msgid "Parameters for two-way merges."
+msgstr "Parametri za dvosmerno spajanje."
+
+#: TortoiseAct/TortoisePreferences.cpp:409
+#: TortoiseAct/TortoisePreferences.cpp:424
+msgid "File containing my changes."
+msgstr "Datoteka z mojimi spremembami."
+
+#: TortoiseAct/TortoisePreferences.cpp:411
+#: TortoiseAct/TortoisePreferences.cpp:428
+msgid "File containing changes from repository."
+msgstr "Datoteka s spremembami iz skladišča."
+
+#: TortoiseAct/TortoisePreferences.cpp:418
+msgid "T&hree-way merge parameters"
+msgstr "Parametri &trosmernega spajanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:419
+msgid "Parameters for three-way merges."
+msgstr "Parametri za trosmerno spajanje."
+
+#: TortoiseAct/TortoisePreferences.cpp:422
+msgid ""
+"\n"
+"\n"
+"\"%mine\" \"%ancestor\" \"%yours\"\n"
+msgstr ""
+"\n"
+"\n"
+"\"%mine\" \"%ancestor\" \"%yours\"\n"
+
+#: TortoiseAct/TortoisePreferences.cpp:423
+#, c-format
+msgid ""
+"\n"
+"%mine: "
+msgstr ""
+"\n"
+"%mine: "
+
+#: TortoiseAct/TortoisePreferences.cpp:425
+#, c-format
+msgid ""
+"\n"
+"%ancestor: "
+msgstr ""
+"\n"
+"%ancestor: "
+
+#: TortoiseAct/TortoisePreferences.cpp:426
+msgid "File containing common ancestor data."
+msgstr "Datoteka s podatki skupnih prednikov."
+
+#: TortoiseAct/TortoisePreferences.cpp:427
+msgid ""
+"\n"
+"%yours: "
+msgstr ""
+"\n"
+"%yours: "
+
+#: TortoiseAct/TortoisePreferences.cpp:434
+msgid "SSH &application (:ext: only)"
+msgstr "Pro&gram za SSH (:ext: only)"
+
+#: TortoiseAct/TortoisePreferences.cpp:435
+msgid "Specify the CVS_EXT application (e.g. ssh.exe, plink.exe)"
+msgstr "Določite program CVS_EXT (npr. ssh.exe, plink.exe)"
+
+#: TortoiseAct/TortoisePreferences.cpp:442
+msgid "SSH &parameters (:ext: only)"
+msgstr "&Parametri SSH (:ext: only)"
+
+#: TortoiseAct/TortoisePreferences.cpp:443
+msgid "Parameters for the CVS_EXT application. The default parameters are:"
+msgstr "Parametri za program CVS_EXT. Privzeti parametri so:"
+
+#: TortoiseAct/TortoisePreferences.cpp:445
+msgid "CVS replaces %u with the username and %h with the hostname."
+msgstr "CVS zamenja %u z uporabniškim imenom in %h z imenom strežnika."
+
+#: TortoiseAct/TortoisePreferences.cpp:450
+msgid "SSH &cvs server (:ext: only)"
+msgstr "Strežnik SSH &cvs (samo :ext:)"
+
+#: TortoiseAct/TortoisePreferences.cpp:451
+msgid "Specify the CVS_SERVER application (e.g. /usr/local/bin/cvsnt)"
+msgstr "Določite program CVS_SERVER (npr. /usr/local/bin/cvsnt)"
+
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "&Bug tracker URL"
+msgstr "URL sledilnika &hroščev"
+
+#: TortoiseAct/TortoisePreferences.cpp:458
+#, c-format
+msgid "In the History and Revision Graph dialogs, TortoiseCVS can automatically create hyperlinks from log messages containing 'bug XXX' or '#XXX' where XXX is a number. This setting tells TortoiseCVS how to build that URL. %s will be replaced with the bug number."
+msgstr "V pogovornih oknih zgodovine in grafa revizij lahko TortoiseCVS samodejno ustvari hiperpovezave iz dnevniških sporočil, ki vsebujejo 'bug XXX' ali '#XXX', kjer XXX predstavlja številko. Ta nastavitev določa, kako naj TortoiseCVS izdela tak URL. %s zamenja številka hrošča."
+
+#: TortoiseAct/TortoisePreferences.cpp:472
+msgid "Empty folders"
+msgstr "Prazne mape"
+
+#: TortoiseAct/TortoisePreferences.cpp:473
+msgid "Hide folders which contain no files. CVS doesn't directly manage folders, so the assumption here is that if you remove all the files from a folder you would like to remove the folder."
+msgstr "Skrij mape, ki so prazne. CVS neposredno ne upravlja z mapami, tako da gre za predpostavko, da bi ob odstranitvi vseh datotek iz mape želeli odstraniti tudi mapo."
+
+#: TortoiseAct/TortoisePreferences.cpp:477
+msgid "Prune &empty folders"
+msgstr "Oklest &prazne mape"
+
+#: TortoiseAct/TortoisePreferences.cpp:482
+msgid "Read Only Default"
+msgstr "Privzeto samo za branje"
+
+#: TortoiseAct/TortoisePreferences.cpp:483
+msgid "Checkout files read only by default, return files to read only with unedit and commit"
+msgstr "Privzeto je prevzemanje datotek le za branje, vrnitev datotek v stanje samo za branje pa z razveljavljanjem urejanja in objavo"
+
+#: TortoiseAct/TortoisePreferences.cpp:485
+msgid "Read &Only Default"
+msgstr "Privzeto &samo za branje"
+
+#: TortoiseAct/TortoisePreferences.cpp:491
+msgid "New folders"
+msgstr "Nove mape"
+
+#: TortoiseAct/TortoisePreferences.cpp:494
+msgid "Create new &folders on update"
+msgstr "Ob posodobitvi ustvari nove &mape"
+
+#: TortoiseAct/TortoisePreferences.cpp:499
+msgid "Force head revision"
+msgstr "Posili revizijo glave"
+
+#: TortoiseAct/TortoisePreferences.cpp:500
+msgid "If you've specified a tag/branch/date on checkout or update, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr "Če ste navedli oznako/vejo/daum ob prevzemu ali posodobitvi, in se ne ujema z nobeno revizijo datoteke, bo CVS pridobil revizijo glave."
+
+#: TortoiseAct/TortoisePreferences.cpp:508
+msgid "Automatic commit"
+msgstr "Samodejno objavljanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:509
+msgid ""
+"If this is checked and you perform a 'CVS Add' and/or a 'CVS Remove', TortoiseCVS will automatically perform a commit of the file.\n"
+"It is recommended that you only enable this option if you work on documents, not source code, or if you are the only person working on the project."
+msgstr ""
+"Če je to aktivirano in izvedete 'CVS Dodaj' in/ali 'CVS Odstrani', bo TortoiseCVS samodejno izvedel objavo datoteke.\n"
+"Priporočeno je, da to možnost omogočite, le če delate na dokumentih in ne na izvorni kodi, ali če ste edina oseba, ki deluje na projektu."
+
+#: TortoiseAct/TortoisePreferences.cpp:515
+msgid "Do not automatically commit after Add/Remove"
+msgstr "Ne objavi samodejno po dodajanju/odstranjevanju"
+
+#: TortoiseAct/TortoisePreferences.cpp:516
+msgid "Automatically commit after Add"
+msgstr "Samodejno objavi po dodajanju"
+
+#: TortoiseAct/TortoisePreferences.cpp:517
+msgid "Automatically commit after Add and Remove"
+msgstr "Samodejno objavi po dodajanju in odstanjevanju"
+
+#: TortoiseAct/TortoisePreferences.cpp:524
+msgid "Allow Network Drives"
+msgstr "Dovoli omrežne pogone"
+
+#: TortoiseAct/TortoisePreferences.cpp:525
+msgid ""
+"If this is checked, sandboxes on network mounted drives will be controlled by TortoiseCVS. It also suppresses CVS errors when accessing a repository via :local: on a network share.\n"
+"NOTE: Placing your sandbox or repository on a network drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr ""
+"Če je ta možnost aktivirana, bo peskovnike na pogonih s prenosnimi mediji nadziral TortoiseCVS. Prav tako potlači napake CVS pri dostopu do skladišč prek :local: na omrežnem deljenem pogonu.\n"
+"OPOMBA: Postavitev peskovnika na prenosljiv pogon lahko povzroči številne težave in jo razvijalci CVS odsvetujejo."
+
+#: TortoiseAct/TortoisePreferences.cpp:532
+msgid "Permit sandboxes and repositories on &network (remote) drives"
+msgstr "Dovoli peskovnike in skladišča na &omrežnih (oddaljenih) pogonih"
+
+#: TortoiseAct/TortoisePreferences.cpp:538
+msgid "Allow Removable Drives"
+msgstr "Dovoli prenosne pogone"
+
+#: TortoiseAct/TortoisePreferences.cpp:539
+msgid ""
+"If this is checked, sandboxes on drives with removable media will be controlled by TortoiseCVS.\n"
+"NOTE: Placing your sandbox on a removable drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr ""
+"Če je ta možnost aktivirana, bo peskovnike na pogonih s prenosnimi mediji nadziral TortoiseCVS.\n"
+"OPOMBA: Postavitev peskovnika na prenosljiv pogon lahko povzroči številne težave in jo razvijalci CVS odsvetujejo."
+
+#: TortoiseAct/TortoisePreferences.cpp:544
+msgid "Permit sandboxes on &removable drives"
+msgstr "Dovoli peskovnike na &prenosljivih pogonih"
+
+#: TortoiseAct/TortoisePreferences.cpp:550
+msgid "Add Ignored Files"
+msgstr "Dodaj prezrte datoteke"
+
+#: TortoiseAct/TortoisePreferences.cpp:551
+msgid "If this is checked, the Add Contents dialog will include files listed in .cvsignore. Useful if you want to add files which are normally ignored, but makes the dialog more cluttered."
+msgstr "Če je to aktivirano, bo pogovorno okno Dodaj vsebino vseboval datoteke, navedene v .cvsignore. Uporabno, če želite dodati datoteke, ki so ponavadi prezrte, povzroči pa bolj nepregledno pogovorno okno."
+
+#: TortoiseAct/TortoisePreferences.cpp:555
+msgid "Show .cvs&ignored files in the Add Contents dialog"
+msgstr "Pokaži prezrte datoteke in datoteke .cvs v pogovornem oknu Dodaj vsebino"
+
+#: TortoiseAct/TortoisePreferences.cpp:561
+msgid "Explorer Columns"
+msgstr "Stolpci v Raziskovalcu"
+
+#: TortoiseAct/TortoisePreferences.cpp:562
+msgid "If this is checked, Tortoise will show the CVS Explorer columns only for folders that are under CVS control"
+msgstr "Če je ta možnost aktivirana, Tortoise pokaže stolpce CVS v Raziskovalcu samo za mape, ki so pod nadzorom CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:565
+msgid "Show columns only for CVS-controlled folders"
+msgstr "Pokaži stolpce le za mape pod nadzorom CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:571
+msgid "Empty comment check"
+msgstr "Preveri prisotnost komentarja"
+
+#: TortoiseAct/TortoisePreferences.cpp:572
+msgid "If this is checked, the Commit dialog will issue a warning if no commit comment has been provided by the user.  You can then either continue or abort the commit operation."
+msgstr "Če je aktivirano, pogovorno okno Objavi izda opozorilo, če uporabnik ni podal komentarja k objavi. Nato lahko nadaljujete ali prekinete operacijo objave."
+
+#: TortoiseAct/TortoisePreferences.cpp:575
+msgid "Issue &warning if no comment provided in commit dialog"
+msgstr "Izdaj &opozorilo, če v pogovornem oknu objave ni podan komentar"
+
+#: TortoiseAct/TortoisePreferences.cpp:582
+msgid "Do not use Edit/Unedit"
+msgstr "Ne uporabi uredi/razveljavi urejanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:583
+msgid "Concurrent editing"
+msgstr "Hkratno urejanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:584
+msgid "Concurrent or exclusive editing"
+msgstr "Hkratno ali izključno urejanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:585
+msgid "Exclusive editing only"
+msgstr "Samo izključno urejanje"
+
+#: TortoiseAct/TortoisePreferences.cpp:589
+msgid "Edit policy"
+msgstr "Politika urejanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:590
+msgid "How to handle the CVS Edit and Unedit commands."
+msgstr "Kako ravnati z ukazi CVS Uredi in Razveljavi urejeno"
+
+#: TortoiseAct/TortoisePreferences.cpp:598
+msgid "Edit options dialog"
+msgstr "Pogovorno okno urejanja možnosti"
+
+#: TortoiseAct/TortoisePreferences.cpp:599
+msgid "Whether to show the edit options dialog"
+msgstr "Ali naj se pogovorno okno urejanja možnosti pokaže ali ne"
+
+#: TortoiseAct/TortoisePreferences.cpp:602
+msgid "Show edit &options dialog"
+msgstr "Pokaži pogovorno okno urejanja &možnosti"
+
+#: TortoiseAct/TortoisePreferences.cpp:607
+msgid "Automatic unedit"
+msgstr "Samodejna razveljavitev urejenega"
+
+#: TortoiseAct/TortoisePreferences.cpp:608
+msgid "If this is checked and you run 'CVS Commit', TortoiseCVS will do a 'cvs unedit' in order to remove any edits you may have on files which you have not modified. NOTE that this requires the use of 'cvs watch on' for all files!"
+msgstr "Če je to omogočeno in zaženete 'CVS Objavi', bo TortoiseCVS izvedel ukaz 'cvs unedit', da bi razveljavil urejanje datotek, ki jih niste spreminjali. Upoštevajte, da to zahteva uporabo 'cvs watch on' za vse datoteke!"
+
+#: TortoiseAct/TortoisePreferences.cpp:613
+msgid "Automatically &unedit after Commit"
+msgstr "Samodejno razveljavi &urejanje po objavi"
+
+#: TortoiseAct/TortoisePreferences.cpp:621
+msgid "Main program"
+msgstr "Glavni program"
+
+#: TortoiseAct/TortoisePreferences.cpp:622
+msgid "Enable debug logs for TortoiseCVS main program"
+msgstr "Omogoči dnevnike razhroščevanja v glavnem programu TortoiseCVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:624
+#: TortoiseAct/TortoisePreferences.cpp:631
+msgid "Enable debug logs"
+msgstr "Omogoči dnevnike razhroščevanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:628
+msgid "Shell extension"
+msgstr "Lupinska razširitev"
+
+#: TortoiseAct/TortoisePreferences.cpp:629
+msgid "Enable debug logs for TortoiseCVS shell extension"
+msgstr "Omogoči dnevnike razhroščevanja za lupinsko razširitev TortoiseCVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:636
+msgid "Debug logs"
+msgstr "Dnevniki razhroščevanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:637
+msgid "Write TortoiseCVS debug information into the folder specified below."
+msgstr "Zapiši podatke o razhroščevanju TortoiseCVS v spodaj navedeno mapo."
+
+#: TortoiseAct/TortoisePreferences.cpp:640
+msgid "Don't save debug logs"
+msgstr "Ne shrani dnevnikov razhroščevanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:641
+msgid "Save debug logs"
+msgstr "Shrani dnevnike razhroščevanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:642
+msgid "Save debug logs, no log file caching"
+msgstr "Shrani dnevnike razhroščevanja, ne pomni dnevnika datotek"
+
+#: TortoiseAct/TortoisePreferences.cpp:646
+msgid "Debug log &folder"
+msgstr "&Mapa dnevnika razhroščevanja"
+
+#: TortoiseAct/TortoisePreferences.cpp:647
+msgid "Debug log files will be created in this folder."
+msgstr "Dnevniške datoteke razhroščevanja bodo ustvarjene v tej mapi."
+
+#: TortoiseAct/TortoisePreferences.cpp:651
+msgid "CVSNT logging"
+msgstr "Beleženje CVSNT"
+
+#: TortoiseAct/TortoisePreferences.cpp:652
+msgid "Makes files cvsclient.log.in and cvsclient.log.out in the TortoiseCVS folder for debugging of the CVS protocol."
+msgstr "Naredi datoteki cvsclient.log.in in cvsclient.log.out v mapi TortoiseCVS za namene razhroščevanja protokola CVS."
+
+#: TortoiseAct/TortoisePreferences.cpp:655
+msgid "Create CVSNT client &debug logs"
+msgstr "Ustvari &razhroščevalne dnevnike odjemalca CVSNT"
+
+#: TortoiseAct/TortoisePreferences.cpp:666
+msgid "Noise text colour"
+msgstr "Barva besedila šuma"
+
+#: TortoiseAct/TortoisePreferences.cpp:667
+#: TortoiseAct/TortoisePreferences.cpp:669
+msgid "Colour for noise text in the progress dialog"
+msgstr "Barva za besedilo šuma v pogovornem oknu napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:673
+msgid "Warning text colour"
+msgstr "Barva opozorilnega besedila"
+
+#: TortoiseAct/TortoisePreferences.cpp:674
+#: TortoiseAct/TortoisePreferences.cpp:676
+msgid "Colour for warning text in the progress dialog"
+msgstr "Barva za besedilo opozoril v pogovornem oknu napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:680
+msgid "Updated files colour"
+msgstr "Barva posodobljenih datotek"
+
+#: TortoiseAct/TortoisePreferences.cpp:681
+#: TortoiseAct/TortoisePreferences.cpp:683
+#: TortoiseAct/TortoisePreferences.cpp:690
+msgid "Colour for updated files in the progress dialog"
+msgstr "Barva posodobljenih datotek v pogovornem oknu napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:687
+msgid "Modified files colour"
+msgstr "Barva spremenjenih datotek"
+
+#: TortoiseAct/TortoisePreferences.cpp:688
+msgid "Colour for modified files in the progress dialog"
+msgstr "Barva spremenjenih datotek v pogovornem oknu napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:694
+msgid "Conflict files colour"
+msgstr "Barva spornih datotek"
+
+#: TortoiseAct/TortoisePreferences.cpp:695
+#: TortoiseAct/TortoisePreferences.cpp:697
+msgid "Colour for conflict files in the progress dialog"
+msgstr "Barva za sporne datoteke v pogovornem oknu napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:701
+msgid "Files not in CVS colour"
+msgstr "Barva datotek, ki niso v CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:702
+#: TortoiseAct/TortoisePreferences.cpp:704
+msgid "Colour for files not in CVS in the progress dialog"
+msgstr "Barva za datoteke, ki niso v CVS, v pogovornem oknu napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:708
+msgid "Error text colour"
+msgstr "Barva besedila napake"
+
+#: TortoiseAct/TortoisePreferences.cpp:709
+#: TortoiseAct/TortoisePreferences.cpp:711
+msgid "Colour for error text in the progress dialog"
+msgstr "Barva besedila o napaki v pogovornem oknu napredka"
+
+#: TortoiseAct/TortoisePreferences.cpp:715
+msgid "Tip text colour"
+msgstr "Barva besedila nasveta"
+
+#: TortoiseAct/TortoisePreferences.cpp:716
+#: TortoiseAct/TortoisePreferences.cpp:718
+msgid "Colour for tip text"
+msgstr "Barva za besedilo nasveta"
+
+#: TortoiseAct/TortoisePreferences.cpp:726
+msgid "Server version"
+msgstr "Različica strežnika"
+
+#: TortoiseAct/TortoisePreferences.cpp:727
+msgid "Clear the cache that stores the CVS server version"
+msgstr "Počisti predpomnilnik, ki hrani različico strežnika CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:729
+#: TortoiseAct/TortoisePreferences.cpp:736
+#: TortoiseAct/TortoisePreferences.cpp:743
+msgid "Clear cache"
+msgstr "Počisti predpomnilnik"
+
+#: TortoiseAct/TortoisePreferences.cpp:733
+msgid "Module list"
+msgstr "Seznam modulov"
+
+#: TortoiseAct/TortoisePreferences.cpp:734
+msgid "Clear the cache that stores the CVS module list"
+msgstr "Počisti predpomnilnik, ki hrani seznam modulov CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:740
+msgid "Branch/Tag list"
+msgstr "Seznam vej/oznak"
+
+#: TortoiseAct/TortoisePreferences.cpp:741
+msgid "Clear the cache that stores the CVS branches and tags"
+msgstr "Počisti medpomnilnik, ki hrani veje in oznake CVS"
+
+#: TortoiseAct/TortoiseTip.cpp:70
+msgid ""
+"Tortoise Tip:  This error happens if you didn't enter a message at the top of the Notepad window when you performed a commit.  Please try again and enter some text, describing roughly what you changed.\n"
+"\n"
+"There is also a bug in CVS under Windows which can cause this to happen. If you save the file too quickly, CVS doesn't notice that it has changed.\n"
+"Try again, and wait a few seconds before saving the file!"
+msgstr ""
+"Nasvet Tortoise: Ta napaka se pojavi, če ne vnesete sporočila na vrh okna  Beležnice, ko izvajate objavo. Prosimo, poskusite znova in vnesite besedilo, v katerem v grobem opisujete, kaj ste spremenili.\n"
+"\n"
+"V Windows obstaja tudi hrošč v CVS, ki lahko povzroči to napako. Če datoteko shranite prehitro, CVS ne opazi, da ste jo spremenili.\n"
+"Poskusite znova in počakajte nekaj sekund pred shranjevanjem datoteke!"
+
+#: TortoiseAct/TortoiseTip.cpp:81
+msgid ""
+"Tortoise Tip:  CVS tried to create a new file and discovered that the file already existed.   There can be several causes for this:\n"
+"1) You have created the file locally, and someone else added a file of the same name to CVS.\n"
+"2) Your sandbox has become corrupted (possibly due to interference from antivirus programs).\n"
+"To solve the problem: Rename or delete the affected files, then perform a CVS Update."
+msgstr ""
+"Nasvet Tortoise:  CVS je skušal ustvariti novo datoteko in odkril, da datoteka že obstaja. Za to lahko obstaja več razlogov:\n"
+"1) Datoteko ste ustvarili krajevno in nekdo drug je datoteko z istim imenom dodal v CVS.\n"
+"2) Vaš peskovnik je okvarjen (najverjetneje zaradi vmešavanja antivirusnih programov).\n"
+"Za rešitev problema preimenujte ali izbrišite prizadete datoteke, nato izvedite posodobitev CVS."
+
+#: TortoiseAct/TortoiseTip.cpp:91
+msgid "Tortoise Tip:  One or more of your files has a conflict.  This means that someone else has altered the same part of the file as you.  Look above for the files marked \"C \", and manually edit them to resolve the conflict."
+msgstr "Nasvet Tortoise: Ena ali več datotek je spornih. To pomeni, da je nekdo drug spremenil isti del datoteke kot vi. Zgoraj poiščite datoteke, označene z \"C\" in jih ročno uredite, da razrešite spor."
+
+#: TortoiseAct/TortoiseTip.cpp:99
+msgid "Tortoise Tip:  This error can be caused by a folder called \"CVS\" which was made by you rather than by CVS.  If so, please rename the folder to something else such as \"cvswork\"."
+msgstr "Nasvet Tortoise: To napako lahko povzroči mapa z imenom \"CVS\", ki ste jo ustvarili sami in ne CVS. V tem primeru mapo preimenujte, npr. v \"cvswork\"."
+
+#: TortoiseAct/TortoiseTip.cpp:107
+msgid "Tortoise Tip:  Someone else has committed a new version of one or more of the files you are trying to commit. You need to do a CVS Update and then try to commit again."
+msgstr "Nasvet Tortoise: Nekdo drug je objavil novo različico ene ali več datotek, ki jih želite objaviti tudi sami. Najprej izvedite CVS Posodobi in nato poskusite ponovno z objavo."
+
+#: TortoiseAct/TortoiseTip.cpp:115
+msgid ""
+"Tortoise Tip:  Unfortunately TortoiseCVS no longer supports RSH out of the box.  There are workarounds, as well as fairly easy ways to help us fix this for the next version.  For more information see the FAQ.\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+msgstr ""
+"Nasvet Tortoise:  Žal TortoiseCVS sam nič več ne podpira RSH. Obstajajo načini, kako to zaobiti, kot tudi razmeroma enostavni načini, da nam pomagate to spremeniti v naslednji različici. Za več informacij si oglejte pogosto zastavljena vprašanja (FAQ).\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+
+#: TortoiseAct/TortoiseTip.cpp:124
+msgid ""
+"Tortoise Tip:  This error may be caused by having a folder and a file with the same name (apart from capitalization) in the repository. Such a repository CANNOT be checked out on a Windows file system.\n"
+"\n"
+"You can also get this error on SourceForge. You need to log into the server with SSH to force creation of your home folder. Do this by connecting to username@cvs.projectname.sf.net either with Putty or a command line SSH."
+msgstr ""
+"Nasvet Tortoise: To napako lahko povzročata mapa in datoteka z istim imenom (kljub razliki v velikih in malih črkah) v skladišču. Iz takšnega skladišla NI MOŽNO prevzemati v datotečni sistem Windows.\n"
+"\n"
+"Takšno napako lahko doživite tudi v SourceForge. Prijaviti se morate v strežnik z SSH, da prisilite izdelavo domače mape. To naredite s povezovanjem v username@cvs.projectname.sf.net s Putty ali ukazno vrstico SSH."
+
+#: TortoiseAct/TortoiseTip.cpp:139
+msgid "Tortoise Tip: This error can be caused because there used to be a file in the repository with a name differing only by case from the one you are adding. For example TEST.EXE rather than test.exe. To fix this go into the repository, or get your administrator to, and rename that file to have the same case. It will be in the Attic folder underneath the folder you are in. You will also need to get the local sandbox folder you are in out of CVS again, as it may have bogus entries to the misspelt filename."
+msgstr "Nasvet Tortoise: To napako lahko povzroča prisotnost datoteke v skladišču z imenom, ki se razlikuje le v velikih/malih črkah z imenom datoteke, ki jo dodajate. Npr. TEST.EXE in test.exe. Za rešitev težave pojdite sami ali upravitelj v skladišče in to datoteko tam preimenujte, da bosta imeli enake velike/male črke. Nahajala se bo v mapi Attic pod mapo, v kateri se nahajate. Prav tako boste morali iz CVS ponovno pridobiti mapo krajevnega peskovnika, v katerem se nahajate, saj ima morda lažne vnose zaradi napačno črkovanega imena datoteke."
+
+#: TortoiseAct/TortoiseTip.cpp:151
+msgid "Tortoise Tip: Someone else is editing the file you want to work on. If the file is binary, you must wait for the other user to commit the file before you can edit it. Otherwise, you may edit in parallel with the other user; CVS will eventually merge your changes with those of the other user. However, you might want to talk to the other user to ensure that you are not both working on the same lines of the file."
+msgstr "Nasvet Tortoise: Nekdo drug ureja datoteko, na kateri želite delati. Če gre za dvojiško datoteko, morate počakati, da jo drug uporabnik objavi, preden jo lahko urejate. Sicer jo lahko urejate vzporedno z drugim uporabnikom; CVS bo na koncu spojil vaše spremembe s spremembami drugega uporabnika. Vendar pa je pametno, da se dogovorite z drugim uporabnikom, da ne bi oba delala na istih vrsticah datoteke."
+
+#: TortoiseAct/TortoiseTip.cpp:160
+msgid "Tortoise Tip: Use \"cvs commit\" on the folder that the file is in to remove it permanently."
+msgstr "Nasvet Tortoise: Uporabite \"cvs commit\" (CVS Objavi) na mapi, v kateri je datoteka, da jo odstranite za vedno."
+
+#: TortoiseAct/WebLog.cpp:170
+msgid "Trying "
+msgstr "Poskušanje"
+
+#: TortoiseAct/WebLog.cpp:310
+msgid "Scanning for web log URL on server"
+msgstr "Iskanje URL spletnega dnevnika na strežniku"
+
+#: TortoiseAct/WebLog.cpp:418
+msgid "Please enter the URL where ViewCVS or CVSweb is."
+msgstr "Prosimo, vnesite URL, kjer se nahaja ViewCVS ali CVSweb."
+
+#: TortoiseAct/WebLog.cpp:427
+#, c-format
+msgid "The URL %s responded with error code %d"
+msgstr "URL %s je odgovoril s kodo napake %d"
+
+#: TortoiseAct/WebLog.cpp:440
+msgid "Sorry! The URL isn't responding, or is responding with an error."
+msgstr "Oprostite! URL se ne odziva ali pa se odziva z napako."
+
+#: TortoiseAct/WebLog.cpp:444
+msgid ""
+"This could happen because you are not connected to the internet, because the server is down, or because the path is wrong. If you are behind a firewall which requires a proxy, TortoiseCVS is using the Internet Explorer proxy. You might want to set it and try again.\n"
+"\n"
+"Please either try entering the URL again, or choose the plain text log."
+msgstr ""
+"To se lahko zgodi, ker niste povezani na splet, ker je strežnik nedelujoč ali ker je pot napačna. Če ste za požarnim zidom, ki zahteva prehod, uporabi TortoiseCVS prehod Internet Explorerja. Morda ga morate nastaviti in poskusiti znova.\n"
+"\n"
+"Prosimo, ponovno vnesite URL ali izberite dnevnik z navadnim besedilom."
+
+#: TortoiseAct/WebLog.cpp:452
+msgid "TortoiseCVS couldn't find the URL on your server where ViewCVS or CVSweb is. Please enter the URL manually."
+msgstr "TortoiseCVS ne more najti URL, kjer se na vašem strežniku nahaja ViewCVS ali CVSweb. Prosimo, vnesite URL ročno."
+
+#: TortoiseAct/WebLog.cpp:460
+msgid "You might be able to find it by browsing on the project's web site for a web interface to CVS. Alternatively ask your server administrator. Then copy the top level URL into the prefix box below. Usually you can leave the suffix box blank - it adds extra options to the end of the URL."
+msgstr "Lahko jo najdete z brskanjem na spletni strani projekta po spletnem vmesniku za CVS. Sicer lahko povprašate upravitelja strežnika. Nato kopirajte vrhnji URL v spodnje polje predpone. Ponavadi lahko pustite polje končnice prazno - ta dodaja dodatne možnosti koncu naslova URL."
+
+#: TortoiseAct/WebLog.cpp:466
+msgid "This dialog can also appear if you are trying to log a file that has never been committed."
+msgstr "To pogovorno okno se lahko pojavi, tudi ko želite beležiti datoteko, ki ni bila nikoli objavljena."
+
+#: TortoiseShell/PropSheet.cpp:220
+msgid "Repository"
+msgstr "Skladišče"
+
+#: TortoiseShell/PropSheet.cpp:226
+msgid "Sticky tag/date"
+msgstr "Lepljiva oznaka/datum"
+
+#: TortoiseShell/PropSheet.cpp:229
+msgid "Revision date"
+msgstr "Datum revizije"
+
+#: TortoiseShell/PropSheet.cpp:238
+msgid "File options"
+msgstr "Možnosti datoteke"
+
+#: TortoiseShell/PropSheet.cpp:241
+msgid "&History..."
+msgstr "&Zgodovina ..."
+
+#: TortoiseShell/PropSheet.cpp:263
+msgid "Head"
+msgstr "Glava"
+
+#: TortoiseShell/QueryInfo.cpp:94
+msgid "CVS Status"
+msgstr "CVS Stanje"
+
+#: TortoiseShell/QueryInfo.cpp:96
+msgid "CVS Revision"
+msgstr "Revizija CVS"
+
+#: TortoiseShell/QueryInfo.cpp:98
+msgid "CVS Sticky Tag"
+msgstr "CVS Lepljiva oznaka"
+
+#: TortoiseShell/QueryInfo.cpp:100
+msgid "CVS File Format"
+msgstr "CVS Vrsta datoteke"
+
+#: Utils/LaunchTortoiseAct.cpp:74
+msgid "Failed to launch executable to perform action"
+msgstr "Izvršilne datoteke za izvedbo dejanja ni mogoče zagnati"
+
+#: Utils/PathUtils.cpp:357
+msgid "Failed to find temporary path"
+msgstr "Začasne poti ni mogoče najti."
+
+#: Utils/PathUtils.cpp:372
+#, c-format
+msgid "Failed to generate temporary filename in '%s': error %d"
+msgstr "Začasno ime datoteke v '%s' ni mogoče ustvariti: napaka %d"
+
+#: Utils/PathUtils.cpp:398
+#: Utils/PathUtils.cpp:589
+#, c-format
+msgid "Free space: %s KB"
+msgstr "Prostor na disku: %s KB"
+
+#: Utils/PathUtils.cpp:401
+#: Utils/PathUtils.cpp:592
+#, c-format
+msgid "Total space: %s KB"
+msgstr "Skupaj prostora: %s KB"
+
+#: Utils/PathUtils.cpp:404
+#: Utils/PathUtils.cpp:595
+#, c-format
+msgid "Total free space: %s KB"
+msgstr "Skupaj prostora: %s KB"
+
+#: Utils/PathUtils.cpp:564
+#, c-format
+msgid "Failed to generate temporary folder in '%s': error %d"
+msgstr "Začasne mape v '%s' ni mogoče ustvariti: napaka %d"
+
+#: Utils/PathUtils.cpp:612
+#: Utils/PathUtils.cpp:642
+#, c-format
+msgid "Couldn't scan folder %s"
+msgstr "Mape %s ni mogoče pregledati"
+
+#: Utils/ProcessUtils.cpp:68
+#, c-format
+msgid "Failed to launch %s"
+msgstr "%s ni mogoče pognati"
+
+#: Utils/ProcessUtils.cpp:82
+msgid "Restarting Explorer"
+msgstr "Ponovno poganjanje Raziskovalca"
+
+#: Utils/ProcessUtils.cpp:94
+msgid "GetUserName() failed"
+msgstr "Ukaz GetUserName() ni uspel"
+
+#: Utils/TortoiseDebug.cpp:235
+msgid "Something bad happened to TortoiseCVS, and it crashed. Would you like to save a crash dump file?"
+msgstr "Nekaj slabega se je zgodilo TortoiseCVS, zato se je sesul. Želite shraniti datoteko pomnilniškega izmeta ob sesutju?"
+
+#: Utils/TortoiseDebug.cpp:255
+#, c-format
+msgid "Saved dump file to '%s'"
+msgstr "Datoteka pomnilniškega izmeta shranjena v '%s'"
+
+#: Utils/TortoiseDebug.cpp:260
+#, c-format
+msgid "Failed to save dump file (error %d)"
+msgstr "Datoteke pomnilniškega izmeta ni mogoče shraniti (napaka %d)"
+
+#: Utils/TortoiseDebug.cpp:266
+#, c-format
+msgid "Failed to create dump file (error %d)"
+msgstr "Datoteke pomnilniškega izmeta ni mogoče ustvariti (napaka %d)"
+
+#: Utils/TortoiseDebug.cpp:272
+msgid "DBGHELP.DLL too old"
+msgstr "DBGHELP.DLL je prestar"
+
+#: Utils/TortoiseDebug.cpp:277
+msgid "DBGHELP.DLL not found"
+msgstr "DBGHELP.DLL ni mogoče najti"
+
+#: ../build/TortoiseMenus.config:64
+#: ../build/TortoiseMenus.config:349
+#: ../build/TortoiseMenus.config:355
+msgid "Chec&kout..."
+msgstr "Pre&vzemi ..."
+
+#: ../build/TortoiseMenus.config:66
+#: ../build/TortoiseMenus.config:351
+#: ../build/TortoiseMenus.config:357
+msgid "Retrieve a fresh module from a CVS repository"
+msgstr "Prenesi svež modul iz skladišča CVS"
+
+#: ../build/TortoiseMenus.config:71
+msgid "&Make New Module..."
+msgstr "&Ustvari nov modul ..."
+
+#: ../build/TortoiseMenus.config:73
+msgid "Create a new module in the repository from the selected folder"
+msgstr "Iz izbrane mape ustvarite nov modul v skladišču"
+
+#: ../build/TortoiseMenus.config:81
+msgid "Chec&kout TortoiseCVS"
+msgstr "Pre&vzemi TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:83
+msgid "Fix bugs! Fetch the TortoiseCVS source code"
+msgstr "Polovite hrošče! Prevzemite izvorno kodo TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:95
+msgid "&Diff"
+msgstr "&Razlika"
+
+#: ../build/TortoiseMenus.config:97
+msgid "Shows you the changes you have made (hold down Ctrl to customise)"
+msgstr "Pokaže spremembe, ki ste jih naredili (držite pritisnjeno tipko Ctrl za prilagoditve)"
+
+#: ../build/TortoiseMenus.config:102
+msgid "&Add..."
+msgstr "Dod&aj ..."
+
+#: ../build/TortoiseMenus.config:104
+msgid "Marks a text or binary file for adding to the repository next time you commit"
+msgstr "Označi besedilo ali dvojiško datoteko za dodajanje v skladišče ob naslednji objavi"
+
+#: ../build/TortoiseMenus.config:109
+msgid "&Ignore"
+msgstr "&Prezri"
+
+#: ../build/TortoiseMenus.config:111
+msgid "Make CVS ignore this file by adding it to the .cvsignore file"
+msgstr "CVS naj prezre to datoteko, tako da jo doda v datoteko .cvsignore"
+
+#: ../build/TortoiseMenus.config:116
+msgid "&Update"
+msgstr "&Posodobi"
+
+#: ../build/TortoiseMenus.config:118
+msgid "Merges the latest version from the repository into your local copy (hold down Ctrl for more options)"
+msgstr "Spoji zadnjo različico iz skladišča v vašo krajevno kopijo (pritisnite Ctrl za več možnosti)"
+
+#: ../build/TortoiseMenus.config:125
+msgid "Make the file writable so that it can be edited"
+msgstr "Naredi datoteko zapisljivo, tako da jo je moč urejati"
+
+#: ../build/TortoiseMenus.config:130
+msgid "E&xclusive Edit"
+msgstr "&Izključno urejanje"
+
+#: ../build/TortoiseMenus.config:132
+msgid "Make the file writable so that it can be edited, and prevent any other users from editing it"
+msgstr "Naredi datoteko zapisljivo, tako da jo je moč urejati, in prepreči, da bi jo urejali drugi uporabniki"
+
+#: ../build/TortoiseMenus.config:137
+#: ../build/TortoiseMenus.config:144
+#: ../build/TortoiseMenus.config:151
+msgid "&Commit..."
+msgstr "&Objavi ..."
+
+#: ../build/TortoiseMenus.config:139
+#: ../build/TortoiseMenus.config:146
+#: ../build/TortoiseMenus.config:153
+#: ../build/TortoiseMenus.config:290
+msgid "Puts the changes you have made back into the repository"
+msgstr "Postavi opravljene spremembe nazaj v skladišče"
+
+#: ../build/TortoiseMenus.config:158
+msgid "Add C&ontents..."
+msgstr "Dodaj vsebin&o ..."
+
+#: ../build/TortoiseMenus.config:160
+msgid "Adds files in the selection and subfolders which aren't yet in CVS"
+msgstr "Doda datoteke v izbor in podmape, ki še niso v CVS"
+
+#: ../build/TortoiseMenus.config:178
+msgid "&Web Log"
+msgstr "&Spletni dnevnik"
+
+#: ../build/TortoiseMenus.config:180
+msgid "Browse the file history with a web interface (hold down Ctrl to customise)"
+msgstr "Prebrskaj zgodovino datoteke prek spletnega vmesnika (držite pritisnjeno tipko Ctrl za prilagoditev)"
+
+#: ../build/TortoiseMenus.config:187
+msgid "Browse the file history"
+msgstr "Prebrskaj zgodovino datoteke"
+
+#: ../build/TortoiseMenus.config:194
+msgid "Show the file revision graph"
+msgstr "Pokaži graf revizij"
+
+#: ../build/TortoiseMenus.config:199
+msgid "Ann&otate..."
+msgstr "Razl&oži ..."
+
+#: ../build/TortoiseMenus.config:201
+msgid "Shows the last revision each line was modified and by whom"
+msgstr "Pokaže zadnjo revizijo vsake spremembe vrstice in povzročitelja"
+
+#: ../build/TortoiseMenus.config:206
+msgid "&Show edited files..."
+msgstr "&Pokaži urejene datoteke ..."
+
+#: ../build/TortoiseMenus.config:208
+msgid "Shows files which are being edited"
+msgstr "Pokaži datoteke, ki se urejajo"
+
+#: ../build/TortoiseMenus.config:215
+#: ../build/TortoiseMenus.config:221
+msgid "Make all files in the folder writable so that they can be edited"
+msgstr "Naredi vse datoteke v mapi zapisljive, tako da jih je moč urejati"
+
+#: ../build/TortoiseMenus.config:226
+#: ../build/TortoiseMenus.config:232
+#: ../build/TortoiseMenus.config:238
+msgid "U&nedit"
+msgstr "Razveljavi u&rejanje"
+
+#: ../build/TortoiseMenus.config:228
+msgid "Abandon edits to the file"
+msgstr "Opusti spremembe datoteke"
+
+#: ../build/TortoiseMenus.config:234
+#: ../build/TortoiseMenus.config:240
+msgid "Abandon edits to all files in the folder"
+msgstr "Opusti urejeno v vseh datotekah mape"
+
+#: ../build/TortoiseMenus.config:244
+msgid "Ignore e&xtension"
+msgstr "Prezri &končnico"
+
+#: ../build/TortoiseMenus.config:246
+msgid "Make CVS ignore files with this extension by adding the extension to .cvsignore"
+msgstr "CVS naj prezre datoteke s to končnico, tako da končnico doda v datoteko .cvsignore"
+
+#: ../build/TortoiseMenus.config:252
+#: ../build/TortoiseMenus.config:288
+msgid "&Resolve conflicts..."
+msgstr "&Razreši spore ..."
+
+#: ../build/TortoiseMenus.config:254
+msgid "Manually resolve conflicts resulting from an Update"
+msgstr "Ročno razreši spore zaradi posodobitve"
+
+#: ../build/TortoiseMenus.config:260
+#: ../build/TortoiseMenus.config:267
+msgid "&Make Patch..."
+msgstr "&Naredi popravek ..."
+
+#: ../build/TortoiseMenus.config:262
+#: ../build/TortoiseMenus.config:269
+msgid "Generate a patch file of changes that you have made"
+msgstr "Ustvari datoteko popravka s spremembami, ki ste jih opravili"
+
+#: ../build/TortoiseMenus.config:281
+msgid "&Update Special..."
+msgstr "&Posebna posodobitev ..."
+
+#: ../build/TortoiseMenus.config:283
+msgid "Perform an update to get a particular branch or tag, or to undo your local changes"
+msgstr "Izvedi posodobitev za pridobitev določene veje ali oznake ali za povrnitev krajevnih sprememb"
+
+#: ../build/TortoiseMenus.config:294
+msgid "&Refresh Folder Status"
+msgstr "&Osveži stanje map"
+
+#: ../build/TortoiseMenus.config:296
+msgid "Refresh folder overlay icons to show recursive status"
+msgstr "Posodobi prepisne ikone mape za prikaz rekurzivnega stanja"
+
+#: ../build/TortoiseMenus.config:306
+msgid "Marks a version with a named tag so you can retrieve it again later, or delete an existing tag"
+msgstr "Označi različico z imensko oznako, tako da jo lahko znova pridobite kasneje, ali izbriše obstoječo oznako"
+
+#: ../build/TortoiseMenus.config:313
+msgid "Forks a version off; you can then change the new branch and the original trunk independently"
+msgstr "Razveji različico; nato lahko novo vejo in izvorno deblo spreminjate neodvisno enega od drugega"
+
+#: ../build/TortoiseMenus.config:318
+msgid "&Merge..."
+msgstr "&Spoji ..."
+
+#: ../build/TortoiseMenus.config:320
+msgid "Merge changes into your working copy"
+msgstr "Spoji spremembe v svojo delovno kopijo"
+
+#: ../build/TortoiseMenus.config:328
+msgid "R&ename..."
+msgstr "Pr&eimenuj ..."
+
+#: ../build/TortoiseMenus.config:330
+msgid "Rename a file"
+msgstr "Preimenuj datoteko"
+
+#: ../build/TortoiseMenus.config:335
+msgid "&Remove"
+msgstr "&Odstrani"
+
+#: ../build/TortoiseMenus.config:337
+msgid "Marks files for removal from the repository next time you commit"
+msgstr "Označi datoteke za odstranitev iz skladišča ob naslednji objavi"
+
+#: ../build/TortoiseMenus.config:342
+msgid "&Release..."
+msgstr "&Izdaj ..."
+
+#: ../build/TortoiseMenus.config:344
+msgid "Release (and delete) your working copy; effectively undo a checkout"
+msgstr "Izdaj (in izbriši) svojo delovno kopijo; dejansko razveljavi prevzem"
+
+#: ../build/TortoiseMenus.config:365
+msgid "&Command..."
+msgstr "&Ukaz ..."
+
+#: ../build/TortoiseMenus.config:367
+msgid "Run an arbitrary CVS command"
+msgstr "Poženi poljuben CVS-ukaz"
+
+#: ../build/TortoiseMenus.config:375
+msgid "&Preferences..."
+msgstr "&Možnosti ..."
+
+#: ../build/TortoiseMenus.config:377
+msgid "Customise TortoiseCVS"
+msgstr "Prilagodi TortoiseCVS po meri ..."
+
+#: ../build/TortoiseMenus.config:382
+msgid "&Help..."
+msgstr "&Pomoč ..."
+
+#: ../build/TortoiseMenus.config:384
+msgid "Basic usage instructions and FAQ for TortoiseCVS"
+msgstr "Osnovna navodila uproabe in FAQ za TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:389
+msgid "&About..."
+msgstr "&O programu ..."
+
+#: ../build/TortoiseMenus.config:391
+msgid "About TortoiseCVS"
+msgstr "O TortoiseCVS ..."
+
+#~ msgid "UNSTABLE"
+#~ msgstr "NESTABILNO"
+#~ msgid "Rename to"
+#~ msgstr "Preimenuj v"
+
+#, fuzzy
+#~ msgid "Apply &patch..."
+#~ msgstr "&Uporabi popravek ..."
+
+#, fuzzy
+#~ msgid "Applies a patch file"
+#~ msgstr "Uporabi popravek"
+#~ msgid "Bug"
+#~ msgstr "Hrošč"
+#~ msgid "Refresh"
+#~ msgstr "Osveži"
+#~ msgid "`"
+#~ msgstr "`"
+#~ msgid "'"
+#~ msgstr "'"
+
+#, fuzzy
+#~ msgid ""
+#~ "There is nothing to commit with that bug number.\n"
+#~ "\n"
+#~ "Do you want to check for files to commit without using the bug number? "
+#~ msgstr ""
+#~ "Želite objaviti hrošča, vendar nimate številke hrošča.\n"
+#~ "Želite nadaljevati z objavo brez številke hrošča?"
+#~ msgid "TortoiseCVS question"
+#~ msgstr "Vprašanje TortoiseCVS"
+#~ msgid "TortoiseCVS Security Alert"
+#~ msgstr "TortoiseCVS Varnostno opozorilo"
+#~ msgid "Core developer"
+#~ msgstr "Glavni razvijalec"
+#~ msgid "(Error %d)"
+#~ msgstr "(Napaka %d)"
+#~ msgid "Rename"
+#~ msgstr "Preimenuj"
+#~ msgid "to"
+#~ msgstr "v"
+#~ msgid ""
+#~ "\n"
+#~ "-l \"%u\" \"%h\"\n"
+#~ msgstr ""
+#~ "\n"
+#~ "-l \"%u\" \"%h\"\n"
+

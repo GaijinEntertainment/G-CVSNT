@@ -1,0 +1,52 @@
+.TH Plugins 5 "16 June 2008" "CVSNT 2.5.04"
+
+.SH NAME
+  /etc/cvsnt/Plugins - Configuration file for protocols and external plugins
+
+.SH DESCRIPTION
+This file contains information about the state of the various protocols and external plugins that are available.
+
+By default protocols are enabled, and other plugins are disabled.
+
+.SH PROTOCOLS
+.TP
+.B EnumProtocol=\fI0|1\fP
+Remote enumeration (info \-r).
+.TP
+.B GserverProtocol=\fI0|1\fP
+GSSAPI.
+.TP
+.B PserverProtocol=\fI0|1\fP
+Original pserver.
+.TP
+.B SserverProtocol=\fI0|1\fP
+SSL encrypted pserver.
+.TP
+.B SspiProtocol=\fI0|1\fP
+SSPI (via Winbind, if configured).
+
+.SH PLUGINS
+.TP
+.B AuditTrigger=\fI0|1\fP
+Audit events to database.
+.TP
+.B EmailTrigger=\fI0|1\fP
+Send emails.
+.TP
+.B CheckoutTrigger=\fI0|1\fP
+Enable CVSROOT/shadow.
+
+.SH AUTHORS
+CVSNT and CVSNT Lock Server written by Tony Hoyle <tony.hoyle@march-hare.com>.
+
+Manual page written by Andreas Tscharner <andy@vis.ethz.ch>.
+
+.SH SEE ALSO
+.BR cvsnt ( 1 )
+The CVSNT client and server replacement for cvs.
+
+.BR cvslockd ( 1 )
+The CVSNT lock server replacing the old file based locks.
+
+.BR PServer ( 5 )
+The CVSNT Server and Lock Server configuration file.

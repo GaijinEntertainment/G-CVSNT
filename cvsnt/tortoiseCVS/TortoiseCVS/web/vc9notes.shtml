@@ -1,0 +1,36 @@
+<!--#set var="title" value="Development" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Compiling TortoiseCVS with Microsoft Visual C++ 9.0 Express Edition (Visual Studio 2008)</h2>
+
+<person>By Gabriel Genellina</person>
+
+<ol>
+  <li>Checkout TortoiseCVS source tree:<p>
+
+<tt>CVSROOT=:pserver:anonymous@tortoisecvs.cvs.sourceforge.net:/cvsroot/tortoisecvs</tt>
+
+<p>In this document, I'll use [TortoiseCVS] to refer to the top directory of this sandbox - <tt>c:\prog\TortoiseCVS</tt> in my case.
+
+<li>Download the "flex++", "bison" and "m4" packages from <a href="http://gnuwin32.sourceforge.net/packages.html">the GnuWin32 project</a>
+and install in the default location (that is, <tt>%PROGRAMFILES%\GnuWin32</tt>).
+<p>
+
+<li>Download and install <a href="http://www.cmake.org/cmake/resources/software.html">CMake</a> (latest release: 2.6.2)
+
+<p>
+
+<li>Execute <tt>runcmake-vc9.bat</tt> (preferably in a CMD console window). This should create all the required project files.
+
+<p>
+
+<li>Open [TortoiseCVS]<tt>\build\vc9win32\TortoiseCVS.sln</tt> in Visual Studio and build the solution.
+
+<p>
+
+<li>The main shell extension should build fine. I didn't bother to go beyond that (no translations, no InnoSetup
+    installer, ...). I just copy <tt>TortoiseAct.exe</tt> and <tt>TortoiseShell.dll</tt> onto an existing TortoiseCVS installation
+    (ok, it may be tricky sometimes) and that's all.
+</ol>
+
+<!--#include virtual="wrapper_end.shtml" -->

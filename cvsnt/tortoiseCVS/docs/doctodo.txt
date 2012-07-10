@@ -1,0 +1,19 @@
+Daily use guide
+---------------
+
+	- Section on checkout dialog needs revamping (particularly once
+	we've refactored that dialog again)
+
+More detailed docs
+------------------
+
+Perhaps we should have a "Top Tips FAQ" type section.  It would show
+of the slightly hiddden features in section titled "How to automatically
+launch an editor for ever file containing a conflict".  This would
+be a document in between a FAQ and the Daily Use Guide, and would
+contain anything cool or interesting that we want to say.  For advanced
+uses - we assume all knowledge that is in the Daily Use Guide, and
+document anything else that is otherwise unmentioned (and not mentioned
+in the FAQ).
+
+As a concept, I like the idea of each thing only being documented once.

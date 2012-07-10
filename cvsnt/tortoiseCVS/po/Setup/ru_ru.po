@@ -1,0 +1,113 @@
+# TortoiseCVS - enjoyable version control
+# http://www.tortoisecvs.org
+# 
+# Nikolay Ponomarenko <pnv82@pisem.net>
+msgid ""
+msgstr ""
+"Project-Id-Version: Setup\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2006-06-19 22:51+0100\n"
+"Last-Translator: Torsten Martinsen <torsten@vip.cybercity.dk>\n"
+"Language-Team: ru_RU <ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Russian\n"
+"X-Poedit-Country: RUSSIAN FEDERATION\n"
+
+#: ../build/TortoiseCVS.iss:63
+msgid "Main Files"
+msgstr "Основные файлы"
+
+#: ../build/TortoiseCVS.iss:64
+msgid "Custom Icons"
+msgstr "Дополнительные иконки"
+
+#: ../build/TortoiseCVS.iss:75 ../build/TortoiseCVS.iss:315
+msgid "XP-style rounded"
+msgstr "В стиле XP"
+
+#: ../build/TortoiseCVS.iss:76 ../build/TortoiseCVS.iss:316
+msgid "Classic TortoiseCVS"
+msgstr ""
+
+#: ../build/TortoiseCVS.iss:77
+msgid "Daniel Jackson DanAlpha"
+msgstr ""
+
+#: ../build/TortoiseCVS.iss:78 ../build/TortoiseCVS.iss:318
+msgid "Chinese characters"
+msgstr ""
+
+#: ../build/TortoiseCVS.iss:79
+msgid "Translations"
+msgstr "Локализации"
+
+#: ../build/TortoiseCVS.iss:100
+msgid "Pageant SSH agent"
+msgstr "Pageant агент SSH "
+
+#: ../build/TortoiseCVS.iss:321
+msgid "Error"
+msgstr "Ошибка"
+
+#: ../build/TortoiseCVS.iss:394
+msgid "Help"
+msgstr "Помощь"
+
+#: ../build/TortoiseCVS.iss:395
+msgid "User Guide (English)"
+msgstr "Руководство пользователя (Английский)"
+
+#: ../build/TortoiseCVS.iss:396
+msgid "User Guide (French)"
+msgstr "Руководство пользователя (Французкий)"
+
+#: ../build/TortoiseCVS.iss:397
+msgid "User Guide (Russian)"
+msgstr "Руководство пользователя (Русский)"
+
+#: ../build/TortoiseCVS.iss:398
+#, fuzzy
+msgid "User Guide (Simplified Chinese)"
+msgstr "Руководство пользоветеля (Упрощенный китайский)"
+
+#: ../build/TortoiseCVS.iss:399
+msgid "Preferences"
+msgstr "Предпочтения"
+
+#: ../build/TortoiseCVS.iss:400
+msgid "About"
+msgstr "О программе"
+
+#: ../build/TortoiseCVS.iss:415
+msgid "Preparing for installation"
+msgstr "Подготовка к инсталяции"
+
+#: ../build/TortoiseCVS.iss:416
+msgid "TortoiseCVS is already installed, so Windows Explorer needs to be restarted."
+msgstr "TortoiseCVS  уже установлен, Проводник Windows должен быть перезапущен."
+
+#: ../build/TortoiseCVS.iss:417
+msgid "The installer can do this for you now, or you can restart Windows instead at the end of the installation."
+msgstr "Инсталятор может сделать это для вас сейчас, или вы можете перезагрузить Windows в конце инсталяции."
+
+#: ../build/TortoiseCVS.iss:418
+msgid "Restart Windows Explorer"
+msgstr "Перезапуск Проводника Windows"
+
+#: ../build/TortoiseCVS.iss:419
+msgid "Finishing the installation"
+msgstr "Окончание инсталяции"
+
+#: ../build/TortoiseCVS.iss:420
+msgid "To finish the installation, Windows Explorer needs to be restarted."
+msgstr "Для окончаниея инсталяции Проводник Windows должен быть перезапущен."
+
+#: ../build/TortoiseCVS.iss:421
+msgid "The installer can do this for you now, or you can restart Windows instead."
+msgstr "Инсталятор может может сделать это сейчас или вы можете перезагрузить Windows."
+
+#, fuzzy
+#~ msgid "This release of TortoiseCVS does not support 64-bit Windows.%nYou will only be able to use TortoiseCVS from the 32-bit Explorer.%nYou should download the x64 installer instead.%nProceed with the installation?"
+#~ msgstr "Этот релиз TortoiseCVS официально не поддерживает 64-bit Windows.%n Вы можете использовать TortoiseCVS из 32-битного Проводника.%n Продолжить инсталяцию?"

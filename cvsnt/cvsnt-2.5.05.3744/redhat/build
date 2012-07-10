@@ -1,0 +1,66 @@
+#!/bin/bash
+#
+# On our build system we have ntpdate set with the run-as-root bit set 
+# (ie: chmod 4755 /usr/sbin/ntpdate) so that anyone can sync the time
+# though you probably wouldn't do this on any old server.  If you need
+# root privs to run ntpdate then "sudo" it below instead.
+#
+# This script uses SCP to copy the tarball and the resulting package
+# to the server ACER64DEBIAN.  Remember to set up a key pair so that
+# you do not need to enter a password all the time...
+#   cd ~/.ssh
+#   ssh-keygen -b 1024 -t dsa -f id_dsa -P ''
+#   touch authorized_keys2
+#   cat id_dsa.pub >> authorized_keys2
+#   chmod 400 id_dsa
+#   scp authorized_keys2 acer64debian:~/.ssh/
+# 
+MYHOST=acer64debian
+
+# Set the current date/time
+#echo "Enter the root password so I can sync the local clock" > /dev/stderr
+#sudo /usr/sbin/ntpdate au.pool.ntp.org
+/usr/sbin/ntpdate au.pool.ntp.org
+
+echo "If prompted enter the password for $MYHOST so I can get the file 'release'" > /dev/stderr
+scp $MYHOST:cvs/release .
+VERSION=`cat release`
+WHOAMI=`whoami`
+echo "If promoted enter the password for $MYHOST so I can get the file 'cvsnt-$VERSION.tar.gz'" > /dev/stderr
+scp $MYHOST:cvs/cvsnt-$VERSION.tar.gz .
+rm -rf ./cvsnt-$VERSION
+tar xzf cvsnt-$VERSION.tar.gz cvsnt-$VERSION/redhat/cvsnt.spec.in
+rm -rf cvsnt.spec
+if [ -f cvsnt.spec ]; then echo "cannot remove old local spec"; exit 1; fi
+sed "s/@VERSION@/$VERSION/" <cvsnt-$VERSION/redhat/cvsnt.spec.in >cvsnt.spec
+#echo "if you want to modify cvsnt.spec do so now, then press ENTER"
+#read
+if [ ! -f cvsnt.spec ]; then echo "cannot create new local spec"; exit 1; fi
+rm -rf cvsnt-$VERSION
+echo "`which cp` cvsnt.spec /usr/src/redhat/SPECS"
+sudo cp cvsnt.spec /usr/src/redhat/SPECS
+echo "`which chown` $WHOAMI /usr/src/redhat/SPECS/cvsnt.spec"
+sudo chown $WHOAMI /usr/src/redhat/SPECS/cvsnt.spec
+echo "`which chgrp` $WHOAMI /usr/src/redhat/SPECS/cvsnt.spec"
+sudo chgrp $WHOAMI /usr/src/redhat/SPECS/cvsnt.spec
+echo "`which scp` abarrett@acer64debian:cvs/cvsnt-$VERSION.tar.gz /usr/src/redhat/SOURCES"
+sudo scp abarrett@acer64debian:cvs/cvsnt-$VERSION.tar.gz /usr/src/redhat/SOURCES
+echo "`which chown` $WHOAMI /usr/src/redhat/SOURCES/cvsnt-$VERSION.tar.gz"
+sudo chown $WHOAMI /usr/src/redhat/SOURCES/cvsnt-$VERSION.tar.gz
+echo "`which chgrp` $WHOAMI /usr/src/redhat/SOURCES/cvsnt-$VERSION.tar.gz"
+sudo chgrp $WHOAMI /usr/src/redhat/SOURCES/cvsnt-$VERSION.tar.gz
+echo "***************** BEGIN RPMBUILD"
+echo "`which rpmbuild` -vv -bb --sign /usr/src/redhat/SPECS/cvsnt.spec"
+sudo rpmbuild -vv -bb --sign /usr/src/redhat/SPECS/cvsnt.spec
+#echo "Press ENTER to continue"
+#read
+mkdir rpm
+rm rpm/*
+cp ~/key-public-cvs-suite-support.asc rpm
+cp /usr/src/redhat/RPMS/i386/cvsnt-$VERSION-1.i386.rpm rpm
+cp /usr/src/redhat/RPMS/i386/cvsnt-database-*-$VERSION-1.i386.rpm rpm
+cp /usr/src/redhat/RPMS/i386/cvsnt-protocol-*-$VERSION-1.i386.rpm rpm
+( cd rpm; tar czf ../cvsnt-$VERSION-rh9-rpm.tar.gz * )
+echo "If prompted enter the password for $MYHOST so I can put the file 'cvsnt-$VERSION-rh9-rpm.tar.gz'" > /dev/stderr
+echo "scp cvsnt-$VERSION-rh9-rpm.tar.gz acer64debian:cvs"
+scp cvsnt-$VERSION-rh9-rpm.tar.gz $MYHOST:cvs

@@ -1,0 +1,122 @@
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN" "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd"
+   [
+   <!ENTITY GettingStarted SYSTEM "GettingStarted.xml">
+   <!ENTITY BasicUsage SYSTEM "BasicUsage.xml">
+   <!ENTITY AdvancedUsage SYSTEM "AdvancedUsage.xml">
+   <!ENTITY Customizing SYSTEM "Customizing.xml">
+   <!ENTITY CommandReference SYSTEM "CommandReference.xml">
+   <!ENTITY DialogReference SYSTEM "DialogReference.xml">
+   <!ENTITY ArticlesTipsTricks SYSTEM "ArticlesTipsTricks.xml">
+   ]>
+
+<book>
+<bookinfo>
+  <title>TortoiseCVS User's Guide</title>
+  <subtitle>Version 1.9.14</subtitle>
+  <authorgroup>
+    <author>
+      <firstname>Ben</firstname><surname>Campbell</surname>
+    </author>
+    <author>
+      <firstname>Martin</firstname><surname>Crawford</surname>
+    </author>
+    <author>
+      <firstname>Hartmut</firstname><surname>Honisch</surname>
+    </author>
+    <author>
+      <firstname>Francis</firstname><surname>Irving</surname>
+    </author>
+    <author>
+      <firstname>Torsten</firstname><surname>Martinsen</surname>
+    </author>
+    <author>
+      <firstname>Ian</firstname><surname>Dees</surname>
+    </author>
+  </authorgroup>
+  <copyright><year>2001 - 2006</year><holder>TortoiseCVS</holder></copyright>
+</bookinfo>
+
+<!--
+
+TODOS
+
+Revision Graph: Numerous improvements, too many to mention separately. (Torsten)
+
+Implemented RFE [627916] "Run arbitrary CVS command". (Torsten)
+
+New handling of CVS Edit.
+
+
+-->
+
+
+<!-- ====== Included chapters================================== -->
+
+&GettingStarted;
+&BasicUsage;
+&AdvancedUsage;
+&Customizing;
+&CommandReference;
+&DialogReference;
+&ArticlesTipsTricks;
+
+<!-- ====== Resources ========================================= -->
+
+<chapter id="resources">
+  <title id="resources-title">Resources and Credits</title>
+
+  <para id="resources.cvsbook">
+  The book <citetitle pubwork="book">Open Source Development with
+  CVS</citetitle> is available in electronic form from <ulink
+  url="http://cvsbook.red-bean.com/">the book's web site</ulink>.
+  </para>
+
+  <para id="resources.cvsnt-manual" xreflabel="CVSNT Manual">
+  The reference manual for <productname>CVSNT</productname> is available 
+  <ulink url="http://www.cvsnt.org/manual/">here</ulink>.
+  </para>
+
+  <para>
+  Development of TortoiseCVS has been made a lot easier thanks to a number of other projects:
+  </para>
+  <itemizedlist>
+  <listitem>
+  <para>
+  <ulink url="http://wxwidgets.org/">wxWidgets</ulink> is a GUI framework, which is used for all dialogs
+  in TortoiseCVS.
+  </para>
+  </listitem>
+  <listitem>
+  <para>
+  <ulink url="http://cvsnt.org/wiki">CVSNT</ulink> is the client that TortoiseCVS uses to communicate with the CVS server.
+  Commercial support for CVSNT is offered by <ulink url="http://www.march-hare.com/">March Hare</ulink>.
+  </para>
+  </listitem>
+  <listitem>
+  <para>
+  <ulink url="http://www.jrsoftware.org/isinfo.php">Inno Setup</ulink> is used to build the installer for TortoiseCVS.
+  </para>
+  </listitem>
+  <listitem>
+  <para>
+  <ulink url="http://www.cygwin.com/">Cygwin</ulink> provides a number of UNIX tools that make building TortoiseCVS a
+  lot easier.
+  </para>
+  </listitem>
+  <listitem>
+  <para>
+  <ulink url="http://www.e-novative.info/software/ede.php">eDE</ulink> is a DocBook environment used for building
+  the TortoiseCVS documentation.
+  </para>
+  </listitem>
+  <listitem>
+  <para>
+  <ulink url="http://cppunit.sourceforge.net/">CppUnit</ulink> is a unit test framework which is used for testing some
+  parts of TortoiseCVS.
+  </para>
+  </listitem>
+  </itemizedlist>
+
+</chapter>
+
+</book>

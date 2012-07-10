@@ -1,0 +1,20 @@
+
+RCS file: /cvs/user/tma/aisconfig/sys-webstat.xml,v
+Working file: sys-webstat.xml
+head: 1.2
+branch:
+locks: strict
+access list:
+symbolic names:
+keyword substitution: kv
+total revisions: 2;	selected revisions: 2
+description:
+----------------------------
+revision 1.2
+date: 2009/10/01 08:23:30;  author: tma;  state: Exp;  lines: +82 -77;  kopt: kv;  commitid: 70974ac46701aff3;  filename: sys-webstat.xml;
+Updated for HEAD.
+----------------------------
+revision 1.1
+date: 2007/11/21 07:44:27;  author: tma;  state: Exp;  kopt: kv;  commitid: 39814743e1da15f6;  filename: sys-webstat.xml;  bugid: 1234;
+*** empty log message ***
+=============================================================================

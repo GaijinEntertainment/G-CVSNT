@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="msvcrt">
+        <DirectoryRef Id="COMMON_INSTALLDIR" FileSource="$(var.CVSNT_BASE)\sysfiles\">
+            <Component Id="Msvcrt" Guid="174a67b5-150f-4527-8924-8f9c3605eee2" DiskId="1">
+                <File Id="msvcrt.dll" Name="msvcrt.dll" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
+

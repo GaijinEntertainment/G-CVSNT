@@ -1,0 +1,20 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="ebooktrial">
+
+        <DirectoryRef Id="TOOLS_INSTALLDIR" FileSource="$(var.MARCH_HARE)\..\..\ebook\">
+            <Component Id="eBook" Guid="A70DB6BB-8041-4489-BC76-513EA0D8395D" DiskId="5">
+                <RegistryValue Id="eBook" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="eBook" Type="string" Value="1" KeyPath="yes" />
+                <File Id="eBook.pdf" Name="eBook.pdf" Source="$(var.MARCH_HARE)\..\..\ebook\eBookTrial.pdf">
+                    <Shortcut Id="eBook.pdf" Name="eBook" Advertise="no" Directory="CvsntDocumentationFolder" />
+                </File>
+            </Component>
+        </DirectoryRef>
+
+            <Feature Id="ebooktrial" Title="eBook" Description="eBook" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="eBook" />
+                <ComponentRef Id="CvsntDocumentationFolder" />
+            </Feature>
+    </Fragment>
+</Wix>

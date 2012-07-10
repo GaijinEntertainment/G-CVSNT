@@ -1,0 +1,812 @@
+<!-- ====== Command Reference for TortoiseCVS ================================== -->
+
+<chapter id="ref">
+  <title id="ref-title">Command Reference for TortoiseCVS</title>
+  <para>
+    This chapter is written to illustrate most main features and
+    functionality of TortoiseCVS. It assumes that a) you already have an
+    understanding of CVS and b) you have access to an already installed a CVS
+    server with created a CVS repository. If you are new to CVS then please refer
+    to the section "TortoiseCVS for Beginners." 
+  </para>
+
+  <!-- ====== Installing TortoiseCVS =========================================== -->
+
+  <section id="ref.install">
+    <title id="ref.install-title">Installing TortoiseCVS</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Download the latest version of TortoiseCVS from the web site (<ulink
+  url="http://tortoisecvs.org/">http://tortoisecvs.org/</ulink>) and save to a
+  temporary location on your hard drive. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Run the installer. If you are running Windows NT or 2000 you must
+  have local admin privileges to install TortoiseCVS correctly. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choose the location for TortoiseCVS to be installed. The default is <filename>C:\Program Files\TortoiseCVS</filename>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choose the installation type, either <guilabel>Full</guilabel>,
+  <guilabel>Compact</guilabel>, or <guilabel>Custom installation</guilabel>. If you desire
+  internationalisation support, you will need either the <guilabel>Full</guilabel>
+  or <guilabel>Custom installation</guilabel> options. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Once the installer has completed you must reboot the computer for
+	  TortoiseCVS to finish its installation<footnote>
+              <para>
+	      Strictly speaking, it is only necessary to restart Windows
+	      Explorer. If you are feeling adventurous, you can try killing
+	      <literal>explorer.exe</literal> from Task Manager. In some cases
+	      <productname>Windows</productname> will automatically start a
+	      new Explorer instance, in other cases you will have to do it yourself.
+              </para>
+            </footnote>.
+        </para>
+      </listitem>
+    </orderedlist>
+
+  </section>
+
+  <!-- ====== CVS Checkout ===================================================== -->
+
+  <section id="ref.checkout">
+    <title id="ref.checkout-title">Obtaining a Working Copy: CVS Checkout...</title>
+    <abstract>
+      <para>
+        Creates a local sandbox from a CVS repository.
+      </para>
+    </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          Create a folder for the sandbox in Windows Explorer.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Right-click on the folder.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Select <guimenuitem>CVS Checkout...</guimenuitem> from the context-menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <link linkend="dialogs.checkout" endterm="dialogs.checkout-title"/> will appear. From here you can either
+    enter the repository's CVSROOT into the <guilabel>CVSROOT</guilabel> field, or construct a CVSROOT using the
+    <guilabel>Protocol</guilabel>,  <guilabel>Server</guilabel>, <guilabel>Port</guilabel>, <guilabel>Repository
+    name</guilabel>, and <guilabel>User name</guilabel> fields. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          If you know the module name you can enter it in the
+    <guilabel>Module</guilabel> field. Conversely, you can checkout an entire
+    repository by entering a period (<command>.</command>) into the
+    <guilabel>Module</guilabel> field. If you do not know the module name you
+    can click on <guibutton>Fetch list</guibutton> to populate the drop-down
+    with available modules. Note: Some CVS servers do not support this
+    feature; if you cannot populate this list you should contact the CVS
+    server administrator. 
+        </para>
+        <para>
+If you are checking out a single file you can also specify a bug number that this work relates to.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Click <guibutton>OK</guibutton> to being checking out the sandbox.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Depending on the protocol and if this is the first time checking out from this CVS repository, you will be
+    prompted to enter a password. Enter the password in the dialog and click <guibutton>OK</guibutton>. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> will appear, which provides a detail
+    status of what files are being checked out by TortoiseCVS. By default this dialog will close after the operation is
+    complete, unless it encounters a problem. 
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Update ======================================================= -->
+
+    <section id="ref.update">
+      <title id="ref.update-title">Getting Other People's Changes: CVS Update</title>
+      <abstract>
+        <para>
+          Synchronizes a local sandbox with a CVS repository. See also <link
+      linkend="ref.update.special">Update Special</link>.
+        </para>
+      </abstract>
+      <orderedlist>
+        <listitem>
+          <para>
+            To update a folder either right-click on it or within it on the Explorer view (but not on any specific files) or to update one or more files select the files to update and right-click on them.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Select <guimenuitem>CVS Update</guimenuitem> from the context-menu.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            The <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> will appear to provide a detail
+      status of the files that are being updated by TortoiseCVS. By default this dialog will close after the operation
+      is complete, unless it encounters a problem. 
+          </para>
+        </listitem>
+      </orderedlist>
+    </section>
+  <!-- ====== Update Special ================================================= -->
+
+  <section id="ref.update.special">
+    <title id="ref.update.special-title">CVS Update Special...</title>
+      <abstract>
+        <para>
+          Synchronizes a local sandbox with a CVS repository. See also <link linkend="ref.update">Update</link>.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          To update a folder either right-click on it or within it on the Explorer view (but not on any specific files) or to update one or more files select the files to update and right-click on them.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Select <guimenuitem>CVS &rarr; CVS Update Special...</guimenuitem> from the context-menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <link linkend="dialogs.updatespecial">Update Special Dialog</link> will appear. Enter into the textbox labeled <guilabel>Get tag/revision/branch:</guilabel> either the Revision number (i.e. <literal>1.3</literal>), Tag (i.e. <filename>release_1_1_0</filename>), or Branch (i.e. <filename>vendorx_branch</filename>) to change your sandbox copy to.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> will appear to provide a detail status
+      of the files that are being updated by TortoiseCVS. By default this dialog will close after the operation is
+      complete, unless it encounters a problem. 
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+
+  <!-- ====== CVS Commit ======================================================= -->
+
+  <section id="ref.commit">
+    <title id="ref.commit-title">Making Your Changes Available to Others: CVS Commit...</title>
+      <abstract>
+        <para>
+          Update the CVS repository with your local changes.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          To commit changes either right-click on the desired folder and/or files.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Select <guimenuitem>CVS Commit...</guimenuitem> from the context-menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <link linkend="dialogs.commit" endterm="dialogs.commit-title"/>
+  will appear, which will allow you to enter a comment for the commit
+  action. Additionally, you can choose which changes to commit by checking the
+  individual files on the dialog list.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Click <guibutton>OK</guibutton> (or press
+  <keycap>Ctrl-Enter</keycap>) once you have entered the appropriate comments
+  and selected the changes to commit.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <link linkend="dialogs.progress"
+  endterm="dialogs.progress-title"/> will appear to provide a detail status of
+  the committing process performed by TortoiseCVS. By default this dialog will
+  close after the operation is complete, unless it encounters a problem.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Add and Add Recursively ====================================== -->
+
+  <section id="ref.add">
+    <title id="ref.add-title">Adding New Files: CVS Add and CVS Add Contents...</title>
+      <abstract>
+        <para>
+          Add local files and/or folders to the CVS repository.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          To add files or folders to the CVS select and right-click the files or folders you wish to add. 
+	  These files must have the CVS Status of Not In CVS.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          If you have selected a folder you will be provided the option to
+	  <guimenuitem>Add Recursively</guimenuitem> in the context-menu. 
+	  This option will add all files in the selected folder and its sub-folders. 
+	  Otherwise, to only add those files and folders selected select <guimenuitem>Add</guimenuitem>
+	  from the context-menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          The <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> will show a detail status
+      of the adding process performed by TortoiseCVS.
+        </para>
+        <para>
+	  TortoiseCVS adds the files and shows a Tortoise Tip that
+	  reminds you that you must commit the added files to finish the process.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Remove =========================================================== -->
+
+  <section id="ref.remove">
+    <title id="ref.remove-title">Discarding Obsolete Files: CVS Remove</title>
+    <abstract>
+      <para>
+        Remove a file from the current branch. The file will still be
+  available when retrieving an older revision or tag.
+      </para>
+    </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          To remove one or more files from the CVS repository select the
+  desired files and/or folders to remove and right-click on them.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Select <guimenuitem>CVS &rarr; Remove </guimenuitem> from the
+	  context-menu.
+	  TortoiseCVS performs the removal and shows a Tortoise Tip that
+	  reminds you that you must commit the removal to finish the process.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+         Finally, invoke the <guimenuitem>CVS Commit</guimenuitem> command on
+	 the folder (or a parent folder).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+        When another user now performs an Update, CVS will remove the file(s)
+	from the sandbox.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Rename =========================================================== -->
+
+  <section id="ref.rename">
+    <title id="ref.rename-title">Renaming or Moving Files: CVS Rename</title>
+    <abstract>
+      <para>
+        Rename a file, and/or move it to a new location. The file will still be
+  available under the old name and location when retrieving an older revision or tag.
+      </para>
+    </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          To rename one or more files select the desired files and/or folders to renamee and right-click on them.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Select <guimenuitem>CVS &rarr; Rename</guimenuitem> from the
+	  context-menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	Enter the new name and/or location (as a relative path) of the files (if you have selected more than one item,
+	you must enter a path).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	  Click <guilabel>OK</guilabel>.
+	  TortoiseCVS performs the rename and shows a Tortoise Tip that
+	  reminds you that you must commit the rename to finish the process.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+         Finally, invoke the <guimenuitem>CVS Commit</guimenuitem> command on
+	 the folder (or a parent folder).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+        When another user now performs an Update, CVS will rename and/or move the file(s)
+	in the sandbox.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Diff ========================================================= -->
+
+  <section id="ref.diff">
+    <title id="ref.diff-title">Finding Out What Has Changed: CVS Diff...</title>
+      <abstract>
+        <para>
+          Compare a local file to a version in the CVS repository.
+        </para>
+      </abstract>
+      <orderedlist>
+        <listitem>
+          <para>
+	  To compare a file to a different version from the CVS repository,
+	  select the desired file and right-click on it. 
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>
+	    Select <guimenuitem>CVS &rarr; Diff </guimenuitem> from the context-menu.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>
+	  If this is the first time you have used TortoiseCVS's Diff feature,
+	  you will be asked to select an external diff application.  <ulink
+	  url="http://winmerge.sf.net">WinMerge</ulink> and <ulink
+	  url="http://www.prestosoft.com/ps.asp?page=edp_examdiff">ExamDiff</ulink>
+	  are both available free of charge and are well-suited for text-based
+	  source code.  If you are developing in the LabVIEW programming
+	  language, you can use <ulink
+	  url="http://meta-diff.sf.net/lvdiff.html">LVDiff</ulink> to compare
+	  your block diagrams visually.
+	  <ulink url="http://www.componentsoftware.com/products/csdiff/download.htm">CSDiff</ulink>
+	  is designed to compare different versions of Word documents.  To use
+	  a combination of diff tools based on the file type you are
+	  comparing, try <ulink url="http://meta-diff.sf.net">meta-diff</ulink>. 
+	  </para>
+        </listitem>
+	
+	<listitem>
+	  <para>
+	    TortoiseCVS will launch the diff tool you have chosen and compare
+	  your local copy of the selected file with the version from the
+	  repository.  For more sophisticated diff options (such as comparing
+	  to an older repository copy or comparing two older versions to each
+	  other), see <link linkend="advanced.history" endterm="advanced.history-title"/>. 
+	  </para>
+	</listitem>
+      </orderedlist>
+  </section>
+
+  <!-- ====== Tagging ========================================================== -->
+
+  <section id="ref.tags">
+    <title id="ref.tags-title">Making a Snapshot: CVS Tag...</title>
+      <abstract>
+        <para>
+          Make a snapshot of a project at a given point in time for later retrieval.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+        To create a tag, select the desired files and/or folders to tag
+	and right-click on them. Note: A tag is normally applied to a folder,
+	usually the top folder of the sandbox.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Select <guimenuitem>CVS &rarr; Tag</guimenuitem> from the
+	  context-menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+         Enter the desired tag name. Note that CVS places some constraints on
+	the tag name; these constraints are shown at the bottom of the dialog.
+	To see which tags are already used in
+	this folder, click the <guibutton>Update list...</guibutton> button.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	By default, the <guilabel>Check that the files are
+	unmodified</guilabel> checkbox is enabled. This prevents you from
+	applying the tag if you have uncommitted changes. Under special
+	circumstances, you might want to disable this.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	If the tag already exists, CVS will not move it unless you select
+	<guilabel>Move existing tag</guilabel>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	To remove a tag which you applied by mistake, or no longer want,
+	select <guilabel>Delete existing tag</guilabel>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	Finally, click <guibutton>OK</guibutton>.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Create Branch ==================================================== -->
+
+  <section id="ref.branch">
+    <title id="ref.branch-title">Lines of Development: CVS Branch...</title>
+      <abstract>
+        <para>
+          Create a branch (aka fork) for a separate line of development.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+        To create a branch, select the desired files and/or folders you want to branch
+	and right-click on them. Note: A branch is normally created on an entire folder,
+	usually the top folder of the sandbox.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Select <guimenuitem>CVS &rarr; Branch</guimenuitem> from the
+	  context-menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+         Enter the desired branch name. Note that CVS places some constraints on
+	the branch name; these constraints are shown at the bottom of the dialog.
+	To see which branches are already used in
+	this folder, click the <guibutton>Update list...</guibutton> button.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	By default, the <guilabel>Check that the files are
+	unmodified</guilabel> checkbox is enabled. This prevents you from
+	creating the branch if you have uncommitted changes. Under special
+	circumstances, you might want to disable this.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	If the branch already exists, CVS will not move it unless you select
+	<guilabel>Move existing branch</guilabel>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	To remove a branch which you created by mistake, or no longer want,
+	select <guilabel>Delete existing branch</guilabel>. You should be very
+	careful when doing this.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	Finally, click <guibutton>OK</guibutton>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+	Note that your sandbox is not automatically changed so that you are
+	working on the newly created branch. To do this, see
+	<link linkend="advanced.branching.selecting" endterm="advanced.branching.selecting-title"/>.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Merge ============================================================ -->
+
+  <section id="ref.merge">
+    <title id="ref.merge-title">CVS Merge...</title>
+      <abstract>
+        <para>
+          Update one branch with changes from another branch.
+        </para>
+      </abstract>
+      <para>
+      See <xref linkend="advanced.branching.merging"/>.
+      </para>
+  </section>
+
+  <!-- ====== Making a New Module ============================================== -->
+
+  <section>
+    <title>CVS Make New Module</title>
+      <abstract>
+        <para>
+          Create a new module (project) in the CVS repository.
+        </para>
+      </abstract>
+      <para>
+      See <xref linkend="advanced.newmodule"/>.
+      </para>
+  </section>
+
+  <!-- ====== Watching & Locking =============================================== -->
+
+  <section>
+    <title>Watching And Locking</title>
+      <abstract>
+        <para>
+	Track who is editing which files.
+        </para>
+      </abstract>
+      <para>
+      See <xref linkend="advanced.cvswatch"/>.
+      </para>
+  </section>
+
+  <!-- ====== Annotate =============================================== -->
+
+  <section id="cmd.annotate">
+    <title>Finding Out Who to Blame: CVS Annotate</title>
+    <para>
+    When something suddenly stops working, it can be valuable to find out
+    exactly who is to blame for the change. This is what <guilabel>CVS
+    Annotate</guilabel> is for.
+    </para>
+    <figure>
+        <title>Annotate Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/annotatedialog.png" format="PNG"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Annotate Dialog</phrase>
+          </textobject>
+        </mediaobject>
+    </figure>
+    <para>
+    For each line of the file, the dialog shows 
+    <orderedlist>
+    <listitem>
+    <para>
+    From which revision that line originates (e.g. lines marked as
+    <literal>1.1</literal> have not been changed since the first revision of the file).
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    The author of the line, i.e. the person who made the last change.
+    (TortoiseCVS tries to display the first 30 characters of the author name, but many CVS servers
+    are only capable of displaying the first 8 characters, as can also be seen in the screenshot above).
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    The time and date when the line was last changed.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    The current content of the line.
+    </para>
+    </listitem>
+    </orderedlist>
+    </para>
+    <para>
+    If you right-click a line in the dialog, you have the option of launching
+    various commands, including viewing an annotation for a particular
+    revision.
+    </para>
+    <para>
+    The <guilabel>Show log messages</guilabel> menu item toggles display of log messages; when this is
+    enabled, the log message for the selected line is shown in the status bar at the bottom of the dialog.
+    </para>
+    <para>
+    Finally, you can change the appearance of the dialog by choosing between
+    various highlighting options. Note that when highlighting is active, the bar to the right of
+    the scroll bar gives an overview of the entire file.
+    </para>
+    <para>
+    The <guibutton>Find</guibutton> button allows you to search for a piece of text using the dialog
+    shown in <xref linkend="finddialog" endterm="finddialog-title"/>.
+    </para>
+    <figure id="finddialog">
+        <title id="finddialog-title">Find Dialog</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/finddialog.png" format="PNG"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Find Dialog</phrase>
+          </textobject>
+        </mediaobject>
+    </figure>
+  </section>
+
+  <!-- ====== CVS Columns =============================================== -->
+
+  <section id="cmd.columns">
+    <title id="cmd.columns-title">Showing More Information: CVS Explorer Columns</title>
+    <para>
+    In Details view, TortoiseCVS can show CVS-specific columns in the Explorer
+    view (only on Windows 2000 and later). The available columns are
+    <itemizedlist>
+    <listitem><para>CVS Revision</para></listitem>
+    <listitem><para>CVS Sticky Tag</para></listitem>
+    <listitem><para>CVS Status</para></listitem>
+    <listitem><para>CVS File Format</para></listitem>
+    </itemizedlist>
+    </para>
+    <para>
+    To select which columns to display, right-click on the header as shown in
+    the figure below. Select <guilabel>More...</guilabel>, and you will see a
+    dialog listing all the available columns on your system. Scroll down to
+    find the "CVS" columns and select the ones you want.
+    </para>
+    <figure>
+        <title>Choosing which columns to display</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0045.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Choosing which columns to display</phrase>
+          </textobject>
+        </mediaobject>
+    </figure>
+  </section>
+
+  <!-- ====== Keyboard Shortcuts =============================================== -->
+
+  <section id="cmd.keys">
+    <title id="cmd.keys-title">Keyboard Shortcuts</title>
+    <para>
+    TODO: This section will explain how to use TortoiseCVS without the mouse.
+    </para>
+  </section>
+
+  <!-- ====== Web Log URL Autodetection ======================================== -->
+
+  <section id="cmd.weblog">
+    <title id="cmd.weblog-title">How Web Log Autodetects the Server URL</title>
+    <para>
+    As mentioned in <link linkend="advanced.weblog"
+    endterm="advanced.weblog-title"/>, TortoiseCVS can in many cases
+    automatically detect the URL used by your <application>ViewCVS</application> or
+    <application>CVSweb</application> server. It does this by using the
+    following algorithm:
+
+    <orderedlist>
+    <listitem>
+    <para>
+    Start with the name of the CVS server, with a <literal>http://</literal> prefix.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Append one item from the list
+    <itemizedlist>
+    <listitem><para><literal>/cgi-bin</literal></para></listitem>
+    <listitem><para><literal>/viewcvs</literal></para></listitem>
+    <listitem><para><literal>/cvsweb</literal></para></listitem>
+    <listitem><para><literal>/bin</literal></para></listitem>
+    <listitem><para>(the empty string)</para></listitem>
+    </itemizedlist>
+    and an item from the list
+    <itemizedlist>
+    <listitem><para><literal>/viewcvs.cgi</literal></para></listitem>
+    <listitem><para><literal>/viewcvs</literal></para></listitem>
+    <listitem><para><literal>/cvsweb.cgi</literal></para></listitem>
+    <listitem><para><literal>/cvsweb.pl</literal></para></listitem>
+    <listitem><para><literal>/cvsweb</literal></para></listitem>
+    </itemizedlist>
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Append the relative path for the file or folder (i.e. the value of 'Repository' shown in
+    the CVS Properties dialog).
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Check if the computed URL works. If not, add <literal>?cvsroot=</literal>
+    followed by the name of the module and try again.
+    </para>
+    </listitem>
+    </orderedlist>
+    The above steps are done for each possible permutation of the different
+    prefixes and suffixes. If a URL is found which returns HTTP status 200
+    (OK), the search stops. If no such URL is found, and an URL is found which
+    returns HTTP status 401 (Denied) or 403 (Forbidden), that URL is used
+    (based on the assumption that the user will be allowed access after
+    authenticating to the web server).
+    </para>
+    <para>
+    Actually, there is also a little bit of magic done if the server name contains <literal>.sourceforge.net</literal>;
+    SourceForge uses a non-standard mapping from CVSROOT/module to server name.
+    </para>
+  </section>
+
+  <!-- ====== Fetch list ====================================================== -->
+
+  <section id="cmd.modulelist">
+    <title id="cmd.modulelist-title">How 'Fetch list...' finds the list of modules</title>
+    <para>
+    In the <link linkend="dialogs.checkout"
+    endterm="dialogs.checkout-title"/>, there is a button named
+    <guilabel>Fetch list...</guilabel>. Clicking this causes TortoiseCVS to
+    attempt determining which modules exist on the selected CVS server. 
+    It does this by using the following algorithm:
+    <orderedlist>
+    <listitem>
+    <para>
+    Run the command <command>cvs co -c</command> to obtain the contents of
+    <filename>CVSROOT/modules</filename>. Note that the CVS administrator must
+    maintain this file manually, so it might be out of date (or empty).
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Run the command <command>cvs ls</command> to obtain all existing
+    modules. This is a reliable way of obtaining the module list, but only
+    works if the server runs CVSNT or a recent version of cvshome.org CVS.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Attempt to guess the Web Log URL (see <link linkend="cmd.weblog"
+    endterm="cmd.weblog-title"/>) and determine the available modules by
+    parsing the output from the Web Log server. This of course only works if
+    the CVS server provides Web Log.
+    </para>
+    </listitem>
+    </orderedlist>
+    </para>
+    </section>
+</chapter>

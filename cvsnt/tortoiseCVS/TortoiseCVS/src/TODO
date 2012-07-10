@@ -1,0 +1,19 @@
+Restart Explorer:
+
+    { send WM_QUIT to explorer - 18 == WM_QUIT}
+    hwnd := FindWindowByClassName('Progman');
+    PostMessage(hwnd, 18, 0, 0);
+    retryAttempt := 0;
+    { wait a while for it to exit  - 10 seconds, checking twice/sec }
+    for retryAttempt := 1 to 20 do begin
+      sleep(500);
+      if FindWindowByClassName('Progman') = 0 then break
+    end;
+    sleep(2000);
+    { explorer is dead - restart it (SW_SHOW=5) }
+    InstExec('explorer.exe', '', '', False, False, 5, errCode);
+    { Now a few seconds to actually start }
+    for retryAttempt := 1 to 20 do begin
+      sleep(500);
+      if FindWindowByClassName('Progman') <> 0 then break
+    end;

@@ -1,0 +1,2 @@
+#!/bin/bash
+cvs2cl -F CVSNT_2_0_x --window 3600

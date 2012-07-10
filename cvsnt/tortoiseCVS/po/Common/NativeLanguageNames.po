@@ -1,0 +1,570 @@
+﻿msgid ""
+msgstr ""
+"Project-Id-Version: TortoiseCVS\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2010-07-29 23:45+0200\n"
+"Last-Translator: Philippe Verdy <verdy_p@gmail.com>\n"
+"Language-Team: tortoisecvs-translators@lists.sourceforge.net\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+
+# af
+msgid "Afrikaans"
+msgstr "Afrikaans"
+
+# als
+msgid "Alemanic"
+msgstr "Alemannisch"
+
+# am
+msgid "Amharic"
+msgstr "አማርኛ"
+
+# an
+msgid "Aragonese"
+msgstr "Aragonés"
+
+# ar
+msgid "Arabic"
+msgstr "العربية"
+
+# as
+msgid "Assamese"
+msgstr "অসমিয়া"
+
+# ast
+msgid "Asturian"
+msgstr "Asturianu"
+
+# az
+msgid "Azeri"
+msgstr "Azərbaycan"
+
+# bcl
+msgid "Central Bicolano"
+msgstr "Bikol"
+
+# be
+msgid "Belarussian"
+msgstr "Беларуская"
+
+# bg
+msgid "Bulgarian"
+msgstr "Български"
+
+# bms
+msgid "Banyumasan"
+msgstr "Basa Banyumasan"
+
+# bn
+msgid "Bengali"
+msgstr "বাংলা"
+
+# br
+msgid "Breton"
+msgstr "Brezhoneg"
+
+# bpy-Deva
+msgid "Bishnupriya Manipuri (Devanagari)"
+msgstr "বিষ্ণুপ্রিয়া মণিপুরী"
+
+# bpy-Guja
+msgid "Bishnupriya Manipuri (Gujarati)"
+msgstr "ইমার ঠার"
+
+# bpy-Latn
+msgid "Bishnupriya Manipuri (Latin)"
+msgstr "Imarthar"
+
+# bs
+msgid "Bosnian"
+msgstr "Bosanski"
+
+# ca
+msgid "Catalan"
+msgstr "Català"
+
+# ceb
+msgid "Cebuano"
+msgstr "Sinugboanon Binisaya"
+
+# co
+msgid "Corsican"
+msgstr "Corsu"
+
+# cs
+msgid "Czech"
+msgstr "Český"
+
+# cv
+msgid "Chuvash"
+msgstr "Чăваш"
+
+# cy
+msgid "Welsh"
+msgstr "Cymraeg"
+
+# da
+msgid "Danish"
+msgstr "Dansk"
+
+# de
+msgid "German"
+msgstr "Deutsch"
+
+# dv
+msgid "Maldivian"
+msgstr "ދިވެހިބަސް"
+
+# el
+msgid "Greek"
+msgstr "Ελληνικά"
+
+# en
+msgid "English"
+msgstr "English"
+
+# eo
+msgid "Esperanto"
+msgstr "Esperanto"
+
+# es
+msgid "Spanish"
+msgstr "Español"
+
+# et
+msgid "Estonian"
+msgstr "Eesti"
+
+# eu
+msgid "Basque"
+msgstr "Euskara"
+
+# fa
+msgid "Farsi"
+msgstr "فارسی"
+
+# fi
+msgid "Finnish"
+msgstr "Suomi"
+
+# fo
+msgid "Faeroese"
+msgstr "Føroyskt"
+
+# fr
+msgid "French"
+msgstr "Français"
+
+# fy
+msgid "Western Frisian"
+msgstr "Frisk"
+
+# ga
+msgid "Irish"
+msgstr "Gaeilge"
+
+# gan-Hani
+msgid "Gan (Sinographic)"
+msgstr "贛語"
+
+# gan-Latn
+msgid "Gan (Latin)"
+msgstr "Gànyŭ"
+
+# gd
+msgid "Scottish Gaelic"
+msgstr "Gàidhlig"
+
+# gl
+msgid "Galician"
+msgstr "Galego"
+
+# glk
+msgid "Gilaki"
+msgstr "گیلکی"
+
+# gu
+msgid "Gujarati"
+msgstr "ગુજરાતી"
+
+# he
+msgid "Hebrew"
+msgstr "עברית"
+
+# hi
+msgid "Hindi"
+msgstr "हिन्दी"
+
+# hr
+msgid "Croatian"
+msgstr "Hrvatski"
+
+# hsb
+msgid "Upper Sorbian"
+msgstr "Hornjoserbsce"
+
+# ht
+msgid "Haitian"
+msgstr "Krèyol ayisyen"
+
+# hu
+msgid "Hungarian"
+msgstr "Magyar"
+
+# hy
+msgid "Armenian"
+msgstr "Հայերեն"
+
+# ia
+msgid "Interlingua"
+msgstr "Interlingua"
+
+# id
+msgid "Indonesian"
+msgstr "Bahasa Indonesia"
+
+# ie
+msgid "Interlingue"
+msgstr "Interlingue"
+
+# io
+msgid "Ido"
+msgstr "Ido"
+
+# is
+msgid "Icelandic"
+msgstr "Íslenska"
+
+# it
+msgid "Italian"
+msgstr "Italiano"
+
+# ja
+msgid "Japanese"
+msgstr "日本語"
+
+# jv
+msgid "Javanese"
+msgstr "Basa Jawa"
+
+# ka
+msgid "Georgian"
+msgstr "ქართული"
+
+# kk
+msgid "Kazakh"
+msgstr "Қазақша"
+
+# kn
+msgid "Kannara"
+msgstr "ಕನ್ನಡ"
+
+# ko
+msgid "Korean"
+msgstr "한국어"
+
+# ksh
+msgid "Ripuarish"
+msgstr "Ripoarisch"
+
+# ku-Arab
+msgid "Kurdish (Arabic)"
+msgstr "كوردی"
+
+# ku-Latn
+msgid "Kurdish (Latin)"
+msgstr "Kurdî"
+
+# la
+msgid "Latin"
+msgstr "Latina"
+
+# lb
+msgid "Luxemburgish"
+msgstr "Lëtzebuergesch"
+
+# lb
+msgid "Limburgish"
+msgstr "Limburgs"
+
+# lmo
+msgid "Lombard"
+msgstr "Lumbaart"
+
+# lt
+msgid "Lithuanian"
+msgstr "Lietuvių"
+
+# lv
+msgid "Latvian"
+msgstr "Latviešu"
+
+# mi
+msgid "Maori"
+msgstr "Māori"
+
+# mk
+msgid "Macedonian"
+msgstr "Македонски"
+
+# ml
+msgid "Malayalam"
+msgstr "മലയാളം"
+
+# mn
+msgid "Mongolian"
+msgstr "Монгол"
+
+# mr
+msgid "Marathi"
+msgstr "मराठी"
+
+# ms
+msgid "Malaysian"
+msgstr "Bahasa Melayu"
+
+# nah
+msgid "Nahuatl"
+msgstr "Nāhuatl"
+
+# nan
+msgid "Minnan"
+msgstr "Bân-lâm-gú"
+
+# nap
+msgid "Napolitan"
+msgstr "Nnapulitano"
+
+# nb
+msgid "Norwegian (Bokmål)"
+msgstr "Norsk (Bokmål)"
+
+# nds
+msgid "Lower Saxon"
+msgstr "Plattdüütsch"
+
+# nds-NL
+msgid "Lower Saxon (Netherlands)"
+msgstr "Nedersaksisch"
+
+# new
+msgid "Newari"
+msgstr "नेपाल भाषा"
+
+# nl
+msgid "Dutch"
+msgstr "Nederlands"
+
+# nn
+msgid "Norwegian (Nynorsk)"
+msgstr "Norsk (Nynorsk)"
+
+# no
+msgid "Norwegian"
+msgstr "Norsk"
+
+# oc
+msgid "Occitan"
+msgstr "Occitan"
+
+# os
+msgid "Ossetian"
+msgstr "Иронау"
+
+# pag
+msgid "Pangasinan"
+msgstr "Pangasinan"
+
+# pam
+msgid "Pampagan"
+msgstr "Kapampangan"
+
+# pl
+msgid "Polish"
+msgstr "Polski"
+
+# pms
+msgid "Piedmontese"
+msgstr "Piemontèis"
+
+# pt
+msgid "Portuguese"
+msgstr "Português"
+
+# qu
+msgid "Quechua"
+msgstr "Runa Simi"
+
+# rm
+msgid "Raetho-Romance"
+msgstr "Rumantsch"
+
+# ro
+msgid "Romanian"
+msgstr "Română"
+
+# ru
+msgid "Russian"
+msgstr "Русский"
+
+# rup
+msgid "Aromanian"
+msgstr "Armãneashce"
+
+# sa
+msgid "Sanskrit"
+msgstr "संस्कृतम्"
+
+# sah-Cyrl
+msgid "Sakha (Cyrillic)"
+msgstr "Саха тыла"
+
+# sah-Latn
+msgid "Sakha (Latin)"
+msgstr "Saxa Tyla"
+
+# scn
+msgid "Sicilian"
+msgstr "Sicilianu"
+
+# sk
+msgid "Slovakian"
+msgstr "Slovenčina"
+
+# sh-Cyrl
+msgid "Serbocroatian (Cyrillic)"
+msgstr "Српскохрватски"
+
+# sh-Latn
+msgid "Serbocroatian (Latin)"
+msgstr "Srpskohrvatski"
+
+# sl
+msgid "Slovenian"
+msgstr "Slovenščina"
+
+# smg
+msgid "Samogitian"
+msgstr "Žemaitėška"
+
+# sq
+msgid "Albanian"
+msgstr "Shqip"
+
+# sr-Cyrl
+msgid "Serbian (Cyrillic)"
+msgstr "Српски"
+
+# sr-Latn
+msgid "Serbian (Latin)"
+msgstr "Srpski"
+
+# su
+msgid "Sundanese"
+msgstr "Basa Sunda"
+
+# sv
+msgid "Swedish"
+msgstr "Svenska"
+
+# sw
+msgid "Swahili"
+msgstr "Kiswahili"
+
+# te
+msgid "Tamil"
+msgstr "தமிழ்"
+
+# te
+msgid "Telugu"
+msgstr "తెలుగు"
+
+# tg
+msgid "Tadjik"
+msgstr "Тоҷикӣ"
+
+# th
+msgid "Thai"
+msgstr "ภาษาไทย"
+
+# tk-Arab
+msgid "Turkmen (Arabic)"
+msgstr "تركمن"
+
+# tk-Cyrl
+msgid "Turkmen (Cyrillic)"
+msgstr "Туркмен"
+
+# tl
+msgid "Tagalog"
+msgstr "Tagalog"
+
+# tr
+msgid "Turkish"
+msgstr "Türkçe"
+
+# tt-Latn
+msgid "Tatar (Latin)"
+msgstr "Tatarça"
+
+# tt-Cyrl
+msgid "Tatar (Cyrillic)"
+msgstr "Татарча"
+
+# uk
+msgid "Ukrainian"
+msgstr "Українська"
+
+# ur
+msgid "Urdu"
+msgstr "اردو"
+
+# uz
+msgid "Uzbek"
+msgstr "O‘zbek"
+
+# vec
+msgid "Venitian"
+msgstr "Vèneto"
+
+# vi
+msgid "Vietnamese"
+msgstr "Tiếng Việt"
+
+# vls
+msgid "Western Flemish"
+msgstr "West-Vloams"
+
+# vo
+msgid "Volapük"
+msgstr "Volapük"
+
+# vro
+msgid "Võro"
+msgstr "Võro"
+
+# wa
+msgid "Walloon"
+msgstr "Walon"
+
+# war
+msgid "Waray"
+msgstr "Winaray"
+
+# wuu
+msgid "Wu"
+msgstr "吴语"
+
+# yi
+msgid "Yiddish"
+msgstr "ייִדיש"
+
+# yue
+msgid "Cantonese"
+msgstr "粵語"
+
+# zh
+msgid "Chinese"
+msgstr "中文"

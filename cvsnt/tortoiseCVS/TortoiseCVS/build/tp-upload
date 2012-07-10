@@ -1,0 +1,6 @@
+#!/bin/bash
+shopt -s igncr #
+HOST=testpilot.tortoisecvs.org
+USER=testpilot
+. testpilotpassword
+./ftp-upload -v -h $HOST --user $USER --password $TESTPILOT_PASSWORD --dir www $1

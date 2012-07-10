@@ -1,0 +1,17 @@
+*.ncb
+*.opt
+*.plg
+*.mak
+Debug
+Makefile
+Release
+WinDebug
+WinRel
+config.cache
+config.h
+config.log
+config.status
+cvs-*.tar.gz
+cvsinit
+cvsnt.mdp
+stamp-h1

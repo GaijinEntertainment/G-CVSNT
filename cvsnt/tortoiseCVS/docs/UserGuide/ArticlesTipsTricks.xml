@@ -1,0 +1,469 @@
+<!-- ====== Articles, Tips and Tricks ========================================= -->
+
+<chapter id="tips">
+  <title id="tips-title">Articles, Tips and Tricks</title>
+
+
+  <!-- ====== Using TortoiseCVS with SourceForge ============================= -->
+
+  <section id="tips.sourceforge">
+    <title id="tips.sourceforge-title">Using TortoiseCVS with SourceForge</title>
+
+    <bridgehead renderas="sect3">TortoiseCVS Client Installation Instructions</bridgehead>
+    <para>
+      This document provides instructions for installing and using the TortoiseCVS CVS client software. These instructions are designed for SourceForge.net project developers who are using 32-bit Microsoft Windows platform. It is for developers who would like to work with the source code for a project which is hosted on SourceForge.net. For background information you may like to read the other available documents about CVS.
+    </para>
+    <para>
+      TortoiseCVS has advantages over WinCVS for work on SourceForge. It has a clearer interface which is integrated into Windows Explorer. WinCVS has a more complex and mature interface. For more obscure commands it may be easier or necessary to use WinCVS.
+    </para>
+    <para>
+      A particular benefit is that TortoiseCVS has an SSH client built into it, without special setup. Anyone can easily commit code to SourceForge.net projects using TortoiseCVS.
+    </para>
+    
+    <bridgehead renderas="sect3">Installing TortoiseCVS</bridgehead>
+    <orderedlist>
+      <listitem>
+        <para>
+          Go to <ulink url="http://www.tortoisecvs.org">http://tortoisecvs.org/</ulink> and download the Download page.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          To install, run the executable and follow the instructions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Since TortoiseCVS is a shell extension, you need to reboot your machine.
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Checking out an existing project</bridgehead>
+    <para>
+      If you are working on an existing project first you now need to check out the code.
+    </para>
+    <orderedlist>
+      <listitem>
+        <para>
+          Make sure you have made an account on SourceForge.net, and that you have been added as a developer to the project you are going to work on. A project administrator needs to do this.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          In Windows Explorer go to the folder that you would like to check the code out into.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Right click and from the context menu choose the command <guimenuitem>CVS Checkout...</guimenuitem>; it's next to the Tortoise icon.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          You will need your user name on SourceForge.net, and the project UNIX name. Fill in the dialog as follows:
+          <itemizedlist>
+            <listitem>
+              <para>
+                Protocol: Secure Shell (:ext:)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Server: cvs.sourceforge.net
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Directory: /cvsroot/<emphasis>projectname</emphasis>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Username: <emphasis>username</emphasis>
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Click <guilabel>Fetch List</guilabel> to get a choice of modules. You will need to enter your password in the
+    dialog at this point. Then pick the module that you would like. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choose <guibutton>OK</guibutton>.TortoiseCVS will now check out the code.  You will need to enter your password.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          You can now alter files and then select <guimenuitem>CVS Commit</guimenuitem> on the top level folder to make your changes in the repository.  For more information read the <ulink url="http://www.tortoiscvs.org/docs/UserGuide_en/">TortoiseCVS User's Guide</ulink>.
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Get an error?</bridgehead>
+    <para>
+      If you get an error saying something like <computeroutput>Could not chdir to home
+      folder /home/users/r/rd/rdonkin: No such file or folder</computeroutput> then
+      you need to log into the server with SSH to force creation of your home
+      folder. Do this by connecting to <literal>username@cvs.sf.net</literal>
+      either with Putty or a command line SSH.
+    </para>
+
+    <bridgehead renderas="sect3">Working on a new project</bridgehead>
+    <para>
+      If you are working on a new project then you first need to create a new module in the repository.
+    </para>
+    <orderedlist>
+      <listitem>
+        <para>
+          Create a folder with the name you would like the module to have.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Put the files you would like to add in the folder.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Right click on the folder, and choose <guimenuitem>Make New Module</guimenuitem> from the CVS submenu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Fill in the dialog as described in the previous section. Note that the module name is filled in for you.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choose <guibutton>OK</guibutton>. You will need to enter your password twice, and the module will be made for you.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Proceed to add files and folders by right clicking on them and choosing <guimenuitem>CVS Add</guimenuitem> or <guimenuitem>CVS Add All Recursively</guimenuitem> from the context menu.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          For more information read the <ulink url="http://www.tortoisecvs.org/docs/UserGuide_en/">TortoiseCVS Daily User's Guide</ulink>
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Tired of entering your password all the time?</bridgehead>
+    <para>
+      You need to make a public/private key pair. The public key goes on the server, and the private key sits on your hard drive. Now, when you connect the server can verify who you are because only you have your private key.
+    </para>
+    <para>
+      To further protect your private key it is encrypted on your hard disk with a passphrase. You can however choose an empty passphrase, in which case you never have to enter a password but anyone with access to your computer can access your SSH CVS account. Or you can use an SSH Agent (such as Pageant) which will remember your passphrase for the duration of one session, so you only have to enter it once.
+    </para>
+    <para>
+      TortoiseCVS uses a version of Plink as its SSH client. This means you can use PuTTYgen to make a public/private key pair, and you can use Pageant to point to where the private key is. First of all download them both from the <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">PuTTY web site</ulink>.
+    </para>
+    <para>
+      For information on how to use them read the <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/putty/docs.html">PuTTY documentation</ulink> on PuTTYgen and Pageant. In particular, make sure you read the sections "8.2: Using PuTTYgen, the PuTTY key generator" and "9.3.1 Making Pageant automatically load keys on startup".
+    </para>
+    <para>
+      After making your public key with PuTTYgen you need to upload it using the SourceForge.net web interface. Log into the SourceForge web site, and go to your Account Preferences page. Down at the bottom is a section "Shell Account Information" with an entry "CVS/SSH Shared Authorized Keys". You need to add your public key there.
+    </para>
+  </section>
+
+
+  <!-- ====== How CVS Differs from Microsoft Visual Source Safe ============== -->
+
+  <section id="tips.sourcesafe">
+    <title id="tips.sourcesafe-title">How CVS Differs from <productname>Microsoft Visual Source Safe</productname></title>
+    <para>
+      TortoiseCVS differs from <productname>Visual Source Safe</productname>
+    (VSS) in many ways. The most apparent difference may be that TortoiseCVS
+    does not require users to lock the files they are working on, as VSS does
+    by default. In fact, the CVS documentation even encourages users not to
+    use file locking. In the rare occasion where several people have changed
+    the same file at the same time, CVS will normally be able to merge their
+    changes. If two or more developers have changed the same few lines,
+    TortoiseCVS will report a conflict, insert directives in the file, and
+    leave it to the developers to decide what to do. Such conflicts are very
+    rare, as they normally occur as a result of lacking communication between
+    the developers (eg. two people trying to fix the same problem). 
+    </para>
+    <para>
+      Another important difference is that VSS gives you a server view, while
+    TortoiseCVS shows a client view. In practice this means that, unlike VSS,
+    TortoiseCVS will not tell you about changes in the repository until you do
+    an update, or explicitly query the status of selected files. Changes
+    reported by TortoiseCVS reflect modifications done by you after the last
+    checkout, update or commit. 
+    </para>
+  </section>
+  
+  <!-- ====== Creating new icons for TortoiseCVS ============================= -->
+
+  <section id="tips.createicons">
+    <title id="tips.createicons-title">Creating new icons for TortoiseCVS</title>
+    <para>
+      TortoiseCVS icons are Windows icon files that are overlaid on top of
+    source code file icons in Explorer to show their status in CVS. The reason
+    this technique works is that most of the area in a TortoiseCVS icon is
+    transparent, allowing the source icon to show through. If you are
+    designing your own TortoiseCVS icon set, you'll need to strike a
+    careful balance between visibility of the original file and easy viewing
+    of CVS states. Some icon sets achieve this balance by adding a distinctive
+    colour or shape to one corner of each icon; others achieve the illusion of
+    shading the entire icon by alternating transparent pixels with coloured
+    ones. You can even combine these two ideas of unique shapes and
+    semitransparent shading: see the &#34;NG&#34; icon set that ships with
+    TortoiseCVS for an example. 
+    <orderedlist>
+       <listitem>
+	  <para>
+    Create your icon set using a graphics editor. For the best viewing
+    results, you should create 16x16, 32x32, and 48x48 versions of each icon. The icon
+    editors that ship with the Borland and Microsoft compilers can do this
+    task easily, as can most shareware icon editors. If you prefer to stay
+    with free software, you can use <ulink url="http://www.gimp.org">The
+    GIMP</ulink> to create a PNG file for each icon size, and then
+    combine them together with <ulink
+    url="http://www.winterdrache.de/freeware/png2ico">png2ico</ulink>.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Make sure you have created one correctly-named icon for each of the seven
+    possible CVS states:
+    <filename>TortoiseNotInCVS.ico</filename>, 
+    <filename>TortoiseInCVS.ico</filename>,
+    <filename>TortoiseInCVSReadOnly.ico</filename>,
+    <filename>TortoiseChanged.ico</filename>,
+    <filename>TortoiseConflict.ico</filename>,
+    <filename>TortoiseAdded.ico</filename>, and
+    <filename>TortoiseIgnored.ico</filename>. 
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Create a folder inside the directory where you installed
+    TortoiseCVS, name it something that matches the theme of your icon set,
+    and copy your seven new icon files into the new folder.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Open the Registry Editor (Click <guilabel>Start</guilabel> &rarr;
+    <guilabel>Run</guilabel> and type <literal>regedit</literal>). Navigate to
+    <literal>HKEY_LOCAL_MACHINE\SOFTWARE\TortoiseCVS\Icons</literal>. Inside this key,
+    create a new string value. For the name of this new value, type in the
+    name that you would like to call your new icon set. Double-click on the
+    new value to set the actual data, which is the name of the folder you
+    created in step 3. 
+    </para>
+    </listitem>
+    </orderedlist>
+    </para>
+  </section>  
+  
+  <!-- ====== Creating a new locale for TortoiseCVS ============================ -->
+
+  <section id="tips.createlocale">
+    <title id="tips.createlocale-title">Creating a new locale (translation) for TortoiseCVS</title>
+    <section>
+    <title>Overview</title>
+    <para>
+    Internally, TortoiseCVS uses the GNU gettext library for translating messages. 
+    Gettext works like this:
+    </para>
+    <orderedlist>
+    <listitem>
+    <para>All messages are present in English in the source code.</para>
+    </listitem>
+    <listitem>
+    <para>A tool (<literal>xgettext</literal>) automatically extracts the messages
+    into a specially formatted text file (a <filename class='extension'>.po</filename> file), 
+    which can then be translated.
+    </para>
+    </listitem>
+    <listitem>
+    <para>The <filename class='extension'>.po</filename> file is finally converted to a
+    <filename class='extension'>.mo</filename> file, 
+    which is used by the TortoiseCVS executable.</para>
+    </listitem>
+    <listitem>
+    <para>When texts are updated in the source code, or when new texts are added,
+    another tool (msgmerge) automatically updates the various .po files. The translator will then
+    have to review any <firstterm>fuzzy</firstterm> entries (see the Gettext Guide below for an
+    explanation of this).</para>
+    </listitem>
+    </orderedlist>
+    </section>
+    <section>
+    <title>Gettext Documentation</title>
+    <para>
+    This simple <ulink url="http://www.tortoisecvs.org/gettextguide.shtml">Gettext Guide</ulink>
+    gives an introduction to gettext.
+    For the full story, go to <ulink url="http://www.gnu.org/software/gettext/manual/">the manual</ulink>.
+    </para>
+    </section>
+    <section>
+    <title>How to start</title>
+    <orderedlist>
+    <listitem>
+    <bridgehead>Check out the po module</bridgehead>
+    <para>
+    In the Checkout dialog, use the CVSROOT
+    <synopsis>:ext:<replaceable>your_sf_login</replaceable>@cvs.sourceforge.net:/cvsroot/tortoisecvs</synopsis>
+    and the module name <computeroutput>po</computeroutput>.
+    </para>
+    </listitem>
+    <listitem>
+    <bridgehead>Determine the correct language/country code</bridgehead>
+    <para>Go to <ulink url="http://www.gnu.org/software/gettext/manual/html_chapter/gettext_15.html#SEC221">
+    this page</ulink> to find the code for your language, and to
+    <ulink url="http://www.gnu.org/software/gettext/manual/html_chapter/gettext_16.html">this page</ulink>
+    to find your country code.
+    Put the two together with an underscore between; i.e. for French as spoken in Canada you would choose 
+    <literal>fr_CA</literal>.
+    </para>
+    </listitem>
+    <listitem>
+    <bridgehead>Create a new .po file</bridgehead>
+    <para>
+    Go into the TortoiseCVS folder, and copy the <filename>en_GB.po</filename> file to a new file; 
+    in our example this would be <filename>fr_CA.po</filename>.
+    </para>
+    </listitem>
+    <listitem>
+    <bridgehead>Translate your new file</bridgehead>
+    <para>
+    using a text editor or one of the special tools available such as <ulink url="http://www.poedit.org/">poEdit</ulink>.
+    </para>
+    </listitem>
+    <listitem>
+    <bridgehead>Compile the .po file</bridgehead>
+    <para>
+    as described in the above references. For testing, you can just copy the file to 
+    the <filename>locale/en_GB</filename> folder under <filename>Program Files/TortoiseCVS</filename>
+    (note that it <emphasis>must</emphasis> be named <filename>TortoiseCVS.mo</filename>).
+    </para>
+    </listitem>
+    </orderedlist>
+    </section>
+  </section> 
+
+  <!-- ====== Using PuTTY sessions ============================ -->
+
+  <section id="tips.puttysessions">
+    <title id="tips.puttysessions-title">Using PuTTY sessions</title>
+    <para>
+    If you need different SSH parameters for different hosts, you can do so by
+    using a feature of the <application>PuTTY</application> suite called
+    <emphasis>sessions</emphasis>.
+    </para>
+    <orderedlist>
+    <listitem>
+    <para>
+    Download the PuTTY suite from <ulink
+    url="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">the
+    PuTTY site</ulink>.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Run <filename>putty.exe</filename> and enter the required parameters, then
+    enter an appropriate session name below the <guilabel>Saved
+    Sessions</guilabel> label, and click <guilabel>Save</guilabel>.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    In the TortoiseCVS <link linkend="dialogs.checkout"
+    endterm="dialogs.checkout-title"/>, enter the session name instead of the
+    host name.
+    </para>
+    </listitem>
+    </orderedlist>
+  </section> 
+
+  <!-- ====== Using Pageant ============================ -->
+
+  <section id="tips.pageant">
+    <title id="tips.pageant-title">Using Pageant to avoid having to enter the
+    SSH password every time</title>
+    <para>
+    When using SSH, you normally have to enter your password every time you do
+    a CVS operation. To avoid this, while maintaining a reasonable level of
+    security, you can use an <emphasis>SSH Agent</emphasis>. The SSH Agent in
+    the <application>PuTTY</application> suite is known as <application>Pageant</application>.
+    </para>
+    <orderedlist>
+    <listitem>
+    <para>
+    Download the PuTTY suite from <ulink
+    url="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">the
+    PuTTY site</ulink>.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Run <filename>pageant.exe</filename>. Right-click on its icon
+    <inlinemediaobject>
+    <imageobject>
+    <imagedata fileref="figure/img0042.gif" format="GIF"></imagedata>
+    </imageobject>
+    </inlinemediaobject>
+    in the system tray and select <guilabel>Add Key</guilabel>, then browse to your private key
+    file. If the key is password protected, Pageant will ask for the password.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+     To avoid having to do the above every time you boot up your computer,
+    create a shortcut to Pageant in your <guilabel>Programs</guilabel> &rarr; 
+    <guilabel>Startup</guilabel> folder, specifying the key file as argument.
+    </para>
+    </listitem>
+    </orderedlist>
+  </section> 
+
+  <!-- ====== Line Endings ============================ -->
+
+  <section id="tips.lineendings">
+    <title id="tips.lineendings-title">How TortoiseCVS manages line endings</title>
+    <para>
+    TortoiseCVS looks at the line endings of the CVS/Root file. This file is created when the module is first checked
+    out, and is usually not changed afterwards. So when you check the <guilabel>UNIX line endings</guilabel> checkbox
+    in the Checkout dialog, CVS creates the Root file with UNIX line endings, and this again causes TortoiseCVS
+     to force CVS to use UNIX line endings on all subsequent CVS operations.
+    </para>
+    <para>
+    See also <xref linkend="dialogs.preferences.advanced.sandbox"/>.
+    </para>
+  </section> 
+
+  <!-- ====== Command Line ============================ -->
+
+  <section id="tips.cmdline">
+    <title id="tips.cmdline-title">Using other CVS clients</title>
+    <para>
+    You can use other CVS front ends, such as WinCVS, Eclipse, etc. in the same sandbox as TortoiseCVS.
+    Bear in mind that different CVS front ends may have different limitations; refer to the documentation for the
+    particular front end if in doubt.
+    </para>
+    <para>
+    You can of course also use the command line client directly. We recommend that you do <emphasis>not</emphasis>
+    use the CVS client included with Cygwin (see the TortoiseCVS FAQ). The TortoiseCVS installation includes an
+    appropriate version of the CVSNT command line client; you just need to add the TortoiseCVS installation folder to
+    your <literal>PATH</literal>.
+    </para>
+    <para>
+    Using SSH from the command line needs slightly more: If you want the command line client to use the user-friendly
+    TortoisePlink SSH client, you must set an additional environment variable, <literal>CVS_EXT</literal>. The variable
+    should be set to <literal>tortoiseplink.exe -l "%u" "%h"</literal>.
+    </para>
+  </section> 
+
+
+</chapter>

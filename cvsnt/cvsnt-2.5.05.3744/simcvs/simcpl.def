@@ -1,0 +1,6 @@
+; simcpl.def : Declares the module parameters for the DLL.
+
+LIBRARY      "simcpl"
+
+EXPORTS
+	CPlApplet	@1

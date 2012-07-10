@@ -1,0 +1,215 @@
+Windows Registry Editor Version 5.00
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}]
+@="TortoiseCVS"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TrtseShl64.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+"ThreadingModel"="Apartment"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb711-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb711-1c4b-11d4-bed5-005004b1f42f}]
+@="TortoiseCVS"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb711-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TrtseShl64.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb711-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+"ThreadingModel"="Apartment"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb712-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb712-1c4b-11d4-bed5-005004b1f42f}]
+@="TortoiseCVS"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb712-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TrtseShl64.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb712-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+"ThreadingModel"="Apartment"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb713-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb713-1c4b-11d4-bed5-005004b1f42f}]
+@="TortoiseCVS"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb713-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TrtseShl64.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb713-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+"ThreadingModel"="Apartment"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb714-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb714-1c4b-11d4-bed5-005004b1f42f}]
+@="TortoiseCVS"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb714-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TrtseShl64.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb714-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+"ThreadingModel"="Apartment"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb715-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb715-1c4b-11d4-bed5-005004b1f42f}]
+@="TortoiseCVS"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb715-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TrtseShl64.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb715-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+"ThreadingModel"="Apartment"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb716-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb716-1c4b-11d4-bed5-005004b1f42f}]
+@="TortoiseCVS"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb716-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TrtseShl64.dll"
+
+[HKEY_CLASSES_ROOT\CLSID\{5d1cb716-1c4b-11d4-bed5-005004b1f42f}\InProcServer32]
+"ThreadingModel"="Apartment"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS0]
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS0]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS1]
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS1]
+@="{5d1cb711-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS2]
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS2]
+@="{5d1cb712-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS3]
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS3]
+@="{5d1cb713-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS4]
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS4]
+@="{5d1cb714-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS5]
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS5]
+@="{5d1cb715-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS6]
+
+[HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS6]
+@="{5d1cb716-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved]
+"{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"="Tortoise CVS"
+"{5d1cb711-1c4b-11d4-bed5-005004b1f42f}"="Tortoise CVS"
+"{5d1cb712-1c4b-11d4-bed5-005004b1f42f}"="Tortoise CVS"
+"{5d1cb713-1c4b-11d4-bed5-005004b1f42f}"="Tortoise CVS"
+"{5d1cb714-1c4b-11d4-bed5-005004b1f42f}"="Tortoise CVS"
+"{5d1cb715-1c4b-11d4-bed5-005004b1f42f}"="Tortoise CVS"
+"{5d1cb716-1c4b-11d4-bed5-005004b1f42f}"="Tortoise CVS"
+
+[HKEY_CLASSES_ROOT\Directory\shellex\ContextMenuHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\Directory\shellex\ContextMenuHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\Directory\Background\shellex\ContextMenuHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\Directory\Background\shellex\ContextMenuHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\Drive\shellex\ContextMenuHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\Drive\shellex\ContextMenuHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\Folder\shellex\ContextMenuHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\Folder\shellex\ContextMenuHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\*\shellex\ContextMenuHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\*\shellex\ContextMenuHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\InternetShortcut\shellex\ContextMenuHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\InternetShortcut\shellex\ContextMenuHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\lnkfile\shellex\ContextMenuHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\lnkfile\shellex\ContextMenuHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\*\shellex\PropertySheetHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\*\shellex\PropertySheetHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\Folder\shellex\PropertySheetHandlers\TortoiseCVS]
+
+[HKEY_CLASSES_ROOT\Folder\shellex\PropertySheetHandlers\TortoiseCVS]
+@="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}"
+
+[HKEY_CLASSES_ROOT\Folder\shellex\ColumnHandlers\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}]
+
+[HKEY_CLASSES_ROOT\Folder\shellex\ColumnHandlers\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}]
+@="Tortoise CVS"
+
+[HKEY_CLASSES_ROOT\CVS]
+@="URL:CVS Protocol"
+"URL Protocol"=""
+
+[HKEY_CLASSES_ROOT\CVS\DefaultIcon]
+@="D:\\Program Files (x86)\\TortoiseCVS\\TortoiseAct.exe"
+
+[HKEY_CLASSES_ROOT\CVS\shell\open\command]
+@="\"D:\\Program Files (x86)\\TortoiseCVS\\TortoiseAct.exe\" -u \"%1\""
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\TortoiseCVS]
+"RootDir"="D:\\Program Files (x86)\\TortoiseCVS\\"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\TortoiseCVS\CustomIcons]
+"TortoiseCVS"="TortoiseCVS"
+"Barracuda"="Barracuda"
+"Stefan Bertels"="Bertels"
+"Nikolai Devereaux"="Nikolai"
+"Mathias Hasselmann"="Tbf"
+"Timo Kauppinen"="Timo"
+"Cosmin Smeu"="Cosmin"
+"Greg Searle"="GregSearle"
+"Pierre Ossman"="PierreOssman"
+"Nikolai Giraldo"="NG"
+"XP-style rounded"="XPStyleRounded"
+"Classic TortoiseCVS"="Classic"
+
+[HKEY_LOCAL_MACHINE\SOFTWARE\TortoiseCVS\Languages]
+"en_GB"=dword:00000001
+"de_DE"=dword:00000001
+"fr_FR"=dword:00000001
+"it_IT"=dword:00000001
+"ja_JP"=dword:00000001
+"hu_HU"=dword:00000001
+"ko_KR"=dword:00000001
+"nl_NL"=dword:00000001
+"pt_BR"=dword:00000001
+"ru_RU"=dword:00000001
+"ro_RO"=dword:00000001
+"zh_CN"=dword:00000001
+"zh_TW"=dword:00000001
+"pl_PL"=dword:00000001

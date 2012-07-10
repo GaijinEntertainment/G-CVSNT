@@ -1,0 +1,105 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Setup\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2010-11-17 11:41+0800\n"
+"Last-Translator: Ikbal Majeri <mimajeri@gmail.com>\n"
+"Language-Team: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Arabic\n"
+"X-Poedit-Country: TUNISIA\n"
+
+#: ../build/TortoiseCVS.iss:63
+msgid "Main Files"
+msgstr "الملفات الرئيسية"
+
+#: ../build/TortoiseCVS.iss:64
+msgid "Custom Icons"
+msgstr ""
+
+#: ../build/TortoiseCVS.iss:75 ../build/TortoiseCVS.iss:348
+msgid "XP-style rounded"
+msgstr ""
+
+#: ../build/TortoiseCVS.iss:76 ../build/TortoiseCVS.iss:349
+msgid "Classic TortoiseCVS"
+msgstr "TortoiseCVS كلاسيك"
+
+#: ../build/TortoiseCVS.iss:77
+msgid "Daniel Jackson DanAlpha"
+msgstr "DanAlpha دانيال جاكسون"
+
+#: ../build/TortoiseCVS.iss:78 ../build/TortoiseCVS.iss:351
+msgid "Chinese characters"
+msgstr "الأحرف الصينية"
+
+#: ../build/TortoiseCVS.iss:79
+msgid "Translations"
+msgstr "ترجمة"
+
+#: ../build/TortoiseCVS.iss:101
+msgid "Pageant SSH agent"
+msgstr ""
+
+#: ../build/TortoiseCVS.iss:354
+msgid "Error"
+msgstr "الخطأ"
+
+#: ../build/TortoiseCVS.iss:410
+msgid "Help"
+msgstr "ساعد"
+
+#: ../build/TortoiseCVS.iss:411
+msgid "User Guide (English)"
+msgstr "(دليل المستخدم (بالإنجليزية"
+
+#: ../build/TortoiseCVS.iss:412
+msgid "User Guide (French)"
+msgstr "(دليل المستخدم (بالفرنسية"
+
+#: ../build/TortoiseCVS.iss:413
+msgid "User Guide (Russian)"
+msgstr "(دليل المستخدم (بالروسية"
+
+#: ../build/TortoiseCVS.iss:414
+#, fuzzy
+msgid "User Guide (Simplified Chinese)"
+msgstr "(دليل المستخدم (بالصينية المبسطة"
+
+#: ../build/TortoiseCVS.iss:415
+msgid "Preferences"
+msgstr "التفضيلات"
+
+#: ../build/TortoiseCVS.iss:416
+msgid "About"
+msgstr "عن"
+
+#: ../build/TortoiseCVS.iss:430
+msgid "Are you sure you want to completely remove %1 and all of its components?%n%nPLEASE NOTE that uninstalling requires a reboot. If you want to install another version of TortoiseCVS, there is no need to uninstall first."
+msgstr ""
+
+#: ../build/TortoiseCVS.iss:433
+msgid "Preparing for installation"
+msgstr "تحضير التثبيت"
+
+#: ../build/TortoiseCVS.iss:434
+msgid "As part of the installation, Windows Explorer needs to be restarted.%nThe installer can do this for you, or you can restart Windows instead at the end of the installation."
+msgstr "كجزء من عملية التثبيت ، ويندوز إكسبلورر يحتاج إلى إعادة.%n يمكن المثبت القيام بذلك نيابة عنك ، أو يمكنك إعادة تشغيل ويندوز بدلا من ذلك في نهاية التثبيت"
+
+#: ../build/TortoiseCVS.iss:435
+msgid "Restart Windows Explorer when necessary"
+msgstr "إعادة تشغيل ويندوز إكسبلورر عند الضرورة"
+
+#: ../build/TortoiseCVS.iss:436
+msgid "Restart Windows after installation"
+msgstr "إعادة تشغيل ويندوز بعد التثبيت"
+
+#: ../build/TortoiseCVS.iss:437
+msgid "Finishing the installation"
+msgstr "الانتهاء من التثبيت"
+
+#: ../build/TortoiseCVS.iss:438
+msgid "Restarting Windows Explorer"
+msgstr "إعادة تشغيل ويندوز إكسبلورر"

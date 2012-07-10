@@ -1,0 +1,15 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="wait4cvs">
+        <DirectoryRef Id="TOOLS_INSTALLDIR" FileSource="$(var.MARCH_HARE)\..\..\wait4cvs\">
+            <Component Id="wait4cvs" Guid="4b72935c-06e6-4c57-9947-1f02600d2149" DiskId="5">
+                <File Id="wait4cvs.exe" Name="wait4cvs.exe" />
+            </Component>
+        </DirectoryRef>
+
+        <FeatureRef Id="ServerComponents">
+            <ComponentRef Id="wait4cvs" />
+        </FeatureRef>
+    </Fragment>
+</Wix>

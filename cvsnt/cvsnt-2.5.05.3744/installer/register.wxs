@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="register">
+        <Binary Id="Installer" SourceFile="$(var.CVSNT_BASE)\installer.dll" />
+        <CustomAction Id="RegisterInstall" BinaryKey="Installer" DllEntry="CustomActionInstall" Impersonate="yes" />
+        <CustomAction Id="RegisterUninstall" BinaryKey="Installer" DllEntry="CustomActionUninstall" Impersonate="yes" />
+        <InstallExecuteSequence>
+            <Custom Action="RegisterInstall" Sequence="6101">$CommandLineFiles &gt; 2</Custom>
+            <Custom Action="RegisterUninstall" Sequence="6102">$CommandLineFiles = 2</Custom>
+        </InstallExecuteSequence>
+    </Fragment>
+</Wix>

@@ -1,0 +1,12 @@
+release
+Debug
+udebug
+*.user
+*.ncb
+*.suo
+Release
+debug
+x64
+*.rsp
+ReleaseD
+cvsnt-version.h

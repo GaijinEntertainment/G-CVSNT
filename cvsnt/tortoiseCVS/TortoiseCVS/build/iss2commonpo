@@ -1,0 +1,9 @@
+#!/bin/bash
+shopt -s igncr #
+FILENAME=`echo "$1" | sed "s/\//\\\\\\\\\\\\//g"`
+grep -n "^.*$2(\"[^\"]*\")" "$1" | \
+	sed -n "s/^\([^:]*\).*$2(\(\"[^\"]*\"\).*$/#: "$FILENAME":\1\nmsgid \2\nmsgstr \"\"\n/gp" | \
+	msguniq
+
+exit 0
+

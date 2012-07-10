@@ -1,0 +1,4204 @@
+# TortoiseCVS - enjoyable version control
+# http://www.tortoisecvs.org
+# Polish (pl_PL) language .po-file
+# 
+# 	FileName: pl_PL.po
+# 	Polish language version
+# 	Translation by: Leszek Tomanek leszek.tomanek@interia.pl
+# 
+# 	Nazwa pliku: pl_PL.po
+# 	Polska wersja językowa
+# 	Tłumaczenie: Leszek Tomanek leszek.tomanek@interia.pl
+# 	wersja: 1.0
+# 
+# Tłumaczenie specjalnych słów:
+# release		wydawać, wydanie, zwolnić, udostępnić, uwolnienie - relese (czasownik) uwolnij, publikowanie
+# revision		zmiana, korekta, poprawka, wersja
+# tag			etykieta
+# keyword		słowo kluczowe
+# check
+# checkin		Pobierz do kontroli
+# checkout		Zwróć kontrolę
+# patch			łatka
+# branch			gałąź, rozgałęzienie
+# abandon		porzuć
+# abort			przerwij
+# working		robocza/y
+# 
+# nie zostały przetłumaczone słowa (głównie po to, aby nie wprowadzać zamieszania):
+# debug
+# log
+# Web Log
+# Attic
+# sandbox
+# 
+msgid ""
+msgstr ""
+"Project-Id-Version: TortoiseCVS\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2006-06-19 22:45+0100\n"
+"Last-Translator: Torsten Martinsen <torsten@vip.cybercity.dk>\n"
+"Language-Team: pl_PL <ADDRESS>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Polish\n"
+"X-Poedit-Country: POLAND\n"
+
+#: ContextMenus/DefaultMenus.cpp:43
+msgid "Syntax error"
+msgstr "Błąd syntaktyczny"
+
+#: ContextMenus/DefaultMenus.cpp:61
+msgid "Unexpected end of file"
+msgstr "Nieoczekiwany koniec pliku"
+
+#: ContextMenus/DefaultMenus.cpp:187
+#, c-format
+msgid ""
+"Error while parsing config file\n"
+"(\"%s\" line %d): %s"
+msgstr ""
+"Błąd podczas przetwarzania pliku konfiguracyjnego\n"
+"(\"%s\" linia %d): %s"
+
+#: CVSGlue/CVSAction.cpp:48
+msgid ""
+"Tortoise Tip:  Sometimes you get this error if you have the repository folder wrong in the Checkout dialog.  Make sure you have a slash at the start of the folder name, and that the case and path are correct.  Watch out for spurious trailing characters.\n"
+"\n"
+"Examples are:  \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/cvsgui\""
+msgstr ""
+"Wskazówka Tortoise: Ten błąd powstaje w momencie podania błędnego folderu repozytorium, z którego będzie pobierany moduł. Sprawdź, czy na samym początku nazwy repozytorium znajduje się \"/\" (dla repozytorium lokalnego tego znaku ma nie być, dla repozytorium na serwerze odległym ma być). Zwróć uwagę również na wielkość znaków oraz znaki interpunkcyjne jak \":\".\n"
+"\n"
+"Przykłady poprawnych lokalizacji:\n"
+"Lokalne - \"C:\\RepozytoriumCVS\\\", \"C:\\MojFolder\\CVSRep\\\"\n"
+"Odległe - \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/tortoisecvs\""
+
+#: CVSGlue/CVSAction.cpp:369
+#, fuzzy
+msgid ""
+"Tortoise Tip: Apparently you are using the :local: protocol, and you have an older version of CVSNT installed than the one included with TortoiseCVS. To resolve this problem, do one of the following:\n"
+"1) Don't use :local: - add the repository to your local CVSNT server\n"
+"   (Control Panel/CVS for NT/Repositories) and use a network protocol\n"
+"   (e.g. :pserver: or :sspi:) to access the repository.\n"
+"   This requires a fresh checkout.\n"
+"2) Remove your local CVSNT server installation if you don't need it.\n"
+"3) Update your local CVSNT server installation to the same version included\n"
+"   with TortoiseCVS."
+msgstr ""
+"Wskazówka Tortoise: Najwyraźniej używasz protokołu :local: oraz posiadasz starszą wersję CVSNT niż ta załączona do TortoiseCVS. Aby rozwiązać ten problem wykonaj jeden z następujących kroków:\n"
+"1) Nie używaj protokołu :local: - dodaj repozytorium do loklanego servera CVSNT\n"
+"   (Panel sterowania/CVS dla NT/Repozytorium) i użyj protokołu sieciowego\n"
+"   (np. :pserver: lub :sspi:) aby uzyskać dostęp do repozytorium.\n"
+"   Wykonanie tego kroku wymaga ponownego pobrania plików do edycji.\n"
+"2) Usuń server CVSNT, jeśli z niego nie korzystasz.\n"
+"3) Pobierz najnowszą wersję servera CVSNT (np. 2.0.62.1817)"
+
+#: CVSGlue/CVSAction.cpp:404
+msgid "Internal error, CVSAction::DoCommand used twice within same process."
+msgstr "Wewnętrzny błąd, CVSAction::DoCommand użyta dwókrotnie dla tego samego procesu."
+
+#: CVSGlue/CVSAction.cpp:523
+#, c-format
+msgid ""
+"In %s: %s\n"
+"CVSROOT=%s"
+msgstr ""
+"W %s: %s\n"
+"CVSROOT=%s"
+
+#: CVSGlue/CVSAction.cpp:555
+#, c-format
+msgid ""
+"Trouble launching the CVS process:\n"
+"%s\n"
+"On folder: %s\n"
+"%s\n"
+"Please check there is a cvs.exe in the same folder as TortoiseCVS or on the path."
+msgstr ""
+"Wystąpił problem z uruchomieniem procesu CVS:\n"
+"%s\n"
+"W folderze: %s\n"
+"%s\n"
+"Proszę sprawdzić czy cvs.exe znajduje się w tym samym folderze co TortoiseCVS."
+
+#: CVSGlue/CVSAction.cpp:608
+msgid "CVS operation aborted by user request"
+msgstr "Polecenie CVS przerwane na żądanie użytkownika"
+
+#: CVSGlue/CVSAction.cpp:615
+msgid "Success, CVS operation completed"
+msgstr "Sukces, polecenie CVS zakończone pomyślnie"
+
+#: CVSGlue/CVSAction.cpp:619
+msgid "Error, CVS operation failed"
+msgstr "Błąd, polecenie CVS nieudane"
+
+#: CVSGlue/CVSAction.cpp:660
+msgid "Error, one of the CVS operations failed"
+msgstr "Błąd, jedno z poleceń CVS nie zostało wykonane"
+
+#: CVSGlue/CVSAction.cpp:920
+#, fuzzy, c-format
+msgid ""
+"%s has been modified. Do you want to discard your local changes and revert to the most current version in the repository?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Unedit command (take no action)."
+msgstr ""
+"Plik %s został zmieniony. Czy chcesz anulować zmiany lokalne i przywrócić najświeższą wersję z repozytorium ?\n"
+"Wybierz \"Tak\", aby to uczynić lub \"Nie\", aby anulować polecenie."
+
+#: CVSGlue/CVSAction.cpp:935
+msgid ""
+"You have altered files in this repository. See the main TortoiseCVS dialog for details.\n"
+"Do you want to discard your local changes?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Release command (take no action)."
+msgstr ""
+"Pliki w repozytorium zostały zmienione. Zobacz okno postępu aby dowiedzieć się więcej.\n"
+"Czy chcesz anulować zmiany lokalne ?\n"
+"Wybierz \"Tak\", aby to uczynić lub \"Nie\", aby anulować polecenie."
+
+#: CVSGlue/CVSAction.cpp:960
+#, c-format
+msgid ""
+"The server's host key is not cached in the registry.\n"
+"Key fingerprint: %s\n"
+"If you trust this host, hit \"Yes\" to add the key to the cache.\n"
+"If you want to connect just once, hit \"No\".\n"
+"If you don't trust this host, hit \"Cancel\".\n"
+msgstr ""
+"Klucz serwera nie znajduje się w pamięci podręcznej rejestru. \n"
+"Odcisk klucza: %s\n"
+"Jeśli ufasz temu serwerowi wybierz \"Tak\" aby dodać klucz do pamięci podręcznej.\n"
+"Jeśli chcesz się połączyć tylko raz, wybierz \"Nie\".\n"
+"Jeśli nie ufasz temu serwerowi, wybierz \"Anuluj\".\n"
+
+#: CVSGlue/CVSAction.cpp:1500
+msgid "Retrying command with encryption disabled\n"
+msgstr "Wznowienie polecenia z enkrypcją wyłączone\n"
+
+#: CVSGlue/CVSAction.cpp:1513
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s on %s"
+msgstr ""
+"Brak repozytorium CVS dla folderu:\n"
+"\n"
+"%s on %s"
+
+#: CVSGlue/CVSAction.cpp:1519
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s"
+msgstr ""
+"Brak repozytorium CVS dla folderu:\n"
+"\n"
+"%s"
+
+#: CVSGlue/CVSAction.cpp:1525
+msgid "If this is the wrong folder, correct it and try again. If you want to initialise a new repository with \"cvs init\" then check the box below and TortoiseCVS will try again."
+msgstr "Jeśli to jest nieprawidłowy folder, napraw go i spróbuj ponownie. Jeśli chcesz zainicjalizować nowe repozytorium \"cvs init\" zaznacz kwadrat poniżej, a TortoiseCVS spróbuje ponownie."
+
+#: CVSGlue/CVSAction.cpp:1530
+msgid "&Initialise a new repository here (makes a CVSROOT folder)"
+msgstr "&Inicjalizuj nowe repozytorium tutaj (tworzy folder CVSROOT)"
+
+#: CVSGlue/CvsEntries.cpp:572
+msgid "Ignored Folder"
+msgstr "Ignorowane foldery"
+
+#: CVSGlue/CvsEntries.cpp:574
+#, fuzzy
+msgid "Non-CVS Folder"
+msgstr "Folder poza repozytorium CVS"
+
+#: CVSGlue/CvsEntries.cpp:576 DialogsWxw/AddFilesDialog.cpp:2244
+#: DialogsWxw/AddFilesDialog.cpp:2284 TortoiseShell/ColumnProvider.cpp:234
+msgid "Folder"
+msgstr "Folder"
+
+#: CVSGlue/CvsEntries.cpp:610 CVSGlue/CVSStatus.cpp:1649
+msgid "Ignored"
+msgstr "Ignorowane"
+
+#: CVSGlue/CvsEntries.cpp:614
+#, fuzzy
+msgid "Non-CVS file"
+msgstr "Folder poza repozytorium CVS"
+
+#: CVSGlue/CvsEntries.cpp:618
+msgid "Conflict"
+msgstr ""
+
+#: CVSGlue/CvsEntries.cpp:622 CVSGlue/CVSStatus.cpp:1519
+msgid "Binary"
+msgstr "Binarny"
+
+#: CVSGlue/CvsEntries.cpp:622
+#, fuzzy
+msgid "Mod. Binary"
+msgstr "Binarny"
+
+#: CVSGlue/CvsEntries.cpp:626 DialogsWxw/AddFilesDialog.cpp:2302
+#: DialogsWxw/CommitDialog.cpp:951 DialogsWxw/HistoryDialog.cpp:403
+#: DialogsWxw/MakePatchDialog.cpp:540 DialogsWxw/ModuleBasicsPage.cpp:392
+msgid "File"
+msgstr "Plik"
+
+#: CVSGlue/CvsEntries.cpp:626
+#, fuzzy
+msgid "Mod. File"
+msgstr "Moduł"
+
+#: CVSGlue/CVSStatus.cpp:1434
+msgid "Normal"
+msgstr "Normalny"
+
+#: CVSGlue/CVSStatus.cpp:1440
+msgid "Only keyword names"
+msgstr "Tylko nazwy słów kluczowych"
+
+#: CVSGlue/CVSStatus.cpp:1446
+msgid "Only keyword values"
+msgstr "Tylko wartości słów kluczowych"
+
+#: CVSGlue/CVSStatus.cpp:1452
+msgid "Include locker"
+msgstr "Dołącz blokadę"
+
+#: CVSGlue/CVSStatus.cpp:1458
+msgid "Disabled"
+msgstr "Wyłączony"
+
+#: CVSGlue/CVSStatus.cpp:1464
+msgid "None"
+msgstr "Żaden"
+
+#: CVSGlue/CVSStatus.cpp:1470
+msgid "Custom"
+msgstr "Własny"
+
+#: CVSGlue/CVSStatus.cpp:1501
+msgid "Unknown"
+msgstr "Nieznany"
+
+#: CVSGlue/CVSStatus.cpp:1507
+msgid "Text/ASCII"
+msgstr "Tekst/ASCII"
+
+#: CVSGlue/CVSStatus.cpp:1513
+msgid "Text/Unicode"
+msgstr "Tekst/Unicode"
+
+#: CVSGlue/CVSStatus.cpp:1536
+msgid "Binary diff"
+msgstr "Binarne różnice"
+
+#: CVSGlue/CVSStatus.cpp:1540
+msgid "Compressed"
+msgstr "Skompresowane"
+
+#: CVSGlue/CVSStatus.cpp:1544
+msgid "UNIX line endings"
+msgstr "Format zakończeń lini UNIX"
+
+#: CVSGlue/CVSStatus.cpp:1548
+#, fuzzy
+msgid "Static file"
+msgstr "pliki łatek"
+
+#: CVSGlue/CVSStatus.cpp:1589 CVSGlue/CVSStatus.cpp:1637
+#: DialogsWxw/IconSetDialog.cpp:49
+msgid "Not in CVS"
+msgstr "Poza repozytorium CVS"
+
+#: CVSGlue/CVSStatus.cpp:1595
+msgid "Unmodified r/o"
+msgstr "Niezmodyfikowane r/o"
+
+#: CVSGlue/CVSStatus.cpp:1601
+msgid "Unmodified"
+msgstr "Niezmodyfikowane"
+
+#: CVSGlue/CVSStatus.cpp:1607
+msgid "Edited"
+msgstr "Edytowane"
+
+#: CVSGlue/CVSStatus.cpp:1613
+msgid "Edited r/o"
+msgstr "Edytowane r/o"
+
+#: CVSGlue/CVSStatus.cpp:1619 DialogsWxw/IconSetDialog.cpp:46
+msgid "Modified"
+msgstr "Zmodyfikowane"
+
+#: CVSGlue/CVSStatus.cpp:1625 DialogsWxw/IconSetDialog.cpp:47
+#: TortoiseShell/ColumnProvider.cpp:266
+msgid "Added"
+msgstr "Dodane"
+
+#: CVSGlue/CVSStatus.cpp:1631 DialogsWxw/IconSetDialog.cpp:48
+msgid "Needs merge"
+msgstr "Wymaga scalenia"
+
+#: CVSGlue/CVSStatus.cpp:1643 DialogsWxw/CheckoutDialog.cpp:150
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102 DialogsWxw/MakeModuleDialog.cpp:66
+#: DialogsWxw/ModuleBasicsPage.cpp:213 DialogsWxw/ModuleBasicsPage.cpp:224
+msgid "Module"
+msgstr "Moduł"
+
+#: CVSGlue/CVSStatus.cpp:1655
+msgid "Removed"
+msgstr "Usunięte"
+
+#: CVSGlue/CVSStatus.cpp:1661
+msgid "Renamed"
+msgstr "Zmieniona nazwa"
+
+#: CVSGlue/CVSStatus.cpp:1667
+msgid "Missing"
+msgstr "Brakujące"
+
+#: CVSGlue/ndir.cpp:202
+#, c-format
+msgid "can't open folder `%s'."
+msgstr "nie mozna otworzyć folderu `%s'."
+
+#: CVSGlue/ndir.cpp:211
+#, c-format
+msgid "done."
+msgstr "zakończone."
+
+#: DialogsWxw/AboutDialog.cpp:64
+msgid "TortoiseCVS - About"
+msgstr "TortoiseCVS - O programie"
+
+#: DialogsWxw/AboutDialog.cpp:77 DialogsWxw/LoginDialog.cpp:33
+#: DialogsWxw/MessageDialog.cpp:29 TortoiseAct/TortoisePreferences.cpp:87
+#: Utils/LaunchTortoiseAct.cpp:77 Utils/ProcessUtils.cpp:68
+#: Utils/TortoiseException.cpp:30 Utils/TortoiseException.cpp:47
+msgid "TortoiseCVS"
+msgstr "TortoiseCVS"
+
+#: DialogsWxw/AboutDialog.cpp:79
+msgid "UNSTABLE"
+msgstr "NIESTABILNA"
+
+#: DialogsWxw/AboutDialog.cpp:82
+msgid "DEBUG"
+msgstr "DEBUG"
+
+#: DialogsWxw/AboutDialog.cpp:85
+msgid "version"
+msgstr "wersja"
+
+#: DialogsWxw/AboutDialog.cpp:103 DialogsWxw/AddFilesDialog.cpp:497
+#: DialogsWxw/AnnotateDialog.cpp:218 DialogsWxw/BranchTagDlg.cpp:167
+#: DialogsWxw/CheckoutDialog.cpp:156 DialogsWxw/CheckQueryDlg.cpp:56
+#: DialogsWxw/CommandDialog.cpp:77 DialogsWxw/CommitDialog.cpp:416
+#: DialogsWxw/CreditsDialog.cpp:165 DialogsWxw/EditDialog.cpp:154
+#: DialogsWxw/GraphDialog.cpp:233 DialogsWxw/GraphSettingsDialog.cpp:117
+#: DialogsWxw/HistoryDialog.cpp:537 DialogsWxw/IconSetDialog.cpp:135
+#: DialogsWxw/LogConfigDialog.cpp:124 DialogsWxw/MakeModuleDialog.cpp:92
+#: DialogsWxw/MakePatchDialog.cpp:329 DialogsWxw/MergeDlg.cpp:154
+#: DialogsWxw/PreferencesDialog.cpp:378 DialogsWxw/ProgressDialog.cpp:187
+#: DialogsWxw/ReleaseDialog.cpp:143 DialogsWxw/RenameDialog.cpp:83
+#: DialogsWxw/UpdateDlg.cpp:175
+msgid "OK"
+msgstr "OK"
+
+#: DialogsWxw/AboutDialog.cpp:110
+msgid "&Credits..."
+msgstr "&Twórcy..."
+
+#: DialogsWxw/AboutDialog.cpp:128 DialogsWxw/AboutDialog.cpp:170
+#, c-format
+msgid "%s client version"
+msgstr "%s wersja klienta"
+
+#: DialogsWxw/AboutDialog.cpp:129 DialogsWxw/AboutDialog.cpp:150
+#: DialogsWxw/AboutDialog.cpp:171 DialogsWxw/CommandDialog.cpp:61
+#: DialogsWxw/CommitDialog.cpp:338 DialogsWxw/CommitDialog.cpp:358
+#: DialogsWxw/CommitDialog.cpp:368 DialogsWxw/CommitDialog.cpp:768
+#: DialogsWxw/CreditsDialog.cpp:136 DialogsWxw/EditDialog.cpp:101
+#: DialogsWxw/EditDialog.cpp:112 DialogsWxw/EditDialog.cpp:127
+#: DialogsWxw/GraphDialog.cpp:396 DialogsWxw/GraphDialog.cpp:404
+#: DialogsWxw/GraphDialog.cpp:414 DialogsWxw/GraphDialog.cpp:424
+#: DialogsWxw/GraphDialog.cpp:435 DialogsWxw/GraphDialog.cpp:444
+#: DialogsWxw/GraphDialog.cpp:520 DialogsWxw/GraphDialog.cpp:527
+#: DialogsWxw/GraphDialog.cpp:535 DialogsWxw/GraphDialog.cpp:543
+#: DialogsWxw/GraphDialog.cpp:551 DialogsWxw/HistoryDialog.cpp:404
+#: DialogsWxw/HistoryDialog.cpp:410 DialogsWxw/HistoryDialog.cpp:415
+#: DialogsWxw/HistoryDialog.cpp:422 DialogsWxw/HistoryDialog.cpp:433
+#: DialogsWxw/HistoryDialog.cpp:439 DialogsWxw/HistoryDialog.cpp:445
+#: DialogsWxw/HistoryDialog.cpp:451 DialogsWxw/HistoryDialog.cpp:479
+#: DialogsWxw/HistoryDialog.cpp:1094 DialogsWxw/IconSetDialog.cpp:119
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102
+#: DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104 DialogsWxw/MakeModuleDialog.cpp:71
+#: DialogsWxw/ModuleBasicsPage.cpp:208 DialogsWxw/ModuleBasicsPage.cpp:209
+#: DialogsWxw/ModuleBasicsPage.cpp:210 DialogsWxw/ModuleBasicsPage.cpp:211
+#: DialogsWxw/ModuleBasicsPage.cpp:212 DialogsWxw/ModuleBasicsPage.cpp:213
+#: DialogsWxw/ModuleBasicsPage.cpp:214 DialogsWxw/ModuleBasicsPage.cpp:215
+#: DialogsWxw/ModuleBasicsPage.cpp:339 DialogsWxw/PreferencesDialog.cpp:459
+#: DialogsWxw/PreferencesDialog.cpp:873 DialogsWxw/RenameDialog.cpp:63
+#: TortoiseShell/PropSheet.cpp:215 TortoiseShell/PropSheet.cpp:218
+#: TortoiseShell/PropSheet.cpp:221 TortoiseShell/PropSheet.cpp:224
+#: TortoiseShell/PropSheet.cpp:227 TortoiseShell/PropSheet.cpp:230
+#: TortoiseShell/PropSheet.cpp:233 TortoiseShell/PropSheet.cpp:236
+#: TortoiseShell/PropSheet.cpp:239
+msgid ":"
+msgstr ":"
+
+#: DialogsWxw/AboutDialog.cpp:149
+#, c-format
+msgid "%s server version"
+msgstr "%s wersja serwera"
+
+#: DialogsWxw/AddFilesDialog.cpp:309
+msgid "Yes"
+msgstr "Tak"
+
+#: DialogsWxw/AddFilesDialog.cpp:311
+msgid "No"
+msgstr "Nie"
+
+#: DialogsWxw/AddFilesDialog.cpp:407
+msgid "TortoiseCVS - Add"
+msgstr "TortoiseCVS - Dodawanie"
+
+#: DialogsWxw/AddFilesDialog.cpp:442
+msgid "Confirm the files to add."
+msgstr "Zatwierdź pliki do dodania."
+
+#: DialogsWxw/AddFilesDialog.cpp:444
+msgid "Hint: Right-click to change file format."
+msgstr "Podpowiedź: Kliknij prawym przyciskiem, aby zmienić opcje dla pliku."
+
+#: DialogsWxw/AddFilesDialog.cpp:448
+msgid "Show items in &subfolders"
+msgstr "Pokaż pozycje w podfolderach"
+
+#: DialogsWxw/AddFilesDialog.cpp:464 DialogsWxw/CommitDialog.cpp:389
+#: DialogsWxw/ConflictListDialog.cpp:123 DialogsWxw/EditorListListCtrl.cpp:38
+#: DialogsWxw/HistoryDialog.cpp:1093 DialogsWxw/MakePatchDialog.cpp:308
+msgid "Filename"
+msgstr "Nazwa pliku"
+
+#: DialogsWxw/AddFilesDialog.cpp:465
+msgid "Type"
+msgstr "Typ"
+
+#: DialogsWxw/AddFilesDialog.cpp:466
+msgid "Add"
+msgstr "Dodaj"
+
+#: DialogsWxw/AddFilesDialog.cpp:467 DialogsWxw/AddFilesDialog.cpp:2481
+#: DialogsWxw/CommitDialog.cpp:391 DialogsWxw/ConflictListDialog.cpp:124
+msgid "Format"
+msgstr "Format"
+
+#: DialogsWxw/AddFilesDialog.cpp:468 DialogsWxw/AddFilesDialog.cpp:2454
+#: DialogsWxw/HistoryDialog.cpp:438 TortoiseShell/PropSheet.cpp:235
+msgid "Keywords"
+msgstr "Słowa kluczowe"
+
+#: DialogsWxw/AddFilesDialog.cpp:499 DialogsWxw/BranchTagDlg.cpp:169
+#: DialogsWxw/CheckoutDialog.cpp:158 DialogsWxw/CommandDialog.cpp:79
+#: DialogsWxw/CommitDialog.cpp:418 DialogsWxw/EditDialog.cpp:156
+#: DialogsWxw/FindDialog.cpp:38 DialogsWxw/GraphSettingsDialog.cpp:119
+#: DialogsWxw/HistoryDialog.cpp:539 DialogsWxw/IconSetDialog.cpp:136
+#: DialogsWxw/LogConfigDialog.cpp:126 DialogsWxw/MakeModuleDialog.cpp:94
+#: DialogsWxw/MakePatchDialog.cpp:331 DialogsWxw/MergeDlg.cpp:156
+#: DialogsWxw/PreferencesDialog.cpp:380 DialogsWxw/ReleaseDialog.cpp:145
+#: DialogsWxw/RenameDialog.cpp:85 DialogsWxw/UpdateDlg.cpp:177
+#: DialogsWxw/YesNoAllDialog.cpp:81
+msgid "Cancel"
+msgstr "Anuluj"
+
+#: DialogsWxw/AddFilesDialog.cpp:577 TortoiseAct/TortoiseAct.cpp:484
+msgid "Could not connect to server"
+msgstr "Nie można połączyc z serwerem"
+
+#: DialogsWxw/AddFilesDialog.cpp:834 DialogsWxw/AddFilesDialog.cpp:2509
+#: DialogsWxw/CheckoutDialog.cpp:152 DialogsWxw/HistoryDialog.cpp:444
+#: DialogsWxw/MakeModuleDialog.cpp:80
+msgid "Options"
+msgstr "Opcje"
+
+#: DialogsWxw/AddFilesDialog.cpp:858 DialogsWxw/CommitDialog.cpp:668
+#: DialogsWxw/ConflictListDialog.cpp:144 DialogsWxw/MakePatchDialog.cpp:431
+#, c-format
+msgid "%d file(s)"
+msgstr "%d plik(i)"
+
+#: DialogsWxw/AddFilesDialog.cpp:922 DialogsWxw/AddFilesDialog.cpp:2403
+#: DialogsWxw/CommitDialog.cpp:146 DialogsWxw/MakePatchDialog.cpp:114
+msgid "Check"
+msgstr "Zaznacz"
+
+#: DialogsWxw/AddFilesDialog.cpp:922 DialogsWxw/AddFilesDialog.cpp:2403
+msgid "Check item(s)"
+msgstr "Zaznacz pozycje"
+
+#: DialogsWxw/AddFilesDialog.cpp:924 DialogsWxw/AddFilesDialog.cpp:2405
+#: DialogsWxw/CommitDialog.cpp:147 DialogsWxw/MakePatchDialog.cpp:115
+msgid "Uncheck"
+msgstr "Odznacz"
+
+#: DialogsWxw/AddFilesDialog.cpp:924 DialogsWxw/AddFilesDialog.cpp:2405
+msgid "Uncheck item(s)"
+msgstr "Odznacz pozycje"
+
+#: DialogsWxw/AddFilesDialog.cpp:926 DialogsWxw/AddFilesDialog.cpp:2407
+msgid "Autoignore"
+msgstr "Automatyczne ignorowanie"
+
+#: DialogsWxw/AddFilesDialog.cpp:926 DialogsWxw/AddFilesDialog.cpp:2407
+msgid "Ignore item(s) according to CVS ignore rules"
+msgstr "Ignoruj pozycje zgodnie z regułą ignorowania CVS"
+
+#: DialogsWxw/AddFilesDialog.cpp:932 DialogsWxw/AddFilesDialog.cpp:2415
+msgid "Check recursively"
+msgstr "Zaznacz rekurencyjnie"
+
+#: DialogsWxw/AddFilesDialog.cpp:933 DialogsWxw/AddFilesDialog.cpp:2416
+msgid "Check item(s) recursively"
+msgstr "Zaznacz pozycje rekurencyjnie"
+
+#: DialogsWxw/AddFilesDialog.cpp:935 DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck recursively"
+msgstr "Odznacz rekurencyjnie"
+
+#: DialogsWxw/AddFilesDialog.cpp:936 DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck item(s) recursively"
+msgstr "Odznacz pozycje rekurencyjnie"
+
+#: DialogsWxw/AddFilesDialog.cpp:938 DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Autoignore recursively"
+msgstr "Automatyczne ignorowanie (rekurencyjnie)"
+
+#: DialogsWxw/AddFilesDialog.cpp:939 DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Ignore item(s) recursively according to CVS ignore rules"
+msgstr "Ignoruj pozycje rekurencyjnie zgodnie z regułami ignorowania CVS"
+
+#: DialogsWxw/AddFilesDialog.cpp:946 DialogsWxw/AddFilesDialog.cpp:2522
+#: DialogsWxw/CommitDialog.cpp:204 DialogsWxw/ConflictListDialog.cpp:313
+#: DialogsWxw/EditorListListCtrl.cpp:133 DialogsWxw/MakePatchDialog.cpp:142
+msgid "Explorer"
+msgstr "Explorer"
+
+#: DialogsWxw/AddFilesDialog.cpp:1093
+#, c-format
+msgid "Invalid file format: %s"
+msgstr "Niepoprawny format pliku %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:1095
+msgid "Please specify a valid file format for all files you want to add."
+msgstr "Określ poprawny format dla wszystkich plików, które chcesz dodać."
+
+#: DialogsWxw/AddFilesDialog.cpp:2298 DialogsWxw/CommitDialog.cpp:949
+#: DialogsWxw/MakePatchDialog.cpp:536
+#, c-format
+msgid "%s File"
+msgstr "%s plik"
+
+#: DialogsWxw/AddFilesDialog.cpp:2445
+#, c-format
+msgid "Set keyword expansion to %s"
+msgstr "Ustaw słowo kluczowe dla %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:2469
+#, c-format
+msgid "Set format to %s"
+msgstr "Ustaw format na %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect"
+msgstr "Automatyczne wykrywanie"
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect file format"
+msgstr "Automatyczne wykrywanie formatu pliku"
+
+#: DialogsWxw/AddFilesDialog.cpp:2500
+#, c-format
+msgid "Set options to %s"
+msgstr "Ustaw opcje dla %s"
+
+#: DialogsWxw/AnnotateDialog.cpp:160
+msgid "TortoiseCVS - Annotate"
+msgstr "TortoiseCVS - Adnotacje"
+
+#: DialogsWxw/AnnotateDialog.cpp:193
+msgid "Line"
+msgstr "Linia"
+
+#: DialogsWxw/AnnotateDialog.cpp:194 DialogsWxw/CheckoutDialog.cpp:151
+#: DialogsWxw/GraphDialog.cpp:395 DialogsWxw/HistoryDialog.cpp:467
+#: DialogsWxw/ModuleBasicsPage.cpp:393 TortoiseShell/PropSheet.cpp:223
+msgid "Revision"
+msgstr "Rewizja"
+
+#: DialogsWxw/AnnotateDialog.cpp:195 DialogsWxw/GraphDialog.cpp:413
+#: DialogsWxw/HistoryDialog.cpp:469
+msgid "Author"
+msgstr "Autor"
+
+#: DialogsWxw/AnnotateDialog.cpp:196 DialogsWxw/EditorListListCtrl.cpp:40
+#: DialogsWxw/GraphDialog.cpp:403 DialogsWxw/HistoryDialog.cpp:468
+#: DialogsWxw/ModuleBasicsPage.cpp:394
+msgid "Date"
+msgstr "Data"
+
+#: DialogsWxw/AnnotateDialog.cpp:198 DialogsWxw/CommitDialog.cpp:357
+#: DialogsWxw/GraphDialog.cpp:434 DialogsWxw/HistoryDialog.cpp:471
+msgid "Bug Number"
+msgstr "Numer błędu"
+
+#: DialogsWxw/AnnotateDialog.cpp:200
+msgid "Text"
+msgstr "Tekst"
+
+#: DialogsWxw/AnnotateDialog.cpp:221
+msgid "&Find"
+msgstr "Szukaj"
+
+#: DialogsWxw/AnnotateDialog.cpp:425 DialogsWxw/AnnotateListCtrl.cpp:218
+msgid "Highlight by Author"
+msgstr "Podświetl tego samego Autora"
+
+#: DialogsWxw/AnnotateDialog.cpp:430 DialogsWxw/AnnotateListCtrl.cpp:220
+msgid "Highlight by Revision"
+msgstr "Podświetl tą samą Rewizję"
+
+#: DialogsWxw/AnnotateDialog.cpp:435 DialogsWxw/AnnotateListCtrl.cpp:222
+msgid "Highlight by Date"
+msgstr "Podświetl tą samą Datę"
+
+#: DialogsWxw/AnnotateDialog.cpp:440 DialogsWxw/AnnotateListCtrl.cpp:224
+#, fuzzy
+msgid "Highlight by Bug Number"
+msgstr "Podświetl tego samego Autora"
+
+#: DialogsWxw/AnnotateDialog.cpp:445 DialogsWxw/AnnotateListCtrl.cpp:227
+msgid "Highlight by Age (Fixed)"
+msgstr "Podświetl ten sam wiek (Naprawione)"
+
+#: DialogsWxw/AnnotateDialog.cpp:450 DialogsWxw/AnnotateListCtrl.cpp:229
+msgid "Highlight by Age (Scaled)"
+msgstr "Podświetl ten sam wiek (Scalone)"
+
+#: DialogsWxw/AnnotateDialog.cpp:455 DialogsWxw/AnnotateListCtrl.cpp:214
+msgid "No Highlighting"
+msgstr "Bez podświetlenia"
+
+#: DialogsWxw/AnnotateDialog.cpp:480
+#, c-format
+msgid "Annotate %s"
+msgstr "Adnotacja %s"
+
+#: DialogsWxw/AnnotateDialog.cpp:529 DialogsWxw/WxwHelpers.cpp:497
+#: TortoiseAct/TortoiseActUtils.cpp:186 TortoiseAct/TortoiseActUtils.cpp:296
+msgid "This file is new and has never been committed to the server or is an empty file on the server."
+msgstr "Ten plik nie był jeszcze nigdy zatwierdzony w repozytorium"
+
+#: DialogsWxw/AnnotateDialog.cpp:637
+msgid "Continue search from the end of the file?"
+msgstr "Rozpocząć wyszukiwanie od końca pliku ?"
+
+#: DialogsWxw/AnnotateDialog.cpp:658
+msgid "Continue search from the beginning of the file?"
+msgstr "Rozpocząć wyszukiwanie od początku pliku ?"
+
+#: DialogsWxw/AnnotateDialog.cpp:668
+msgid "Search complete"
+msgstr "Wyszukiwanie zakończone"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:202 DialogsWxw/GraphDialog.cpp:893
+#: DialogsWxw/HistoryDialog.cpp:1191
+msgid "&Diff (working file)"
+msgstr "&Różnice (plik roboczy)"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:203 DialogsWxw/GraphDialog.cpp:894
+#: DialogsWxw/HistoryDialog.cpp:1192
+msgid "&View this revision"
+msgstr "Pokaż tą rewizję"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:204 DialogsWxw/GraphDialog.cpp:897
+#: DialogsWxw/HistoryDialog.cpp:1195
+msgid "&Annotate this revision"
+msgstr "Dodaj adnotację dla tej rewizji"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:205 DialogsWxw/GraphDialog.cpp:898
+#: DialogsWxw/HistoryDialog.cpp:1196
+msgid "&Get this revision (sticky)"
+msgstr "&Pobierz tą rewizję (lepkie)"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:206 DialogsWxw/GraphDialog.cpp:903
+#: DialogsWxw/HistoryDialog.cpp:1201
+msgid "&Save this revision as..."
+msgstr "Zapi&sz tą rewizję jako..."
+
+#: DialogsWxw/AnnotateListCtrl.cpp:210
+msgid "Show &log messages"
+msgstr "Pokaż zapis &logu"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:324
+#, c-format
+msgid "Retrieving log messages for %s"
+msgstr "Pobieranie zapisu logu dla %s"
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Tag"
+msgstr "TortoiseCVS - Etykieta"
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Create Branch"
+msgstr "TortoiseCVS - Tworzenie gałęzi"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "&Tag:"
+msgstr "&Etykieta"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "New &branch name:"
+msgstr "Nazwa nowej gałęzi:"
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+msgid "Name of tag"
+msgstr "Nazwa etykiety"
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+msgid "Name of branch"
+msgstr "Nazwa gałęzi"
+
+#: DialogsWxw/BranchTagDlg.cpp:111 DialogsWxw/RevOptions.cpp:80
+#: DialogsWxw/UpdateDlg.cpp:389
+msgid "&Update list..."
+msgstr "&Aktualizuj listę..."
+
+#: DialogsWxw/BranchTagDlg.cpp:112 DialogsWxw/MergeDlg.cpp:113
+#: DialogsWxw/RevOptions.cpp:83
+msgid "&Scan subfolders"
+msgstr "&Skanuj podfoldery"
+
+#: DialogsWxw/BranchTagDlg.cpp:115 DialogsWxw/MergeDlg.cpp:122
+#: DialogsWxw/RevOptions.cpp:94 DialogsWxw/UpdateDlg.cpp:390
+msgid "Retrieves a list of tags and branches from the server, and puts them in the dropdown box"
+msgstr "Odzyskuje listy etykiet i gałęzi z serwera i umieszcza je w rozwijanej liście"
+
+#: DialogsWxw/BranchTagDlg.cpp:124
+msgid "Check that the &files are unmodified"
+msgstr "Sprawdź pliki niezmodyfikowane"
+
+#: DialogsWxw/BranchTagDlg.cpp:126
+msgid "Ensures there are no uncommitted changes before performing the operation"
+msgstr "Sprawdza czy są niezatwierdzone zmiany przed wykonaniem polecenia"
+
+#: DialogsWxw/BranchTagDlg.cpp:133
+msgid "&Create new tag"
+msgstr "&Stwórz nową etykietę"
+
+#: DialogsWxw/BranchTagDlg.cpp:134
+msgid "&Move existing tag"
+msgstr "P&rzenieś etykietę"
+
+#: DialogsWxw/BranchTagDlg.cpp:135
+msgid "&Delete existing tag"
+msgstr "&Usuń etykietę"
+
+#: DialogsWxw/BranchTagDlg.cpp:138
+msgid "The tag will be assigned to the repository versions nearest to your working sources. This happens directly to the repository."
+msgstr "Etykieta będzie przypisana w repozytorium do wersji najbliższej wersji roboczej. Zostanie to uczynione bezpośrednio w repozytorium."
+
+#: DialogsWxw/BranchTagDlg.cpp:144
+msgid "&Create new branch"
+msgstr "&Stwórz nową gałąż"
+
+#: DialogsWxw/BranchTagDlg.cpp:145
+msgid "&Move existing branch"
+msgstr "&Przenieś istniejącą gałąź"
+
+#: DialogsWxw/BranchTagDlg.cpp:146
+msgid "&Delete existing branch"
+msgstr "&Skasuj istniejącą gałąź"
+
+#: DialogsWxw/BranchTagDlg.cpp:150
+msgid "The branch will be applied to the repository versions nearest to your working sources. This happens directly to the repository, leaving your working sources on the original branch."
+msgstr "Gałąź będzie przypisana w repozytorium do wersji najbliższej wersji roboczej. Zostanie to uczynione bezpośrednio w repozytorium, pozostawiając oryginalną wersję roboczą."
+
+#: DialogsWxw/BranchTagDlg.cpp:158
+msgid ""
+"Tag and branch names can contain letters, digits, \"-\" (dash) and \"_\" (underscore) only. In particular, this means no dots, and no spaces.\n"
+"They must also start with a letter."
+msgstr ""
+"Etykiety i nazwy gałęzi mogą zawierać tylko litery, cyfry, znaki \"-\" (myślnik) i \"_\" (podkreślenie). Oznacza to, że nie są akceptowane kropki i spacje.\n"
+"Muszą rozpoczynać się od litery."
+
+#: DialogsWxw/BranchTagDlg.cpp:234
+msgid "No tags found."
+msgstr "Brak etykiet."
+
+#: DialogsWxw/CheckoutDialog.cpp:138
+msgid "TortoiseCVS - Checkout Module"
+msgstr "TortoiseCVS - Pobranie modułu do kontroli"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:62
+msgid "Purpose of checkout"
+msgstr "Cel pobrania do kontroli"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:65
+msgid "Prevents creation of CVS admin folders"
+msgstr "Zapobiegaj tworzenia folderów administratorskich CVS"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:67
+msgid "&Checkout - for working on the module"
+msgstr "&Pobranie do kontroli - do pracy nad modułem"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:71
+msgid "&Export - for making a software release"
+msgstr "&Eksportuj - publikacja oprogramowania"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:81
+msgid "Normally TortoiseCVS will checkout files so they can be modified  If you check this, TortoiseCVS will set the files to read-only and you can use the Edit option to make them changeable."
+msgstr ""
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:84
+#, fuzzy
+msgid "Check out read only"
+msgstr "Pobieranie do kontroli plików tylko do odczytu"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:89
+msgid "Name of folder to create"
+msgstr "Nazwa folderu do utworzenia"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:92
+msgid "Use this name instead of module name for the new folder"
+msgstr "Użyj tej nazwy jako nowego folderu zamiast nazwy modułu"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:95
+msgid "Use &default folder name"
+msgstr "Użyj &domyślnego folderu"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:99
+msgid "Use &module name and tag/branch/revision as folder name"
+msgstr "Użyj nazwy &modułu i etykiety/gałęzi/rewizji jako nazwy folderu"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:100
+msgid "Enter your own &folder name"
+msgstr "Wprowadź własny &folder"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:107
+msgid "Custom folder name:"
+msgstr "Własny folder:"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:121
+msgid "Normally, text files checked out on Windows will use CRLF as the line ending. If you check this, TortoiseCVS will use UNIX line endings (LF only)."
+msgstr "Domyślnie zakończenia pobranych plików teksotwych będą zakończone znakami CRLF (Windows). Po wybraniu tej opcji pliki będą zakończone tylko znakiem LF (UNIX)."
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:124
+msgid "Use UNIX &line endings"
+msgstr "Format zakończeń &lini UNIX"
+
+#: DialogsWxw/CheckQueryDlg.cpp:41 DialogsWxw/HistoryDialog.cpp:1052
+#: DialogsWxw/YesNoDialog.cpp:30
+msgid "TortoiseCVS Question"
+msgstr "TortoiseCVS Pytanie"
+
+#: DialogsWxw/CommandDialog.cpp:52
+msgid "TortoiseCVS - Command"
+msgstr "TortoiseCVS - Polecenie"
+
+#: DialogsWxw/CommandDialog.cpp:60
+msgid "Command"
+msgstr "Polecenie"
+
+#: DialogsWxw/CommandDialog.cpp:64
+msgid "CVS command"
+msgstr "Polecenie CVS"
+
+#: DialogsWxw/CommitDialog.cpp:148 DialogsWxw/MakePatchDialog.cpp:116
+msgid "&Copy filename(s)"
+msgstr "Kopiuj plik(i)"
+
+#: DialogsWxw/CommitDialog.cpp:149 DialogsWxw/MakePatchDialog.cpp:117
+msgid "Copy &filename(s) with folders"
+msgstr "Kopiuj plik(i) z &folderami"
+
+#: DialogsWxw/CommitDialog.cpp:153
+#, fuzzy
+msgid "C&ommit selected files..."
+msgstr "Zatwierdź wybrane pliki"
+
+#: DialogsWxw/CommitDialog.cpp:157
+msgid "Get c&lean copy of selected files"
+msgstr "Pobierz czystą kopię zaznaczonych plików (&lepkie)"
+
+#: DialogsWxw/CommitDialog.cpp:168 DialogsWxw/ConflictListDialog.cpp:295
+#: DialogsWxw/MakePatchDialog.cpp:128
+msgid "&Diff..."
+msgstr "&Różnice..."
+
+#: DialogsWxw/CommitDialog.cpp:169 DialogsWxw/ConflictListDialog.cpp:296
+#: ../build/TortoiseMenus.config:195
+msgid "H&istory..."
+msgstr "H&istoria..."
+
+#: DialogsWxw/CommitDialog.cpp:170 DialogsWxw/ConflictListDialog.cpp:298
+#: TortoiseShell/PropSheet.cpp:242 ../build/TortoiseMenus.config:202
+msgid "Revision &Graph..."
+msgstr "&Graf rewizji..."
+
+#: DialogsWxw/CommitDialog.cpp:183
+msgid "CVS &Web Log..."
+msgstr "CVS &Web Log..."
+
+#: DialogsWxw/CommitDialog.cpp:188
+msgid "R&estore"
+msgstr "Odtwórz"
+
+#: DialogsWxw/CommitDialog.cpp:314
+msgid "TortoiseCVS - Commit"
+msgstr "TortoiseCVS - Zatwierdź"
+
+#: DialogsWxw/CommitDialog.cpp:333 DialogsWxw/ConflictListDialog.cpp:118
+#: DialogsWxw/EditorListDialog.cpp:95 DialogsWxw/MakePatchDialog.cpp:296
+#, c-format
+msgid "Folder: %s"
+msgstr "Folder: %s"
+
+#: DialogsWxw/CommitDialog.cpp:337 DialogsWxw/EditDialog.cpp:100
+msgid "Comment History"
+msgstr "Historia komentarzy"
+
+#: DialogsWxw/CommitDialog.cpp:342 DialogsWxw/EditDialog.cpp:105
+msgid "Previous comments (use Ctrl-Up and Ctrl-Down in the Comment field to select)"
+msgstr "Poprzednie komentarze (użyj Ctrl-Up i Ctrl-Down w polu komentarzy do zaznaczenia)"
+
+#: DialogsWxw/CommitDialog.cpp:367 DialogsWxw/EditDialog.cpp:112
+#: DialogsWxw/GraphDialog.cpp:443 DialogsWxw/HistoryDialog.cpp:472
+#: DialogsWxw/HistoryDialog.cpp:478 DialogsWxw/MakeModuleDialog.cpp:70
+msgid "Comment"
+msgstr "Komentarz"
+
+#: DialogsWxw/CommitDialog.cpp:390 DialogsWxw/MakePatchDialog.cpp:309
+msgid "Filetype"
+msgstr "Typ pliku"
+
+#: DialogsWxw/CommitDialog.cpp:392 DialogsWxw/ConflictListDialog.cpp:125
+#: DialogsWxw/HistoryDialog.cpp:421 DialogsWxw/MakePatchDialog.cpp:310
+#: TortoiseShell/PropSheet.cpp:214
+msgid "Status"
+msgstr "Status"
+
+#: DialogsWxw/CommitDialog.cpp:393 DialogsWxw/EditorListListCtrl.cpp:43
+#: DialogsWxw/ModuleBasicsPage.cpp:339
+#, fuzzy
+msgid "Bug number"
+msgstr "Numer błędu"
+
+#: DialogsWxw/CommitDialog.cpp:411 DialogsWxw/MakePatchDialog.cpp:324
+msgid "To see the changes you have made, double or right click on the files above."
+msgstr "Dodatkowe opcje - kliknij prawym przyciskiem na powyższych plikach."
+
+#: DialogsWxw/CommitDialog.cpp:423 DialogsWxw/EditDialog.cpp:108
+msgid "&Wrap lines"
+msgstr "Zawijaj linie"
+
+#: DialogsWxw/CommitDialog.cpp:427 DialogsWxw/EditDialog.cpp:138
+#: DialogsWxw/ModuleBasicsPage.cpp:345
+msgid "&Use Bug"
+msgstr "&Użyj błędu"
+
+#: DialogsWxw/CommitDialog.cpp:432
+msgid "&Mark Bug"
+msgstr "Oznacz błąd"
+
+#: DialogsWxw/CommitDialog.cpp:880
+msgid ""
+"You are attempting to commit but have written no comment.\n"
+"Do you wish to continue to commit without a comment?"
+msgstr ""
+"Brak komentarza.\n"
+"Czy chcesz kontynuować pomimo jego braku ?"
+
+#: DialogsWxw/CommitDialog.cpp:888
+msgid ""
+"You are attempting to commit but have no bug number.\n"
+"Do you wish to continue the commit without the bug number?"
+msgstr ""
+"Brak numeru błędu.\n"
+"Czy chcesz kontynuować pomimo jego braku ?"
+
+#: DialogsWxw/ConflictDialog.cpp:57
+msgid "TortoiseCVS - Merge Conflicts"
+msgstr "TortoiseCVS - Scalanie konfliktów"
+
+#: DialogsWxw/ConflictDialog.cpp:362
+msgid "Choose Merge Operation"
+msgstr "Wybierz operację scalania"
+
+#: DialogsWxw/ConflictDialog.cpp:371
+msgid "How would you like to merge the conflicts?"
+msgstr "Jak chcesz scalić konflikty?"
+
+#: DialogsWxw/ConflictDialog.cpp:375
+msgid "Edit with default text editor"
+msgstr "Edytuj w domyślnym edytorze"
+
+#: DialogsWxw/ConflictDialog.cpp:380
+msgid "Two-way merge"
+msgstr "Dwufazowe scalanie"
+
+#: DialogsWxw/ConflictDialog.cpp:385
+msgid "Three-way merge"
+msgstr "Trójfazowe pscalanie"
+
+#: DialogsWxw/ConflictDialog.cpp:389
+msgid "Hint: Three-way merges are only possible if your merge application supports them."
+msgstr "Podpowiedź: Trójfazowe scalanie jest możliwe tylko gdy jest wspierane przez aplikację."
+
+#: DialogsWxw/ConflictDialog.cpp:433
+msgid "Perform Direct Merge"
+msgstr "Wykonaj bezpośrednie scalanie"
+
+#: DialogsWxw/ConflictDialog.cpp:442
+msgid "TortoiseCVS has created the following temporary merge file:"
+msgstr "TortoiseCVS utworzył tymczasowy plik scalania:"
+
+#: DialogsWxw/ConflictDialog.cpp:463
+msgid "Perform Two-Way Merge"
+msgstr "Wykonaj dwufazowe scalanie"
+
+#: DialogsWxw/ConflictDialog.cpp:472 DialogsWxw/ConflictDialog.cpp:502
+msgid "TortoiseCVS has created the following temporary merge files:"
+msgstr "TortoiseCVS utworzył tymczasowe pliki scalania:"
+
+#: DialogsWxw/ConflictDialog.cpp:493
+msgid "Perform Three-Way Merge"
+msgstr "Wykonaj trójfazowe scalanie"
+
+#: DialogsWxw/ConflictListDialog.cpp:84
+msgid "TortoiseCVS - Resolve Conflicts"
+msgstr "TortoiseCVS - Rozwiązywanie konfliktów"
+
+#: DialogsWxw/ConflictListDialog.cpp:114
+msgid "CVS encountered conflicts when trying to merge your changes in the files below. Please merge your changes manually."
+msgstr "CVS napotkał dużą ilość konfliktów podczas próby scalania w poniższych plikach. Dokonaj scalania ręcznie."
+
+#: DialogsWxw/ConflictListDialog.cpp:133
+msgid "To resolve the conflicts, double or right click on the files above."
+msgstr "Aby rozwiązać konflikty, kliknij przwym przyciskiem na powyższych plikach."
+
+#: DialogsWxw/ConflictListDialog.cpp:138 DialogsWxw/EditorListDialog.cpp:106
+msgid "Close"
+msgstr "Zamknij"
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+msgid "&Merge Conflicts..."
+msgstr "Scalanie konfliktów..."
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+msgid "Merge conflicts manually"
+msgstr "Scal konflikty ręcznie"
+
+#: DialogsWxw/ConflictListDialog.cpp:287
+msgid "&Discard local changes..."
+msgstr "&Odrzuć lokalne zmiany..."
+
+#: DialogsWxw/ConflictListDialog.cpp:288
+msgid "Delete file and get a clean copy from CVS..."
+msgstr "Skasuj pliki i pobierz czystą kopię z CVS..."
+
+#: DialogsWxw/ConflictListDialog.cpp:295
+msgid "Show differences to original revision"
+msgstr "Pokaż różnice względem rewizji oryginalnej"
+
+#: DialogsWxw/ConflictListDialog.cpp:297
+msgid "Show history"
+msgstr "Pokaż historie"
+
+#: DialogsWxw/ConflictListDialog.cpp:299
+msgid "Show revision graph"
+msgstr "Pokaż graf rewizji"
+
+#: DialogsWxw/CreditsDialog.cpp:46
+msgid "TortoiseCVS - Credits"
+msgstr "TortoiseCVS - Twórcy"
+
+#: DialogsWxw/CreditsDialog.cpp:63
+msgid "Better looking icons"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:64
+msgid "Persistent dialog size patch, Annotate feature, various bugfixes and improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:65
+msgid "Catalan translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:66
+msgid "French translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:67
+msgid "CVS columns in Explorer detailed list view"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:68
+msgid "German translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:69
+msgid "Branching, tagging and merging, menu config file, various user interface improvements and bug fixes"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:70
+msgid "64-bit Windows port"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:71 DialogsWxw/CreditsDialog.cpp:74
+#: DialogsWxw/CreditsDialog.cpp:96
+msgid "Spanish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:72
+msgid "French User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:73
+msgid "Danish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:75
+msgid "Norwegian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:76
+#, fuzzy
+msgid "Icons"
+msgstr "Bez ikon"
+
+#: DialogsWxw/CreditsDialog.cpp:77
+msgid "Win32 native user interface (not used now, but provoked the migration from GTK to wxWindows)"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:78
+msgid "Romanian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:79
+msgid "Brazilian Portuguese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:80
+msgid "Project founder (no longer active), original code, Visual C++ and mingw32 compilation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:81
+msgid "Dutch translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:82
+#, fuzzy
+msgid "Revision Graph improvements"
+msgstr "Graf rewizji dla %s"
+
+#: DialogsWxw/CreditsDialog.cpp:83
+#, fuzzy
+msgid "Warn on empty commit comment patch"
+msgstr "Ostrzegaj, jeśli brak komentarza przy zatwierdzaniu"
+
+#: DialogsWxw/CreditsDialog.cpp:84
+msgid "Improved SSH support"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:85
+#, fuzzy
+msgid "Make new module patch"
+msgstr "&Stwórz nowy moduł..."
+
+#: DialogsWxw/CreditsDialog.cpp:86
+msgid "Improved treelist control"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:87
+msgid "Georgian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:88
+msgid "Core developer (no longer active)"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:89
+msgid "cvs.exe pipe code prototype, Borland compilation, various bug fixes"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:90
+msgid "Commit dialog patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:91
+msgid "Make New Module edit module path patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:92
+msgid "SSPI encryption patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:93
+msgid "CVS property page, context menu"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:94
+#, fuzzy
+msgid "Default icons"
+msgstr "Ikony menu"
+
+#: DialogsWxw/CreditsDialog.cpp:95 DialogsWxw/CreditsDialog.cpp:108
+msgid "Various bug fixing patches"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:97
+msgid "History dialog patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:98 DialogsWxw/CreditsDialog.cpp:101
+msgid "Korean translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:99
+msgid "Polish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:100
+msgid "Traditional Chinese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:103
+msgid "Edit options dialog, repository browser, defect tracking integration, 64-bit development platform"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:104
+msgid "Project management, User Guide, domain name, various patches"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:105
+msgid "Slovenian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:106
+msgid "CVS property page improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:107
+msgid "Charlie Vernon Smythe logo and icon"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:109
+msgid "Russian program translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:110
+msgid "Turkish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:111
+msgid "rcsinfo patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:112
+msgid "Simplified Chinese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:113
+msgid "Simplified Chinese User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:114
+msgid "Automatic use of Unix line endings patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:115
+msgid "Borland compilation, bug fix, CVS property page improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:116
+msgid "mingw32 compilation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:117
+msgid "Web site design"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:118
+msgid "Core developer, release manager, documentation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:119
+msgid "Czech translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:120
+msgid "Russian User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:121
+msgid "Japanese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:135
+msgid ""
+"People who have contributed to TortoiseCVS\n"
+"(mouse over name to see details)"
+msgstr ""
+"Osoby, które przyczyniły się do powstania TortoiseCVS\n"
+"(aby dowiedzieć się więcej wskaż myszką daną osobę)"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:55
+msgid "Remove"
+msgstr "Usuń"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:57
+msgid "Del"
+msgstr "Del"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:62
+msgid "Remove All"
+msgstr "Usuń wszystko"
+
+#: DialogsWxw/EditDialog.cpp:89
+msgid "TortoiseCVS - Edit"
+msgstr "TortoiseCVS - Edycja"
+
+#: DialogsWxw/EditDialog.cpp:127
+msgid "Bug &Number"
+msgstr "&Numer błędu"
+
+#: DialogsWxw/EditDialog.cpp:239
+msgid "You are attempting to edit but have no bug number. Do you wish to continue the edit without the bug number?"
+msgstr "Brak numeru błędu. Czy chcesz kontynuować pomimo jego braku ?"
+
+#: DialogsWxw/EditorListDialog.cpp:66
+msgid "TortoiseCVS - List Editors"
+msgstr "TortoiseCVS - Lista twórców"
+
+#: DialogsWxw/EditorListDialog.cpp:112
+#, c-format
+msgid "%d edited file(s)"
+msgstr "%d edytowane pliki"
+
+#: DialogsWxw/EditorListListCtrl.cpp:39
+msgid "Editors"
+msgstr "Twórcy"
+
+#: DialogsWxw/EditorListListCtrl.cpp:41
+msgid "Host"
+msgstr "Host"
+
+#: DialogsWxw/EditorListListCtrl.cpp:42
+msgid "Local path"
+msgstr "Ścieżka lokalna"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Undo"
+msgstr "C&ofnij"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Redo"
+msgstr "&Powtórz"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Cu&t"
+msgstr "W&ytnij"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Copy"
+msgstr "&Kopiuj"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Paste"
+msgstr "&Wklej"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Delete"
+msgstr "&Usuń"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Select &All"
+msgstr "&Zaznacz  wszystko"
+
+#: DialogsWxw/FindDialog.cpp:28
+msgid "TortoiseCVS - Find"
+msgstr "TortoiseCVS - Wyszukiwanie"
+
+#: DialogsWxw/FindDialog.cpp:33
+msgid "Find what: "
+msgstr "Znajdz..."
+
+#: DialogsWxw/FindDialog.cpp:36
+msgid "Find Next"
+msgstr "Znajdź następny"
+
+#: DialogsWxw/FindDialog.cpp:37
+msgid "&Mark All"
+msgstr "Zaznacz wszystko"
+
+#: DialogsWxw/FindDialog.cpp:52
+msgid "Match &Case"
+msgstr "Zazna&cz wystąpenie"
+
+#: DialogsWxw/FindDialog.cpp:54
+msgid "Search &Up"
+msgstr "Sz&ukaj w górę"
+
+#: DialogsWxw/FindDialog.cpp:56
+msgid "&Wrap Search"
+msgstr "Za&wijaj linie"
+
+#: DialogsWxw/GraphDialog.cpp:108
+#, c-format
+msgid "Revision Graph for %s"
+msgstr "Graf rewizji dla %s"
+
+#: DialogsWxw/GraphDialog.cpp:178
+#, c-format
+msgid "TortoiseCVS - Revision Graph for %s"
+msgstr "TortoiseCVS - Graf rewizji dla %s"
+
+#: DialogsWxw/GraphDialog.cpp:212 DialogsWxw/HistoryDialog.cpp:489
+msgid "Show &tags"
+msgstr "Pokaż e&tykiety"
+
+#: DialogsWxw/GraphDialog.cpp:215
+msgid "&Collapse revisions"
+msgstr "&Zwiń rewizje"
+
+#: DialogsWxw/GraphDialog.cpp:242
+msgid "Set &Limits..."
+msgstr "Ustaw limity..."
+
+#: DialogsWxw/GraphDialog.cpp:423
+msgid "Mergepoint"
+msgstr "Punkt scalania"
+
+#: DialogsWxw/GraphDialog.cpp:519
+msgid "Description"
+msgstr "Opis"
+
+#: DialogsWxw/GraphDialog.cpp:526
+msgid "File Format"
+msgstr "Format pliku"
+
+#: DialogsWxw/GraphDialog.cpp:534
+msgid "Keyword substitution"
+msgstr "Zastępcze słowa kluczowe"
+
+#: DialogsWxw/GraphDialog.cpp:542
+msgid "Storage options"
+msgstr "Opcje przechowywania"
+
+#: DialogsWxw/GraphDialog.cpp:550
+msgid "Total revisions"
+msgstr "Wszystkie rewizje"
+
+#: DialogsWxw/GraphDialog.cpp:666
+#, c-format
+msgid "Revision graph for %s"
+msgstr "Graf rewizji dla %s"
+
+#: DialogsWxw/GraphDialog.cpp:899 DialogsWxw/HistoryDialog.cpp:1197
+msgid "Get &clean copy of this revision (sticky)"
+msgstr "Pobierz &czystą kopię tej rewizji (lepkie)"
+
+#: DialogsWxw/GraphDialog.cpp:900 DialogsWxw/HistoryDialog.cpp:1198
+#: ../build/TortoiseMenus.config:314
+msgid "&Tag..."
+msgstr "&Etykieta..."
+
+#: DialogsWxw/GraphDialog.cpp:901 DialogsWxw/HistoryDialog.cpp:1199
+#: ../build/TortoiseMenus.config:321
+msgid "&Branch..."
+msgstr "&Rozdziel..."
+
+#: DialogsWxw/GraphDialog.cpp:908 DialogsWxw/HistoryDialog.cpp:1281
+msgid "&Diff (selected revisions)"
+msgstr "&Różnice (zaznaczone rewizje)"
+
+#: DialogsWxw/GraphDialog.cpp:910 DialogsWxw/HistoryDialog.cpp:1283
+msgid "&Merge changes (selected revisions)"
+msgstr "Scal z&miany (zaznaczone rewizje)"
+
+#: DialogsWxw/GraphDialog.cpp:912 DialogsWxw/HistoryDialog.cpp:1285
+msgid "&Undo changes (selected revisions)"
+msgstr "&Cofnij zmiany (zaznaczone rewizje)"
+
+#: DialogsWxw/GraphDialog.cpp:929 DialogsWxw/HistoryDialog.cpp:1221
+msgid "&Get this branch (sticky)"
+msgstr "Pobierz tą &gałąź (lepkie)"
+
+#: DialogsWxw/GraphDialog.cpp:930 DialogsWxw/HistoryDialog.cpp:1222
+msgid "Get &clean copy of this branch (sticky)"
+msgstr "Pobierz &czystą kopię tej gałęzi (lepkie)"
+
+#: DialogsWxw/GraphDialog.cpp:932
+msgid "Always &hide this branch"
+msgstr "Zawsze chowaj tą gałąź"
+
+#: DialogsWxw/GraphDialog.cpp:933
+msgid "&Only show this branch"
+msgstr "Pokaż tylko tą gałąź"
+
+#: DialogsWxw/GraphDialog.cpp:946 DialogsWxw/HistoryDialog.cpp:1235
+msgid "&Return to HEAD branch"
+msgstr "Pow&róć do gałęzi HEAD"
+
+#: DialogsWxw/GraphDialog.cpp:947 DialogsWxw/HistoryDialog.cpp:1236
+msgid "R&eturn to clean copy of HEAD branch"
+msgstr "Powróć do czyst&ej kopii w gałęzi HEAD"
+
+#: DialogsWxw/GraphDialog.cpp:949
+msgid "Show &all branches"
+msgstr "Pokaż wszystkie gałęzie"
+
+#: DialogsWxw/GraphDialog.cpp:963
+msgid "Zoom &in (I)"
+msgstr "Powiększ (&I)"
+
+#: DialogsWxw/GraphDialog.cpp:964
+msgid "Zoom &out (O)"
+msgstr "Zmniejsz (&O)"
+
+#: DialogsWxw/GraphDialog.cpp:966
+msgid "&Save graph as bitmap..."
+msgstr "Zapisz graf jako bitmapę..."
+
+#: DialogsWxw/GraphDialog.cpp:1003 DialogsWxw/HistoryDialog.cpp:939
+#: TortoiseAct/TortoiseAct.cpp:1829
+#, c-format
+msgid "Finished tagging in %s"
+msgstr "Zakończono tworzenie etykiety dla %s"
+
+#: DialogsWxw/GraphDialog.cpp:1026 DialogsWxw/GraphDialog.cpp:1082
+#: DialogsWxw/HistoryDialog.cpp:961 DialogsWxw/HistoryDialog.cpp:1017
+#: TortoiseAct/TortoiseAct.cpp:1850 TortoiseAct/TortoiseAct.cpp:1907
+msgid "Internal error: Invalid action"
+msgstr "Wewnętrzny błąd: Niewłaściwa akcja"
+
+#: DialogsWxw/GraphDialog.cpp:1033 DialogsWxw/HistoryDialog.cpp:968
+#: TortoiseAct/TortoiseAct.cpp:1856
+#, c-format
+msgid "Tagging in %s"
+msgstr "Tworzenie etykiety dla %s"
+
+#: DialogsWxw/GraphDialog.cpp:1054 DialogsWxw/HistoryDialog.cpp:989
+#: TortoiseAct/TortoiseAct.cpp:1877
+#, c-format
+msgid "Finished branching in %s"
+msgstr "Zakończono rozgałęzianie dla %s"
+
+#: DialogsWxw/GraphDialog.cpp:1090 DialogsWxw/HistoryDialog.cpp:1024
+#: TortoiseAct/TortoiseAct.cpp:1913
+#, c-format
+msgid "Branching in %s"
+msgstr "Rozgałęzianie dla %s"
+
+#: DialogsWxw/GraphDialog.cpp:1188 DialogsWxw/HistoryDialog.cpp:884
+msgid "Retrieving a clean copy deletes your changes."
+msgstr "Pobranie czystej kopii wykasuje twoje zmiany."
+
+#: DialogsWxw/GraphDialog.cpp:1188 DialogsWxw/HistoryDialog.cpp:884
+msgid "Warning"
+msgstr "Ostrzeżenie"
+
+#: DialogsWxw/GraphDialog.cpp:1216
+msgid "Bitmap files"
+msgstr "Bitmapy"
+
+#: DialogsWxw/GraphDialog.cpp:1218
+msgid "Save Revision Graph"
+msgstr "Zapisz graf rewizji"
+
+#: DialogsWxw/GraphDialog.cpp:1246
+msgid "Failed to save Revision Graph bitmap"
+msgstr "Nieudana operacja zapisywania grafu rewizji"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:65
+msgid "TortoiseCVS - Revision Graph Settings"
+msgstr "TortoiseCVS - Ustawienia grafu rewizji"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:74
+msgid "&Start date/time:"
+msgstr "Data/cza&s rozpoczęcia"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:75
+msgid "Do not show revisions/tags/branches before a specific date."
+msgstr "Nie pokazuj rewizji/etykiet/gałęzi przed określoną datą."
+
+#: DialogsWxw/GraphSettingsDialog.cpp:77 DialogsWxw/UpdateDlg.cpp:407
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar.\n"
+"e.g.: \"1988-09-24\"  \"yesterday\"  \"24 Sep 20:05\""
+msgstr ""
+"Wybierz datę z kalendarza i/lub edytują ją w polu powyżej pola kalendarza.\n"
+"np.: \"1988-09-24\"  \"yesterday\"  \"24 Sep 20:05\""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:96
+msgid "&End date/time:"
+msgstr "Data/czas zakończ&enia"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:97
+msgid "Do not show revisions/tags/branches after a specific date."
+msgstr "Nie pokazuj rewizji/etykiet/gałęzi po określonej dacie."
+
+#: DialogsWxw/HistoryDialog.cpp:100 DialogsWxw/HistoryDialog.cpp:328
+#, c-format
+msgid "History for %s"
+msgstr "Historia dla %s"
+
+#: DialogsWxw/HistoryDialog.cpp:170
+#, c-format
+msgid "%d revision(s)"
+msgstr "%d rewizje"
+
+#: DialogsWxw/HistoryDialog.cpp:371
+#, c-format
+msgid "TortoiseCVS - History for %s"
+msgstr "TortoiseCVS - Historia dla %s"
+
+#: DialogsWxw/HistoryDialog.cpp:409 DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/ModuleBasicsPage.cpp:214 TortoiseShell/PropSheet.cpp:217
+msgid "CVSROOT"
+msgstr "CVSROOT"
+
+#: DialogsWxw/HistoryDialog.cpp:414
+msgid "Sticky tag"
+msgstr "Lepka etykieta"
+
+#: DialogsWxw/HistoryDialog.cpp:432 TortoiseShell/PropSheet.cpp:232
+msgid "File format"
+msgstr "Format pliku"
+
+#: DialogsWxw/HistoryDialog.cpp:450
+msgid "Other"
+msgstr "Inne"
+
+#: DialogsWxw/HistoryDialog.cpp:470
+msgid "Changes"
+msgstr "Zmiany"
+
+#: DialogsWxw/HistoryDialog.cpp:540
+msgid "Apply"
+msgstr "Zastosuj"
+
+#: DialogsWxw/HistoryDialog.cpp:719
+msgid "Changing comment"
+msgstr "Komentarz do zmiany"
+
+#: DialogsWxw/HistoryDialog.cpp:757
+msgid "(None)"
+msgstr "(żaden)"
+
+#: DialogsWxw/HistoryDialog.cpp:1050
+#, c-format
+msgid ""
+"You have changed the comment of revision %s.\n"
+"Do you want to save it?"
+msgstr ""
+"Komentarz do rewizji %s został zmieniony.\n"
+"Czy chcesz go zachować ?"
+
+#: DialogsWxw/HistoryDialog.cpp:1205
+msgid "C&opy comment to clipboard"
+msgstr ""
+
+#: DialogsWxw/IconSetDialog.cpp:44
+msgid "In CVS"
+msgstr "W CVS"
+
+#: DialogsWxw/IconSetDialog.cpp:45
+msgid "In CVS, read-only"
+msgstr "W CVS, tylko do odczytu"
+
+#: DialogsWxw/IconSetDialog.cpp:50
+msgid "Ignored by CVS"
+msgstr "Ignorowane przez CVS"
+
+#: DialogsWxw/IconSetDialog.cpp:86
+msgid "TortoiseCVS - Icon sets"
+msgstr "TortoiseCVS - Zbiory ikon"
+
+#: DialogsWxw/IconSetDialog.cpp:94
+msgid "Please select an icon set to be used as overlay icons:"
+msgstr "Wskaż zbiór ikon, który ma być używany jako nakładka:"
+
+#: DialogsWxw/IconSetDialog.cpp:107
+msgid "Icon preview:"
+msgstr "Podgląd ikon:"
+
+#: DialogsWxw/IconSetDialog.cpp:166 DialogsWxw/PreferencesDialog.cpp:579
+#: DialogsWxw/PreferencesDialog.cpp:787
+msgid "No icons"
+msgstr "Bez ikon"
+
+#: DialogsWxw/LogConfigDialog.cpp:80
+msgid "TortoiseCVS - Web Log Configuration"
+msgstr "TortoiseCVS - Konfiguracja Web Log"
+
+#: DialogsWxw/LogConfigDialog.cpp:97
+msgid "Web log URL &prefix:"
+msgstr "Web Log URL &prefix:"
+
+#: DialogsWxw/LogConfigDialog.cpp:107
+msgid "&Suffix:"
+msgstr "&Sufix:"
+
+#: DialogsWxw/LogConfigDialog.cpp:116
+msgid "&Plain text log (if your server doesn't support web log)"
+msgstr "&Czysty tekst logu (jeśli twój serwer nie obsługuje Web Log)"
+
+#: DialogsWxw/LogConfigDialog.cpp:120
+msgid "&Automatically scan the server for the URL (again)"
+msgstr "&Automatycznie skanyj serwer w poszukiwaniu adresu URL (ponownie)"
+
+#: DialogsWxw/LoginDialog.cpp:32
+msgid "Password:"
+msgstr "Hasło:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97 DialogsWxw/ModuleBasicsPage.cpp:208
+msgid "Protocol"
+msgstr "Protokół"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98 DialogsWxw/ModuleBasicsPage.cpp:209
+msgid "Protocol parameters"
+msgstr "Parametry protokołu"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99 DialogsWxw/ModuleBasicsPage.cpp:210
+msgid "Server"
+msgstr "Serwer"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100 DialogsWxw/ModuleBasicsPage.cpp:211
+msgid "Repository folder"
+msgstr "Folder repozytorium"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101 DialogsWxw/ModuleBasicsPage.cpp:212
+msgid "User name"
+msgstr "Nazwa użytkownika"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104 DialogsWxw/ModuleBasicsPage.cpp:215
+msgid "Port"
+msgstr "Port"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:108 DialogsWxw/ModuleBasicsPage.cpp:221
+msgid "Previous CVSROOTs"
+msgstr "Poprzedni CVSROOT"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:148 DialogsWxw/ModuleBasicsPage.cpp:290
+msgid "Password server (:pserver:)"
+msgstr "Hasło serwera (:pserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:149 DialogsWxw/ModuleBasicsPage.cpp:291
+msgid "Windows authentication (:sspi:)"
+msgstr "Uwierzytelnienie Windows (:sspi:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:150 DialogsWxw/ModuleBasicsPage.cpp:293
+msgid "Secure shell (:ext:)"
+msgstr "Bezpieczna pomwłoka (:ext:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:151 DialogsWxw/ModuleBasicsPage.cpp:295
+msgid "Secure shell (:ssh:)"
+msgstr "Bezpieczna pomwłoka (:ssh:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:152 DialogsWxw/ModuleBasicsPage.cpp:296
+msgid "Remote shell (:server:)"
+msgstr "Zdalna powłoka (:server:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:153 DialogsWxw/ModuleBasicsPage.cpp:297
+msgid "Locally mounted folder (:local:)"
+msgstr "Lokalnie zamapowany folder (:local:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:154 DialogsWxw/ModuleBasicsPage.cpp:298
+msgid "Kerberos (:gserver:)"
+msgstr "Kerberos (:gserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:155 DialogsWxw/ModuleBasicsPage.cpp:299
+msgid "SSL (:sserver:)"
+msgstr "SSL (:sserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:156
+msgid "Named pipe (:ntserver:)"
+msgstr "Nazwa kanału (:ntserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:199 DialogsWxw/ModuleBasicsPage.cpp:375
+msgid "&Fetch list..."
+msgstr "&Pobierz listę"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:216 DialogsWxw/ModuleBasicsPage.cpp:173
+msgid "How your machine should connect to the CVS repository"
+msgstr "Określa za pomocą jakiego protokołu będzie odbywało się połączenie z repozytorium CVS."
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:217 DialogsWxw/ModuleBasicsPage.cpp:174
+msgid "Parameters associated with this protocol"
+msgstr "Parametry wskazanego protokołu"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:218 DialogsWxw/ModuleBasicsPage.cpp:175
+msgid "The computer that the CVS repository is on"
+msgstr "Komputer, na którym znajduje się zepozytorium CVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:219 DialogsWxw/ModuleBasicsPage.cpp:176
+msgid "Location of the repository on the server"
+msgstr "Lokalizacja repozytorium na serwerze"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:220 DialogsWxw/ModuleBasicsPage.cpp:177
+msgid "The user name that CVS should use"
+msgstr "Nazwa użytkownika używana przez CVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:221
+msgid "The name of the module"
+msgstr "Nazwa modułu"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:222 DialogsWxw/ModuleBasicsPage.cpp:179
+msgid "Technical details of the CVSROOT which TortoiseCVS is going to use"
+msgstr "Szczegóły techniczne CVSROOT, który będzie używany przez TortoiseCVS"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:223 DialogsWxw/ModuleBasicsPage.cpp:180
+msgid "Retrieves a list of modules from the server, and puts them in the dropdown box"
+msgstr "Pobierz listę modułów z serwera i umieść ją w rozwijanej liście"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:224
+#, fuzzy
+msgid "The TCP port of your CVS server process"
+msgstr "Port TCP dla procesu serwera CVS (opcjonalne)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:252 DialogsWxw/ModuleBasicsPage.cpp:446
+msgid "Click here and paste in the CVSROOT"
+msgstr "Kliknij tu i wklej w CVSROOT"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:488
+#: DialogsWxw/ModuleBasicsPage.cpp:1009
+msgid "Module list not available for server"
+msgstr "Lista modułów niedostępna na serwerze"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:493
+#: DialogsWxw/ModuleBasicsPage.cpp:1014
+msgid ""
+"Ask your administrator to either install a web browser interface on the server (CVSweb or ViewCVS) or add the modules to the CVSROOT/modules file.\n"
+"\n"
+"Meanwhile, you'll have to find the module name elsewhere."
+msgstr ""
+"Poproś administratora, aby zainstalował na serwerze moduł przeglądarki internetowej CVSweb lub ViewCVS, lub aby dodał nazwy modułów do pliku CVSROOT/modules.\n"
+"\n"
+"Tymczasem, będziesz musiał podać nazwę modułu ręcznie."
+
+#: DialogsWxw/MakeModuleDialog.cpp:56
+msgid "TortoiseCVS - Make New Module"
+msgstr "TortoiseCVS - Tworzenie nowego modułu"
+
+#: DialogsWxw/MakeModuleDialog.cpp:77
+msgid "Check out files read-only"
+msgstr "Pobieranie do kontroli plików tylko do odczytu"
+
+#: DialogsWxw/MakeModuleDialog.cpp:79
+msgid "Run 'cvs watch on' on the new module so that files will be checked out read-only"
+msgstr "Włącz opcję pilnowanie cvs' na nowym module, aby plikom po pobraniu został nadany atrybut tylko do odczytu"
+
+#: DialogsWxw/MakePatchDialog.cpp:240
+msgid "TortoiseCVS - Make Patch"
+msgstr "TortoiseCVS - Tworzenie łatki"
+
+#: DialogsWxw/MakePatchDialog.cpp:302
+msgid "&Add files..."
+msgstr "Dod&aj pliki..."
+
+#: DialogsWxw/MakePatchDialog.cpp:566 TortoiseAct/TortoiseAct.cpp:631
+#, fuzzy
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS."
+msgstr ""
+"Nie ma nic do dodania do repozytorium.\n"
+"\n"
+"Wszystkie pliki oraz zawartości podfolderów już są w repozytorium CVS lub są oznaczone jako ignorowane."
+
+#: DialogsWxw/MakePatchDialog.cpp:569 TortoiseAct/TortoiseAct.cpp:634
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS, or are specified in a .cvsignore file."
+msgstr ""
+"Nie ma nic do dodania do repozytorium.\n"
+"\n"
+"Wszystkie pliki oraz zawartości podfolderów już są w repozytorium CVS lub są oznaczone jako ignorowane."
+
+#: DialogsWxw/MakePatchDialog.cpp:592
+msgid "TortoiseCVS - Add files to patch"
+msgstr "TortoiseCVS - Dodaj pliki do łatki"
+
+#: DialogsWxw/MakePatchDialog.cpp:593
+msgid "Select files to add to the patch"
+msgstr "Zaznacz pliki, które mają być dodane do łatki"
+
+#: DialogsWxw/MergeDlg.cpp:75
+msgid "TortoiseCVS - Merge"
+msgstr "TortoiseCVS - Scalanie"
+
+#: DialogsWxw/MergeDlg.cpp:88
+msgid "Start:"
+msgstr "Start:"
+
+#: DialogsWxw/MergeDlg.cpp:96
+msgid "End:"
+msgstr "Koniec:"
+
+#: DialogsWxw/MergeDlg.cpp:105 DialogsWxw/MergeDlg.cpp:106
+msgid "Name of revision/tag/branch to merge into your working folder."
+msgstr "Nazwa rewizji/etykiety/gałęzi, którą połączyć w folder roboczy."
+
+#: DialogsWxw/MergeDlg.cpp:112
+msgid "&Update lists..."
+msgstr "&Aktualizuj listę..."
+
+#: DialogsWxw/MergeDlg.cpp:115
+#, fuzzy
+msgid "Suppress keyword &expansion"
+msgstr "Ustaw słowo kluczowe dla %s"
+
+#: DialogsWxw/MergeDlg.cpp:125
+msgid "Suppress expansion of keywords to avoid spurious conflicts"
+msgstr ""
+
+#: DialogsWxw/MergeDlg.cpp:135
+msgid "Create missing subfolders"
+msgstr "Utwórz brakujące foldery"
+
+#: DialogsWxw/MergeDlg.cpp:137 DialogsWxw/UpdateDlg.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:492
+msgid "Create any folders that exist in the repository if they are missing from the working folder."
+msgstr "Utwórz foldery które istnieją w repozytorium, a których nie ma w roboczym folderze."
+
+#: DialogsWxw/MergeDlg.cpp:146
+msgid ""
+"The changes between the specified revisions/tags/branches will be merged into your current working sources. If you want to merge an entire branch, enter the branch name in the first edit field and leave the second one blank.\n"
+"The repository is not altered until a commit is performed."
+msgstr ""
+"Zmiany pomiędzy poszczególnymi rewizjami/etykietami/gałęziami będą połączone w jedną kopię roboczą. Jeśli chcesz połączyć całą gałąź, wpisz nazwę gałęzi w pierwsze pole a drugie zostaw puste.\n"
+"Repozytorium nie będzie zmienione do czasu zatwierdzenia operacji."
+
+#: DialogsWxw/MergeDlg.cpp:163
+msgid "Merge changes between the following branches/tags/revisions:"
+msgstr "Scal zmiany pomiędzy następującymi gałęziami/etykietami/rewizjami:"
+
+#: DialogsWxw/MergeDlg.cpp:198 DialogsWxw/RevOptions.cpp:203
+#: DialogsWxw/UpdateDlg.cpp:327
+msgid "No tags or branches found."
+msgstr "Nie znaleziono etykiet i gałęzi"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:178
+msgid "The name of the module, or full path of any file or folder in the module"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:181
+msgid "The TCP port of your CVS server process (optional)"
+msgstr "Port TCP dla procesu serwera CVS (opcjonalne)"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:182
+msgid "Do a CVS Edit on the file/folder after checkout"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:183
+msgid "Mark edit with bug number"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:342 ../build/TortoiseMenus.config:133
+#: ../build/TortoiseMenus.config:223 ../build/TortoiseMenus.config:229
+msgid "&Edit"
+msgstr "&Edytuj"
+
+#: DialogsWxw/PreferencesDialog.cpp:165 DialogsWxw/PreferencesDialog.cpp:361
+msgid "TortoiseCVS - Preferences"
+msgstr "TortoiseCVS - Ustawienia"
+
+#: DialogsWxw/PreferencesDialog.cpp:169 DialogsWxw/PreferencesDialog.cpp:374
+msgid "Global"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:341
+#, fuzzy
+msgid ""
+"You have selected a different icon set - it won't take effect until Windows Explorer is restarted.\n"
+"You can log off or reboot the system, or TortoiseCVS can simply restart the Explorer process for you.\n"
+"Do you want to restart the Explorer process?"
+msgstr ""
+"Wybrano nowy zbiór ikon. Zmiany nie będą widoczne do momentu restartu Windows Explorer.\n"
+"Możesz się wylogować, zrestartować komputer lub pozwolić Tortoise na restart procesu Explorera.\n"
+"Czy chcesz zrestartować proces Explorera ?"
+
+#: DialogsWxw/PreferencesDialog.cpp:483 DialogsWxw/PreferencesDialog.cpp:501
+#: DialogsWxw/PreferencesDialog.cpp:585
+msgid "Browse..."
+msgstr "Przeglądaj"
+
+#: DialogsWxw/PreferencesDialog.cpp:588
+msgid "Rebuild..."
+msgstr "Przebuduj..."
+
+#: DialogsWxw/PreferencesDialog.cpp:601
+msgid "Sample text"
+msgstr "Przykładowy tekst"
+
+#: DialogsWxw/PreferencesDialog.cpp:608
+msgid "Select colour..."
+msgstr "Wybierz kolor..."
+
+#: DialogsWxw/PreferencesDialog.cpp:799 TortoiseAct/TortoiseAct.cpp:3388
+msgid "Error rebuilding icons. You may not have the required permissions."
+msgstr "Błąd przy przebudowywaniu ikon. Prawdopodobnie nie masz wystarczających uprawnień."
+
+#: DialogsWxw/PreferencesDialog.cpp:810
+msgid "Cache has been cleared"
+msgstr "Pamięć podręczna wyczyszczona"
+
+#: DialogsWxw/PreferencesDialog.cpp:822
+msgid "Ignored files"
+msgstr "Ignorowane pliki"
+
+#: DialogsWxw/PreferencesDialog.cpp:824
+msgid "Per-user list of cvsignore file name patterns"
+msgstr "Lista ignorowanych plików (oraz wzorców nazw \"*.exe\")"
+
+#: DialogsWxw/PreferencesDialog.cpp:832
+msgid "Hint: To reset the list and include all files, enter a single exclamation mark (\"!\")."
+msgstr "Podpowiedź: Aby wyczyścić listę i dodać wszystkie pliki, wstaw pojedyńczy wykrzyknik (\"!\")."
+
+#: DialogsWxw/PreferencesDialog.cpp:838
+msgid "A list of files (or file name patterns like \"*.exe\") that CVS ignores when running certain operations. The entries must be separated by whitespace and are appended to the default built-in ignored list. A single exclamation mark (\"!\") resets the list. For details refer to the original CVS documentation."
+msgstr "Lista plików (lub wzorców nazw \"*.exe\") które ignoruje CVS przy wykonywaniu operacji. Wpisy muszą być rozdzielone przez znaki spacji i załączone do wbudowanej listy ignorowanych plików. Pojedyńczy wykrzyknik (\"!\") wczyści listę. Aby dowiedzieć się więcej zobacz dokumentację CVS."
+
+#: DialogsWxw/PreferencesDialog.cpp:870
+msgid "Scope"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:872
+#, fuzzy
+msgid "Preference &scope"
+msgstr "&Ustawienia..."
+
+#: DialogsWxw/PreferencesDialog.cpp:875
+msgid "Whether to set preferences globally or for the current module"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:879
+msgid "Set global preferences"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:894 DialogsWxw/PreferencesDialog.cpp:905
+#, c-format
+msgid "PrefControl index %d not found"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:150 ProgressDialogStub.cpp:36
+msgid "TortoiseCVS - Working"
+msgstr "TortoiseCVS - Wykonywanie poleceń..."
+
+#: DialogsWxw/ProgressDialog.cpp:159
+msgid "TortoiseCVS - Finished"
+msgstr "TortoiseCVS - Zakończono operację"
+
+#: DialogsWxw/ProgressDialog.cpp:180
+msgid "Working..."
+msgstr "Operacja w toku ..."
+
+#: DialogsWxw/ProgressDialog.cpp:188
+msgid "Abort"
+msgstr "Przerwij"
+
+#: DialogsWxw/ProgressDialog.cpp:205
+msgid "Close on completion"
+msgstr "Zamknij po zakończeniu"
+
+#: DialogsWxw/ProgressDialog.cpp:542
+msgid "TortoiseCVS - Aborting"
+msgstr "TortoiseCVS - Przerywanie"
+
+#: DialogsWxw/ProgressDialog.cpp:543
+msgid "Aborting..."
+msgstr "Przerywanie..."
+
+#: DialogsWxw/ProgressDialog.cpp:578
+msgid "TortoiseCVS - Aborted"
+msgstr "TortoiseCVS - Przerwano"
+
+#: DialogsWxw/ProgressDialog.cpp:579
+msgid "Aborted"
+msgstr "Przerwano"
+
+#: DialogsWxw/ProgressDialog.cpp:585
+msgid "Finished"
+msgstr "Zakończono"
+
+#: DialogsWxw/ProgressDialog.cpp:813
+msgid "Output"
+msgstr "Dane wyjściowe"
+
+#: DialogsWxw/ProgressDialog.cpp:896
+msgid "Copy"
+msgstr "Kopiuj"
+
+#: DialogsWxw/ProgressDialog.cpp:903
+msgid "Select All"
+msgstr "Zaznacz  wszystko"
+
+#: DialogsWxw/ReleaseDialog.cpp:43 TortoiseAct/TortoiseAct.cpp:4100
+msgid "multiple folders"
+msgstr "złożone foldery"
+
+#: DialogsWxw/ReleaseDialog.cpp:44
+#, c-format
+msgid "Finished release in %s"
+msgstr "Zakończono publikowanie dla %s"
+
+#: DialogsWxw/ReleaseDialog.cpp:76
+#, c-format
+msgid "CVS Release in %s will result in the following potentially destructive changes:"
+msgstr "Publikacja CVS w %s może spowodować poniższe potencjalne zniszczenia:"
+
+#: DialogsWxw/ReleaseDialog.cpp:79
+#, c-format
+msgid "%d modified file(s)"
+msgstr "%d zmodyikowane pliki"
+
+#: DialogsWxw/ReleaseDialog.cpp:82
+#, c-format
+msgid "%d newly added file(s) that have not been committed"
+msgstr "%d nowo dodane plik(i), które nie zostały zatwierdzone"
+
+#: DialogsWxw/ReleaseDialog.cpp:86
+#, c-format
+msgid "%d removed file(s) that have not been committed"
+msgstr "%d usunięte plik(i), które nie zostały zatwierdzone"
+
+#: DialogsWxw/ReleaseDialog.cpp:90
+#, c-format
+msgid "%d renamed file(s) that have not been committed"
+msgstr "%d plik(i) ze zmienioną nazwą, które nie zostały zatwierdzone"
+
+#: DialogsWxw/ReleaseDialog.cpp:94
+#, c-format
+msgid "%d file(s) that are not under CVS control"
+msgstr "%d plik(i), których nie kontroluje CVS"
+
+#: DialogsWxw/ReleaseDialog.cpp:97
+#, c-format
+msgid "%s will be deleted.  Are you sure you want to do this?"
+msgstr "%s będzie skasowany .  Kontynuować?"
+
+#: DialogsWxw/ReleaseDialog.cpp:109
+msgid "Releasing in "
+msgstr "Publikowanie w"
+
+#: DialogsWxw/ReleaseDialog.cpp:122
+msgid "TortoiseCVS - Release"
+msgstr "TortoiseCVS - Publikacja"
+
+#: DialogsWxw/ReleaseDialog.cpp:128
+msgid "Release Options:"
+msgstr "Opcje publikacji:"
+
+#: DialogsWxw/ReleaseDialog.cpp:133
+msgid "Delete files and folders that are under CVS control (-d)"
+msgstr "Usuń pliki i foldery, które kontroluje CVS (-d)"
+
+#: DialogsWxw/ReleaseDialog.cpp:134
+msgid "Delete contents of folders including non-cvs files (-d -f)"
+msgstr "Usuń zawartość folderów, które zawierają pliki niekontrolowane przez CVS (-d -f)"
+
+#: DialogsWxw/ReleaseDialog.cpp:135
+msgid "Delete CVS control files only (-e)"
+msgstr "Usuń tyko pliki kontrolujące CVS (-e)"
+
+#: DialogsWxw/RenameDialog.cpp:53
+msgid "TortoiseCVS - Rename"
+msgstr "TortoiseCVS - Zmiana nazwy"
+
+#: DialogsWxw/RenameDialog.cpp:63
+#, fuzzy, c-format
+msgid "Rename '%s' to"
+msgstr "Zmień na"
+
+#: DialogsWxw/RenameDialog.cpp:105
+msgid "Rename to"
+msgstr "Zmień na"
+
+#: DialogsWxw/RevOptions.cpp:65
+msgid "Branch or tag"
+msgstr "Gałąź lub etykieta"
+
+#: DialogsWxw/RevOptions.cpp:68
+msgid "Use &HEAD branch"
+msgstr "Użyj gałęzi HEAD"
+
+#: DialogsWxw/RevOptions.cpp:71
+msgid "&Choose branch or tag"
+msgstr "&Wybierz gałąź lub etykietę"
+
+#: DialogsWxw/RevOptions.cpp:73
+msgid "Branch or tag name:"
+msgstr "Nazwa gałęzi lub etykiety:"
+
+#: DialogsWxw/RevOptions.cpp:87 TortoiseAct/TortoisePreferences.cpp:503
+msgid "If no matching revision is found, use the most recent one"
+msgstr "Jeśli brak pasującej rewizji, użyj najnowszej"
+
+#: DialogsWxw/RevOptions.cpp:89 DialogsWxw/UpdateDlg.cpp:439
+msgid "If you've specified a tag / branch / date, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr "Jeśli określisz nazwę konkretnej etykiety/gałęzi/daty i nie zostanie znaleziona odpowiednia do tych ustawień rewizja, CVS pobierze rewizję HEAD."
+
+#: DialogsWxw/RevOptions.cpp:91
+msgid "Which tag or branch should be retrieved"
+msgstr "Wskaż etykietę lub gałąź, która ma być odzyskana"
+
+#: DialogsWxw/RevOptions.cpp:100
+msgid "Date and time"
+msgstr "Data i czas"
+
+#: DialogsWxw/RevOptions.cpp:105
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar, e.g.\n"
+"  \"1988-09-24\"\n"
+"  \"yesterday\"\n"
+"  \"24 Sep 20:05\""
+msgstr ""
+"Wybierz datę z kalendarza i/lub edytuj wartość w polu powyżej kalendarza, np.:\n"
+"  \"1988-09-24\"\n"
+"  \"24 Maj 20:05\""
+
+#: DialogsWxw/RevOptions.cpp:109
+msgid "Most &recent files"
+msgstr "Najnowsze pliki"
+
+#: DialogsWxw/RevOptions.cpp:111
+msgid "Files at certain &time"
+msgstr "&Określony czas plików"
+
+#: DialogsWxw/RevOptions.cpp:112
+msgid "Date/time of files to get:"
+msgstr "Data/czas plików do pobrania:"
+
+#: DialogsWxw/UpdateDlg.cpp:151
+msgid "TortoiseCVS - Update"
+msgstr "TortoiseCVS - Aktualizacja"
+
+#: DialogsWxw/UpdateDlg.cpp:170
+msgid "Basic"
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:171 TortoiseAct/TortoisePreferences.cpp:45
+#: TortoiseAct/TortoisePreferences.cpp:280
+#: TortoiseAct/TortoisePreferences.cpp:297
+#: TortoiseAct/TortoisePreferences.cpp:304
+#: TortoiseAct/TortoisePreferences.cpp:316
+#: TortoiseAct/TortoisePreferences.cpp:324
+#: TortoiseAct/TortoisePreferences.cpp:332
+#: TortoiseAct/TortoisePreferences.cpp:338
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Advanced"
+msgstr "Zaawansowane"
+
+#: DialogsWxw/UpdateDlg.cpp:370
+msgid "Get &tag/branch/revision:"
+msgstr "Pobierz &etykietę/gałąź/rewizję:"
+
+#: DialogsWxw/UpdateDlg.cpp:372
+msgid "Switches your working copy to a specific branch/tag/revision. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "Przełącza kopię roboczą na określoną gałąź/etykietę/rewizję. To polecenie spowoduje, że późniejsze zmiany staną się obowiązujące i będą widoczne."
+
+#: DialogsWxw/UpdateDlg.cpp:383
+msgid "Branch/Tag/Revision specifier"
+msgstr "Uściślenie Gałęzi/Etykiety/Rewizji"
+
+#: DialogsWxw/UpdateDlg.cpp:394
+msgid "Scan subdirs"
+msgstr "Skanuj podfoldery"
+
+#: DialogsWxw/UpdateDlg.cpp:402
+msgid "Get &date/time:"
+msgstr "Pobierz &datę/czas"
+
+#: DialogsWxw/UpdateDlg.cpp:404
+msgid "Switches your working copy to the latest version before a specific date. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "Skanuj podfoldery"
+
+#: DialogsWxw/UpdateDlg.cpp:427
+msgid "&Clean copy - WARNING:  this deletes your changes"
+msgstr "&Czysta kopia - OSTRZEŻENIE - zmieniane pliki zostaną skasowane"
+
+#: DialogsWxw/UpdateDlg.cpp:429
+msgid ""
+"Overwrite any locally modified files during the update.\n"
+"They are backed up to .#file.revision in case you do this by mistake."
+msgstr ""
+"Nadpisz wszystkie zmienione pliki lokalne podczas aktualizacji.\n"
+"Będą one zachowane w pliku kopii .#plik.rewizja na wypadek nieumyślnego wykonania polecenia. "
+
+#: DialogsWxw/UpdateDlg.cpp:432
+#, fuzzy
+msgid "Create missing &subfolders"
+msgstr "Utwórz brakujące foldery"
+
+#: DialogsWxw/UpdateDlg.cpp:437
+#, fuzzy
+msgid "If no &matching revision is found, use the most recent one"
+msgstr "Jeśli brak pasującej rewizji, użyj najnowszej"
+
+#: DialogsWxw/UpdateDlg.cpp:462
+#, fuzzy
+msgid "Get &folder:"
+msgstr "Folder domowy"
+
+#: DialogsWxw/UpdateDlg.cpp:464
+msgid "Perform the update on the specified folder only. Useful for getting a single new folder without getting all other new folders."
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:476
+#, fuzzy
+msgid "&Simulate update"
+msgstr "Symuluj aktualizację"
+
+#: DialogsWxw/UpdateDlg.cpp:477
+msgid "Do not execute anything that will change the disk."
+msgstr "Nie wykonuj żadnego polecenia, które przeprowadzi zmiany na dysku."
+
+#: DialogsWxw/UpdateDlg.cpp:479
+#, fuzzy
+msgid "&Prune empty folders"
+msgstr "Usuń &puste foldery"
+
+#: DialogsWxw/UpdateDlg.cpp:480
+#, fuzzy
+msgid "Delete any folders that do not contain files."
+msgstr "Usuń pliki i foldery, które kontroluje CVS (-d)"
+
+#: DialogsWxw/UpdateDlg.cpp:482
+msgid "&Recurse"
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:483
+#, fuzzy
+msgid "Update subfolders."
+msgstr "&Skanuj podfoldery"
+
+#: DialogsWxw/YesNoAllDialog.cpp:63
+#, fuzzy
+msgid "TortoiseCVS - Question"
+msgstr "TortoiseCVS Pytanie"
+
+#: DialogsWxw/YesNoAllDialog.cpp:75
+msgid "&Yes"
+msgstr "&Tak"
+
+#: DialogsWxw/YesNoAllDialog.cpp:77
+msgid "&No"
+msgstr "&Nie"
+
+#: DialogsWxw/YesNoAllDialog.cpp:84
+msgid "Yes to &all"
+msgstr "T&ak, wszystko"
+
+#: DialogsWxw/YesNoAllDialog.cpp:86
+msgid "N&o to all"
+msgstr "Nie dla w&szystkich"
+
+#: TortoiseAct/TortoiseAct.cpp:314
+msgid "Unknown verb:"
+msgstr "Nierozpoznane polecenie:"
+
+#: TortoiseAct/TortoiseAct.cpp:326
+msgid ""
+"Too few arguments passed to TortoiseAct.\n"
+"\n"
+"TortoiseAct is designed to be run by the Explorer extension TrtseShl.dll. You don't need to run it yourself unless you have a special purpose.\n"
+"\n"
+"Command line arguments:\n"
+"TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"
+msgstr ""
+"Zbyt mało argumentów przekazanych do TortoiseAct.\n"
+"\n"
+"TortoiseAct jest uruchamiany przez rozszerzenie Explorer'a - TrtseShl.dll. Nie potrzeba go uruchamiać ręcznie bez szczególnej potrzeby.\n"
+"\n"
+"Argumenty dla lini poleceń:\n"
+"TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"
+
+#: TortoiseAct/TortoiseAct.cpp:351
+#, c-format
+msgid "Invalid arguments passed to TortoiseAct (expected handle \"-h 0xXXXXXXXX\", got %s)"
+msgstr "Nieprawidłowe argumenty przekazane do TortoiseAct (expected handle \"-h 0xXXXXXXXX\", got %s)"
+
+#: TortoiseAct/TortoiseAct.cpp:364
+msgid "File containing input filenames not found:"
+msgstr "Plik zawierający wprowadzone nazwy nie został znaleziony:"
+
+#: TortoiseAct/TortoiseAct.cpp:398
+msgid "Empty file list disallowed"
+msgstr "Puste listy plików są zabronione"
+
+#: TortoiseAct/TortoiseAct.cpp:476
+#, c-format
+msgid "Finished add in %s"
+msgstr "Zakończono dodawanie dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:568
+#, c-format
+msgid "Adding in %s"
+msgstr "Dodawanie dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:654
+msgid "There is nothing to add or commit."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:712 TortoiseAct/TortoiseAct.cpp:727
+#, c-format
+msgid "Finished adding to .cvsignore in %s"
+msgstr "Zakończono dodawanie do pliku .cvsignore dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:799 TortoiseAct/TortoiseAct.cpp:904
+#: TortoiseAct/TortoiseAct.cpp:3545
+#, c-format
+msgid "Finished checkout in %s"
+msgstr "Zakończono pobieranie do kontroli dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:813 TortoiseAct/TortoiseAct.cpp:3589
+msgid "No tag specified for Export, using HEAD"
+msgstr "Brak określonej etykiety do Eksportu, zostanie użyta HEAD"
+
+#: TortoiseAct/TortoiseAct.cpp:860 TortoiseAct/TortoiseAct.cpp:918
+#: TortoiseAct/TortoiseAct.cpp:3587
+#, c-format
+msgid "Checking out in %s"
+msgstr "Pobieranie do kontroli %s"
+
+#: TortoiseAct/TortoiseAct.cpp:921
+msgid "You can now compile the TortoiseCVS code."
+msgstr "Możesz teraz skompilować kod TortoiseCVS."
+
+#: TortoiseAct/TortoiseAct.cpp:923
+msgid "Create a patch file: If you fix some bugs or add some new features, please submit the changes for other users.  Right click on the changed files or folders and choose Make Patch from the CVS submenu."
+msgstr "Utwórz plik łatki. Jeśli dokonano zmian lub poprawiono błędy, powinno się wysłać innym użytkownikom plik łatki. Kliknij prawym przyciskiem na zmienionym pliku lub folderze zawierającym zmienione pliki i wybierz z menu 'Twórz plik łatki'."
+
+#: TortoiseAct/TortoiseAct.cpp:943
+msgid "You should not create a module in the root folder of a drive."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:967
+#, c-format
+msgid "Finished make new module in %s"
+msgstr "Zakończono tworzenie modułu dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:978
+msgid "Importing"
+msgstr "Import"
+
+#: TortoiseAct/TortoiseAct.cpp:998
+msgid "Checking out"
+msgstr "Pobieranie do kontroli"
+
+#: TortoiseAct/TortoiseAct.cpp:1010
+msgid "Enabling watch"
+msgstr "Włączanie pilnowania"
+
+#: TortoiseAct/TortoiseAct.cpp:1015
+msgid ""
+"Tortoise Tip: The top-level folder has now been created in CVS.\n"
+"To add files and subfolders, invoke the CVS Add Contents command."
+msgstr ""
+"Wskazówka Tortoise: Główny folder został utworzony w repozytorium CVS.\n"
+"Aby dodać pliki i podkatalogi wybierz polecenie Dodaj zawartość."
+
+#: TortoiseAct/TortoiseAct.cpp:1056
+msgid ""
+"There is nothing to commit.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"Brak pozycji do zatwierdzenia.\n"
+"\n"
+"Wszystkie pliki i foldery, które zaznaczyłeś pozostały niezmienione od czasu ostatniego zatwierdzenia."
+
+#: TortoiseAct/TortoiseAct.cpp:1104
+#, c-format
+msgid "Finished log in %s"
+msgstr "Zakończono tworzenie logu dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1126
+#, c-format
+msgid "Logging in %s"
+msgstr "Logowanie w %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1181
+#, fuzzy, c-format
+msgid "Are you sure that you want to CVS Remove all files in the folder '%s'?"
+msgstr "Czy chcesz usunąć wszystkie pliki w folderze '%s' ?"
+
+#: TortoiseAct/TortoiseAct.cpp:1184
+#, c-format
+msgid "Are you sure that you want to CVS Remove '%s'?"
+msgstr "Czy chcesz usunąć '%s' ?"
+
+#: TortoiseAct/TortoiseAct.cpp:1187
+#, c-format
+msgid "Are you sure that you want to CVS Remove these %d items?"
+msgstr "Czy chcesz usunąć %d ?"
+
+#: TortoiseAct/TortoiseAct.cpp:1256
+msgid "No files found that could be removed.\n"
+msgstr "Brak plików, które mogą być usunięte.\n"
+
+#: TortoiseAct/TortoiseAct.cpp:1257
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, and then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr "CVS nie przechowuje folderów (tylko same pliki), jeśli chcesz usunąć folder - usuń wszystkie pliki jakie się w nim znajdują i wykonaj aktualizację CVS. Dla poprawnego działania wymagane jest zaznaczenie opcji 'Usuń puste foldery' w ustawieniach."
+
+#: TortoiseAct/TortoiseAct.cpp:1265
+#, c-format
+msgid "Finished remove in %s"
+msgstr "Zakończono usuwanie dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1324
+#, fuzzy, c-format
+msgid ""
+"The file\n"
+"\n"
+"%s\n"
+"is modified. Are you sure that you want to remove it and thus lose your changes?"
+msgstr "Czy chcesz usunąć %d ?"
+
+#: TortoiseAct/TortoiseAct.cpp:1331
+#, fuzzy, c-format
+msgid ""
+"The files\n"
+"\n"
+"%s\n"
+"are modified. Are you sure that you want to remove them and thus lose your changes?"
+msgstr "Czy chcesz usunąć %d ?"
+
+#: TortoiseAct/TortoiseAct.cpp:1339 TortoiseAct/TortoiseAct.cpp:2428
+#, c-format
+msgid "Editing in %s"
+msgstr "Edycja w %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1356
+#, c-format
+msgid "Removing in %s"
+msgstr "Usuwanie w %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1374
+#, c-format
+msgid ""
+"Couldn't rename file:\n"
+"%s to %s"
+msgstr ""
+"Nie można zmienić nazwy pliku:\n"
+"%s na %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1409 TortoiseAct/TortoiseAct.cpp:1431
+#, c-format
+msgid ""
+"Couldn't rename file back:\n"
+"%s to %s"
+msgstr ""
+"Nieudana próba cofnięcia zmiany nazwy dla piku:\n"
+"%s na %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1459
+#, fuzzy
+msgid "Couldn't recycle"
+msgstr "Nieudane skanowanie folderu %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1466
+msgid "No removable files found"
+msgstr "Brak, plików które można usunąć"
+
+#: TortoiseAct/TortoiseAct.cpp:1488
+#, fuzzy
+msgid ""
+"Tortoise Tip: Any removed files have been moved to the Recycle Bin.\n"
+"To undo the remove: Choose CVS Commit, right-click the file, and click Restore.\n"
+msgstr ""
+"Wskazówka Tortoise: Wszystkie usunięte pliki znajdują się w Koszu.\n"
+"Możesz cofnąć operację usuwania poprzez przywrócenie plików z kosza i wydanie polecenia Dodaj."
+
+#: TortoiseAct/TortoiseAct.cpp:1490
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr "CVS nie przechowuje folderów (tylko same pliki), jeśli chcesz usunąć folder - usuń wszystkie pliki jakie się w nim znajdują i wykonaj aktualizację CVS. Dla poprawnego działania wymagane jest zaznaczenie opcji 'Usuń puste foldery' w ustawieniach."
+
+#: TortoiseAct/TortoiseAct.cpp:1520
+#, c-format
+msgid "Finished rename in %s"
+msgstr "Zakończono zmianę nazwy w %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1540
+#, c-format
+msgid "Finished restoring in %s"
+msgstr "Zakończono odtwarzanie dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1583
+#, c-format
+msgid "Restoring in %s"
+msgstr "Odtwarzanie dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1661
+#, c-format
+msgid "Finished update in %s"
+msgstr "Zakończono aktualizację dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1715
+#, c-format
+msgid "Updating in %s"
+msgstr "Aktualizacja w %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1769
+#, c-format
+msgid "Finished clean update in %s"
+msgstr "Zakończono aktualizację dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1781
+#, c-format
+msgid "Doing clean update in %s"
+msgstr "Wykonywanie aktualizacji dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1979
+#, c-format
+msgid "Editing before merge in %s"
+msgstr "Edycja przed scalaniem dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2039
+#, c-format
+msgid "Finished merge in %s"
+msgstr "Zakończono scalanie dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2058
+#, c-format
+msgid "Merging in %s"
+msgstr "Scalanie dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2147
+msgid "unknown"
+msgstr "nieznane"
+
+#: TortoiseAct/TortoiseAct.cpp:2203 TortoiseAct/TortoiseAct.cpp:3881
+msgid "Failed to reprocess file list"
+msgstr "Niudana próba przetworzenia listy plików"
+
+#: TortoiseAct/TortoiseAct.cpp:2212
+#, c-format
+msgid "Finished making patch in %s"
+msgstr "Zakończono wykonywanie łatki dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2234
+#, c-format
+msgid "Making patch in %s"
+msgstr "Tworzenie łatki dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2248
+msgid ""
+"There are no patches.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"Brak plików łatki.\n"
+"\n"
+"Wszystkie pliki i foldery, które zaznaczyłeś pozostały niezmienione od czasu ostatniego zatwierdzenia."
+
+#: TortoiseAct/TortoiseAct.cpp:2254
+msgid "Patch files"
+msgstr "pliki łatek"
+
+#: TortoiseAct/TortoiseAct.cpp:2256
+msgid "Text files"
+msgstr "Pliki tekstowe"
+
+#: TortoiseAct/TortoiseAct.cpp:2258 TortoiseAct/TortoiseAct.cpp:3251
+msgid "All files"
+msgstr "Wszystkie pliki"
+
+#: TortoiseAct/TortoiseAct.cpp:2261
+msgid "Save patch file"
+msgstr "Zapisz plik łatki"
+
+#: TortoiseAct/TortoiseAct.cpp:2426
+#, c-format
+msgid "Finished edit in %s"
+msgstr "Kończenie edycji dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2508
+#, c-format
+msgid "Finished unedit in %s"
+msgstr "Zakończono polecenie kończenia edytowania dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2522
+#, c-format
+msgid "Unediting in %s"
+msgstr "Zakańczanie edycji dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2539
+#, c-format
+msgid "Finished list editors in %s"
+msgstr "Zakończono pobieranie listy dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2827
+msgid "Merging changes in binary files is not allowed."
+msgstr "Scalanie zmian dla plików binarnych nie jest dozwolone."
+
+#: TortoiseAct/TortoiseAct.cpp:2897
+msgid "The selected file doesn't contain any conflict markers"
+msgstr "Wskazany plik nie zawiera żadnych znaczników określających konflikty"
+
+#: TortoiseAct/TortoiseAct.cpp:2910
+#, c-format
+msgid ""
+"File containing your changes: %s\n"
+"File containing repository changes: %s\n"
+"Please merge your changes into: %s"
+msgstr ""
+"Pliki zawierające zmiany: %s\n"
+"Pliki w repozytorium zawierające zmiany: %s\n"
+"Scal zmiany w: %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2946
+#, c-format
+msgid "Do you want to overwrite your working copy of \"%s\" with your merge results in \"%s\"?"
+msgstr "Czy chcesz nadpisać roboczą kopię \"%s\" przez scalony plik \"%s\"?"
+
+#: TortoiseAct/TortoiseAct.cpp:2949
+msgid "Save merged file"
+msgstr "Zapisz scalony plik"
+
+#: TortoiseAct/TortoiseAct.cpp:2960
+#, c-format
+msgid "Failed to overwrite %s"
+msgstr "Nieudana próba nadpisania dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:3250
+msgid "Save file revision"
+msgstr "Zapisz plik rewizji"
+
+#: TortoiseAct/TortoiseAct.cpp:3351
+msgid "There are no conflicts to resolve"
+msgstr "Brak konfliktów do rozwiązania"
+
+#: TortoiseAct/TortoiseAct.cpp:3461
+#, c-format
+msgid "Finished '%s' in %s"
+msgstr "Zakończono '%s' w %s"
+
+#: TortoiseAct/TortoiseAct.cpp:3487
+msgid "Invalid cvs:// URL"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3497
+msgid "Invalid cvs:// URL: no module specified"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3510
+#, c-format
+msgid "Invalid CVSROOT %s specified in cvs:// URL"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3538
+msgid "Choose destination folder for CVS checkout"
+msgstr "Wybierz lokalizację dla pobieranego folderu"
+
+#: TortoiseAct/TortoiseAct.cpp:3539
+msgid "Folders"
+msgstr "Foldery"
+
+#: TortoiseAct/TortoiseAct.cpp:3754
+msgid ""
+"The files you want to compare contain characters that cannot be represented in the current codepage.\n"
+"To prevent loss of information, the files will be temporarily converted to UTF-8."
+msgstr ""
+"Pliki, które chcesz porównać zawierają znaki, które nie znajdują się w wybranej stronie kodowej.\n"
+"Aby zapobiec utracie informacji, plik będzie tymczasowo przekonwertowany do standardu UTF-8."
+
+#: TortoiseAct/TortoiseAct.cpp:3756
+msgid "UTF-8 conversion"
+msgstr "Konversja UTF-8"
+
+#: TortoiseAct/TortoiseAct.cpp:3869
+msgid ""
+"You have tried to commit one or more renamed files without committing all changed\n"
+"(modified, added, or removed) files in the same folder.\n"
+"CVSNT does not currently support this. Please try again."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3888
+#, c-format
+msgid "Finished commit in %s"
+msgstr "Zatwierdzanie wykonane dla %s"
+
+#: TortoiseAct/TortoiseAct.cpp:3986
+#, c-format
+msgid "Committing in %s"
+msgstr "Zatwierdzanie dla %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:45
+msgid "Choose external diff application"
+msgstr "Wybierz zewnętrzną aplikację obsługującą różnice"
+
+#: TortoiseAct/TortoiseActUtils.cpp:50
+msgid "Choose external merge application"
+msgstr "Wybierz zewnętrzną aplikację do scalania"
+
+#: TortoiseAct/TortoiseActUtils.cpp:74 TortoiseAct/TortoisePreferences.cpp:364
+#: TortoiseAct/TortoisePreferences.cpp:401
+#: TortoiseAct/TortoisePreferences.cpp:439
+#: TortoiseAct/TortoisePreferences.cpp:454
+msgid "Executables"
+msgstr "Pliki uruchomieniowe"
+
+#: TortoiseAct/TortoiseActUtils.cpp:109 TortoiseAct/TortoiseActUtils.cpp:137
+#, c-format
+msgid "Finished diff in %s"
+msgstr "Zakończono obsługę różnic dla %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:111 TortoiseAct/TortoiseActUtils.cpp:139
+#, c-format
+msgid "Diffing in %s"
+msgstr "Obsługa różnic dla %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:246 TortoiseAct/TortoiseActUtils.cpp:248
+#, c-format
+msgid "Viewing %s"
+msgstr "Podgląd %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:362
+msgid "Failed to launch external diff application"
+msgstr "Nieudana próba uruchomienia zewnętrznej aplikacji obsługującej różnice"
+
+#: TortoiseAct/TortoiseActUtils.cpp:414
+msgid "Failed to launch external merge application"
+msgstr "Nieudana próba uruchomienia zewnętrznej aplikacji scalającej"
+
+#: TortoiseAct/TortoisePreferences.cpp:41
+#: TortoiseAct/TortoisePreferences.cpp:177
+#: TortoiseAct/TortoisePreferences.cpp:189
+#: TortoiseAct/TortoisePreferences.cpp:199
+#: TortoiseAct/TortoisePreferences.cpp:214
+#: TortoiseAct/TortoisePreferences.cpp:221
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "Main"
+msgstr "Główne"
+
+#: TortoiseAct/TortoisePreferences.cpp:42
+#: TortoiseAct/TortoisePreferences.cpp:472
+#: TortoiseAct/TortoisePreferences.cpp:482
+#: TortoiseAct/TortoisePreferences.cpp:490
+#: TortoiseAct/TortoisePreferences.cpp:498
+#: TortoiseAct/TortoisePreferences.cpp:507
+#: TortoiseAct/TortoisePreferences.cpp:523
+#: TortoiseAct/TortoisePreferences.cpp:537
+#: TortoiseAct/TortoisePreferences.cpp:549
+#: TortoiseAct/TortoisePreferences.cpp:560
+#: TortoiseAct/TortoisePreferences.cpp:570
+msgid "Policy"
+msgstr "Polityka"
+
+#: TortoiseAct/TortoisePreferences.cpp:43
+#: TortoiseAct/TortoisePreferences.cpp:588
+#: TortoiseAct/TortoisePreferences.cpp:597
+#: TortoiseAct/TortoisePreferences.cpp:606
+msgid "Edit"
+msgstr "Edytuj"
+
+#: TortoiseAct/TortoisePreferences.cpp:44
+#: TortoiseAct/TortoisePreferences.cpp:361
+#: TortoiseAct/TortoisePreferences.cpp:368
+#: TortoiseAct/TortoisePreferences.cpp:381
+#: TortoiseAct/TortoisePreferences.cpp:398
+#: TortoiseAct/TortoisePreferences.cpp:404
+#: TortoiseAct/TortoisePreferences.cpp:418
+#: TortoiseAct/TortoisePreferences.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:442
+#: TortoiseAct/TortoisePreferences.cpp:450
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "Tools"
+msgstr "Narzędzia"
+
+#: TortoiseAct/TortoisePreferences.cpp:46
+#: TortoiseAct/TortoisePreferences.cpp:665
+#: TortoiseAct/TortoisePreferences.cpp:672
+#: TortoiseAct/TortoisePreferences.cpp:679
+#: TortoiseAct/TortoisePreferences.cpp:686
+#: TortoiseAct/TortoisePreferences.cpp:693
+#: TortoiseAct/TortoisePreferences.cpp:700
+#: TortoiseAct/TortoisePreferences.cpp:707
+#: TortoiseAct/TortoisePreferences.cpp:714
+msgid "Appearance"
+msgstr "Wygląd"
+
+#: TortoiseAct/TortoisePreferences.cpp:47
+#: TortoiseAct/TortoisePreferences.cpp:725
+#: TortoiseAct/TortoisePreferences.cpp:732
+#: TortoiseAct/TortoisePreferences.cpp:739
+msgid "Cache"
+msgstr "Pamięć podręczna"
+
+#: TortoiseAct/TortoisePreferences.cpp:49
+#: TortoiseAct/TortoisePreferences.cpp:620
+#: TortoiseAct/TortoisePreferences.cpp:627
+#: TortoiseAct/TortoisePreferences.cpp:635
+#: TortoiseAct/TortoisePreferences.cpp:646
+#: TortoiseAct/TortoisePreferences.cpp:651
+msgid "Debug"
+msgstr "Debuguj"
+
+#: TortoiseAct/TortoisePreferences.cpp:85
+msgid "Error"
+msgstr "Błąd"
+
+#: TortoiseAct/TortoisePreferences.cpp:177
+msgid "&Progress dialog"
+msgstr "&Okno dialogowe postępu"
+
+#: TortoiseAct/TortoisePreferences.cpp:178
+msgid "Automatically close the progress window when a command completes successfully.  You can hold Ctrl down while selecting a CVS command, or as one is finishing, to prevent this on a one off basis."
+msgstr "Automatycznie zamykaj okno postępu gdy polecenie zakończy się pomyślnie. Przytrzymaj klawisz Ctrl podczasz wybierania polecenia, lub podczas jego wykonywania, aby zapobiec zamknięciu okna."
+
+#: TortoiseAct/TortoisePreferences.cpp:183
+msgid "Close manually"
+msgstr "Zamknij ręcznie"
+
+#: TortoiseAct/TortoisePreferences.cpp:184
+msgid "Close if no messages"
+msgstr "Zamknij, jeśli brak wiadomości"
+
+#: TortoiseAct/TortoisePreferences.cpp:185
+msgid "Close if no errors"
+msgstr "Zamknij, jeśli brak błędów"
+
+#: TortoiseAct/TortoisePreferences.cpp:189
+msgid "Progress &messages"
+msgstr "Informacje postępu"
+
+#: TortoiseAct/TortoisePreferences.cpp:190
+msgid "How detailed CVS is about what it is doing.  Errors are always printed, even at the most silent levels."
+msgstr "Określa stopień w jakim TortoiseCVS będzie informował użytkownika o wykonywanych poleceniach. Błędy będą zawsze wyświetlane nawet na najniższym poziomie."
+
+#: TortoiseAct/TortoisePreferences.cpp:193
+msgid "Loud"
+msgstr "Pełne"
+
+#: TortoiseAct/TortoisePreferences.cpp:194
+msgid "Quiet"
+msgstr "Tylko potrzebne"
+
+#: TortoiseAct/TortoisePreferences.cpp:195
+msgid "Really Quiet"
+msgstr "Minimalne"
+
+#: TortoiseAct/TortoisePreferences.cpp:199
+msgid "&Overlay icons"
+msgstr "&Ikony nakładki"
+
+#: TortoiseAct/TortoisePreferences.cpp:200
+msgid "The set of overlay icons TortoiseCVS uses."
+msgstr "Zbiór ikon, które będą używane przez TortoiseCVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:201
+msgid "Changes won't take effect until you log off or reboot."
+msgstr "Zmiany nie będą widoczne do momentu wylogowania lub ponownego uruchomienia komputera."
+
+#: TortoiseAct/TortoisePreferences.cpp:210
+msgid "Don't change icon."
+msgstr "Nie zmieniaj ikon."
+
+#: TortoiseAct/TortoisePreferences.cpp:211
+msgid "Change icon when folder contains changed files."
+msgstr "Zmień ikony jeśli folder zawiera zmienione pliki."
+
+#: TortoiseAct/TortoisePreferences.cpp:212
+msgid "Change icon when folder or subfolders contain changed files."
+msgstr "Zmień ikony jeśli folder lub podfoldery zawierają zmienione pliki."
+
+#: TortoiseAct/TortoisePreferences.cpp:214
+msgid "Folder overlay icons"
+msgstr "Nakładka ikon folderów"
+
+#: TortoiseAct/TortoisePreferences.cpp:215
+msgid "Change folder icon when folder or subfolders contain changed files."
+msgstr "Zmień ikony folderów i podfolderów jesli zawierają one zmienione pliki."
+
+#: TortoiseAct/TortoisePreferences.cpp:221
+msgid "Autoload changed folder icons"
+msgstr "Automatycznie przeładuj ikony nakładki"
+
+#: TortoiseAct/TortoisePreferences.cpp:222
+msgid ""
+"Enabled: Changed folder icons are updated automatically.\n"
+"Disabled: Changed folder icons are only updated explicitly through the context menu."
+msgstr ""
+"Włączone: Ikony zmienionych folderów będą przeładowywane automatycznie.\n"
+"Wyłączone: Ikony zmienionych folderów będą przeładowywane tylko przez wybranie polecenia w menu."
+
+#: TortoiseAct/TortoisePreferences.cpp:225
+msgid "Autoload folder icon overlays"
+msgstr "Przeładowanie ikon"
+
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "L&anguage"
+msgstr "&Język"
+
+#: TortoiseAct/TortoisePreferences.cpp:231
+msgid "The language used in TortoiseCVS dialogs and menus."
+msgstr "Język używany w oknach dialogowych TortoiseCVS i w menu"
+
+#: TortoiseAct/TortoisePreferences.cpp:257
+msgid "Windows default"
+msgstr "Domyślny Windows "
+
+#: TortoiseAct/TortoisePreferences.cpp:278
+msgid "<failed to calculate home folder>"
+msgstr "<nieudana próba przetworzenia folderu domowego>"
+
+#: TortoiseAct/TortoisePreferences.cpp:280
+msgid "Home folder"
+msgstr "Folder domowy"
+
+#: TortoiseAct/TortoisePreferences.cpp:281
+msgid ""
+"The home folder is where the global .cvsignore file is stored. SSH connections also expect your .ssh folder with keys and known hosts to be in your home folder.\n"
+"By default, TortoiseCVS works out a home folder for you. It looks for folders in this order:\n"
+" - An environment variable called HOME\n"
+" - WinCVS specified home folder\n"
+" - My Documents.\n"
+"You can turn off this automatic calculation, and instead specify your own custom home folder below.\n"
+"Currently the calculation result is: "
+msgstr ""
+"Folder domowy to folder w którym przechowywany jest globalny plik .cvsignore. Połączenia SSH wymagają aby w folderze domowym był katalog .ssh z wymaganymi kluczami.\n"
+"Domyślnie, TortoiseCVS sam wybiera folder domowy w następującym porządku:\n"
+"- Zmienna środowskowa o nazwie HOME\n"
+"- Folder domowy określony przez WinCVS\n"
+"- Moje Dokumenty\n"
+"Możesz wyłączyć tą opcję i samemu wskazać scieżkę do folderu domowego.\n"
+"Obecnie folder domowy znajduje się w:"
+
+#: TortoiseAct/TortoisePreferences.cpp:293
+msgid "Always recalculate &home folder"
+msgstr "Domyślny folder domowy"
+
+#: TortoiseAct/TortoisePreferences.cpp:297
+msgid "Custom home &folder"
+msgstr "Własny folder domowy"
+
+#: TortoiseAct/TortoisePreferences.cpp:298
+msgid "If you turn off automatic home folder calculation, you can enter an explicit path here."
+msgstr "Jeśli opcja domyślnego folderu domowego została odznaczona, tutaj możesz podać ścieżkę do własnego folderu domowego."
+
+#: TortoiseAct/TortoisePreferences.cpp:304
+msgid "&Network compression"
+msgstr "&Kompresja sieciowa"
+
+#: TortoiseAct/TortoisePreferences.cpp:305
+msgid "Reduce network load by compressing traffic to and from the CVS server. High levels may be slow to calculate."
+msgstr "Redukuje ilość danych przesyłanych siecią do i z serwera CVS poprzez zastosowanie kompresji. Wysoki poziom może spowodować problemy z odczytaniem."
+
+#: TortoiseAct/TortoisePreferences.cpp:308
+msgid "0 - None"
+msgstr "0 - Brak"
+
+#: TortoiseAct/TortoisePreferences.cpp:309
+msgid "3 - Low"
+msgstr "3 - Słaba"
+
+#: TortoiseAct/TortoisePreferences.cpp:310
+msgid "6 - Good"
+msgstr "6 - Dobra"
+
+#: TortoiseAct/TortoisePreferences.cpp:311
+msgid "9 - Best"
+msgstr "9 - Najlepsza"
+
+#: TortoiseAct/TortoisePreferences.cpp:316
+msgid "&Excluded folders"
+msgstr "Pomijane foldery"
+
+#: TortoiseAct/TortoisePreferences.cpp:317
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are disabled."
+msgstr "Lista folderów (rozdzielonych średnikami ';') dla których domyślnie wyłączone jest przetwarzanie CVS (nie będzie dla nich menu kontekstowego oraz nie będzie nakładki ikon)"
+
+#: TortoiseAct/TortoisePreferences.cpp:324
+msgid "&Included folders"
+msgstr "Załączone foldery"
+
+#: TortoiseAct/TortoisePreferences.cpp:325
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are enabled. An empty list enables all folders."
+msgstr "Lista folderów (rozdzielonych średnikami ';') dla których domyślnie włączone jest przetwarzanie CVS. Pusta lista ustawia domyślnie wszystkie foldery."
+
+#: TortoiseAct/TortoisePreferences.cpp:332
+msgid "Menu icons"
+msgstr "Ikony menu"
+
+#: TortoiseAct/TortoisePreferences.cpp:333
+msgid "Enable/disable"
+msgstr "Włącz/wyłącz"
+
+#: TortoiseAct/TortoisePreferences.cpp:335
+msgid "Enable menu &icons"
+msgstr "Włącz ikony w menu konteksotwym"
+
+#: TortoiseAct/TortoisePreferences.cpp:339
+msgid "Maximum number of tags for graph"
+msgstr "Maksymalna liczba etykiet w grafie"
+
+#: TortoiseAct/TortoisePreferences.cpp:340
+msgid "Controls how many tags the graph dialog will display per revision.  Enter -1 to show them all."
+msgstr "Określa ile etykiet będzie wyświetlanych w grafie dla danej rewizji. Wpisz -1, aby pokazać wszystkie."
+
+#: TortoiseAct/TortoisePreferences.cpp:346
+msgid "Autodetect (default to DOS)"
+msgstr "Automatyczne wykrywanie formatu pliku (domyślny DOS)"
+
+#: TortoiseAct/TortoisePreferences.cpp:347
+msgid "Autodetect (default to UNIX)"
+msgstr "Automatyczne wykrywanie formatu pliku (domyślny UNIX)"
+
+#: TortoiseAct/TortoisePreferences.cpp:348
+msgid "DOS"
+msgstr "DOS"
+
+#: TortoiseAct/TortoisePreferences.cpp:349
+msgid "UNIX"
+msgstr "UNIX"
+
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Sandbox DOS/UNIX"
+msgstr "Repozytorium robocze DOS/UNIX"
+
+#: TortoiseAct/TortoisePreferences.cpp:352
+msgid "Use either LF (UNIX) or CRLF (DOS) line separators in text files."
+msgstr "Określa format zakończeń lini (LF dla UNIX lub CRLF dla DOS) w plikach tekstowych."
+
+#: TortoiseAct/TortoisePreferences.cpp:361
+msgid "&Diff application"
+msgstr "&Aplikacja obsługująca różnice"
+
+#: TortoiseAct/TortoisePreferences.cpp:362
+msgid "Specify the program you use to compare files."
+msgstr "Określ aplikację do obsługi porównywania plików"
+
+#: TortoiseAct/TortoisePreferences.cpp:368
+msgid "&Two-way diff parameters"
+msgstr "Parametry dla &dwufazowej obsługi różnic"
+
+#: TortoiseAct/TortoisePreferences.cpp:369
+msgid "Parameters for two-way diffs."
+msgstr "Parametry dla dwufazowej obsługi różnic"
+
+#: TortoiseAct/TortoisePreferences.cpp:371
+#: TortoiseAct/TortoisePreferences.cpp:407
+#, fuzzy
+msgid "The default parameters are:"
+msgstr "Parametry dla &trójfazowej obsługi różnic"
+
+#: TortoiseAct/TortoisePreferences.cpp:373
+#: TortoiseAct/TortoisePreferences.cpp:374
+#: TortoiseAct/TortoisePreferences.cpp:387
+#: TortoiseAct/TortoisePreferences.cpp:389
+#: TortoiseAct/TortoisePreferences.cpp:391
+msgid "Name of file selected for diff."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:381
+msgid "T&hree-way diff parameters"
+msgstr "Parametry dla &trójfazowej obsługi różnic"
+
+#: TortoiseAct/TortoisePreferences.cpp:382
+msgid "Parameters for three-way diffs."
+msgstr "Parametry dla trójfazowej obsługi różnic"
+
+#: TortoiseAct/TortoisePreferences.cpp:398
+msgid "&Merge application"
+msgstr "Aplikacja &scalająca"
+
+#: TortoiseAct/TortoisePreferences.cpp:399
+msgid "Specify the program you use to merge files."
+msgstr "Określ program, który będzie wykorzystywany do scalania plików."
+
+#: TortoiseAct/TortoisePreferences.cpp:404
+msgid "&Two-way merge parameters"
+msgstr "Parametry &dwufazowego scalania"
+
+#: TortoiseAct/TortoisePreferences.cpp:405
+msgid "Parameters for two-way merges."
+msgstr "Parametry dla scalania dwufazowego."
+
+#: TortoiseAct/TortoisePreferences.cpp:409
+#: TortoiseAct/TortoisePreferences.cpp:424
+msgid "File containing my changes."
+msgstr "Pliki zawierające zmiany."
+
+#: TortoiseAct/TortoisePreferences.cpp:411
+#: TortoiseAct/TortoisePreferences.cpp:428
+msgid "File containing changes from repository."
+msgstr "Pliki z repozytorium.zawierające zmiany."
+
+#: TortoiseAct/TortoisePreferences.cpp:418
+msgid "T&hree-way merge parameters"
+msgstr "Parametry &trójfazowego scalania"
+
+#: TortoiseAct/TortoisePreferences.cpp:419
+msgid "Parameters for three-way merges."
+msgstr "Parametry dla scalania trójfazowego."
+
+#: TortoiseAct/TortoisePreferences.cpp:422
+msgid ""
+"\n"
+"\n"
+"\"%mine\" \"%ancestor\" \"%yours\"\n"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:423
+#, c-format
+msgid ""
+"\n"
+"%mine: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:425
+#, c-format
+msgid ""
+"\n"
+"%ancestor: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:426
+msgid "File containing common ancestor data."
+msgstr "Pliki zawierające wspólne dane poprzednich plików."
+
+#: TortoiseAct/TortoisePreferences.cpp:427
+msgid ""
+"\n"
+"%yours: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:434
+msgid "SSH &application (:ext: only)"
+msgstr "&Aplikacja SSH (:ext: tylko)"
+
+#: TortoiseAct/TortoisePreferences.cpp:435
+msgid "Specify the CVS_EXT application (e.g. ssh.exe, plink.exe)"
+msgstr "Określa aplikację CVS_EXT (np.: ssh.exe, plink.exe)"
+
+#: TortoiseAct/TortoisePreferences.cpp:442
+msgid "SSH &parameters (:ext: only)"
+msgstr "&Parametry SSH (:ext: tylko)"
+
+#: TortoiseAct/TortoisePreferences.cpp:443
+msgid "Parameters for the CVS_EXT application. The default parameters are:"
+msgstr "Parametry dla aplikacji CVS_EXT. Domyślne parametry to:"
+
+#: TortoiseAct/TortoisePreferences.cpp:445
+msgid "CVS replaces %u with the username and %h with the hostname."
+msgstr "CVS zmienia %u na nazwę użytkownika i %h na nazwę hostu."
+
+#: TortoiseAct/TortoisePreferences.cpp:450
+msgid "SSH &cvs server (:ext: only)"
+msgstr "Server SSH dla &cvs (:ext: tylko)"
+
+#: TortoiseAct/TortoisePreferences.cpp:451
+msgid "Specify the CVS_SERVER application (e.g. /usr/local/bin/cvsnt)"
+msgstr "Określa aplikację CVS_SERVER (np.: /usr/local/bin/cvsnt)"
+
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "&Bug tracker URL"
+msgstr "URL do śledzenia &błędów"
+
+#: TortoiseAct/TortoisePreferences.cpp:458
+#, c-format
+msgid "In the History and Revision Graph dialogs, TortoiseCVS can automatically create hyperlinks from log messages containing 'bug XXX' or '#XXX' where XXX is a number. This setting tells TortoiseCVS how to build that URL. %s will be replaced with the bug number."
+msgstr "W oknach dialogowych Historii i Grafu rewizji TortoiseCVS automatycznie utworzy linki do logów zawierających 'bł±d XXX' lub '#XXX' gdzie XXX to numer błędu. Ta opcja określa jak mają być tworzone linki %s które będą zastąpione przez numer błędu."
+
+#: TortoiseAct/TortoisePreferences.cpp:472
+msgid "Empty folders"
+msgstr "Puste foldery"
+
+#: TortoiseAct/TortoisePreferences.cpp:473
+msgid "Hide folders which contain no files. CVS doesn't directly manage folders, so the assumption here is that if you remove all the files from a folder you would like to remove the folder."
+msgstr "Ukryj foldery, w których nie ma żadnych plików. CVS nie zarządza bezpośrednio folderami, jeśli usuniesz wszystkie pliki z folderu, zaznaczenie tej opcji pozwoli na wykasowanie tego folderu."
+
+#: TortoiseAct/TortoisePreferences.cpp:477
+msgid "Prune &empty folders"
+msgstr "Usuń &puste foldery"
+
+#: TortoiseAct/TortoisePreferences.cpp:482
+msgid "Read Only Default"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:483
+msgid "Checkout files read only by default, return files to read only with unedit and commit"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:485
+msgid "Read &Only Default"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:491
+#, fuzzy
+msgid "New folders"
+msgstr "Folder domowy"
+
+#: TortoiseAct/TortoisePreferences.cpp:494
+msgid "Create new &folders on update"
+msgstr "Utwórz brakujące foldery podczas aktualizacji"
+
+#: TortoiseAct/TortoisePreferences.cpp:499
+msgid "Force head revision"
+msgstr "Wymuś rewizję HEAD"
+
+#: TortoiseAct/TortoisePreferences.cpp:500
+msgid "If you've specified a tag/branch/date on checkout or update, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr "Jeśli określono etykietę/gałąź/datę dla pobierania pliku lub aktualizacji, a nie zostanie znaleziona pasująca rewizja dla pliku, CVS automatycznie przypisze rewizję HEAD."
+
+#: TortoiseAct/TortoisePreferences.cpp:508
+msgid "Automatic commit"
+msgstr "Automatyczne zatwierdzanie"
+
+#: TortoiseAct/TortoisePreferences.cpp:509
+msgid ""
+"If this is checked and you perform a 'CVS Add' and/or a 'CVS Remove', TortoiseCVS will automatically perform a commit of the file.\n"
+"It is recommended that you only enable this option if you work on documents, not source code, or if you are the only person working on the project."
+msgstr ""
+"Jeśli ta opcja będzie zaznaczona, po dodaniu lub usunięciu pliku do repozytorium, TortoiseCVS automatycznie zatwierdzi polecenie. \n"
+"Zaznaczenie tej opcji jest zalecane tylko w przypadku pracy nad dokumentami (nie kodami źródłowymi) lub jeśli jesteś jedyną osobą pracującą nad projektem, który znajduje się w repozytorium CVS."
+
+#: TortoiseAct/TortoisePreferences.cpp:515
+msgid "Do not automatically commit after Add/Remove"
+msgstr "Nie ztwierdzaj automatycznie pliku po dodaniu lub usunięciu"
+
+#: TortoiseAct/TortoisePreferences.cpp:516
+msgid "Automatically commit after Add"
+msgstr "Automatyczne zatwierdzenie pliku po dodaniu"
+
+#: TortoiseAct/TortoisePreferences.cpp:517
+msgid "Automatically commit after Add and Remove"
+msgstr "Automatyczne zatwierdzenie pliku po dodaniu lub usunięciu"
+
+#: TortoiseAct/TortoisePreferences.cpp:524
+msgid "Allow Network Drives"
+msgstr "Dyski sieciowe"
+
+#: TortoiseAct/TortoisePreferences.cpp:525
+msgid ""
+"If this is checked, sandboxes on network mounted drives will be controlled by TortoiseCVS. It also suppresses CVS errors when accessing a repository via :local: on a network share.\n"
+"NOTE: Placing your sandbox or repository on a network drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr ""
+"Jeśli ta opcja będzie zaznaczona, repozytorium ulokowane na dyskach sieciowych będzie kontrolowane przez TortoiseCVS. Zaznaczenie tej opcji zlikwiduje powstawanie błędów podczas dostępu do repozytorium ulokowanych na dyskach sieciowych.\n"
+" UWAGA: Umieszczanie repozytoriów na dyskach sieciowych lub dyskach usuwalnych jest niezalecane."
+
+#: TortoiseAct/TortoisePreferences.cpp:532
+msgid "Permit sandboxes and repositories on &network (remote) drives"
+msgstr "Zezwalaj na tworzenie repozytorium na dyskach sieciowych"
+
+#: TortoiseAct/TortoisePreferences.cpp:538
+msgid "Allow Removable Drives"
+msgstr "Usuwalne nośniki"
+
+#: TortoiseAct/TortoisePreferences.cpp:539
+msgid ""
+"If this is checked, sandboxes on drives with removable media will be controlled by TortoiseCVS.\n"
+"NOTE: Placing your sandbox on a removable drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr ""
+"Jeśli ta opcja będzie zaznaczona, repozytorium ulokowane na dyskach usuwalnych (dyski USB, ...) będzie kontrolowane przez TortoiseCVS. Jednak zezwolenie na tworzenie repozytorium na takich dyskach nie jest zalecane ze względu na powstawanie licznych błędów.\n"
+" UWAGA: Umieszczanie repozytoriów na dyskach sieciowych lub dyskach usuwalnych jest niezalecane."
+
+#: TortoiseAct/TortoisePreferences.cpp:544
+msgid "Permit sandboxes on &removable drives"
+msgstr "Zezwalaj na tworzenie repozytorium na dyskach usuwalnych"
+
+#: TortoiseAct/TortoisePreferences.cpp:550
+msgid "Add Ignored Files"
+msgstr "Dodaj ignorowane pliki"
+
+#: TortoiseAct/TortoisePreferences.cpp:551
+msgid "If this is checked, the Add Contents dialog will include files listed in .cvsignore. Useful if you want to add files which are normally ignored, but makes the dialog more cluttered."
+msgstr "Jeśli ta opcja jest zaznaczona, polecenie Dodaj zawartość spowoduje dodanie plików z listy plików ignorowanych. Opcja ta jest użyteczna, gdy chcesz, aby pliki określone jako ignorowane mogły zostać dodane."
+
+#: TortoiseAct/TortoisePreferences.cpp:555
+msgid "Show .cvs&ignored files in the Add Contents dialog"
+msgstr "Pokaż pliki &ignorowane w oknie Dodawania zawartości"
+
+#: TortoiseAct/TortoisePreferences.cpp:561
+msgid "Explorer Columns"
+msgstr "Kolumny Explorera"
+
+#: TortoiseAct/TortoisePreferences.cpp:562
+msgid "If this is checked, Tortoise will show the CVS Explorer columns only for folders that are under CVS control"
+msgstr "Jeśli ta opcja jest zaznaczona, Tortoise pokaże kolumny CVS tylko dla folderów, które są pod kontrolą CVS."
+
+#: TortoiseAct/TortoisePreferences.cpp:565
+msgid "Show columns only for CVS-controlled folders"
+msgstr "Pokaż kolumny tylko dla folderów kontrolowanych przez CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:571
+msgid "Empty comment check"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:572
+msgid "If this is checked, the Commit dialog will issue a warning if no commit comment has been provided by the user.  You can then either continue or abort the commit operation."
+msgstr "Jeśli ta opcja będzie zaznaczona, polecenie Zatwierdź spowoduje sprawdzenie czy dodano komentarz."
+
+#: TortoiseAct/TortoisePreferences.cpp:575
+msgid "Issue &warning if no comment provided in commit dialog"
+msgstr "&Wygenerowanie ostrzeżenia przy braku komentarza podczas zatwierdzania"
+
+#: TortoiseAct/TortoisePreferences.cpp:582
+msgid "Do not use Edit/Unedit"
+msgstr "Nie używaj Edytuj/Zakończ edycję"
+
+#: TortoiseAct/TortoisePreferences.cpp:583
+msgid "Concurrent editing"
+msgstr "Równoczesna edycja"
+
+#: TortoiseAct/TortoisePreferences.cpp:584
+msgid "Concurrent or exclusive editing"
+msgstr "Równoczesna lub wyłączna edycja"
+
+#: TortoiseAct/TortoisePreferences.cpp:585
+msgid "Exclusive editing only"
+msgstr "Wyłączność edycji"
+
+#: TortoiseAct/TortoisePreferences.cpp:589
+msgid "Edit policy"
+msgstr "Polityka edytowania:"
+
+#: TortoiseAct/TortoisePreferences.cpp:590
+msgid "How to handle the CVS Edit and Unedit commands."
+msgstr "Określa jak mają być wykonywane komendy edycji i zakończenia edycji."
+
+#: TortoiseAct/TortoisePreferences.cpp:598
+msgid "Edit options dialog"
+msgstr "Okno zmiany ustawień"
+
+#: TortoiseAct/TortoisePreferences.cpp:599
+msgid "Whether to show the edit options dialog"
+msgstr "Zaznaczenie tej opcji powoduje pokazywanie okna zmiany ustawień"
+
+#: TortoiseAct/TortoisePreferences.cpp:602
+msgid "Show edit &options dialog"
+msgstr "Pokaż &okno zmiany ustawień"
+
+#: TortoiseAct/TortoisePreferences.cpp:607
+msgid "Automatic unedit"
+msgstr "Automatyczne zakańczanie edycji"
+
+#: TortoiseAct/TortoisePreferences.cpp:608
+msgid "If this is checked and you run 'CVS Commit', TortoiseCVS will do a 'cvs unedit' in order to remove any edits you may have on files which you have not modified."
+msgstr "Jeśli ta opcja będzie zaznaczona, po wykonaniu polecenia CVS 'Zatwierdź' TortoiseCVS automatycznie wykona polecenie zakończenia edycji."
+
+#: TortoiseAct/TortoisePreferences.cpp:613
+msgid "Automatically &unedit after Commit"
+msgstr "Automatycznie zakończ edycję po Zatwierdzeniu"
+
+#: TortoiseAct/TortoisePreferences.cpp:621
+msgid "Main program"
+msgstr "Główny program"
+
+#: TortoiseAct/TortoisePreferences.cpp:622
+msgid "Enable debug logs for TortoiseCVS main program"
+msgstr "Włącz logi dla głównego programu w trybie debugowania"
+
+#: TortoiseAct/TortoisePreferences.cpp:624
+#: TortoiseAct/TortoisePreferences.cpp:631
+msgid "Enable debug logs"
+msgstr "Włącz logi debugera"
+
+#: TortoiseAct/TortoisePreferences.cpp:628
+msgid "Shell extension"
+msgstr "Rozszerzenia powłoki"
+
+#: TortoiseAct/TortoisePreferences.cpp:629
+msgid "Enable debug logs for TortoiseCVS shell extension"
+msgstr "Włącz logi dla rozszerzeń nakładki w trybie debugowania"
+
+#: TortoiseAct/TortoisePreferences.cpp:636
+msgid "Debug logs"
+msgstr "Log debugowania"
+
+#: TortoiseAct/TortoisePreferences.cpp:637
+msgid "Write TortoiseCVS debug information into the folder specified below."
+msgstr "Zapisz informacje o debugowaniu TortoiseCVS w folderze określonym poniżej."
+
+#: TortoiseAct/TortoisePreferences.cpp:640
+msgid "Don't save debug logs"
+msgstr "Nie zapisuj logów debugera"
+
+#: TortoiseAct/TortoisePreferences.cpp:641
+msgid "Save debug logs"
+msgstr "Zapisz logi debugera"
+
+#: TortoiseAct/TortoisePreferences.cpp:642
+msgid "Save debug logs, no log file caching"
+msgstr "Zapisz logi debugera bez używania pamięci podręcznej"
+
+#: TortoiseAct/TortoisePreferences.cpp:646
+msgid "Debug log &folder"
+msgstr "Folder dla logów debugowania"
+
+#: TortoiseAct/TortoisePreferences.cpp:647
+msgid "Debug log files will be created in this folder."
+msgstr "Pliki logów debugowania będą przechowywane w tym folderze."
+
+#: TortoiseAct/TortoisePreferences.cpp:651
+msgid "CVSNT logging"
+msgstr "CVSNT Logowanie"
+
+#: TortoiseAct/TortoisePreferences.cpp:652
+msgid "Makes files cvsclient.log.in and cvsclient.log.out in the TortoiseCVS folder for debugging of the CVS protocol."
+msgstr "Tworzy pliki cvsclient.log.in i cvsclient.log.out w folderze TortoiseCVS na potrzeby debugowania protokołu CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:655
+msgid "Create CVSNT client &debug logs"
+msgstr "Twórz logi debugowania dla klienta CVSNT"
+
+#: TortoiseAct/TortoisePreferences.cpp:666
+msgid "Noise text colour"
+msgstr "Kolor zbędnego tekstu"
+
+#: TortoiseAct/TortoisePreferences.cpp:667
+#: TortoiseAct/TortoisePreferences.cpp:669
+msgid "Colour for noise text in the progress dialog"
+msgstr "Kolor zbędnego tekstu wyświetlanego w oknie postepu"
+
+#: TortoiseAct/TortoisePreferences.cpp:673
+msgid "Warning text colour"
+msgstr "Kolor ostrzeżeń"
+
+#: TortoiseAct/TortoisePreferences.cpp:674
+#: TortoiseAct/TortoisePreferences.cpp:676
+msgid "Colour for warning text in the progress dialog"
+msgstr "Kolor tekstu ostrzeżeń"
+
+#: TortoiseAct/TortoisePreferences.cpp:680
+msgid "Updated files colour"
+msgstr "Kolor zaktualizowanych plików"
+
+#: TortoiseAct/TortoisePreferences.cpp:681
+#: TortoiseAct/TortoisePreferences.cpp:683
+#: TortoiseAct/TortoisePreferences.cpp:690
+msgid "Colour for updated files in the progress dialog"
+msgstr "Kolor tekstu zaktualizowanych plików"
+
+#: TortoiseAct/TortoisePreferences.cpp:687
+msgid "Modified files colour"
+msgstr "Kolor zmienionych plików"
+
+#: TortoiseAct/TortoisePreferences.cpp:688
+msgid "Colour for modified files in the progress dialog"
+msgstr "Kolor zmienionych plików wyświetlanych w oknie postepu"
+
+#: TortoiseAct/TortoisePreferences.cpp:694
+msgid "Conflict files colour"
+msgstr "Kolor sprzecznych plików"
+
+#: TortoiseAct/TortoisePreferences.cpp:695
+#: TortoiseAct/TortoisePreferences.cpp:697
+msgid "Colour for conflict files in the progress dialog"
+msgstr "Kolor sprzecznych plików wyświetlanych w oknie postepu"
+
+#: TortoiseAct/TortoisePreferences.cpp:701
+msgid "Files not in CVS colour"
+msgstr "Kolor plików poza CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:702
+#: TortoiseAct/TortoisePreferences.cpp:704
+msgid "Colour for files not in CVS in the progress dialog"
+msgstr "Kolor dla plików nie będących pod kontrolą CVS"
+
+#: TortoiseAct/TortoisePreferences.cpp:708
+msgid "Error text colour"
+msgstr "Kolor błędów"
+
+#: TortoiseAct/TortoisePreferences.cpp:709
+#: TortoiseAct/TortoisePreferences.cpp:711
+msgid "Colour for error text in the progress dialog"
+msgstr "Kolor tekstu błędów wyświetlanych w oknie postępu"
+
+#: TortoiseAct/TortoisePreferences.cpp:715
+msgid "Tip text colour"
+msgstr "Kolor podpowiedzi"
+
+#: TortoiseAct/TortoisePreferences.cpp:716
+#: TortoiseAct/TortoisePreferences.cpp:718
+msgid "Colour for tip text"
+msgstr "Kolor tekstu podpowiedzi"
+
+#: TortoiseAct/TortoisePreferences.cpp:726
+msgid "Server version"
+msgstr "Wersja serwera"
+
+#: TortoiseAct/TortoisePreferences.cpp:727
+msgid "Clear the cache that stores the CVS server version"
+msgstr "Wyczyść pamięć podręczną, w której przechowywana jest wersja serwerowa"
+
+#: TortoiseAct/TortoisePreferences.cpp:729
+#: TortoiseAct/TortoisePreferences.cpp:736
+#: TortoiseAct/TortoisePreferences.cpp:743
+msgid "Clear cache"
+msgstr "Wyczyść pamięć podręczną"
+
+#: TortoiseAct/TortoisePreferences.cpp:733
+msgid "Module list"
+msgstr "Lista modułów"
+
+#: TortoiseAct/TortoisePreferences.cpp:734
+msgid "Clear the cache that stores the CVS module list"
+msgstr "Wyczyść pamięć podręczną, w której przechowywana jest lista modułów"
+
+#: TortoiseAct/TortoisePreferences.cpp:740
+msgid "Branch/Tag list"
+msgstr "Lista gałęzi/etykiet"
+
+#: TortoiseAct/TortoisePreferences.cpp:741
+msgid "Clear the cache that stores the CVS branches and tags"
+msgstr "Wyczyść pamięć podręczną, w której przechowywane są etykiety i gałęzie CVS"
+
+#: TortoiseAct/TortoiseTip.cpp:70
+msgid ""
+"Tortoise Tip:  This error happens if you didn't enter a message at the top of the Notepad window when you performed a commit.  Please try again and enter some text, describing roughly what you changed.\n"
+"\n"
+"There is also a bug in CVS under Windows which can cause this to happen. If you save the file too quickly, CVS doesn't notice that it has changed.\n"
+"Try again, and wait a few seconds before saving the file!"
+msgstr ""
+"Wskazówka Tortoise: Ten błąd powstaje w momencie gdy nie podano informacji w oknie Notatnika podczas przeprowadzania ztwierdzenia. Spróbuj ponownie, tym razem wpisując jakąś informację opisującą co zostało zmienione.\n"
+"\n"
+"Ten błąd jest także znany jako błąd występujący w CVS dla Windows. Jeśli plik zostanie zapisany zbyt szybko, CVS może nie zdążyć zauważyć wprowadzenia zmian. Spróbuj ponownie, tym razem odczekując chwilkę przed zapisaniem pliku."
+
+#: TortoiseAct/TortoiseTip.cpp:81
+msgid ""
+"Tortoise Tip:  CVS tried to create a new file and discovered that the file already existed.   There can be several causes for this:\n"
+"1) You have created the file locally, and someone else added a file of the same name to CVS.\n"
+"2) Your sandbox has become corrupted (possibly due to interference from antivirus programs).\n"
+"To solve the problem: Rename or delete the affected files, then perform a CVS Update."
+msgstr ""
+
+#: TortoiseAct/TortoiseTip.cpp:91
+msgid "Tortoise Tip:  One or more of your files has a conflict.  This means that someone else has altered the same part of the file as you.  Look above for the files marked \"C \", and manually edit them to resolve the conflict."
+msgstr "Wskazówka Tortoise: Jeden lub więcej plików zawiera dane powodujące konflikt. Oznacza to, że inna osoba mogła zmienić tą samą część pliku, która przez Ciebie została właśnie zmieniona. Spróbuj ręcznie naprawić miejsca powodujące konflikt - powyżej wymieniono te miejsca oznaczając je znakiem \"C \"."
+
+#: TortoiseAct/TortoiseTip.cpp:99
+msgid "Tortoise Tip:  This error can be caused by a folder called \"CVS\" which was made by you rather than by CVS.  If so, please rename the folder to something else such as \"cvswork\"."
+msgstr "Wskazówka Tortoise: Ten błąd może powstawać w momencie gdy napotkano na folder CVS stworzony ręcznie, a nie przez system CVS. Jeśli tak się stało, zmień nazwę tego folderu na inną np.: \"cvswork\"."
+
+#: TortoiseAct/TortoiseTip.cpp:107
+msgid "Tortoise Tip:  Someone else has committed a new version of one or more of the files you are trying to commit. You need to do a CVS Update and then try to commit again."
+msgstr "Wskazówka Tortoise: Ktoś inny Zatwierdził w repozytorium nowszą wersję pliku lub plików, dla których próbujesz wykonac operację Zatwierdzenia. Musisz wykonać polecenie Aktualizacji, a następnie ponownego Zatwierdzenia."
+
+#: TortoiseAct/TortoiseTip.cpp:115
+msgid ""
+"Tortoise Tip:  Unfortunately TortoiseCVS no longer supports RSH out of the box.  There are workarounds, as well as fairly easy ways to help us fix this for the next version.  For more information see the FAQ.\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+msgstr ""
+"Wskazówka Tortoise: TortoiseCVS nie obsługuje RSH. Aby dowiedzieć się więcej przeczytaj FAQ.\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+
+#: TortoiseAct/TortoiseTip.cpp:124
+msgid ""
+"Tortoise Tip:  This error may be caused by having a folder and a file with the same name (apart from capitalization) in the repository. Such a repository CANNOT be checked out on a Windows file system.\n"
+"\n"
+"You can also get this error on SourceForge. You need to log into the server with SSH to force creation of your home folder. Do this by connecting to username@cvs.projectname.sf.net either with Putty or a command line SSH."
+msgstr ""
+"Wskazówka Tortoise: Ten błąd może powstać w momencie, gdy w repozytorium istnieje już folder lub plik posiadający taką samą nazwę. Taki moduł nie może być pobrany z repozytorium.\n"
+"\n"
+"Ten błąd może powstać także w momencie korzystania z SourceForge. Należy sie zalogować na serwer korzystając z SSH i wymusić utworzenie folderu domowego. Aby to uczynić zalecane jest wykorzystanie aplikacji Putty lub lini komend SSH."
+
+#: TortoiseAct/TortoiseTip.cpp:139
+msgid "Tortoise Tip: This error can be caused because there used to be a file in the repository with a name differing only by case from the one you are adding. For example TEST.EXE rather than test.exe. To fix this go into the repository, or get your administrator to, and rename that file to have the same case. It will be in the Attic folder underneath the folder you are in. You will also need to get the local sandbox folder you are in out of CVS again, as it may have bogus entries to the misspelt filename."
+msgstr "Wskazówka Tortoise: Ten błąd powstaje w momencie próby dodania pliku do repozytorium, którego nazwa zawiera inną wielkość znaków niż plik, który już znajduje się w repozytorium. Przykład: TEST.EXE jest różne od test.exe. Aby napraić ten błąd zmień lub poproś administratora, aby zmienił, nazwę pliku w repozytorium (lub zmienił jego położenie w repozytorium np.: poprzzez przeniesienie go do folderu Attic). Po zmianie nazwy, należy ponownie pobrać moduł z repozytorium CVS, aby uniknąć kolejnego wystąpienia tego błędu."
+
+#: TortoiseAct/TortoiseTip.cpp:151
+msgid "Tortoise Tip: Someone else is editing the file you want to work on. If the file is binary, you must wait for the other user to commit the file before you can edit it. Otherwise, you may edit in parallel with the other user; CVS will eventually merge your changes with those of the other user. However, you might want to talk to the other user to ensure that you are not both working on the same lines of the file."
+msgstr "Wskazówka Tortoise: Inna osoba aktualnie edytuje ten plik. Jesli jest to plik binarny, należy poczekać do momentu, aż osoba edytująca wykona na tym pliku polecenie zatwierdzenia i zakończy jego edycję. Jeśli jest to plik teksotwy można pracować na kopii tego pliku równolegle i dokonać połączenia zmian po zakończeniu pracy. Skontaktuj się z osobą edytującą, aby wykluczyć prawdopodobieństwo, że edytowane będą te same linie tekstu."
+
+#: TortoiseAct/TortoiseTip.cpp:160
+msgid "Tortoise Tip: Use \"cvs commit\" on the folder that the file is in to remove it permanently."
+msgstr "Wskazówka Tortoise: Wykonaj polecenie CVS Zatwierdź dla folderu zawierającego usuwany plik, aby usunąć go  całkowicie."
+
+#: TortoiseAct/WebLog.cpp:170
+msgid "Trying "
+msgstr "Próbuję..."
+
+#: TortoiseAct/WebLog.cpp:310
+msgid "Scanning for web log URL on server"
+msgstr "Skanuj w poszukiwaniu adresu URL Web Log na serwerze"
+
+#: TortoiseAct/WebLog.cpp:418
+msgid "Please enter the URL where ViewCVS or CVSweb is."
+msgstr "Określ adres URL, pod którym znajduje się ViewCVS lub CVSweb."
+
+#: TortoiseAct/WebLog.cpp:427
+#, c-format
+msgid "The URL %s responded with error code %d"
+msgstr "Adres URL %s odpowiedział z kodem błędu %d"
+
+#: TortoiseAct/WebLog.cpp:440
+msgid "Sorry! The URL isn't responding, or is responding with an error."
+msgstr "Uwaga! Podany adres URL nie odpowiada lub podaje błędną odpowiedź."
+
+#: TortoiseAct/WebLog.cpp:444
+msgid ""
+"This could happen because you are not connected to the internet, because the server is down, or because the path is wrong. If you are behind a firewall which requires a proxy, TortoiseCVS is using the Internet Explorer proxy. You might want to set it and try again.\n"
+"\n"
+"Please either try entering the URL again, or choose the plain text log."
+msgstr ""
+"Zaistniały broblem wynika z tego, że brak jest połączenia z internet'em, że serwer jest wyłączony lub ścieżka jest niepoprawna. Jeśli znajdujesz się za zaporą ogniową, która wymaga serwera proxy, TortoiseCVS użyje serwera proxy Internet Explorera. Spróbuj ustawić go i spróbuj ponownie.\n"
+"\n"
+"Wprowadź inny adres URL lub wybierz zwykły tekstowy log."
+
+#: TortoiseAct/WebLog.cpp:452
+msgid "TortoiseCVS couldn't find the URL on your server where ViewCVS or CVSweb is. Please enter the URL manually."
+msgstr "TortoiseCVS nie mógł znaleść adresu URL na serwerze gdzie powinny znajdować się ViewCVS lub CVSweb. Proszę podać adres URL ręcznie."
+
+#: TortoiseAct/WebLog.cpp:460
+msgid "You might be able to find it by browsing on the project's web site for a web interface to CVS. Alternatively ask your server administrator. Then copy the top level URL into the prefix box below. Usually you can leave the suffix box blank - it adds extra options to the end of the URL."
+msgstr "Można naleść ten adres URL poprzez przeglądanie strony domowej CVS projektu, można zapytac o ten adres URL także administratora serwera CVS. Należy wpisać ten adres w pole poniżej. Zazwyczaj pole sufiks można pozostawić puste - można tam wpisać dodatkowe opcje, które zostaną dodane do adresu URL."
+
+#: TortoiseAct/WebLog.cpp:466
+msgid "This dialog can also appear if you are trying to log a file that has never been committed."
+msgstr "Ten komunikat może się pojawiac także w przypadku gdy próbowano stworzyć log dla pliku, który nigdy nie został zatwierdzony w repozytorium."
+
+#: TortoiseShell/PropSheet.cpp:220
+msgid "Repository"
+msgstr "Repozytorium"
+
+#: TortoiseShell/PropSheet.cpp:226
+msgid "Sticky tag/date"
+msgstr "Lepka etykieta/data"
+
+#: TortoiseShell/PropSheet.cpp:229
+msgid "Revision date"
+msgstr "Data rewizji"
+
+#: TortoiseShell/PropSheet.cpp:238
+msgid "File options"
+msgstr "Opcje plików"
+
+#: TortoiseShell/PropSheet.cpp:241
+msgid "&History..."
+msgstr "&Historia..."
+
+#: TortoiseShell/PropSheet.cpp:263
+msgid "Head"
+msgstr "Head"
+
+#: TortoiseShell/QueryInfo.cpp:94
+msgid "CVS Status"
+msgstr "Status CVS"
+
+#: TortoiseShell/QueryInfo.cpp:96
+msgid "CVS Revision"
+msgstr "CVS Rewizja"
+
+#: TortoiseShell/QueryInfo.cpp:98
+msgid "CVS Sticky Tag"
+msgstr "Lepka etykieta CVS"
+
+#: TortoiseShell/QueryInfo.cpp:100
+msgid "CVS File Format"
+msgstr "Format pliku CVS"
+
+#: Utils/LaunchTortoiseAct.cpp:74
+msgid "Failed to launch executable to perform action"
+msgstr "Nieudana próba uruchomienia pliku wykonywalnego do przeprowadzenia akcji"
+
+#: Utils/PathUtils.cpp:357
+msgid "Failed to find temporary path"
+msgstr "Nieudana próba odnalezienia tymczasowej sciezki"
+
+#: Utils/PathUtils.cpp:372
+#, c-format
+msgid "Failed to generate temporary filename in '%s': error %d"
+msgstr "Nieudana próba wygenerowania pliku tymczasowego dla '%s': błąd %d"
+
+#: Utils/PathUtils.cpp:398 Utils/PathUtils.cpp:589
+#, c-format
+msgid "Free space: %s KB"
+msgstr "Wolna przestrzeń: %s KB"
+
+#: Utils/PathUtils.cpp:401 Utils/PathUtils.cpp:592
+#, c-format
+msgid "Total space: %s KB"
+msgstr "Całkowita przestrzeń: %s KB"
+
+#: Utils/PathUtils.cpp:404 Utils/PathUtils.cpp:595
+#, c-format
+msgid "Total free space: %s KB"
+msgstr "Całkowita wolna przestrzeń: %s KB"
+
+#: Utils/PathUtils.cpp:564
+#, c-format
+msgid "Failed to generate temporary folder in '%s': error %d"
+msgstr "Nieudana próba wygenerowania tymczasowego katalogu w '%s': błąd %d"
+
+#: Utils/PathUtils.cpp:612 Utils/PathUtils.cpp:642
+#, c-format
+msgid "Couldn't scan folder %s"
+msgstr "Nieudane skanowanie folderu %s"
+
+#: Utils/ProcessUtils.cpp:67
+#, c-format
+msgid "Failed to launch %s"
+msgstr "Nieudana próba uruchomienia %s"
+
+#: Utils/ProcessUtils.cpp:92
+#, fuzzy
+msgid "GetUserName() failed"
+msgstr "Nieudana próba wykonania FindExecutable()"
+
+#: Utils/TortoiseDebug.cpp:235
+msgid "Something bad happened to TortoiseCVS, and it crashed. Would you like to save a crash dump file?"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:255
+#, c-format
+msgid "Saved dump file to '%s'"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:260
+#, fuzzy, c-format
+msgid "Failed to save dump file (error %d)"
+msgstr "Nieudana próba wygenerowania pliku tymczasowego dla '%s': błąd %d"
+
+#: Utils/TortoiseDebug.cpp:266
+#, fuzzy, c-format
+msgid "Failed to create dump file (error %d)"
+msgstr "Nieudana próba wygenerowania pliku tymczasowego dla '%s': błąd %d"
+
+#: Utils/TortoiseDebug.cpp:272
+msgid "DBGHELP.DLL too old"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:277
+msgid "DBGHELP.DLL not found"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:64 ../build/TortoiseMenus.config:359
+#: ../build/TortoiseMenus.config:365
+msgid "Chec&kout..."
+msgstr "Pobierz do &kontroli"
+
+#: ../build/TortoiseMenus.config:66 ../build/TortoiseMenus.config:361
+#: ../build/TortoiseMenus.config:367
+msgid "Retrieve a fresh module from a CVS repository"
+msgstr "Odzyskaj najnowszy moduł z repozytorium CVS"
+
+#: ../build/TortoiseMenus.config:71
+msgid "&Make New Module..."
+msgstr "&Stwórz nowy moduł..."
+
+#: ../build/TortoiseMenus.config:73
+msgid "Create a new module in the repository from the selected folder"
+msgstr "Stwórz nowy moduł w repozytorium dla wskazanego folderu"
+
+#: ../build/TortoiseMenus.config:81
+#, fuzzy
+msgid "Apply &patch..."
+msgstr "&Twórz plik łatki"
+
+#: ../build/TortoiseMenus.config:83
+#, fuzzy
+msgid "Applies a patch file"
+msgstr "Zapisz plik łatki"
+
+#: ../build/TortoiseMenus.config:91
+msgid "Chec&kout TortoiseCVS"
+msgstr "Pobierz do &kontroli TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:93
+msgid "Fix bugs! Fetch the TortoiseCVS source code"
+msgstr "Napraw błędy! Pobierz kody źródłowe TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:105
+msgid "&Diff"
+msgstr "&Różnice"
+
+#: ../build/TortoiseMenus.config:107
+msgid "Shows you the changes you have made (hold down Ctrl to customise)"
+msgstr "Pokaż zmiany, kórych dokonano (przytrzymaj Ctrl aby dostosować)"
+
+#: ../build/TortoiseMenus.config:112
+msgid "&Add..."
+msgstr "&Dodaj..."
+
+#: ../build/TortoiseMenus.config:114
+msgid "Marks a text or binary file for adding to the repository next time you commit"
+msgstr "Oznacz plik tekstowy lub binarny do dodania do repozytorium podoczas następnego zatwierdzania"
+
+#: ../build/TortoiseMenus.config:119
+msgid "&Ignore"
+msgstr "&Ignoruj"
+
+#: ../build/TortoiseMenus.config:121
+msgid "Make CVS ignore this file by adding it to the .cvsignore file"
+msgstr "Wskaż CVS aby ignorował plik poprzez dodanie go do pliku .cvsignore"
+
+#: ../build/TortoiseMenus.config:126
+msgid "&Update"
+msgstr "&Aktualizuj"
+
+#: ../build/TortoiseMenus.config:128
+msgid "Merges the latest version from the repository into your local copy (hold down Ctrl for more options)"
+msgstr "Scal ostatnie wersje z repozytorium w lokalną kopię (przytrzymaj Ctrl aby uzyskać więcej opcji)"
+
+#: ../build/TortoiseMenus.config:135
+msgid "Make the file writable so that it can be edited"
+msgstr "Ustaw atrybut zapisywania dla pliku, aby móc je edytować"
+
+#: ../build/TortoiseMenus.config:140
+msgid "E&xclusive Edit"
+msgstr "Wyłączna edycja"
+
+#: ../build/TortoiseMenus.config:142
+msgid "Make the file writable so that it can be edited, and prevent any other users from editing it"
+msgstr "Ustaw atrybut zapisywania dla pliku, aby móc je edytować"
+
+#: ../build/TortoiseMenus.config:147 ../build/TortoiseMenus.config:154
+#: ../build/TortoiseMenus.config:161
+msgid "&Commit..."
+msgstr "&Zatwierdź..."
+
+#: ../build/TortoiseMenus.config:149 ../build/TortoiseMenus.config:156
+#: ../build/TortoiseMenus.config:163 ../build/TortoiseMenus.config:300
+msgid "Puts the changes you have made back into the repository"
+msgstr "Wprowadza zmiany, których dokonano z powrotem do repozytorium."
+
+#: ../build/TortoiseMenus.config:168
+msgid "Add C&ontents..."
+msgstr "Dodaj zawartość..."
+
+#: ../build/TortoiseMenus.config:170
+msgid "Adds files in the selection and subfolders which aren't yet in CVS"
+msgstr "Dodaj pliki oraz podfoldery, które nie są jeszcze w repozytorium CVS"
+
+#: ../build/TortoiseMenus.config:188
+msgid "&Web Log"
+msgstr "&Web Log"
+
+#: ../build/TortoiseMenus.config:190
+msgid "Browse the file history with a web interface (hold down Ctrl to customise)"
+msgstr "Przeglądaj historię za pomocą przeglądarki internetowej (przytrzymaj Ctrl aby dostosować)"
+
+#: ../build/TortoiseMenus.config:197
+msgid "Browse the file history"
+msgstr "Przeglądaj historię pliku"
+
+#: ../build/TortoiseMenus.config:204
+msgid "Show the file revision graph"
+msgstr "Pokaż graf rewizji dla pliku"
+
+#: ../build/TortoiseMenus.config:209
+msgid "Ann&otate..."
+msgstr "Adn&otacja..."
+
+#: ../build/TortoiseMenus.config:211
+msgid "Shows the last revision each line was modified and by whom"
+msgstr "Pokazuje linie, które zostały zmienione w ostatniej rewizji (także autora zmian)"
+
+#: ../build/TortoiseMenus.config:216
+msgid "&Show edited files..."
+msgstr "&Pokaż edytowane pliki..."
+
+#: ../build/TortoiseMenus.config:218
+msgid "Shows files which are being edited"
+msgstr "Pokaż pliki, które są aktualnie edytowane"
+
+#: ../build/TortoiseMenus.config:225 ../build/TortoiseMenus.config:231
+msgid "Make all files in the folder writable so that they can be edited"
+msgstr "Ustaw atrybut zapisywania dla wszystkich plików w folderze, aby móc je edytować"
+
+#: ../build/TortoiseMenus.config:236 ../build/TortoiseMenus.config:242
+#: ../build/TortoiseMenus.config:248
+msgid "U&nedit"
+msgstr "Zakończ edycję"
+
+#: ../build/TortoiseMenus.config:238
+msgid "Abandon edits to the file"
+msgstr "Przerwij edycję pliku"
+
+#: ../build/TortoiseMenus.config:244 ../build/TortoiseMenus.config:250
+msgid "Abandon edits to all files in the folder"
+msgstr "Przerwij edycję wszystkich plików w tym folderze"
+
+#: ../build/TortoiseMenus.config:254
+msgid "Ignore e&xtension"
+msgstr "Ignoruj rozszerzenia"
+
+#: ../build/TortoiseMenus.config:256
+msgid "Make CVS ignore files with this extension by adding the extension to .cvsignore"
+msgstr "Ustaw ignorowanie plików przez CVS poprzez dodanie rozszerzenia do pliku .cvsignore"
+
+#: ../build/TortoiseMenus.config:262 ../build/TortoiseMenus.config:298
+msgid "&Resolve conflicts..."
+msgstr "&Rozwiąż konflikty..."
+
+#: ../build/TortoiseMenus.config:264
+msgid "Manually resolve conflicts resulting from an Update"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:270 ../build/TortoiseMenus.config:277
+msgid "&Make Patch..."
+msgstr "&Twórz plik łatki"
+
+#: ../build/TortoiseMenus.config:272 ../build/TortoiseMenus.config:279
+msgid "Generate a patch file of changes that you have made"
+msgstr "Generuj łatkę dla zmian, które zostały wprowadzone"
+
+#: ../build/TortoiseMenus.config:291
+msgid "&Update Special..."
+msgstr "&Specjalna aktualizacja..."
+
+#: ../build/TortoiseMenus.config:293
+msgid "Perform an update to get a particular branch or tag, or to undo your local changes"
+msgstr "Przeprowadź aktualizację aby uzyskać dostęp do gałęzi lub etykiety lub aby cofnąźć zmiany dokonane lokalnie"
+
+#: ../build/TortoiseMenus.config:304
+msgid "&Refresh Folder Status"
+msgstr "&Odśwież status folderu"
+
+#: ../build/TortoiseMenus.config:306
+msgid "Refresh folder overlay icons to show recursive status"
+msgstr "Odśąwież ikony dla folderu, aby pokazać status folderu"
+
+#: ../build/TortoiseMenus.config:316
+msgid "Marks a version with a named tag so you can retrieve it again later, or delete an existing tag"
+msgstr "Zaznacz wersję z etykietą tak by móc ją odzyskać później lub skasować"
+
+#: ../build/TortoiseMenus.config:323
+msgid "Forks a version off; you can then change the new branch and the original trunk independently"
+msgstr "Rozdziel wersję, dzęki czemu będzie można zmieniać nową i oryginalną gałąź niezależnie"
+
+#: ../build/TortoiseMenus.config:328
+msgid "&Merge..."
+msgstr "&Scal..."
+
+#: ../build/TortoiseMenus.config:330
+msgid "Merge changes into your working copy"
+msgstr "Scal zmiany w roboczą kopię"
+
+#: ../build/TortoiseMenus.config:338
+msgid "R&ename..."
+msgstr "Zmi&eń nazwę"
+
+#: ../build/TortoiseMenus.config:340
+msgid "Rename a file"
+msgstr "Zmień nazwę pliku"
+
+#: ../build/TortoiseMenus.config:345
+msgid "&Remove"
+msgstr "&Usuń"
+
+#: ../build/TortoiseMenus.config:347
+msgid "Marks files for removal from the repository next time you commit"
+msgstr "Zaznacz pliki do usunięcia z repozytorium podczas następnej aktualizacji"
+
+#: ../build/TortoiseMenus.config:352
+msgid "&Release..."
+msgstr "&Publikuj..."
+
+#: ../build/TortoiseMenus.config:354
+msgid "Release (and delete) your working copy; effectively undo a checkout"
+msgstr "Publikuj (i skasuj) roboczą kopię, skutecznie cofnij pobranie do kontroli"
+
+#: ../build/TortoiseMenus.config:375
+msgid "&Command..."
+msgstr "&Polecenie..."
+
+#: ../build/TortoiseMenus.config:377
+msgid "Run an arbitrary CVS command"
+msgstr "Wykonaj dowolne polecenie CVS"
+
+#: ../build/TortoiseMenus.config:385
+msgid "&Preferences..."
+msgstr "&Ustawienia..."
+
+#: ../build/TortoiseMenus.config:387
+msgid "Customise TortoiseCVS"
+msgstr "Dostosuj TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:392
+msgid "&Help..."
+msgstr "&Pomoc..."
+
+#: ../build/TortoiseMenus.config:394
+msgid "Basic usage instructions and FAQ for TortoiseCVS"
+msgstr "Podstawowe instrukcje użycia i FAQ dla TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:399
+msgid "&About..."
+msgstr "&O programie..."
+
+#: ../build/TortoiseMenus.config:401
+msgid "About TortoiseCVS"
+msgstr "O TortoiseCVS"
+
+#~ msgid "Bug"
+#~ msgstr "Błąd"
+
+#~ msgid "Refresh"
+#~ msgstr "Odśwież"
+
+#, fuzzy
+#~ msgid ""
+#~ "There is nothing to commit with that bug number.\n"
+#~ "\n"
+#~ "Do you want to check for files to commit without using the bug number? "
+#~ msgstr ""
+#~ "Brak numeru błędu.\n"
+#~ "Czy chcesz kontynuować pomimo jego braku ?"
+
+#~ msgid "TortoiseCVS question"
+#~ msgstr "TortoiseCVS Pytanie"
+
+#~ msgid "TortoiseCVS Security Alert"
+#~ msgstr "TortoiseCVS Komunikat bezpieczeństwa"
+
+#, fuzzy
+#~ msgid "(Error %d)"
+#~ msgstr "Błąd"
+
+#~ msgid "Rename"
+#~ msgstr "Zmień nazwę"
+
+#~ msgid "to"
+#~ msgstr "na"
+
+#~ msgid "Internal error, command line too long to be broken up."
+#~ msgstr "Wewnętrzny błąd, linia poleceń zbyt długa aby ją przetworzyć."
+
+#~ msgid "Couldn't create Win32 mutex"
+#~ msgstr "Nieudane tworzenie Win32 mutex"
+
+#~ msgid "Couldn't close Win32 mutex"
+#~ msgstr "Nieudane zamknięcie Win32 mutex"
+
+#~ msgid "Couldn't lock Win32 mutex"
+#~ msgstr "Nieudana próba zablokowania Win32 mutex"
+
+#~ msgid "Couldn't release Win32 mutex"
+#~ msgstr "Nieudana próba publikacji Win32 mutex"
+
+#~ msgid "Update creates missing folders"
+#~ msgstr "Aktualizacja brakujących folderów"
+
+#~ msgid "(not cached)"
+#~ msgstr "(bez użycia pamięci podręcznej)"

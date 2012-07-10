@@ -1,0 +1,60 @@
+<!--#set var="title" value="Download" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Downloads</h2>
+
+<p>TortoiseCVS works under Windows 95, 98, ME, NT, 2000, XP, and 2003. Vista and Windows 7 is also supported, although some people report problems with UAC.
+
+<p>Stable (for deployment), Windows 2000 and later -
+<a href="http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.12.3.exe">TortoiseCVS-1.12.3.exe</a> - 7th January 2011
+
+<br><a href="releasenotes-1-12-0.shtml">Release announcement, including list of major changes</a>
+
+<p>Older release for Windows 98 and NT4 -
+<a href="http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.8.32.exe">TortoiseCVS-1.8.32.exe</a> -
+5.84 MB - 26th February 2008
+
+<!--
+<p>Release Candidate of next stable version (for testing) -
+<a href="http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.12.1-RC6.exe?download">TortoiseCVS 1.12.1 RC6</a> - 
+14.9 MB - 12th May 2010
+
+<p>Unstable (for testing) -
+<a href="http://prdownloads.sourceforge.net/tortoisecvs/TortoiseCVS-1.11.3.exe?download">TortoiseCVS-1.11.3.exe</a> -
+14.8 MB - 23rd November 2008
+-->
+
+<p>Please also visit our 
+<a href="http://sourceforge.net/projects/tortoisecvs/">Sourceforge project homepage</a> 
+for the most recent releases. 
+
+<p> <b>Quick installation:</b> Run the download executable to install.  You
+should read the <a href="faq.shtml#whydonticonsappear">FAQ</a> for information on
+icon overlays for NT/95.
+
+<p><b>Change log:</b> You can read the change log here: <a href="stablechangelog.shtml">stable branch</a> and
+<a href="changelog.shtml">unstable branch</a>.
+For the very latest changes, you'll have to get a version from CVS and compile
+it yourself (see <a href="development.shtml">development</a>), or try
+the test release as described below.
+
+<p><b>Release schedule:</b> TortoiseCVS releases come in two flavours: Stable and Unstable.
+<p>
+In Stable releases, only important bug fixes are applied - no major new features are introduced.
+In the Unstable line of development, new (perhaps experimental) features are added.
+Once the new features have been deemed stable, they are migrated to the Stable line of development.
+<p>
+Stable releases are numbered <i>x.y.z</i>, where <i>y</i> is an even number - e.g. 1.0.0.
+For Unstable releases, <i>y</i> is an odd number - e.g. 1.1.0.
+We recommend that you use a Stable version in production environments
+(but please test out the Unstable releases if you have the opportunity).
+<p>
+If you are feeling adventurous, you might also want to try out the current
+<a href="development.shtml#testpilot">test release</a>.
+
+<p><b>DISCLAIMER:</b> Like most software (even software that you pay for),
+TortoiseCVS comes with no warranty.  Only you are responsible for any loss
+of data. Saying that, the developers use it every day with valuable
+data, and have had no problems which might cause loss of data.
+
+<!--#include virtual="wrapper_end.shtml" -->

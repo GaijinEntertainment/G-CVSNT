@@ -1,0 +1,29 @@
+#!/bin/sh 
+. /etc/rc.common
+
+StartService( )
+{
+  if [ "${CVSLOCKD:=-NO-}" = "-YES-" ]; then
+    ConsoleMessage "Starting CVSNT lock server"
+    cvslockd
+  fi
+}
+
+StopService( )
+{
+  ConsoleMessage "Stopping CVSNT lock server"
+  killall cvslockd
+}
+
+RestartService( )
+{
+  if [ "${CVSLOCKD:=-NO-}" = "-YES-" ]; then
+    ConsoleMessage "Restarting CVSNT lock server"
+    StopService
+    StartService
+  else
+    StopService
+  fi
+}
+
+RunService "$1"

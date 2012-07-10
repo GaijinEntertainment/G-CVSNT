@@ -1,0 +1,205 @@
+#!/bin/sh
+shopt -s igncr #
+
+#set -x
+UIDHEADERS="5d1cb710 5d1cb711 5d1cb712 5d1cb713 5d1cb714 5d1cb715 5d1cb716"
+
+# uidhdr regsuffix check dllsuffix
+function generateCLSIDhelper()
+{
+    echo "Root: HKCR$2; Subkey: CLSID\\{{$1-1c4b-11d4-bed5-005004b1f42f}; Flags: uninsdeletekey; Check: $3"
+    echo "Root: HKCR$2; Subkey: CLSID\\{{$1-1c4b-11d4-bed5-005004b1f42f}; ValueType: string; ValueName: ; ValueData: TortoiseCVS; Check: $3"
+    echo "Root: HKCR$2; Subkey: CLSID\\{{$1-1c4b-11d4-bed5-005004b1f42f}\\InProcServer32; ValueType: string; ValueName: ; ValueData: {app}\\TortoiseShell$4.dll; Check: $3"
+    echo "Root: HKCR$2; Subkey: CLSID\\{{$1-1c4b-11d4-bed5-005004b1f42f}\\InProcServer32; ValueType: string; ValueName: ThreadingModel; ValueData: Apartment; Check: $3"
+    echo
+}
+
+# uidhdr index regsuffix check
+function generateSIOIhelper()
+{
+    echo "Root: HKLM$3; Subkey: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\TortoiseCVS$2; Flags: uninsdeletekey; Check: $4"
+    echo "Root: HKLM$3; Subkey: Software\\Microsoft\\Windows\\CurrentVersion\\Explorer\\ShellIconOverlayIdentifiers\\TortoiseCVS$2; ValueType: string; ValueName: ; ValueData: {{$1-1c4b-11d4-bed5-005004b1f42f}; Check: $4"
+    echo
+}
+
+# uidhdr regsuffix check
+function generateApprovedhelper()
+{
+    echo "Root: HKLM$2; Subkey: SOFTWARE\\Microsoft\\Windows\\CurrentVersion\\Shell Extensions\\Approved; ValueType: string; ValueName: {{$1-1c4b-11d4-bed5-005004b1f42f}; ValueData: TortoiseCVS; Flags: uninsdeletevalue; Check: $3"
+    echo
+}
+
+# regsuffix check key1 key2
+function generateShellEx()
+{
+    echo "Root: HKCR$1; Subkey: $3\\shellex\\$4; Flags: uninsdeletekey; Check: $2"
+    echo "Root: HKCR$1; Subkey: $3\\shellex\\$4; ValueType: string; ValueName: ; ValueData: {{5d1cb710-1c4b-11d4-bed5-005004b1f42f}; Check: $2"
+}
+
+# regsuffix check key
+function generateCMH()
+{
+    generateShellEx $1 "$2" "$3" "ContextMenuHandlers\\TortoiseCVS"
+}
+
+# regsuffix check
+function generateDirCMH()
+{
+    generateCMH "$1" "$2" "Directory"
+}
+
+# regsuffix check
+function generateDirBCMH()
+{
+    generateCMH "$1" "$2" "Directory\\Background"
+}
+
+# regsuffix check
+function generateDriveCMH()
+{
+    generateCMH "$1" "$2" "Drive"
+}
+
+# regsuffix check
+function generateFolderCMH()
+{
+    generateCMH "$1" "$2" "Folder"
+}
+
+# regsuffix check
+function generateStarCMH()
+{
+    generateCMH "$1" "$2" "*"
+}
+
+# regsuffix check
+function generateISCMH()
+{
+    generateCMH "$1" "$2" "InternetShortcut"
+}
+
+# regsuffix check
+function generateLinkCMH()
+{
+    generateCMH "$1" "$2" "lnkfile"
+}
+
+# regsuffix check key
+function generatePSH()
+{
+    generateShellEx $1 "$2" "$3" "PropertySheetHandlers\\TortoiseCVS"
+}
+
+function generateStarPSH()
+{
+    generatePSH "$1" "$2" "*"
+}
+
+function generateFolderPSH()
+{
+    generatePSH "$1" "$2" "Folder"
+}
+
+# regsuffix check
+function generateInfoTip()
+{
+    echo "Root: HKCR$1; Subkey: Folder\\shellex\\{{00021500-0000-0000-c000-000000000046}; Flags: uninsdeletekey; Check: $2"
+    echo "Root: HKCR$1; Subkey: Folder\\shellex\\{{00021500-0000-0000-c000-000000000046}; ValueType: string; ValueName: ; ValueData: {{5d1cb710-1c4b-11d4-bed5-005004b1f42f}; Check: $2"
+}
+
+# regsuffix check
+function generateColumnHandler()
+{
+    echo "Root: HKCR$1; Subkey: Folder\\shellex\\ColumnHandlers\\{{5d1cb710-1c4b-11d4-bed5-005004b1f42f}; Flags: uninsdeletekey; Check: $2"
+    echo "Root: HKCR$1; Subkey: Folder\\shellex\\ColumnHandlers\\{{5d1cb710-1c4b-11d4-bed5-005004b1f42f}; ValueType: string; ValueName: ; ValueData: TortoiseCVS; Check: $2"
+}
+
+# regsuffix check
+function generateUrlHandler()
+{
+    echo "Root: HKCR$1; Subkey: CVS; ValueType: string; ValueName: ; ValueData: \"URL:CVS Protocol\"; Check: $2"
+    echo "Root: HKCR$1; Subkey: CVS; ValueType: string; ValueName: \"URL Protocol\"; ValueData: ""; Check: $2"
+    echo "Root: HKCR$1; Subkey: CVS\\DefaultIcon; ValueType: string; ValueName: ; ValueData: \"{app}\\TortoiseAct.exe\"; Check: $2"
+    echo "Root: HKCR$1; Subkey: CVS\\shell\\open\\command; ValueType: string; ValueName: ; ValueData: \"\"\"{app}\\TortoiseAct.exe\"\" cvsurl -u \"\"%1\"\"\"; Check: $2"
+}
+
+function generateCLSID()
+{
+    generateCLSIDhelper $1 32 "" ""
+    generateCLSIDhelper $1 64 "IsWin64" "64"
+}
+
+# uidhdr index
+function generateSIOI()
+{
+    generateSIOIhelper $1 $2 32 "" ""
+    generateSIOIhelper $1 $2 64 "IsWin64" "64"
+}
+
+# uidhdr
+function generateApproved()
+{
+    generateApprovedhelper $1 32 "" ""
+    generateApprovedhelper $1 64 "IsWin64" "64"
+}
+
+echo "; Icon handler COM controls"
+for uidhdr in $UIDHEADERS; do
+    generateCLSID $uidhdr
+done
+
+echo "; The actual icon overlay handlers for Explorer"
+index=0
+for uidhdr in $UIDHEADERS; do
+    generateSIOI $uidhdr $index
+    index=$((index + 1))
+done
+
+echo "; Make them approved by administrator"
+for uidhdr in $UIDHEADERS; do
+    generateApproved $uidhdr
+done
+
+echo "; Context menu handlers"
+
+generateDirCMH 32 ""
+generateDirCMH 64 "IsWin64"
+
+generateDirBCMH 32 ""
+generateDirBCMH 64 "IsWin64"
+
+generateDriveCMH 32 ""
+generateDriveCMH 64 "IsWin64"
+
+generateFolderCMH 32 ""
+generateFolderCMH 64 "IsWin64"
+
+generateStarCMH 32 ""
+generateStarCMH 64 "IsWin64"
+
+generateISCMH 32 ""
+generateISCMH 64 "IsWin64"
+
+generateLinkCMH 32 ""
+generateLinkCMH 64 "IsWin64"
+
+echo "; Property page handler"
+
+generateStarPSH 32 ""
+generateStarPSH 64 "IsWin64"
+
+generateFolderPSH 32 ""
+generateFolderPSH 64 "IsWin64"
+
+generateInfoTip 32 ""
+generateInfoTip 64 "IsWin64"
+
+echo "; Column provider"
+
+generateColumnHandler 32 ""
+generateColumnHandler 64 "IsWin64"
+
+echo "; Support for cvs: URLs (e.g. cvs://:pserver:anonymous@cvs.tortoisecvs.sourceforge.net:/cvsroot/tortoisecvs#tortoisecvs-1-0-4)"
+
+generateUrlHandler 32 ""
+generateUrlHandler 64 "IsWin64"

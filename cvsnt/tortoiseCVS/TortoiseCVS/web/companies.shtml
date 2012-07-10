@@ -1,0 +1,1024 @@
+
+
+<!--#set var="title" value="Companies" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Companies using TortoiseCVS</h2>
+
+<p>
+<b><a href="http://www.ams.co.nz">Advanced Management Systems Limited</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Albany, New Zealand</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>5 - 10</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td><i>
+				"Makes everyday use very easy."<br>
+				<br>
+				- Myles Penlington, Software Engineer
+				</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.axiomdesign.com/">Axiom Design</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Pleasanton, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>12</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Project Managers, Technical Writers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"We wouldn't be able to use CVS without TortoiseCVS."<br>
+				<br>
+				- Ian Epperson
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.behaviordesign.com/">Behavior</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>New York, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>5 - 10</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Web Developers, Graphic/Animation Designers, Managers, Copywriters</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2003</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td><i>
+				"We're not using CVS concurrency at all, and in fact we're only using CVS because it is the only decent cross-platform (mac and win) source control system. We're still experimenting, but TCVS is very promising. Still, it's shame TCVS isn't available on Mac."<br>
+				<br>
+				- Christopher Fahey
+				</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b>Bemis Technologies</b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Toronto, Canada</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>5</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Graphic Designers, Technical Writers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2001</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"Without TortoiseCVS we would have been using Source-un-Safe..."<br>
+				<br>
+				- Martin Crawford
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.bluekrait.com/">Blue Krait Consulting Inc.</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>North America</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>1 - 5</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2001</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td><i>
+				"I have been using TortoiseCVS personally since 2000, and have had several people pick it up. I've used it in my former Consulting company, and now use it as a standard in my personal Consulting company. I currently have 3 (including me) using it right now for a project with a state law enforcement agency."<br>
+				<br>
+				- Blair Sandberg
+				</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.bodog.com/">Bodog Sports Casino Poker</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Vancouver, Canada</td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>25-30</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Designers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2004</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td><i>
+		"TortoiseCVS totally rocks the Kasbah, it’s the CVS client 
+		<b>I</b> would have written if I knew anything about Windows programming."<br>
+		<br>
+		- Carl Schmidt, Chief Technology Officer
+		</i></td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.capitalc.se/">Capital C</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Stockholm, Sweden</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>12</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Technical Writers, CVS Administrator</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"Wonderful tool for technical writers and CVS administrator. 
+				Very visible!! I love this tool!!"<br>
+				<br>
+				- Ulf Torberger, Configuration Manager
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://http://capita.wustl.edu/">Center of Air Pollution Impact and Trend Analysis (CAPITA)</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Saint Louis, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>1 - 2</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i></i></td>
+	</tr>
+</table>
+</p>
+
+
+
+<p>
+<b><a href="http://www.cibc.com/">CIBC National Collections</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Toronto, Canada</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>20</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Business Analysts, Project Managers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"TortoiseCVS enabled us to rapidly deploy a CVS version control environment that can be shared between our developers, business analysts, and project manager."<br>
+				<br>
+				- Dan Roncadin
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.computercsi.com">Computer Consulting
+Specialists</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Sarasota, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>2</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Web Designers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				Since using TortoiseCVS, we do not use WinCVS any more.
+				The latest version makes it easy to develop on Windows
+				workstations, with our CVS repository on Linux.  The
+				explorer shell icons were easily changed, and it's a
+        pleasure to use.  Kudos to the TortoiseCVS team!
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.creaturelabs.com/">CreatureLabs</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Cambridge, UK</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>20 - 30</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Game Engineers, Project Managers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2000</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+			This is where the Tortoise was born. 
+			Francis Irving developed TortoiseCVS with the encouragement of CreatureLabs.
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.cyberwolf.com/">Cyberwolf.com</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Santa Fe, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>8</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Technical Support, Technical Writers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2003</i></td>
+	</tr>
+</table>
+</p>
+     
+<p>
+<b><a href="http://www.detec.de/">DETEC</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Germany</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>6</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Application Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2004</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+			"Makes CVS really easy to use. Great revision graph and diffing options."<br>
+			- Christoph Gaa
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.eagle-solutions.com/">Eagle Solutions</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Gap, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>8</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Project Managers, Customer Service Reps</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2003</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"Made a few customizations, but our guys generally like the product as is.  Got one or two that use the command line exclusively, but for GUI, Tortoise has been our only choice.  Still working out a bug or two, but nothing severe."<br>
+				<br>
+				- Keith D. Zimmerman, MCSD
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.extel.com.au/">Extel Communications Pty Ltd</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Melbourne, Australia</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>20 - 30</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"I'm a CVS user since 1994.  But this company would not have agreed to start using CVS without TortoiseCVS.  It's a massive enabler!"<br>
+				<br>
+				- Mitch Davis
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.gatehouse.dk/">GateHouse A/S</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Denmark</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>80</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Project Managers, Administration</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.inter-networks.be/">Inter Networks</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Brussels, Belgium</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>3</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Project Managers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"Good option for windows users and those new to version control."<br>
+				<br>
+				- t
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+
+<p>
+<b><a href="http://www.kaz-group.com.au/">KAZ Group Ltd.</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Melbourne, Australia</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>10</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Technical group for remote disaster recovery</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td><i>
+				"Documents used for Disaster Recovery of specific customers are included in CVS to enable the retrival of such documents at a remote site."<br>
+				<br>
+				- Bruno Jimenez
+				</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.logicpd.com/">Logic Product Development</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Minneapolis, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>25</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Hardware Developers, Marketing, Industrial Designers, Technical Writers, Sales</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>&nbsp;</i></td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.microforte.com/">Micro Forte</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Sydney &amp; Canberra, Australia</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>11</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Graphic Artists</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2001</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"It was the only way to get our artists using CVS, WinCVS was too hard."<br>
+				<br>
+				- Simon Hayes, Chief Technical Officer
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.morpace.com/">Morpace International, Inc</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Farmington Hills, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>5</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"Very nice front end to CVS."<br>
+				<br>
+				- John Sivak
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+
+<p>
+<b><a href="http://www.netcentrex.net/">NetCentrex</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Paris, France</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>15</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2003</i></td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://nmbtc.com/">NMB Technologies Corporation</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Chatsworth, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>6</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2001</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"We use TortoiseCVS for all of our access to our CVS source code repository. As Lead Developer, it's my job to choose tools and technologies that not only suit our IT needs, but are easy to adopt and use.  TortoiseCVS is by far the easiest CVS client to use and understand, and makes the job of introducing source control to more junior developer a breeze."<br>
+				<br>
+				- Dana Cordes, Lead Programmer/Analyst
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+
+<p>
+<b><a href="http://alfarrabio.di.uminho.pt/mpessoa">People's Museum (Museu da Pessoa)</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Portugal </i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>6</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Interviewers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2001</i></td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.rfel.com/">RF Engines Ltd</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Newport, UK</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>15</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, CTO, IT</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"Its FREE!, Easy to use and understand, easy to implement, better bug fixing than most commercial programs, good technical forum. Thank-you TCVS Team. ( Used with Viewcvs,and Examdiff )"<br>
+				<br>
+				- Chris Bridges, IT Manager
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.shortcutpublishing.com/">Shortcut Software Development B.V. </a></b><br>
+<table width="100%">Arnhem
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Arnhem, The Netherlands</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>6</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers, Project Managers, CEO</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"Slowly but surely making the transition from storing everything in Visual SourceSafe to CVS. Tortoise CVS makes the transition a breeze."<br>
+				<br>
+				- Dimitri
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.stickybit.se/">Stickybit AB</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Sweden</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>1</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2003</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"I like TortoiseCVS a lot - it's simple, intuitive and effective."<br>
+				<br>
+				- Jimisola Laursen
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.softwareag.com/">Software AG</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Germany</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>10</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Quality Assurance</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2001</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+			<i>
+				"TCVS is used in one QA team so far."<br>
+				<br>
+				- Adam Egger
+			</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.viva.org/">Viva Network</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>UK</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>8</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Database Developers, Web Developers, Content Writers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2002</i></td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.rrze.uni-erlangen.de/">Regionales Rechenzentrum Erlangen</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Germany</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>80</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Physicists, Mathematicians, Computer Scientists</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2003</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+		<i>
+		Due to TortoiseCVS and CVS we are not forced
+		to buy an expensive CMS which urges us to use something
+		strange as an editor :-)<br>
+		<br>
+		- Wolfgang Wiese
+		<i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.ssginnovations.com/">SSG Innovations LLC</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Grand Blanc, MI, USA</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>3</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Application, database, web developers, technical writers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2003</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+		<i>
+		TortoiseCVS has become an integral part of our development
+		cycle and is one of our most prized development tools.  I cringe at the
+		thought of using anything else!<br>
+		<br>
+		- Robert S. Wojciechowski Jr.
+		<i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.aoemedia.de/typo3-frankfurt.html">TYPO3 Frankfurt</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i> Wiesbaden/Frankfurt/Mainz/Rhein-Main, Germany</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>12</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2006</i></td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.clever-soft.com/">CleverSoft</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Freiburg & Munich, Germany</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>5</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Everything: source code and all documents</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2001</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td>
+		<i>
+		Through the ease of use of TortoiseCVS, CVS has become an integral part of
+		our workflow. Everything is managed using CVS: source code, documents for
+		QA, specs, design, business plan, financials, management etc.<br>
+		<br>
+		- Florian Clever
+		<i>
+		</td>
+	</tr>
+</table>
+</p>
+
+<p>
+<b><a href="http://www.webarbyte.de">WEB.arbyte</a></b><br>
+<table width="100%">
+	<tr valign="top">
+		<td width="15%">Location</td>
+		<td><i>Berlin, Germany</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Users</td>
+		<td><i>6</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Roles</td>
+		<td><i>Developers</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Since</td>
+		<td><i>2004</i></td>
+	</tr>
+	<tr valign="top">
+		<td>Comments</td>
+		<td><i>
+				"Thx for this great piece of software!"<br>
+				<br>
+				- Silvan Maa&szlig;, Managing Director
+				</i>
+		</td>
+	</tr>
+</table>
+</p>
+
+
+<!--#include virtual="wrapper_end.shtml" -->

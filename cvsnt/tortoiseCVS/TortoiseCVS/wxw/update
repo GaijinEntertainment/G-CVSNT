@@ -1,0 +1,51 @@
+#! /bin/bash
+# Run under Cygwin 
+
+# Quick script to grab new wxWindows binaries and headers
+# and put them in this folder.  You should then manually
+# add/remove files and commit to CVS.
+
+# This is used to maintain the binary version of wxWindows
+# which TortoiseCVS source code comes with.
+
+function processfile()
+{
+	DIR=`echo $1 | sed "s/\//\\\\\\\\\//g"`
+	echo $DIR
+	while read FOO
+	do
+		
+		BAR=`echo ./$FOO | sed "s/$DIR//"`
+		echo $BAR
+		if [ -d "$FOO" ]
+		then
+			mkdir -p "$BAR"
+		else
+			cp "$FOO" "$BAR"
+		fi
+	done
+}
+
+function usage()
+{
+	echo -e "Usage"
+	echo -e "=====\n"
+	echo -e "update (wxWindows-Dir)\n"
+}
+
+if [ "$1" == "" ]; then
+	usage
+	exit 1
+fi
+
+if ! [ -e $1 ]; then
+	echo "Error: Directory $1 not found"
+	exit 1
+fi
+
+mkdir -p lib
+cp $1/lib/mswd/wx/setup.h include/wx/setup.h
+cp $1/lib/wxmsw.lib lib
+cp $1/lib/wxmswd.lib lib
+find $1/include | grep -v CVS | processfile $1
+

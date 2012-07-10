@@ -1,0 +1,11 @@
+--- Q:\Temp\cvsnt\cvsgui\cvsgui_process.cpp	2003-04-26 23:08:14.000000000 +0200
++++ cvsgui_process.cpp	2003-05-10 14:08:04.000000000 +0200
+@@ -965,7 +965,7 @@
+ 	if( !startupInfo->hasTty )
+ 	{
+ 		si.dwFlags |= STARTF_USESHOWWINDOW;
+-		si.wShowWindow = SW_SHOWMINNOACTIVE;
++		si.wShowWindow = SW_HIDE;
+ 	
+ 		stdoldIn  = GetStdHandle(STD_INPUT_HANDLE);
+ 		stdoldOut = GetStdHandle(STD_OUTPUT_HANDLE);

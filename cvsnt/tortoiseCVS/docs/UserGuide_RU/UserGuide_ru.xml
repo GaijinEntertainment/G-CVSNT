@@ -1,0 +1,101 @@
+<?xml version="1.0" encoding="windows-1251"?> 
+<!-- $Revision: 1.1 $ -->
+
+<!DOCTYPE book SYSTEM "file:///c:/docbook/dtd/docbookx.dtd" 
+   [
+   <!ENTITY GettingStarted SYSTEM "GettingStarted_ru.xml">
+   <!ENTITY BasicUsage SYSTEM "BasicUsage_ru.xml">
+   <!ENTITY AdvancedUsage SYSTEM "AdvancedUsage_ru.xml">
+   <!ENTITY Customizing SYSTEM "Customizing_ru.xml">
+   <!ENTITY CommandReference SYSTEM "CommandReference_ru.xml">
+   <!ENTITY DialogReference SYSTEM "DialogReference_ru.xml">
+   <!ENTITY ArticlesTipsTricks SYSTEM "ArticlesTipsTricks_ru.xml">
+   ]>
+
+<book>
+
+<bookinfo>
+  <title>TortoiseCVS Руководство пользователя</title>
+  <subtitle>Версия 1.9.9</subtitle>
+  <authorgroup>
+    <author>
+      <firstname>Ben</firstname><surname>Campbell</surname>
+    </author>
+    <author>
+      <firstname>Martin</firstname><surname>Crawford</surname>
+    </author>
+    <author>
+      <firstname>Hartmut</firstname><surname>Honisch</surname>
+    </author>
+    <author>
+      <firstname>Francis</firstname><surname>Irving</surname>
+    </author>
+    <author>
+      <firstname>Torsten</firstname><surname>Martinsen</surname>
+    </author>
+    <author>
+      <firstname>Ian</firstname><surname>Dees</surname>
+    </author>
+  </authorgroup>
+  <copyright><year>2001 - 2005</year><holder>TortoiseCVS</holder></copyright>
+  <copyright><year>2005</year><holder>Перевод Владимир Сердюк</holder></copyright>
+<!--
+
+-->
+
+</bookinfo>
+
+<preface id="translationConvention">
+  <title id="translationConvention-title">О переводе</title>
+  <para>
+В названиях пунктов меню и диалогов сначала дается русский перевод согласно файла перевода, 
+а затем в скобках английский. Если некоторый текст при переводе вызывал у меня сомнения в 
+правильности он дается в скобках в оригинале. Если вы знаете английский язык лучше и знаете 
+перевод пришлите мне его с указанием в каком разделе находится не уточненный перевод.
+</para>
+
+
+  <para>
+Перевод делался "под себя". Если вы имеете лучший вариант перевода некоторого текста, пожалуйста, пришлите мне его, этим вы улучшите качество документации. Вы будете добавлены в соавторы перевода. 
+  </para>
+  <para>
+Об ошибках, не точностях и не ясностях русского перевода, пожалуйста, сообщайте мне на vserd@users.sourceforge.net или еще лучше вносите правки прямо в CVS репозиторий проекта TortoiseCVS с помощью TortoiseCVS!!!.
+</para>
+
+</preface>
+
+<!-- ====== Included chapters================================== -->
+
+&GettingStarted;
+&BasicUsage;
+&AdvancedUsage;
+&Customizing;
+&CommandReference;
+&DialogReference;
+&ArticlesTipsTricks;
+
+<!-- ====== Resources ========================================= -->
+
+<chapter id="resources">
+
+  <title id="resources-title">Ресурсы</title>
+
+  <para id="resources.cvsbook">
+  Книга <citetitle pubwork="book">Open Source Development with
+  CVS (Open Source разработка с использованием CVS)</citetitle> доступна в электоронной форме с  <ulink
+  url="http://cvsbook.red-bean.com/"> сайта книги</ulink>.
+  </para>
+
+  <para id="resources.cvsnt-manual" xreflabel="CVSNT Manual">
+  Справочное руководство по <productname>CVSNT</productname> можете взять
+  <ulink url="http://www.cvsnt.org/manual/">здесь</ulink>.
+  </para>
+
+  <para>
+  Примечание переводчика. 
+  Книги на английском языке.
+  </para>
+
+</chapter>
+
+</book>

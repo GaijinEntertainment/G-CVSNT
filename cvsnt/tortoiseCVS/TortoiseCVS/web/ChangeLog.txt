@@ -1,0 +1,3360 @@
+Changes available only in CVS:
+-----------------------------
+
+Changes for 1.12.5 (24 Jan 2011):
+--------------------------------
+
+Fixed bug 3162694: RevisionGraph and History List are out of order.
+
+
+Changes for 1.12.4 (19 Jan 2011):
+--------------------------------
+
+Fixed bug 3157457: 1.12.3 forces restart.
+
+Fixed bug 3152932: History and Revision Graph dialogs do not appear.
+
+Fixed bug 3155658: About dialog displays "UNSTABLE".
+
+
+Changes for 1.12.3 (07 Jan 2011):
+--------------------------------
+
+TortoiseCVS is now built using Visual Studio 2008 (VC9).
+
+TortoiseCVS now uses the Unicode version of Inno Setup.
+
+
+Changes for 1.12.2 (25 Oct 2010):
+--------------------------------
+
+Remove warning when installing on Vista and above.
+
+
+Changes for 1.12.1 (18 Oct 2010):
+--------------------------------
+
+Official 1.12.1 release.
+
+
+Changes for 1.12.1 RC 6 (12 May 2010):
+-------------------------------------
+
+Fixed bug 2997006: 1.12.1 RC5 does not install CVSNT.
+
+Fixed bug in parsing CVS build number.
+
+Applied patch 2918491: switch, and other features of CVSNT 2.5.05.
+
+
+Changes for 1.12.1 RC 5 (30 Mar 2010):
+-------------------------------------
+
+Fixed bug 2949626: Import fails.
+
+Fixed bug 2958697: Make patch: added files go to wrong location.
+
+Fixed bug 2925518: Commercial Messages in log.
+
+Upgraded CVSNT version to 2.5.05.3744, with :local: support.
+
+Changed wording of installer warning to also include Windows 7.
+
+
+Changes for 1.12.1 RC 4 (11 Dec 2009):
+------------------------------------
+
+Use client-only version of CVSNT installer.
+
+
+Changes for 1.12.1 RC 3 (03 Dec 2009):
+-------------------------------------
+
+Fixed installer error.
+
+
+Changes for 1.12.1 RC 2 (02 Dec 2009):
+-------------------------------------
+
+Upgraded TortoiseOverlays to version 1.0.9.
+
+Changes for 1.12.1 RC 1 (24 Nov 2009):
+-------------------------------------
+
+Fixed bug 2818556: Installer fails with more than one Explorer task.
+
+Fixed bug 2522849: Error "Couldn't add image" in Add dialog.
+
+Fixed bug 2874015: Paths with # characters do not open Web log.
+
+Bug 2822974 (History fails if bugid contains semicolon character): 
+Prevent user from entering non-alphanumeric bug IDs.
+
+Fixed bug 2819140: Cannot parse date/time: 07 juil. 2009.
+
+Fixed bug 2818434: -M option and old command line client.
+
+Upgraded CVSNT version to 2.5.05.3489.
+
+Honour the /SILENT option to Setup.
+
+In the Checkout dialog's repository browser, show timestamps as local time.
+
+Upgraded wxWidgets to version 2.8.9.
+
+Support for Visual Studio 2008, courtesy of Gabriel Genellina.
+
+
+Changes for 1.11.3 (23 Nov 2008):
+--------------------------------
+
+Applied part of March Hare CVS Suite patch of October 2008, including:
+- Better handling of exclusive edit
+- Bug number support in Merge and Make Patch dialogs
+- New "Exclusive editing and set ACL" Edit Policy
+
+Merged some missing fixes from 1.10.x branch.
+
+
+Changes for 1.11.2 (22 Nov 2008):
+--------------------------------
+
+Upgraded CVSNT version to 2.5.05.3240.
+
+
+Changes for 1.11.1 (27 Sep 2008):
+--------------------------------
+
+Use SHChangeNotify() instead of Explorer refresh. Addresses bug 1896560 and RFE 529287.
+
+Applied TortoisePlink patch from Assaf Raman to avoid spurious crash in vsnprintf().
+
+Fixed crash in List Editors dialog. Thanks to Mogens Beltoft for reporting this.
+
+
+Changes for 1.10.9 (01 Sep 2008):
+--------------------------------
+
+The Preferences dialog now indicates which settings for Edit Policy only work
+against CVSNT servers.
+
+Fixed bug 2076554: 'Normal(kv)' add option is not correct.
+
+Fixed bug 2064147: Revision Graph won't redraw.
+
+Downgraded TortoisePlink to version 0.56.
+
+Fix bug where conflicts were not detecting during an Update, if an additional
+update was triggered due to identical files. Thanks to Flávio Etrusco for 
+pointing this out.
+
+Fixed bug 1768669: Context menu icons setting only takes effect after Explorer is restarted.
+
+Fixed bug 1871840: Scroll wheel doesn't work in Revision Graph view.
+
+Fixed bug 1995609: Get clean copy in Commit dialog doesn't update file count.
+
+Use CMake for managing the build process.
+
+In the Revision Graph dialog, clicking a branch now highlights it.
+
+Upgraded CVSNT version to 2.5.04.3125.
+
+Upgraded wxWidgets to version 2.8.7.
+
+Use TortoiseOverlays to work around the Explorer limit of 14 overlay icons. 
+This also adds support for 'deleted' and 'locked' overlay icons.
+
+Fix problem with too much space on Revision Graph.
+
+Fixed possible crash when retrieving the list of tags and branches.
+
+
+Changes for 1.10.9 (01 Sep 2008):
+--------------------------------
+
+The Preferences dialog now indicates which settings for Edit Policy only work
+against CVSNT servers.
+
+Fixed bug 2076554: 'Normal(kv)' add option is not correct.
+
+Fixed bug 2064147: Revision Graph won't redraw.
+
+Downgraded TortoisePlink to version 0.56.
+
+Fix bug where conflicts were not detecting during an Update, if an additional
+update was triggered due to identical files. Thanks to Flávio Etrusco for 
+pointing this out.
+
+
+Changes for 1.10.8 (01 Jul 2008):
+--------------------------------
+
+Fixed bug 1768669: Context menu icons setting only takes effect after Explorer is restarted.
+
+Fixed bug 1871840: Scroll wheel doesn't work in Revision Graph view.
+
+Fixed bug 1995609: Get clean copy in Commit dialog doesn't update file count.
+
+
+Changes for 1.10.7 (03 Jun 2008):
+--------------------------------
+
+Fixed two bugs in Make Patch:
+- Contents of added files was not included.
+- If a binary file was present in a directory, it was not possible to add other files in that directory.
+
+Checkout dialog now has a resize grip, remembers its size, and fits on 1024 x 768 screens.
+
+Updated French and Spanish translations.
+
+
+Changes for 1.10.6 (07 Apr 2008):
+--------------------------------
+
+Clarified restart options as per bug 1889699.
+
+Fixed bug 1925930: CVS Revision not shown when using exclusive edit.
+
+Dialog is now resizable. This fixes bug 1925298: Checkout dialog too wide for 1024px screens.
+
+Fixed bug 1932767: Windows GDI+ Exception and bug 1932798: GDI+ is not properly initialized (internal GDI+ error).
+
+Default edit policy is now "Do not use Edit/Unedit".
+
+Fixed bug 1909227: Editors Dialog: 'Explorer' in context menu is broken.
+
+Fixed bug 1910345: Annotate Dialog: 'Find' doesn't paint if 'No Highlight' is chosen.
+
+
+Changes for 1.10.5 (28 Feb 2008):
+--------------------------------
+
+Fixed bug 1902001: CVSIgnore command creates .cvsignore file in wrong folder.
+
+Fixed bug 1901966: Folder treeview in Add Contents Dialog pops the menu twice.
+
+Fixed bug 1901947: Add Contents Dialog has bugs in selection with binary files.
+
+Fixed bug where 'edit -m' could be used against non-CVSNT servers.
+
+Fixed bug 1891753: No longer possible to merge between time points.
+
+
+Changes for 1.10.4 (06 Feb 2008):
+--------------------------------
+
+Fixed bug where binary files were not selected in the Add Contents dialog.
+
+Fixed bug 1886344: cvs edit uses option 'x' against non-CVSNT servers.
+
+Fixed bug 1824313: Calendar in Checkout dialog has bugs.
+
+
+Changes for 1.10.3 (24 Jan 2008):
+--------------------------------
+
+Improved layout in the Revision Graph dialog.
+
+Deleted revisions are now shown in red in the History dialog.
+
+
+Changes for 1.10.2 (22 Jan 2008):
+--------------------------------
+
+Fixed bug 1871119: History dialog isn't updated after a tag change.
+
+Fixed bug 1858751: Update Branch/Tag List Dialog Box crashes.
+
+After installing CVSNT, stop the lock server service as well the as dispatcher service.
+
+
+Changes for 1.10.1 (02 Dec 2007):
+--------------------------------
+
+Add warning when installing on Vista.
+
+Fixed bug 1834868: 'Make patch' adds new files with absolute path.
+
+Added three more Vista UAC fixes from Pontus Netler.
+
+Changed CVSNT version to 2.5.03.2382.
+
+Fixed bug 1823568: Files are sorted descending in Checkout dialog module list.
+
+Fixed bug 1822544: Bad behaviour in 'Server' editbox in Checkout dialog.
+
+ 
+Changes for 1.10.1 RC11 (29 Oct 2007):
+-------------------------------------
+
+Updated CVSNT to version 2.5.04.2862.
+
+Fixed bug where language names were displayed incorrectly in the Preferences dialog.
+Added English as a language choice.
+
+Applied patch 1808937 from Gottfried Ganssauge: Support running on Vista Ultimate.
+
+Fixed bug 1812483: "CVS Command..." crashes.
+
+Fixed bug 1799774: Column width of file list in commit dialog.
+
+Only show 'Autoignore' in Add Contents dialog if 
+'Add ignored files' is selected in Preferences.
+
+Fixed bug 1806164: Backslash in comment not escaped.
+
+Fixed bug 1794079: Whitespace after server name should be trimmed.
+
+Added Vista UAC fix from Pontus Netler.
+
+
+Changes for 1.10.1 RC10 (10 Sep 2007):
+-------------------------------------
+
+Fixed bug 1785150: CVS Diff fetches Unicode file in UTF-8.
+
+Fixed bug 1785115: Restore in Commit Dialog clears file list.
+
+Fixed bug 1724473: Preferences dialog fails to load .cvsignore.
+
+Unedit: Fixed bug where wrong filename was shown in the confirmation dialog.
+
+List Editors: Fixed bug where context menu was shown in the wrong place.
+
+
+Changes for 1.10.1 RC9 (14 Aug 2007):
+------------------------------------
+
+
+Added FAQ entry to explain why CVS columns cannot be supported on Vista.
+
+Fixed bug 1768653: gdiplus.dll not removed during uninstall.
+
+Fixed bug 1723945: No text in context menu on Win2K if Folder view active.
+
+If you select the 'Custom' setup type, you can now choose the install location for CVSNT.
+
+Fixed bug where no overlay icon was shown for modified static files.
+
+Always allow Commit on static files.
+
+
+Changes for 1.10.1 RC8 (11 Jul 2007):
+------------------------------------
+
+Updated CVSNT to version 2.5.04.2471.
+
+Synched cvsgui protocol with WinCVS.
+
+Fixed bug 1745860: Fails with large number of files.
+
+Fixed bug where the About dialog did not show the server version.
+
+Synched TortoisePlink with PuTTY 0.60.
+
+Fixed bug 1745229: Bug tracker doesn't use module preferences.
+
+
+Changes for 1.10.1 RC7 (27 Jun 2007):
+------------------------------------
+
+Several installer improvements; see RFE 1724859 and bug 1725089.
+
+
+Changes for 1.10.1 RC6 (23 Jun 2007):
+------------------------------------
+
+Applied patch 1734975: Vista themed icons & W2k background folder missing icons fix.
+
+Fixed bug 1724390: Installer should need only one Explorer restart.
+
+Fixed a bug where the commit message was not remembered when the commit failed
+(thanks to Anders Lauritsen for pointing this out).
+
+Fixed bug 1736502: Revision Graph ignores max tags setting.
+
+Fixed bug 1725236: Partial commit dialog crashes upon return.
+
+Fixed bug 1728886: Keyword substitution defaults to -kc for Text/ASCII files.
+
+Made installer restart of Explorer faster.
+
+Fixed bug 1724911: CVS Diff fails "silently".
+
+Fixed bug 1724468: Installer resets "network compression" preference.
+
+Branch/Tag: Removed limitation on number of tags/branches shown in combobox.
+
+
+Changes for 1.10.1 RC5 (10 May 2007):
+------------------------------------
+
+Fixed bug 1716291: Bug in "Make patch".
+
+Fixed bug 1702921: Garbled text in preferences dialog.
+
+Fixed bug where full paths were shown in Commit dialog.
+
+Fixed bug 1701838: Commit dialog: Item removed on canceled commit.
+
+Fixed bug 1701850: Commit dialog crashes program on UseBug checkbox.
+
+
+Changes for 1.10.1 RC4 (14 Apr 2007):
+------------------------------------
+
+Clarify that Automatic unedit only works properly with watch on.
+
+Fixed some cases where 'cvs edit' was called with incorrect options.
+
+Fixed bug 1698980: Browsing for tools weird.
+
+
+Changes for 1.10.1 RC3 (05 Apr 2007):
+------------------------------------
+
+Ensure use of correct cvs.exe.
+
+Removed support for Win9x.
+
+
+Changes for 1.10.1 RC2 (02 Apr 2007):
+------------------------------------
+
+Fix crash in History.
+
+
+Changes for 1.10.1 RC1 (02 Apr 2007):
+------------------------------------
+
+Fix problem with too much space on Revision Graph.
+
+Fixed bug where -c was incorrectly specified for Edit.
+
+
+Changes for 1.9.23 (16 Mar 2007):
+--------------------------------
+
+Fixed several bugs in migrating preferences.
+
+Delete old CVSNT installation.
+
+Add text files with -c if Edit Policy is set.
+
+Fixed bug 1669761: History doesn't show tags if .cvsrc contains log -N.
+
+Fixed bug 1600622: Context Menu in Vista RTM (thanks to patch from djpowell).
+
+
+Changes for 1.9.22 (28 Feb 2007):
+--------------------------------
+
+Downgraded CVSNT to version 2.5.03.2382. Use official CVSNT installer.
+
+Fixed bug where calendar control was not disabled after selecting and deselecting 'Files at certain time'.
+
+Fixed bug 1644961: Can not "Mark Bug" during Commit.
+
+
+Changes for 1.9.21 (23 Jan 2007):
+--------------------------------
+
+Fixed bug 1632294: Wrong manifests.
+
+Fixed bug 1632699: History: column widths are not restored.
+
+Fixed bug 1632598: Exclusive Edit command is not exclusive.
+
+Applied patch 1632529: Do not duplicate bug number in comment (thanks to Ilya Slobodin).
+
+
+Changes for 1.9.20 (09 Jan 2007):
+--------------------------------
+
+Fixed bug 1613361: Need to commit "twice" after bugid changes.
+
+Fixed bug 1619374: Should not remember "Mark bug" flag.
+
+Fixed bug 1611606: Can't add back a file after remove following instructions.
+
+Fixed bug where bug tracker URL was not handled correctly (thanks to Ilya Slobodin
+for patch 1613334: Fix of Bug Tracker URL).
+
+Properly fixed bug 1598378: Tries to add .cvsignore with absolute path.
+
+
+Changes for 1.9.19 (02 Dec 2006):
+--------------------------------
+
+Fixed bug 1598062: Binary files added with -k+L.
+
+Added registry entries for CVSNT SmartLoader, fixing bug 1598605: Unable to load
+version 1.9.0.0 of iconv.dll.
+
+Fix several bugs in migrating preferences. This fixes bug 1594666: Default 
+preferences not set correctly.
+
+Fixed bug 1604358: Cannot CVS Remove folder.
+
+Applied patch 1601260: Use bug (-b) and Mark bug (-B) should be mutually exclusive.
+
+Made Add Contents work again.
+
+Fixed bug 1598378: Tries to add .cvsignore with absolute path.
+
+Implemented RFE 1259411: Allow to specify RCS expansion options during merge.
+
+Fixed bug when user selects multiple modules inside a non-CVS folder.
+
+Fixed bug where Scope tab in Preferences dialog was never shown.
+
+Fixed bug 1593946: No context menu at all and no icons on Windows 2000.
+
+
+Changes for 1.9.18 (05 Nov 2006):
+--------------------------------
+
+Add Contents: Fixed bug where overlay icons were not showing. (Torsten)
+
+Fixed bug 1589870: Setup: Failed to copy TortoiseCVS installer helper. (Torsten)
+
+Fixed bug 1589874: sserver libraries are missing. (Torsten)
+
+
+Changes for 1.9.17 (31 Oct 2006):
+--------------------------------
+
+Fixed bug 1584472: Preferences dialog does not retain information. (Torsten)
+
+Fixed bug 1584470: About Dialog Crashes TortoiseCVS. (Torsten)
+
+Fixed bug 1583798: Offers no CVS Checkout. (Torsten)
+
+Fixed bug 1577585: Included/excluded folders doesnt work. (Torsten)
+
+Fixed bug 1496119: Rename functionality broken. (Torsten)
+
+Fixed bug 1429905: Context menu on renamed files. (Torsten)
+
+Fixed bug 1428908: A renamed file stays "Renamed" in display. (Torsten)
+
+Fixed bug 1237740: Rename for folders does't work. (Torsten)
+
+Fixed bug 1191069: Diff cmd on a renamed item. (Torsten)
+
+Fixed bug 1174352: Rename without commit allowed. (Torsten)
+
+Fixed bug 1584672: CVS Diff line ending does not match sandbox. (Torsten)
+
+Renamed files can now be properly committed. (Torsten)
+
+
+Changes for 1.9.16 (21 Oct 2006):
+--------------------------------
+
+Improved handling of View in History and Revision Graph dialogs. (Torsten)
+
+Updated menu icons. (Torsten)
+
+Revision Graph: Do not truncate comment in tooltip. (Torsten)
+
+Fixed bug 1577585: Included/excluded folders doesn't work. (Torsten)
+
+Fixed bug 1566259: Multiple commits on related directories. (Torsten)
+
+The installer now attempts to download and install the Microsoft 
+Visual C++ 2005 Redistributable Package (x86 and x64) if it is not
+already installed. (Torsten)
+
+Updated CVSNT to version 2.5.04.2471 (includes the free version of 
+CVSNT Manager). (Torsten)
+
+Fixed bug in handling of bug numbers in Commit dialog. (Torsten)
+
+Fixed bug 1562405: No overlay icons in 32-bit Explorer on x64. (Torsten)
+
+Fixed bug 1561662: Start Explorer after killing it if 
+Windows doesn't. (Torsten)
+
+Fixed bug 1560743: Crash during CVS Commit. (Torsten)
+
+Fixed bug 1560748: Crash on "Tag...". (Torsten)
+
+Fixed bug 1560746: No context menu in history. (Torsten)
+
+Fixed bug 1560739: No Code Lines in Annotate. (Torsten)
+
+
+Changes for 1.9.15 (17 Sep 2006):
+--------------------------------
+
+Fixed bug 1555364: Too many CVS operations. (Torsten)
+
+Fixed bug 1558570: CVS unedit doesn't work. (Torsten)
+
+Partly implemented RFE 1329258: Support "Static Files". (Torsten)
+
+Add Contents: Always show Explorer menu in context menu. (Torsten)
+
+History and Revision Graph can now handle filenames containing semicolons. (Torsten)
+
+Added bug number support to 'Show edited files' command. (Torsten)
+
+Various installer improvements. (Torsten)
+
+Full support for 64-bit Windows on AMD processors. (Torsten, March Hare)
+
+Added bug number support in Annotate dialog. (March Hare, Torsten)
+
+Fixed a bug in the CVSGUI protocol code that caused exit code to sometimes be lost. (Torsten)
+
+Fixed bug 1541385: Nested checkout does not work. (Torsten)
+
+Fixed bug 1531316: TortoiseAct.exe exception when tagging. (Torsten)
+
+Fixed bug 1531945: Large update - initial output truncated. (Torsten)
+
+Bug fixes for bug number support. (Torsten)
+
+Fixed bug 1532831: Ignores custom home folder. (Torsten)
+
+
+Changes for 1.9.14 (26 Jul 2006):
+--------------------------------
+
+Fixed bug 1527747: CVS update failure. (Torsten)
+
+Create cvs.exe.local to force CVSNT to use the correct DLLs. (Torsten)
+
+Fixed bug that prevented CVS Ignore from working. (Torsten)
+
+Fixed bug 1521721: Invalid option -- -. (Torsten)
+
+Fixed bug where context menus were always shown in English. (Torsten)
+
+Fixed bug 1523703: Can't add folder to repository. (Torsten)
+
+Fixed a preference bug. (Torsten)
+
+Update to Inno Setup 5.1.6. (Torsten)
+
+
+Changes for 1.9.13 (11 Jul 2006):
+--------------------------------
+
+Updated CVSNT to version 2.5.03.2260. (Torsten)
+
+Changed directory handling; this fixes some problems with the way
+CVSNT applies permission checks. (Torsten)
+
+Fixed bug 1501884: Crash with xplorer2. (Torsten)
+
+Drop Win9x and NT4 support. (Torsten)
+
+Applied patch 1505966: Fix for some shell menu icons having grayish background. (Torsten)
+
+Applied patch 1503619: Nice full-size extension icons instead of squished ones. (Torsten)
+
+Fix handling of UNIX sandboxes. (Torsten)
+
+Fixed bug 1501570: CVSGlue always producing UNIX endings. (Torsten)
+
+Fixed bug 1502427: Checkboxes in every column in Add Contents dialog. (Torsten)
+
+Link PostInst statically to attempt to fix bug 149953: 1.9.12 install failure. (Torsten)
+
+Converted Polish translation to UTF-8 (thanks to Adam Strzelecki). (Torsten)
+
+
+Changes for 1.9.12 (01 Jun 2006):
+--------------------------------
+
+Upgraded wxWidgets to 2.6.3. (Torsten)
+
+Fixed bug 1433229: 'Commit selected files' should end with ellipsis. (Torsten)
+
+Updated the Web Log URL autodetection code to match the new CVS server 
+naming scheme at Sourceforge. (Torsten)
+
+Updated the 'Checkout TortoiseCVS' command to match the new CVS server 
+naming scheme at Sourceforge. (Torsten)
+
+Fixed bug 1477251: sserver will not take protocol parameters. (Torsten)
+
+Dropped support for Win9x. (Torsten)
+
+The "Automatic unedit" feature is now compatible with CVS 1.12.12. (Torsten)
+
+Fixed bug 1455510: Branch/tag lost on export with date/time. (Torsten)
+
+Fixed bug 1402261: CVS submenu lacks a separator above Tag. (Torsten)
+
+Added Slovenian translation from Martin Srebotnjak. (Torsten)
+
+Fixed bug 1398031: Diff causes 'absolute pathname' error. (Torsten)
+
+Fixed bug 1397741: Diff: Temp file has a write lock. (Torsten)
+
+Fixed bug 1362026: Files/folders starting with '!' could not be ignored. (Torsten)
+
+Preferences (except for Icon set and Colours) can now be set both globally and per-module. (Torsten)
+
+Accept protocol parameters for all protocols except :local: and :ext:. (Torsten)
+
+Fixed bug 1362751: Conflict files generated with wrong line feed. (Torsten)
+
+TortoiseCVS now always uses "cvs ls" to obtain a listing of modules on the server
+(recent CVSNT clients are able to emulate "cvs ls" in the client even if the server
+does not support it natively). (Torsten)
+
+Updated CVSNT to version 2.5.03.2230. (Torsten)
+
+Fixed bug 1364610: Diff fails when -N option activated on server
+for checkout command. (Torsten)
+
+Fixed bug 1369803: "Chinese [GB2312]" in Language selection is Big5. (Torsten)
+
+Add "Copy to Clipboard" menu item in History dialog (RFE 1251698). (Torsten)
+
+Added option in Update Special to disable recursion (RFE 1237492). (Torsten)
+
+
+Changes for 1.9.11 (29 Oct 2005):
+--------------------------------
+
+Fixed bug 1329103: Abort didn't abort. (Torsten)
+
+Fixed bug 1325817: Dropdown "CVS Command" forgetful. (Torsten)
+
+Upgrade to latest cvsgui protocol. (Torsten)
+
+Show native language names in the language dropdown in Preferences. (Torsten)
+
+Make Catalan and Georgian show up in the language dropdown in Preferences. (Torsten)
+
+Applied modified version of patch 1325859: Shorten two strings. (Torsten)
+
+Fixed bug 1325841: Status bar wrong. (Torsten)
+
+Fixed bug 1307984: Crash when selecting "Add content". (Torsten)
+
+Fixed bug: Tag, Branch, Web Log, and Update Special was not available for edited files. (Torsten)
+
+Fixed bug 1307950: German dialog text cut off. (Torsten)
+
+Fixed bug in build scripts that caused strings in the installer not to be translated. Thanks to Juan Diego Gutiérrez
+Gallardo for pointing this out. (Torsten)
+
+Include Russian User Guide by Vladimir Serdyuk.
+
+Include Spanish, Korean, Romanian, Turkish, and Traditional Chinese translations for Inno Setup. (Torsten)
+
+Update to Inno Setup 5.1.5. (Torsten)
+
+Fixed bug 1297217: Progress Dialog always autoclosing after Edit command. (Torsten)
+
+Do not install the :ntserver: protocol DLL. (Torsten)
+
+
+Changes for 1.9.10 (09 Sep 2005):
+--------------------------------
+
+Fixed bug 1213844: "Fetch list" command broken. (Torsten)
+
+Fixed a few installer bugs. (Torsten)
+
+Implemented RFE 1203884: Update special needs "create empty folders" option. (Torsten)
+
+Implemented RFE 1203885: Allow user to specify a folder name in "Update Special". (Torsten)
+
+Fixed bug in Add dialog: "Binary Diff" and other options could not be selected. (Torsten)
+
+Added Pageant to installer (RFE 1172882). Updated puttygen to 0.58. (Torsten)
+
+Fixed progress dialog keyboard focus problem. (Torsten)
+
+Fixed bug 1267129: "Collapse revisions" not reversible. (Torsten)
+
+Fixed bug in displaying server version when using :local:. (Torsten)
+
+Fixed bug 1267137: Buttons in "Annotate -> Find" not aligned. (Torsten)
+
+
+Changes for 1.9.9 (22 Aug 2005):
+-------------------------------
+
+Repository browser in Checkout dialog, contributed by March Hare. (Torsten)
+
+User Guide has been slightly updated and features a new look. (Torsten)
+
+Made Set Limits button in Revision Graph work again. (Torsten)
+
+Implemented RFE 528333: CVS_SERVER support. This code was contributed by 
+March Hare. (Torsten)
+
+Started adding support for bug numbers, based on code contributed by 
+March Hare. (Torsten)
+
+Moved Edit preferences to a separate tab and implemented proper ghosting. (Torsten)
+
+New preference "Show edit dialog" that allows entering a comment when 
+editing a file. This code was contributed by March Hare (march-hare.com). (Torsten)
+
+The Checkout, Tag, Branch, Update Special, and Merge dialogs now prevent
+entering illegal tag characters. (Torsten) 
+
+Fixed bug 1256088: Local CVS server not working. (Torsten)
+
+Fixed bug 1206305: Initial connection to SSH module fetch problem. (Torsten)
+
+
+Changes for 1.9.8 (01 Aug 2005):
+-------------------------------
+
+Fixed bug 1217230: Collaborative edit file state name and menu name. (Torsten)
+
+Fixed bug 1240587: Flag -kx always set for binary files. (Torsten)
+
+Fixed bug 1213844: "Fetch list" command broken. (Torsten)
+
+Fixed bug 1206308: Action window "Close on completion" inconsistent. (Torsten)
+
+Updated CVSNT to version 2.5.01.2025. (Torsten)
+
+http://tortoisecvs.org/download.shtml now links to the new tcvswix project 
+(run by Kevin Cheng), which provides Windows Installer (.msi) packages of
+TortoiseCVS.
+
+Added Simplified Chinese User Guide from shengfang. (Torsten)
+
+Fixed bug 1234090: No overlay icon on file after "edit". (Torsten)
+
+Annotate: Applied patch from Marcel Gosselin to make searching upwards working 
+again. (Torsten)
+
+
+Changes for 1.9.7 (17 Jul 2005):
+-------------------------------
+
+Fixed bug 1238005: Escape doesn't close Revision Graph dialog. (Torsten)
+
+Applied patch 1221620: Update command does't refresh overlay of files. (Torsten)
+
+Fixed bug 1221702: Create Branch crowded/missing text. (Torsten)
+
+Fixed bug where clicking a truncated log message in the Commit dialog history 
+selected the truncated message instead of the original message. (Torsten)
+
+Fixed bug: Right-clicking in conflict resolution list did not work. (Torsten)
+
+Fixed bug 1239012: Add Contents fails on existing directory. (Torsten)
+
+Applied patch from Marcel Gosselin for Find in Annotate dialog. (Torsten)
+
+Ask for confirmation before installing on Win64. (Torsten)
+
+Fixed bug 1221158: Checkout: Created folder name contains invalid characters. (Torsten)
+
+Fixed bug 1207099: 1.9.5 messed up the statusbar. (Torsten)
+
+Applied patch 1193660: Better English. (Torsten)
+
+Fixed bug 1206095: Crash in Revision Graph when toggling "show tags". (Torsten)
+
+
+Changes for 1.9.6 (05 Jun 2005):
+-------------------------------
+
+Updated to wxWidgets 2.6.0, thereby fixing bug 1204326: Error 
+loading %HOME%\.cvsignore. (Torsten)
+
+Added Georgian translation (contributed by Gia Shervashidze). (Torsten)
+
+TortoiseCVS now refuses to be installed on 64-bit Windows. (Torsten)
+
+Fixed bug 1202920: About dialogue: Line endings broken. (Torsten)
+
+Fixed bug 1193140: Installer claims TortoiseCVS already installed.
+
+Added option to disable Explorer tooltips. (Torsten)
+
+Fixed bug 1194077: Colors wrong in annotate. (Torsten)
+
+Fixed bug 1032776: Comment history - wrong selection. (Torsten)
+
+Fixed bug 1196530: Small context menu not at mouse position. (Torsten)
+
+Annotate dialog now properly remembers highlight setting. (Torsten)
+
+64-bit portability patches from Bruno Jouhier. (Torsten)
+
+Implemented RFE 1169594: Prompt on Remove. (Torsten)
+
+Implemented RFE 529291: Browser links to go to checkout dialog. (Torsten)
+
+
+Changes for 1.9.5 (30 Apr 2005):
+-------------------------------
+
+Implemented RFE 991068: "Create Patch" functionality similar to "Commit" func. (Torsten)
+
+An older CVSNT version is now installed on Windows 95/98/ME. (Torsten)
+
+Fixed bug where CVS Diff would sometimes inexplicably fail. (Torsten)
+
+Added Spanish translation (started by Carlos Mendez and now maintained 
+by Juan Diego Gutiérrez Gallardo). (Torsten)
+
+Implemented RFE [747412] "Show CVS information in Explorer tooltips". (Hartmut/Torsten)
+
+TortoiseCVS is now case sensitive when matching files against .cvsignore, just as
+CVSNT has been for some time. (Torsten)
+
+Implemented RFE [1062406] "Make 'clean copy' more accessible for committals". (Torsten)
+
+Implemented RFE [1170210] "Commit dialog - one comment per file". (Torsten)
+
+Implemented RFE [1153941] "Use 'c' and 'x' expansion modes for binary files". (Torsten)
+
+When doing CVS Add or CVS Contents, TortoiseCVS no longer shows 
+confusing '?' messages. (Torsten)
+
+Fixed bug [1182230] "CVS -> Annotate... -> show log messages works 
+randomly". (Torsten)
+
+Fixed bug [1182258] "TCVS talks in first person." (Torsten)
+
+Fixed bug [1178010] "(1.9.4) Weird behaviour of Ctrl+Up and 
+Ctrl+Down in History". (Torsten)
+
+Removed VC6 projects, as they have not been maintained for a long time. (Torsten)
+
+Removed the "Checkout wxWidgets" command. (Torsten)
+
+Fixed bug [1168046] "(1.9.4) History dialog doesn't handle line breaks 
+properly". (Torsten)
+
+Fixed bug [1168985] "(1.9.4) RevisionGraph Dialog doesn't reload". (Torsten)
+
+Fixed bug [1167635] "Commit + Comment-History may crash". (Torsten)
+
+In the History dialog, Ctrl-Up/Down no longer wraps around. (Torsten)
+
+Added Catalan translation from Alex Guardiet. (Torsten)
+
+It is now possible to install TortoiseCVS without restarting Windows. (Torsten)
+
+Update to Inno Setup 5.0.8. (Torsten)
+
+
+Changes for 1.9.4 (20 Mar 2005):
+-------------------------------
+
+Fixed bug [1166752] "ALL dialogs are opened at Z-order bottom". (Torsten)
+
+
+Changes for 1.9.3 (09 Mar 2005):
+-------------------------------
+
+Rebuilt, no changes to source.
+
+
+Changes for 1.9.2 (05 Mar 2005):
+-------------------------------
+
+Implemented RFE [863224] "Use 'cvs editors' for 'Automatic unedit'". (Torsten)
+
+Implemented RFE [556337] "Policy: auto-commit after remove please". (Torsten)
+
+Implemented RFE [1156421] "Show Explorer Menu for multiple selected files". (Torsten)
+
+
+Changes for 1.9.1 (27 Feb 2005):
+-------------------------------
+
+Added Japanese (Yutaka Yokokawa) and Romanian (Dumitru Pletosu) 
+translations. (Torsten)
+
+Added tip for the case where an old version of the CVSNT lock server 
+is installed locally. (Torsten)
+
+Fixed bug [1119783] "Incomplete shell extensions on folders with 
+customized icons". (Torsten)
+
+Fixed bug [1123051] "moving branch fails in History and Rev.Graph
+dialog". (Torsten)
+
+Links of the form "bug 123" and "#123" in the History and Revision Graph 
+dialogs are now automatically converted to hyperlinks to a user-configurable
+bug tracker (addresses RFE [935783] "Providing clickable links to Mantis"). (Torsten)
+
+Implemented RFE [743265] "add leading / to repository folder for checkout". (Torsten)
+
+When TortoiseCVS is first installed on a machine, it is no longer necessary 
+to restart Windows. Reinstalls still require restarts, however.
+
+Implemented RFE [696840] "Changing icons does not require a reboot". (Torsten)
+
+CVS Edit now uses the -x option for binary files to implement true 
+exclusive edits. (Torsten)
+
+There is now an "Edit policy" preference which allows specifying if the 
+Edit/Unedit commands are shown in the context menu. Also, it is possible 
+to have an "Exclusive edit" command, or to make all edits exclusive. (Torsten)
+
+The preference "Automatic commit" now includes modified and deleted files when 
+invoked from Add Contents (addresses RFE [807612] "Add Contents + Commit"). (Torsten)
+
+Implemented RFE [1038747] "Avoid fetching more than one Modules list". (Torsten)
+
+Fixed bug [1110777] "History log does not remember apply action". (Torsten)
+
+Newly created .cvsignore files are automatically added to the repository. (Torsten)
+
+Implemented RFE [744228] "Close on completion checkbox for progress dialog". (Torsten)
+
+Implemented RFE [1077523] "Support of the new CVSNT "rename / move" 
+feature". (Torsten)
+
+History dialog: Added keyboard shortcut. Show keyword expansion and filename
+information on a per-revision basis. (Torsten)
+
+Disabled "View" menu item in History and Revision Graph dialogs for
+executable files (addresses RFE [1071161] "action "View this revision" 
+can be dangerous"). (Torsten)
+
+Fixed bug [1102428] "TortoiseCVS will CRASH explorer". (Hartmut)
+
+Implemented RFE [1005036] "Show messages when -n flag is set." (Torsten)
+
+Implemented RFE [1004430] "extension of Unedit dialog". (Torsten)
+
+Implemented RFE [1100457] "Show check-in comments on annotate". (Torsten)
+
+Added new icons from visli with Chinese character overlay. (Torsten)
+
+Fancier Credits dialog. (Torsten)
+
+Implemented RFE [1076367] "Warn on empty commit comments" thanks to patch from
+Friedrich Brunzema. (Torsten)
+
+Fixed bug [1102248] "Missing Russian timezone parsing in getdate.y". (Torsten)
+
+Fixed bug [1097045] "TortoiseCVS interaction breaks Cmd-window keystrokes". 
+(Hartmut)
+
+Fixed 100% CPU usage problem. (Hartmut)
+
+Updated CVSNT to version 2.0.62.1817. (Torsten)
+
+Fixed bug [1092624] "Strange behaviour: 'Finished ...'-dialog closes on 
+MouseOver. (Hartmut)
+
+Fixed bug in Commit dialog where double clicking on an added or removed file
+always toggled the first file in the list. (Torsten)
+
+Revision Graph: Numerous improvements, too many to mention separately. (Torsten)
+
+Web Log no longer authenticates using "blast_username". (Torsten)
+
+Fixed bug [1082937] "Auto Unedit of unmodified files fails". (Torsten)
+
+Fixed bug [1083979] "Compiled CVSROOT lacks a colon". (Hartmut)
+
+Fixed bug [1083696] "Module field input value autocomplete fails". (Hartmut)
+
+Implemented RFE [898638] "Save revision Graph as picture". (Torsten)
+
+Implemented RFE [936603] "Highlight merge arrow on Revision Graph". (Torsten)
+
+Revision Graph dialog: Options to toggle display of tags, as well as
+non-interesting revisions. (Torsten)
+
+Checkout dialog: Remove any trailing slash from the CVSROOT
+directory. (Torsten)
+
+Fixed bug [1062665] "cvslock.exe should be deleted". (Hartmut)
+
+Fixed bug [1062334] "Comment history munges newlines". (Torsten)
+
+Fixed bug [982772] "Advoiding lost changes when changing rows in the history
+vie". (Torsten)
+
+CVS Add: Always treat .sql files as text. (Torsten)
+
+Implemented RFE [627916] "Run arbitrary CVS command". (Torsten)
+
+Fixed bug "Invalid keyword expansion -ku when adding Unicode files" (Hartmut)
+
+Fixed bug [1060938] "Must Resolve Coflicts one at a time". (Hartmut)
+
+Fixed bug [1060210] "No prompt to add ssh key to cache". (Hartmut)
+
+Fixed [1058941] "'cvs version' breaks update and add". (Hartmut)
+
+Update to InnoSetup 4.2.7. (Hartmut)
+
+Fixed bug where "tag" and "remove" always reported success. (Torsten)
+
+Added "Show tags" checkbox in Revision Graph. (Torsten)
+
+Update to TortoisePlink 0.56. (Hartmut)
+
+Added CVSNT lock server, required for :local: protocol. Fixes bugs [1052996] 
+and [1046257]. (Hartmut)
+
+Fixed bug [1051161]" TortoiseShell.dll not updated after upgrade". (Hartmut)
+
+Fixed bug [1046257] "Local mode doesn't work in 1.8.1" by updating cvs95.exe
+to 2.0.58a. (Torsten)
+
+Fixed bug [1039807] "Annotate doesn't show tab character properly". (Torsten)
+
+Implemented RFE [1043839] "Include cvsagent from CVSNT". (Torsten)
+
+Update to CVSNT 2.0.58. (Torsten)
+
+Fixed bug [1017260] "Diff fails to generate temp filename". (Hartmut)
+
+Fixed bug [1030868] "'Make New Module Dialog' is too narrow". (Hartmut)
+
+Fixed bug [1040282] "Wrong accelerator for 'Tag' field in Tag dialog". (Hartmut)
+
+Fixed problem with "CVS update" not asking for password. (Hartmut)
+
+Fixed bug [1032178] "Month DropDown Box on Checkout does not drop down." (Hartmut)
+
+Do not use -B for old CVS servers (prior to 1.11.1p2). (Torsten)
+
+Revision Graph: Allow suppressing display of tags and "non-interesting"
+revisions (i.e. revisions which do not have tags/branches, or are the source
+or target of a mergepoint). (Torsten)
+
+Checkout dialog: Allow choosing the port for :ext: as well as for :ssh:. (Torsten)
+
+Add Contents dialog: No longer shows files in .cvsignore by default - there is
+now an option in Preferences to get the new behaviour (RFE [994412]). (Torsten)
+
+Commit dialog: There is now an empty entry at the top of the History dropdown,
+so that it is easy to select the previous entry using the mouse. (Torsten)
+
+Make Patch: Do not show "Browse" button when only files are selected. (Torsten)
+
+Fixed bug [1026604] "1.8.0-RC6 doesn't work on NT4". (Hartmut)
+
+Update to CVSNT 2.0.51d. (Hartmut)
+
+Support for renaming files (this feature is still experimental in CVSNT). (Torsten)
+
+New default icon set. (Torsten)
+
+Implemented RFE [987436] "Display Server CVS version clarifications".
+(Torsten) 
+
+Workaround for CVSNT bug where edit -c does not check for existing edits if
+invoked from parent directory. (Torsten)
+
+If a command fails with "end of file from server" and the protocol is SSPI,
+retry the command without encryption to support SSPI on Linux
+servers. (Torsten)
+
+The List Editors command now has its own dialog and shows not only filename
+and author, but also date, hostname, and path. It is also possible to sort the
+listing on the different columns. (Torsten)
+
+Annotate dialog now remembers sort column. (Hartmut)
+
+Fixed bug in History Dialog: Enable clipping again for non-branches and 
+non-tags. (Hartmut)
+
+Fixed bug [1017431] "History screen does not show anything." (Hartmut)
+
+Implemented RFE [1013084] "Add 'Annotate' to the context menu in the Annotate 
+view". (Hartmut)
+
+Fixed crash for file "NUL". (Hartmut)
+
+Added new iconsets (patches [1005962], [1014654], [1014670]). (Hartmut)
+
+Fixed bug in History Dialog: Tags and branches were clipped. (Torsten)
+
+Fixed bug in History Dialog: Changed log messages did not persist when moving
+to a different revision. (Torsten)
+
+Made "List Editors" work again. (Torsten)
+
+Implemented RFE [702472] "Add CVS Status display of 'Locked'": In the
+Properties dialog and in the Explorer "CVS Status" column, a file which is
+unmodified but Edited by the user will show as "Locked". (Torsten)
+
+Fix broken %mine / %yours substitution for external merge application. (Hartmut)
+
+Implemented RFE [688928] "CVS checkout into checked-out folder". (Torsten)
+
+Fixed bug [995108] "Committing project root folder in 1.8 gives uptodate fail".
+(Hartmut)
+
+Implement RFE [1005041] "cvs add content could better deal with .cvsignore".
+(Hartmut)
+
+Updated TortoisePlink to 0.55 to fix security bug. (Torsten)
+
+Fixed bug [1003932] "Adding of files since Tortoise 1.7 impossible". (Hartmut)
+
+Fixed bug [971187] "Web Log / TortoiseAct.exe problem". (Hartmut)
+
+Fixed bug [1000090] "Folders with [ ] don't add correctly to .cvsignore". 
+(Hartmut)
+
+Fixed bug [1002963] "sserver doesn't work without ca.pem". (Hartmut)
+
+Update to CVSNT 2.0.51a, fixes bug [999567] "weird problem with .exe 
+files in repository". (Hartmut)
+
+Fixed bug [997637] "Diff does't work within a directory with dots". (Hartmut)
+
+Add column "state" to Add Files dialog (see RFE 994412 "CVS Add Contents dialog 
+shows ignored files"). (Hartmut)
+
+Fixed bug [993791] ""View this revision" -- selecting viewer". (Torsten)
+
+Add "-ssh" to default TortoisePlink parameters. (Torsten)
+
+Updated CVSNT to version 2.0.48. (Torsten)
+
+Fix MinGW compilation. (Hartmut)
+
+Added French User Guide thanks to Cedric Babault. (Torsten, Hartmut)
+
+Build process now uses GnuWin32's bison and flex instead of Cygwin's. (Hartmut)
+
+Add statusbars to all resizable dialogs as the old resize grip is not redrawn 
+properly on a themed XP system. (Hartmut)
+
+Add column "filetype" to commit dialog. (Hartmut)
+
+Show sort indicator in listview header in commit, annotate and add files 
+dialogs. (Hartmut)
+
+Replaced richedit in progress dialog with listview (plus other tweaks) to 
+improve performance when doing operations with lots of CVS output 
+(should fix bug [883903] "high cpu usage"). (Hartmut)
+
+Implemented RFE [977228] "Add the filename to history window title." (Hartmut)
+
+Fixed bug [970347] "Manual still refers to FileTypes.config". (Hartmut)
+
+Fixed bug [960863] "'Update special/Get tag' in base folder broken". (Hartmut)
+
+Implemented RFE [703395] "Wrap check-in messages at <80 chars.". (Torsten)
+
+Increased setup compression - see patch [912489]. (Hartmut)
+
+Implemented RFE [974056] "Annotate a specific revision". (Hartmut)
+
+Update to wxWindows 2.5.2. (Hartmut)
+
+Implement RFE [972751] "Override automatic line ending format detection". (Hartmut)
+
+Fixed bug [971187] "Web Log / TortoiseAct.exe problem". (Hartmut)
+
+Fixed bug [971159] "Shell icon shows non-existant change". (Hartmut)
+
+Implemented RFE [654869] "'View' in History dialog". (Torsten)
+
+Implemented RFE [952945] "Sticky Date column in Explorer": The explorer column
+"CVS Sticky Tag" is now known as "CVS Sticky Tag/Date" and shows either sticky
+tag or sticky date. Similar functionality is now available in the CVS property
+sheet. (Torsten)
+
+Added Catalan translation to the installer. (Torsten)
+
+The caption on the CVS submenu can now be changed by editing the registry
+entry "SubMenuName". (Torsten)
+
+
+Changes for 1.7.3 (04 Jun 2004):
+-------------------------------
+
+Fixed bug [942998] "TCVS causes crash in VB6 File Open dialog". (Hartmut)
+
+Update to InnoSetup 4.2.4 (Hartmut)
+
+DEBUG builds of TortoiseAct.exe and TortoiseShell.dll now create dump files
+when crashing. (Hartmut)
+
+Fixed bug [964372] "Focus error in Commit dialog". (Hartmut)
+
+Applied patch [961486] "UNIX". (Hartmut)
+
+Fixed bug [962106] "1.7.2: CVS/Repository content is invalid". (Hartmut)
+
+Fixed bug [960941] "could not add file with TortoiseCVS". (Hartmut)
+
+Fixed bug [959187] "comment history made TortoiseCVS exit with no info". (Hartmut)
+
+Fixed bug [961604] "TortoiseCVS 1.7.2 does not install locale files". (Hartmut)
+
+Fixed bug [961391] "Right click doesn't work properly". (Hartmut)
+
+
+Changes for 1.7.2 (26 May 2004):
+-------------------------------
+
+Fixed bug [960008] "Backslashes break right-click diff". (Hartmut)
+
+Fixed bug [959852] "Copying text from 1.7.1 leads to explorer hanging". (Hartmut)
+
+Update to CVSNT 2.0.41a. (Torsten)
+
+Fixed bug [948692] "Problem with Diff command using Unix Line endings". (Hartmut)
+
+Fixed bug [948564] "Annotate shows HEAD branch". (Torsten)
+
+Branch/Tag dialog: Changed keyboard shortcut for "Check that the files are
+unmodified" from Alt-U to Alt-F to avoid clash with "Update list..."
+button. (Torsten)
+
+Implemented RFE [763245] "Include files to be added to the rep. in Make
+Patch". (Torsten)
+
+Fixed broken "Restore" in commit dialog. Allow "Restore" for multiple 
+files. (Hartmut)
+
+Show progress dialog before annotate / history / revision graph dialog. (Hartmut)
+
+Implemented new "cvs log" parser that fixes bug [798803] 
+"cvstree parser bug". (Hartmut)
+
+Fixed bug "CVS ignores TEMP variable". (Hartmut)
+
+Improved performance for "Annotate". (Hartmut)
+
+
+Changes for 1.7.1 (16 Apr 2004):
+-------------------------------
+
+Implemented RFE "Allow branching and tagging for modified files". (Hartmut)
+
+Fixed bug [916703] "Tag operation crash if server doesn't support rlog". (Hartmut)
+
+Implemented RFE [931407] "support cvs checkout -f option". (Hartmut)
+
+Updated to InnoSetup 4.1.7. (Hartmut)
+
+Fixed bug [928093] "installer modifies no sounds scheme". (Hartmut)
+
+Fixed bug [927247] "Add Project Server String Generation Error". (Hartmut)
+
+Update dialog now defaults to empty tag. And it's now possible to specify both tag and
+date when updating. (Hartmut)
+
+Fixed incorrect/missing dates in history / revision graph. (Hartmut)
+
+Fixed bug [913795] "hangs when Removing certain file". (Hartmut)
+
+Fixed bug [921523] "plink std out". (Hartmut)
+
+Commit comment field now defaults to empty, and Ctrl-Up/Ctrl-Down select from comment history.
+(see RFE [863754] "Commit comment field should default to empty"). (Torsten)
+
+
+Changes for 1.7.0 (13 Mar 2004):
+-------------------------------
+
+Implement RFE [909728] "Checkout by branch and date". (Hartmut)
+
+Preserve custom CVSROOT in checkout dialog. (Hartmut)
+
+Update to TortoisePlink 0.54. (Hartmut)
+
+Applied patch [910827] "Annotate Feature". (Torsten)
+
+"Allow Network Drives" policy now overrides CVSNT network share errors 
+(fixes bug [909736]). (Hartmut)
+
+Implemented RFE [857170] "Use edit -z if supported". (Torsten)
+
+Recognize "unrecognized auth response" as indication that login is necessary.
+(Torsten)
+
+Implemented RFE [774001] "Add visual indication of mergepoints". (Torsten)
+
+Fixed crash in History and Revision Graph. (Torsten)
+
+Fixed bug [900172] "Checkout dialog module list has default size (100)". (Hartmut)
+
+Fixed bug [890424] "Dialogs may open on the wrong desktop". (Hartmut)
+
+Fixed bug [895492] "Overlayed icon of readded file is wrong". (Hartmut)
+
+Fixed bug [874233] "Problems with daylight savings" (Hartmut)
+
+Fixed bug [865636] "ru_RU: several fresh bugs" (Hartmut)
+
+Now also builds with Visual Studio 2003. (Hartmut)
+
+Update to InnoSetup 4.1.5. (Hartmut)
+
+When conflicts occur, we now show a list of all conflict files. (Hartmut)
+
+Various attempts to improve performance when dealing with large amounts of
+files. (Hartmut)
+
+Added feature "Simulated update" (cvs -n update). (Hartmut)
+
+Ignore files with system attribute set. (Hartmut)
+
+TortoiseCVS now sometimes retrieves the CVS server version to offer enhanced
+functionality. (Hartmut)
+
+SSH parameters now completely user-definable. (Hartmut)
+
+"Resolve conflicts" now recursively scans subdirectories. (Hartmut)
+
+Move "Rebuild icons" from context menu to preferences dialog. (Hartmut)
+
+New "Add" dialog with treeview and lots of new features. (Hartmut)
+
+Update to CVSNT 2.0.26. (Hartmut)
+
+Fixed crash in Postinst.exe when .cvspass contained an empty line. (Torsten)
+
+Fixed bug [878307] "Prune empty folders fails on update special". (Torsten)
+
+Fixed SSPI login issue. (Torsten)
+
+Add Contents: Do not add folders which are in the ignore list. (Torsten)
+
+Fixed bug [849605] "Duplicate tags in lists" again. (Hartmut)
+
+Moved "Rebuild icons" from context menu to the preferences dialog. (Hartmut)
+
+Implemented RFE [792263] "Add "File type" column in Commit dialog". (Hartmut)
+
+Implemented RFE [852473] "Enhanced branch tag dialog". (Hartmut)
+
+Improved handling of CVSROOT input. (Hartmut)
+
+Fixed bug in RecursiveScan() where folders were added to the list of writable
+files. (Torsten)
+
+Redesign of many dialogs: Reduced flicker, added window splitters etc. (Hartmut)
+
+Upgrade to current snapshot of wxWindows sources. (Hartmut)
+
+DEBUG releases: Added preference to write log files without caching. (Hartmut)
+
+Fixed crash in commit dialog when entering long comments. (Hartmut)
+
+Limited number and length of comment history entries. (Hartmut)
+
+Fixed bug "Delay when right-clicking". (Hartmut)
+
+Applied patch [851770] "French installer messages". (Hartmut)
+
+Show TAB characters in comments properly. (Torsten)
+
+Fixed bug "Backslashes in server path". (Hartmut)
+
+Fixed bug "Include path not working correctly". (Hartmut)
+
+Make context menu appear faster. (Hartmut)
+
+Use treelistview in history dialog more efficiently. (Hartmut)
+
+Applied patch [848405] "Proposal for better English". (Torsten)
+
+Fixed bug [845076] "Explorer crashes after release or moving folder". (Torsten/Hartmut)
+
+Fixed bug [846194] "Problem with Subfolders?". (Torsten/Hartmut)
+
+Fixed bug [846850] "Can't delete sandbox". (Torsten/Hartmut)
+
+Fixed cached branches/tags for combobox in "Update special". (Hartmut)
+
+Fixed bug [848216] "Custom weblog urls not always considered". (Hartmut)
+
+Fixed bug [848516] "Control-backspace doesn't work". (Hartmut)
+
+Fixed bug [844289] "Fetch List bug". (Hartmut)
+
+Fixed bug [849605] "Duplicate tags in lists". (Hartmut)
+
+Fixed bug [850058] "Leak in CVSStatus due to typo". (Hartmut)
+
+Readied for compilation with VC7 and MinGW/GCC. (Hartmut)
+
+Updated CVSNT to version 2.0.11. (Torsten)
+
+Added :ssh: to supported protocols, and enable setting port for this
+protocol. (Torsten)
+
+Fixed bug [841503] "history list control selection not highlighted
+fully". (Torsten)
+
+Applied patch [819814] "Adds protocol parameters for the sserver
+protocol". (Torsten)
+
+Fixed bug [841508] "Crash after missing repository dialog". (Torsten)
+
+CVS Remove: Do not move directories. (Torsten)
+
+Fixe bug in "Fetch modules list". (Hartmut)
+
+Fixed bug [686480] "Update window state not always saved" again. (Hartmut)
+
+Fixed broken "Excluded folders". (Hartmut)
+
+Fixed bug [841984] "Checkout module with aliases". (Hartmut)
+
+Fixed abort bug in cvsgui protocol. (Hartmut)
+
+Fixed bug [840029] "Fetch list" and abort. (Hartmut)
+
+Fixed bug [837580] "Many updates in single window". (Hartmut)
+
+Added preference "autoload folder icons". (Hartmut) 
+
+Fixed bug "Backslashes in commit comments are doubled". (Hartmut)
+
+Better handling of diff / merge when no external diff / merge application is 
+defined. (Hartmut)
+
+Fixed bug "Filename in unedit message box messed up". (Hartmut)
+
+Fixed bug [836944] "CVS access via SSH stops with 1.5.6." (Hartmut)
+
+"core" is no longer part of the standard ignore list, as this is probably not
+very useful on Windows. (Torsten)
+
+Fixed bug [836947] "Error while parsing config file". (Hartmut)
+
+Fixed bug [834789] "History dialog always shows first revision". (Hartmut)
+
+Fixed bug "Can't login to cvs.tigris.org". (Hartmut)
+
+Fixed bug [835095] "Web Log crash". (Hartmut)
+
+
+Changes for 1.5.6 (01 Nov 2003):
+-------------------------------
+
+Fixed bug [832565] "right click doesn't select revision in History
+dialog". (Torsten)
+
+Fixed bug [832533] "cvsignore hint shouldn't be displayed if
+unecessary". (Torsten)
+
+Fixed bug "Can't edit readonly files on network drives". (Hartmut)
+
+Fixed bug "Explorer stops responding when browsing folders". (Hartmut)
+
+Fixed bug [832528] "Can't type letters with [alt] in Commit dialog". (Hartmut)
+
+UI now compatible with large fonts. (Hartmut)
+
+Update to wxWindows 2.4.2. (Hartmut)
+
+Show separate icon for each menu command (defined in TortoiseMenus.config). (Torsten)
+
+Fixed bug [831005] "crash when trying to Add Contents with new directory in
+it." (Torsten)
+
+Fixed bug [830445] "pserver with passwords". (Torsten)
+
+Fixed bug [830164] "UpdateSpecial buttons offscreen". (Torsten)
+
+
+Changes for 1.5.5 (24 Oct 2003):
+-------------------------------
+
+Fixed bug [788555] "History dialog shows Tag in wrong order". (Torsten)
+
+Fixed bug [826169] "Abort doesn't really stop". (Hartmut)
+
+Setup will now always overwrite all files in the TortoiseCVS directory without
+asking, as users lo longer need to modify files there. (Hartmut)
+
+Replaced "FileTypes.config" with "TortoiseCVS.Filetypes" in HOME directory.
+(Hartmut)
+
+Added new preference "SSH parameters" replacing the various batch files
+in the Tortoise directory. (Hartmut)
+
+Fixed bug [819768] "Small progress dialog jams the TortoiseAct". (Hartmut)
+
+Fixed bug [825155] "about box version & running off right side". (Hartmut)
+
+Added WebLog hack for detecting the case where ViewCVS fakes a "200 OK" HTTP
+status code, fixing bug [710620] "Web Log passes wrong cvsroot". (Torsten)
+
+Do not set the background colour of the progress dialog *text*
+either. (Torsten)
+
+Added caching for CVS column info in Explorer. (Hartmut)
+
+Recursive folder status now stored in file in CVS folder. Select "Refresh 
+folder status" from context menu to update. (Hartmut)
+
+Fixed Win9x crashes in cvsgui protocol. (Hartmut)
+
+Really fixed bug [814869] "CVS READ no longer observed". (Hartmut)
+
+
+Changes for 1.5.4 (14 Oct 2003):
+-------------------------------
+
+Fixed bug [814869] "CVS READ no longer observed". (Hartmut)
+
+When Adding files, it is now possible to disable keyword expansion
+(-kk). (Torsten)
+
+Added pt_BR translation. (Torsten)
+
+Fixed bug [821059] "Checkout in wrong folder (v1.5.3)". (Torsten)
+
+Implemented RFE [756103] "highlight local revision in the history
+dialog". Sticky tag/branch is also highlighted. (Torsten)
+
+Applied patches from puddle: [817481] "Fix time format" and [8169040] "Copy
+filenames to clipboard from commit dialog". (Torsten)
+
+
+Changes for 1.5.3 (04 Oct 2003):
+-------------------------------
+
+Always show context-independent entries in CVS context menu. (Hartmut)
+
+Get module names with spaces correctly (CVSNT server only). (Hartmut)
+
+Fixed bug [596656] "Tortoise dialogs shown on wrong monitor" (Hartmut)
+
+Merge tool and diff tool are now two separate preferences. (Hartmut)
+
+Fixed bug [814527] "Can't call edit on files without archive attribute".
+(Hartmut)
+
+Fixed bug [709425] "Error in Tag not shown in final status" (Hartmut)
+
+Don't follow shortcuts inside CVS sandboxes. (Hartmut)
+
+Reenabled "My Documents" context menu entries for Win2k. (Hartmut)
+
+Fixed bug [789150] "Long delay when right-clicking large zip file" (Hartmut)
+
+Fixed bug [808508] "CVS menu entries not available after adding a file" 
+(Hartmut)
+
+Ctrl-A now selects all comment text in Commit and History dialogs. (Hartmut)
+
+Fixed bug [804835] "Trouble launching the CVS process". (Hartmut)
+
+Fixed bug in History dialog that affected selecting two revisions (thanks to
+J. Andrew MacDonald for reporting this). (Torsten)
+
+Do not set the background colour of the progress dialog. (Torsten)
+
+Implemented RFE [771641] "Option to checkout to folder with name of
+tag/branch". (Torsten)
+
+Implemented RFE [767392] "Allow Commit Dialog Maximization/Auto
+resize". (Torsten)
+
+
+Changes for 1.5.2 (13 Sep 2003):
+-------------------------------
+
+Moved "Maximum number of tags for graph" option to Advanced page. (Torsten)
+
+Removed "Check Unix sandbox" option. (Torsten)
+
+Improved handling of the "Automatic unedit" option. (Torsten)
+
+Added Danish translation from Claus Gårde Henriksen. (Torsten)
+
+Implemented RFE [778897] "Add comment when making a new module.". (Torsten)
+ 
+Implemented RFE [751760] "Login should look at repository". (Torsten)
+
+Implemented RFE [787071] "Replace 'CVS Add to .cvsignore' to 'CVS Ignore this
+file'". (Torsten)
+
+Applied patch [801628] "Automatic use of Unix style CR/LF" from Simon
+Elén. (Torsten)
+
+History dialog almost completely rewritten - now uses a tree list control for
+better handling of tags and branches. (Torsten)
+
+Added Traditional Chinese translation from Rex Tsai. (Torsten)
+
+
+Changes for 1.5.1 (16 Aug 2003):
+-------------------------------
+
+Partly implemented RFE [596052] "Multiple CVSROOTs on one server". (Torsten)
+
+Fixed crash in CVSStatus::RecursiveScan(). (Torsten)
+
+Update to CVSNT 2.0.8. (Hartmut)
+
+Always use CVS executable that comes with TortoiseCVS. Removed
+corresponding preference. (Hartmut)
+
+Fixed bug in caching that crashed explorer. (Hartmut)
+
+Fixed bug [785279] "Trouble with CVSGUI protocol". (Hartmut)
+
+Option for creating missing folders when merging. (Torsten)
+
+Fixed bug [770885] "Cannot commit merged files added on branch". (Torsten)
+
+Fixed bug [782061] "Special chars not shown in revison graph
+comments". (Torsten)
+
+Implemented RFE [782855] "Explain how to commit a removed file in a
+TortoiseTip". (Torsten)
+
+
+Changes for 1.5.0 (03 Aug 2003):
+-------------------------------
+
+Fixed bug [776318] "Wrong Timezone only in Revision Graph". (Hartmut)
+
+Fixed bug "Fetch tags button fetches incorrect tags when multiple files are 
+selected". (Hartmut)
+
+Fixed bug [773116] "diff fails to fetch original". (Torsten)
+
+Applied patch from Stephane Lajoie to display a special icon for added
+files. (Torsten)
+[Need help from graphics-savvy people for fixing the remaining icon sets]
+
+More intelligent handling of password-protected weblog servers. (Torsten)
+
+Fetching modules only pops up a single progress dialog. (Hartmut)
+
+Fixed URL for TortoiseCVS checkout. (Hartmut)
+
+Fixed web log parsing for Sourceforge.net. (Hartmut)
+
+Fixed bug [769148] "diff uses wrong CVSROOT". (Hartmut)
+
+Fixed bug [753308] "Explorer crashes on XP when presented with special (?) 
+files". (Hartmut)
+
+Tags, branches and module names are now cached in the registry. (Hartmut)
+
+Commit dialog restores its size now. (Hartmut)
+
+Fixed bug [610493] "My Network" "shortcuts" not followed. (Hartmut)
+
+Moved po files to separate module. (Torsten)
+
+Increased comment length limit to 20K. (Hartmut)
+
+Added progress dialog text colors to preferences. (Hartmut)
+
+Added Portuguese translation from Flavio Etrusco. (Torsten)
+
+Fixed Make Patch failing when using SSPI or other encryption-capable
+protocols. (Torsten)
+
+Fixed icon rebuild bug on Win9x. (Hartmut)
+
+Increased comment length limit to 20K. (Hartmut)
+
+Fixed bug [760385] "contextual menu missing some entries". (Hartmut)
+
+Fixed bug [761002] "CVSROOT environment variable ignored". (Hartmut)
+
+Fixed bug [759680] "Fetch (module) list shows a lot of wrong items". (Hartmut)
+
+Fixed bug [757410] "Long delay opening My Computer on XP with mapped drives".
+(Hartmut)
+
+Fixed bug [759662] "'operation successful' though cvs reported an error".
+(Hartmut)
+
+Reenabled shell extension for UNC paths. (Hartmut)
+
+Fixed bug [755020] "AV/Crash when trying to add many files". (Hartmut)
+
+Fixed bug "TortoisePlink zombies under Win98". (Hartmut)
+
+Fixed bug "TortoisePlink hangs under Win98". (Hartmut)
+
+Remove command now works recursively on directories. (Hartmut)
+
+
+Changes for 1.4.0 RC 5 (08 June 2003):
+-------------------------------------
+
+All strings in the About dialog can now be copied from. (Torsten)
+
+Fixed bug [748822] "Unedit of changed files does not work". (Hartmut)
+
+Fixed bug in CVSRevisionDataSortCriteria::CompareRevisions() and improved
+sorting of tags and branches in History dialog. (Torsten)
+
+
+Changes for 1.4.0 RC 4 (02 June 2003):
+-------------------------------------
+
+Fixed bug "Crash when conflict". (Hartmut)
+
+Added "Merge" in history dialog. (Hartmut)
+
+Fixed Explorer crashes in Win2K. (Hartmut)
+
+Fixed "standard icons" translation issue. (Hartmut)
+
+Only show available languages in preference dialog. (Hartmut)
+
+Disable TortoiseCVS for virtual / network folders that cannot be addressed
+through a drive letter. (Hartmut)
+
+Fixed bug where menu was incorrect in root folders. (Hartmut)
+
+Improved icon cache rebuilding. (Hartmut)
+
+Fixed bug [741554] "Tag combobox truncates tag names". (Hartmut)
+
+Fixed bug [741527] "bug in dialog" (Hartmut) and improved the handling of the
+external Diff application (Torsten).
+
+
+Changes for 1.4.0 RC 3 (19 May 2003):
+------------------------------------
+
+Title of About dialog was not translated - thanks to Alexandre Ratti for
+reporting this. (Torsten)
+
+Fixed bug [738822] "History dialog error". (Hartmut)
+
+
+Changes for 1.4.0 RC 2 (16 May 2003):
+------------------------------------
+
+Added one more batch file for use with SSH:
+- TortoisePlinkWithPort.bat forces use of a particular port. (Martin)
+
+Applied patch [721516] "1.3.4 "Make patch" fix". (Torsten)
+
+Attempt to fix TortoisePlink dialogs on Win98. (Torsten)
+
+Fixed bugs [737943] "Right-clicking to change type in Add Contents crashes"
+and [737295] "Crash when right-clicking file in Commit dialog". (Hartmut) 
+
+Updated CVSNT to version 2.0.4. (Torsten)
+
+Translate the colon added in the Preferences dialog (for the benefit of the
+French translation). (Torsten)
+
+Made TortoisePlinkWithPassword.bat and TortoisePlinkSSH2.bat work on Win98
+(patch provided by Zonnet). (Torsten)
+
+Removed Daily Use Guide. (Torsten)
+
+
+Changes for 1.4.0 RC 1 (12 May 2003):
+------------------------------------
+
+Applied patch [736133] Unification for "Tags or Branches". (Hartmut)
+
+Fixed "Show Changed Folders" bug. (Hartmut)
+
+Show "Folder" in file format explorer column for folders. (Hartmut)
+
+Fixed bug [735768]: Resource leak in ShellExt.cpp. (Hartmut)
+
+Hide password in progress dialog. (Hartmut)
+
+Added missing files for sserver protocol. (Hartmut)
+
+Added User Guide to installation. (Torsten)
+
+Applied patch [736133] Unification for "Tags or Branches". (Hartmut)
+
+Fixed "Show Changed Folders" bug. (Hartmut)
+
+Show "Folder" in file format explorer column for folders. (Hartmut)
+
+Fixed bug [735768]: Resource leak in ShellExt.cpp. (Hartmut)
+
+Use cvsgui protocol for communication with CVS client. (Hartmut)
+
+Switched order of files in diff application when resolving conflicts to be 
+consistent with "diff": Editable file always as second. (Hartmut)
+
+Update to CVS 2.0.3. (Hartmut)
+
+Don't show password in progress dialog. (Hartmut)
+
+Move iconsets to icons subdir, Standard icon set now called "TortoiseCVS" to
+work around localization problems. (Hartmut)
+
+Allow port number for sserver protocol. (Hartmut)
+
+Make temporary conflict files unique. (Hartmut)
+
+Fixed bug [731481] "Update Special doesn't default sticky tag for directories". 
+(Hartmut)
+
+Hopefully fixed bug [73153] "cvs update freezes after completed under XP".
+(Hartmut)
+
+Restructured UI strings for better translation. (Hartmut)
+
+Fixed bug [729844] "Nomenclature". (Hartmut)
+
+
+Changes for 1.3.11 (03 May 2003):
+--------------------------------
+
+CVS Resolve Conflicts now prompts for Diff application if it is not set (like
+CVS Diff has always done). (Torsten)
+
+Updated CVSNT to version 2.0.2. (Torsten)
+
+Fixed various issues with CVS Unedit confirmation dialog. (Torsten)
+
+Support :sserver: protocol. (Torsten)
+
+Allow omitting user name for :ext:, :pserver:, and :server:
+protocols. (Torsten)
+
+Only allow digits in the Port field in the Checkout dialog. (Torsten)
+
+Include version resource in TortoiseAct, TortoiseShell, and
+TortoisePlink. (Torsten)
+
+Implemented RFE [721982] "Commit with no comments". (Torsten)
+
+Fixed bug [722723] "Set background color of progress message box". (Torsten)
+
+Fixed bug [722283] "About command fails with bad SSH app set". (Torsten)
+
+Fixed bug [722782] "Password not Accepted in GUI". (Hartmut)
+
+Fixed bugs (Hartmut):
+- "No username in CVSROOT when using sspi"
+- "No second CVSROOT shown when diffing 2 revisions"
+
+
+Changes for 1.3.10 (16 Apr 2003):
+---------------------------------
+
+Implemented RFE [719537] "Key focus "close" button after update" (Hartmut).
+
+Added "Allow Removable Drives" to preferences dialog (Hartmut).
+
+Fixed bug [722064]: "Icon overlay not working with Removable Drives" (Hartmut).
+
+Fixed bug: CVSROOT history empty in checkout dialog (Hartmut).
+
+Fixed bug: Access violation in preferences dialog (Hartmut).
+
+Put comment column in history dialog at the end (Hartmut).
+
+Include locale files in installation type "full" (Hartmut).
+
+New type "auto" in filetypes.config to use TortoiseCVS's internal file format
+detection algorithm. Also new: Interface to specify plugin-dll that determines
+the file format. (Hartmut)
+
+Made names of temporary files used by CVS Diff unique so that multiple
+simultaneous instances of TortoiseAct do not corrupt each others temporary
+files. (Torsten)
+
+Fixed bug [718967]: "Explorer crashes during close". (Hartmut)
+
+Fixed bug: Commit message in commit dialog not always entirely 
+selected. (Hartmut)
+
+Prevent Revision Graph and History from crashing when a file has never been
+committed, or has been merged but not committed. (Torsten)
+
+Fixed bug: When setting Language to Windows default in Preferences, 
+TortoiseCVS always used English. (Torsten)
+
+Changes for 1.3.9 (04 Apr 2003):
+-------------------------------
+
+Handle trailing backslash in log message. (Torsten)
+
+Avoid showing progress dialog before Commit dialog. (Torsten)
+
+Updated CVSNT to version 2.0.0. (Torsten)
+
+Fixed scrolling in Progress Dialog on WinNT. (Hartmut)
+
+Fixed bug [686480] "Update window state in Progress Dialog not 
+always saved". (Hartmut)
+
+Fixed bug [714303] "Shell 1.3.8 crashes on CVS ADD". (Hartmut)
+
+
+Changes for 1.3.8 (01 Apr 2003):
+-------------------------------
+
+Fixed bugs
+- [700842] "promtly apply changes made to cvsignore"
+- [711984] "1.3.5 explorer hangs (30min) right click non-cvs"
+- [712076] "1.3.7 kills right click menu after select all"
+- [712826] "CVS Status" column for folders is incorrect
+(Hartmut)
+
+Improved the Commit History feature. (Hartmut)
+
+Performance improvements in shell extension. (Hartmut)
+
+Updated Credits dialog. (Torsten)
+
+Fixed keyboard shortcut for "Unix line endings" to avoid conflict with "Check
+Unix sandbox". (Torsten)
+
+
+Changes for 1.3.7 (28 Mar 2003):
+-------------------------------
+
+Fixed bugs in handling of "Allow Removable Drives" option introduced in
+1.3.5. (Torsten)
+
+Fixed bug [687291] "order of files sent to Diff application" again. (Torsten)
+
+Fixed bug [710959] "Port number is not cleared in Checkout dialog". (Hartmut)
+
+Fixed bugs [709877] and [709636] (login problems). (Hartmut)
+
+Ensure Unix line endings when checking out TortoiseCVS code. (Torsten)
+
+
+Changes for 1.3.6 (24 Mar 2003):
+-------------------------------
+
+Fixed cosmetic bugs in CVS property page. (Torsten)
+
+Fixed bug [708594] "Diff fails to obtain file from CVS". (Hartmut)
+
+Fixed bug [708108] "CVS files not overwitten in 1.3.5". (Torsten)
+
+Fixed build errors. (Torsten)
+
+Changes for 1.3.5 (21 Mar 2003):
+-------------------------------
+
+Fixed bug 677336 again. (Torsten)
+
+Updated CVSNT to release 76. (Torsten)
+
+Fixed bug [700842] "Promtly apply changes made to 'cvsignore'". (Hartmut)
+
+Rewrite of CVSStatus caching. It's supposed to be thread-safe(r) now,
+that should fix the "Explorer crashing"-bugs. (Hartmut)
+
+Added preference for selecting language. (Torsten)
+
+Messages shown by TortoiseShell are now also translated. (Torsten)
+
+Preference for enabling/disabling -d option to "cvs update". (Torsten)
+
+Option for enabling/disabling -d option in Update Special. (Torsten)
+
+By adding a registry DWORD value named "Allow Removable Drives" under
+HKEY_CURRENT_USER\Software\TortoiseCVS, it is now possible to activate icon
+overlays and context menus on floppy/ZIP drives and the like. This is an
+experimental feature. (Torsten)
+
+Logging in to :pserver: works again. (Torsten)
+
+Added preferences "Excluded directories" and "Included directories". (Hartmut)
+
+Fixed possible race condition bug in progress dialog. (Hartmut)
+
+Fixed bug [699077] "merge crashes in 1.3.4". (Torsten)
+
+Added Frank Fesevur's improved Timo Kauppinen icon set (enhanced with 48x48 
+icons). (Hartmut)
+
+Shell extension: 
+- Fixed memory leak (COM objects don't get released by Explorer)
+- Faster startup (initialize context menus only when needed, removed common
+  controls initialization)
+- Added new explorer column "CVS Text Style" (Hartmut)
+
+Added preference to disable web log parsing. (Hartmut)
+
+When creating a module, "Fetch modules" won't overwrite the module name. (Hartmut)
+
+Improved performance for revision graph drawing. (Hartmut)
+
+Fixed bug [696554] "Installing new version overwrites all files". (Hartmut)
+
+Fixed bug [693899] "Delete from commit dialogs hangs in confirm dialog". (Hartmut)
+
+
+Changes for 1.3.4 (01 Mar 2003):
+-------------------------------
+
+Restored old behaviour of double clicking on modified files in the Commit
+dialog: Again launches Diff instead of selecting/unselecting. (Torsten)
+
+New error sound. (Torsten)
+
+Fixed bug [661836] "Deep nested import". (Torsten)
+
+It is now again possible to edit the "Automatic unedit" and "Automatic commit"
+options in Preferences. (Torsten)
+
+Updated CVSNT to release 73. (Torsten)
+
+History and Revision Graph no longer use "cvs rlog", but "cvs log". (Torsten)
+
+Revision Graph improvements. (Hartmut)
+
+Fixed bug [650633] "Removing conflicted file problem". (Torsten)
+
+Added preference "Use Unix line endings". (Torsten)
+
+Localization support is now added. If your language is supported, TortoiseCVS
+will automatically translate messages to the language that you have set up in
+Control Panel. At present, no translations are included, but German and French
+are in progress. (Torsten)
+
+Don't use "cvs update -p" to checkout files: If a file doesn't end with a 
+newline character, cvs will add one if redirected to stdout. Use "cvs 
+checkout" to a temporary directory instead. (Hartmut)
+
+Different command line parameter syntax for TortoiseAct to be able
+to handle arbitrary parameters. (Hartmut)
+
+Comment history in reverse order (last comment first in list).
+Comment history now preserves newline characters. (Hartmut)
+
+Fixed bug [667749] "CVSDiff in WinNT is still buggy". (Torsten)
+
+Context Menus for tags and branches in revision graph. (Hartmut)
+
+Applied patch [688698] "CVS History - Split Show Branches/Tags". (Torsten)
+
+Generic fix for multiple context menu entries. (Torsten)
+
+Improved wording of "revert changes?" message upon CVS Unedit, as suggested by
+Christopher Fahey. (Torsten)
+
+Added preview dialog for overlay icon sets (feature request [688923] "Icon
+preview"). (Hartmut)
+
+Implemented feature request [686232] "Save check-in comments". (Torsten)
+
+Fixed bug [687291] "order of files sent to Diff application". (Torsten)
+
+Do not pass backslashes to external programs. (Torsten)
+
+Added new icon set from Greg Searle. (Torsten)
+
+"Quirky" tabs in Preferences renamed to "Advanced". (Torsten)
+
+Changes for 1.3.3 (14 Feb 2003):
+-------------------------------
+
+Updated CVSNT to release 72. (Torsten)
+
+Added two batch files for use with SSH:
+- TortoisePlinkSSH2.bat forces use of SSH protocol version 2, which may be
+necessary to make public-key authentication work.
+- TortoisePlinkWithPassword.bat passes the password directly on the command
+line (NOT recommended and extremely unsafe!)
+
+Fixed bug [684697] "No "sub-menu"". (Torsten)
+
+Do not overwrite existing SSH preferences when re-installing. (Torsten)
+
+Added FAQ entry to describe how to use the new conflict resolution
+engine. (Torsten/Hartmut)
+
+
+Changes for 1.3.2 (12 Feb 2003):
+-------------------------------
+
+In the Revision Graph dialog, you can now tag or branch a revision, thanks to
+a patch from Frank Listing. (Torsten)
+
+Fixed bug "Keyword substitution not correctly parsed in (r)log". (Hartmut)
+
+In various dialogs, file paths are now shortened using "..." when too little
+space is available. (Hartmut)
+
+Updated CVSNT to release 71. (Torsten)
+
+Upgrade to wxWindows 2.4.0 (Hartmut)
+
+When committing unchanged files, the timestamp is reset. (Hartmut)
+
+In AddFilesDialog, added Explorer context menu. (Hartmut)
+
+In Commit Dialog, replaced Listboxes with Listviews. (Hartmut)
+
+Applied patch [666247] "Fixes to help compiling under MinGW32". (Torsten)
+
+Removed the "Commit .cvsignore" preference. You must now manually do CVS Add
+and CVS Commit of the .cvsignore files (read-only .cvsignore are still
+subjected to a CVS Edit). (Torsten)
+
+"Add extension to .cvsignore" is now on the CVS submenu. (Torsten)
+
+Removed the "Assume read-only files" preference:
+- The CVS Edit command is now always shown for read-only files (for
+directories, it is shown on the CVS submenu). 
+- The CVS Unedit command is always shown, but is now on the CVS submenu.
+- There is now a checkbox in the Make New Module dialog for running "cvs watch
+on" on the newly created module. (Torsten) 
+
+Support for passing -B when moving/deleting a tag. (Torsten)
+
+Fixed bug [679988] "1.2.2 Continual beeps after Add Contents
+failure". (Torsten)
+
+In the History and Revision Graph dialogs, it is now possible to save a
+specific revision to a file. (Torsten)
+
+The Revision Graph dialog now includes the commands Diff and Get like the
+History dialog. (Torsten).
+
+The Revision Graph dialog now shows the log message etc. for the revision that
+the mouse is over. (Torsten).
+
+Improved comment handling in history dialog. (Hartmut)
+
+"commitid" won't appear in comments any more. (Hartmut)
+
+Fixed bug [671693] "Automatic unedit only for writable files". (Torsten)
+
+Make CVS Diff work like "cvs diff", i.e. show differences relative to the
+originally checked out revision, not the current HEAD revision. Thanks to Lars
+Christensen for pointing this out (fixes bug 677336). (Torsten)
+
+History Dialog now initially scrolls to the end of the list. (Hartmut)
+
+Removed explicit handling of UTF-8 files (internally, they're handled like
+ASCII files anyway). (Hartmut)
+
+Replaced Conflict Editor with our own parser + call to external diff 
+application. (Hartmut)
+
+Improved support for Unicode files, automatic conversion for non Unicode-
+enabled external diff applications. (Hartmut)
+
+Implemented feature request [673695] "Edit before remove". (Torsten)
+
+
+Changes for 1.3.1 (25 Jan 2003):
+--------------------------------
+
+The size of the menu icons can no longer be selected (they can still be turned
+off). (Torsten)
+
+Implemented feature request [671693] "Automatic unedit only for writable
+files". (Torsten)
+
+Improved, thread-safe cvsignore algorithm. (Hartmut)
+
+History dialog: Comment text control grows with dialog. (Hartmut)
+
+Per-user cvsignore file can be edited in Preferences. (Hartmut)
+
+Show ignored files in AddFiles dialog. (Hartmut)
+
+Added preference "Commit .cvsignore after adding file (pattern)". (Hartmut)
+
+The version information in the About dialog can now be copied to the
+clipboard. (Torsten)
+
+Updated CVSNT to release 66. (Torsten)
+
+Implemented feature request [653157] "Tip for CVS Edit". (Torsten)
+
+When fetching the module list, we now try a "cvs ls" (only supported by CVSNT).
+(Hartmut)
+
+"Fetch tags" now either includes subdirs or not (before CVS 1.11.1.2, subdirs 
+are always included regardless of what the user specifies due to a bug in CVS). 
+(Hartmut)
+
+You can now fetch tags in the checkout dialog. (Hartmut)
+
+You can now select alternate icon sets during installation. (Hartmut)
+
+Menu option to rebuild the icon cache. (Hartmut)
+
+Fixed bug [666018] "Aborting Diff...". (Torsten)
+
+Fixed bug [659952] "MRU shouldn't overwrite 'module'". (Hartmut)
+
+Implemented feature request [621360] "Only show context menu on some
+folders". (Torsten)
+
+Fixed bug [665546] "comment is resent in History dialog". (Torsten)
+
+Install package: Now based on Inno Setup 3.0.6, reboot on uninstall if files
+are locked. (Hartmut)
+
+Fixed bug [660827] "Add: Deselecting directory is buggy". (Hartmut)
+
+Reorganized code so that CVSGlue and Utils can be built as a library. (Torsten)
+
+Fixed bug [652635] "Broken menu when right-clicking start". (Hartmut)
+
+Fixed bug [633938] "Cannot remove file if name starts with '-'". (Hartmut)
+
+Fixed bug [637650] "1.1.x White spaces in .cvsignore not handled by CVS". (Hartmut)
+
+
+Changes for 1.3.0 (21 Dec 2002):
+--------------------------------
+
+Fixed bug [645210] "V1.2.1 Absolute Paths Illegal for server". (Hartmut/Torsten)
+
+Fixed bug [645367] "GetUserName()". (Torsten)
+
+Fixed bug [645373] "rar files are stored corruptedly". (Torsten)
+
+Fixed bug [651658] "hist. dialog: diff doesn't pass filename". (Torsten)
+
+When adding files, the new Add dialog now shows the type (text/unicode/binary)
+that TortoiseCVS will use as default, and also offers the possibility of
+changing the type associated with a particular extension. (Hartmut)
+
+Fixed bug [637390] "substitued (virtual) drives not working". (Torsten)
+
+Applied patch [642493] "Disable Shell Extension on remote drives" contributed
+by Geoff Beier. (Torsten)
+
+Fixed stupid bug in previous version of CVSEntries.cpp. (Torsten)
+
+Applied patch [632214] "Adds columns to HistoryDialog". (Torsten)
+
+CVSEntries.cpp no longer changes the directory. This hopefully fixes bug
+[624828] "Locked folder prevents deletion" and possibly also bug
+[606076] "1.0.X - Empty folders containing only CVS folder". (Torsten)
+
+Fixed bug [609214] "1.x.x TortoiseShell fails in a root directory". (Torsten)
+
+Applied patch from Geoff Beier for bug [637325] "Don't bring progress dialog
+to front". (Torsten)
+
+Fixed bug where read-only files were always being shown with the "In CVS,
+read-only" icon even if the file was in fact not in CVS. Thanks to Ian
+Epperson for pointing this out. (Torsten)
+
+In the Checkout dialog, the OK button is now disabled while the module list is
+being fetched. (Torsten)
+
+Fixed bug [638130] "1.1.7 Can't "CVS Add" *.exe". (Torsten)
+
+Make New Module dialog: Module is no longer changed when you click an entry in
+the CVSROOT history. (Torsten)
+
+Make New Module dialog: Size grip no longer overlays Cancel button. (Torsten)
+
+Made TortoisePlink display proper version information. (Torsten)
+
+Fixed bug [636009] ""CVS Revision" for newly added files". (Hartmut)
+
+Fixed TortoisePlink bug where the "The server's host key is not cached in the
+registry" message was written to stderr. (Torsten)
+
+Changes for 1.1.9 (12 Nov 2002):
+--------------------------------
+
+Fixed bug [636886] "1.1.8 can't use plink from PuTTY". (Torsten)
+
+If CVSROOT was set in the environment, the history list in the Checkout dialog
+did not work correctly. (Torsten).
+
+Fix 100 % CPU usage on Windows XP. (Torsten)
+
+Changes for 1.1.8 (06 Nov 2002):
+--------------------------------
+
+Show Edited Files now properly handles file names and user names with spaces. (Torsten)
+
+On Windows 95/98/ME, omit -x flag with SSPI protocol since it makes CVSNT
+crash (see http://www.cvsnt.org/cgi-bin/bugzilla/show_bug.cgi?id=32). (Torsten)
+
+In the Checkout dialog, the 'Fetch list' button is now enabled even if no
+username is entered. (Torsten)
+
+Fixed bugs related to new 'Port' field in Checkout dialog. (Torsten)
+
+Fixed problem with spaces in CVS_RSH no longer handled by CVSNT. (Torsten)
+
+
+Changes for 1.1.7 (30 October 2002):
+-----------------------------------
+
+Updated CVSNT to build 57j. (Torsten)
+
+Implemented feature request [588465] "'Conflict Editor' command in
+menu". (Torsten)
+
+Implemented feature request [571647] "Colour code 'List edited files'
+output". (Torsten)
+
+Fixed bug [627415] "Make patch fails with removed files". (Torsten)
+
+The installer no longer overwrites custom icon files. (Torsten)
+
+Applied registry bugfix from Alan Dabiri. (Torsten)
+
+Applied patch from Alan Dabiri for Progress dialog: It can now be minimized
+and maximized, and it remembers its size. (Torsten)
+
+
+Changes for 1.1.6 (23 October 2002):
+-----------------------------------
+
+Applied patch from Alan Dabiri for History dialog: There is now a checkbox to
+enable/disable display of symbolic tags. (Torsten)
+
+Fixed bug with missing menu icons. (Torsten)
+
+Fixed bug where some menu items were shown twice. (Torsten)
+
+Applied more patches for Borland C++ Builder from Stefan Hoffmeister. (Torsten)
+
+Changes actually in 1.1.5:
+
+In the History dialog, it is now possible to change the text of the log
+messages. (Torsten)
+
+Changes for 1.1.5 (21 October 2002):
+-----------------------------------
+
+"CVS Edit" no longer uses the "-a commit" argument to "cvs edit". (Torsten)
+
+Applied patch from Radoslav Paskalev to support rcsinfo templates when
+committing. (Torsten)
+
+Make New Module: Applied patch from Jason Mills so that the module name can
+now be edited. (Torsten)
+
+"CVS Add" is now shown even for files that are listed in .cvsignore. (Torsten)
+
+"CVS Add to .cvsignore" is not shown for files that are already listed in .cvsignore. (Torsten)
+
+Fixed bug that caused -r to always be added when doing an export (thanks to
+John Pedersen for reporting this). (Torsten)
+
+When an error occurs during execution of a CVS command, TortoiseCVS now plays
+an error sound. The installer sets a default sound for this event; open
+Control Panel/Sounds and Multimedia to select another sound. (Torsten)
+
+Applied several patches from Hartmut Honisch:
+- You can now specify the port in the Checkout dialog
+- Resizable dialogs now have a "resize grip"
+- In the file "Filetypes.config", you can now specify file extensions that
+  should be considered text or binary.
+
+Applied patch from Alan Dabiri to save and restore size of Checkout, History, and
+Revision Graph dialogs. (Torsten)
+
+Applied patch from Alan Dabiri to improve look of History dialog. (Torsten)
+
+Fixed bug [617456] "Undesired unicode conversion". (Torsten)
+
+Fixed bug [623609] "Adding to CVS ignore is buggy". (Torsten)
+
+Fixed bug [617519] "CVS Edit on directory does not work". (Torsten)
+
+Downgraded CVSNT to build 57f. (Torsten)
+
+Attempted fix for bug [606079] "1.0.x Can't commit directories with
+thumbs.db". (Torsten)
+
+Fixed bug [602303] "Automatic unedit bug". (Torsten)
+
+Fixed bug [617758] "1.1.2 auto unediting removed files errors". (Torsten)
+
+Implemented feature request [542999] "Property page could display CVSROOT". (Torsten)
+
+Applied several patches from Stefan Hoffmeister:
+- History and Revision Graph can now be accessed from the property page.
+- History dialog now has Minimize and Maximize buttons.
+- Branch/tag list now lists the most recent tag first.
+- Cleaned up casts in dialog code.
+- Progress dialog caption now says "Aborted" when Abort is clicked.
+(Torsten)
+
+Applied Stefan Hoffmeister's patches for Borland C++ Builder. (Torsten)
+
+Updated TortoisePlink so it tracks version 0.53 of the PuTTY suite. (Torsten)
+
+
+Changes for 1.1.4 (2 October 2002):
+-----------------------------------
+
+Fixed bug [614553] "Minor bug - SSH App Browse Button". (Torsten)
+
+Improvements to History and Revision Graph dialogs. Removed revision list on
+property page. (Torsten)
+
+Removed "core" from default ignore list, so that TortoiseCVS again handles
+directories named "core". (Torsten)
+
+Reread default ignore list (from %HOME/.cvsignore) after 100 seconds. (Torsten)
+
+Fixed bug [611664] "Large comments on commit cause errors" by limiting the
+length of the comment entered when committing. (Torsten)
+
+Make sure that Add All Recursively does not add CVS directories. (Torsten)
+
+When adding a file with zero length, assume it is ASCII if the extension
+indicates that it is text (.cpp, .txt etc.). (Torsten)
+
+Fixed bug [611714] "Icon overlays not shown on UNC paths". (Torsten)
+
+REALLY fixed bug [604494] "CVS Unedit problem". (Torsten)
+
+Fixed bug [613636] "commit fails because of -c option". (Torsten)
+
+Changes for 1.1.3 (20 September 2002):
+--------------------------------------
+
+Fixed About dialog. (Torsten)
+
+SSPI protocol DLL was wrong version. Fixed. (Torsten)
+
+Fixed bug [604630] "Make patch with new files fails". (Torsten)
+
+Reduced max command line length to 4096 for NT platforms. (Torsten)
+
+Applied Geoff Beier's patch for bug [530319] "0.xx Administrative rights for
+installation". (Torsten)
+
+Offer to reboot after installation. (Torsten)
+
+Fixed bug [604494] "CVS Unedit problem". (Torsten)
+
+Icon overlays are no longer shown for WebDrive volumes. (Torsten)
+
+Avoid passing -c to 'cvs commit', since that does not work if the server is
+not CVSNT. (Torsten)
+
+Fixed bug [605425] "Dialog title has errant ampersand". (Torsten)
+
+Move properly to latest CVS version of wxWindows, hopefully fixed all
+the errors we were getting before in message handlers.  If you get access
+violations in any dialogs, please let us know, as we probably know what it
+is! (Francis)
+
+Fixed bug in "Add Contents" which didn't properly add nested folders,
+thanks to Aaron Kynaston for finding it (Francis)
+
+Updated CVSNT to build 57h. (Torsten)
+
+Changes for 1.1.2 (4 September 2002):
+-------------------------------------
+
+Fixed bug [598634] "hide the "Commit" menu if it's useless". (Torsten)
+
+Fixed bug [530319] "0.xx Administrative rights for installation". (Torsten)
+
+Fixed problem with bogus removable drive detection on Win95/98, had
+the symptom that menus sometimes wouldn't work. (Francis)
+
+Added flex/bison to CVS. (Francis/Torsten)
+
+The option of adding a file as Unicode is now only offered when the server
+runs CVSNT. Closes bug 583800. (Torsten)
+
+Various fixes for History and Revision Graph dialogs. (Torsten)
+
+Allow entering user name for SSPI. (Torsten)
+
+Implemented feature request [533643] "Check for CVSROOT environment
+variable". (Torsten)
+
+Do not assume that C:\ always exists. (Torsten)
+
+Show value of CVSROOT in progress dialog. (Francis)
+
+Fixed bug [589924] "diff of binary file fails". (Torsten)
+
+Added support for adding files and file extensions to .cvsignore. (Torsten)
+
+Maybe fixed installation problem in Win98 by changing PostInst.  Now changes
+the cvs executable registry setting if it is currently an empty string.  Also
+leaves PostInst.exe about after install, so you can run it again for testing
+and debugging. (Francis)
+
+Changes for 1.1.1 (19 August 2002):
+-----------------------------------
+
+Added About dialog. (Torsten)
+
+Fixed bug [596353] "update special" calendar". (Torsten)
+
+Fixed bug [591134] "Add All Recursively does not add files". (Torsten)
+
+Fixed bug [571645] "Merge should do Edit first". (Torsten)
+
+Fixed bug [561877] "0.50 Commands Fail when CVS in top level dir". (Torsten)
+
+Applied patch [571611] "Switch -x Data Encryption (sspi/gserver)" from Joakim
+Beijar. (Torsten)
+
+Fixed bug [558859] "Case Sensitive" by making CVSStatus use case-insensitive
+compare. (Torsten)
+
+Update dialog now fills in revision only when box checked again (for
+a while it could add the ghosted revision text in, I think). (Francis)
+
+Attempted fix for doing "cvs login" with SSPI at the right time. (Francis)
+
+Various usability improvements to the checkout dialog, including right
+click on history list to remove old CVSROOT entries.  Still more stuff
+to do... (Francis)
+
+Fixed bug [589493] Can now perform actions directly on "My Documents", or 
+indeed any shell namespace folder which has a pathname.  I've reduced and 
+rewritten a big chunk of the ShellExt code, and hopefully haven't broken 
+anything else.  Please check things like columns and property page 
+work (Francis)
+
+Fixed bug [528170] Right click in commit dialog now selects, also added
+in double clicking now does stuff [534738]. (Francis)
+
+Add All Recursively replaced by Add Contents.  This now works on directories
+which already have some CVS files in them.  It brings up a dialog with a list
+of the files that it is going to add.  This least already ignores cvsignore specified files. 
+As elsewhere in TortoiseCVS, that is .cvsignore and $HOME/.cvsignore files, not yet
+the remote CVSROOT/cvsignore file. (Francis)
+
+Tag, branch and merge dialogs now have a button to get a list of tag/branches,
+making it easier for you to reselect one, or pick a similar name for a 
+new one. (Francis)
+
+Added manifest so it appears with themes in XP.  Please shout up if there
+are any problems caused by this.  Made 48x48 versions of overlay icons
+for Windows XP.  (Francis)
+
+Changes for 1.1.0 (2 August 2002):
+----------------------------------
+
+Added workaround for CVSNT bug where 'edit -c' does not work
+correctly. (Torsten)
+
+Fixed bug [568087] "0.53 "Make New Module" fails (pserver & CVSNT Server)". (Torsten)
+
+Added TortoiseTip for case sensitivity issue, as partly described here
+http://ccvs.cvshome.org/fom/cache/131.html (Francis)
+
+Cope with tigris web server saying 'cvs login' rather than "cvs login" (Francis)
+
+Fixed bug in IsLeapYear() (submitted by Will Dean). (Torsten)
+
+Fixed bug [542998] "0.45 Progress dialog doesn't scroll to bottom". (Torsten)
+
+Icon overlays now obey .cvsignore (currently only $HOME/.cvsignore and the one
+in the current directory are searched, not the one in $CVSROOT/CVSROOT). (Torsten)
+
+Remove no longer deletes files; it leaves a copy named '.#filename.removed.extension'. (Francis)
+
+Implemented feature request [558205] "Taskbar-friendly progress window
+titles". (Torsten)
+
+Implemented feature request [559807] "Add Win2k support for HOME directory". (Torsten)
+
+Fixed bug [564501] "Make Patch fails for Sourceforge repos.". (Torsten)
+
+You can now use the new History dialog to view the revision history of a
+file. (Torsten)
+
+New Revision Graph dialog to view the revision graph of a file. (Torsten)
+
+Icon overlays are no longer shown for removable drives (floppy, CD-ROM
+etc.). This also avoids accessing A: drive when Explorer is started. (Torsten)
+
+Added accelerator keys to some of the dialogs. (Torsten)
+
+Applied compilation fixes for MSVC 7 from Sven Axelsson. (Torsten)
+
+A new set of icons has been contributed by Mathias Hasselmann. (Torsten)
+
+Revision numbers are now sorted correctly on the property page. (Torsten)
+
+The Create Tag dialog is now simply called 'Tag'. (Torsten)
+
+Fixed bug [557099] "0.xx Revision list on Property Sheet too big". (Torsten)
+
+In the Update Special dialog, you can now specify a date as well as a
+revision. (Torsten)
+
+The dialog formerly known as "Create Tag" is now simply called "Tag" to
+reflect the new possibilities. (Torsten)
+
+Web Log and Help now always opens a new browser window instead of reusing an
+existing window (closes feature request [537084] "Web Log in new IE
+Window"). (Torsten)
+
+When viewing the properties of a file, under the CVS tab you can now do diffs
+between older versions and/or an old version with current version.  (Powers)
+Brief user guide: 
+- To diff a revision against the working file, just right click and select Diff.
+- To diff one revision against another, mark the first revision by
+  left-clicking, then mark the other revision using Ctrl-left click. Finally
+  right click and select Diff.
+
+On same tab as above, you can do a "Get" on a single file.  This is equivalent to
+"cvs update -r <ver/tag> <filename>".  (Powers)
+
+
+Changes for 0.54 (26 June 2002):
+-------------------------------
+
+Fixed bug [560320] "Commit Limited to 2/3 Files Per Use". (Torsten)
+
+Fixed problems with running several instances of TortoiseAct.exe at the same
+time. (Torsten)
+
+Fixed bug [528787] "0.xx Web log fails on password secure sites". (Torsten)
+
+Updated CVS to CVSNT 1.11.1.3 Build 57f to fix memory problems.
+
+
+Changes for 0.53 (1 June 2002):
+-------------------------------
+
+In Preferences/External diff application and Preferences/Conflict Editor, it
+is now also possible to select .bat and .cmd files. Closes feature request
+[559173] "Run a batch (.bat) file on "Diff"". (Torsten)
+
+Updated CVS to CVSNT 1.11.1.3 Build 57d to fix problems with SSH zombie
+processes. (Torsten)
+
+Network compression level now defaults to None to avoid problems with some
+servers hanging. (Torsten)
+
+Changes for 0.52 (13 May 2002):
+-------------------------------
+
+CVS Add was accidentally broken in 0.51 when adding directories. Fixed. (Torsten)
+
+The Create Tag dialog now has a set of radio buttons for selecting Create,
+Move, or Delete Tag. (Torsten)
+
+Changes for 0.51 (6 May 2002):
+------------------------------
+
+A new set of icons has been contributed by Stefan Bertels. (Torsten)
+
+Unicode support: When adding a Unicode file (autodetected or chosen by user)
+TortoiseCVS now uses the CVSNT option '-ku'. (Torsten)
+
+Improved text/binary detection, including Unicode support. TortoiseCVS now
+knows that certain file types such as .c, .cpp, .txt etc are always text
+(ASCII or Unicode). Files containing ISO-Latin characters are now reliably
+detected as text. (Torsten)
+
+The progress dialog is now colour coded in WinCVS fashion. (Torsten)
+
+The Edit/Unedit commands now use 'cvs edit -c' instaed of 'cvs admin -l'. This
+addresses bugs [528639] "0.47 Unedit doesn't get the right username", and
+[533699], "0.48 Unedit issue".
+Removed List Locked Files command (no longer needed).
+Removed exclusive edit command (it never worked properly anyway). (Torsten)
+
+'cvs watch on' is now only run when a new module is created. (Torsten)
+
+Avoid launching an excessive number of conflict editor windows. (Torsten)
+
+Avoid launching the conflict editor on binary files. (Torsten)
+
+Fixed bug in Diff where the temporary file was deleted too early. This meant
+that if the external diff application was not found the first time, the file
+was gone when the user had selected the correct application. (Torsten)
+
+Fixed bug [543220], "0.45 "Many files" overflows piped buffer.
+
+Added tip as suggested in tracker item [528788], "0.xx Case-insensitive files
+causes problem." (Torsten)
+
+Fixed bug [528180], "Wrong CVSROOT". (Torsten)
+
+When Create Tag fails (e.g. because the tag is rejected by 'taginfo'),
+TortoiseCVS now remembers the tag name on the next attempt. (Torsten)
+
+Added support for Windows 95/98/ME, fixing bug [538630], "0.46 CVS not
+working on Win95/98". (Torsten)
+
+Do not call CVS with a files argument of ".". Doing so can cause CVS to check
+out an entire repository (and delete the other modules again) when you do an
+update. (Torsten)
+
+TortoisePlink now exits if you click Cancel in the password dialog, thereby
+partly addressing bug [545398], "0.50 SSH wrong password cancel
+ignored".
+
+When doing a CVS Commit, the progress dialog was shown before the commit
+dialog. (Torsten)
+
+Make Patch works again now. (Torsten)
+
+Changes for 0.50 (15 April 2002):
+---------------------------------
+
+Fixed minor bug in installer. (Francis)
+
+Added new preference option 'Automatic unedit' for use with 'Watch
+on'. (Torsten)
+
+FAQ updated regarding SSH usage. (Martin, Francis)
+
+FAQ updated regarding Edit/Unedit. (Torsten)
+
+Changes for 0.49 (11 April 2002):
+---------------------------------
+
+Seamless SSH support! TortoiseCVS now uses its own special SSH client,
+TortoisePlink (a hacked version of Plink from the PuTTY suite), which means
+that no configuration is needed for using SSH. (Torsten)
+
+TODO: The FAQ entries regarding SSH need to be rewritten.
+
+RSH is officially not supported out the box.  See the entry in the FAQ for
+more information.  You can help us fix this if you care.  (Francis)
+
+Make new module now works without making spurious subfolders, and for local
+and remote repositories. (Georgi Beloev, patch applied by Francis).
+
+Explorer resource leak in owner draw menus cleaned up, bug #531423. (Francis)
+
+Weblog should now work for nonstandard ports (still does not work if a
+passsword is required, though) (see tracker item 528334). (Torsten)
+
+Fix for the scenario where there is a cvs.exe in the PATH, but the TortoiseCVS
+install directory is not in the PATH. (Torsten)
+
+The Edit/Unedit commands could crash if CVSStatus::GetOptions() returned
+NULL. Fix: Call HasOptions() first. (Reported by Volker Abel) (Torsten)
+
+Added support for :gserver: and :sspi: protocols to the checkout dialog. (Torsten)
+
+Disable owner draw when shell extensions not installed, so menus appear
+on native Windows NT. (Torsten and Francis)
+
+Changes for 0.48 (22 March 2002):
+---------------------------------
+
+Daylight savings fix (updated stat function) from WinCVS applied. (Francis)
+
+IMPORTANT NOTE:  You must fix the incorrect CVS/Entries files for every 
+directory checked out on your computer. Server repositories are not affected
+and don't need to be changed or fixed.  The easiest way to fix them is
+to perform a CVS-->Update.
+
+Checkout TortoiseCVS option uses new SourceForge project (Francis)
+
+Can now enter quotes in comments in checkout dialog again. (Francis)
+
+Plink is now included instead of ssh. (Torsten)
+
+CVSNT 1.11.1.3 is now included instead of the standard CVS 1.11.1p1. (Torsten)
+
+Canonicalize URL for weblog (fix contributed by Pierre). (Torsten)
+
+Explorer detail column for 'CVS Sticky Tag' now shows nothing if no sticky tag
+or date is in effect (previously it would show "Head" in this case)
+(suggested by Christian Hargraves).  (Torsten)
+
+Fixed bug where an extraneous '=' was appended to some environment 
+variables - this caused RSH access to fail. (Torsten)
+
+Automatically offers to "cvs init" a new repository if you try
+and access one with an invalid directory.  Useful if you just
+want to use CVS locally - you can just Make New Module, and do
+everything with TortoiseCVS.  (Francis)
+
+Various bug fixes to new CVSROOT parsing stuff in checkout dialog.
+Choosing : in directory names should work again now.  (Francis)
+
+Changes for 0.47 (09 March 2002):
+---------------------------------
+
+Bugfix for CVSEditExclusive from Joe Navratil. (Torsten)
+
+Checkout dialog now features a box you can paste CVSROOT
+values directly into, and a history of previous CVSROOT/modules
+which you have checked out.  Now there are 3 different ways
+to enter the same information, I'm worried it might be too confusing.
+Clarifying suggestions welcome! (Francis)
+
+Password entry now works with CVSNT (tested with 1.11.1.3). (Torsten)
+
+Option to automatically launch a conflict editor (see
+http://sourceforge.net/projects/conflicteditor/) when a conflict
+occurs on update. (Torsten)
+
+Option to automatically perform a commit after an add. (Torsten)
+
+Improved weblog error reporting. (Torsten)
+
+Minor change in installation script to ensure that 
+TortoiseMenus.config is in sync with TortoiseShell.dll after a 
+new install. (Torsten)
+
+Tortoise icon on context menu should now always line up.  i.e. The text
+to the right of the Tortoise (CVS Update etc.) should be exactly aligned
+with other items on the context menu.  I've tested it on NT, 2000 and 98.
+Please try on 95 and XP.  If it doesn't line up, try CVS->Prefs->Quirky
+and change the icon size to small/medium/large to see which is correct.
+Then let me know which size your OS.  (Francis)
+
+Shortcut .lnk and Internet .url files can now be added to repositories.
+In the case of shortcuts, you are given menu items for both the source and
+the target where appropriate. Please check this works for you, as it needs
+new registry keys which I've added to the installer, but haven't tested.  
+(Francis)
+
+General bug fix for the new cvs.exe, to do with performing commands
+on top level directories.  See comments in TortoiseAct::PreprocessFileList
+for more details.  (Francis)
+
+"Clean Update" replaced by "Update Special..." which now offers
+all update options, including cleaning.  (Francis)
+
+Fetch module list button in checkout dialog, replacing the list
+modules menu item.  (Francis)
+
+Preference to change the CVS executable used.  (Francis).
+
+Right click context menu in commit dialog would sometimes have
+non-functioning menu items, fixed.  Patch applied by Francis. (Juan)
+
+Changes for 0.46 (16 February 2002):
+------------------------------------
+
+Oops - CVS Commit was not shown unless 'Watch on' was enabled 
+in preferences.
+
+Changes for 0.45 (15 February 2002):
+------------------------------------
+
+Files with certain extensions such as .doc etc. are now always
+treated as binary, thus overriding the default text/binary
+detection mechanism. Related to bug 365. (Torsten)
+
+The option "Close If No Error" has been renamed to "Close
+Automatically" and now offers more choices. (Torsten)
+
+Added "SSH" page to Preferences dialog. (Francis)
+
+The progress dialog now uses a rich edit control. This solves
+the problem I observed e.g. when checking out TortoiseCVS, where
+the last part of the CVS output was not shown. Also allows
+using different colours in the dialog in the future. (Torsten)
+
+Added options page to Checkout dialog, with options for export
+(ie no admin dirs) and for overriding the name of the checkout dir.
+(BenC)
+
+Several new features related to using 'cvs watch on':
+- Added new verb 'CVSListEditors' which does a 'cvs editors'.
+- The 'CVS Lock' and 'CVS Unlock' commands added in 0.44 are now
+  replaced by 'CVS Edit' and 'CVS Unedit'. For binary files,
+  these work the same way as the old ones (i.e. cvs
+  update+cvs edit+cvs admin -l and cvs admin -u+cvs unedit,
+  respectively); for text files, they just cvs edit and cvs
+  unedit, respectively.
+- Added new verb 'CVSEditExclusive' which always does cvs
+  update+cvs edit+cvs admin -l.
+- 'CVS Unedit' does not allow you to unlock a file locked by
+  another user ('CVS Unlock' had this drawback).
+- New command 'CVS List Locks' to show any locked files.
+- All these commands are only shown if the new Preferences
+  option "Watch on" (off by default) is selected, and they
+  take the read-only status of the file into account.
+  Also files which are in CVS, but read-only, are shown with
+  a new icon.
+- There is also a new option in Preferences to automatically
+  open a 'CVS Edit'ed file using the application registered
+  for the file type.
+  This should close bug 703. Also related to bug 95.
+- All this stuff needs to be properly documented.
+  (Torsten) 
+
+Integrated patch from Geoff Beier
+(http://sourceforge.net/tracker/index.php?func=detail&aid=503925&group_id=10072&atid=310072):
+- better SSH integration
+- option for pruning of empty directories
+(Torsten)
+With fix from Juan Carlos Arevalo-Baeza (Francis)
+
+TortoiseCVS now uses an external cvs.exe instead of the
+cvs2ntlib.dll. (Torsten)
+
+Fixed missing quotes in TortoiseUtils.cpp causing problems
+on temporary directories with spaces. (Martin)
+
+Explorer detail colums for 'CVS Status', 'CVS Revision' and
+'CVS Sticky Tag'. To activate the CVS columns: Right-click 
+on the column headers bar (View Details only) in a CVS 
+folder, select 'More...' and then checkoff the CVS columns 
+you wish to activate, click 'OK'. To make the CVS columns 
+appear always go to 'Tools'-> 'Folder Options'-> Click 
+'Like Current Folder'. Note this feature only works on
+Windows2000 or greater systems. If you're compiling you'll 
+need to have the Plaform SDK November 2001 or later installed.
+(Andy Hird)
+
+New 'CVS Clean Update' command. Does a 'cvs -C update'.
+(Torsten)
+	 
+New 'CVS List Modules' command. Does a 'cvs co -c'.
+(Torsten)
+
+Fixed bug 708. (Martin)
+
+Fixed bug 717. (Torsten)
+
+Changes for 0.44 (10 November 2001):
+------------------------------------
+
+This time some changes to encourage contributions:
+
+Easily checkout TortoiseCVS and/or wxWindows source code
+from a new menu option.  If you don't grab the wxWindows
+source, you can still use the precompiled libraries for
+Visual C++. (Francis)
+
+Make Patch file option for submitting fixes to open source
+projects.  (Francis)
+
+And other stuff:
+
+Preferences dialog now ghosts disabled options correctly,
+has browse button where appropriate, and has multiple pages
+with some new options. Fixed radio buttons on update dialog.
+Other minor bugs. (Francis)
+
+CVS Lock and CVS Unlock options which use "cvs edit" and
+"cvs admin -l" to perform exclusive locks.  These commands
+are not enabled by default, edit TortoiseMenus.config to
+enable them.  Looking for a good way to enable them only
+when they are required - read only files and/or "cvs watch
+on". (Torsten Martinsen)
+
+Fixed bug 636, Make New Module now clears up its temporary
+directory before use.  Also copes better with making an
+existing module - all the files from the existing module are
+checked out on top of the ones you are trying to add.  You
+even get an Explorer dialog if the file names clash ;)
+(Francis)
+
+Unix sandbox check.  This looks to see if your working
+folder appears to have been checked out under Unix, and
+warns you if it has.  Using a folder checked out on Unix
+with Windows CVS can cause trouble. You can turn off this
+check in preferences.  (Francis)
+
+Fixed bug 550, C:\ home directory paths not working on
+Win98.  (Francis)
+
+Changes for 0.43 (11 June 2001):
+-------------------------------
+
+TortoiseCVS Daily Use guide written. Please read this and
+let us know what you think. (BenC)
+
+New installer using NSIS.  Please check this works for you!
+New features are: Self extracting EXE with nicer interface,
+start menu items, uninstallation in add/remove programs.
+(Francis)
+
+Icons on context menu.  Too large under NT? (Nathan and
+Francis)
+
+Changes for 0.42 (26 May 2001):
+-------------------------------
+
+Checkout no longer prunes empty directories. This is a
+compromise that should be right for most people. (BenC)
+
+Menu configuration is now read from config file (BenC)
+
+Added a "CVS" property sheet to the file and directory.  It
+displays the revision number, modification status, time
+stamp, sticky tag, whether the file is binary, and a
+revision history.  Sorting isn't quite right yet.  (Jon
+Rowlands)
+
+Commit dialog now only accepts comments with have some
+non-whitespace characters in them.  Right click menu is now
+a proper Explorer menu (where possible). (Francis)
+
+Renamed the faux-import "Make New Module". (Francis)
+
+Added context menu for directory background (right-click in
+open directory window). This behaves the same as
+right-clicking on the directory name in the parent
+directory's window. (Jon Rowlands)
+
+Allowed context menu in drive root directories. Includes a
+horrible kludge to exclude drives A: and B: (need a better
+way -- need to determine whether drive is removable, without
+accessing drive).  (Jon Rowlands)
+
+Fixed a bug in determining "modified" status. The strcmp()
+can fail inappropriately because the VC++ asctime() function
+doesn't produce the same format as UNIX (day of month has a
+leading zero in VC++, not in UNIX). Worked around this by
+treating zero and space as equivalent in that character
+position. (Jon Rowlands)
+
+Removed old version commmit as new one seems fine. (Francis)
+
+Support for new Soureforge web log scheme. (Francis)
+
+Borland compilation fixes, and hence code nearer to the C++
+standard!  (Ian Dees)
+
+Explorer window is now automatically refreshed for all
+appropriate commands.  Let me know if there are cases where
+it does refresh when it is annoying and doesn't need to, or
+if there are cases where id doesn't refresh and it should.
+(Francis)
+
+Other things: Warning about user folders called "CVS", which
+sometimes caused an infinite loop.  Various other tips and
+improvements for when people have folders called "CVS". Bug
+with diff if you login during the diff.  Tortoise Tip when
+you (might) have the repository directory wrong.  Registry
+handle leak fixed.  Finally got icon for TortoiseAct.exe
+working.  (Francis)
+
+Don't panic!
+
+Changes for 0.41 (23 February 2001):
+------------------------------------
+
+No changes - but actually managed to ship the correct
+TortoiseAct.exe this time!  Version 0.40 had an old version
+of the executable, accidentally.
+
+Changes for 0.40 (22 February 2001):
+------------------------------------
+
+Import command now works.  It is different from CVS import,
+simpler (or less powerful, depending how you look at it!).
+Right click on a folder that isn't in CVS, do CVS-->Import
+and it will make a new module in the repository.  The folder
+will now appear to be in CVS "in place". (Francis)
+
+Automatically use WinCVS external diff if available.
+(Francis)
+
+Remote shell (rsh) support via :server:. (Francis)
+
+Client logging registry key added properly.  This is
+documented in help.html. (Francis)
+
+Worked round bug in wxWindows where web log dialog crashed.
+Tidied up web log code into a separate class. (Francis)
+
+Changes for 0.37 (12 February 2001):
+------------------------------------
+
+WARNING: The new commit dialog may not be perfect.  It is
+possible that it's scanning code could miss files that you
+have changed, added or removed.  I haven't seen any problems
+yet, but to find any, please do "CVS Commit... (old)" just
+after a new style commit, to check everything has been
+committed.
+
+Added commit dialog.  Hooray!  At last.  It needs some
+testing, as it uses new code partly-hacked from WinCVS to
+recurisvely scan for changes (modified, added and removed
+files). (Francis)
+
+Compiled and linked TortoiseAct.exe with Mingw32.  This was
+using a cross-compiler running under Linux, but it should
+work for native Mingw32 as well. The resulting executable
+doesn't work - memory allocation in STL is broken, so it
+crashes on the first vector::push_back.  (Francis)
+
+For directories, icon overlays can now show you if any files
+within them have chagned.  This is too slow to be useful,
+perhaps someone can profile it and make it really fast, but
+I suspect it will always be a bit too slow.  To enable, add
+a DWORD key "Show Changed Directories" with the value 1 to
+HKCU/Software/TortoiseCVS. (Francis)
+
+Removed password entry from CVS Checkout dialog.  It was
+unnecessary, since CVSAction prompts you for the password
+when necessary.  (Francis)
+
+Changes for 0.36 (29 January 2001):
+-----------------------------------
+
+Threaded progress dialog.  Now it is more responsive during
+long checkouts.  I'm sure it will introduce at least one new
+problem though. (Francis)
+
+Changed default of "Automatically close if no error" to
+false.  I think it confuses non-experts? (Francis)
+
+Added support for merging. Woohoo! (BenC)
+
+Minor changes to add explanation text on tag/branch dialogs,
+in order to make it more obvious what happens when you click
+OK. (BenC)
+
+Added options to update to retrieve specific revisions and
+to reset sticky tags - hold down control key while updating
+to bring up dialog box with these extra options. (BenC)
+
+Stop Win2K floppy drive clicking in My Computer, by stopping
+TortoiseCVS scanning top level drives.  I hope I've applied
+his patch correctly, please check for me! (Stefan
+Hoffmeister)
+
+Borland compilation improvements (Stefan Hoffmeister)
+
+
+Changes for 0.35 (8 January 2001):
+----------------------------------
+
+Completed first rough draft of wxWindows support.  This
+means that all dialogs are now implemented with a native
+Win32 widget set, using the wxWindows API to make it easier
+to program them.  Some of the dialog layouts are rough at
+the edges, and any help to make them prettier would be
+welcomed! (Francis)
+
+Changed process launching to use CreateProcess rather than
+WinExec, which fixes problems with MessageBoxes not
+appearing (Francis)
+
+Recursive directory adding.  This is a new menu item
+available when you select a directory which is not in CVS.
+Currently it adds _all_ files - with .cvsignore support
+later it should know better what to ignore.  Watch you don't
+add too many files. (Francis)
+
+Speeded up multiple file adding by adding all text files in
+a directory in one command together, and then all the binary
+files together. (Francis)
+
+
+Changes for 0.34 (26 October 2000):
+-----------------------------------
+
+Initial Win32 user interface support (Didier Trosset)
+
+[ This Win32 UI support is not yet in the binary release, as
+some of the dialogs are not implemented.  I'm also
+considering porting the whole lot to wxWindows - a cross
+platform, Open Source widget-set layer, which also gives you
+a genuine native Windows interface.
+Suggestions/comments/help welcome. ]
+
+Preferences dialog.  It's fairly easy to add new
+preferences, so we'll have to try not to go overboard on
+them. (Francis)
+
+NT CVS Server support.  Hopefully works with either ntserver
+or pserver protocol, although I couldn't test pserver.
+(Francis)
+
+Locally mounted directory support. (Francis)
+
+Web log now scans for lots of URLs.  Suggestions for extra
+ones are welcomed! (Francis)
+
+Error handling for CVS Remove improved, so if there is an
+error during removal you don't lose your file. (Francis)
+
+Windows 95 registry bug fix - external diff program setting
+(and others) will now be correctly remembered (Ian Dees)
+
+Initial SSH support.  Very unfriendly, as it prompts for
+your password every operation from a DOS window. (Francis)
+
+Changes for 0.33 (released 11 October 2000):
+--------------------------------------------
+
+Fixed bug with commit on multiple files (to do with
+separators and the new submenu) (Francis)
+
+Added "HOME" registry value. If not present, "C:" is
+assumed.  (ie .cvspass can now be relocated) (BenC)
+
+Put Checkout on the main menu, rather than a submenu
+(Francis)
+
+Changes for 0.32 (released 2 October 2000):
+-------------------------------------------
+
+Checkout dlg now remembers servernames, usernames and
+modules  (BenC)
+
+Checkout can now specify branch, tag and/or date  (BenC)
+
+Added Branch and Tag actions  (BenC)
+
+Web log implemented - directly launch your browser into
+CVSWeb or ViewCVS on a particular file or directory.  If
+your server doesn't have either of these excellent programs
+installed, you can do a vanilla textual log.  (Francis)
+(BenC)
+
+Separated into an executable and a dll so you can now
+perform multiple CVS operations at once.  Should improve
+stability as GTK is no longer in Explorer's process space,
+and is not loaded in DllMain  (Francis)
+
+Default to quiet mode (CVS parameter "-q") to reduce the
+noise in the progress display   (Francis)
+
+Certain menu items are now on a submenu.  This is a general
+ability that could be a configuration option later.
+
+In particular, "CVS Remove" is now on the sub menu, to
+reduce the chance of people accidentally selecting it
+(Francis)
+
+Automatically close progress dialog when there is no error.
+I suspect that some will love this and some will hate it.
+It should be a configuration option eventually (Francis)
+
+TortoiseTip feature added.  Only one tip so far.  Basically
+this adds text to help explain obscure or out of context CVS
+command line messages in the progress dialog (Francis)
+
+
+Changes for 0.31 (released 25 August 2000):
+-------------------------------------------
+
+Improved speed of directory display (with some caching).
+
+
+Changes for 0.3 (released 4 August 2000):
+-----------------------------------------
+
+New password dialog.  It automatically appears and prompts
+you for your password if a CVS operation fails because you
+need to login.  This solves lots of problems with missing
+.cvspass files or changed passwords.
+
+Text/Binary file dialog.  If TortoiseCVS can't identify if a
+file is text or binary, then it prompts you to tell it.
+
+Aesthetic improvements to the main progress dialog.
+
+New version 2000-07-22 of GTK/GDK/GLIB.
+
+
+TortoiseCVS web site - http://www.tortoisecvs.org

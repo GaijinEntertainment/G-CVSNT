@@ -1,0 +1,5 @@
+cd cvsnt-2.5.05.3744
+autoreconf -i
+bash configure
+make
+sudo make install

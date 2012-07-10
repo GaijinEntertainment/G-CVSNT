@@ -1,0 +1,4876 @@
+# TortoiseCVS - enjoyable version control
+# http://www.tortoisecvs.org
+# Chinese (zh_TW) language .po-file
+# convert from zh_CN
+# Rex Tsai <chihchun@debian.org.tw>
+# $Id: zh_TW.po,v 1.1 2012/03/04 01:09:09 aliot Exp $
+msgid ""
+msgstr ""
+"Project-Id-Version: TortoiseCVS\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2006-06-19 22:48+0100\n"
+"Last-Translator: Torsten Martinsen <torsten@vip.cybercity.dk>\n"
+"Language-Team: zh_TW <chihchun@debian.org.tw>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Chinese\n"
+"X-Poedit-Country: TAIWAN\n"
+
+#: ContextMenus/DefaultMenus.cpp:43
+msgid "Syntax error"
+msgstr "語法錯誤"
+
+#: ContextMenus/DefaultMenus.cpp:61
+msgid "Unexpected end of file"
+msgstr "不期望的檔案結尾"
+
+#: ContextMenus/DefaultMenus.cpp:187
+#, c-format
+msgid ""
+"Error while parsing config file\n"
+"(\"%s\" line %d): %s"
+msgstr ""
+"當處理配置檔案時出錯\n"
+"(\"%s\" 行 %d): %s"
+
+#: CVSGlue/CVSAction.cpp:48
+msgid ""
+"Tortoise Tip:  Sometimes you get this error if you have the repository folder wrong in the Checkout dialog.  Make sure you have a slash at the start of the folder name, and that the case and path are correct.  Watch out for spurious trailing characters.\n"
+"\n"
+"Examples are:  \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/cvsgui\""
+msgstr ""
+"Tortoise 技巧:  有時您在取出對話框中得到關於倉庫檔案夾的錯誤，請確認您在檔案夾名稱前有一個斜槓符號，並確認檔案名稱的大小寫和路徑是否正確. 察看是否有多餘的字符.\n"
+"\n"
+"例如:  \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/cvsgui\""
+
+#: CVSGlue/CVSAction.cpp:369
+msgid ""
+"Tortoise Tip: Apparently you are using the :local: protocol, and you have an older version of CVSNT installed than the one included with TortoiseCVS. To resolve this problem, do one of the following:\n"
+"1) Don't use :local: - add the repository to your local CVSNT server\n"
+"   (Control Panel/CVS for NT/Repositories) and use a network protocol\n"
+"   (e.g. :pserver: or :sspi:) to access the repository.\n"
+"   This requires a fresh checkout.\n"
+"2) Remove your local CVSNT server installation if you don't need it.\n"
+"3) Update your local CVSNT server installation to the same version included\n"
+"   with TortoiseCVS."
+msgstr ""
+
+#: CVSGlue/CVSAction.cpp:404
+msgid "Internal error, CVSAction::DoCommand used twice within same process."
+msgstr "內部錯誤, 在同一程序中 CVSAction::DoCommand 被使用了兩次"
+
+#: CVSGlue/CVSAction.cpp:523
+#, c-format
+msgid ""
+"In %s: %s\n"
+"CVSROOT=%s"
+msgstr ""
+"在 %s: %s\n"
+"CVSROOT=%s"
+
+#: CVSGlue/CVSAction.cpp:555
+#, fuzzy, c-format
+msgid ""
+"Trouble launching the CVS process:\n"
+"%s\n"
+"On folder: %s\n"
+"%s\n"
+"Please check there is a cvs.exe in the same folder as TortoiseCVS or on the path."
+msgstr ""
+"在啟動CVS的過程中發生錯誤:\n"
+"%s\n"
+"在檔案夾:%s\n"
+"%s\n"
+"請檢查 cvs.exe 是否與 TortoiseCVS 在同一檔案夾或相同路徑下。"
+
+#: CVSGlue/CVSAction.cpp:608
+msgid "CVS operation aborted by user request"
+msgstr "CVS 操作被用戶中止"
+
+#: CVSGlue/CVSAction.cpp:615
+msgid "Success, CVS operation completed"
+msgstr "成功，CVS 操作完成"
+
+#: CVSGlue/CVSAction.cpp:619
+msgid "Error, CVS operation failed"
+msgstr "錯誤, CVS 操作失敗"
+
+#: CVSGlue/CVSAction.cpp:660
+msgid "Error, one of the CVS operations failed"
+msgstr "錯誤, 其中一個 CVS 操作失敗"
+
+#: CVSGlue/CVSAction.cpp:920
+#, fuzzy, c-format
+msgid ""
+"%s has been modified. Do you want to discard your local changes and revert to the most current version in the repository?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Unedit command (take no action)."
+msgstr ""
+"%s 已被修改. 您希望忽略您在本地所作的改動並恢復到倉庫中的最新版本麼?\n"
+"選擇 \"是\" 忽略您做的改動, 或者選擇 \"否\" 取消 Unedit 命令 (不做任何操作)."
+
+#: CVSGlue/CVSAction.cpp:935
+msgid ""
+"You have altered files in this repository. See the main TortoiseCVS dialog for details.\n"
+"Do you want to discard your local changes?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Release command (take no action)."
+msgstr ""
+"您已經更改了該倉庫的檔案. 請看 TortoiseCVS 對話框獲得更多的細節. \n"
+"您希望忽略您的本地更改?\n"
+"選擇 \"Yes\" 忽略您的改動；或者選擇 \"No\" 取消發布 Release 命令 (不做任何操作)."
+
+#: CVSGlue/CVSAction.cpp:960
+#, c-format
+msgid ""
+"The server's host key is not cached in the registry.\n"
+"Key fingerprint: %s\n"
+"If you trust this host, hit \"Yes\" to add the key to the cache.\n"
+"If you want to connect just once, hit \"No\".\n"
+"If you don't trust this host, hit \"Cancel\".\n"
+msgstr ""
+
+#: CVSGlue/CVSAction.cpp:1500
+msgid "Retrying command with encryption disabled\n"
+msgstr ""
+
+#: CVSGlue/CVSAction.cpp:1513
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s on %s"
+msgstr ""
+"該目錄中沒有 CVS 倉庫:\n"
+"\n"
+"%s 在 %s"
+
+#: CVSGlue/CVSAction.cpp:1519
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s"
+msgstr ""
+"該目錄中沒有 CVS 倉庫:\n"
+"\n"
+"%s"
+
+#: CVSGlue/CVSAction.cpp:1525
+#, fuzzy
+msgid "If this is the wrong folder, correct it and try again. If you want to initialise a new repository with \"cvs init\" then check the box below and TortoiseCVS will try again."
+msgstr "如果這是一個錯誤的目錄，請糾正然後再試一次。如果您希望使用\"cvs init\"建立一個新倉庫，請確認下面的選項，TortoiseCVS 將再試一次。"
+
+#: CVSGlue/CVSAction.cpp:1530
+msgid "&Initialise a new repository here (makes a CVSROOT folder)"
+msgstr "在此初始化新倉庫(創建一個 CVSROOT 檔案夾)(&I)"
+
+#: CVSGlue/CvsEntries.cpp:572
+msgid "Ignored Folder"
+msgstr "被忽略的檔案夾"
+
+#: CVSGlue/CvsEntries.cpp:574
+#, fuzzy
+msgid "Non-CVS Folder"
+msgstr "非 CVS 檔案夾"
+
+#: CVSGlue/CvsEntries.cpp:576 DialogsWxw/AddFilesDialog.cpp:2244
+#: DialogsWxw/AddFilesDialog.cpp:2284 TortoiseShell/ColumnProvider.cpp:234
+msgid "Folder"
+msgstr "檔案夾"
+
+#: CVSGlue/CvsEntries.cpp:610 CVSGlue/CVSStatus.cpp:1649
+#, fuzzy
+msgid "Ignored"
+msgstr "已忽略檔案的顏色"
+
+#: CVSGlue/CvsEntries.cpp:614
+#, fuzzy
+msgid "Non-CVS file"
+msgstr "非 CVS 檔案夾"
+
+#: CVSGlue/CvsEntries.cpp:618
+msgid "Conflict"
+msgstr "衝突"
+
+#: CVSGlue/CvsEntries.cpp:622 CVSGlue/CVSStatus.cpp:1519
+msgid "Binary"
+msgstr "二進制"
+
+#: CVSGlue/CvsEntries.cpp:622
+#, fuzzy
+msgid "Mod. Binary"
+msgstr "二進制"
+
+#: CVSGlue/CvsEntries.cpp:626 DialogsWxw/AddFilesDialog.cpp:2302
+#: DialogsWxw/CommitDialog.cpp:951 DialogsWxw/HistoryDialog.cpp:403
+#: DialogsWxw/MakePatchDialog.cpp:540 DialogsWxw/ModuleBasicsPage.cpp:392
+#, fuzzy
+msgid "File"
+msgstr "檔案:"
+
+#: CVSGlue/CvsEntries.cpp:626
+#, fuzzy
+msgid "Mod. File"
+msgstr "模組"
+
+#: CVSGlue/CVSStatus.cpp:1434
+#, fuzzy
+msgid "Normal"
+msgstr "格式"
+
+#: CVSGlue/CVSStatus.cpp:1440
+#, fuzzy
+msgid "Only keyword names"
+msgstr "只有關鍵字名稱 (-kk)"
+
+#: CVSGlue/CVSStatus.cpp:1446
+#, fuzzy
+msgid "Only keyword values"
+msgstr "只有關鍵字名稱 (-kk)"
+
+#: CVSGlue/CVSStatus.cpp:1452
+#, fuzzy
+msgid "Include locker"
+msgstr "包括加鎖檔案 (-kkvl)"
+
+#: CVSGlue/CVSStatus.cpp:1458
+msgid "Disabled"
+msgstr ""
+
+#: CVSGlue/CVSStatus.cpp:1464
+#, fuzzy
+msgid "None"
+msgstr "(沒有)"
+
+#: CVSGlue/CVSStatus.cpp:1470
+msgid "Custom"
+msgstr ""
+
+#: CVSGlue/CVSStatus.cpp:1501
+msgid "Unknown"
+msgstr "未知"
+
+#: CVSGlue/CVSStatus.cpp:1507
+msgid "Text/ASCII"
+msgstr "純文字/ASCII"
+
+#: CVSGlue/CVSStatus.cpp:1513
+msgid "Text/Unicode"
+msgstr "純文字/Unicode"
+
+#: CVSGlue/CVSStatus.cpp:1536
+#, fuzzy
+msgid "Binary diff"
+msgstr "二進制"
+
+#: CVSGlue/CVSStatus.cpp:1540
+msgid "Compressed"
+msgstr ""
+
+#: CVSGlue/CVSStatus.cpp:1544
+#, fuzzy
+msgid "UNIX line endings"
+msgstr "使用Unix換行符(&L)"
+
+#: CVSGlue/CVSStatus.cpp:1548
+#, fuzzy
+msgid "Static file"
+msgstr "保存補丁檔案"
+
+#: CVSGlue/CVSStatus.cpp:1589 CVSGlue/CVSStatus.cpp:1637
+#: DialogsWxw/IconSetDialog.cpp:49
+msgid "Not in CVS"
+msgstr "不在CVS中"
+
+#: CVSGlue/CVSStatus.cpp:1595
+#, fuzzy
+msgid "Unmodified r/o"
+msgstr "未修改"
+
+#: CVSGlue/CVSStatus.cpp:1601
+msgid "Unmodified"
+msgstr "未修改"
+
+#: CVSGlue/CVSStatus.cpp:1607
+#, fuzzy
+msgid "Edited"
+msgstr "編輯(&E)"
+
+#: CVSGlue/CVSStatus.cpp:1613
+#, fuzzy
+msgid "Edited r/o"
+msgstr "未修改"
+
+#: CVSGlue/CVSStatus.cpp:1619 DialogsWxw/IconSetDialog.cpp:46
+msgid "Modified"
+msgstr "已修改"
+
+#: CVSGlue/CVSStatus.cpp:1625 DialogsWxw/IconSetDialog.cpp:47
+#: TortoiseShell/ColumnProvider.cpp:266
+msgid "Added"
+msgstr "已新增"
+
+#: CVSGlue/CVSStatus.cpp:1631 DialogsWxw/IconSetDialog.cpp:48
+msgid "Needs merge"
+msgstr "需要合併"
+
+#: CVSGlue/CVSStatus.cpp:1643 DialogsWxw/CheckoutDialog.cpp:150
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102 DialogsWxw/MakeModuleDialog.cpp:66
+#: DialogsWxw/ModuleBasicsPage.cpp:213 DialogsWxw/ModuleBasicsPage.cpp:224
+msgid "Module"
+msgstr "模組"
+
+#: CVSGlue/CVSStatus.cpp:1655
+#, fuzzy
+msgid "Removed"
+msgstr "刪除"
+
+#: CVSGlue/CVSStatus.cpp:1661
+#, fuzzy
+msgid "Renamed"
+msgstr "檔案名"
+
+#: CVSGlue/CVSStatus.cpp:1667
+msgid "Missing"
+msgstr ""
+
+#: CVSGlue/ndir.cpp:202
+#, c-format
+msgid "can't open folder `%s'."
+msgstr "不能打開檔案夾 `%s'."
+
+#: CVSGlue/ndir.cpp:211
+#, c-format
+msgid "done."
+msgstr "完成."
+
+#: DialogsWxw/AboutDialog.cpp:64
+#, fuzzy
+msgid "TortoiseCVS - About"
+msgstr "TortoiseCVS - 已經放棄"
+
+#: DialogsWxw/AboutDialog.cpp:77 DialogsWxw/LoginDialog.cpp:33
+#: DialogsWxw/MessageDialog.cpp:29 TortoiseAct/TortoisePreferences.cpp:87
+#: Utils/LaunchTortoiseAct.cpp:77 Utils/ProcessUtils.cpp:68
+#: Utils/TortoiseException.cpp:30 Utils/TortoiseException.cpp:47
+msgid "TortoiseCVS"
+msgstr "TortoiseCVS"
+
+#: DialogsWxw/AboutDialog.cpp:79
+msgid "UNSTABLE"
+msgstr "不穩定版"
+
+#: DialogsWxw/AboutDialog.cpp:82
+msgid "DEBUG"
+msgstr ""
+
+#: DialogsWxw/AboutDialog.cpp:85
+msgid "version"
+msgstr "版本"
+
+#: DialogsWxw/AboutDialog.cpp:103 DialogsWxw/AddFilesDialog.cpp:497
+#: DialogsWxw/AnnotateDialog.cpp:218 DialogsWxw/BranchTagDlg.cpp:167
+#: DialogsWxw/CheckoutDialog.cpp:156 DialogsWxw/CheckQueryDlg.cpp:56
+#: DialogsWxw/CommandDialog.cpp:77 DialogsWxw/CommitDialog.cpp:416
+#: DialogsWxw/CreditsDialog.cpp:165 DialogsWxw/EditDialog.cpp:154
+#: DialogsWxw/GraphDialog.cpp:233 DialogsWxw/GraphSettingsDialog.cpp:117
+#: DialogsWxw/HistoryDialog.cpp:537 DialogsWxw/IconSetDialog.cpp:135
+#: DialogsWxw/LogConfigDialog.cpp:124 DialogsWxw/MakeModuleDialog.cpp:92
+#: DialogsWxw/MakePatchDialog.cpp:329 DialogsWxw/MergeDlg.cpp:154
+#: DialogsWxw/PreferencesDialog.cpp:378 DialogsWxw/ProgressDialog.cpp:187
+#: DialogsWxw/ReleaseDialog.cpp:143 DialogsWxw/RenameDialog.cpp:83
+#: DialogsWxw/UpdateDlg.cpp:175
+msgid "OK"
+msgstr "確認"
+
+#: DialogsWxw/AboutDialog.cpp:110
+#, fuzzy
+msgid "&Credits..."
+msgstr "參加人員..."
+
+#: DialogsWxw/AboutDialog.cpp:128 DialogsWxw/AboutDialog.cpp:170
+#, fuzzy, c-format
+msgid "%s client version"
+msgstr "版本"
+
+#: DialogsWxw/AboutDialog.cpp:129 DialogsWxw/AboutDialog.cpp:150
+#: DialogsWxw/AboutDialog.cpp:171 DialogsWxw/CommandDialog.cpp:61
+#: DialogsWxw/CommitDialog.cpp:338 DialogsWxw/CommitDialog.cpp:358
+#: DialogsWxw/CommitDialog.cpp:368 DialogsWxw/CommitDialog.cpp:768
+#: DialogsWxw/CreditsDialog.cpp:136 DialogsWxw/EditDialog.cpp:101
+#: DialogsWxw/EditDialog.cpp:112 DialogsWxw/EditDialog.cpp:127
+#: DialogsWxw/GraphDialog.cpp:396 DialogsWxw/GraphDialog.cpp:404
+#: DialogsWxw/GraphDialog.cpp:414 DialogsWxw/GraphDialog.cpp:424
+#: DialogsWxw/GraphDialog.cpp:435 DialogsWxw/GraphDialog.cpp:444
+#: DialogsWxw/GraphDialog.cpp:520 DialogsWxw/GraphDialog.cpp:527
+#: DialogsWxw/GraphDialog.cpp:535 DialogsWxw/GraphDialog.cpp:543
+#: DialogsWxw/GraphDialog.cpp:551 DialogsWxw/HistoryDialog.cpp:404
+#: DialogsWxw/HistoryDialog.cpp:410 DialogsWxw/HistoryDialog.cpp:415
+#: DialogsWxw/HistoryDialog.cpp:422 DialogsWxw/HistoryDialog.cpp:433
+#: DialogsWxw/HistoryDialog.cpp:439 DialogsWxw/HistoryDialog.cpp:445
+#: DialogsWxw/HistoryDialog.cpp:451 DialogsWxw/HistoryDialog.cpp:479
+#: DialogsWxw/HistoryDialog.cpp:1094 DialogsWxw/IconSetDialog.cpp:119
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102
+#: DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104 DialogsWxw/MakeModuleDialog.cpp:71
+#: DialogsWxw/ModuleBasicsPage.cpp:208 DialogsWxw/ModuleBasicsPage.cpp:209
+#: DialogsWxw/ModuleBasicsPage.cpp:210 DialogsWxw/ModuleBasicsPage.cpp:211
+#: DialogsWxw/ModuleBasicsPage.cpp:212 DialogsWxw/ModuleBasicsPage.cpp:213
+#: DialogsWxw/ModuleBasicsPage.cpp:214 DialogsWxw/ModuleBasicsPage.cpp:215
+#: DialogsWxw/ModuleBasicsPage.cpp:339 DialogsWxw/PreferencesDialog.cpp:459
+#: DialogsWxw/PreferencesDialog.cpp:873 DialogsWxw/RenameDialog.cpp:63
+#: TortoiseShell/PropSheet.cpp:215 TortoiseShell/PropSheet.cpp:218
+#: TortoiseShell/PropSheet.cpp:221 TortoiseShell/PropSheet.cpp:224
+#: TortoiseShell/PropSheet.cpp:227 TortoiseShell/PropSheet.cpp:230
+#: TortoiseShell/PropSheet.cpp:233 TortoiseShell/PropSheet.cpp:236
+#: TortoiseShell/PropSheet.cpp:239
+msgid ":"
+msgstr ""
+
+#: DialogsWxw/AboutDialog.cpp:149
+#, fuzzy, c-format
+msgid "%s server version"
+msgstr "版本"
+
+#: DialogsWxw/AddFilesDialog.cpp:309
+msgid "Yes"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:311
+#, fuzzy
+msgid "No"
+msgstr "(沒有)"
+
+#: DialogsWxw/AddFilesDialog.cpp:407
+msgid "TortoiseCVS - Add"
+msgstr "TortoiseCVS - 新增"
+
+#: DialogsWxw/AddFilesDialog.cpp:442
+msgid "Confirm the files to add."
+msgstr "確認新增這些檔案."
+
+#: DialogsWxw/AddFilesDialog.cpp:444
+#, fuzzy
+msgid "Hint: Right-click to change file format."
+msgstr "按右鍵更改檔案格式"
+
+#: DialogsWxw/AddFilesDialog.cpp:448
+#, fuzzy
+msgid "Show items in &subfolders"
+msgstr "創建丟失的子目錄"
+
+#: DialogsWxw/AddFilesDialog.cpp:464 DialogsWxw/CommitDialog.cpp:389
+#: DialogsWxw/ConflictListDialog.cpp:123 DialogsWxw/EditorListListCtrl.cpp:38
+#: DialogsWxw/HistoryDialog.cpp:1093 DialogsWxw/MakePatchDialog.cpp:308
+msgid "Filename"
+msgstr "檔案名"
+
+#: DialogsWxw/AddFilesDialog.cpp:465
+msgid "Type"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:466
+#, fuzzy
+msgid "Add"
+msgstr "已新增"
+
+#: DialogsWxw/AddFilesDialog.cpp:467 DialogsWxw/AddFilesDialog.cpp:2481
+#: DialogsWxw/CommitDialog.cpp:391 DialogsWxw/ConflictListDialog.cpp:124
+msgid "Format"
+msgstr "格式"
+
+#: DialogsWxw/AddFilesDialog.cpp:468 DialogsWxw/AddFilesDialog.cpp:2454
+#: DialogsWxw/HistoryDialog.cpp:438 TortoiseShell/PropSheet.cpp:235
+#, fuzzy
+msgid "Keywords"
+msgstr "關鍵字擴展:"
+
+#: DialogsWxw/AddFilesDialog.cpp:499 DialogsWxw/BranchTagDlg.cpp:169
+#: DialogsWxw/CheckoutDialog.cpp:158 DialogsWxw/CommandDialog.cpp:79
+#: DialogsWxw/CommitDialog.cpp:418 DialogsWxw/EditDialog.cpp:156
+#: DialogsWxw/FindDialog.cpp:38 DialogsWxw/GraphSettingsDialog.cpp:119
+#: DialogsWxw/HistoryDialog.cpp:539 DialogsWxw/IconSetDialog.cpp:136
+#: DialogsWxw/LogConfigDialog.cpp:126 DialogsWxw/MakeModuleDialog.cpp:94
+#: DialogsWxw/MakePatchDialog.cpp:331 DialogsWxw/MergeDlg.cpp:156
+#: DialogsWxw/PreferencesDialog.cpp:380 DialogsWxw/ReleaseDialog.cpp:145
+#: DialogsWxw/RenameDialog.cpp:85 DialogsWxw/UpdateDlg.cpp:177
+#: DialogsWxw/YesNoAllDialog.cpp:81
+msgid "Cancel"
+msgstr "取消"
+
+#: DialogsWxw/AddFilesDialog.cpp:577 TortoiseAct/TortoiseAct.cpp:484
+msgid "Could not connect to server"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:834 DialogsWxw/AddFilesDialog.cpp:2509
+#: DialogsWxw/CheckoutDialog.cpp:152 DialogsWxw/HistoryDialog.cpp:444
+#: DialogsWxw/MakeModuleDialog.cpp:80
+msgid "Options"
+msgstr "選項"
+
+#: DialogsWxw/AddFilesDialog.cpp:858 DialogsWxw/CommitDialog.cpp:668
+#: DialogsWxw/ConflictListDialog.cpp:144 DialogsWxw/MakePatchDialog.cpp:431
+#, fuzzy, c-format
+msgid "%d file(s)"
+msgstr "檔案顏色已修改"
+
+#: DialogsWxw/AddFilesDialog.cpp:922 DialogsWxw/AddFilesDialog.cpp:2403
+#: DialogsWxw/CommitDialog.cpp:146 DialogsWxw/MakePatchDialog.cpp:114
+msgid "Check"
+msgstr "確認"
+
+#: DialogsWxw/AddFilesDialog.cpp:922 DialogsWxw/AddFilesDialog.cpp:2403
+#, fuzzy
+msgid "Check item(s)"
+msgstr "確認選擇的條目"
+
+#: DialogsWxw/AddFilesDialog.cpp:924 DialogsWxw/AddFilesDialog.cpp:2405
+#: DialogsWxw/CommitDialog.cpp:147 DialogsWxw/MakePatchDialog.cpp:115
+msgid "Uncheck"
+msgstr "取消確認"
+
+#: DialogsWxw/AddFilesDialog.cpp:924 DialogsWxw/AddFilesDialog.cpp:2405
+#, fuzzy
+msgid "Uncheck item(s)"
+msgstr "取消確認選擇的條目"
+
+#: DialogsWxw/AddFilesDialog.cpp:926 DialogsWxw/AddFilesDialog.cpp:2407
+#, fuzzy
+msgid "Autoignore"
+msgstr "新增到忽略檔案(&A)"
+
+#: DialogsWxw/AddFilesDialog.cpp:926 DialogsWxw/AddFilesDialog.cpp:2407
+msgid "Ignore item(s) according to CVS ignore rules"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:932 DialogsWxw/AddFilesDialog.cpp:2415
+msgid "Check recursively"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:933 DialogsWxw/AddFilesDialog.cpp:2416
+msgid "Check item(s) recursively"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:935 DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck recursively"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:936 DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck item(s) recursively"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:938 DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Autoignore recursively"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:939 DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Ignore item(s) recursively according to CVS ignore rules"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:946 DialogsWxw/AddFilesDialog.cpp:2522
+#: DialogsWxw/CommitDialog.cpp:204 DialogsWxw/ConflictListDialog.cpp:313
+#: DialogsWxw/EditorListListCtrl.cpp:133 DialogsWxw/MakePatchDialog.cpp:142
+msgid "Explorer"
+msgstr "資源管理器"
+
+#: DialogsWxw/AddFilesDialog.cpp:1093
+#, fuzzy, c-format
+msgid "Invalid file format: %s"
+msgstr "無效的檔案格式:  \"Unknown\""
+
+#: DialogsWxw/AddFilesDialog.cpp:1095
+msgid "Please specify a valid file format for all files you want to add."
+msgstr "請為您希望新增的檔案指定一種有效的檔案格式. "
+
+#: DialogsWxw/AddFilesDialog.cpp:2298 DialogsWxw/CommitDialog.cpp:949
+#: DialogsWxw/MakePatchDialog.cpp:536
+#, fuzzy, c-format
+msgid "%s File"
+msgstr "檔案:"
+
+#: DialogsWxw/AddFilesDialog.cpp:2445
+#, fuzzy, c-format
+msgid "Set keyword expansion to %s"
+msgstr "關鍵字擴展:"
+
+#: DialogsWxw/AddFilesDialog.cpp:2469
+#, c-format
+msgid "Set format to %s"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect file format"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:2500
+#, c-format
+msgid "Set options to %s"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:160
+#, fuzzy
+msgid "TortoiseCVS - Annotate"
+msgstr "TortoiseCVS - 已經中止"
+
+#: DialogsWxw/AnnotateDialog.cpp:193
+msgid "Line"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:194 DialogsWxw/CheckoutDialog.cpp:151
+#: DialogsWxw/GraphDialog.cpp:395 DialogsWxw/HistoryDialog.cpp:467
+#: DialogsWxw/ModuleBasicsPage.cpp:393 TortoiseShell/PropSheet.cpp:223
+msgid "Revision"
+msgstr "修訂版本"
+
+#: DialogsWxw/AnnotateDialog.cpp:195 DialogsWxw/GraphDialog.cpp:413
+#: DialogsWxw/HistoryDialog.cpp:469
+msgid "Author"
+msgstr "修訂者"
+
+#: DialogsWxw/AnnotateDialog.cpp:196 DialogsWxw/EditorListListCtrl.cpp:40
+#: DialogsWxw/GraphDialog.cpp:403 DialogsWxw/HistoryDialog.cpp:468
+#: DialogsWxw/ModuleBasicsPage.cpp:394
+msgid "Date"
+msgstr "日期"
+
+#: DialogsWxw/AnnotateDialog.cpp:198 DialogsWxw/CommitDialog.cpp:357
+#: DialogsWxw/GraphDialog.cpp:434 DialogsWxw/HistoryDialog.cpp:471
+msgid "Bug Number"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:200
+msgid "Text"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:221
+#, fuzzy
+msgid "&Find"
+msgstr "新增完成"
+
+#: DialogsWxw/AnnotateDialog.cpp:425 DialogsWxw/AnnotateListCtrl.cpp:218
+msgid "Highlight by Author"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:430 DialogsWxw/AnnotateListCtrl.cpp:220
+msgid "Highlight by Revision"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:435 DialogsWxw/AnnotateListCtrl.cpp:222
+msgid "Highlight by Date"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:440 DialogsWxw/AnnotateListCtrl.cpp:224
+msgid "Highlight by Bug Number"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:445 DialogsWxw/AnnotateListCtrl.cpp:227
+msgid "Highlight by Age (Fixed)"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:450 DialogsWxw/AnnotateListCtrl.cpp:229
+msgid "Highlight by Age (Scaled)"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:455 DialogsWxw/AnnotateListCtrl.cpp:214
+msgid "No Highlighting"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:480
+#, c-format
+msgid "Annotate %s"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:529 DialogsWxw/WxwHelpers.cpp:497
+#: TortoiseAct/TortoiseActUtils.cpp:186 TortoiseAct/TortoiseActUtils.cpp:296
+msgid "This file is new and has never been committed to the server or is an empty file on the server."
+msgstr "這個檔案是新檔案從來沒有提交到伺服器上,或在伺服器上是一個空檔案."
+
+#: DialogsWxw/AnnotateDialog.cpp:637
+msgid "Continue search from the end of the file?"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:658
+msgid "Continue search from the beginning of the file?"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:668
+#, fuzzy
+msgid "Search complete"
+msgstr "所有工作都成功完成了."
+
+#: DialogsWxw/AnnotateListCtrl.cpp:202 DialogsWxw/GraphDialog.cpp:893
+#: DialogsWxw/HistoryDialog.cpp:1191
+#, fuzzy
+msgid "&Diff (working file)"
+msgstr "比較（本地檔案）"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:203 DialogsWxw/GraphDialog.cpp:894
+#: DialogsWxw/HistoryDialog.cpp:1192
+#, fuzzy
+msgid "&View this revision"
+msgstr "保存該版本"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:204 DialogsWxw/GraphDialog.cpp:897
+#: DialogsWxw/HistoryDialog.cpp:1195
+#, fuzzy
+msgid "&Annotate this revision"
+msgstr "保存該版本"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:205 DialogsWxw/GraphDialog.cpp:898
+#: DialogsWxw/HistoryDialog.cpp:1196
+#, fuzzy
+msgid "&Get this revision (sticky)"
+msgstr "取得該版本 (附著版本標籤)"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:206 DialogsWxw/GraphDialog.cpp:903
+#: DialogsWxw/HistoryDialog.cpp:1201
+#, fuzzy
+msgid "&Save this revision as..."
+msgstr "保存此版本為..."
+
+#: DialogsWxw/AnnotateListCtrl.cpp:210
+#, fuzzy
+msgid "Show &log messages"
+msgstr "顯示標籤"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:324
+#, c-format
+msgid "Retrieving log messages for %s"
+msgstr ""
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Tag"
+msgstr "TortoiseCVS - 標籤"
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Create Branch"
+msgstr "TortoiseCVS - 創建分支"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "&Tag:"
+msgstr "標籤(&T):"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "New &branch name:"
+msgstr "新分支名稱(&B):"
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+#, fuzzy
+msgid "Name of tag"
+msgstr "標籤名稱."
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+#, fuzzy
+msgid "Name of branch"
+msgstr "分支名稱."
+
+#: DialogsWxw/BranchTagDlg.cpp:111 DialogsWxw/RevOptions.cpp:80
+#: DialogsWxw/UpdateDlg.cpp:389
+msgid "&Update list..."
+msgstr "更新列表(&U)..."
+
+#: DialogsWxw/BranchTagDlg.cpp:112 DialogsWxw/MergeDlg.cpp:113
+#: DialogsWxw/RevOptions.cpp:83
+#, fuzzy
+msgid "&Scan subfolders"
+msgstr "搜索子目錄(&S)"
+
+#: DialogsWxw/BranchTagDlg.cpp:115 DialogsWxw/MergeDlg.cpp:122
+#: DialogsWxw/RevOptions.cpp:94 DialogsWxw/UpdateDlg.cpp:390
+msgid "Retrieves a list of tags and branches from the server, and puts them in the dropdown box"
+msgstr "從伺服器獲取標籤和分支列表, 並顯示在下拉框中"
+
+#: DialogsWxw/BranchTagDlg.cpp:124
+#, fuzzy
+msgid "Check that the &files are unmodified"
+msgstr "檢查這些檔案是否未修改"
+
+#: DialogsWxw/BranchTagDlg.cpp:126
+msgid "Ensures there are no uncommitted changes before performing the operation"
+msgstr "確認在此操作前沒有未提交的變更"
+
+#: DialogsWxw/BranchTagDlg.cpp:133
+msgid "&Create new tag"
+msgstr "建立新標籤(&C)"
+
+#: DialogsWxw/BranchTagDlg.cpp:134
+msgid "&Move existing tag"
+msgstr "移動存在的標籤(&M)"
+
+#: DialogsWxw/BranchTagDlg.cpp:135
+msgid "&Delete existing tag"
+msgstr "刪除已有的標籤(&D)"
+
+#: DialogsWxw/BranchTagDlg.cpp:138
+#, fuzzy
+msgid "The tag will be assigned to the repository versions nearest to your working sources. This happens directly to the repository."
+msgstr ""
+"這個標籤將被分配給離您工作代碼最近的倉庫版本.\n"
+"這將直接對倉庫操作."
+
+#: DialogsWxw/BranchTagDlg.cpp:144
+#, fuzzy
+msgid "&Create new branch"
+msgstr "建立新標籤(&C)"
+
+#: DialogsWxw/BranchTagDlg.cpp:145
+#, fuzzy
+msgid "&Move existing branch"
+msgstr "移動存在的標籤(&M)"
+
+#: DialogsWxw/BranchTagDlg.cpp:146
+#, fuzzy
+msgid "&Delete existing branch"
+msgstr "刪除已有的標籤(&D)"
+
+#: DialogsWxw/BranchTagDlg.cpp:150
+#, fuzzy
+msgid "The branch will be applied to the repository versions nearest to your working sources. This happens directly to the repository, leaving your working sources on the original branch."
+msgstr ""
+"該分支將應用到倉庫中離您本地代碼最接近的修訂版.\n"
+"這將直接對倉庫操作，使您的本地代碼直接轉到新的分支."
+
+#: DialogsWxw/BranchTagDlg.cpp:158
+#, fuzzy
+msgid ""
+"Tag and branch names can contain letters, digits, \"-\" (dash) and \"_\" (underscore) only. In particular, this means no dots, and no spaces.\n"
+"They must also start with a letter."
+msgstr ""
+"標籤和分支名稱只能包含字母, 數字, \"-\" (短橫線) 和 \"_\" (下劃線).\n"
+"中間不能有點和空格.\n"
+"他們必須是一個字母開始."
+
+#: DialogsWxw/BranchTagDlg.cpp:234
+msgid "No tags found."
+msgstr "沒有找到標籤."
+
+#: DialogsWxw/CheckoutDialog.cpp:138
+msgid "TortoiseCVS - Checkout Module"
+msgstr "TortoiseCVS - 取出模組"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:62
+msgid "Purpose of checkout"
+msgstr "取出目的"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:65
+msgid "Prevents creation of CVS admin folders"
+msgstr "禁止創建 CVS 管理檔案夾"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:67
+msgid "&Checkout - for working on the module"
+msgstr "取出 - 在該模組上工作"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:71
+msgid "&Export - for making a software release"
+msgstr "導出 - 創建一個軟件的發布版本(&E)"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:81
+msgid "Normally TortoiseCVS will checkout files so they can be modified  If you check this, TortoiseCVS will set the files to read-only and you can use the Edit option to make them changeable."
+msgstr ""
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:84
+#, fuzzy
+msgid "Check out read only"
+msgstr "按只讀方式取出檔案"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:89
+msgid "Name of folder to create"
+msgstr "被創建的檔案夾名稱"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:92
+msgid "Use this name instead of module name for the new folder"
+msgstr "使用該檔案夾名代替模組名稱"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:95
+#, fuzzy
+msgid "Use &default folder name"
+msgstr "使用模組名稱作為檔案夾名稱(&M)"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:99
+#, fuzzy
+msgid "Use &module name and tag/branch/revision as folder name"
+msgstr "使用模組名稱作為檔案夾名稱(&M)"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:100
+msgid "Enter your own &folder name"
+msgstr "輸入您自己的檔案夾名稱(&D)"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:107
+msgid "Custom folder name:"
+msgstr "定制檔案夾名稱:"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:121
+#, fuzzy
+msgid "Normally, text files checked out on Windows will use CRLF as the line ending. If you check this, TortoiseCVS will use UNIX line endings (LF only)."
+msgstr "通常, 純文字檔案在Windows中取出使用CRLF作為行尾. 如果確認, TortoiseCVS將使用Unix行尾(只有LF)."
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:124
+#, fuzzy
+msgid "Use UNIX &line endings"
+msgstr "使用Unix換行符(&L)"
+
+#: DialogsWxw/CheckQueryDlg.cpp:41 DialogsWxw/HistoryDialog.cpp:1052
+#: DialogsWxw/YesNoDialog.cpp:30
+msgid "TortoiseCVS Question"
+msgstr "TortoiseCVS 問題"
+
+#: DialogsWxw/CommandDialog.cpp:52
+#, fuzzy
+msgid "TortoiseCVS - Command"
+msgstr "TortoiseCVS - 提交"
+
+#: DialogsWxw/CommandDialog.cpp:60
+#, fuzzy
+msgid "Command"
+msgstr "注釋"
+
+#: DialogsWxw/CommandDialog.cpp:64
+msgid "CVS command"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:148 DialogsWxw/MakePatchDialog.cpp:116
+msgid "&Copy filename(s)"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:149 DialogsWxw/MakePatchDialog.cpp:117
+msgid "Copy &filename(s) with folders"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:153
+#, fuzzy
+msgid "C&ommit selected files..."
+msgstr "未編輯的檔案"
+
+#: DialogsWxw/CommitDialog.cpp:157
+#, fuzzy
+msgid "Get c&lean copy of selected files"
+msgstr "獲取此分支的幹淨拷貝 (附著版本標籤)"
+
+#: DialogsWxw/CommitDialog.cpp:168 DialogsWxw/ConflictListDialog.cpp:295
+#: DialogsWxw/MakePatchDialog.cpp:128
+msgid "&Diff..."
+msgstr "版本比較(&D)..."
+
+#: DialogsWxw/CommitDialog.cpp:169 DialogsWxw/ConflictListDialog.cpp:296
+#: ../build/TortoiseMenus.config:195
+#, fuzzy
+msgid "H&istory..."
+msgstr "歷史(&H)..."
+
+#: DialogsWxw/CommitDialog.cpp:170 DialogsWxw/ConflictListDialog.cpp:298
+#: TortoiseShell/PropSheet.cpp:242 ../build/TortoiseMenus.config:202
+msgid "Revision &Graph..."
+msgstr "版本分支圖(&G)..."
+
+#: DialogsWxw/CommitDialog.cpp:183
+msgid "CVS &Web Log..."
+msgstr "CVS 網絡日誌(&W)..."
+
+#: DialogsWxw/CommitDialog.cpp:188
+#, fuzzy
+msgid "R&estore"
+msgstr "恢復"
+
+#: DialogsWxw/CommitDialog.cpp:314
+msgid "TortoiseCVS - Commit"
+msgstr "TortoiseCVS - 提交"
+
+#: DialogsWxw/CommitDialog.cpp:333 DialogsWxw/ConflictListDialog.cpp:118
+#: DialogsWxw/EditorListDialog.cpp:95 DialogsWxw/MakePatchDialog.cpp:296
+#, c-format
+msgid "Folder: %s"
+msgstr "檔案夾: %s"
+
+#: DialogsWxw/CommitDialog.cpp:337 DialogsWxw/EditDialog.cpp:100
+#, fuzzy
+msgid "Comment History"
+msgstr "注釋歷史:"
+
+#: DialogsWxw/CommitDialog.cpp:342 DialogsWxw/EditDialog.cpp:105
+msgid "Previous comments (use Ctrl-Up and Ctrl-Down in the Comment field to select)"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:367 DialogsWxw/EditDialog.cpp:112
+#: DialogsWxw/GraphDialog.cpp:443 DialogsWxw/HistoryDialog.cpp:472
+#: DialogsWxw/HistoryDialog.cpp:478 DialogsWxw/MakeModuleDialog.cpp:70
+msgid "Comment"
+msgstr "注釋"
+
+#: DialogsWxw/CommitDialog.cpp:390 DialogsWxw/MakePatchDialog.cpp:309
+#, fuzzy
+msgid "Filetype"
+msgstr "檔案類型:"
+
+#: DialogsWxw/CommitDialog.cpp:392 DialogsWxw/ConflictListDialog.cpp:125
+#: DialogsWxw/HistoryDialog.cpp:421 DialogsWxw/MakePatchDialog.cpp:310
+#: TortoiseShell/PropSheet.cpp:214
+#, fuzzy
+msgid "Status"
+msgstr "狀態:"
+
+#: DialogsWxw/CommitDialog.cpp:393 DialogsWxw/EditorListListCtrl.cpp:43
+#: DialogsWxw/ModuleBasicsPage.cpp:339
+msgid "Bug number"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:411 DialogsWxw/MakePatchDialog.cpp:324
+msgid "To see the changes you have made, double or right click on the files above."
+msgstr "在檔案上雙擊滑鼠或按滑鼠右鍵查看您做的變更."
+
+#: DialogsWxw/CommitDialog.cpp:423 DialogsWxw/EditDialog.cpp:108
+msgid "&Wrap lines"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:427 DialogsWxw/EditDialog.cpp:138
+#: DialogsWxw/ModuleBasicsPage.cpp:345
+msgid "&Use Bug"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:432
+msgid "&Mark Bug"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:880
+msgid ""
+"You are attempting to commit but have written no comment.\n"
+"Do you wish to continue to commit without a comment?"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:888
+msgid ""
+"You are attempting to commit but have no bug number.\n"
+"Do you wish to continue the commit without the bug number?"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:57
+#, fuzzy
+msgid "TortoiseCVS - Merge Conflicts"
+msgstr "TortoiseCVS - 合併"
+
+#: DialogsWxw/ConflictDialog.cpp:362
+#, fuzzy
+msgid "Choose Merge Operation"
+msgstr "選擇外部版本比較工具"
+
+#: DialogsWxw/ConflictDialog.cpp:371
+msgid "How would you like to merge the conflicts?"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:375
+msgid "Edit with default text editor"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:380
+msgid "Two-way merge"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:385
+#, fuzzy
+msgid "Three-way merge"
+msgstr "需要合併"
+
+#: DialogsWxw/ConflictDialog.cpp:389
+msgid "Hint: Three-way merges are only possible if your merge application supports them."
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:433
+msgid "Perform Direct Merge"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:442
+msgid "TortoiseCVS has created the following temporary merge file:"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:463
+msgid "Perform Two-Way Merge"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:472 DialogsWxw/ConflictDialog.cpp:502
+msgid "TortoiseCVS has created the following temporary merge files:"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:493
+msgid "Perform Three-Way Merge"
+msgstr ""
+
+#: DialogsWxw/ConflictListDialog.cpp:84
+#, fuzzy
+msgid "TortoiseCVS - Resolve Conflicts"
+msgstr "TortoiseCVS - 合併"
+
+#: DialogsWxw/ConflictListDialog.cpp:114
+msgid "CVS encountered conflicts when trying to merge your changes in the files below. Please merge your changes manually."
+msgstr ""
+
+#: DialogsWxw/ConflictListDialog.cpp:133
+#, fuzzy
+msgid "To resolve the conflicts, double or right click on the files above."
+msgstr "在檔案上雙擊滑鼠或按滑鼠右鍵查看您做的變更."
+
+#: DialogsWxw/ConflictListDialog.cpp:138 DialogsWxw/EditorListDialog.cpp:106
+msgid "Close"
+msgstr "關閉"
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+#, fuzzy
+msgid "&Merge Conflicts..."
+msgstr "解決衝突(&R)..."
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+#, fuzzy
+msgid "Merge conflicts manually"
+msgstr "嵌套的衝突"
+
+#: DialogsWxw/ConflictListDialog.cpp:287
+msgid "&Discard local changes..."
+msgstr ""
+
+#: DialogsWxw/ConflictListDialog.cpp:288
+msgid "Delete file and get a clean copy from CVS..."
+msgstr ""
+
+#: DialogsWxw/ConflictListDialog.cpp:295
+msgid "Show differences to original revision"
+msgstr "顯示同原始版本的不同"
+
+#: DialogsWxw/ConflictListDialog.cpp:297
+msgid "Show history"
+msgstr "顯示歷史"
+
+#: DialogsWxw/ConflictListDialog.cpp:299
+msgid "Show revision graph"
+msgstr "顯示版本分支圖"
+
+#: DialogsWxw/CreditsDialog.cpp:46
+#, fuzzy
+msgid "TortoiseCVS - Credits"
+msgstr "TortoiseCVS - 提交"
+
+#: DialogsWxw/CreditsDialog.cpp:63
+msgid "Better looking icons"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:64
+msgid "Persistent dialog size patch, Annotate feature, various bugfixes and improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:65
+msgid "Catalan translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:66
+msgid "French translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:67
+msgid "CVS columns in Explorer detailed list view"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:68
+msgid "German translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:69
+msgid "Branching, tagging and merging, menu config file, various user interface improvements and bug fixes"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:70
+msgid "64-bit Windows port"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:71 DialogsWxw/CreditsDialog.cpp:74
+#: DialogsWxw/CreditsDialog.cpp:96
+msgid "Spanish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:72
+msgid "French User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:73
+msgid "Danish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:75
+msgid "Norwegian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:76
+#, fuzzy
+msgid "Icons"
+msgstr "沒有圖示"
+
+#: DialogsWxw/CreditsDialog.cpp:77
+msgid "Win32 native user interface (not used now, but provoked the migration from GTK to wxWindows)"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:78
+msgid "Romanian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:79
+msgid "Brazilian Portuguese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:80
+msgid "Project founder (no longer active), original code, Visual C++ and mingw32 compilation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:81
+msgid "Dutch translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:82
+#, fuzzy
+msgid "Revision Graph improvements"
+msgstr "版本分支圖(&G)"
+
+#: DialogsWxw/CreditsDialog.cpp:83
+msgid "Warn on empty commit comment patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:84
+msgid "Improved SSH support"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:85
+#, fuzzy
+msgid "Make new module patch"
+msgstr "創建新模組(&M)..."
+
+#: DialogsWxw/CreditsDialog.cpp:86
+msgid "Improved treelist control"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:87
+msgid "Georgian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:88
+msgid "Core developer (no longer active)"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:89
+msgid "cvs.exe pipe code prototype, Borland compilation, various bug fixes"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:90
+msgid "Commit dialog patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:91
+msgid "Make New Module edit module path patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:92
+msgid "SSPI encryption patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:93
+msgid "CVS property page, context menu"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:94
+#, fuzzy
+msgid "Default icons"
+msgstr "預設編碼"
+
+#: DialogsWxw/CreditsDialog.cpp:95 DialogsWxw/CreditsDialog.cpp:108
+msgid "Various bug fixing patches"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:97
+msgid "History dialog patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:98 DialogsWxw/CreditsDialog.cpp:101
+msgid "Korean translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:99
+msgid "Polish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:100
+msgid "Traditional Chinese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:103
+msgid "Edit options dialog, repository browser, defect tracking integration, 64-bit development platform"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:104
+msgid "Project management, User Guide, domain name, various patches"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:105
+msgid "Slovenian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:106
+msgid "CVS property page improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:107
+msgid "Charlie Vernon Smythe logo and icon"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:109
+msgid "Russian program translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:110
+msgid "Turkish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:111
+msgid "rcsinfo patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:112
+msgid "Simplified Chinese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:113
+msgid "Simplified Chinese User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:114
+msgid "Automatic use of Unix line endings patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:115
+msgid "Borland compilation, bug fix, CVS property page improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:116
+msgid "mingw32 compilation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:117
+msgid "Web site design"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:118
+msgid "Core developer, release manager, documentation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:119
+msgid "Czech translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:120
+msgid "Russian User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:121
+msgid "Japanese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:135
+#, fuzzy
+msgid ""
+"People who have contributed to TortoiseCVS\n"
+"(mouse over name to see details)"
+msgstr "對 TortoiseCVS 有貢獻的人員:"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:55
+msgid "Remove"
+msgstr "刪除"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:57
+msgid "Del"
+msgstr "刪除"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:62
+msgid "Remove All"
+msgstr "全部刪除"
+
+#: DialogsWxw/EditDialog.cpp:89
+#, fuzzy
+msgid "TortoiseCVS - Edit"
+msgstr "TortoiseCVS - 提交"
+
+#: DialogsWxw/EditDialog.cpp:127
+msgid "Bug &Number"
+msgstr ""
+
+#: DialogsWxw/EditDialog.cpp:239
+msgid "You are attempting to edit but have no bug number. Do you wish to continue the edit without the bug number?"
+msgstr ""
+
+#: DialogsWxw/EditorListDialog.cpp:66
+#, fuzzy
+msgid "TortoiseCVS - List Editors"
+msgstr "TortoiseCVS - 歷史"
+
+#: DialogsWxw/EditorListDialog.cpp:112
+#, fuzzy, c-format
+msgid "%d edited file(s)"
+msgstr "檔案顏色已修改"
+
+#: DialogsWxw/EditorListListCtrl.cpp:39
+#, fuzzy
+msgid "Editors"
+msgstr "編輯(&E)"
+
+#: DialogsWxw/EditorListListCtrl.cpp:41
+msgid "Host"
+msgstr ""
+
+#: DialogsWxw/EditorListListCtrl.cpp:42
+msgid "Local path"
+msgstr ""
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Undo"
+msgstr ""
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+#, fuzzy
+msgid "&Redo"
+msgstr "刪除(&R)"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Cu&t"
+msgstr ""
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Copy"
+msgstr ""
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+#, fuzzy
+msgid "&Paste"
+msgstr "更新(&U)"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+#, fuzzy
+msgid "&Delete"
+msgstr "刪除"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Select &All"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:28
+#, fuzzy
+msgid "TortoiseCVS - Find"
+msgstr "TortoiseCVS - 已經完成"
+
+#: DialogsWxw/FindDialog.cpp:33
+msgid "Find what: "
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:36
+msgid "Find Next"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:37
+msgid "&Mark All"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:52
+msgid "Match &Case"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:54
+msgid "Search &Up"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:56
+msgid "&Wrap Search"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:108
+#, fuzzy, c-format
+msgid "Revision Graph for %s"
+msgstr "版本分支圖(&G)"
+
+#: DialogsWxw/GraphDialog.cpp:178
+#, fuzzy, c-format
+msgid "TortoiseCVS - Revision Graph for %s"
+msgstr "TortoiseCVS - 版本分支圖"
+
+#: DialogsWxw/GraphDialog.cpp:212 DialogsWxw/HistoryDialog.cpp:489
+#, fuzzy
+msgid "Show &tags"
+msgstr "顯示標籤"
+
+#: DialogsWxw/GraphDialog.cpp:215
+#, fuzzy
+msgid "&Collapse revisions"
+msgstr "全部版本:"
+
+#: DialogsWxw/GraphDialog.cpp:242
+msgid "Set &Limits..."
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:423
+msgid "Mergepoint"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:519
+#, fuzzy
+msgid "Description"
+msgstr "描述:"
+
+#: DialogsWxw/GraphDialog.cpp:526
+#, fuzzy
+msgid "File Format"
+msgstr "檔案格式:"
+
+#: DialogsWxw/GraphDialog.cpp:534
+#, fuzzy
+msgid "Keyword substitution"
+msgstr "關鍵詞替代:"
+
+#: DialogsWxw/GraphDialog.cpp:542
+msgid "Storage options"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:550
+#, fuzzy
+msgid "Total revisions"
+msgstr "全部版本:"
+
+#: DialogsWxw/GraphDialog.cpp:666
+#, fuzzy, c-format
+msgid "Revision graph for %s"
+msgstr "版本分支圖(&G)"
+
+#: DialogsWxw/GraphDialog.cpp:899 DialogsWxw/HistoryDialog.cpp:1197
+#, fuzzy
+msgid "Get &clean copy of this revision (sticky)"
+msgstr "取得該修訂版本的幹淨拷貝 (附著版本標籤)"
+
+#: DialogsWxw/GraphDialog.cpp:900 DialogsWxw/HistoryDialog.cpp:1198
+#: ../build/TortoiseMenus.config:314
+msgid "&Tag..."
+msgstr "貼標籤(&T)..."
+
+#: DialogsWxw/GraphDialog.cpp:901 DialogsWxw/HistoryDialog.cpp:1199
+#: ../build/TortoiseMenus.config:321
+msgid "&Branch..."
+msgstr "分枝(&B)..."
+
+#: DialogsWxw/GraphDialog.cpp:908 DialogsWxw/HistoryDialog.cpp:1281
+#, fuzzy
+msgid "&Diff (selected revisions)"
+msgstr "比較(確認的修訂版本)..."
+
+#: DialogsWxw/GraphDialog.cpp:910 DialogsWxw/HistoryDialog.cpp:1283
+#, fuzzy
+msgid "&Merge changes (selected revisions)"
+msgstr "合併變更(確認的修訂版本)..."
+
+#: DialogsWxw/GraphDialog.cpp:912 DialogsWxw/HistoryDialog.cpp:1285
+#, fuzzy
+msgid "&Undo changes (selected revisions)"
+msgstr "合併變更(確認的修訂版本)..."
+
+#: DialogsWxw/GraphDialog.cpp:929 DialogsWxw/HistoryDialog.cpp:1221
+#, fuzzy
+msgid "&Get this branch (sticky)"
+msgstr "獲取此分支 (附著版本標籤)"
+
+#: DialogsWxw/GraphDialog.cpp:930 DialogsWxw/HistoryDialog.cpp:1222
+#, fuzzy
+msgid "Get &clean copy of this branch (sticky)"
+msgstr "獲取此分支的幹淨拷貝 (附著版本標籤)"
+
+#: DialogsWxw/GraphDialog.cpp:932
+msgid "Always &hide this branch"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:933
+msgid "&Only show this branch"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:946 DialogsWxw/HistoryDialog.cpp:1235
+#, fuzzy
+msgid "&Return to HEAD branch"
+msgstr "返回主(HEAD)分支"
+
+#: DialogsWxw/GraphDialog.cpp:947 DialogsWxw/HistoryDialog.cpp:1236
+#, fuzzy
+msgid "R&eturn to clean copy of HEAD branch"
+msgstr "返回主(HEAD)分支的幹淨拷貝"
+
+#: DialogsWxw/GraphDialog.cpp:949
+#, fuzzy
+msgid "Show &all branches"
+msgstr "顯示分支"
+
+#: DialogsWxw/GraphDialog.cpp:963
+msgid "Zoom &in (I)"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:964
+msgid "Zoom &out (O)"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:966
+msgid "&Save graph as bitmap..."
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:1003 DialogsWxw/HistoryDialog.cpp:939
+#: TortoiseAct/TortoiseAct.cpp:1829
+#, fuzzy, c-format
+msgid "Finished tagging in %s"
+msgstr "標記標籤完成"
+
+#: DialogsWxw/GraphDialog.cpp:1026 DialogsWxw/GraphDialog.cpp:1082
+#: DialogsWxw/HistoryDialog.cpp:961 DialogsWxw/HistoryDialog.cpp:1017
+#: TortoiseAct/TortoiseAct.cpp:1850 TortoiseAct/TortoiseAct.cpp:1907
+msgid "Internal error: Invalid action"
+msgstr "內部錯誤:無效的動作"
+
+#: DialogsWxw/GraphDialog.cpp:1033 DialogsWxw/HistoryDialog.cpp:968
+#: TortoiseAct/TortoiseAct.cpp:1856
+#, c-format
+msgid "Tagging in %s"
+msgstr "正在%s上附著標籤"
+
+#: DialogsWxw/GraphDialog.cpp:1054 DialogsWxw/HistoryDialog.cpp:989
+#: TortoiseAct/TortoiseAct.cpp:1877
+#, fuzzy, c-format
+msgid "Finished branching in %s"
+msgstr "分支動作完成"
+
+#: DialogsWxw/GraphDialog.cpp:1090 DialogsWxw/HistoryDialog.cpp:1024
+#: TortoiseAct/TortoiseAct.cpp:1913
+#, c-format
+msgid "Branching in %s"
+msgstr "正在%s上創建分支"
+
+#: DialogsWxw/GraphDialog.cpp:1188 DialogsWxw/HistoryDialog.cpp:884
+msgid "Retrieving a clean copy deletes your changes."
+msgstr "重新得到一個幹淨的拷貝, 刪除您的改動"
+
+#: DialogsWxw/GraphDialog.cpp:1188 DialogsWxw/HistoryDialog.cpp:884
+msgid "Warning"
+msgstr "警告"
+
+#: DialogsWxw/GraphDialog.cpp:1216
+#, fuzzy
+msgid "Bitmap files"
+msgstr "已編輯的檔案:"
+
+#: DialogsWxw/GraphDialog.cpp:1218
+#, fuzzy
+msgid "Save Revision Graph"
+msgstr "版本分支圖(&G)..."
+
+#: DialogsWxw/GraphDialog.cpp:1246
+msgid "Failed to save Revision Graph bitmap"
+msgstr ""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:65
+#, fuzzy
+msgid "TortoiseCVS - Revision Graph Settings"
+msgstr "TortoiseCVS - 版本分支圖"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:74
+#, fuzzy
+msgid "&Start date/time:"
+msgstr "取得日期/時間(&D):"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:75
+msgid "Do not show revisions/tags/branches before a specific date."
+msgstr ""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:77 DialogsWxw/UpdateDlg.cpp:407
+#, fuzzy
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar.\n"
+"e.g.: \"1988-09-24\"  \"yesterday\"  \"24 Sep 20:05\""
+msgstr ""
+"從日歷中選擇日期, 並/或在上面的日歷框中編輯日期和時間.\n"
+"例如: \"1988-09-24\"  \"yesterday\"  \"24 Sep 20:05\""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:96
+#, fuzzy
+msgid "&End date/time:"
+msgstr "取得日期/時間(&D):"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:97
+msgid "Do not show revisions/tags/branches after a specific date."
+msgstr ""
+
+#: DialogsWxw/HistoryDialog.cpp:100 DialogsWxw/HistoryDialog.cpp:328
+#, fuzzy, c-format
+msgid "History for %s"
+msgstr "歷史(&I)"
+
+#: DialogsWxw/HistoryDialog.cpp:170
+#, fuzzy, c-format
+msgid "%d revision(s)"
+msgstr "全部版本:"
+
+#: DialogsWxw/HistoryDialog.cpp:371
+#, fuzzy, c-format
+msgid "TortoiseCVS - History for %s"
+msgstr "TortoiseCVS - 歷史"
+
+#: DialogsWxw/HistoryDialog.cpp:409 DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/ModuleBasicsPage.cpp:214 TortoiseShell/PropSheet.cpp:217
+#, fuzzy
+msgid "CVSROOT"
+msgstr "CVSROOT:"
+
+#: DialogsWxw/HistoryDialog.cpp:414
+#, fuzzy
+msgid "Sticky tag"
+msgstr "附著標籤:"
+
+#: DialogsWxw/HistoryDialog.cpp:432 TortoiseShell/PropSheet.cpp:232
+#, fuzzy
+msgid "File format"
+msgstr "檔案格式:"
+
+#: DialogsWxw/HistoryDialog.cpp:450
+msgid "Other"
+msgstr ""
+
+#: DialogsWxw/HistoryDialog.cpp:470
+msgid "Changes"
+msgstr "變更"
+
+#: DialogsWxw/HistoryDialog.cpp:540
+msgid "Apply"
+msgstr "應用"
+
+#: DialogsWxw/HistoryDialog.cpp:719
+msgid "Changing comment"
+msgstr "改變注釋"
+
+#: DialogsWxw/HistoryDialog.cpp:757
+msgid "(None)"
+msgstr "(沒有)"
+
+#: DialogsWxw/HistoryDialog.cpp:1050
+#, c-format
+msgid ""
+"You have changed the comment of revision %s.\n"
+"Do you want to save it?"
+msgstr ""
+
+#: DialogsWxw/HistoryDialog.cpp:1205
+msgid "C&opy comment to clipboard"
+msgstr ""
+
+#: DialogsWxw/IconSetDialog.cpp:44
+msgid "In CVS"
+msgstr "在 CVS 中"
+
+#: DialogsWxw/IconSetDialog.cpp:45
+msgid "In CVS, read-only"
+msgstr "在 CVS 中, 只讀"
+
+#: DialogsWxw/IconSetDialog.cpp:50
+msgid "Ignored by CVS"
+msgstr "被 CVS 忽略"
+
+#: DialogsWxw/IconSetDialog.cpp:86
+#, fuzzy
+msgid "TortoiseCVS - Icon sets"
+msgstr "TortoiseCVS - 圖示集"
+
+#: DialogsWxw/IconSetDialog.cpp:94
+msgid "Please select an icon set to be used as overlay icons:"
+msgstr "請選擇您想要的圖示集"
+
+#: DialogsWxw/IconSetDialog.cpp:107
+msgid "Icon preview:"
+msgstr "圖示預覽:"
+
+#: DialogsWxw/IconSetDialog.cpp:166 DialogsWxw/PreferencesDialog.cpp:579
+#: DialogsWxw/PreferencesDialog.cpp:787
+msgid "No icons"
+msgstr "沒有圖示"
+
+#: DialogsWxw/LogConfigDialog.cpp:80
+msgid "TortoiseCVS - Web Log Configuration"
+msgstr "TortoiseCVS - 網絡日誌配置"
+
+#: DialogsWxw/LogConfigDialog.cpp:97
+msgid "Web log URL &prefix:"
+msgstr "網絡日誌URL前綴(&P):"
+
+#: DialogsWxw/LogConfigDialog.cpp:107
+msgid "&Suffix:"
+msgstr "後綴(&S):"
+
+#: DialogsWxw/LogConfigDialog.cpp:116
+msgid "&Plain text log (if your server doesn't support web log)"
+msgstr "純純文字日誌(如果您的伺服器不支持網絡日誌)(&P)"
+
+#: DialogsWxw/LogConfigDialog.cpp:120
+msgid "&Automatically scan the server for the URL (again)"
+msgstr "自動掃描該伺服器搜索URL(&A)"
+
+#: DialogsWxw/LoginDialog.cpp:32
+msgid "Password:"
+msgstr "密碼:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97 DialogsWxw/ModuleBasicsPage.cpp:208
+#, fuzzy
+msgid "Protocol"
+msgstr "協議:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98 DialogsWxw/ModuleBasicsPage.cpp:209
+msgid "Protocol parameters"
+msgstr ""
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99 DialogsWxw/ModuleBasicsPage.cpp:210
+#, fuzzy
+msgid "Server"
+msgstr "伺服器:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100 DialogsWxw/ModuleBasicsPage.cpp:211
+#, fuzzy
+msgid "Repository folder"
+msgstr "倉庫檔案夾:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101 DialogsWxw/ModuleBasicsPage.cpp:212
+#, fuzzy
+msgid "User name"
+msgstr "用戶名:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104 DialogsWxw/ModuleBasicsPage.cpp:215
+#, fuzzy
+msgid "Port"
+msgstr "埠號:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:108 DialogsWxw/ModuleBasicsPage.cpp:221
+msgid "Previous CVSROOTs"
+msgstr "先前的 CVSROOT 列表"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:148 DialogsWxw/ModuleBasicsPage.cpp:290
+msgid "Password server (:pserver:)"
+msgstr "口令授權服務協議 (:pserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:149 DialogsWxw/ModuleBasicsPage.cpp:291
+msgid "Windows authentication (:sspi:)"
+msgstr "Windows授權協議 (:sspi:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:150 DialogsWxw/ModuleBasicsPage.cpp:293
+msgid "Secure shell (:ext:)"
+msgstr "ssh授權協議 (:ext:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:151 DialogsWxw/ModuleBasicsPage.cpp:295
+#, fuzzy
+msgid "Secure shell (:ssh:)"
+msgstr "ssh授權協議 (:ext:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:152 DialogsWxw/ModuleBasicsPage.cpp:296
+msgid "Remote shell (:server:)"
+msgstr "遠程 shell (:server:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:153 DialogsWxw/ModuleBasicsPage.cpp:297
+msgid "Locally mounted folder (:local:)"
+msgstr "本地裝載(mount)目錄(:local:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:154 DialogsWxw/ModuleBasicsPage.cpp:298
+msgid "Kerberos (:gserver:)"
+msgstr "Kerberos 協議 (:gserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:155 DialogsWxw/ModuleBasicsPage.cpp:299
+msgid "SSL (:sserver:)"
+msgstr "SSL 協議 (:sserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:156
+msgid "Named pipe (:ntserver:)"
+msgstr "命名管道 (:ntserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:199 DialogsWxw/ModuleBasicsPage.cpp:375
+msgid "&Fetch list..."
+msgstr "獲取列表(&F)..."
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:216 DialogsWxw/ModuleBasicsPage.cpp:173
+msgid "How your machine should connect to the CVS repository"
+msgstr "您的計算機同 CVS 倉庫的通訊協議方式"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:217 DialogsWxw/ModuleBasicsPage.cpp:174
+msgid "Parameters associated with this protocol"
+msgstr ""
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:218 DialogsWxw/ModuleBasicsPage.cpp:175
+msgid "The computer that the CVS repository is on"
+msgstr "CVS 倉庫所在的計算機"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:219 DialogsWxw/ModuleBasicsPage.cpp:176
+msgid "Location of the repository on the server"
+msgstr "在此伺服器上的倉庫位置"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:220 DialogsWxw/ModuleBasicsPage.cpp:177
+msgid "The user name that CVS should use"
+msgstr "用於 CVS 登錄驗證的用戶名稱"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:221
+msgid "The name of the module"
+msgstr "模組名稱"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:222 DialogsWxw/ModuleBasicsPage.cpp:179
+msgid "Technical details of the CVSROOT which TortoiseCVS is going to use"
+msgstr "TortoiseCVS 使用的 CVSROOT 技術細節"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:223 DialogsWxw/ModuleBasicsPage.cpp:180
+msgid "Retrieves a list of modules from the server, and puts them in the dropdown box"
+msgstr "從伺服器上取回模組名稱，並顯示在下拉框中"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:224
+#, fuzzy
+msgid "The TCP port of your CVS server process"
+msgstr "CVS伺服器的 TCP 埠號"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:252 DialogsWxw/ModuleBasicsPage.cpp:446
+msgid "Click here and paste in the CVSROOT"
+msgstr "單擊此處並粘貼在CVSROOT中"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:488
+#: DialogsWxw/ModuleBasicsPage.cpp:1009
+msgid "Module list not available for server"
+msgstr "不能從伺服器上取回模組清單"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:493
+#: DialogsWxw/ModuleBasicsPage.cpp:1014
+#, fuzzy
+msgid ""
+"Ask your administrator to either install a web browser interface on the server (CVSweb or ViewCVS) or add the modules to the CVSROOT/modules file.\n"
+"\n"
+"Meanwhile, you'll have to find the module name elsewhere."
+msgstr ""
+"詢問您的系統管理員是否在伺服器上安裝了一個網頁瀏覽接口(CVSWeb or ViewCVS) 或在CVSROOT/modules 檔案中新增了模組列表\n"
+"\n"
+"否則, 您需要其他方法得到模組名稱"
+
+#: DialogsWxw/MakeModuleDialog.cpp:56
+msgid "TortoiseCVS - Make New Module"
+msgstr "TortoiseCVS - 創建新模組"
+
+#: DialogsWxw/MakeModuleDialog.cpp:77
+msgid "Check out files read-only"
+msgstr "按只讀方式取出檔案"
+
+#: DialogsWxw/MakeModuleDialog.cpp:79
+msgid "Run 'cvs watch on' on the new module so that files will be checked out read-only"
+msgstr "在新模組中運行'cvs watch on'命令, 以便檔案以只讀形式取出"
+
+#: DialogsWxw/MakePatchDialog.cpp:240
+#, fuzzy
+msgid "TortoiseCVS - Make Patch"
+msgstr "TortoiseCVS - 創建分支"
+
+#: DialogsWxw/MakePatchDialog.cpp:302
+#, fuzzy
+msgid "&Add files..."
+msgstr "顯示已編輯的檔案(&S)..."
+
+#: DialogsWxw/MakePatchDialog.cpp:566 TortoiseAct/TortoiseAct.cpp:631
+#, fuzzy
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS."
+msgstr ""
+"沒有任何檔案可以新增.\n"
+"\n"
+"所有的檔案,檔案夾和您已經選擇的內容已經在CVS中, 或則被列在在忽略檔案中了."
+
+#: DialogsWxw/MakePatchDialog.cpp:569 TortoiseAct/TortoiseAct.cpp:634
+#, fuzzy
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS, or are specified in a .cvsignore file."
+msgstr ""
+"沒有任何檔案可以新增.\n"
+"\n"
+"所有的檔案,檔案夾和您已經選擇的內容已經在CVS中, 或則被列在在忽略檔案中了."
+
+#: DialogsWxw/MakePatchDialog.cpp:592
+#, fuzzy
+msgid "TortoiseCVS - Add files to patch"
+msgstr "TortoiseCVS - 新增"
+
+#: DialogsWxw/MakePatchDialog.cpp:593
+#, fuzzy
+msgid "Select files to add to the patch"
+msgstr "確認新增這些檔案."
+
+#: DialogsWxw/MergeDlg.cpp:75
+msgid "TortoiseCVS - Merge"
+msgstr "TortoiseCVS - 合併"
+
+#: DialogsWxw/MergeDlg.cpp:88
+#, fuzzy
+msgid "Start:"
+msgstr "狀態:"
+
+#: DialogsWxw/MergeDlg.cpp:96
+msgid "End:"
+msgstr ""
+
+#: DialogsWxw/MergeDlg.cpp:105 DialogsWxw/MergeDlg.cpp:106
+#, fuzzy
+msgid "Name of revision/tag/branch to merge into your working folder."
+msgstr "版本/標籤/分支 合併到本地目錄. "
+
+#: DialogsWxw/MergeDlg.cpp:112
+msgid "&Update lists..."
+msgstr "更新列表(&U)..."
+
+#: DialogsWxw/MergeDlg.cpp:115
+#, fuzzy
+msgid "Suppress keyword &expansion"
+msgstr "關鍵字擴展:"
+
+#: DialogsWxw/MergeDlg.cpp:125
+msgid "Suppress expansion of keywords to avoid spurious conflicts"
+msgstr ""
+
+#: DialogsWxw/MergeDlg.cpp:135
+msgid "Create missing subfolders"
+msgstr "創建丟失的子目錄"
+
+#: DialogsWxw/MergeDlg.cpp:137 DialogsWxw/UpdateDlg.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:492
+msgid "Create any folders that exist in the repository if they are missing from the working folder."
+msgstr "創建倉庫中存在,而工作目錄中丟失的目錄"
+
+#: DialogsWxw/MergeDlg.cpp:146
+#, fuzzy
+msgid ""
+"The changes between the specified revisions/tags/branches will be merged into your current working sources. If you want to merge an entire branch, enter the branch name in the first edit field and leave the second one blank.\n"
+"The repository is not altered until a commit is performed."
+msgstr ""
+"指定的版本/標籤/分支將被合併到您的當前工作代碼中。\n"
+"如果您希望合併整個分支，請在第一個欄位中輸入分支名稱，第二個保持空白。\n"
+"倉庫將在您提交以後才會改變。"
+
+#: DialogsWxw/MergeDlg.cpp:163
+#, fuzzy
+msgid "Merge changes between the following branches/tags/revisions:"
+msgstr "以標籤/分支/修訂版本合併變更"
+
+#: DialogsWxw/MergeDlg.cpp:198 DialogsWxw/RevOptions.cpp:203
+#: DialogsWxw/UpdateDlg.cpp:327
+msgid "No tags or branches found."
+msgstr "沒有找到指定的標籤或分支."
+
+#: DialogsWxw/ModuleBasicsPage.cpp:178
+msgid "The name of the module, or full path of any file or folder in the module"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:181
+#, fuzzy
+msgid "The TCP port of your CVS server process (optional)"
+msgstr "CVS伺服器的 TCP 埠號"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:182
+msgid "Do a CVS Edit on the file/folder after checkout"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:183
+msgid "Mark edit with bug number"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:342 ../build/TortoiseMenus.config:133
+#: ../build/TortoiseMenus.config:223 ../build/TortoiseMenus.config:229
+msgid "&Edit"
+msgstr "編輯(&E)"
+
+#: DialogsWxw/PreferencesDialog.cpp:165 DialogsWxw/PreferencesDialog.cpp:361
+#, fuzzy
+msgid "TortoiseCVS - Preferences"
+msgstr "TortoiseCVS 參數選擇"
+
+#: DialogsWxw/PreferencesDialog.cpp:169 DialogsWxw/PreferencesDialog.cpp:374
+msgid "Global"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:341
+#, fuzzy
+msgid ""
+"You have selected a different icon set - it won't take effect until Windows Explorer is restarted.\n"
+"You can log off or reboot the system, or TortoiseCVS can simply restart the Explorer process for you.\n"
+"Do you want to restart the Explorer process?"
+msgstr "您已經選擇了一個不同的圖示集 - 它將在您注銷或重新啟動計算機後生效"
+
+#: DialogsWxw/PreferencesDialog.cpp:483 DialogsWxw/PreferencesDialog.cpp:501
+#: DialogsWxw/PreferencesDialog.cpp:585
+msgid "Browse..."
+msgstr "瀏覽..."
+
+#: DialogsWxw/PreferencesDialog.cpp:588
+msgid "Rebuild..."
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:601
+msgid "Sample text"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:608
+#, fuzzy
+msgid "Select colour..."
+msgstr "選擇顏色..."
+
+#: DialogsWxw/PreferencesDialog.cpp:799 TortoiseAct/TortoiseAct.cpp:3388
+msgid "Error rebuilding icons. You may not have the required permissions."
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:810
+msgid "Cache has been cleared"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:822
+#, fuzzy
+msgid "Ignored files"
+msgstr "已忽略檔案的顏色"
+
+#: DialogsWxw/PreferencesDialog.cpp:824
+msgid "Per-user list of cvsignore file name patterns"
+msgstr "預定義的忽略檔案列表"
+
+#: DialogsWxw/PreferencesDialog.cpp:832
+msgid "Hint: To reset the list and include all files, enter a single exclamation mark (\"!\")."
+msgstr "提示: 重新設置此列表和包含的所有檔案, 鍵入嘆號(\"!\")"
+
+#: DialogsWxw/PreferencesDialog.cpp:838
+msgid "A list of files (or file name patterns like \"*.exe\") that CVS ignores when running certain operations. The entries must be separated by whitespace and are appended to the default built-in ignored list. A single exclamation mark (\"!\") resets the list. For details refer to the original CVS documentation."
+msgstr "當執行操作時, CVS忽略的檔案列表 (或檔案通配符, 如\"*.exe\"). 這些條目必須由空格分開, 並新增到預設內嵌的忽略清單中. 單個驚嘆號(\"!\")重置這個清單. 詳情請參看CVS自身參考文檔."
+
+#: DialogsWxw/PreferencesDialog.cpp:870
+msgid "Scope"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:872
+#, fuzzy
+msgid "Preference &scope"
+msgstr "選項(&P)..."
+
+#: DialogsWxw/PreferencesDialog.cpp:875
+msgid "Whether to set preferences globally or for the current module"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:879
+msgid "Set global preferences"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:894 DialogsWxw/PreferencesDialog.cpp:905
+#, c-format
+msgid "PrefControl index %d not found"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:150 ProgressDialogStub.cpp:36
+msgid "TortoiseCVS - Working"
+msgstr "TortoiseCVS - 處理中"
+
+#: DialogsWxw/ProgressDialog.cpp:159
+msgid "TortoiseCVS - Finished"
+msgstr "TortoiseCVS - 已經完成"
+
+#: DialogsWxw/ProgressDialog.cpp:180
+#, fuzzy
+msgid "Working..."
+msgstr "正在打開..."
+
+#: DialogsWxw/ProgressDialog.cpp:188
+msgid "Abort"
+msgstr "中止"
+
+#: DialogsWxw/ProgressDialog.cpp:205
+msgid "Close on completion"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:542
+msgid "TortoiseCVS - Aborting"
+msgstr "TortoiseCVS - 正在中止"
+
+# Created by menus2po which converts a TortoiseCVS
+# menu configuration file to a GNU gettext .po file.
+# Generation date: Sat May 10 23:11:00 RDT 2003
+#: DialogsWxw/ProgressDialog.cpp:543
+#, fuzzy
+msgid "Aborting..."
+msgstr "關於(&A)"
+
+#: DialogsWxw/ProgressDialog.cpp:578
+msgid "TortoiseCVS - Aborted"
+msgstr "TortoiseCVS - 已經中止"
+
+#: DialogsWxw/ProgressDialog.cpp:579
+#, fuzzy
+msgid "Aborted"
+msgstr "中止"
+
+#: DialogsWxw/ProgressDialog.cpp:585
+#, fuzzy
+msgid "Finished"
+msgstr "新增完成"
+
+#: DialogsWxw/ProgressDialog.cpp:813
+msgid "Output"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:896
+msgid "Copy"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:903
+#, fuzzy
+msgid "Select All"
+msgstr "選擇顏色..."
+
+#: DialogsWxw/ReleaseDialog.cpp:43 TortoiseAct/TortoiseAct.cpp:4100
+#, fuzzy
+msgid "multiple folders"
+msgstr "空檔案夾"
+
+#: DialogsWxw/ReleaseDialog.cpp:44
+#, fuzzy, c-format
+msgid "Finished release in %s"
+msgstr "刪除完成"
+
+#: DialogsWxw/ReleaseDialog.cpp:76
+#, c-format
+msgid "CVS Release in %s will result in the following potentially destructive changes:"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:79
+#, fuzzy, c-format
+msgid "%d modified file(s)"
+msgstr "檔案顏色已修改"
+
+#: DialogsWxw/ReleaseDialog.cpp:82
+#, c-format
+msgid "%d newly added file(s) that have not been committed"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:86
+#, c-format
+msgid "%d removed file(s) that have not been committed"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:90
+#, c-format
+msgid "%d renamed file(s) that have not been committed"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:94
+#, c-format
+msgid "%d file(s) that are not under CVS control"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:97
+#, c-format
+msgid "%s will be deleted.  Are you sure you want to do this?"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:109
+#, fuzzy
+msgid "Releasing in "
+msgstr "正在恢復從"
+
+#: DialogsWxw/ReleaseDialog.cpp:122
+#, fuzzy
+msgid "TortoiseCVS - Release"
+msgstr "TortoiseCVS - 合併"
+
+#: DialogsWxw/ReleaseDialog.cpp:128
+#, fuzzy
+msgid "Release Options:"
+msgstr "選項"
+
+#: DialogsWxw/ReleaseDialog.cpp:133
+msgid "Delete files and folders that are under CVS control (-d)"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:134
+msgid "Delete contents of folders including non-cvs files (-d -f)"
+msgstr ""
+
+#: DialogsWxw/ReleaseDialog.cpp:135
+msgid "Delete CVS control files only (-e)"
+msgstr ""
+
+#: DialogsWxw/RenameDialog.cpp:53
+#, fuzzy
+msgid "TortoiseCVS - Rename"
+msgstr "TortoiseCVS - 合併"
+
+#: DialogsWxw/RenameDialog.cpp:63
+#, fuzzy, c-format
+msgid "Rename '%s' to"
+msgstr "選項"
+
+#: DialogsWxw/RenameDialog.cpp:105
+#, fuzzy
+msgid "Rename to"
+msgstr "選項"
+
+#: DialogsWxw/RevOptions.cpp:65
+msgid "Branch or tag"
+msgstr "分支或標籤"
+
+#: DialogsWxw/RevOptions.cpp:68
+msgid "Use &HEAD branch"
+msgstr "使用主(HEAD)分支(&H)"
+
+#: DialogsWxw/RevOptions.cpp:71
+msgid "&Choose branch or tag"
+msgstr "選擇分支或標籤(&C)"
+
+#: DialogsWxw/RevOptions.cpp:73
+msgid "Branch or tag name:"
+msgstr "分支或標籤名稱:"
+
+#: DialogsWxw/RevOptions.cpp:87 TortoiseAct/TortoisePreferences.cpp:503
+msgid "If no matching revision is found, use the most recent one"
+msgstr ""
+
+#: DialogsWxw/RevOptions.cpp:89 DialogsWxw/UpdateDlg.cpp:439
+msgid "If you've specified a tag / branch / date, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr ""
+
+#: DialogsWxw/RevOptions.cpp:91
+msgid "Which tag or branch should be retrieved"
+msgstr "應該取回哪一個分支(標籤)"
+
+#: DialogsWxw/RevOptions.cpp:100
+msgid "Date and time"
+msgstr "日期和時間"
+
+#: DialogsWxw/RevOptions.cpp:105
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar, e.g.\n"
+"  \"1988-09-24\"\n"
+"  \"yesterday\"\n"
+"  \"24 Sep 20:05\""
+msgstr ""
+"從日歷中選擇日期, 並/或在上面的日歷框中編輯日期和時間, 例如\n"
+"  \"1988-09-24\"\n"
+"  \"yesterday\"\n"
+"  \"24 Sep 20:05\""
+
+#: DialogsWxw/RevOptions.cpp:109
+msgid "Most &recent files"
+msgstr "最新的檔案(&R)"
+
+#: DialogsWxw/RevOptions.cpp:111
+msgid "Files at certain &time"
+msgstr "在指定時間的檔案(&T)"
+
+#: DialogsWxw/RevOptions.cpp:112
+msgid "Date/time of files to get:"
+msgstr "取回檔案的日期/時間:"
+
+#: DialogsWxw/UpdateDlg.cpp:151
+msgid "TortoiseCVS - Update"
+msgstr "TortoiseCVS - 更新"
+
+#: DialogsWxw/UpdateDlg.cpp:170
+msgid "Basic"
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:171 TortoiseAct/TortoisePreferences.cpp:45
+#: TortoiseAct/TortoisePreferences.cpp:280
+#: TortoiseAct/TortoisePreferences.cpp:297
+#: TortoiseAct/TortoisePreferences.cpp:304
+#: TortoiseAct/TortoisePreferences.cpp:316
+#: TortoiseAct/TortoisePreferences.cpp:324
+#: TortoiseAct/TortoisePreferences.cpp:332
+#: TortoiseAct/TortoisePreferences.cpp:338
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Advanced"
+msgstr "進階選項"
+
+#: DialogsWxw/UpdateDlg.cpp:370
+msgid "Get &tag/branch/revision:"
+msgstr "取得標籤/分支/修訂版本(&T):"
+
+#: DialogsWxw/UpdateDlg.cpp:372
+msgid "Switches your working copy to a specific branch/tag/revision. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "更改您的工作拷貝到一個特定分支/標籤/版本. 隱藏著粘貼標籤, 並發性更新, 提交等等. 將在這個版本上操作."
+
+#: DialogsWxw/UpdateDlg.cpp:383
+msgid "Branch/Tag/Revision specifier"
+msgstr "分支/標籤/修訂版本指定"
+
+#: DialogsWxw/UpdateDlg.cpp:394
+msgid "Scan subdirs"
+msgstr "檢查子目錄"
+
+#: DialogsWxw/UpdateDlg.cpp:402
+msgid "Get &date/time:"
+msgstr "取得日期/時間(&D):"
+
+#: DialogsWxw/UpdateDlg.cpp:404
+msgid "Switches your working copy to the latest version before a specific date. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "更改您的工作拷貝到制定日期前的最後版本。隱藏著粘貼標籤，並發性更新，提交等等。將在這個版本上操作。"
+
+#: DialogsWxw/UpdateDlg.cpp:427
+msgid "&Clean copy - WARNING:  this deletes your changes"
+msgstr "幹淨的拷貝 - 警告: 這將刪除您所作的變更(&C)"
+
+#: DialogsWxw/UpdateDlg.cpp:429
+msgid ""
+"Overwrite any locally modified files during the update.\n"
+"They are backed up to .#file.revision in case you do this by mistake."
+msgstr ""
+"在更新操作時覆蓋任何本地修訂的檔案.\n"
+"當您在錯誤操作時,他們被備份成 .#檔案名稱.版本號."
+
+#: DialogsWxw/UpdateDlg.cpp:432
+#, fuzzy
+msgid "Create missing &subfolders"
+msgstr "創建丟失的子目錄"
+
+#: DialogsWxw/UpdateDlg.cpp:437
+msgid "If no &matching revision is found, use the most recent one"
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:462
+#, fuzzy
+msgid "Get &folder:"
+msgstr "主檔案夾"
+
+#: DialogsWxw/UpdateDlg.cpp:464
+msgid "Perform the update on the specified folder only. Useful for getting a single new folder without getting all other new folders."
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:476
+#, fuzzy
+msgid "&Simulate update"
+msgstr "完成更新"
+
+#: DialogsWxw/UpdateDlg.cpp:477
+msgid "Do not execute anything that will change the disk."
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:479
+#, fuzzy
+msgid "&Prune empty folders"
+msgstr "刪除空檔案夾(&E)"
+
+#: DialogsWxw/UpdateDlg.cpp:480
+msgid "Delete any folders that do not contain files."
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:482
+msgid "&Recurse"
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:483
+#, fuzzy
+msgid "Update subfolders."
+msgstr "搜索子目錄(&S)"
+
+#: DialogsWxw/YesNoAllDialog.cpp:63
+#, fuzzy
+msgid "TortoiseCVS - Question"
+msgstr "TortoiseCVS 問題"
+
+#: DialogsWxw/YesNoAllDialog.cpp:75
+msgid "&Yes"
+msgstr ""
+
+#: DialogsWxw/YesNoAllDialog.cpp:77
+#, fuzzy
+msgid "&No"
+msgstr "(沒有)"
+
+#: DialogsWxw/YesNoAllDialog.cpp:84
+msgid "Yes to &all"
+msgstr ""
+
+#: DialogsWxw/YesNoAllDialog.cpp:86
+msgid "N&o to all"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:314
+msgid "Unknown verb:"
+msgstr "未知的動詞:"
+
+#: TortoiseAct/TortoiseAct.cpp:326
+#, fuzzy
+msgid ""
+"Too few arguments passed to TortoiseAct.\n"
+"\n"
+"TortoiseAct is designed to be run by the Explorer extension TrtseShl.dll. You don't need to run it yourself unless you have a special purpose.\n"
+"\n"
+"Command line arguments:\n"
+"TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"
+msgstr ""
+"太少的參數傳給TortoiseAct.\n"
+"\n"
+"TortoiseAct 被設計為被TrtseShl.dll所運行. 除非您有特殊目的您不需要直接運行他.\n"
+"\n"
+"命令行參數:\n"
+"TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"
+
+#: TortoiseAct/TortoiseAct.cpp:351
+#, fuzzy, c-format
+msgid "Invalid arguments passed to TortoiseAct (expected handle \"-h 0xXXXXXXXX\", got %s)"
+msgstr "無效的參數傳遞給TortoiseAct (期望句柄 \"-h 0xXXXXXXXX\")"
+
+#: TortoiseAct/TortoiseAct.cpp:364
+msgid "File containing input filenames not found:"
+msgstr "包含的輸入檔案沒有發現:"
+
+#: TortoiseAct/TortoiseAct.cpp:398
+msgid "Empty file list disallowed"
+msgstr "不允許空檔案列表"
+
+#: TortoiseAct/TortoiseAct.cpp:476
+#, fuzzy, c-format
+msgid "Finished add in %s"
+msgstr "新增完成"
+
+#: TortoiseAct/TortoiseAct.cpp:568
+#, c-format
+msgid "Adding in %s"
+msgstr "正在新增進%s"
+
+#: TortoiseAct/TortoiseAct.cpp:654
+msgid "There is nothing to add or commit."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:712 TortoiseAct/TortoiseAct.cpp:727
+#, fuzzy, c-format
+msgid "Finished adding to .cvsignore in %s"
+msgstr "新增到忽略檔案(.cvsignore)完成"
+
+#: TortoiseAct/TortoiseAct.cpp:799 TortoiseAct/TortoiseAct.cpp:904
+#: TortoiseAct/TortoiseAct.cpp:3545
+#, fuzzy, c-format
+msgid "Finished checkout in %s"
+msgstr "取出完成"
+
+#: TortoiseAct/TortoiseAct.cpp:813 TortoiseAct/TortoiseAct.cpp:3589
+msgid "No tag specified for Export, using HEAD"
+msgstr "在導出時沒有指明標籤,使用預設的HEAD標籤"
+
+#: TortoiseAct/TortoiseAct.cpp:860 TortoiseAct/TortoiseAct.cpp:918
+#: TortoiseAct/TortoiseAct.cpp:3587
+#, c-format
+msgid "Checking out in %s"
+msgstr "正在取出到%s"
+
+#: TortoiseAct/TortoiseAct.cpp:921
+msgid "You can now compile the TortoiseCVS code."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:923
+msgid "Create a patch file: If you fix some bugs or add some new features, please submit the changes for other users.  Right click on the changed files or folders and choose Make Patch from the CVS submenu."
+msgstr "創建補丁檔案: 如果您修訂了一些錯誤或新增了一些新特性, 請為其他用戶提交變更檔案. 在變更的檔案或檔案夾上按右鍵並在CVS子菜單上選擇生成補丁."
+
+#: TortoiseAct/TortoiseAct.cpp:943
+msgid "You should not create a module in the root folder of a drive."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:967
+#, fuzzy, c-format
+msgid "Finished make new module in %s"
+msgstr "創建新模組完成"
+
+#: TortoiseAct/TortoiseAct.cpp:978
+msgid "Importing"
+msgstr "正在導入"
+
+#: TortoiseAct/TortoiseAct.cpp:998
+msgid "Checking out"
+msgstr "正在取出"
+
+#: TortoiseAct/TortoiseAct.cpp:1010
+msgid "Enabling watch"
+msgstr "正在打開監視功能"
+
+#: TortoiseAct/TortoiseAct.cpp:1015
+msgid ""
+"Tortoise Tip: The top-level folder has now been created in CVS.\n"
+"To add files and subfolders, invoke the CVS Add Contents command."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1056
+msgid ""
+"There is nothing to commit.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"沒有檔案可以提交.\n"
+"\n"
+"所有您選擇的檔案和檔案夾在最後一次提交後沒有變更."
+
+#: TortoiseAct/TortoiseAct.cpp:1104
+#, fuzzy, c-format
+msgid "Finished log in %s"
+msgstr "日誌完成"
+
+#: TortoiseAct/TortoiseAct.cpp:1126
+#, c-format
+msgid "Logging in %s"
+msgstr "正在記錄日誌到 %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1181
+#, c-format
+msgid "Are you sure that you want to CVS Remove all files in the folder '%s'?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1184
+#, c-format
+msgid "Are you sure that you want to CVS Remove '%s'?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1187
+#, c-format
+msgid "Are you sure that you want to CVS Remove these %d items?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1256
+msgid "No files found that could be removed.\n"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1257
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, and then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1265
+#, fuzzy, c-format
+msgid "Finished remove in %s"
+msgstr "刪除完成"
+
+#: TortoiseAct/TortoiseAct.cpp:1324
+#, c-format
+msgid ""
+"The file\n"
+"\n"
+"%s\n"
+"is modified. Are you sure that you want to remove it and thus lose your changes?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1331
+#, c-format
+msgid ""
+"The files\n"
+"\n"
+"%s\n"
+"are modified. Are you sure that you want to remove them and thus lose your changes?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1339 TortoiseAct/TortoiseAct.cpp:2428
+#, c-format
+msgid "Editing in %s"
+msgstr "正在編輯 %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1356
+#, c-format
+msgid "Removing in %s"
+msgstr "正在刪除 %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1374
+#, c-format
+msgid ""
+"Couldn't rename file:\n"
+"%s to %s"
+msgstr ""
+"不能更改檔案名:\n"
+"%s 為 %s:"
+
+#: TortoiseAct/TortoiseAct.cpp:1409 TortoiseAct/TortoiseAct.cpp:1431
+#, c-format
+msgid ""
+"Couldn't rename file back:\n"
+"%s to %s"
+msgstr ""
+"不能重命名檔案:\n"
+"%s 為 %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1459
+#, fuzzy
+msgid "Couldn't recycle"
+msgstr ""
+"不能更改檔案名:\n"
+"%s 為 %s:"
+
+#: TortoiseAct/TortoiseAct.cpp:1466
+#, fuzzy
+msgid "No removable files found"
+msgstr "允許可移動磁盤"
+
+#: TortoiseAct/TortoiseAct.cpp:1488
+msgid ""
+"Tortoise Tip: Any removed files have been moved to the Recycle Bin.\n"
+"To undo the remove: Choose CVS Commit, right-click the file, and click Restore.\n"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1490
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1520
+#, fuzzy, c-format
+msgid "Finished rename in %s"
+msgstr "刪除完成"
+
+#: TortoiseAct/TortoiseAct.cpp:1540
+#, fuzzy, c-format
+msgid "Finished restoring in %s"
+msgstr "恢復已完成"
+
+#: TortoiseAct/TortoiseAct.cpp:1583
+#, fuzzy, c-format
+msgid "Restoring in %s"
+msgstr "正在恢復從"
+
+#: TortoiseAct/TortoiseAct.cpp:1661
+#, fuzzy, c-format
+msgid "Finished update in %s"
+msgstr "完成更新"
+
+#: TortoiseAct/TortoiseAct.cpp:1715
+#, c-format
+msgid "Updating in %s"
+msgstr "正在更新 %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1769
+#, fuzzy, c-format
+msgid "Finished clean update in %s"
+msgstr "完成更新"
+
+#: TortoiseAct/TortoiseAct.cpp:1781
+#, fuzzy, c-format
+msgid "Doing clean update in %s"
+msgstr "完成更新"
+
+#: TortoiseAct/TortoiseAct.cpp:1979
+#, c-format
+msgid "Editing before merge in %s"
+msgstr "正在編輯, 在合併到 %s 前"
+
+#: TortoiseAct/TortoiseAct.cpp:2039
+#, fuzzy, c-format
+msgid "Finished merge in %s"
+msgstr "合併完成"
+
+#: TortoiseAct/TortoiseAct.cpp:2058
+#, c-format
+msgid "Merging in %s"
+msgstr "正在合併 %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2147
+msgid "unknown"
+msgstr "未知"
+
+#: TortoiseAct/TortoiseAct.cpp:2203 TortoiseAct/TortoiseAct.cpp:3881
+msgid "Failed to reprocess file list"
+msgstr "重新處理檔案列表失敗"
+
+#: TortoiseAct/TortoiseAct.cpp:2212
+#, fuzzy, c-format
+msgid "Finished making patch in %s"
+msgstr "打補丁完成"
+
+#: TortoiseAct/TortoiseAct.cpp:2234
+#, c-format
+msgid "Making patch in %s"
+msgstr "正在打補丁 %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2248
+msgid ""
+"There are no patches.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"沒有補丁.\n"
+"\n"
+"在您最後一次體檢以後您選擇的所有檔案和檔案夾都沒有變更."
+
+#: TortoiseAct/TortoiseAct.cpp:2254
+#, fuzzy
+msgid "Patch files"
+msgstr "保存補丁檔案"
+
+#: TortoiseAct/TortoiseAct.cpp:2256
+#, fuzzy
+msgid "Text files"
+msgstr "該檔案 "
+
+#: TortoiseAct/TortoiseAct.cpp:2258 TortoiseAct/TortoiseAct.cpp:3251
+#, fuzzy
+msgid "All files"
+msgstr "所有檔案|*.*"
+
+#: TortoiseAct/TortoiseAct.cpp:2261
+msgid "Save patch file"
+msgstr "保存補丁檔案"
+
+#: TortoiseAct/TortoiseAct.cpp:2426
+#, fuzzy, c-format
+msgid "Finished edit in %s"
+msgstr "編輯完成"
+
+#: TortoiseAct/TortoiseAct.cpp:2508
+#, fuzzy, c-format
+msgid "Finished unedit in %s"
+msgstr "撤銷編輯(unedit)完成"
+
+#: TortoiseAct/TortoiseAct.cpp:2522
+#, c-format
+msgid "Unediting in %s"
+msgstr "對%s正在撤銷編輯(unedit)"
+
+#: TortoiseAct/TortoiseAct.cpp:2539
+#, fuzzy, c-format
+msgid "Finished list editors in %s"
+msgstr "列出編輯者清單完成"
+
+#: TortoiseAct/TortoiseAct.cpp:2827
+msgid "Merging changes in binary files is not allowed."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:2897
+msgid "The selected file doesn't contain any conflict markers"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:2910
+#, c-format
+msgid ""
+"File containing your changes: %s\n"
+"File containing repository changes: %s\n"
+"Please merge your changes into: %s"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:2946
+#, c-format
+msgid "Do you want to overwrite your working copy of \"%s\" with your merge results in \"%s\"?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:2949
+msgid "Save merged file"
+msgstr "保存合併後的檔案"
+
+#: TortoiseAct/TortoiseAct.cpp:2960
+#, c-format
+msgid "Failed to overwrite %s"
+msgstr "覆蓋 %s 失敗"
+
+#: TortoiseAct/TortoiseAct.cpp:3250
+msgid "Save file revision"
+msgstr "保存檔案版本"
+
+#: TortoiseAct/TortoiseAct.cpp:3351
+msgid "There are no conflicts to resolve"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3461
+#, fuzzy, c-format
+msgid "Finished '%s' in %s"
+msgstr "新增完成"
+
+#: TortoiseAct/TortoiseAct.cpp:3487
+msgid "Invalid cvs:// URL"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3497
+msgid "Invalid cvs:// URL: no module specified"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3510
+#, c-format
+msgid "Invalid CVSROOT %s specified in cvs:// URL"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3538
+msgid "Choose destination folder for CVS checkout"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3539
+#, fuzzy
+msgid "Folders"
+msgstr "檔案夾"
+
+#: TortoiseAct/TortoiseAct.cpp:3754
+msgid ""
+"The files you want to compare contain characters that cannot be represented in the current codepage.\n"
+"To prevent loss of information, the files will be temporarily converted to UTF-8."
+msgstr ""
+"您想比較的檔案包含當前代碼頁不能表示的字符.\n"
+"為防止信息丟失, 檔案將被臨時轉換為UTF-8."
+
+#: TortoiseAct/TortoiseAct.cpp:3756
+msgid "UTF-8 conversion"
+msgstr "UTF-8 轉換"
+
+#: TortoiseAct/TortoiseAct.cpp:3869
+msgid ""
+"You have tried to commit one or more renamed files without committing all changed\n"
+"(modified, added, or removed) files in the same folder.\n"
+"CVSNT does not currently support this. Please try again."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3888
+#, fuzzy, c-format
+msgid "Finished commit in %s"
+msgstr "提交完成"
+
+#: TortoiseAct/TortoiseAct.cpp:3986
+#, c-format
+msgid "Committing in %s"
+msgstr "提交到: %s "
+
+#: TortoiseAct/TortoiseActUtils.cpp:45
+msgid "Choose external diff application"
+msgstr "選擇外部版本比較工具"
+
+#: TortoiseAct/TortoiseActUtils.cpp:50
+#, fuzzy
+msgid "Choose external merge application"
+msgstr "選擇外部版本比較工具"
+
+#: TortoiseAct/TortoiseActUtils.cpp:74 TortoiseAct/TortoisePreferences.cpp:364
+#: TortoiseAct/TortoisePreferences.cpp:401
+#: TortoiseAct/TortoisePreferences.cpp:439
+#: TortoiseAct/TortoisePreferences.cpp:454
+msgid "Executables"
+msgstr "可執行檔案"
+
+#: TortoiseAct/TortoiseActUtils.cpp:109 TortoiseAct/TortoiseActUtils.cpp:137
+#, fuzzy, c-format
+msgid "Finished diff in %s"
+msgstr "比較完成"
+
+#: TortoiseAct/TortoiseActUtils.cpp:111 TortoiseAct/TortoiseActUtils.cpp:139
+#, c-format
+msgid "Diffing in %s"
+msgstr "正在比較 %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:246 TortoiseAct/TortoiseActUtils.cpp:248
+#, fuzzy, c-format
+msgid "Viewing %s"
+msgstr "正在編輯 %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:362
+#, fuzzy
+msgid "Failed to launch external diff application"
+msgstr "不能調用外部版本比較工具"
+
+#: TortoiseAct/TortoiseActUtils.cpp:414
+#, fuzzy
+msgid "Failed to launch external merge application"
+msgstr "不能調用外部版本比較工具"
+
+#: TortoiseAct/TortoisePreferences.cpp:41
+#: TortoiseAct/TortoisePreferences.cpp:177
+#: TortoiseAct/TortoisePreferences.cpp:189
+#: TortoiseAct/TortoisePreferences.cpp:199
+#: TortoiseAct/TortoisePreferences.cpp:214
+#: TortoiseAct/TortoisePreferences.cpp:221
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "Main"
+msgstr "主要選項"
+
+#: TortoiseAct/TortoisePreferences.cpp:42
+#: TortoiseAct/TortoisePreferences.cpp:472
+#: TortoiseAct/TortoisePreferences.cpp:482
+#: TortoiseAct/TortoisePreferences.cpp:490
+#: TortoiseAct/TortoisePreferences.cpp:498
+#: TortoiseAct/TortoisePreferences.cpp:507
+#: TortoiseAct/TortoisePreferences.cpp:523
+#: TortoiseAct/TortoisePreferences.cpp:537
+#: TortoiseAct/TortoisePreferences.cpp:549
+#: TortoiseAct/TortoisePreferences.cpp:560
+#: TortoiseAct/TortoisePreferences.cpp:570
+msgid "Policy"
+msgstr "策略"
+
+#: TortoiseAct/TortoisePreferences.cpp:43
+#: TortoiseAct/TortoisePreferences.cpp:588
+#: TortoiseAct/TortoisePreferences.cpp:597
+#: TortoiseAct/TortoisePreferences.cpp:606
+#, fuzzy
+msgid "Edit"
+msgstr "編輯(&E)"
+
+#: TortoiseAct/TortoisePreferences.cpp:44
+#: TortoiseAct/TortoisePreferences.cpp:361
+#: TortoiseAct/TortoisePreferences.cpp:368
+#: TortoiseAct/TortoisePreferences.cpp:381
+#: TortoiseAct/TortoisePreferences.cpp:398
+#: TortoiseAct/TortoisePreferences.cpp:404
+#: TortoiseAct/TortoisePreferences.cpp:418
+#: TortoiseAct/TortoisePreferences.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:442
+#: TortoiseAct/TortoisePreferences.cpp:450
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "Tools"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:46
+#: TortoiseAct/TortoisePreferences.cpp:665
+#: TortoiseAct/TortoisePreferences.cpp:672
+#: TortoiseAct/TortoisePreferences.cpp:679
+#: TortoiseAct/TortoisePreferences.cpp:686
+#: TortoiseAct/TortoisePreferences.cpp:693
+#: TortoiseAct/TortoisePreferences.cpp:700
+#: TortoiseAct/TortoisePreferences.cpp:707
+#: TortoiseAct/TortoisePreferences.cpp:714
+msgid "Appearance"
+msgstr "外觀"
+
+#: TortoiseAct/TortoisePreferences.cpp:47
+#: TortoiseAct/TortoisePreferences.cpp:725
+#: TortoiseAct/TortoisePreferences.cpp:732
+#: TortoiseAct/TortoisePreferences.cpp:739
+#, fuzzy
+msgid "Cache"
+msgstr "取消"
+
+#: TortoiseAct/TortoisePreferences.cpp:49
+#: TortoiseAct/TortoisePreferences.cpp:620
+#: TortoiseAct/TortoisePreferences.cpp:627
+#: TortoiseAct/TortoisePreferences.cpp:635
+#: TortoiseAct/TortoisePreferences.cpp:646
+#: TortoiseAct/TortoisePreferences.cpp:651
+msgid "Debug"
+msgstr "除錯"
+
+#: TortoiseAct/TortoisePreferences.cpp:85
+#, fuzzy
+msgid "Error"
+msgstr "錯誤"
+
+#: TortoiseAct/TortoisePreferences.cpp:177
+msgid "&Progress dialog"
+msgstr "進度對話框(&P)"
+
+#: TortoiseAct/TortoisePreferences.cpp:178
+msgid "Automatically close the progress window when a command completes successfully.  You can hold Ctrl down while selecting a CVS command, or as one is finishing, to prevent this on a one off basis."
+msgstr "當命令完成成功時自動關閉進度窗口. 您在選擇CVS命令或在命令完成時按住Ctrl鍵防止對話框關閉."
+
+#: TortoiseAct/TortoisePreferences.cpp:183
+msgid "Close manually"
+msgstr "手工關閉"
+
+#: TortoiseAct/TortoisePreferences.cpp:184
+msgid "Close if no messages"
+msgstr "沒有信息關閉"
+
+#: TortoiseAct/TortoisePreferences.cpp:185
+msgid "Close if no errors"
+msgstr "沒有錯誤關閉"
+
+#: TortoiseAct/TortoisePreferences.cpp:189
+msgid "Progress &messages"
+msgstr "進度消息(&M)"
+
+#: TortoiseAct/TortoisePreferences.cpp:190
+msgid "How detailed CVS is about what it is doing.  Errors are always printed, even at the most silent levels."
+msgstr "指 CVS 顯示進度訊息的細節程度，不過即使在非常安靜的情況下，錯誤信息也總是會顯示的."
+
+#: TortoiseAct/TortoisePreferences.cpp:193
+msgid "Loud"
+msgstr "吵鬧"
+
+#: TortoiseAct/TortoisePreferences.cpp:194
+msgid "Quiet"
+msgstr "安靜"
+
+#: TortoiseAct/TortoisePreferences.cpp:195
+msgid "Really Quiet"
+msgstr "非常安靜"
+
+#: TortoiseAct/TortoisePreferences.cpp:199
+msgid "&Overlay icons"
+msgstr "疊加圖示(&O)"
+
+#: TortoiseAct/TortoisePreferences.cpp:200
+msgid "The set of overlay icons TortoiseCVS uses."
+msgstr "TortoiseCVS 使用的 CVS 圖示集. "
+
+#: TortoiseAct/TortoisePreferences.cpp:201
+msgid "Changes won't take effect until you log off or reboot."
+msgstr "設定變動將在您登出或重開機後生效. "
+
+#: TortoiseAct/TortoisePreferences.cpp:210
+msgid "Don't change icon."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:211
+msgid "Change icon when folder contains changed files."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:212
+msgid "Change icon when folder or subfolders contain changed files."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:214
+#, fuzzy
+msgid "Folder overlay icons"
+msgstr "圖示疊加"
+
+#: TortoiseAct/TortoisePreferences.cpp:215
+msgid "Change folder icon when folder or subfolders contain changed files."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:221
+#, fuzzy
+msgid "Autoload changed folder icons"
+msgstr "顯示改變的檔案夾(&C)"
+
+#: TortoiseAct/TortoisePreferences.cpp:222
+msgid ""
+"Enabled: Changed folder icons are updated automatically.\n"
+"Disabled: Changed folder icons are only updated explicitly through the context menu."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:225
+#, fuzzy
+msgid "Autoload folder icon overlays"
+msgstr "圖示疊加"
+
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "L&anguage"
+msgstr "語言(&A)"
+
+#: TortoiseAct/TortoisePreferences.cpp:231
+msgid "The language used in TortoiseCVS dialogs and menus."
+msgstr "在TortoiseCVS的對話框和菜單中使用的語言. "
+
+#: TortoiseAct/TortoisePreferences.cpp:257
+msgid "Windows default"
+msgstr "Windows預設"
+
+#: TortoiseAct/TortoisePreferences.cpp:278
+msgid "<failed to calculate home folder>"
+msgstr "<自動決定主檔案夾時失敗>"
+
+#: TortoiseAct/TortoisePreferences.cpp:280
+msgid "Home folder"
+msgstr "主檔案夾"
+
+#: TortoiseAct/TortoisePreferences.cpp:281
+msgid ""
+"The home folder is where the global .cvsignore file is stored. SSH connections also expect your .ssh folder with keys and known hosts to be in your home folder.\n"
+"By default, TortoiseCVS works out a home folder for you. It looks for folders in this order:\n"
+" - An environment variable called HOME\n"
+" - WinCVS specified home folder\n"
+" - My Documents.\n"
+"You can turn off this automatic calculation, and instead specify your own custom home folder below.\n"
+"Currently the calculation result is: "
+msgstr ""
+"主檔案夾是通用忽略檔案(.cvsigonre)存放的地方。SSH 連接也需要在主檔案夾中的.ssh檔案夾中存放密匙和已知的主機.\n"
+"在預設選項時 TortoiseCVS 可以自己決定主檔案夾。它決定的順序是:\n"
+" - 環境變量HOME所指目錄\n"
+" - WinCVS 指定的主目錄\n"
+" - 我的文檔.\n"
+"您可以關閉自動決定主目錄的功能，由您自己在下面指明您的主檔案夾.\n"
+"當前自動決定的結果是: "
+
+#: TortoiseAct/TortoisePreferences.cpp:293
+msgid "Always recalculate &home folder"
+msgstr "總是重新決定主檔案夾(&H)"
+
+#: TortoiseAct/TortoisePreferences.cpp:297
+msgid "Custom home &folder"
+msgstr "自定義主檔案夾(&F)"
+
+#: TortoiseAct/TortoisePreferences.cpp:298
+msgid "If you turn off automatic home folder calculation, you can enter an explicit path here."
+msgstr "如果您關閉主檔案夾自動決定功能, 請在此輸入指定路徑."
+
+#: TortoiseAct/TortoisePreferences.cpp:304
+msgid "&Network compression"
+msgstr "網絡壓縮(&N)"
+
+#: TortoiseAct/TortoisePreferences.cpp:305
+msgid "Reduce network load by compressing traffic to and from the CVS server. High levels may be slow to calculate."
+msgstr "通過壓縮數據減少網絡交通傳輸時間. 壓縮層次越好計算時間越長."
+
+#: TortoiseAct/TortoisePreferences.cpp:308
+msgid "0 - None"
+msgstr "0 - 沒有"
+
+#: TortoiseAct/TortoisePreferences.cpp:309
+msgid "3 - Low"
+msgstr "3 - 低"
+
+#: TortoiseAct/TortoisePreferences.cpp:310
+msgid "6 - Good"
+msgstr "6 - 好"
+
+#: TortoiseAct/TortoisePreferences.cpp:311
+msgid "9 - Best"
+msgstr "9 - 最好"
+
+#: TortoiseAct/TortoisePreferences.cpp:316
+msgid "&Excluded folders"
+msgstr "拒絕接納的檔案夾(&E)"
+
+#: TortoiseAct/TortoisePreferences.cpp:317
+#, fuzzy
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are disabled."
+msgstr "分號隔開的檔案夾清單禁止使用疊加圖示和即時菜單."
+
+#: TortoiseAct/TortoisePreferences.cpp:324
+msgid "&Included folders"
+msgstr "包含的檔案夾(&I)"
+
+#: TortoiseAct/TortoisePreferences.cpp:325
+#, fuzzy
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are enabled. An empty list enables all folders."
+msgstr "分號隔開的檔案夾清單允許使用疊加圖示和即時菜單. 空列表表示允許所有檔案夾."
+
+#: TortoiseAct/TortoisePreferences.cpp:332
+msgid "Menu icons"
+msgstr "菜單圖示"
+
+#: TortoiseAct/TortoisePreferences.cpp:333
+msgid "Enable/disable"
+msgstr "打開/禁止"
+
+#: TortoiseAct/TortoisePreferences.cpp:335
+msgid "Enable menu &icons"
+msgstr "打開菜單圖示(&I)"
+
+#: TortoiseAct/TortoisePreferences.cpp:339
+msgid "Maximum number of tags for graph"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:340
+msgid "Controls how many tags the graph dialog will display per revision.  Enter -1 to show them all."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:346
+msgid "Autodetect (default to DOS)"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:347
+msgid "Autodetect (default to UNIX)"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:348
+msgid "DOS"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:349
+msgid "UNIX"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Sandbox DOS/UNIX"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:352
+msgid "Use either LF (UNIX) or CRLF (DOS) line separators in text files."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:361
+#, fuzzy
+msgid "&Diff application"
+msgstr "其他版本比較程序(&D)"
+
+#: TortoiseAct/TortoisePreferences.cpp:362
+msgid "Specify the program you use to compare files."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:368
+msgid "&Two-way diff parameters"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:369
+msgid "Parameters for two-way diffs."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:371
+#: TortoiseAct/TortoisePreferences.cpp:407
+msgid "The default parameters are:"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:373
+#: TortoiseAct/TortoisePreferences.cpp:374
+#: TortoiseAct/TortoisePreferences.cpp:387
+#: TortoiseAct/TortoisePreferences.cpp:389
+#: TortoiseAct/TortoisePreferences.cpp:391
+msgid "Name of file selected for diff."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:381
+msgid "T&hree-way diff parameters"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:382
+msgid "Parameters for three-way diffs."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:398
+#, fuzzy
+msgid "&Merge application"
+msgstr "其他版本比較程序(&D)"
+
+#: TortoiseAct/TortoisePreferences.cpp:399
+msgid "Specify the program you use to merge files."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:404
+msgid "&Two-way merge parameters"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:405
+msgid "Parameters for two-way merges."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:409
+#: TortoiseAct/TortoisePreferences.cpp:424
+msgid "File containing my changes."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:411
+#: TortoiseAct/TortoisePreferences.cpp:428
+msgid "File containing changes from repository."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:418
+msgid "T&hree-way merge parameters"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:419
+msgid "Parameters for three-way merges."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:422
+msgid ""
+"\n"
+"\n"
+"\"%mine\" \"%ancestor\" \"%yours\"\n"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:423
+#, c-format
+msgid ""
+"\n"
+"%mine: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:425
+#, c-format
+msgid ""
+"\n"
+"%ancestor: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:426
+#, fuzzy
+msgid "File containing common ancestor data."
+msgstr "包含的輸入檔案沒有發現:"
+
+#: TortoiseAct/TortoisePreferences.cpp:427
+msgid ""
+"\n"
+"%yours: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:434
+#, fuzzy
+msgid "SSH &application (:ext: only)"
+msgstr "SSH 應用程序(&A)"
+
+#: TortoiseAct/TortoisePreferences.cpp:435
+#, fuzzy
+msgid "Specify the CVS_EXT application (e.g. ssh.exe, plink.exe)"
+msgstr "指定 CVS RSH 應用程序 (如:ssh.exe, plink.exe) "
+
+#: TortoiseAct/TortoisePreferences.cpp:442
+msgid "SSH &parameters (:ext: only)"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:443
+msgid "Parameters for the CVS_EXT application. The default parameters are:"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:445
+msgid "CVS replaces %u with the username and %h with the hostname."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:450
+#, fuzzy
+msgid "SSH &cvs server (:ext: only)"
+msgstr "SSH 應用程序(&A)"
+
+#: TortoiseAct/TortoisePreferences.cpp:451
+#, fuzzy
+msgid "Specify the CVS_SERVER application (e.g. /usr/local/bin/cvsnt)"
+msgstr "指定CVS程序(如: cvs.exe)"
+
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "&Bug tracker URL"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:458
+#, c-format
+msgid "In the History and Revision Graph dialogs, TortoiseCVS can automatically create hyperlinks from log messages containing 'bug XXX' or '#XXX' where XXX is a number. This setting tells TortoiseCVS how to build that URL. %s will be replaced with the bug number."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:472
+msgid "Empty folders"
+msgstr "空檔案夾"
+
+#: TortoiseAct/TortoisePreferences.cpp:473
+msgid "Hide folders which contain no files. CVS doesn't directly manage folders, so the assumption here is that if you remove all the files from a folder you would like to remove the folder."
+msgstr "隱藏沒有包含任何檔案的檔案夾. CVS並不直接管理檔案夾, 因此假定就是如果您從一個檔案夾刪除了所有檔案, 那麼就是希望刪除這個檔案夾."
+
+#: TortoiseAct/TortoisePreferences.cpp:477
+msgid "Prune &empty folders"
+msgstr "刪除空檔案夾(&E)"
+
+#: TortoiseAct/TortoisePreferences.cpp:482
+msgid "Read Only Default"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:483
+msgid "Checkout files read only by default, return files to read only with unedit and commit"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:485
+msgid "Read &Only Default"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:491
+#, fuzzy
+msgid "New folders"
+msgstr "主檔案夾"
+
+#: TortoiseAct/TortoisePreferences.cpp:494
+msgid "Create new &folders on update"
+msgstr "在更新時創建新檔案夾(&F)"
+
+#: TortoiseAct/TortoisePreferences.cpp:499
+#, fuzzy
+msgid "Force head revision"
+msgstr "保存檔案版本"
+
+#: TortoiseAct/TortoisePreferences.cpp:500
+msgid "If you've specified a tag/branch/date on checkout or update, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:508
+msgid "Automatic commit"
+msgstr "自動提交"
+
+#: TortoiseAct/TortoisePreferences.cpp:509
+#, fuzzy
+msgid ""
+"If this is checked and you perform a 'CVS Add' and/or a 'CVS Remove', TortoiseCVS will automatically perform a commit of the file.\n"
+"It is recommended that you only enable this option if you work on documents, not source code, or if you are the only person working on the project."
+msgstr "如果確認,您執行'CVS 新增'命令時, TortoiseCVS將自動執行檔案提交. 不建議使用此選項!"
+
+#: TortoiseAct/TortoisePreferences.cpp:515
+#, fuzzy
+msgid "Do not automatically commit after Add/Remove"
+msgstr "在編輯後自動打開檔案(&O)"
+
+#: TortoiseAct/TortoisePreferences.cpp:516
+#, fuzzy
+msgid "Automatically commit after Add"
+msgstr "在編輯後自動打開檔案(&O)"
+
+#: TortoiseAct/TortoisePreferences.cpp:517
+#, fuzzy
+msgid "Automatically commit after Add and Remove"
+msgstr "在編輯後自動打開檔案(&O)"
+
+#: TortoiseAct/TortoisePreferences.cpp:524
+msgid "Allow Network Drives"
+msgstr "允許網絡驅動器"
+
+#: TortoiseAct/TortoisePreferences.cpp:525
+#, fuzzy
+msgid ""
+"If this is checked, sandboxes on network mounted drives will be controlled by TortoiseCVS. It also suppresses CVS errors when accessing a repository via :local: on a network share.\n"
+"NOTE: Placing your sandbox or repository on a network drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr "如果確認, 在由網絡裝載驅動器上的工作目錄將由TortoiseCVS控制. 這可能會導致很多問題,不建議確認"
+
+#: TortoiseAct/TortoisePreferences.cpp:532
+#, fuzzy
+msgid "Permit sandboxes and repositories on &network (remote) drives"
+msgstr "允許工作目錄在網絡驅動器(遠程)上(不建議)(&N)"
+
+#: TortoiseAct/TortoisePreferences.cpp:538
+msgid "Allow Removable Drives"
+msgstr "允許可移動磁盤"
+
+#: TortoiseAct/TortoisePreferences.cpp:539
+#, fuzzy
+msgid ""
+"If this is checked, sandboxes on drives with removable media will be controlled by TortoiseCVS.\n"
+"NOTE: Placing your sandbox on a removable drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr "如果確認, 在可以移動磁盤上的工作目錄將由TortoiseCVS控制. 這可能會導致很多問題,不建議確認"
+
+#: TortoiseAct/TortoisePreferences.cpp:544
+#, fuzzy
+msgid "Permit sandboxes on &removable drives"
+msgstr "允許工作目錄在可移動磁盤上(不建議)(&R)"
+
+#: TortoiseAct/TortoisePreferences.cpp:550
+#, fuzzy
+msgid "Add Ignored Files"
+msgstr "已忽略檔案的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:551
+msgid "If this is checked, the Add Contents dialog will include files listed in .cvsignore. Useful if you want to add files which are normally ignored, but makes the dialog more cluttered."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:555
+#, fuzzy
+msgid "Show .cvs&ignored files in the Add Contents dialog"
+msgstr "在處理對話框中已忽略檔案的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:561
+#, fuzzy
+msgid "Explorer Columns"
+msgstr "資源管理器"
+
+#: TortoiseAct/TortoisePreferences.cpp:562
+msgid "If this is checked, Tortoise will show the CVS Explorer columns only for folders that are under CVS control"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:565
+msgid "Show columns only for CVS-controlled folders"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:571
+msgid "Empty comment check"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:572
+msgid "If this is checked, the Commit dialog will issue a warning if no commit comment has been provided by the user.  You can then either continue or abort the commit operation."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:575
+msgid "Issue &warning if no comment provided in commit dialog"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:582
+msgid "Do not use Edit/Unedit"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:583
+msgid "Concurrent editing"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:584
+msgid "Concurrent or exclusive editing"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:585
+msgid "Exclusive editing only"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:589
+msgid "Edit policy"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:590
+msgid "How to handle the CVS Edit and Unedit commands."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:598
+msgid "Edit options dialog"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:599
+msgid "Whether to show the edit options dialog"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:602
+msgid "Show edit &options dialog"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:607
+msgid "Automatic unedit"
+msgstr "自動撤銷編輯(unedit)"
+
+#: TortoiseAct/TortoisePreferences.cpp:608
+msgid "If this is checked and you run 'CVS Commit', TortoiseCVS will do a 'cvs unedit' in order to remove any edits you may have on files which you have not modified."
+msgstr "如果確認, 您執行'CVS 提交'命令時, TortoiseCVS將自動執行'cvs 取消編輯'命令, 取消在所有沒有修改檔案上的編輯命令."
+
+#: TortoiseAct/TortoisePreferences.cpp:613
+msgid "Automatically &unedit after Commit"
+msgstr "在提交後自動撤銷編輯(unedit)(&U)"
+
+#: TortoiseAct/TortoisePreferences.cpp:621
+msgid "Main program"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:622
+msgid "Enable debug logs for TortoiseCVS main program"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:624
+#: TortoiseAct/TortoisePreferences.cpp:631
+#, fuzzy
+msgid "Enable debug logs"
+msgstr "除錯日誌"
+
+#: TortoiseAct/TortoisePreferences.cpp:628
+#, fuzzy
+msgid "Shell extension"
+msgstr "已忽略檔案的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:629
+msgid "Enable debug logs for TortoiseCVS shell extension"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:636
+msgid "Debug logs"
+msgstr "除錯日誌"
+
+#: TortoiseAct/TortoisePreferences.cpp:637
+#, fuzzy
+msgid "Write TortoiseCVS debug information into the folder specified below."
+msgstr "如果確認，TortoiseCVS將把除錯資訊寫入下面指定的目錄。"
+
+#: TortoiseAct/TortoisePreferences.cpp:640
+#, fuzzy
+msgid "Don't save debug logs"
+msgstr "除錯日誌"
+
+#: TortoiseAct/TortoisePreferences.cpp:641
+#, fuzzy
+msgid "Save debug logs"
+msgstr "除錯日誌"
+
+#: TortoiseAct/TortoisePreferences.cpp:642
+#, fuzzy
+msgid "Save debug logs, no log file caching"
+msgstr "寫出除錯檔案"
+
+#: TortoiseAct/TortoisePreferences.cpp:646
+msgid "Debug log &folder"
+msgstr "寫出除錯檔案夾(&F)"
+
+#: TortoiseAct/TortoisePreferences.cpp:647
+msgid "Debug log files will be created in this folder."
+msgstr "寫出除錯檔案將在這個檔案夾中創建。"
+
+#: TortoiseAct/TortoisePreferences.cpp:651
+#, fuzzy
+msgid "CVSNT logging"
+msgstr "日誌"
+
+#: TortoiseAct/TortoisePreferences.cpp:652
+msgid "Makes files cvsclient.log.in and cvsclient.log.out in the TortoiseCVS folder for debugging of the CVS protocol."
+msgstr "為除錯CVS協議在TortoiseCVS主目錄中生成cvsclient.log.in和cvsclient.log.out檔案."
+
+#: TortoiseAct/TortoisePreferences.cpp:655
+#, fuzzy
+msgid "Create CVSNT client &debug logs"
+msgstr "創建客戶端除錯日誌(&D)"
+
+#: TortoiseAct/TortoisePreferences.cpp:666
+#, fuzzy
+msgid "Noise text colour"
+msgstr "噪聲純文字顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:667
+#: TortoiseAct/TortoisePreferences.cpp:669
+#, fuzzy
+msgid "Colour for noise text in the progress dialog"
+msgstr "在處理對話框中噪聲純文字的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:673
+#, fuzzy
+msgid "Warning text colour"
+msgstr "警告文字顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:674
+#: TortoiseAct/TortoisePreferences.cpp:676
+#, fuzzy
+msgid "Colour for warning text in the progress dialog"
+msgstr "在處理對話框中警告文字的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:680
+#, fuzzy
+msgid "Updated files colour"
+msgstr "檔案顏色已更新"
+
+#: TortoiseAct/TortoisePreferences.cpp:681
+#: TortoiseAct/TortoisePreferences.cpp:683
+#: TortoiseAct/TortoisePreferences.cpp:690
+#, fuzzy
+msgid "Colour for updated files in the progress dialog"
+msgstr "在處理對話框中已更新檔案的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:687
+#, fuzzy
+msgid "Modified files colour"
+msgstr "檔案顏色已修改"
+
+#: TortoiseAct/TortoisePreferences.cpp:688
+#, fuzzy
+msgid "Colour for modified files in the progress dialog"
+msgstr "在處理對話框中已修改檔案的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:694
+#, fuzzy
+msgid "Conflict files colour"
+msgstr "衝突檔案的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:695
+#: TortoiseAct/TortoisePreferences.cpp:697
+#, fuzzy
+msgid "Colour for conflict files in the progress dialog"
+msgstr "在處理對話框中衝突檔案的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:701
+msgid "Files not in CVS colour"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:702
+#: TortoiseAct/TortoisePreferences.cpp:704
+#, fuzzy
+msgid "Colour for files not in CVS in the progress dialog"
+msgstr "在處理對話框中噪聲純文字的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:708
+#, fuzzy
+msgid "Error text colour"
+msgstr "錯誤純文字顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:709
+#: TortoiseAct/TortoisePreferences.cpp:711
+#, fuzzy
+msgid "Colour for error text in the progress dialog"
+msgstr "在處理對話框中錯誤純文字的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:715
+#, fuzzy
+msgid "Tip text colour"
+msgstr "技巧純文字顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:716
+#: TortoiseAct/TortoisePreferences.cpp:718
+#, fuzzy
+msgid "Colour for tip text"
+msgstr "在處理對話框中已技巧純文字的顏色"
+
+#: TortoiseAct/TortoisePreferences.cpp:726
+#, fuzzy
+msgid "Server version"
+msgstr "版本"
+
+#: TortoiseAct/TortoisePreferences.cpp:727
+msgid "Clear the cache that stores the CVS server version"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:729
+#: TortoiseAct/TortoisePreferences.cpp:736
+#: TortoiseAct/TortoisePreferences.cpp:743
+#, fuzzy
+msgid "Clear cache"
+msgstr "取消"
+
+#: TortoiseAct/TortoisePreferences.cpp:733
+#, fuzzy
+msgid "Module list"
+msgstr "模組"
+
+#: TortoiseAct/TortoisePreferences.cpp:734
+msgid "Clear the cache that stores the CVS module list"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:740
+#, fuzzy
+msgid "Branch/Tag list"
+msgstr "正在%s上創建分支"
+
+#: TortoiseAct/TortoisePreferences.cpp:741
+msgid "Clear the cache that stores the CVS branches and tags"
+msgstr ""
+
+#: TortoiseAct/TortoiseTip.cpp:70
+msgid ""
+"Tortoise Tip:  This error happens if you didn't enter a message at the top of the Notepad window when you performed a commit.  Please try again and enter some text, describing roughly what you changed.\n"
+"\n"
+"There is also a bug in CVS under Windows which can cause this to happen. If you save the file too quickly, CVS doesn't notice that it has changed.\n"
+"Try again, and wait a few seconds before saving the file!"
+msgstr ""
+"Tortoise技巧:  這個錯誤發生是因為您沒有在提交時的窗口中輸入日誌信息.  請給出一些信息再試一次, 大概描述您修訂的內容.\n"
+"\n"
+"在Windows下的CVS有一個缺陷能夠導致這個錯誤(檔案的時間標籤不夠). 如果您保存這個檔案太快, CVS不能辨別這個檔案變更了.\n"
+"請再試一次, 在保存檔案前先等幾秒鐘!"
+
+#: TortoiseAct/TortoiseTip.cpp:81
+msgid ""
+"Tortoise Tip:  CVS tried to create a new file and discovered that the file already existed.   There can be several causes for this:\n"
+"1) You have created the file locally, and someone else added a file of the same name to CVS.\n"
+"2) Your sandbox has become corrupted (possibly due to interference from antivirus programs).\n"
+"To solve the problem: Rename or delete the affected files, then perform a CVS Update."
+msgstr ""
+
+#: TortoiseAct/TortoiseTip.cpp:91
+msgid "Tortoise Tip:  One or more of your files has a conflict.  This means that someone else has altered the same part of the file as you.  Look above for the files marked \"C \", and manually edit them to resolve the conflict."
+msgstr "Tortoise技巧: 您的一個或多個檔案發生衝突. 這表示有其他用戶修改了這個(些)檔案相同的部分. 清查看標記有\"C \"的檔案, 並且手工解決這些衝突."
+
+#: TortoiseAct/TortoiseTip.cpp:99
+msgid "Tortoise Tip:  This error can be caused by a folder called \"CVS\" which was made by you rather than by CVS.  If so, please rename the folder to something else such as \"cvswork\"."
+msgstr "Tortoise技巧: 這個錯誤的發生是由于一個叫\"CVS\"的檔案夾不是由CVS自動創建的而是由您自己創建的. 如果是這樣, 請把這個檔案夾更名為其他名稱, 例如\"cvswork\"."
+
+#: TortoiseAct/TortoiseTip.cpp:107
+msgid "Tortoise Tip:  Someone else has committed a new version of one or more of the files you are trying to commit. You need to do a CVS Update and then try to commit again."
+msgstr "Tortoise技巧: 其他用戶已經提交了您試圖提交的檔案或一些檔案中的新版本. 您需要先進行CVS更新操作然後再次提交."
+
+#: TortoiseAct/TortoiseTip.cpp:115
+msgid ""
+"Tortoise Tip:  Unfortunately TortoiseCVS no longer supports RSH out of the box.  There are workarounds, as well as fairly easy ways to help us fix this for the next version.  For more information see the FAQ.\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+msgstr ""
+"Tortoise技巧: 不幸的是TortoiseCVS不再支持RSH協議out of the box.  There are workarounds, as well as fairly easy ways to help us fix this for the next version.  更多的信息請看FAQ.\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+
+#: TortoiseAct/TortoiseTip.cpp:124
+#, fuzzy
+msgid ""
+"Tortoise Tip:  This error may be caused by having a folder and a file with the same name (apart from capitalization) in the repository. Such a repository CANNOT be checked out on a Windows file system.\n"
+"\n"
+"You can also get this error on SourceForge. You need to log into the server with SSH to force creation of your home folder. Do this by connecting to username@cvs.projectname.sf.net either with Putty or a command line SSH."
+msgstr ""
+"Tortoise技巧: 這個錯誤可能是在倉庫中一個檔案夾和一個檔案有相同的名稱(除了大小寫). 這樣的倉庫不能在Windows系統中取出.\n"
+"\n"
+"您可以在SourceForge中找到這個錯誤. 您需要通過SSH登錄到伺服器來強迫建議您的主檔案夾. 您可以使用Putty軟件或則命令行ssh軟件連接username@cvs.projectname.sf.net."
+
+#: TortoiseAct/TortoiseTip.cpp:139
+msgid "Tortoise Tip: This error can be caused because there used to be a file in the repository with a name differing only by case from the one you are adding. For example TEST.EXE rather than test.exe. To fix this go into the repository, or get your administrator to, and rename that file to have the same case. It will be in the Attic folder underneath the folder you are in. You will also need to get the local sandbox folder you are in out of CVS again, as it may have bogus entries to the misspelt filename."
+msgstr "Tortoise技巧: 這個錯誤的發生是因為在倉庫中有個檔案的名稱與您新增檔案的名稱大小寫不同. 例如 TEST.EXE 與 test.exe. 解決這個問題需要進入倉庫, 或聯系您的系統管理員, 把這個檔案更名為大小寫相同. 這個檔案有可能在您所進檔案夾的Attic目錄中. 當可能有些條目拼錯了檔案名時, 您也許需要重新取出本地工作目錄."
+
+#: TortoiseAct/TortoiseTip.cpp:151
+msgid "Tortoise Tip: Someone else is editing the file you want to work on. If the file is binary, you must wait for the other user to commit the file before you can edit it. Otherwise, you may edit in parallel with the other user; CVS will eventually merge your changes with those of the other user. However, you might want to talk to the other user to ensure that you are not both working on the same lines of the file."
+msgstr "Tortoise技巧: 其他用戶正在編輯您想要打開的檔案. 如果這個檔案是二進制檔案, 在您編輯之前必須等待這個用戶提交完成. 否則您可以同其他用戶並行編輯; CVS將最終合併您同其他用戶的變更. 但您必須確認您沒有同其他用戶編輯同一個檔案的同一行."
+
+#: TortoiseAct/TortoiseTip.cpp:160
+msgid "Tortoise Tip: Use \"cvs commit\" on the folder that the file is in to remove it permanently."
+msgstr ""
+
+#: TortoiseAct/WebLog.cpp:170
+msgid "Trying "
+msgstr "嘗試 "
+
+#: TortoiseAct/WebLog.cpp:310
+msgid "Scanning for web log URL on server"
+msgstr "正在伺服器上搜索網絡日誌鏈接URL"
+
+#: TortoiseAct/WebLog.cpp:418
+#, fuzzy
+msgid "Please enter the URL where ViewCVS or CVSweb is."
+msgstr "請在此寫入ViewCVS 或 CVSWeb的URL地址"
+
+#: TortoiseAct/WebLog.cpp:427
+#, c-format
+msgid "The URL %s responded with error code %d"
+msgstr "URL%s響應了一個錯誤代碼%d"
+
+#: TortoiseAct/WebLog.cpp:440
+msgid "Sorry! The URL isn't responding, or is responding with an error."
+msgstr "對不起! 這個URL沒有響應, 或響應了一個錯誤."
+
+#: TortoiseAct/WebLog.cpp:444
+msgid ""
+"This could happen because you are not connected to the internet, because the server is down, or because the path is wrong. If you are behind a firewall which requires a proxy, TortoiseCVS is using the Internet Explorer proxy. You might want to set it and try again.\n"
+"\n"
+"Please either try entering the URL again, or choose the plain text log."
+msgstr ""
+"這將在您沒有聯接到網際網路，伺服器沒有開啟或路徑錯誤時發生。如果您在一個防火牆後面您可能需要一個代理服務，TortoiseCVS使用IE瀏覽器代理。您可能需要設定代理並重新試一下.\n"
+"\n"
+"請再次鍵入一個URL，或選擇純純文字的日誌."
+
+#: TortoiseAct/WebLog.cpp:452
+#, fuzzy
+msgid "TortoiseCVS couldn't find the URL on your server where ViewCVS or CVSweb is. Please enter the URL manually."
+msgstr "TortoiseCVS 在您的伺服器上不能尋找到ViewCVS或CVSWeb的URL地址。請手工錄入地址."
+
+#: TortoiseAct/WebLog.cpp:460
+msgid "You might be able to find it by browsing on the project's web site for a web interface to CVS. Alternatively ask your server administrator. Then copy the top level URL into the prefix box below. Usually you can leave the suffix box blank - it adds extra options to the end of the URL."
+msgstr "您可以在此項目的 Web 站點上尋找到一個 CVS 的 web 接口。否則詢問您的系統管理員，然後拷貝頂層的URL到下面的前綴框中。通常您可以讓後綴框空白 - 它在URL末尾新增附加的參數"
+
+#: TortoiseAct/WebLog.cpp:466
+msgid "This dialog can also appear if you are trying to log a file that has never been committed."
+msgstr "如果您試圖記錄一個沒有被提交的檔案，這個對話框也將出現"
+
+#: TortoiseShell/PropSheet.cpp:220
+#, fuzzy
+msgid "Repository"
+msgstr "倉庫:"
+
+#: TortoiseShell/PropSheet.cpp:226
+#, fuzzy
+msgid "Sticky tag/date"
+msgstr "附著標籤:"
+
+#: TortoiseShell/PropSheet.cpp:229
+#, fuzzy
+msgid "Revision date"
+msgstr "版本日期:"
+
+#: TortoiseShell/PropSheet.cpp:238
+#, fuzzy
+msgid "File options"
+msgstr "選項"
+
+#: TortoiseShell/PropSheet.cpp:241
+msgid "&History..."
+msgstr "歷史(&H)..."
+
+#: TortoiseShell/PropSheet.cpp:263
+msgid "Head"
+msgstr "Head"
+
+#: TortoiseShell/QueryInfo.cpp:94
+#, fuzzy
+msgid "CVS Status"
+msgstr "狀態:"
+
+#: TortoiseShell/QueryInfo.cpp:96
+#, fuzzy
+msgid "CVS Revision"
+msgstr "修訂版本"
+
+#: TortoiseShell/QueryInfo.cpp:98
+#, fuzzy
+msgid "CVS Sticky Tag"
+msgstr "粘性標籤"
+
+#: TortoiseShell/QueryInfo.cpp:100
+#, fuzzy
+msgid "CVS File Format"
+msgstr "檔案格式:"
+
+#: Utils/LaunchTortoiseAct.cpp:74
+msgid "Failed to launch executable to perform action"
+msgstr "執行可執行檔案失敗"
+
+#: Utils/PathUtils.cpp:357
+msgid "Failed to find temporary path"
+msgstr "尋找臨時目錄失敗"
+
+#: Utils/PathUtils.cpp:372
+#, c-format
+msgid "Failed to generate temporary filename in '%s': error %d"
+msgstr "在 %s 創建臨時檔案失敗: 錯誤 %d"
+
+#: Utils/PathUtils.cpp:398 Utils/PathUtils.cpp:589
+#, c-format
+msgid "Free space: %s KB"
+msgstr "自由空間: %s KB"
+
+#: Utils/PathUtils.cpp:401 Utils/PathUtils.cpp:592
+#, c-format
+msgid "Total space: %s KB"
+msgstr "全部空間: %s KB"
+
+#: Utils/PathUtils.cpp:404 Utils/PathUtils.cpp:595
+#, c-format
+msgid "Total free space: %s KB"
+msgstr "全部自由空間: %s KB"
+
+#: Utils/PathUtils.cpp:564
+#, fuzzy, c-format
+msgid "Failed to generate temporary folder in '%s': error %d"
+msgstr "在 %s 創建臨時檔案失敗: 錯誤 %d"
+
+#: Utils/PathUtils.cpp:612 Utils/PathUtils.cpp:642
+#, c-format
+msgid "Couldn't scan folder %s"
+msgstr "不能搜索檔案夾%s"
+
+#: Utils/ProcessUtils.cpp:67
+#, c-format
+msgid "Failed to launch %s"
+msgstr "不能啟動 %s"
+
+#: Utils/ProcessUtils.cpp:92
+#, fuzzy
+msgid "GetUserName() failed"
+msgstr "GetVersionEx失敗"
+
+#: Utils/TortoiseDebug.cpp:235
+msgid "Something bad happened to TortoiseCVS, and it crashed. Would you like to save a crash dump file?"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:255
+#, c-format
+msgid "Saved dump file to '%s'"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:260
+#, fuzzy, c-format
+msgid "Failed to save dump file (error %d)"
+msgstr "在 %s 創建臨時檔案失敗: 錯誤 %d"
+
+#: Utils/TortoiseDebug.cpp:266
+#, fuzzy, c-format
+msgid "Failed to create dump file (error %d)"
+msgstr "在 %s 創建臨時檔案失敗: 錯誤 %d"
+
+#: Utils/TortoiseDebug.cpp:272
+msgid "DBGHELP.DLL too old"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:277
+msgid "DBGHELP.DLL not found"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:64 ../build/TortoiseMenus.config:359
+#: ../build/TortoiseMenus.config:365
+msgid "Chec&kout..."
+msgstr "取出(&K)..."
+
+#: ../build/TortoiseMenus.config:66 ../build/TortoiseMenus.config:361
+#: ../build/TortoiseMenus.config:367
+msgid "Retrieve a fresh module from a CVS repository"
+msgstr "從 CVS 倉庫取出新模組"
+
+#: ../build/TortoiseMenus.config:71
+msgid "&Make New Module..."
+msgstr "創建新模組(&M)..."
+
+#: ../build/TortoiseMenus.config:73
+#, fuzzy
+msgid "Create a new module in the repository from the selected folder"
+msgstr "從選擇的目錄中在倉庫裡創建一個新模組"
+
+#: ../build/TortoiseMenus.config:81
+#, fuzzy
+msgid "Apply &patch..."
+msgstr "生成補丁(&M)..."
+
+#: ../build/TortoiseMenus.config:83
+#, fuzzy
+msgid "Applies a patch file"
+msgstr "保存補丁檔案"
+
+#: ../build/TortoiseMenus.config:91
+msgid "Chec&kout TortoiseCVS"
+msgstr "取出TortoiseCVS(&K)"
+
+#: ../build/TortoiseMenus.config:93
+msgid "Fix bugs! Fetch the TortoiseCVS source code"
+msgstr "修復錯誤！取得 TortoiseCVS 原始碼。"
+
+#: ../build/TortoiseMenus.config:105
+#, fuzzy
+msgid "&Diff"
+msgstr "版本比較(&D)..."
+
+#: ../build/TortoiseMenus.config:107
+msgid "Shows you the changes you have made (hold down Ctrl to customise)"
+msgstr "顯示您做過的變更(按住Ctrl鍵配置)"
+
+#: ../build/TortoiseMenus.config:112
+msgid "&Add..."
+msgstr "新增(&A)..."
+
+#: ../build/TortoiseMenus.config:114
+msgid "Marks a text or binary file for adding to the repository next time you commit"
+msgstr "為您下次提交時加入倉庫, 標記此純文字或二進制檔案"
+
+#: ../build/TortoiseMenus.config:119
+#, fuzzy
+msgid "&Ignore"
+msgstr "已忽略檔案的顏色"
+
+#: ../build/TortoiseMenus.config:121
+#, fuzzy
+msgid "Make CVS ignore this file by adding it to the .cvsignore file"
+msgstr "把此副檔名新增到 CVS 忽略檔案名單中"
+
+#: ../build/TortoiseMenus.config:126
+msgid "&Update"
+msgstr "更新(&U)"
+
+#: ../build/TortoiseMenus.config:128
+msgid "Merges the latest version from the repository into your local copy (hold down Ctrl for more options)"
+msgstr "從倉庫中合併最後的版本到您的本地拷貝(按住Ctrl鍵配置)"
+
+#: ../build/TortoiseMenus.config:135
+msgid "Make the file writable so that it can be edited"
+msgstr "使此檔案可寫，以便編輯"
+
+#: ../build/TortoiseMenus.config:140
+msgid "E&xclusive Edit"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:142
+#, fuzzy
+msgid "Make the file writable so that it can be edited, and prevent any other users from editing it"
+msgstr "使此檔案可寫，以便編輯"
+
+#: ../build/TortoiseMenus.config:147 ../build/TortoiseMenus.config:154
+#: ../build/TortoiseMenus.config:161
+msgid "&Commit..."
+msgstr "提交(&C)..."
+
+#: ../build/TortoiseMenus.config:149 ../build/TortoiseMenus.config:156
+#: ../build/TortoiseMenus.config:163 ../build/TortoiseMenus.config:300
+msgid "Puts the changes you have made back into the repository"
+msgstr "把您做的修訂提交到倉庫中"
+
+#: ../build/TortoiseMenus.config:168
+#, fuzzy
+msgid "Add C&ontents..."
+msgstr "新增所有內容(&C)..."
+
+#: ../build/TortoiseMenus.config:170
+#, fuzzy
+msgid "Adds files in the selection and subfolders which aren't yet in CVS"
+msgstr "新增不在 CVS 中的檔案和子目錄"
+
+#: ../build/TortoiseMenus.config:188
+msgid "&Web Log"
+msgstr "網上日誌(&W)"
+
+#: ../build/TortoiseMenus.config:190
+msgid "Browse the file history with a web interface (hold down Ctrl to customise)"
+msgstr "通過 Web 界面瀏覽檔案的歷史檔案(按住 Ctrl 鍵配置)"
+
+#: ../build/TortoiseMenus.config:197
+msgid "Browse the file history"
+msgstr "瀏覽該檔案的歷史"
+
+#: ../build/TortoiseMenus.config:204
+msgid "Show the file revision graph"
+msgstr "顯示此檔案版本分支圖"
+
+#: ../build/TortoiseMenus.config:209
+msgid "Ann&otate..."
+msgstr ""
+
+#: ../build/TortoiseMenus.config:211
+msgid "Shows the last revision each line was modified and by whom"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:216
+msgid "&Show edited files..."
+msgstr "顯示已編輯的檔案(&S)..."
+
+#: ../build/TortoiseMenus.config:218
+msgid "Shows files which are being edited"
+msgstr "顯示正在編輯的檔案"
+
+#: ../build/TortoiseMenus.config:225 ../build/TortoiseMenus.config:231
+#, fuzzy
+msgid "Make all files in the folder writable so that they can be edited"
+msgstr "使此目錄下所有檔案可寫，以便編輯"
+
+#: ../build/TortoiseMenus.config:236 ../build/TortoiseMenus.config:242
+#: ../build/TortoiseMenus.config:248
+msgid "U&nedit"
+msgstr "取消編輯狀態(&N)"
+
+#: ../build/TortoiseMenus.config:238
+msgid "Abandon edits to the file"
+msgstr "放棄此檔案的編輯"
+
+#: ../build/TortoiseMenus.config:244 ../build/TortoiseMenus.config:250
+#, fuzzy
+msgid "Abandon edits to all files in the folder"
+msgstr "放棄此目錄中所有檔案的編輯"
+
+#: ../build/TortoiseMenus.config:254
+#, fuzzy
+msgid "Ignore e&xtension"
+msgstr "已忽略檔案的顏色"
+
+#: ../build/TortoiseMenus.config:256
+#, fuzzy
+msgid "Make CVS ignore files with this extension by adding the extension to .cvsignore"
+msgstr "把此副檔名新增到 CVS 忽略檔案名單中"
+
+#: ../build/TortoiseMenus.config:262 ../build/TortoiseMenus.config:298
+msgid "&Resolve conflicts..."
+msgstr "解決衝突(&R)..."
+
+#: ../build/TortoiseMenus.config:264
+msgid "Manually resolve conflicts resulting from an Update"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:270 ../build/TortoiseMenus.config:277
+msgid "&Make Patch..."
+msgstr "生成補丁(&M)..."
+
+#: ../build/TortoiseMenus.config:272 ../build/TortoiseMenus.config:279
+msgid "Generate a patch file of changes that you have made"
+msgstr "生成補丁檔案(您做了更改的)"
+
+#: ../build/TortoiseMenus.config:291
+msgid "&Update Special..."
+msgstr "更新到指定版本(&U)..."
+
+#: ../build/TortoiseMenus.config:293
+msgid "Perform an update to get a particular branch or tag, or to undo your local changes"
+msgstr "執行特定分支或標籤版本的升級, 或取消您本地的變更"
+
+#: ../build/TortoiseMenus.config:304
+msgid "&Refresh Folder Status"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:306
+msgid "Refresh folder overlay icons to show recursive status"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:316
+msgid "Marks a version with a named tag so you can retrieve it again later, or delete an existing tag"
+msgstr "使用一個命名的標籤標記此版本以便您能夠在以後重新找回它, 或刪除一個存在的標籤"
+
+#: ../build/TortoiseMenus.config:323
+msgid "Forks a version off; you can then change the new branch and the original trunk independently"
+msgstr "從當前版本中分支一個版本出來,然後你就可以改動新分支的版本, 保持與主幹（分支）版本相對獨立."
+
+#: ../build/TortoiseMenus.config:328
+msgid "&Merge..."
+msgstr "合併(&M)..."
+
+#: ../build/TortoiseMenus.config:330
+msgid "Merge changes into your working copy"
+msgstr "合併更改到您的工作目錄"
+
+#: ../build/TortoiseMenus.config:338
+#, fuzzy
+msgid "R&ename..."
+msgstr "檔案名"
+
+#: ../build/TortoiseMenus.config:340
+#, fuzzy
+msgid "Rename a file"
+msgstr "保存補丁檔案"
+
+#: ../build/TortoiseMenus.config:345
+msgid "&Remove"
+msgstr "刪除(&R)"
+
+#: ../build/TortoiseMenus.config:347
+msgid "Marks files for removal from the repository next time you commit"
+msgstr "標記這些檔案以便您下次提交時從倉庫中刪除"
+
+#: ../build/TortoiseMenus.config:352
+#, fuzzy
+msgid "&Release..."
+msgstr "合併(&M)..."
+
+#: ../build/TortoiseMenus.config:354
+msgid "Release (and delete) your working copy; effectively undo a checkout"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:375
+#, fuzzy
+msgid "&Command..."
+msgstr "提交(&C)..."
+
+#: ../build/TortoiseMenus.config:377
+msgid "Run an arbitrary CVS command"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:385
+msgid "&Preferences..."
+msgstr "選項(&P)..."
+
+#: ../build/TortoiseMenus.config:387
+msgid "Customise TortoiseCVS"
+msgstr "配置TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:392
+#, fuzzy
+msgid "&Help..."
+msgstr "幫助(&H)"
+
+#: ../build/TortoiseMenus.config:394
+msgid "Basic usage instructions and FAQ for TortoiseCVS"
+msgstr "TortoiseCVS 的基本使用方法和 FAQ"
+
+# Created by menus2po which converts a TortoiseCVS
+# menu configuration file to a GNU gettext .po file.
+# Generation date: Sat May 10 23:11:00 RDT 2003
+#: ../build/TortoiseMenus.config:399
+#, fuzzy
+msgid "&About..."
+msgstr "關於(&A)"
+
+#: ../build/TortoiseMenus.config:401
+msgid "About TortoiseCVS"
+msgstr "關於 TortoiseCVS"
+
+#, fuzzy
+#~ msgid "TortoiseCVS question"
+#~ msgstr "TortoiseCVS 問題"
+
+#, fuzzy
+#~ msgid "TortoiseCVS Security Alert"
+#~ msgstr "TortoiseCVS - 取出模組"
+
+#, fuzzy
+#~ msgid "(Error %d)"
+#~ msgstr "錯誤"
+
+#, fuzzy
+#~ msgid "Rename"
+#~ msgstr "檔案名"
+
+#~ msgid "Internal error, command line too long to be broken up."
+#~ msgstr "內部錯誤, 命令行太長而不能被結束"
+
+#~ msgid "FindExecutable() failed"
+#~ msgstr "FindExecutable() 失敗"
+
+#~ msgid "Couldn't create Win32 mutex"
+#~ msgstr "不能創建 Win32 mutex"
+
+#~ msgid "Couldn't close Win32 mutex"
+#~ msgstr "不能關閉 Win32 mutex"
+
+#~ msgid "Couldn't lock Win32 mutex"
+#~ msgstr "不能鎖定 Win32 mutex"
+
+#~ msgid "Couldn't release Win32 mutex"
+#~ msgstr "不能釋放 Win32 mutex"
+
+#~ msgid "Update creates missing folders"
+#~ msgstr "在更新時建立丟失的檔案夾"
+
+#, fuzzy
+#~ msgid "Locked"
+#~ msgstr "吵鬧"
+
+#~ msgid "Parse web logs"
+#~ msgstr "分析網絡日誌"
+
+#, fuzzy
+#~ msgid "If this is checked, Tortoise will try to parse the output of CVS web applications like ViewCVS or CVSweb running on a CVS server."
+#~ msgstr "如果確認, Tortoise將試圖分析運行在CVS伺服器上的CVS網絡應用例如ViewCVS或CvsWeb的輸出"
+
+#, fuzzy
+#~ msgid "Parse output of CVS web applications (ViewCVS, CVSweb, ...)"
+#~ msgstr "分析 CVS web 應用(ViewCVS, CvsWeb, ...)的輸出"
+
+#~ msgid "Check selected item(s)"
+#~ msgstr "確認選擇的條目"
+
+#~ msgid "Uncheck selected item(s)"
+#~ msgstr "取消確認選擇的條目"
+
+#~ msgid "Show web log"
+#~ msgstr "顯示網絡日誌"
+
+#~ msgid "Restore selected item(s)"
+#~ msgstr "恢復確認的條目"
+
+#, fuzzy
+#~ msgid "Additional &files"
+#~ msgstr "所有檔案|*.*"
+
+#, fuzzy
+#~ msgid "&Browse"
+#~ msgstr "瀏覽..."
+
+#, fuzzy
+#~ msgid "Files"
+#~ msgstr "檔案:"
+
+#, fuzzy
+#~ msgid "You can now compile the TortoiseCVS code.  It will use a precompiled set of wxWidgets libraries unless you also fetch the wxWidgets code."
+#~ msgstr "您現在可以編譯TortoiseCVS代碼. 除非您也獲取wxWindows源代碼它將使用已經編譯好的wxWindows庫檔案."
+
+#~ msgid "Logging in in %s"
+#~ msgstr "正在紀錄日誌到%s"
+
+#~ msgid "No template setup file to copy from: %s"
+#~ msgstr "沒有模版安裝檔案拷貝: %s"
+
+#~ msgid "Patched setup file already exists: %s"
+#~ msgstr "補丁的安裝檔案已經存在: %s"
+
+#~ msgid "Patching setup file..."
+#~ msgstr "正在生成安裝檔案..."
+
+#, fuzzy
+#~ msgid "TortoiseCVS copied and patched this file."
+#~ msgstr "// TortoiseCVS 拷貝並生成補丁檔案"
+
+#, fuzzy
+#~ msgid "See comments below for details."
+#~ msgstr "// 查看下面的注釋了解詳細信息."
+
+#, fuzzy
+#~ msgid "Patched by TortoiseCVS:"
+#~ msgstr "// 該補丁由 TortoiseCVS 制作:"
+
+#~ msgid "Warning: Exactly three patches were not applied."
+#~ msgstr "警告: 有三個補丁沒有應用."
+
+#, fuzzy
+#~ msgid "You can now compile the wxWidgets code.  If the TortoiseCVS code folder is within the same folder as the wxWidgets code, the TortoiseCVS Visual C++ project will automatically find the wxWidgets one."
+#~ msgstr "您現在可以編譯wxWindows代碼. 如果TortoiseCVS代碼同wxWindows在同一檔案夾中, TortoiseCVS Visual C++項目可以自動找到wxWindows."
+
+#, fuzzy
+#~ msgid "Chec&kout wxWidgets"
+#~ msgstr "取出wxWindows(&K)"
+
+#~ msgid "Easy GUI library used by TortoiseCVS"
+#~ msgstr "TortoiseCVS 使用了 Easy GUI 庫"
+
+#~ msgid "Show tags"
+#~ msgstr "顯示標籤"
+
+#, fuzzy
+#~ msgid "Save changed comment"
+#~ msgstr "改變注釋"
+
+#~ msgid "Hint"
+#~ msgstr "提示"
+
+#, fuzzy
+#~ msgid "Diff (working file)"
+#~ msgstr "比較（本地檔案）"
+
+#~ msgid "Get this revision (sticky)"
+#~ msgstr "取得該版本 (附著版本標籤)"
+
+#~ msgid "Save this revision as..."
+#~ msgstr "保存此版本為..."
+
+#, fuzzy
+#~ msgid "Write debug logs"
+#~ msgstr "寫出除錯檔案"
+
+#, fuzzy
+#~ msgid "Ignored files colour"
+#~ msgstr "已忽略檔案的顏色"
+
+#, fuzzy
+#~ msgid "Colour for ignored files in the progress dialog"
+#~ msgstr "在處理對話框中已忽略檔案的顏色"
+
+#~ msgid "Unix line endings"
+#~ msgstr "Unix 換行"
+
+#~ msgid "Diff (working file)..."
+#~ msgstr "比較（本地檔案）"
+
+#~ msgid "Previous comments"
+#~ msgstr "以前的注釋"
+
+#~ msgid "(earlier messages cleared because too long)"
+#~ msgstr "(因為列表太長早期的信息已被清除)"
+
+#~ msgid "Automatically &commit file after add (NOT recommended)"
+#~ msgstr "在新增檔案後自動提交(不建議)(&C)"
+
+#, fuzzy
+#~ msgid "Link text colour"
+#~ msgstr "技巧純文字顏色"
+
+#~ msgid "Return to main (&HEAD) branch"
+#~ msgstr "返回主(HEAD)分支(&H)"
+
+#~ msgid "Switch your local copy back to the main (HEAD) branch.  The technical term is 'reset sticky tags'."
+#~ msgstr "切換您的本地拷貝到主分支上. 術語稱作'復位粘貼的標籤(reset sticky tags)'."
+
+#~ msgid "Could not retrieve file log:"
+#~ msgstr "不能獲取檔案日誌:"
+
+#, fuzzy
+#~ msgid "Could not retrieve file annotation:"
+#~ msgstr "不能獲取檔案日誌:"
+
+#~ msgid "Normal (-kkv)"
+#~ msgstr "正常 (-kkv)"
+
+#~ msgid "From last checkin (-ko)"
+#~ msgstr "來自上一次登入(-ko)"
+
+#~ msgid "Normal/Unicode (-ku)"
+#~ msgstr "標準/Unicode (-ku)"
+
+#~ msgid "Binary (-kb)"
+#~ msgstr "二進制(-kb)"
+
+#~ msgid "ASCII"
+#~ msgstr "純文字(ASCII)"
+
+#~ msgid "Unicode"
+#~ msgstr "Unicode"
+
+#~ msgid "Merge changes..."
+#~ msgstr "合併變更(&M)..."
+
+#~ msgid "Modified in %s"
+#~ msgstr "在%s中被修改的"
+
+#~ msgid "Added to %s"
+#~ msgstr "新增到%s"
+
+#~ msgid "Removed from %s"
+#~ msgstr "從%s刪除"
+
+#~ msgid "Ignored files in %s:"
+#~ msgstr "在 %s 中被忽略的檔案"
+
+#~ msgid ""
+#~ "Hint: Files matching the current cvsignored list won't be processed.\n"
+#~ "To change the cvsignored list, see \"Preferences\"."
+#~ msgstr ""
+#~ "提示:符合當前忽略清單中的檔案是不被處理的.\n"
+#~ "您可以在\"Preferences\"中更改忽略清單"
+
+#~ msgid "Tag is &branch tag"
+#~ msgstr "標籤是分支標籤(&B)"
+
+#, fuzzy
+#~ msgid "Specify the program you use to compare files. Want to use more than one diff program?  Try http://meta-diff.sourceforge.net."
+#~ msgstr "指定您想用來比較的檔案. 如果想使用其他版本比較程序, 請訪問http://meta-diff.sourceforge.net."
+
+#~ msgid "Diff supports &Unicode"
+#~ msgstr "版本比較工具支持(&U)"
+
+#~ msgid "If this is unchecked, files marked as Unicode files given to the diff application will be converted to ASCII using the active codepage, or to UTF-8 if the file contains characters that cannot be displayed in the active codepage."
+#~ msgstr "如果取消確認, 當檔案包含當前代碼頁不能顯示的字符時, 標注著Unicode的檔案在比較應用程序打開時將使用當前代碼頁轉換為ASCII碼或UTF-8碼."
+
+#~ msgid "External diff application supports Unicode"
+#~ msgstr "Unicode支持"
+
+#, fuzzy
+#~ msgid "Merge supports &Unicode"
+#~ msgstr "版本比較工具支持(&U)"
+
+#, fuzzy
+#~ msgid "If this is unchecked, files marked as Unicode files given to the merge application will be converted to ASCII using the active codepage, or to UTF-8 if the file contains characters that cannot be displayed in the active codepage."
+#~ msgstr "如果取消確認, 當檔案包含當前代碼頁不能顯示的字符時, 標注著Unicode的檔案在比較應用程序打開時將使用當前代碼頁轉換為ASCII碼或UTF-8碼."
+
+#, fuzzy
+#~ msgid "External merge application supports Unicode"
+#~ msgstr "Unicode支持"
+
+#, fuzzy
+#~ msgid "StdErr text colour"
+#~ msgstr "標準錯誤(StdErr)純文字顏色"
+
+#, fuzzy
+#~ msgid "Colour for text written to stderr in the progress dialog"
+#~ msgstr "在處理對話框中標準錯誤(StdErr)純文字的顏色"
+
+#, fuzzy
+#~ msgid "You appear to have a folder called \"CVS\" in a top level folder.  Sorry, but you cannot call a folder which contains CVS checkouts \"CVS\", as that folder name is used internally by CVS."
+#~ msgstr "您在頂層目錄中有一個檔案夾的名稱叫 \"CVS\". 但這個檔案夾名稱已經被CVS內部使用, 您不能取出一個包含\"CVS\"的檔案夾."
+
+#~ msgid "Could not open file '%s'"
+#~ msgstr "不能打開檔案 '%s'"
+
+#~ msgid "The file %s contains nested conflict sections. You need to resolve them first before resolving the most recent conflicts. Do you want to resolve the nested conflicts now?"
+#~ msgstr " 此檔案 %s 包含嵌套的衝突. 您需要首先解決它們! 您想現在解決嵌套的衝突嗎? "
+
+#~ msgid "Do you want to save your manually merged file (and overwrite the file containing the conflict markers)?"
+#~ msgstr "您希望保存手工合併的檔案麼(並且覆蓋包含衝突標記的檔案)?"
+
+#~ msgid "error"
+#~ msgstr "錯誤"
+
+#, fuzzy
+#~ msgid "&Web Log..."
+#~ msgstr "CVS 網絡日誌(&W)..."
+
+#~ msgid "&Rebuild Icons"
+#~ msgstr "重建圖示(&R)"
+
+#~ msgid "Rebuild Windows icon cache"
+#~ msgstr "重建 Windows 圖示快取"
+
+#~ msgid "Diff..."
+#~ msgstr "比較..."
+
+#~ msgid "&Revision graph..."
+#~ msgstr "版本分支圖(&R)..."
+
+#~ msgid "Tag..."
+#~ msgstr "標籤..."
+
+#~ msgid "Branch..."
+#~ msgstr "分支..."
+
+#~ msgid "Retrieves a list of tags and branches from the  server, and puts them in the dropdown box"
+#~ msgstr "從伺服器上取回標籤和分支列表, 並下顯示在下拉式列表框中"
+
+#~ msgid "CVS version: %s"
+#~ msgstr "CVS 版本: %s"
+
+#~ msgid "SSH version: %s"
+#~ msgstr "SSH 版本: %s"
+
+#~ msgid "Comment:"
+#~ msgstr "注釋:"
+
+#~ msgid "Revision:"
+#~ msgstr "修訂版本:"
+
+#~ msgid "Date:"
+#~ msgstr "日期:"
+
+#~ msgid "Author:"
+#~ msgstr "修訂者:"
+
+#~ msgid "and branch/tag/revision:"
+#~ msgstr "新增標籤/分支/修訂版本:"
+
+#~ msgid "Module:"
+#~ msgstr "模組:"
+
+#, fuzzy
+#~ msgid "CVS Release in "
+#~ msgstr "CVS 版本: %s"
+
+#~ msgid "Patch files (*.patch)|*.patch|Text files (*.txt)|*.txt|All files|*.*"
+#~ msgstr "補丁檔案 (*.patch)|*.patch|純文字檔案 (*.txt)|*.txt|所有檔案|*.*"
+
+#~ msgid "Executables (*.exe)|*.exe"
+#~ msgstr "可執行檔案 (*.exe)|*.exe;*.bat;*.cmd"
+
+#~ msgid "Command invoked without IShellExtInit::Initialize"
+#~ msgstr "命令調用缺少IShellExtInit::Initialize"
+
+#~ msgid "SSH"
+#~ msgstr "SSH"
+
+#~ msgid "Only values (-kv)"
+#~ msgstr "只有值 (-kv)"
+
+#~ msgid "File type is Ascii"
+#~ msgstr "檔案類型是Ascii"
+
+#~ msgid "File type is Binary"
+#~ msgstr "檔案類型是二進制"
+
+#~ msgid "File type is Unicode"
+#~ msgstr "檔案類型是Unicode"
+
+#~ msgid "OK (without comment)"
+#~ msgstr "確認(沒有注釋)"
+
+#~ msgid "This CVS sandbox may be for Unix, not Windows."
+#~ msgstr "此CVS工作目錄是unix版本的工作目錄, 不是Windows版本的工作目錄"
+
+#~ msgid ""
+#~ "This can cause problems.  You should check out a module under Windows to use it with Windows, or under Unix to use it with Unix.\n"
+#~ "\n"
+#~ "Apache/Samba users:  It's quite likely that you're doing web development on a Unix web server with a file share.  In this case, check out the module again from TortoiseCVS.  Don't worry, Apache and Perl will work fine with the extra carriage return whitespace.\n"
+#~ "\n"
+#~ "Alternatively, this error can be caused by a CVS\\Root file which is corrupt for another reason.\n"
+#~ "This check looks for a carriage return and a line feed as the last two characters of the file.\n"
+#~ "\n"
+#~ "You can disable this check in Preferences."
+#~ msgstr ""
+#~ "這會導致一些問題.  您可以在Windows下取出模組在Windows下使用, 或在Unix下取出在Unix下使用.\n"
+#~ "\n"
+#~ "Apache/Samba 用戶:  您正在一個Unix網絡伺服器的共享檔案系統上開發.  這種情況下, 重新從TortoiseCVS中取出模組.  不用擔心, Apache和Perl在額外回車返回空格時將很好工作.\n"
+#~ "\n"
+#~ "另一方面, 這個錯誤也可能由CVS\\Root檔案由于其他原因破壞導致.\n"
+#~ "這個選項尋找當檔案的最後兩個字符時回車和換行的情況.\n"
+#~ "\n"
+#~ "您可以在偏好中關閉這個選項."
+
+#~ msgid "Show folders which recursively contain changed files as changed. This can be very slow."
+#~ msgstr "顯示包含變更檔案的檔案夾. 這會使顯示變得很慢."
+
+#~ msgid "Unix compatibility"
+#~ msgstr "Unix 兼容"
+
+#~ msgid "Windows and Unix sandboxes are incompatible under CVS. You must check out under Windows to work under Windows, or check out under Unix to work under Unix. TortoiseCVS can warn you if you try to use a Unix sandbox, or you can turn off the check."
+#~ msgstr "Windows和Unix工作目錄在CVS中不兼容. 您在Windows中取出的工作目錄必須在Windows中工作, 在Unix中取出的工作目錄必須在Unix中工作. 如果您試圖使用Unix工作目錄, TortoiseCVS能夠發出警告. 或則您關閉此選項."
+
+#~ msgid "Check not &Unix sandbox"
+#~ msgstr "確認非Unix工作目錄(&U)"
+
+#~ msgid "Automatic open"
+#~ msgstr "自動打開"
+
+#~ msgid "If this is checked and you select 'CVS Edit' on a single file, TortoiseCVS will open the file using the registered application for that file (e.g. Word for .doc files etc.)"
+#~ msgstr "如果確認,您在單個檔案上執行'CVS 編輯'命令時, TortoiseCVS將使用注冊的應用程序打開此檔案(例如 .doc檔案使用Word打開等)"
+
+#~ msgid ".cvsignore"
+#~ msgstr "忽略檔案(.cvsignore)"
+
+#~ msgid "CVS &application"
+#~ msgstr "CVS 應用程序(&A)"
+
+#~ msgid "&Add extension to .cvsignore"
+#~ msgstr "新增擴展名到忽略檔案(&A)"
+
+#~ msgid "Make CVS ignore this file"
+#~ msgstr "忽略此檔案"
+
+#~ msgid "Branch to merge from:"
+#~ msgstr "分支合併來自:"
+
+#~ msgid "Error creating pipe thread"
+#~ msgstr "錯誤創建管道線程"
+
+#~ msgid "CreatePipe failed"
+#~ msgstr "創建管道失敗"
+
+#~ msgid "DuplicateHandle failed"
+#~ msgstr "復制句柄失敗"
+
+#, fuzzy
+#~ msgid "TortoiseCVS version"
+#~ msgstr "TortoiseCVS 問題"
+
+#~ msgid "Checkout Module History"
+#~ msgstr "取出模組歷史"
+
+#, fuzzy
+#~ msgid "Couldn't rename file back:\n"
+#~ msgstr ""
+#~ "不能重命名檔案:\n"
+#~ "%s 為 %s"
+
+#~ msgid "(target)"
+#~ msgstr "(目標)"
+
+#~ msgid "Executables (*.exe)|*.exe;*.bat;*.cmd"
+#~ msgstr "可執行檔案 (*.exe)|*.exe;*.bat;*.cmd"
+
+#~ msgid "Executables (*.exe;*.bat)|*.exe;*.bat;*.cmd"
+#~ msgstr "可執行檔案 (*.exe;*.bat)|*.exe;*.bat;*.cmd"
+
+#~ msgid "TortoiseCVS UNSTABLE version"
+#~ msgstr "TortoiseCVS 不穩定版"
+
+#~ msgid "Standard icons"
+#~ msgstr "標準圖示"
+
+#~ msgid ""
+#~ "Tortoise Tip:  TortoiseCVS no longer supports :ntserver: protocol for Windows authentication.  You need to change to the newer :sspi: protocol.  For more information see the FAQ.\n"
+#~ "\n"
+#~ "http://www.tortoisecvs.org/faq.html#ntserver"
+#~ msgstr ""
+#~ "Tortoise技巧: TortoiseCVS不再支持Windows驗證的:ntserver:協議. 您需要使用新的:sspi:協議. 更多的信息請看FAQ.\n"
+#~ "\n"
+#~ "http://www.tortoisecvs.org/faq.html#ntserver"
+
+#~ msgid "Unknown encoding (%d)"
+#~ msgstr "未知編碼(%d)"
+
+#~ msgid "default"
+#~ msgstr "預設"
+
+#~ msgid "unknown-%d"
+#~ msgstr "未知-%d"
+
+#~ msgid "can't load any font, aborting"
+#~ msgstr "不能打開任何字體, 操作取消"
+
+#~ msgid ": unknown encoding"
+#~ msgstr ": 不能識別的編碼"
+
+#~ msgid ""
+#~ "No font for displaying text in encoding '%s' found,\n"
+#~ "but an alternative encoding '%s' is available.\n"
+#~ "Do you want to use this encoding (otherwise you will have to choose another one)?"
+#~ msgstr ""
+#~ "在顯示'%s'時沒有找到合適字體,\n"
+#~ "但一個替代編碼'%s'可以使用.\n"
+#~ "您是否願意使用這個替代編碼(否則您必須選擇其他編碼)?"
+
+#~ msgid ""
+#~ "No font for displaying text in encoding '%s' found.\n"
+#~ "Would you like to select a font to be used for this encoding\n"
+#~ "(otherwise the text in this encoding will not be shown correctly)?"
+#~ msgstr ""
+#~ "在顯示'%s'時沒有找到合適字體,\n"
+#~ "您是否願意為這個編碼選擇一種字體\n"
+#~ "(否則這個編碼的純文字不能正常顯示)?"
+
+#~ msgid "All files (*.*)|*.*"
+#~ msgstr "所有檔案 (*.*)|*.*"
+
+#~ msgid "All files (*)|*"
+#~ msgstr "所有檔案 (*)|*"
+
+#~ msgid "No tag or branch found."
+#~ msgstr "沒有找到標籤或分支."
+
+#~ msgid "No tags or branches found"
+#~ msgstr "沒有找到指定的標籤或分支"
+
+#~ msgid "\" line "
+#~ msgstr "\" 行"
+
+#~ msgid "Directory"
+#~ msgstr "目錄"
+
+#~ msgid "Directory: %s"
+#~ msgstr "目錄: %s"
+
+#~ msgid "Revision:\t"
+#~ msgstr "版本:\t"
+
+#~ msgid ""
+#~ "\n"
+#~ "Date:\t\t"
+#~ msgstr ""
+#~ "\n"
+#~ "日期:\t\t"
+
+#~ msgid ""
+#~ "\n"
+#~ "Author:\t\t"
+#~ msgstr ""
+#~ "\n"
+#~ "修訂者:\t\t"
+
+#~ msgid ""
+#~ "\n"
+#~ "Comment:\n"
+#~ msgstr ""
+#~ "\n"
+#~ "注釋:\n"
+
+#~ msgid "Text style:\t\t"
+#~ msgstr "純文字類型:\t\t"
+
+#~ msgid ""
+#~ "\n"
+#~ "Keyword substitution:\t"
+#~ msgstr ""
+#~ "\n"
+#~ "關鍵詞替代:\t"
+
+#~ msgid "Text style:"
+#~ msgstr "純文字類型:"
+
+#~ msgid "Remove\tDel"
+#~ msgstr "移出\t刪除"
+
+#~ msgid "OK (without comment) "
+#~ msgstr "確認 (沒有注釋)"
+
+#~ msgid "Create any directories that exist in the repository if they are missing from the working directory"
+#~ msgstr "從選擇的目錄中在倉庫裡創建一個新"
+
+#~ msgid "Not In CVS"
+#~ msgstr "不在CVS中"
+
+#~ msgid "Checkout CVSROOT History"
+#~ msgstr "取出 CVSROOT 歷史"
+
+#~ msgid "Checkout CVSROOT Module History"
+#~ msgstr "取出 CVSROOT 模組歷史"

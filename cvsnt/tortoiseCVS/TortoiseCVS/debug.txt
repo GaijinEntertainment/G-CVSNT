@@ -1,0 +1,51 @@
+URL:
+
+cvsurl -u cvs://:pserver:anonymous@cvs.sf.net:/cvsroot/tortoisecvs:TortoiseCVS
+
+Edit:
+
+cvsedit -l C:\user\gh\ais\doc\design\framework\frv_aisd_message_icd.doc
+
+Rename:
+
+cvsrename -l C:\mytest\scc\ghdyndlg.cpp
+
+Make Patch:
+
+cvsmakepatch -l C:\mytest\scc\pubscc.h
+cvsmakepatch -l C:\mytest\scc
+
+RevGraph:
+
+CVSRevisionGraph -l C:\user\tma\tcvs\head\TortoiseCVS\src\TortoiseAct\TortoiseAct.cpp
+CVSRevisionGraph -l C:\mytest\box2\test.c
+
+History:
+
+CVSHistory -l C:\mytest\srv\improved.txt
+CVSHistory -l C:\mytest\box2\test.c
+
+Annotate:
+
+cvsannotate -l C:\mytest\box2\addedtoo.c
+cvsannotate -l C:\user\tma\tcvs\head\TortoiseCVS\src\TortoiseAct\TortoiseAct.cpp
+
+Commit:
+
+CVSCommit -l C:\mytest\box2
+
+Diff:
+
+CVSDiff -l C:\user\tma\tcvs\head\TortoiseCVS\src\TortoiseCVS.vc71.sln
+
+About:
+
+CVSAbout -l C:\user\tma\tcvs\head\TortoiseCVS
+
+Preferences:
+
+CVSPrefs -l C:\user\tma\tcvs\head\TortoiseCVS
+
+Add:
+
+cvsaddrecursive -l D:\mytest\sandbox

@@ -1,0 +1,70 @@
+.TH cvslockd 1 "16 June 2008" "CVSNT 2.5.04"
+
+.SH NAME
+cvslockd \- CVSNT Lock Server
+
+.SH SYNOPSIS
+.B cvslockd [-d] [-l] [-g] [-p port]
+
+.SH DESCRIPTION
+cvslockd is the CVSNT lock server. It is a replacement for the old file based locks from cvs.
+.PP
+The lock server reports not only that a lock exists, but also who is holding it and it automatically removes stale locks.
+
+.SH OPTIONS
+.TP
+.B -d
+Debug mode. Print debug output.
+.TP
+.B -l
+Listen on local (loopback) interface only.
+.TP
+.B -g
+Listen on all interfaces.
+.TP
+.B -p port
+Defines the port where the lock server listens. Default is 2402.
+
+.SH FILES
+.I /etc/cvsnt/PServer(5)
+.RS
+Global configuration file for CVSNT server and CVSNT lock server.
+.RE
+.I $CVSROOT/CVSROOT/commitinfo,v
+
+.I $CVSROOT/CVSROOT/cvsignore,v
+
+.I $CVSROOT/CVSROOT/cvswrappers,v
+
+.I $CVSROOT/CVSROOT/editinfo,v
+
+.I $CVSROOT/CVSROOT/history
+
+.I $CVSROOT/CVSROOT/loginfo,v
+
+.I $CVSROOT/CVSROOT/modules,v
+
+.I $CVSROOT/CVSROOT/rcsinfo,v
+
+.I $CVSROOT/CVSROOT/taginfo,v
+
+.I $CVSROOT/CVSROOT/passwd
+
+.I $CVSROOT/CVSROOT/admin
+
+.RS
+CVSNT support files. They are described in
+.I cvsnt.5
+.RE
+
+.SH BUGS
+The lock server may crash at start up, although this has been reported only on Windows 2000 systems.
+
+.SH AUTHORS
+CVSNT and CVSNT Lock Server written by Tony Hoyle <tony.hoyle@march-hare.com>.
+
+Manual page written by Andreas Tscharner <andy@vis.ethz.ch>.
+
+.SH SEE ALSO
+.I cvsnt(1)
+The CVSNT client and server replacement for cvs.

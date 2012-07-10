@@ -1,0 +1,19 @@
+#!/bin/bash
+# usage: setresourceversion resfile dotversion extra
+RESFILE=$1
+DOTVERSION=$2
+EXTRA=$3
+COMMAVERSION=`echo $DOTVERSION | sed -e s/\\\\./,/g`
+if [ "$EXTRA" != "" ]
+then
+  DOTVERSION="$DOTVERSION $EXTRA"
+  COMMAVERSION=$COMMAVERSION
+fi
+cp -f $RESFILE.rc $RESFILE.bak
+sed -e "s/FILEVERSION .*/FILEVERSION $COMMAVERSION/" \
+    -e "s/PRODUCTVERSION .*/PRODUCTVERSION $COMMAVERSION/" \
+    -e "s/FileVersion\".*/FileVersion\", \"$DOTVERSION\\\\0\"/" \
+    -e "s/ProductVersion\".*/ProductVersion\", \"$DOTVERSION\\\\0\"/" \
+    < $RESFILE.bak > $RESFILE.rc
+
+

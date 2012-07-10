@@ -1,0 +1,29 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="releasemanager">
+
+        <DirectoryRef Id="CVSNT_INSTALLDIR" FileSource="$(var.CVSNT_BASE)\">
+            <Directory Id="ReleaseManagerStuff" Name=".">
+                <Component Id="ReleaseManager" Guid="5C24713D-6E03-4805-8E6C-A250DAB96BF8" DiskId="5">
+                    <File Id="ReleaseManager.exe" ShortName="RELEAS~1.EXE" Name="ReleaseManager.exe" KeyPath="yes" Source="$(var.MARCH_HARE)\releasemanager.exe">
+                        <Shortcut Id="ReleaseManager.exe" ShortName="RELEAS~1.EXE" Name="Release Manager" Directory="CvsntStartMenuFolder" Advertise="no" />
+                    </File>
+                </Component>
+                <Component Id="Infozip" Guid="293F0D9C-4606-49e7-B623-90562D38DCC7" DiskId="5">
+                    <File Id="zip32" Name="Zip32.dll" Source="$(var.CVSNT_BASE)/sysfiles/zip32.dll" />
+                    <File Id="unzip32" Name="Unzip32.dll" Source="$(var.CVSNT_BASE)/sysfiles/unzip32.dll" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+
+        <FeatureRef Id="Cvsnt">
+            <Feature Id="ReleaseManager" Title="Release Manager" Description="CVSNT Release Manager" AllowAdvertise="no" Level="3">
+                <Condition Level="0">RELEASEMANAGER&lt;&gt;1</Condition>
+                <ComponentRef Id="ReleaseManager" />
+                <ComponentRef Id="Infozip" />
+                <ComponentRef Id="CvsntStartMenuFolder" />
+            </Feature>
+        </FeatureRef>
+    </Fragment>
+</Wix>

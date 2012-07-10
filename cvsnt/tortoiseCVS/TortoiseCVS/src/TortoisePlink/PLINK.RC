@@ -1,0 +1,3 @@
+200 ICON "putty.ico"
+
+#include "TortoisePlink.rc"

@@ -1,0 +1,6 @@
+<!--#set var="title" value="" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<p>
+
+<!--#include virtual="wrapper_end.shtml" -->

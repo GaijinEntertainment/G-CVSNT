@@ -1,0 +1,18 @@
+//
+// CVSNT.RC2 - resources Microsoft Visual C++ does not edit directly
+//
+
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define PROJECTNAME "cvsnt"
+#define PROJECTDESCRIPTION "cvsnt Client/Server"
+#define PROJECTFILENAME "cvs.exe"
+#include "..\windows-NT\VersionInfoCommon.rc2"

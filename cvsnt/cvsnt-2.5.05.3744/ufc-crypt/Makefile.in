@@ -1,0 +1,151 @@
+#
+# UFC-crypt: ultra fast crypt(3) implementation
+# Copyright (C) 1991, 1992, Free Software Foundation, Inc.
+#
+# This library is free software; you can redistribute it and/or
+# modify it under the terms of the GNU Library General Public
+# License as published by the Free Software Foundation; either
+# version 2 of the License, or (at your option) any later version.
+#
+# This library is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# Library General Public License for more details.
+#
+# You should have received a copy of the GNU Library General Public
+# License along with this library; if not, write to the Free
+# Software Foundation, Inc., 675 Mass Ave, Cambridge, MA 02139, USA.
+#
+# @(#)Makefile	2.17 03/02/92
+#
+
+srcdir     = @srcdir@
+top_srcdir = @top_srcdir@
+VPATH      = @srcdir@
+
+CC=@CC@
+
+CFLAGS=@CFLAGS@ -fPIC -DPIC
+
+AR=ar rc
+RANLIB=ranlib
+TAR=tar
+
+SHELL = /bin/sh
+EXE=
+
+prefix = @prefix@
+exec_prefix = ${prefix}
+libdir = ${exec_prefix}/lib
+includedir = ${prefix}/include
+mandir = ${prefix}/share/man
+man3dir = ${mandir}/man3
+
+
+#
+# Select one of the following modules:
+#
+# You're advised to do a 'make clean' if
+# you change this to ensure you get the
+# proper routine linked into your program
+CRYPT = crypt.o
+
+# portable C version:  crypt.o
+# SUN3 models:         crypt.sun3.o
+# HP series 300/400:   crypt.s300.o
+# SUN SPARC systems:   crypt.sparc.o
+# NeXT 68k systems:    crypt.next68.o
+
+CRYPTOBJ = crypt_util.o $(CRYPT)
+
+all: libufc.a
+
+install:
+
+#
+# Sample programs for debugging/testing/benchmarking
+#
+
+# Simple test for correct operation
+ufc: ufc.c libufc.a
+	$(CC) $(CFLAGS) ufc.c libufc.a -o ufc
+
+tests: cert ufc speedc speedf
+	./cert < ./cert.data
+	./ufc 1
+	./speedc
+	./speedf
+
+# Benchmark UFC fcrypt the crypt(3) in libc.a
+speedf: libufc.a speeds.c
+	$(CC) $(CFLAGS) -DFCRYPT speeds.c libufc.a -o speedf
+speedc: libufc.a speeds.c
+	$(CC) $(CFLAGS)          speeds.c          -o speedc
+
+# DES validation suite
+cert: libufc.a cert.c
+	$(CC) $(CFLAGS) cert.c libufc.a -o cert
+
+#
+
+libufc.a: $(CRYPTOBJ)
+	$(AR) $@ $(CRYPTOBJ)
+	-@ ($(RANLIB) $@ || true) >/dev/null 2>&1
+
+#
+# Additional tagets making variants of libufc.a
+# using machine dependent assembly code. Intended
+# for possible future use by 'Crack'
+#
+libufc.sparc.a: $(CRYPTOBJ) crypt.sparc.o
+	make CRYPT=crypt.sparc.o libufc.a ufc
+	cp libufc.a libufc.sparc.a
+	ranlib libufc.sparc.a
+libufc.sun3.a: $(CRYPTOBJ) crypt.sun3.o
+	make CRYPT=crypt.sun3.o libufc.a ufc
+	cp libufc.a libufc.sun3.a
+	ranlib libufc.sun3.a
+libufc.s300.a: $(CRYPTOBJ) crypt.s300.o
+	make CRYPT=crypt.s300.o libufc.a ufc
+	cp libufc.a libufc.s300.a
+libufc.next68.a: $(CRYPTOBJ) crypt.next68.o
+	make CRYPT=crypt.next68.o libufc.a ufc
+	cp libufc.a libufc.next68.a
+	ranlib libufc.next68.a
+
+crypt_util.o: crypt_util.c ufc-crypt.h
+
+#
+# Crypt functions
+#
+
+# Semiportable
+crypt.o: crypt.c ufc-crypt.h
+
+# Sun3 
+crypt.sun3.o: crypt.sun3.S
+	./S2o crypt.sun3.S crypt.sun3.o
+
+# HP 9000 series 300
+crypt.s300.o: crypt.s300.S
+	./S2o crypt.s300.S crypt.s300.o
+
+# SUN SPARC architecture
+crypt.sparc.o: crypt.sparc.S
+	./S2o crypt.sparc.S crypt.sparc.o
+
+# NeXT 68k machines - thanks to korz.cs.columbia.edu (Fred Korz)
+crypt.next68.o: crypt.next68.S
+	./S2o crypt.next68.S crypt.next68.o
+crypt.next68.S: crypt.sun3.S
+	sed -e '/\.proc/ d' crypt.sun3.S > crypt.next68.S
+
+distclean: clean
+
+clean:
+	/bin/rm -f *.o core *~ ufc libufc*.a speedf speedc tmp.s mon.out cert \
+          a.out Part* crypt.next68.S
+
+kit:
+	makekit COPYING README Makefile S2o crypt.c speeds.c *.S crypt_util.c \
+		ufc.c cert.c cert.data patchlevel.h ufc-crypt.h do_ranlib

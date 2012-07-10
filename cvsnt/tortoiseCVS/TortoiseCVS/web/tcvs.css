@@ -1,0 +1,155 @@
+
+body {
+	background: #333;
+	color: #666;
+	font: 11px/15px "trebuchet ms", "arial", "helvetica", sans-serif;
+	margin: 0;
+	padding: 0;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 0;
+	padding: 0;
+}
+
+h2.faq {
+	padding-top: 100px;
+}
+
+a {
+	background: transparent;
+	color: #990;
+	text-decoration: none;
+}
+
+a:hover {
+	background: transparent;
+	color: #cc0;
+}
+
+a img {
+	border: 0;
+}
+
+#wrapper {
+	background: #fff;
+	margin: 0 auto;
+	text-align: center;
+	width: 650px;
+}
+
+#header {
+	margin: 0 auto;
+	padding: 10px;
+	text-align: center;
+}
+
+#header h1 a {
+	background: #fff url(gx/head.jpg) no-repeat;
+	display: block;
+	height: 150px;
+}
+
+#header h1 span {
+	visibility: hidden;
+}
+
+#nav {
+	background: #fff url(gx/nav.jpg) no-repeat;
+	height: 30px;
+	margin: 0 auto;
+	text-align: center;
+	width: 630px;
+}
+
+#nav ul {
+	list-style: none;
+	margin: 0;
+	padding: 0 10px;
+}
+
+#nav ul li {
+	float: left;
+	line-height: 30px;
+}
+
+#nav ul li a {
+	color: #888051;
+	float: left;
+	font-size: 10px;
+	display: block;
+	height: 30px;
+	padding-left: 10px;
+	text-decoration: none;
+}
+
+#nav ul li a:hover {
+	color: #990;
+}
+
+#content {
+	padding: 50px 20px;
+	text-align: left;
+}
+
+#content p {
+	margin-left: 20px;
+	width: 450px;
+}
+
+#content a:hover {
+	background: #fff url(gx/dot.jpg) repeat-x bottom;
+}
+
+#content ul {
+	width: 450px;
+}
+
+#content ul li {
+	padding-bottom: 4px;
+}
+
+#content h2 {
+	background: #fff;
+	color: #888051;
+	font: 13px/16px "georgia", "trebuchet ms", "arial", "helvetica", sans-serif;
+	font-weight: bold;
+}
+
+#timestamp {
+	background: #fff;
+	color: #888051;
+	margin: 0;
+	font: 10px "trebuchet ms", "arial", "helvetica", sans-serif;
+}
+
+#footer {
+	background: #696856 url(gx/foot.jpg) no-repeat;
+	color: #000;
+	height: 50px;
+	margin: 0 auto;
+	width: 630px;
+}
+
+#footer p {
+	font-size: 10px;
+	float: left;
+	line-height: 16px;
+	padding: 10px;
+	text-align: left;
+}
+
+#footer p a {
+	border-bottom: 2px solid #000;;
+	color: #000;
+}
+
+#footer p a:hover {
+	border-bottom: 2px solid #cc3;
+	color: #000;
+}
+
+#footer a img {
+	float: left;
+	padding: 13px 0 0 0;
+}

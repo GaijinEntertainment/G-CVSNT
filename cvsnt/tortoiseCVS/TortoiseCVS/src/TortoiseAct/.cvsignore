@@ -1,0 +1,10 @@
+DebugWxw
+ReleaseWxw
+Release
+Debug
+*.plg
+*.~*
+udebug
+x64
+*.user
+ReleaseD

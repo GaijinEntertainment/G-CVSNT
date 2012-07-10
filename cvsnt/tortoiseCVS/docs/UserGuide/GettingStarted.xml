@@ -1,0 +1,114 @@
+<!-- ====== Getting Started ==================================================== -->
+<chapter id="begin">
+  <title id="begin-title">Getting Started</title>
+
+  <!-- ====== What is CVS? ===================================================== -->
+  <section id="begin.whatcvs">
+    <title id="begin.whatcvs-title">What is <acronym>CVS</acronym>?</title>
+    <para>
+    <acronym>CVS</acronym>, or the Concurrent Versioning System, is a
+    version control system. Version control systems are generally used as part
+    of the software development cycle to track and co-ordinate source code
+    changes among a team of developers. 
+    </para>
+    <para>
+    For example, bugs sometimes creep in when software is modified, and you
+    might not detect the bug until a long time after you make the
+    modification. With <acronym>CVS</acronym>, you can easily retrieve old
+    versions to see exactly which change caused the bug. This can sometimes be a
+    big help. 
+    </para>
+    <para>
+    You could of course save every version of every file you have ever
+    created. This would however waste an enormous amount of disk
+    space. <acronym>CVS</acronym> stores all the  versions of a file in a single
+    file in a clever way that only stores the differences between versions. 
+    </para>
+    <para>
+    <acronym>CVS</acronym> also helps you if you are part of a group of people
+    working on the same project. It is all too easy to overwrite each others'
+    changes unless you are extremely careful. Some editors, like GNU Emacs, try
+    to make sure that the same file is never modified by two people at the same
+    time. Unfortunately, if someone is using another editor, that safeguard will
+    not work. <acronym>CVS</acronym> solves this problem by insulating the
+    different developers from each other. Every developer works in his own
+    sandbox, and <acronym>CVS</acronym> merges the work when each developer is
+    done. 
+    </para>
+  </section>
+
+  <!-- ====== What is TortoiseCVS? ============================================= -->
+
+  <section id="begin.whattortoisecvs">
+    <title id="begin.whattortoisecvs-title">What is TortoiseCVS?</title>
+    <para>
+      TortoiseCVS is a front-end client to make using <acronym>CVS</acronym>
+  easier and more intuitive. It allows developers to work with files
+  controlled by <acronym>CVS</acronym> directly from <productname>Windows
+  Explorer</productname>. 
+    </para>
+    <para>
+      One of the major drawbacks of <acronym>CVS</acronym> is the command-line
+  interface that is provided. Many developers today are becoming more
+  accustomed to the graphical integrated development environments
+  (<acronym>IDEs</acronym>). TortoiseCVS aims to provide that
+  "point-and-click" environment in a clever and intuitive way. 
+    </para>
+    <para>
+    Note that TortoiseCVS is a CVS <emphasis>client</emphasis>, not a
+    <emphasis>server</emphasis>. This document assumes that you either know how
+    to set up your own server, or that you are using a server that somebody else
+    set up. If you want to learn about setting up a CVS server, see <xref linkend="resources.cvsbook"/>.
+    </para>
+  </section>
+
+  <!-- ====== Where to Begin? =================================================== -->
+
+  <section id="begin.wherebegin">
+    <title id="begin.wherebegin-title">Where to Begin?</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          The best way to learn how to use TortoiseCVS is to play with
+  it. Start by <link linkend="ref.install">installing TortoiseCVS</link>. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          If you are new to CVS start following along with <link linkend="basic" endterm="basic-title"/>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Once you've learned the ropes check out the advanced features in
+  <link linkend="advanced" endterm="advanced-title"/>. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          For pure reference, the chapters <link linkend="ref"
+  endterm="ref-title"/> and <link linkend="dialogs" endterm="dialogs-title"/>
+  will help you get the most out of TortoiseCVS. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          And finally check out <link linkend="tips" endterm="tips-title"/> for
+  a complete and enjoyable version control experience. 
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+  <section id="begin.bugs">
+  <title id="begin.bugs-title">Errors and Omissions in this Manual</title>
+  <para>
+  This manual is not perfect, although we try to make it better all the time.
+  If you find something which you believe is wrong, or if you think something is missing from the 
+  manual, please
+  <ulink url="https://sourceforge.net/tracker/?func=add&amp;group_id=48103&amp;atid=451972">let us know</ulink>.
+  (Please set the <guilabel>Category</guilabel> to <literal>Documentation</literal>; you do not need to include your OS
+  version and CVSROOT).
+</para>
+  </section>
+  
+</chapter>

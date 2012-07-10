@@ -1,0 +1,39 @@
+# This sits in the TortoiseCVS folder on cvsgui.org to redirect to
+# tortoisecvs.org.  It should be named .htaccess.
+
+RedirectPermanent /TortoiseCVS/index.html http://www.tortoisecvs.org/
+RedirectPermanent /TortoiseCVS/index.shtml http://www.tortoisecvs.org/
+RedirectPermanent /TortoiseCVS/ChangeLog.txt http://www.tortoisecvs.org/ChangeLog.txt
+RedirectPermanent /TortoiseCVS/GPL.html http://www.tortoisecvs.org/GPL.html
+RedirectPermanent /TortoiseCVS/IconsBarracuda.zip http://www.tortoisecvs.org/IconsBarracuda.zip
+RedirectPermanent /TortoiseCVS/IconsCosmin.zip http://www.tortoisecvs.org/IconsCosmin.zip
+RedirectPermanent /TortoiseCVS/IconsNikolai.zip http://www.tortoisecvs.org/IconsNikolai.zip
+RedirectPermanent /TortoiseCVS/IconsTimo.zip http://www.tortoisecvs.org/IconsTimo.zip
+RedirectPermanent /TortoiseCVS/TortoiseCVS0-33.zip http://www.tortoisecvs.org/TortoiseCVS0-33.zip
+RedirectPermanent /TortoiseCVS/Web.dsp http://www.tortoisecvs.org/Web.dsp
+RedirectPermanent /TortoiseCVS/changelog.shtml http://www.tortoisecvs.org/changelog.shtml
+RedirectPermanent /TortoiseCVS/charlie.jpeg http://www.tortoisecvs.org/charlie.jpeg
+RedirectPermanent /TortoiseCVS/contributors.shtml http://www.tortoisecvs.org/contributors.shtml
+RedirectPermanent /TortoiseCVS/development.shtml http://www.tortoisecvs.org/development.shtml
+RedirectPermanent /TortoiseCVS/download.shtml http://www.tortoisecvs.org/download.shtml
+RedirectPermanent /TortoiseCVS/faq.html http://www.tortoisecvs.org/faq.html
+RedirectPermanent /TortoiseCVS/goals.shtml http://www.tortoisecvs.org/goals.shtml
+RedirectPermanent /TortoiseCVS/guide.html http://www.tortoisecvs.org/guide.html
+RedirectPermanent /TortoiseCVS/help.html http://www.tortoisecvs.org/help.html
+RedirectPermanent /TortoiseCVS/legal.html http://www.tortoisecvs.org/legal.html
+RedirectPermanent /TortoiseCVS/notes.txt http://www.tortoisecvs.org/notes.txt
+RedirectPermanent /TortoiseCVS/philosophical-gnu-sm.jpg http://www.tortoisecvs.org/philosophical-gnu-sm.jpg
+RedirectPermanent /TortoiseCVS/publicity.txt http://www.tortoisecvs.org/publicity.txt
+RedirectPermanent /TortoiseCVS/quotes.shtml http://www.tortoisecvs.org/quotes.shtml
+RedirectPermanent /TortoiseCVS/screenshot1.png http://www.tortoisecvs.org/screenshot1.png
+RedirectPermanent /TortoiseCVS/screenshot2.png http://www.tortoisecvs.org/screenshot2.png
+RedirectPermanent /TortoiseCVS/style.css http://www.tortoisecvs.org/style.css
+RedirectPermanent /TortoiseCVS/support.shtml http://www.tortoisecvs.org/support.shtml
+RedirectPermanent /TortoiseCVS/template.shtml http://www.tortoisecvs.org/template.shtml
+RedirectPermanent /TortoiseCVS/test.shtml http://www.tortoisecvs.org/test.shtml
+RedirectPermanent /TortoiseCVS/todo.txt http://www.tortoisecvs.org/todo.txt
+RedirectPermanent /TortoiseCVS/upload http://www.tortoisecvs.org/upload
+RedirectPermanent /TortoiseCVS/why.html http://www.tortoisecvs.org/why.html
+RedirectPermanent /TortoiseCVS/wrapper_end.shtml http://www.tortoisecvs.org/wrapper_end.shtml
+RedirectPermanent /TortoiseCVS/wrapper_start.shtml http://www.tortoisecvs.org/wrapper_start.shtml
+RedirectPermanent /TortoiseCVS/zambia.shtml http://www.tortoisecvs.org/zambia.shtml

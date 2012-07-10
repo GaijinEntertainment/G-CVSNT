@@ -1,0 +1,64 @@
+Initial connection string.  Server sends greeting with version number:
+
+CVSLock 1.1 Ready
+
+Commands are:
+
+Login mode   1.0
+Client <user>'|'<root>['|'<client_host>]
+
+Register a lock client.  This must be done before any other commands (except monitor) are
+executed.
+
+Client mode   1.0
+Lock {Read|Write} [Recursive] {File|Directory}'|'<path>
+
+Start a lock on a file or directory.
+
+Client mode   1.0
+Unlock <path> [{Read|Write} [Recursive] {File|Directory}'|'<path>]|'All'
+
+Terminate a lock.   This is also called implicitly if you break connection to the lockserver
+
+Login mode   1.0
+monitor [C][L][V]
+
+(1.1 only) C - Monitor Client login/logout (default)
+(1.1 only) L - Monitor Locks (default)
+(1.1 only) V - Monitor Version changes
+
+Monitor activity.
+
+State is sent to the client in the following format:
+
+Login/Out: 010 MONITOR Client (client) server|client|user|root|state
+Lock:      010 MONITOR Lock (client) Path|Flags  
+Unlock:    010 MONITOR Lock (client) Path|Deleted 
+Version:   010 MONITOR Version (client) Path|Branch|Version|Type
+
+Monitor mode   1.0
+Clients
+
+(monitor mode only) List current lockserver clients.  Results are in the following format:
+
+(client) server|client|user|root|state
+
+
+Error returns:
+
+000 OK {message}
+001 FAIL {message}
+002 WAIT {message}
+010 MONITOR {message}
+
+
+-------------------------------
+protocol 1.1 extensions
+
+client mode 1.1
+Modified [Added|Deleted]'|'<RCS path>'|'<branch>'|'<version>
+
+Error returns:
+
+000 OK {message}
+001 FAIL {message}

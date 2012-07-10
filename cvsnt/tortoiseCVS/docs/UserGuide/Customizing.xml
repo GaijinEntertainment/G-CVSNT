@@ -1,0 +1,44 @@
+<!-- ====== Customizing TortoiseCVS ====================================== -->
+
+<chapter id="customizing">
+  <title id="customizing-title">Customizing TortoiseCVS</title>
+
+    <!-- ====== Icon Overlays ================================================ -->
+
+    <section id="customizing.icons">
+    <title id="customizing.icons-title">Overlay Icons</title>
+    <section id="customizing.icons.changing">
+    <title id="customizing.icons.changing-title">Selecting a Different Set of Overlay Icons</title>
+    <para>
+    TortoiseCVS comes with several sets of overlay icons. You might prefer one
+    of the alternative icon sets to the default one; open the 
+    <link linkend="dialogs.preferences.iconchooser" endterm="dialogs.preferences.iconchooser-title"/> 
+    Iconset Chooser dialog to select another icon set. Regrettably, Explorer
+    caches the overlay icons, which means that you have to restart Windows to
+    see the effect of the change. The dialog shows a preview of the icons to
+    help you choose the correct one.
+    </para>
+    </section>
+    <section id="customizing.icons.recursive">
+    <title id="customizing.icons.recursive-title">Changing how the Overlay Icons Work</title>
+    <para>
+    By default, the overlay icon for a folder will indicate "modified" if any
+    of the files in the folder are modified. It is possible to configure
+    TortoiseCVS to indicate "modified" if any of the files in the folder
+    <emphasis>or in any subfolders</emphasis> are modified.
+    </para>
+    <para>
+    As updating this status can easily be resource-intensive, TortoiseCVS
+    offers the possibility of either updating the status each time you open
+    the folder, or only on demand. In the latter case, the icons will show
+    the cached status, and you will have to invoke
+    <guimenuitem>CVS &rarr; Refresh Folder Status</guimenuitem> to update the status.
+    </para>
+    <para>
+    Go to <link linkend="dialogs.preferences.advanced" endterm="dialogs.preferences.advanced-title"/> 
+    and change the <guilabel>Folder icon overlays</guilabel> setting as you desire.
+    </para>
+    </section>
+    </section>
+
+</chapter>

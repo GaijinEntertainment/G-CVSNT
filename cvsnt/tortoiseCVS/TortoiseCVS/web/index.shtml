@@ -1,0 +1,64 @@
+
+<!--#set var="title" value="About" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>What is TortoiseCVS?</h2>
+<p>
+TortoiseCVS lets you work with files under
+<a href="http://en.wikipedia.org/wiki/Concurrent_Versions_System">CVS</a> 
+version control directly from Windows Explorer. It is freely available under the
+<a href="GPL.html">GPL</a>.
+<p>
+With TortoiseCVS you can directly check out modules, update, commit and
+see differences by right clicking on files and folders within Explorer.
+You can see the state of a file with overlays on top of the normal icons
+within Explorer.
+It even works from within the <a href="screenshot2.png">file open dialog</a>.
+
+<p>
+<img alt="TortoiseCVS at work" src="screenshot1.png"/>
+<p>
+You can perform tagging, branching, merging and importing, and you can go directly to a browser
+web log (using <a href="http://www.lyra.org/viewcvs/">ViewCVS</a>
+or <a href="http://stud.fh-heilbronn.de/~zeller/cgi/cvsweb.cgi/">CVSWeb</a>) on
+a particular file.
+
+<p>
+
+<ul>
+<li>If you want to work
+with an existing repository, <a href="download.shtml">download</a>
+TortoiseCVS and read the User's Guide.
+<li>To create your own local repository to work alone on, <a
+href="faq.shtml#cvsinit">read this FAQ entry</a>.
+<li>If you want to set up a new shared repository, you will need a CVS server.  
+We recommend <a href="http://www.cvsnt.org">CVSNT</a> for both Unix and Windows machines.  
+TortoiseCVS can also be used with original <a href="http://ximbiot.com/cvs/">CVS</a>,
+but some features depend on a <a href="http://cvsnt.org/wiki">CVSNT</a> server.
+</ul>
+
+<p>
+There are some CVS things that you can't do with
+TortoiseCVS - have a look at the
+<a href="http://sourceforge.net/tracker/?atid=451975&group_id=48103&func=browse">feature requests database</a>.
+The GPL license lets you improve TortoiseCVS, as long as you
+make any changes to the source code available.  If you would like to
+help implement some features,
+please see the <a href="development.shtml">development</a> section.
+<p>
+<b>New:</b> <a href="http://www.aoemedia.de/typo3-frankfurt.html">TYPO3 Frankfurt</a></b> 
+have donated &euro;500 to Oxfam in the name of TortoiseCVS. Thanks a lot.
+<p>
+<table width="100%" border="0">
+<tr><td>
+<a href="https://sourceforge.net/potm/potm-2004-12.php">
+   <img src="http://images.sourceforge.net/images/potm-2004-12_monthly.jpg">
+</a></td><td>TortoiseCVS was SourceForge 
+   <a href="https://sourceforge.net/potm/potm-2004-12.php">Project of the Month</a>
+in December 2004.</td></tr>
+</table>
+<p>
+TortoiseCVS is <a href="https://sourceforge.net/docman/display_doc.php?group_id=1&docid=25888">
+officially recommended by SourceForge</a>.
+
+<!--#include virtual="wrapper_end.shtml" -->

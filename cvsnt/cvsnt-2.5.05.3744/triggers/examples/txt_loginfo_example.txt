@@ -1,0 +1,19 @@
+From: [email]
+To: [email]
+Subject: Cvs Commit: [module]
+
+CVSROOT:	[repository]
+Module name:	[module]
+Changes by:	[email]		[date]
+On host:	[hostname]
+[begin_directory]
+
+Directory: [directory]
+
+[begin_file]
+[change_type] [filename]	[tag]	[old_revision] -> [new_revision]	[bugid]
+[end_file]
+[end_directory]
+
+Log message:
+[message]

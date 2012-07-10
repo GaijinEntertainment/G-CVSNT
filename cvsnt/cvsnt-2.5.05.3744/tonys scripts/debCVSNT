@@ -1,0 +1,123 @@
+#!/bin/sh
+
+# $Id: debCVSNT,v 1.1.2.1 2008/07/01 18:30:31 atscharner Exp $
+
+#
+# Copyright 2008 Andreas Tscharner <andy@vis.ethz.ch>
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or
+# (at your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the
+# GNU General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston,
+# MA 02110-1301, USA.
+
+#
+# debCVSNT
+# Small script file to create a Debian package from the CVS version
+#
+# VERSION: 0.1
+#
+# HISTORY:
+#   2008-06-29 Andreas Tscharner: Initial release
+#
+
+#
+# Set local CVS root
+LOCAL_CVSROOT=:pserver:cvs@cvs.cvsnt.org:/usr/local/cvs
+
+#
+# Get CVSNT from CVS
+if [ "$1" != "" ] ; then
+  echo "Export using tag/branch $1"
+  cvs -d$LOCAL_CVSROOT export -r $1 cvsnt
+else
+  echo "No tag/branch given. Exporting TRUNC"
+  cvs -d$LOCAL_CVSROOT export -r HEAD cvsnt
+fi
+
+#
+# Go into CVSNT directory
+cd cvsnt
+
+#
+# Check for EVS instead of CVSNT
+EVS_FOUND=`grep EVS_RPODUCT_MAJOR version_no.h`
+if [ "$EVS_FOUND" != "" ] ; then
+  echo "EVS found."
+  # the following lines are temporary
+  echo "Cannot make a package from EVS. Quitting"
+  exit 1
+fi
+
+#
+# Get CVSNT version number
+CVSNT_MAJOR=`grep CVSNT_PRODUCT_MAJOR version_no.h | awk '{ print $3; }'`
+CVSNT_MINOR=`grep CVSNT_PRODUCT_MINOR version_no.h | awk '{ print $3; }'`
+CVSNT_PATCH=`grep CVSNT_PRODUCT_PATCHLEVEL version_no.h | grep -v LEVELS | awk '{ print $3; }'`
+CVSNT_BUILD=`grep CVSNT_PRODUCT_BUILD build.h | awk '{ print $3; }'`
+
+CVSNT_VERSION=$CVSNT_MAJOR.$CVSNT_MINOR.$CVSNT_PATCH.$CVSNT_BUILD
+
+echo "CVSNT Version found: $CVSNT_VERSION"
+
+#
+# Check for RC or prerelease
+CVSNT_RC=`grep CVSNT_SPECIAL_BUILD version_no.h | grep -v ^// | awk -F\" '{ print $2; }' | awk '{ print $1$2; }' | tr A-Z a-z`
+CVSNT_PRE=`echo $CVSNT_RC | grep pre`
+if [ "$CVSNT_RC" != "" ] ; then
+  if [ "$CVSNT_PRE" != "" ] ; then
+    CVSNT_VERSION=$CVSNT_VERSION~pre
+  else
+    CVSNT_VERSION=$CVSNT_VERSION~$CVSNT_RC
+  fi
+  echo "Extended CVSNT Version: $CVSNT_VERSION"
+fi
+
+#
+# Delete cvsntmmc directory (contains non-free stuff)
+rm -rf cvsntmmc/
+
+#
+# Create tarball and create a symbolic link
+cd ..
+tar -czvvf cvsnt-$CVSNT_VERSION.tar.gz cvsnt/
+ln -s cvsnt-$CVSNT_VERSION.tar.gz cvsnt_$CVSNT_VERSION.orig.tar.gz
+
+#
+# Rename directory and change ito it
+mv cvsnt cvsnt-$CVSNT_VERSION
+cd cvsnt-$CVSNT_VERSION
+
+#
+# Export debian/ directory into current one
+if [ "$1" != "" ] ; then
+  echo "Export branch/tag $1 from debian"
+  cvs -d$LOCAL_CVSROOT export -r $1 debian
+else
+  echo "Export TRUNC from debian"
+  cvs -d$LOCAL_CVSROOT export -r HEAD debian
+fi
+
+#
+# Update/Edit the Debian changelog
+cd debian
+dch --edit
+cd ..
+
+#
+# Try to make a Debian package
+dpkg-buildpackage -rfakeroot
+
+#
+# Leave directory and check the package with lintian
+cd ..
+lintian -i `ls cvsnt_$CVSNT_VERSION*.changes` | less

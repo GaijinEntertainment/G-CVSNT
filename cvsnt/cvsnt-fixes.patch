@@ -1,0 +1,22 @@
+--- cvsnt-2.5.04.3236/lockservice/server.cpp~	2007-11-22 07:32:22.000000000 +0100
++++ cvsnt-2.5.04.3236/lockservice/server.cpp	2009-02-08 19:59:03.012868899 +0100
+@@ -325,7 +325,7 @@
+ 		NotifySCM(SERVICE_RUNNING, 0, 0);
+ #endif
+ 
+-	while(!g_bStop && listen_sock.accept(1000))
++	while(!g_bStop && listen_sock.accept(15000))
+ 	{
+ 		for(size_t n=0; n<listen_sock.accepted_sockets().size(); n++)
+ 			start_thread(listen_sock.accepted_sockets()[n].Detach());
+--- cvsnt-2.5.04.3236/./src/subr.cpp~	2008-05-02 08:27:48.000000000 +0200
++++ cvsnt-2.5.04.3236/./src/subr.cpp	2009-02-08 21:01:45.769160152 +0100
+@@ -1239,7 +1239,7 @@
+ 		if(err==EWOULDBLOCK)
+ 		{
+ 			fd_set fds;
+-			struct timeval tv = { 0,1000 };
++			struct timeval tv = { 15000,0 };
+ 			FD_ZERO(&fds);
+ 			FD_SET(sock,&fds);
+ 			err = select(sock,NULL,&fds,NULL,&tv);

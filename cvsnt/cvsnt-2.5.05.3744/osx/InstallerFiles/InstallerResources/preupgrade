@@ -1,0 +1,6 @@
+#!/bin/sh
+
+SystemStarter stop cvslockd
+killall cvslockd
+service cvspserver stop
+exit 0

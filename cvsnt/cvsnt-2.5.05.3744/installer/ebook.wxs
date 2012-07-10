@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="ebook">
+
+        <DirectoryRef Id="TOOLS_INSTALLDIR" FileSource="$(var.MARCH_HARE)\..\..\ebook\">
+            <Component Id="eBook" Guid="A70DB6BB-8041-4489-BC76-513EA0D8395D" DiskId="5">
+                <File Id="eBook.pdf" Name="eBook.pdf">
+                    <Shortcut Id="eBook.pdf" Name="eBook" Advertise="no" Directory="CvsntDocumentationFolder" />
+                </File>
+            </Component>
+        </DirectoryRef>
+
+        <FeatureRef Id="Cvsnt">
+            <Feature Id="eBook" Title="eBook" Description="eBook" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="eBook" />
+                <ComponentRef Id="CvsntDocumentationFolder" />
+            </Feature>
+        </FeatureRef>
+    </Fragment>
+</Wix>

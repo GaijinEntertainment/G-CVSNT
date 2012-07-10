@@ -1,0 +1,105 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: Setup\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2010-07-29 23:45+0200\n"
+"Last-Translator: Philippe Verdy <verdy_p@gmail.com>\n"
+"Language-Team: tortoisecvs-translators@lists.sourceforge.net\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: French\n"
+"X-Poedit-Country: FRANCE\n"
+
+#: ../build/TortoiseCVS.iss:63
+msgid "Main Files"
+msgstr "Fichiers principaux"
+
+#: ../build/TortoiseCVS.iss:64
+msgid "Custom Icons"
+msgstr "Icônes personnalisées"
+
+#: ../build/TortoiseCVS.iss:75 ../build/TortoiseCVS.iss:348
+msgid "XP-style rounded"
+msgstr "Style arrondi XP"
+
+#: ../build/TortoiseCVS.iss:76 ../build/TortoiseCVS.iss:349
+msgid "Classic TortoiseCVS"
+msgstr "TortoiseCVS classique"
+
+#: ../build/TortoiseCVS.iss:77
+msgid "Daniel Jackson DanAlpha"
+msgstr "Daniel Jackson DanAlpha"
+
+#: ../build/TortoiseCVS.iss:78 ../build/TortoiseCVS.iss:351
+msgid "Chinese characters"
+msgstr "Sinogrammes"
+
+#: ../build/TortoiseCVS.iss:79
+msgid "Translations"
+msgstr "Traductions"
+
+#: ../build/TortoiseCVS.iss:101
+msgid "Pageant SSH agent"
+msgstr "Agent SSH Pageant"
+
+#: ../build/TortoiseCVS.iss:354
+msgid "Error"
+msgstr "Erreur"
+
+#: ../build/TortoiseCVS.iss:410
+msgid "Help"
+msgstr "Aide"
+
+#: ../build/TortoiseCVS.iss:411
+msgid "User Guide (English)"
+msgstr "Guide de l’utilisateur (anglais)"
+
+#: ../build/TortoiseCVS.iss:412
+msgid "User Guide (French)"
+msgstr "Guide de l’utilisateur (français)"
+
+#: ../build/TortoiseCVS.iss:413
+msgid "User Guide (Russian)"
+msgstr "Guide de l’utilisateur (russe)"
+
+#: ../build/TortoiseCVS.iss:414
+#, fuzzy
+msgid "User Guide (Simplified Chinese)"
+msgstr "Guide de l’utilisateur (chinois simplifié)"
+
+#: ../build/TortoiseCVS.iss:415
+msgid "Preferences"
+msgstr "Préférences"
+
+#: ../build/TortoiseCVS.iss:416
+msgid "About"
+msgstr "À propos"
+
+#: ../build/TortoiseCVS.iss:430
+msgid "Are you sure you want to completely remove %1 and all of its components?%n%nPLEASE NOTE that uninstalling requires a reboot. If you want to install another version of TortoiseCVS, there is no need to uninstall first."
+msgstr "Voulez-vous réellement supprimer %1 complètement et l’ensemble de ses composants ?%n%nVEUILLEZ NOTER que la désinstallation nécessite un redémarrage. Si vous voulez installer une autre version de TortoiseCVS, vous devez le désinstaller d’abord."
+
+#: ../build/TortoiseCVS.iss:433
+msgid "Preparing for installation"
+msgstr "Préparation de l’installation"
+
+#: ../build/TortoiseCVS.iss:434
+msgid "As part of the installation, Windows Explorer needs to be restarted.%nThe installer can do this for you, or you can restart Windows instead at the end of the installation."
+msgstr "Pour achever l’installation, l’Explorateur Windows doit être redémarré.%sL’installateur peut le faire pour vous, ou bien vous pouvez redémarrer Windows à la fin de l’installation."
+
+#: ../build/TortoiseCVS.iss:435
+msgid "Restart Windows Explorer when necessary"
+msgstr "Redémarrer l’Explorateur Windows si nécessaire"
+
+#: ../build/TortoiseCVS.iss:436
+msgid "Restart Windows after installation"
+msgstr "Redémarrer l’Explorateur Windows après l’installation"
+
+#: ../build/TortoiseCVS.iss:437
+msgid "Finishing the installation"
+msgstr "Termine l’installation"
+
+#: ../build/TortoiseCVS.iss:438
+msgid "Restarting Windows Explorer"
+msgstr "Redémarrage de l’Explorateur Windows"

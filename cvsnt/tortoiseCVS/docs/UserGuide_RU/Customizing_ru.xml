@@ -1,0 +1,39 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- $Revision: 1.1 $ -->
+
+<!-- ====== Customizing TortoiseCVS ====================================== -->
+
+<chapter id="customizing">
+  <title id="customizing-title">Настройка TortoiseCVS</title>
+
+    <!-- ====== Icon Overlays ================================================ -->
+
+    <section id="customizing.icons">
+    <title id="customizing.icons-title">Замена иконок</title>
+    <section id="customizing.icons.changing">
+    <title id="customizing.icons.changing-title">Выбор различных наборов иконок 
+</title>
+
+    <para>
+TortoiseCVS поставляется с несколькими наборами перекрывающих иконок.  Вы можете предпочесть один из альтернативных наборов иконок в качестве основного. Откройте     <link linkend="dialogs.preferences.iconchooser" endterm="dialogs.preferences.iconchooser-title"/> 
+
+для выбора альтернативного набора. Прискорбно, но Проводник кэширует иконки, так что вы должны перезагрузить Windows для показа изменений иконок. Диалог показывает предпросмотр иконок для облегчения вашего выбора.
+    </para>
+    </section>
+
+    <section id="customizing.icons.recursive">
+    <title id="customizing.icons.recursive-title">Как работает иконка "Измененен" </title>
+    <para>
+По умолчанию иконка для папки отображается как "изменен" если любой из файлов в папке изменен. Возможна настройка TortoiseCVS для показа "изменен" если файл в папке <emphasis>или в любой подпапке</emphasis> был изменен.
+    </para>
+    <para>
+Так как обновление этого статуса может быть ресурсоемким,  TortoiseCVS предлагает возможность обновлять этот статус каждый раз как вы открываете папку или по запросу. В последнем случае, иконки будут отражать кэшированное состояние, и вы должны выбрать <guimenuitem>CVS &rarr; Refresh Folder Status</guimenuitem> для обновления статуса.
+    </para>
+    <para>
+Откройте <link linkend="dialogs.preferences.advanced" endterm="dialogs.preferences.advanced-title"/> и измените настройку <guilabel>Folder icon overlays</guilabel> по вашему желанию.
+    </para>
+    </section>
+
+    </section>
+
+</chapter>

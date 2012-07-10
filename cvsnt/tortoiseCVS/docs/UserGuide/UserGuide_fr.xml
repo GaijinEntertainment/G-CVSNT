@@ -1,0 +1,1641 @@
+<?xml version="1.0" encoding="ISO-8859-1"?>
+<!DOCTYPE book PUBLIC "-//OASIS//DTD DocBook XML V4.2//EN"    "http://www.oasis-open.org/docbook/xml/4.2/docbookx.dtd">
+
+<book>
+<bookinfo>
+  <title>TortoiseCVS</title>
+  <subtitle>Guide utilisateur</subtitle>
+  <authorgroup>
+    <author>
+      <firstname>Ben</firstname><surname>Campbell</surname>
+    </author>
+    <author>
+      <firstname>Martin</firstname><surname>Crawford</surname>
+    </author>
+    <author>
+      <firstname>Hartmut</firstname><surname>Honisch</surname>
+    </author>
+    <author>
+      <firstname>Francis</firstname><surname>Irving</surname>
+    </author>
+    <author>
+      <firstname>Torsten</firstname><surname>Martinsen</surname>
+    </author>
+    <author>
+      <firstname>Ian</firstname><surname>Dees</surname>
+    </author>
+  </authorgroup>
+  <copyright><year>2001 - 2004</year><holder>TortoiseCVS</holder></copyright>
+</bookinfo>
+
+<!-- ====== Getting Started ==================================================== -->
+<chapter id="begin">
+  <title id="begin-title">Pour commencer</title>
+
+  <!-- ====== What is CVS? ===================================================== -->
+  <section id="begin.whatcvs">
+    <title id="begin.whatcvs-title">Qu'est ce que <acronym>CVS</acronym>?</title>
+    <para>
+      <acronym>CVS</acronym>, ou Concurrent Versioning System, est un système de contrôle de version. Les système de contrôle de version sont généralement utilisé comme partie de cycle de développement pour suivre et coordonner les changements du code source au sein de l'équipe de développement.
+    </para>
+    <para>
+      Par exemple, des bugs se glissent parfois qand le programme est modifier, et vous pouvez ne détecter le bug que longtemps après avoir fait les modifications. Avec <acronym>CVS</acronym>, vous pouvez facilement extraire les anciennes versions pour voir exactement quel changement a causé le bug. Ceci peut parfois être d'une grande aide.
+    </para>
+    <para>
+      Vous pouvez bien sûr enregistrer chaque version de chaque fichier que vous avez créer. Ceci devrait cepandant gaspiller une énorme quantité d'espace disque. <acronym>CVS</acronym> stocke toutes les versions d'un fichier dans un fichier unique d'une manière intéligente qui stocke seulement les différences entre les versions.
+    </para>
+    <para>
+      <acronym>CVS</acronym> vous aide aussi si vous faites partie d'un groupe de personnes travaillant sur le même projet. C'est très facile d'écraser les changements des autres même en faisant très attention. Certains éditeurs comme GNU Emacs, essayent d'être sûr que le même fichier n'est jamais modifier par deux personnes en même temps. Malheureusement, si quelqu'un utilise un autre éditeur, cette protection ne fonctionnera pas. <acronym>CVS</acronym> résoud ce problème en isolant les programmeurs les uns des autres. Chaque développeur travaille dans son propre bac à sable (sandbox), et <acronym>CVS</acronym> fusionne le travail quand chaque développeur a terminé.
+    </para>
+  </section>
+
+  <!-- ====== What is TortoiseCVS? ============================================= -->
+  <section id="begin.whattortoisecvs">
+    <title id="begin.whattortoisecvs-title">Qu'est ce que TortoiseCVS?</title>
+    <para>
+      TortoiseCVS est client graphique (front-end) destiné à rendre l'utilisation de <acronym>CVS</acronym> plus facile et plus intuitive. Il permet aux développeurs de travaillez sur les fichiers contrôlés par <acronym>CVS</acronym> directement dans <productname>Windows Explorer</productname>.
+    </para>
+    <para>
+      Un des principales inconvénients de <acronym>CVS</acronym> est l'interface en ligne de commande qui est fournie. Beaucoup de développeurs deviennent plus habitué aux environments de développement intégrés graphique (<acronym>IDEs</acronym>). TortoiseCVS a pour but de fournir cet environmenet pointe et clique de façon intelligente et intuitive.
+    </para>
+  </section>
+
+  <!-- ====== What to Begin? =================================================== -->
+  <section id="begin.wherebegin">
+    <title id="begin.wherebegin-title">Où commencer?</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Le meilleur moyen pour apprendre comment utiliser TortoiseCVS est de jouer avec. Commencez par <link linkend="ref.install">installer TortoiseCVS</link>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Si vous êtes débutant sur CVS, commencez avec <link linkend="basic" endterm="basic-title"></link>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Une fois que vous avez appris les bases, regardez les fonctionnalités avancées dans<link linkend="advanced" endterm="advanced-title"></link>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Pour une complète référence, les chapitres <link linkend="ref" endterm="ref-title"></link> et <link linkend="dialogs" endterm="dialogs-title"></link> vous aideront à utiliser le meilleur de TortoiseCVS.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Et finalement regardez <link linkend="tips" endterm="tips-title"></link> pour une complète et apréciable expérience de contrôle de version.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+</chapter>
+
+<!-- ====== Basic Usage of TortoiseCVS ========================================= -->
+
+<chapter id="basic">
+  <title id="basic-title">Usage Basic de TortoiseCVS</title>
+
+    <!-- ====== Sandboxes ====================================================== -->
+
+    <section id="basic.sandbox">
+      <title id="basic.sandbox-title">Bac à sable (Sandboxes)</title>
+      <para>
+        CVS a une méthode de travail commune à la plupart des autres systèmes de contrôle de version par le fait que les développeurs peuvent éditer le même fichier en même temps. D'abord vous <link linkend="basic.checkout"><emphasis>Emprunter (Checkout)</emphasis></link> une version d'un code source depuis le référentiel dans une copie locale dans votre ordinateur. Cette copie locale est appelée un <emphasis>bac à sable (sandbox)</emphasis>.
+      </para>
+      <para>
+        Vous éditez alors simplement les fichiers que vous voulez changer. Vous pouvez <link linkend="basic.add"><emphasis>Ajouter (Add)</emphasis></link> des nouveaux fichiers et supprimer des fichiers qui ne sont plus nécessaires. Quand vous avez terminé vous <link linkend="basic.commit"><emphasis>Valider (Commit)</emphasis></link> les changements dans le référentiel.
+      </para>
+      <para>
+        Si quelqu'un d'autre a changé le même fichier pendant que vous travaillez dessus, alors la validation va échouer. Vous devez alors <link linkend="basic.update"><emphasis>Actualiser (Update)</emphasis></link> tout vos fichiers code source depuis le référentiel. Ceci fusionnera automatiquement les changements des autres développeurs dans votre copie du fichier.
+      </para>
+      <para>
+        Parfois CVS ne peut pas le faire automatiquement, par exemple si vous avez tous-les-deux changé la même ligne de code. On appelle ceci un <link linkend="basic.conflict"><emphasis>Conflit </emphasis></link>. Les conflits se produisent beaucoup moins souvent que vous pouvez le croire. CVS met les deux versions du code conflictuel dans le fichier, en marquant chacun d'eux. Vous éditez alors manuellement le fichier pour résoudre le conflit avant que vous puissiez valider les changements.
+      </para>
+      <para>
+        Cette méthode de travail a beaucoup d'avantages. Chaque développeur travaille dans un bac à sable. Les changements qu'un autre développeur effectue sont isolés de vous jusqu'à ce que vous réstituiez (check in) vos changements. Cela empèche un goulot d'étranglement dans lequel des gens ne peuvent pes faire des choses parce que quelqu'un d'autre a le fichier extrait (checked out). N'importe quel développeur peut travailler sur des fichiers sans directement accéder au serveur, il a seulement besoin de se connecter pour les actualisations (update) et les validations (commit).
+      </para>
+    </section>
+
+    <!-- ====== Checking out a Module ========================================== -->
+
+    <section id="basic.checkout">
+      <title id="basic.checkout-title">Emprunter un module (Checking out)</title>
+      <para>
+        Obtenir un module du serveur CVS pour la première fois, s'appelle un emprunt (checkout). Emprunter un module du référentiel créer une copie local du module (sandbox).
+      </para>
+      <figure>
+        <title>Fenêtre d'emprunt</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0001.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Fenêtre d'emprunt</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Pour effectuer un emprunt, cliquez droit sur le répertoire où vous voudriez placer le module, et choisisez <guimenuitem>Emprunter...</guimenuitem> dans la pop-up. La <link linkend="dialogs.checkout" endterm="dialogs.checkout-title"></link> apparaitra avec les champs suivant:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <guilabel>Protocole</guilabel> Le protacole à utiliser pour communiquer avec le référentiel CVS distant.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Serveur</guilabel> Le nom du serveur hébergeant le référentiel CVS distant.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Port</guilabel> Le port du référentiel CVS distant. Pas toujours requis.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Dossier de référentiel</guilabel> L'emplacement du référentiel CVS sur le serveur distant.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Nom d'utilisateur</guilabel> Le nom d'utilisateurde votre compte pour le référentiel CVS.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>CVSROOT</guilabel> La chaine de connexion, comprenant les champs précédent. Souvent on vous a donné la chaine de connexion dans ce format, auquel cas vous pouvez juste la copier ici.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Module</guilabel> Le nom du module que vous vouler emprunter. Le nom du module est sensible à la casse.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Vous aurez besoin de connaitre cette information par avance. La plupart des projets ont de la documentation (souvent en-ligne) sur comment se connecter et emprunter leurs modules. De plus, votre chef de projet devrait être en mesure de vous fournir cette information.
+      </para>
+      <para>
+        <emphasis role="bold">Note</emphasis>: Il est plus facile de choisir votre configuration d'emprunt de projet maintenant que de déplacer votre projet sur un serveur différent plus tard. Par exemple, si votre serveur offre deux protocoles CVS différents, soyez sûr de prendre celui le plus adapté à vos besoins.
+      </para>
+      <para>
+        A folder named after the module will be created within the folder you checkout to, so you can keep all your checked out modules in the same folder, even if they are for different projects.
+      </para>
+      <para>
+        Pour plus d'informations voir <link linkend="ref.checkout" endterm="ref.checkout-title"></link>
+      </para>
+    </section>
+
+    <!-- ====== Windows Explorer and TortoiseCVS =============================== -->
+
+    <section id="basic.winexplorer">
+      <title id="basic.winexplorer-title">Explorateur Windows et TortoiseCVS</title>
+      <para>
+        Après avoir emprunter un module, nous pouvons maintenant <emphasis>explorer</emphasis> comment TortoiseCVS fonctionne avec <productname>Windows</productname>. Vous noterez que vos fichiers apparaisent dans l'explorateur Windows avec différents icones. De plus, si vous utilisez soit <productname>Windows 2000</productname> soit <productname>Windows XP</productname> vous verrez aussi de nouvelles colonnes CVS dans la <emphasis>vue Détails</emphasis> de l'explorateur Windows.
+      </para>
+      <figure>
+        <title>Explorateur Windows et TortoiseCVS</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0021.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Explorateur Windows et TortoiseCVS</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        L'icône indique le statut d'un fichier ou répertoire dans CVS. La figure suivante indique les status correspondants pour chaque icônes:
+      </para>
+      <table frame="all">
+      <title>Icônes</title>
+      <tgroup cols="3">
+      <tbody>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0002.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Icône non modifié</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Non modifié</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Ce fichier ou répertoire est à jour avec la version du référentiel CVS.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0003.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Icône modifié</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Modifié</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Ce fichier ou répertoire a été modifié par rapport à la version du référentiel CVS.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0004.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Icône de conflit</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Conflit</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+               Ce fichier ou répertoire est en conflit avec la version du référentiel CVS.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0005.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Icône pas dans CVS</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Pas dans CVS</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Ce fichier ou répertoire n'est pas dans le référentiel CVS.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0006.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Icône CVS Watch</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>CVS Watch</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Ce fichier ou répertoire est sous le contrôle de CVS Watch. 
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0016.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Icône ignoré</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Ignoré</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Ce fichier ou répertoire est ignoré par le référentiel CVS.
+            </para>
+          </entry>
+        </row>
+      </tbody>
+      </tgroup>
+      </table>
+      <para>
+        Vous interagissez avec TortoiseCVS en cliquant droit dans l'explorateur Windows et en choisissant CVS opérations dans le menu contextuel. Les fichiers et répertoires concernés par l'opération dépendent de ce que vous avez sélectionner et d'où vous avez cliqué:
+      </para>
+      <table frame="all">
+      <title>menu contextuel obtenu par clic droit</title>
+      <tgroup cols="2">
+      <tbody>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0008.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Sélection de fichier(s)</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              Un ou plusieurs fichiers sélectionnés, l'opération est effectuée sur ces fichiers.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0009.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Selection de répertoire(s)</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              Un ou plusieurs répertoires sélectionnés, l'opération est effectuée sur ces répertoires et les fichiers ou répertoires contenus.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="images_fr/img0010.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Ailleurs dans l'explorateur</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              Ailleurs dans l'explorateur, l'opération est effectuée sur tous les fichiers et répertoires de la vue.
+            </para>
+          </entry>
+        </row>
+      </tbody>
+      </tgroup>
+      </table>
+    </section>
+
+    <!-- ====== Updating your Sandbox ========================================== -->
+
+    <section id="basic.update">
+      <title id="basic.update-title">Actualiser votre espace de travail (Sandbox)</title>
+      <para>
+        Occasionellent vous voudrez que les changements fait par d'autres soient incorporés dans votre copie de travail locale. Le processus de récuparation des changement depuis le serveur dans votre copie locale s'appelle <link linkend="ref.update">Actualisation (Updating)</link>. L'actualisation devrait être faites sur un seul fichier, un jeu de fichier sélectionné, ou récursivement sur la hiérarchie d'un répertoire. Pour actualiser, mettez en surbrillance les fichiers et/ou répertoires que vous voulez, cliquer droit et sélectionnez <guimenuitem>CVS Actualiser</guimenuitem>. La <link linkend="dialogs.progress" endterm="dialogs.progress-title"></link> apparaitra affichant la progression de l'actualisation.
+      </para>
+      <figure>
+        <title>Actualiser les fichiers et répertoires</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0011.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Actualiser les fichiers et répertoires</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Les changements effectués par d'autres seront fussionnés dans vos fichiers, gardant les changements que vous pouvez avoir effectués dans les même fichiers. Le référentiel n'est <emphasis>pas</emphasis> affecter par l'action d'une actualisation.
+      </para>
+      <para>
+        Si vous obtenez des rapports de conflits pendant un update, veuillez lire <link linkend="basic.conflict" endterm="basic.conflict-title"></link>.
+      </para>
+      <para>
+        Pour plus d'informations voyez <link linkend="ref.update" endterm="ref.update-title"></link>.
+      </para>
+    </section>
+
+    <!-- ====== Committing your Changes to the Repository ====================== -->
+
+    <section id="basic.commit">
+      <title id="basic.commit-title">Valider vos changements dans le réferentiel</title>
+      <para>
+        Rendre les modifications locales disponibles dans le référentiel s'appelle <emphasis>valider (committing)</emphasis>. Avant de valider, vous devriez actuliser pour être sûr qu'il n'ya pas de conflits (voir <link linkend="basic.update" endterm="basic.update-title"></link>).
+      </para>
+      <para>
+        Pour valider vos changements commencez par sélectionner les fichier(s) ou répertoire(s) que vous voulez valider. Cliquer droit sur la sélection, et choisissez l'item du menu <guimenuitem>CVS Valider...</guimenuitem>.
+      </para>
+      <figure>
+        <title>Dialogue Valider</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0007.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Dialogue Valider</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        La <link linkend="dialogs.commit" endterm="dialogs.commit-title"></link> se présentera alors où vous pouvez entrer un bref résumé de ce qui a changé. Vous pouvez également exlure des fichiers modifiés de la validation en décochant leurs checkboxes. Quand vous êtes satisfait de ce que vous valider, cliquez sur <guibutton>OK</guibutton> dans la fenêtre pour déclencher l'opération de validation.
+      </para>
+      <para>
+        Veuillez noter que valider les changements n'ajoutera pas automatiquement les nouveaux fichiers que vous avez créés au référentiel. Voir <link linkend="basic.add" endterm="basic.add-title"></link> sur comment ajouter des fichiers.
+      </para>
+      <para>
+        Pour plus d'information voyez <link linkend="ref.commit" endterm="ref.commit-title"></link>.
+      </para>
+    </section>
+
+    <!-- ====== Resolving Conflicts ================= -->
+
+  <section id="basic.conflict">
+      <title id="basic.conflict-title">Résoudre les conflits</title>
+      <para>
+        Parfois, le serveur CVS reportera un conflit quand vous actualiserez vos fichiers depuis le référentiel. Un conflits se produit quand deux ou plusieurs développeurs ont changé les même lignes d'un fichier. Comme CVS ne sait rien de votre projet, il laisse les développeurs résoudre les conflits. Quand un conflit se produit, vous devez ouvrir le fichier en question, et chercher les lignes commençant par la chaine &lt;&lt;&lt;&lt;&lt;&lt;&lt;.
+      </para>
+      <para>
+        La région conflictuelle est marqué comme ceci:
+      </para>
+      <programlisting>
+&lt;&lt;&lt;&lt;&lt;&lt;&lt; nom du fichier
+  vos changements
+=======
+  code  du référentiel à fusinner
+&gt;&gt;&gt;&gt;&gt;&gt;&gt; version
+      </programlisting>
+      <para>
+        Vous devez décider à quoi le code doit ressembler, faire les changements nécessaires, supprimmer les balises CVS, et <link linkend="basic.commit"><emphasis>Valider</emphasis></link> vos modifications dans le référentiel.
+      </para>      
+    </section>
+
+    <!-- ====== Adding Files and Directories to the Repository ================= -->
+
+    <section id="basic.add">
+      <title id="basic.add-title">Ajouter des fichiers et répertoires au référentiel</title>
+      <para>
+        Si vous créez des nouveaux fichiers ou répertoires vous remarquerez qu'ils apparaissent avec l'icône de status  <emphasis>Pas dans CVS</emphasis> (voir <link linkend="basic.winexplorer" endterm="basic.winexplorer-title"></link>). Pour mettre de nouveaux fichiers ou répertoires sous le contrôle de CVS sélectionnez les item(s) que vous voulez ajouter, cliquer droit et choisissez <guimenuitem>CVS Ajouter</guimenuitem> dans le menu contextuel pour programmer l'addition. La <link linkend="dialogs.add" endterm="dialogs.add-title"></link> est affichée pour que vous puissiez vérifier les fichiers que vous ajouter.
+      </para>
+      <figure>
+        <title>Fenêtre Ajouter</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0017.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Fenêtre Ajouter</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Vous n'avez pas à vous préoccuper de savoir si un fichier est ASCII/Texte, Unicode/Texte, ou Binaire car TortoiseCVS le détecte automatiquement. Pour en savoir plus la dessus voyez <link linkend="advanced.binary" endterm="advanced.binary-title"></link>.
+      </para>
+      <para>
+        Après qu'une opération Ajouter est été effectuée, le ou les fichier(s) icône(s) apparaissent comme "changés". C'est parce que les ajouts sont traités comme des changements locaux et ne sont pas appliqués au référentiel jusqu'à vous les <link linkend="basic.commit"><emphasis>Validiez</emphasis></link>.
+      </para>
+      <para>
+        De plus, vous pouvez ajouter un certains nombre de fichiers ou répertoires à CVS en utilisant la commande <guimenuitem>CVS Ajouter le contenu...</guimenuitem>. Cette opération descends récursivement dans la structure de répertoires, et affichent tous les fichiers non ajoutés dans la fenêtre d'Ajout. Ici vous pouvez cocher et décocher les fichiers et répertoires à ajouter à CVS.
+      </para>
+      <para>
+        Pour plus d'informations, voyez <link linkend="ref.add" endterm="ref.add-title"></link>.
+      </para>
+    </section>
+</chapter>
+
+<!-- ====== Advanced Usage of TortoiseCVS ====================================== -->
+
+<chapter id="advanced">
+  <title id="advanced-title">Utilisation avancée de TortoiseCVS</title>
+
+    <!-- ====== Make New Module ================================================ -->
+
+    <section id="advanced.newmodule">
+      <title id="advanced.newmodule-title">Créer un nouveau référentiel ou module</title>
+      <para>
+        Typiquement un administrateur système créera le référentiel CVS sur le serveur distant. TortoiseCVS, toutefois, peut configurer des référentiels et modules soit localement ou à distance (si vous avez à corriger les permissions).
+      </para>
+      <para>
+        Pour créer un nouveau référentiel et/ou module, préparez les répertoires et fichiers localement comme un nouveau bac à sable (sandbox). Cliquez droit sur le répertoire sommet de la hiérarchie pour votre nouveau module ou référentiel et choisissez l'item <guimenuitem>CVS --&gt; Créer un module...</guimenuitem>. La <link linkend="dialogs.newmodule" endterm="dialogs.newmodule-title"></link> sera affichée. Entrez les détails pour le référentiel CVS nouveau ou existant comme vous le feriez pour un <link linkend="basic.checkout"><emphasis>Emprunt</emphasis></link>. Cliquez <guibutton>Ok</guibutton> pour créer le nouveau module.
+      </para>
+      <figure>
+        <title>Fenètre Créer un nouveau module</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0019.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Fenètre Créer un nouveau module</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Si le serveur distant CVS peut être atteint mais que le référentiel CVS n'éxiste pas, la question suivante se présentera:
+      </para>
+      <figure>
+        <title>Question: Créer un nouveau référentiel </title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0020.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Question: Créer un nouveau référentiel</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Pour créer le nouveau référentiel, valider la coche <guilabel>Générer un référentiel ici</guilabel> et cliquez <guibutton>Ok</guibutton>. Si vous avez les bonnes permissions sur le serveur distant TortoiseCVS créera le nouveau référentiel.
+      </para>
+      <para>
+        Une fois que TortoiseCVS a soit créer un nouveau référentiel CVS soit s'est connecté à un référentiel CVS existant le nouveau module va être créé. Par défaut TortoiseCVS utilise le nom du répertoire sélectionné pour le nom du nouveau module, mais vous pouvez le changer en modifiant la boite texte <guilabel>Module</guilabel>.
+      </para>
+    </section>
+
+    <!-- ====== CVS Watch & Edit =============================================== -->
+
+    <section id="advanced.cvswatch">
+      <title id="advanced.cvswatch-title">Watch, Edit et Unedit</title>
+      <para>
+        CVS peut aussi suivre la sémantique de <emphasis>Verrouillé/Dévérouillé (Lock/Unlock)</emphasis> que la plupart des systèmes de contrôle de versions utilisent, bien que CVS apelle ça <emphasis>Edit/Unedit</emphasis>. Cette fontionnalité, toutefois, n'est pas activé dans CVS par défaut donc avant que vous puissiez commencer vous devez activer <emphasis>Watch</emphasis>.
+      </para>
+      <para>
+        Vous pouvez activer Watch en utilisant TortoiseCVS quand vous <link linkend="advanced.newmodule"><emphasis>Créer un nouveau Module</emphasis></link> en activant la checkbox <guilabel>Emprunter les fichiers en lecture seule</guilabel>. Si vous voulez activer watch sur un module existant, vous devrez exécuter les commandes suivantes (en utilisant l'invite de commande) sur le haut du module:
+        <programlisting>cvs watch on</programlisting>
+      </para>
+      <para>
+        Une fois que Watch est activé, quand vous effectuez un <link linkend="basic.checkout"><emphasis>Emprunt</emphasis></link> ou une <link linkend="basic.update"><emphasis>Actualisation</emphasis></link> le fichier de travail sera créé en lecture seule. Pour changer un ou plusieurs fichiers, sélectionnez le répertoire, fichier ou fichiers que vous voulez modifier. Cliquer droit sur la sélection et choisissez l'item du menu <guimenuitem>CVS Prendre la main</guimenuitem>. Cette commande fonctionne légèrement différemment selon que le fichier est texte ou binaire. Pour les fichiers binaires (comme les .doc), TortoiseCVS effectue une <emphasis>Actualisation</emphasis> sur le fichier puis vérifie si un autre utilisateur est déjà en train d'éditer le fichier. Si c'est le cas, vous ne serez pas autorisé à l'éditer. Pour les fichiers texte (comme les .txt ou .cpp), vous pouvez travailler sur le fichier même si un autre utilisateur travaille déjà dessus; dans ce cas, TortoiseCVS vous informera de ce fait.
+      </para>
+      <para>
+        Quand vous avez fini de travailler sur le ou les fichiers <link linkend="basic.commit"><emphasis>Validez</emphasis></link> les comme vous le feriez normalement. Si, toutefois, vous décidez que vous ne voulez pas faire les changements, sélectionnez le ou les fichiers, cliquez droit sur cette sélection et choisissez l'item du menu <guimenuitem>CVS --&gt; Libérer</guimenuitem> TortoiseCVS vous demandera si vous rétablir la dernière version du référentiel(et ainsi perdre vos changements).
+      </para>
+      <para>
+        Si vous voulez voir quels fichiers est actuellement édités et par qui, cliquez droit n'importe où dans l'explorateur Windows et choisissez l'item du menu <guimenuitem>CVS --&gt; Montrer les fichiers modifiés</guimenuitem>.
+      </para>
+    </section>
+
+    <!-- ====== Tagging ======================================================== -->
+
+    <section id="advanced.tagging">
+      <title id="advanced.tagging-title">Baliser</title>
+      <para>
+        A un stade donné du développement, donné à un ou plusieurs fichiers une balise (label) commune qui se rapporte à leurs versions, s'appelle baliser ces fichiers. Les balises sont typiquement utilisés sur des modules entiers, ainsi l'état courant du module peut être reconstruit dans le futur. Cette sorte de balises devrait être toujours utilisé sur les livrables projet, et avant de commencer des changements majeurs. 
+      </para>
+      <para>
+        Pour baliser un ou plusieurs fichiers ou répertoires avec une balise, sélectionnez le répertoire, fichier ou fichiers que vous voulez baliser. Cliquez droit sur la sélection, et choisissez l'item <guimenuitem>CVS --&gt; Baliser...</guimenuitem>
+      </para>
+      <figure>
+        <title>Fenêtre Baliser</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0012.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Fenêtre Baliser</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        On vous présente alors la <link linkend="dialogs.tags" endterm="dialogs.tags-title"></link>. Ici vous pouvez entrer une balise dans le champ <guilabel>Balise</guilabel>. CVS est assez réstrictif quand aux caractères qu'une balise doit contenir. Une balise doit commencer avec une lettre, et doit conternir des lettres, des chiffres, des "-" (tirets) et des "_" (souligné) seulement. En particulier, cela signifit pas de points, ni espaces. Si vous voulez inclure des numéros de version dans la balise, remplacez les points avec des tirets. Deux noms de balise sont réservés, car ils ont une signification spéciale dans CVS: "HEAD" réfère à la verson la plus récente diponible dans le référentiel, tandis que "BASE" est la dernière version que vous avez emprunter dans le répertoire local.
+      </para>
+      <para>
+        Une fois que la balise est entrée, cliquez le boutton <guibutton>OK</guibutton>. Comme la plupart des opérations CVS, la balise est immédiatement appliquée au référentiel, et aucune validation n'est nécessaire.
+      </para>
+      <para>
+        Pour plus d'informations, voyez <link linkend="ref.tags" endterm="ref.tags-title"></link>.
+      </para>
+    </section>
+
+    <!-- ====== Reverting ====================================================== -->
+
+    <section id="advanced.reverting">
+      <title id="advanced.reverting-title">Revenir à une ancienne version d'un fichier</title>
+      <para>
+        Les développeurs ont occasionnellement besoin d'annuler des changements qui ont déjà été validés. Revenir à une version spécifique dans TortoiseCVS est facile:
+        <orderedlist>
+          <listitem>
+	    <para>
+              Cliquer droit sur le fichier et sélectionner <guimenuitem>CVS --&gt; Historique</guimenuitem> pour afficher la <link linkend="dialogs.history" endterm="dialogs.history-title" />.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Cliquer droit sur la version dont vous avez besoin et choisissez l'option "Enregistrer cette version sous...".
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Qand la boite de dialogue enregistrer sous apparait, ne cliquez pas le bouton "Enregister"; au lieu de ça, double cliquez sur le nom du fichier dans la liste du répertoire.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Répondez "Oui" quand TortoiseCVS vous demande si vous voulez remplacer le fichier.
+	    </para>
+	  </listitem>
+	</orderedlist>
+      </para>
+    </section>
+
+    <!-- ====== Branching And Merging ========================================== -->
+
+    <section id="advanced.branching">
+      <title id="advanced.branching-title">Créer des branches et fusionner (Merging)</title>
+      <para>
+        Une des fonctionnalités des systèmes de contrôle de version, est la possibilité d'isoler des changements dans une ligne de développement séparée. Cette ligne est connu sous le nom de <emphasis>Branche</emphasis>.
+      </para>
+      <para>
+        Créer des branches est utile pour contrôler les changements durant le cycle de vie un projet logiciel. Par exemple, supposez que vous avez fait la première release de votre projet logiciel version 1.0. Vous commencez maintenant à ajouter des nouvelles fonctionnalités en prépération pour la prochaine release majeure 2.0. Entre votre release initiale et le nouvelle version on découvre qu'il y a des bugs dans le logiciel. La version (revision) courante du code source est dans un état de changements permanents et n'est pas supposé être stable pour au moins un autre mois et de plus il n'est pas possible de faire une correction (bugfix release) basé sur les nouvelles sources.
+      </para>
+      <para>
+        Au lieu d'essayer de fixer le bug sur la version courente, ou la branche <emphasis>HEAD</emphasis>, vous créerez une branche sur l'arbre des versions pour tous les fichiers qui constituent la release 1.0. Vous pouvez alors faire les modifications sur la branche sans perturber la branche head. Quand les modifications sont terminées vous pouvez soit les incorporer sur la branche head ou les laisser sur la branche de la release 1.0.
+      </para>
+
+      <section id="advanced.branching.creating">
+        <title id="advanced.branching.creating-title">Créer une branche</title>
+      <para>
+        Pour créer une branche, sélectionnez le repertoire ou fichiers pour lesquels vous voulez une branche. Cliquez droit sur la sélection, et choisissez <guimenuitem>CVS --&gt; Branche...</guimenuitem> dans le menu contextuel.
+      </para>
+      <figure>
+        <title>Boite de dialogue Branche</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0013.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Boite de dialogue Branche</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        On vous présente alors la <link linkend="dialogs.branch" endterm="dialogs.branch-title"></link>. Ici vous pouvez entrer une étiquette dans le champ <guilabel>Nouvelle Branche</guilabel> Les même restrictions de nom que celles qui s'appliquent pour les <link linkend="advanced.tagging"><emphasis>Balises</emphasis></link>, s'appliquent aussi. Une fois que vous avez entré le nom de branche désiré cliquez sur <guibutton>Ok</guibutton>. Comme la plupart des opérations CVS, la branche est immédiatement appliquée au référentiel, et une validation n'est pas requise. La branche, toutefois, est seulement appliquée sur le référentiel. Pour commencer à travailler sur la branch nouvellement créée <link linkend="advanced.branching.selecting">selectionnez la branche pour travailler dessus</link>.
+      </para>
+      </section>
+
+      <section id="advanced.branching.selecting">
+        <title id="advanced.branching.selecting-title">Sélectionner une branche pour travailler dessus</title>
+      <para>
+        Pour commencer à travailler sur une branche au lieu de la ligne de développement par défaut, vous devez atacher votre copie locale à la branche. Il est utile d'être sûr que les actions comme les actualisations (update), validations (commit), etc. se passe sur la branche au lieu de la ligne principale de développement.
+      </para>
+      <para>
+        Pour remplacer votre copie locale par une autre branche, sélectionnez le répertoire le plus élevé du projet. Vous pouvez aussi sélectionner les répertoires et fichiers qui font partis de la branche désirée si vous connaissez cette information. Cliquer droit sur la sélection, et choisissez <guimenuitem>CVS --&gt; Actualisation Spéciale...</guimenuitem>.
+      </para>
+      <figure>
+        <title>Boite de dialogue Actualisation spéciale</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0014.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Boite de dialogue Actualisation spéciale</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        On vous présente alors la <link linkend="dialogs.updatespecial" endterm="dialogs.updatespecial-title"></link>. Ici vous pouvez entrer le nom de la branche que vous voulez sélectionner dans le champ <guilabel>Extraire la balise/branche/version</guilabel>. Cliquer le boutton <guibutton>Ok</guibutton>, et TortoiseCVS fera ensuite les nécessaires actualisations pour transférer votre vopie de travail en la branche désirée. La mise à jour devrai aussi inclure les fichiers ajoutés ou supprimés en fonction de l'état de la branche.
+      </para>
+      <para>
+        TortoiseCVS met ce que l'on appelle des balises collantes (sticky tags) sur les fichiers qui sont affectés par la branche. Pour effacer les balises collantes vous devez <link linkend="advanced.branching.head">revenir à la branche principale (HEAD)</link>.
+      </para>
+      </section>
+
+      <section id="advanced.branching.merging">
+        <title id="advanced.branching.merging-title">Fusionner depuis une branche</title>
+      <para>
+        Quand vous êtes satisfaits des changements que vous avez effectués sur une branche, vous voudrez que ces changements soit disponibles sur la branche principale de développement. Incorporer des changements d'une branche dans une autre, s'appelle fusionner (merging).
+      </para>
+      <para>
+        Pour fusionner depuis une branche, remplacez votre copie locale par la branche dans laquelle vous voulez fusionner les changements. Voyez <link linkend="advanced.branching.selecting" endterm="advanced.branching.selecting-title"></link> ou <link linkend="advanced.branching.head" endterm="advanced.branching.head-title"></link>. Sélectionnez le répertoire du projet de plus haut niveau. Vous pouvez aussi sélectionner les répertoires et fichiers exacts qui font partie de la branche désirée si vous connaissez cette information. Cliquez droit sur la sélection, et choisissez <guimenuitem>CVS --&gt; Fusionner...</guimenuitem>.
+      </para>
+      <figure>
+        <title>Boite de dialogue Fusionner</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0015.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Boite de dialogue Fusionner</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        On vous présente alors la <link linkend="dialogs.merge" endterm="dialogs.merge-title"></link>. Ici vous pouvez entrer le nom de la branche que vous voulez fusionner dans le champ <guilabel>Début</guilabel>. Cliquez le bouton <guibutton>Ok</guibutton>, et TortoiseCVS va ensuite fusionner la branche spécifiée dans votre copie locale. Vos changements ne seront pas fait sur le référentiel du serveur, jusqu'à ce que vous validiez vos changements.
+      </para>
+      <para>
+        [NDT:Paragraphe plus d'actualités à priori, au vue des modifications (tag de Début, tag de fin) effectué dans TortoiseCVS (Je ne traduit donc pas...)]
+The merge given above will try to merge changes from the start of the branch. If you do the operation a second time (to merge changes done to the branch after the last merge), merging from the start of the branch is not what you want, and it will most likely get you into trouble. To get around this problem, you should give the branch a new tag after every merge, and use the new tag when naming the branch for subsequent merges.
+      </para>
+      </section>
+
+      <section id="advanced.branching.head">
+        <title id="advanced.branching.head-title">Revenir à la branche principale</title>
+        <para>
+          Si vous voulez arrêter de travailler sur une branche et remplacer votre copie locale par la ligne principale de développement, vous devez demander à TortoiseCVS de supprimer toutes les balises collantes.
+        </para>
+        <para>
+          Pour supprimer les balises collantes, et ainsi actualiser votre copie locale avec la ligne de développement principale, sélectionnez le répertoire du projet de plus haut niveau. Vous pouvez aussi sélectionner les répertoires et fichiers exacts qui font parti de la branche désirée si vous connaisser cette information. Cliquez droit sur la sélection, et choisissez <guimenuitem>CVS --&gt; Actualisation Spéciale...</guimenuitem>.
+        </para>
+        <para>
+          On vous présente alors la <link linkend="dialogs.updatespecial" endterm="dialogs.updatespecial-title"></link>. Sélectionnez la checkbox <guilabel>Revenir à la branche principale (HEAD)</guilabel> et cliquez sur le bouton <guibutton>Ok</guibutton>. TortoiseCVS fera alors les actualisations nécessaires pour remplacer votre copie de travail par la branche principale.
+        </para>
+      </section>
+    </section>
+
+    <!-- ====== Binary And Unicode Detection =================================== -->
+
+    <section id="advanced.binary">
+      <title id="advanced.binary-title">Détection binaire et Unicode</title>
+      <para>
+        TortoiseCVS essaie de détecter automatiquement le type de fichier que vous ajouter à CVS. Il peut détecter si le fichier est <emphasis>Texte/ASCII</emphasis>, <emphasis>Texte/Unicode</emphasis>, ou <emphasis>Binaire</emphasis>. TortoiseCVS vérifie d'abord l'extension du fichier pour déterminer si le fichier est binaire ou texte. Par exemple <quote>.doc</quote> et <quote>.exe</quote>, sont toujours supposés être binaires alors que d'autres extensions, comme <quote>.cpp</quote> et <quote>.txt</quote>, sont toujours supposées être texte. TortoiseCVS effectue cela en utilisant une liste interne (built-in), d'extensions binaires et textes qui inclus la plupart des extensions de fichiers connues. Pour personnaliser cette liste, vous pouvez copier le fichier <quote>TortoiseCVS.FileTypes</quote> du répertoire d'installation de TortoiseCVS dans votre répertoire HOME et l'éditer en fonction de vos besoin.
+
+      </para>
+      <para>
+        Par défaut TortoiseCVS examinera aussi les 4000 premiers octets d'un fichiers pour déterminer le type. C'est utile dans les cas où l'extension n'est pas connu. Ces quelques premiers octets sont aussi utilisés pour déterminer si le fichier est  Texte/ASCII ou Texte/Unicode.
+      </para>
+      <para>
+        TortoiseCVS fournit aussi un mécanisme sophistiqué de plugin qui permet d'implémenter une DLL pour effectuer la détection du type de fichier. Les détails de cette interface de plugin sont aussi disponible dans le fichier  <quote>FileTypes.config</quote>.
+      </para>
+      <para>
+        Dans tous les cas, la <link linkend="dialogs.add" endterm="dialogs.add-title"></link> présente les fichiers que vous être sur le point d'ajouter et leurs types, vous avez ainsi la chance de corriger les choix effectués.
+      </para>
+    </section>
+
+    <!-- ====== History ======================================================= -->
+
+    <section id="advanced.history">
+      <title id="advanced.history-title">Historique des versions de fichiers</title>
+      <para>
+        TortoiseCVS fournit deux méthodes de revue et de travail sur l'historique d'un fichier. La première est via la <link linkend="dialogs.history" endterm="dialogs.history-title"></link>. Vous pouvez voir l'historique d'un fichier en le sélectionnant et en cliquant droit puis en choisissant <guimenu>CVS --&gt; Historique...</guimenu>.
+      </para>  
+      <figure>
+        <title>Boite de dialogue Historique</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0033.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Boite de dialogue Historique</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        La boite de dialogue Historique montre un log des revisions, balises (tags), et branches pour le fichier sélectionné. Elle vous offre aussi l'opportunité, en cliquant droit sur une version spécifique, balise, ou branche, de <emphasis>comparer (diff)</emphasis>, <emphasis>d'enregistrer </emphasis> la version localement, ou <emphasis>d'extraire</emphasis> avec balises collantes (un concept CVS avancé; généralement l'option <emphasis>Enregistrer</emphasis> est préférable à une <emphasis>extraction</emphasis> collante(stiky update)). Vous pouvez aussi éditer un message de validation (courant ou précédent) en cliquant sur une révision et en tapant dans la zone de texte en bas de la fenêtre.
+      </para>
+      <para>
+        TortoiseCVS fournit aussi un <link linkend="dialogs.revision" endterm="dialogs.revision-title"></link> pour vous montrer graphiquement l'historique d'un fichier. Vous pouvez voir un schéma des version de fichiers en le sélectionnant et en cliquant droit puis en choisissant <guimenu>CVS --&gt; Schéma des versions</guimenu>.
+      </para>
+      <figure>
+        <title>Boite de dialogue du schéma de versions</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="images_fr/img0034.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Boite de dialogue du schéma de versions</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Comme la boite de dialogue Historique, le schéma de versions vous autoriqe à voir les détails et à effectuer des opérations CVS sur chaque version, balise, ou branche.
+      </para>
+    </section>
+
+    <!-- ====== Web Log ======================================================== -->
+
+    <section id="advanced.weblog">
+      <title id="advanced.weblog-title">Web Log</title>
+      <para>
+      </para>
+    </section>
+
+
+    <!-- ====== Make Patch ==================================================== -->
+
+    <section id="advanced.patch">
+      <title id="advanced.patch-title">Faire un fichier patch</title>
+      <para>
+        Parfois vous individuellement pouvez avoir les droits d'accès en lecture à un référentiel CVS ou module, mais pas l'accès en écriture. Les projets Open Source (libres) travaille typiquement de cette façon pour maintenir un contrôle de qualité pour tous les contributerus à un projet. Le plus facile et le plus sûr moyen pour contribuer aux changements de ces projets est de créer un <emphasis>Fichier Patch</emphasis> pour le leur soumettre.
+      </para>
+      <para>
+        Dans TortoiseCVS c'est réalisé en sélectionnant les répertoires, ou fichiers avec des changements que vous voulez inclure dans le fichier patch. Cliquez droit sur vos sélections et choisissez <guimenu>CVS --&gt; Créer un patch...</guimenu> dans le menu contextuel. On vous présentera alors une boite de dialogue enregistrer pour indiquer où enregistrer le fichier patch. Finallement TortoiseCVS ouvrira le nouveau fichier Patch dans Notepad, où vous pouvez valider vos changements.
+      </para>
+    </section>
+
+</chapter>
+
+<!-- ====== Command Reference for TortoiseCVS ================================== -->
+<chapter id="ref">
+  <title id="ref-title">Références des commandes TortoiseCVS</title>
+  <para>
+    Ce chapitre est écrit pour illustrer les principales caractéristiques et fonctionnalités de TortoiseCVS. Il suppose que a) vous avez déjà une compréhension de CVS et b) vous avez accès à un serveur CVS déjà installé avec un référentiel CVS créé. Si vous êtes un novice en CVS veuillez vous référer à la section "TortoiseCVS pour les débutants."
+  </para>
+
+  <!-- ====== Installing TortoiseCVS =========================================== -->
+  <section id="ref.install">
+    <title id="ref.install-title">Installer TortoiseCVS</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Téléchargez la dernière version de TortoiseCVS depuis le site web (<ulink url="http://tortoisecvs.org/">http://tortoisecvs.org/</ulink>) et enregistez la dans un emplacement temporaire sur votre disque dur.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Exécuter l'installeur. Si vous éxécutez Windows NT, 2000, ou XP vous devez avoir des privilèges d'administrateur local pour installer TortoiseCVS correctement.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choisissez l'emplacement d'installation de TortoiseCVS (par défaut: <quote>C:\Program Files\TortoiseCVS</quote>).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choisissez le type d'installation, soit <quote>Full</quote>, <quote>Compact</quote>, ou <quote>Custom installation</quote>. Si vous désirez le support d'internationalisation, vous devez utiliser soit <quote>Full</quote> soit <quote>Custom installation</quote>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Une fois que l'installeur a terminé, vous devez redémarrer l'ordinateur pour que TortoiseCVS finissent son installation.
+            <footnote>
+              <para>
+                Gooviness... sigh!
+              </para>
+            </footnote>
+        </para>
+      </listitem>
+    </orderedlist>
+
+  </section>
+
+  <!-- ====== CVS Checkout ===================================================== -->
+
+  <section id="ref.checkout">
+    <title id="ref.checkout-title">CVS Emprunter...</title>
+    <abstract>
+      <para>
+        Créer un bac à sable local depuis le référentiel CVS.
+      </para>
+    </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          Créer un répertoire pour le bac à sable dans l'explorateur Windows
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Cliquez droit sur le répertoire.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Sélectionnez <guimenuitem>CVS Emprunter...</guimenuitem> dans le menu contextuel.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          La <link linkend="dialogs.checkout" endterm="dialogs.checkout-title"></link> apparaitra. A partir d'ici vous pouvez soit entrer le référentiel CVSROOT dans le champ <guilabel>CVSROOT</guilabel>, soit construire un CVSROOT en utilisant les champs <guilabel>Protocole
+</guilabel>, <guilabel>Serveur</guilabel>, <guilabel>Port</guilabel>, <guilabel>Dossier du référentiel</guilabel>, et <guilabel>Nom d'utilisateur</guilabel>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Si vous connaissez le nom du module vous pouvez l'entrer dans le champ module. Inversement, vous pouvez emprunter un référentiel entier en entrant un point (<command>.</command>) dans le champ <guilabel>Module</guilabel>. Si vous ne connaissez pas le nom du module vous pouvez cliquer sur <guibutton>Dresser la liste</guibutton> pour remplir la liste déroulante avec les modules disponibles. Note: certains serveurs CVS ne supporte pas cette fonctionnalité; si vous ne pouvez pas remplir cette liste vous pouvez contacter l'administrateur du serveur CVS.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Cliquer <guibutton>Ok</guibutton> pour emprunter dans le bac à sable.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          En fonction du protocole et de si c'est le premier emprunt à partir de ce référentiel CVS, on vous demandera d'entrer le mot de passe. Entrez le mot de passe dans la boite de dialogue et cliquez <guibutton>Ok</guibutton>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          La <link linkend="dialogs.progress" endterm="dialogs.progress-title"></link> apparaitra, qui fournit un détail du status des fichiers qui sont empruntés par TortoiseCVS. Par défaut cette boite de dialogue se fermera après que l'opération soit terminée, à moins qu'il est rencontré un problème.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Update ======================================================= -->
+
+    <section id="ref.update">
+      <title id="ref.update-title">CVS Actualiser</title>
+      <abstract>
+        <para>
+          Syncchronise un bac à sable local avec un référentiel CVS.
+        </para>
+      </abstract>
+      <orderedlist>
+        <listitem>
+          <para>
+            Pour actualiser un répertoire cliquez droit soit sur celui-ci soit avec celui-ci dans l'explorateur (mais pas sur un fichier spécifique) ou pour actualisez un ou plusieurs fichiers sélectionnez les fichiers à actualiser et cliquez droit sur ceux-ci.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Selectionnez <guimenuitem>CVS Actualiser</guimenuitem> dans le menu contextuel.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            La <link linkend="dialogs.progress" endterm="dialogs.progress-title"></link> apparaitra pour fournir un status détaillé des fichiers qui sont actualisés par TortoiseCVS. Par défaut cette boite de dialogue se fermera après l'opération, à moins que un problème soit rencontré.
+          </para>
+        </listitem>
+      </orderedlist>
+    </section>
+  <!-- ====== Update Special ================================================= -->
+
+  <section id="ref.update.special">
+    <title id="ref.update.special-title">CVS --&gt; Actualisation Speciale...</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Pour actualiser un répertoire cliquez droit soit sur celui-ci soit avec celui-ci dans l'explorateur (mais pas sur un fichier spécifique) ou pour actualisez un ou plusieurs fichiers sélectionnez les fichiers à actualiser et cliquez droit sur ceux-ci.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Selectionnez <guimenuitem>CVS --&gt; CVS Actualisation Speciale...</guimenuitem> dans le menu contextuel.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          La <link linkend="dialogs.updatespecial">Boite de dialogue Actualisation Speciale</link> apparait. Entrez dans le champ texte <guilabel>Extraire la balise/branche/version:</guilabel> soit le numéro de version (i.e. <quote>1.3</quote>), Balise (i.e. <quote>release_1_1_0</quote>), ou Branche (i.e. <quote>vendorx_branch</quote>) pour changer vorte copie du bac à sable.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+           La <link linkend="dialogs.progress" endterm="dialogs.progress-title"></link> apparaitra pour fournir un status détaillé des fichiers qui sont actualisés par TortoiseCVS. Par défaut cette boite de dialogue se fermera après l'opération, à moins que un problème soit rencontré.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+
+  <!-- ====== CVS Commit ======================================================= -->
+  <section id="ref.commit">
+    <title id="ref.commit-title">CVS Valider...</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Pour valider les changements cliquez droit soit sur le répertoire soit sur des fichiers sélectionnés.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Sélectionnez <guimenuitem>CVS Valider...</guimenuitem> dans le menu contextuel.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          La  <link linkend="dialogs.commit" endterm="dialogs.commit-title"></link> apparaitra, qui vous permettra d'entrer un commentaire pour la validation. De plus, vous pouvez choisir quels changements valider en cochant les fichiers individuels dans la liste.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Cliquez <guibutton>Ok</guibutton> une fois que vous avez entrer les commentaires appropriés et sélectionner les changements à valider.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          La <link linkend="dialogs.progress" endterm="dialogs.progress-title"></link> apparaitra pour fournir un status détaillé des fichiers qui sont validés par TortoiseCVS. Par défaut cette boite de dialogue se fermera après l'opération, à moins que un problème soit rencontré.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Add and Add Recursively ====================================== -->
+  <section id="ref.add">
+    <title id="ref.add-title">CVS Ajouter et CVS Ajouter le contenu...</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Pour ajouter des fichiers ou répertoires à CVS sélectionnez et cliquez droit sur les les fichiers ou répertoires que vous voulez ajouter. Ces fichiers doivent avoir le statut CVS: pas dans CVS.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Si vous avez sélectionné un répertoire on vous fournit l'option d'<guimenuitem>Ajouter Récursivement</guimenuitem> dans le menu contextuel. Cette option ajoutera tous les fichiers dans le répertoire sélectionné ainsi que ses sous-répertoires. Sinon, pour seulement ajouter ces fichiers ou répertoires sélectionnés selectionnez  <guimenuitem>Ajouter</guimenuitem> dans le menu contextuel.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          La <link linkend="dialogs.progress" endterm="dialogs.progress-title"></link> apparaitra pour fournir un status détaillé du processus d'ajout effectué par TortoiseCVS. Par défaut cette boite de dialogue se fermera après l'opération, à moins que un problème soit rencontré.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Remove =========================================================== -->
+  <section id="ref.remove">
+    <title id="ref.remove-title">CVS --&gt; Supprimer</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Pour supprimer un ou plusieurs fichiers du référentiel CVS sélectionnez les fichiers désirés à supprimer et cliquez droit sur ceux-ci.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Sélectionnez <guimenuitem>CVS --&gt; Supprimer</guimenuitem> dans le menu contextuel.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          TODO: Finish these steps.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Diff ========================================================= -->
+  <section id="ref.diff">
+    <title id="ref.diff-title">CVS Comparer(Diff)...</title>
+      <orderedlist>
+        <listitem>
+          <para>
+	    Pour comparer un fichier avec une version différente du référentiel CVS, sélectionnez le fichier désiré et cliquez droit sur celui-ci.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>
+	    Selectionnez <guimenuitem>CVS Comparer</guimenuitem> dans le menu contextuel.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>
+	    Si c'est la première fois que vous utiliser la comparaison dans TortoiseCVS, on vous demandera de sélectionner une application externe de comparaison (diff). <ulink url="http://winmerge.sf.net">WinMerge</ulink> et <ulink url="http://www.prestosoft.com/ps.asp?page=edp_examdiff">ExamDiff</ulink> sont tous deux disponibles gratuitement et sont tout désigné pour le code source basé sur du texte. Si vous développez dans le langage de programmation LabVIEW, vous pouvez utiliser <ulink url="http://meta-diff.sf.net/lvdiff.html">LVDiff</ulink> pour comparer vos schémas blocs visuellement. <ulink url="http://www.componentsoftware.com/products/csdiff/download.htm">CSDiff</ulink> est conçu pour comparer différentes versions de documents Word. Pour utiliser une combinaison d'outils de comparaison basé sur  le type de fichiers que vous comparer, essayez <ulink url="http://meta-diff.sf.net">meta-diff</ulink>.
+	  </para>
+        </listitem>
+	
+	<listitem>
+	  <para>
+	    TortoiseCVS lancera l'otil de comparaison que vous avez choisi et comparera votre copie locale du fichier sélectioné avec la version du référentiel. Pour des options de comparaison plus sophistiqués (comme comparer à une ancienne copie du référentiel ou comparer deux anciennes versions entre elles), voyez <link linkend="advanced.history" endterm="advanced.history-title" />.
+	  </para>
+	</listitem>
+      </orderedlist>
+  </section>
+
+  <!-- ====== Tagging ========================================================== -->
+  <section id="ref.tags">
+    <title id="ref.tags-title">CVS --&gt; Balise...</title>
+    <note><para>TODO: Write...</para></note>
+  </section>
+
+  <!-- ====== Create Branch ==================================================== -->
+  <section id="ref.branch">
+    <title id="ref.branch-title">CVS --&gt; Branche...</title>
+    <note><para>TODO: Write...</para></note>
+  </section>
+
+  <!-- ====== Merge ============================================================ -->
+  <section id="ref.merge">
+    <title id="ref.merge-title">CVS --&gt; Fusionner...</title>
+    <note><para>TODO: Write...</para></note>
+  </section>
+
+  <!-- ====== Making a New Module ============================================== -->
+  <section>
+    <title>CVS --&gt; Créer un nouveau module</title>
+    <note><para>TODO: Write...</para></note>
+  </section>
+
+  <!-- ====== Watching & Locking =============================================== -->
+  <section>
+    <title>Watching &amp; Verrouiller</title>
+    <note><para>TODO: Write... </para></note>
+  </section>
+
+</chapter>
+
+<!-- ====== Dialog Reference for TortoiseCVS =================================== -->
+<chapter id="dialogs">
+  <title id="dialogs-title">Référence des Boites de dialogue de TortoiseCVS</title>
+  <para>
+    Ce chapitre détaille chaque boite de dialogue de TortoiseCVS.
+  </para>
+
+  <section id="dialogs.add">
+    <title id="dialogs.add-title">Boite de Dialogue Ajouter</title>
+    <figure>
+      <title>Boite de Dialogue Ajouter</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0022.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de Dialogue Ajouter</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.checkout">
+    <title id="dialogs.checkout-title">Boite de Dialogue Emprunter (Checkout)</title>
+    <figure>
+      <title>Boite de Dialogue Emprunter (Checkout) - Onglet Module</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0023.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de Dialogue Emprunter (Checkout) - Onglet Module</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Boite de Dialogue Emprunter - Onglet Version</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0024.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de Dialogue Emprunter - Onglet Version</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Boite de Dialogue Emprunter - Onglet Options</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0025.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de Dialogue Emprunter - Onglet Options</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.updatespecial">
+    <title id="dialogs.updatespecial-title">Boite de dialogue Actualisation Spéciale (Update)</title>
+    <figure>
+      <title>Boite de dialogue Actualisation Spéciale (Update)</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0014.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Actualisation Spéciale (Update)</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.commit">
+    <title id="dialogs.commit-title">Boite de dialogue Valider</title>
+    <figure>
+      <title>Boite de dialogue Valider</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0032.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Valider</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.branch">
+    <title id="dialogs.branch-title">Boite de dialogue Branche</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.newmodule">
+    <title id="dialogs.newmodule-title">Boite de dialogue Créer un nouveau module</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.progress">
+    <title id="dialogs.progress-title">Boite de dialogue de progression</title>
+      <figure>
+      <title>Boite de dialogue de progression</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0035.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue de progression</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+      Cette boite de dialogue indique si chaque fichier a été modifié ou non dans CVS ou sur le PC local, en utilisant les codes de lettres suivantes:
+      <glosslist>
+	<glossentry>
+	  <glossterm>C</glossterm>
+	  <glossdef>
+	    <para>
+	      Le fichier a changé dans CVS et localement. TortoiseCVS essaie de fusionner les deux jeux de changements dans la copie locale, mais ne peut pas (probablement parce que les deux changements ont été fait sur la même partie du fichier). Pour plus d'information, voyez <link linkend="basic.conflict" endterm="basic.conflict-title"/>.
+	    </para>
+	  </glossdef>
+	</glossentry>
+	<glossentry>
+	  <glossterm>M</glossterm>
+	  <glossdef>
+	    <para>
+	      Le fichier a seulement changé sur le PC local. TortoiseCVS ne va pas changer la copie locale.
+	    </para>
+	  </glossdef>
+	</glossentry>
+	<glossentry>
+	  <glossterm>P</glossterm>
+	  <glossdef>
+	    <para>
+	      Le fichier a changé dans CVS, et TortoiseCVS a actualisé (Update) la copie locale pour qu'elle concorde.
+	    </para>
+	  </glossdef>
+	</glossentry>
+	<glossentry>
+	  <glossterm>U</glossterm>
+	  <glossdef>
+	    <para>
+	      Le fichier éxiste dans CVS, mais pas sur la machine locale. TortoiseCVS va créer une copie sur le PC local.
+	    </para>
+	  </glossdef>
+	</glossentry>
+      </glosslist>
+    </para>
+  </section>
+
+  <section id="dialogs.tags">
+    <title id="dialogs.tags-title">Boite de dialogue Baliser (Tag) </title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.preferences">
+    <title id="dialogs.preferences-title">Boite de dialogue Preferences</title>
+    <figure>
+      <title>Boite de dialogue Preferences - Onglet Principal</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0026.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Preferences - Onglet Principal</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Boite de dialogue Preferences - Onglet Option</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0027.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Preferences - Onglet Option</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Boite de dialogue Preferences -  Onglet Outils</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0028.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Preferences - Onglet Outils</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Boite de dialogue Preferences - Onglet Avancé</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0029.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Preferences - Onglet Avancé</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Boite de dialogue Preferences - Onglet Fichiers ignorés</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0030.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Preferences - Onglet Fichiers ignorés</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Boite de dialogue Preferences - Jeux d'icônes</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0031.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Preferences - Jeux d'icônes</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.merge">
+    <title id="dialogs.merge-title">Boite de dialogue Fusionner</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.history">
+    <title id="dialogs.history-title">Boite de dialogue Historique</title>
+    <figure>
+      <title>Boite de dialogue Historique</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0033.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Historique</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+  
+  <section id="dialogs.revision">
+    <title id="dialogs.revision-title">Boite de dialogue Schéma des version</title>
+    <figure>
+      <title>Boite de dialogue Schéma des version</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="images_fr/img0034.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Boite de dialogue Schéma des version</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>  
+  
+</chapter>
+
+<!-- ====== Articles Tips and Tricks ========================================= -->
+
+<part id="tips">
+  <title id="tips-title">Articles, Conseils et Astuces</title>
+
+
+  <!-- ====== Using TortoiseCVS with SourceForge ============================= -->
+
+  <article id="tips.sourceforge">
+    <title id="tips.sourceforge-title">Utiliser TortoiseCVS avec SourceForge</title>
+
+    <bridgehead renderas="sect3">Instructions d'installation du Client TortoiseCVS</bridgehead>
+    <para>
+      Ce document fournit des instructions pour installer et utiliser le logiciel client CVS TortoiseCVS. Ces instructions sont écrites pour les développeurs de projets SourceForge.net qui utilisent la plateforme 32-bit Microsoft Windows. Elles sont pour les développeurs qui aimeraient travailler avec le code source d'un projet hébergé sur SourceForge.net. Pour des informations de fond vous devriez vouloir lire les autres documents disponibles à propos de CVS.
+    </para>
+    <para>
+      TortoiseCVS a des avantages par rapport à WinCVS pour travailler sur SourceForge. Il a une interface plus clair qui est intégré dans l'explorateur Windows. WinCVS a une interface plus complexe et mature. Pour les commandes plus obscure il doit être plus facile ou nécessaire d'utiliser WinCVS.
+    </para>
+    <para>
+      Un bénéfice particulier est que TortoiseCVS a un client SSH interne, sans d'installation spéciale. N'importe qui peut facilement valider du code dans des projets SourceForge.net en utilisant TortoiseCVS.
+    </para>
+    
+    <bridgehead renderas="sect3">Installer TortoiseCVS</bridgehead>
+    <orderedlist>
+      <listitem>
+        <para>
+          Allez sur <ulink url="http://www.tortoisecvs.org">http://tortoisecvs.org/</ulink> et téléchargez sur la page Download.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Pour installer, lancez l'exécutable et suivez les instructions.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Comme TortoiseCVS est une extention shell, vous devez redémarer votre machine.
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Emprunter (Checking out) un projet existant</bridgehead>
+    <para>
+      Si vous travaillez sur un projet existant vous devez d'abord emprunter le code.
+    </para>
+    <orderedlist>
+      <listitem>
+        <para>
+          Soyez sûr d'avoir créer un compte sur SourceForge.net, et que vous avez été ajouté comme développeur au projet sur lequel vous allez travailler. Un administrateur du projet doit le faire.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Dans l'explorateur Windows allez dans le répertoire dans lequel vous voulez extraire le code.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Cliquez droit et dans le menu contextuel choisissez la commande <guimenuitem>CVS Emprunter...(ou checkout)</guimenuitem>; elle est à coté de l'icône Tortoise.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Vous aurez besoin de votre nom d'utilisateur sur SourceForge.net, et du nom UNIX du projet. Remplissez la boite de dialogue comme ceci:
+          <itemizedlist>
+            <listitem>
+              <para>
+                Protocole: Terminal sécurisé (:ext)
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Serveur: cvs.sourceforge.net
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Dossier du référentiel: /cvsroot/<emphasis>nom du projet</emphasis>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Nom d'utilisateur: <emphasis>nom d'utilisateur</emphasis>
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Cliquez <guilabel>Dresser la liste</guilabel> pour obtenir un choix de modules. Vous devrez entrer votre mot de passe dans la boite de dialogue à ce niveau. Puis choisissez le module que vous voulez.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choisissez <guibutton>OK</guibutton>. TortoiseCVS va maintenant emprunter le code. Vous devrez entrer votre mot de passe.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Vous pouvez maintenant modifier les fichiers et sélectionner <guimenuitem> CVS Valider (Commit)</guimenuitem>sur le répertoire principal pour faire vos changements dans le référentiel. Pour plus d'information lisez le <ulink url="http://www.tortoiscvs.org/docs/UserGuide_en/">Guide Utilisateur TortoiseCVS</ulink>.
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Obtention d'une erreur?</bridgehead>
+    <para>
+      Si vous obtenez une erreur disant quelque chose comme <quote>Could not chdir to home
+      folder /home/users/r/rd/rdonkin: No such file or folder</quote> vous devez alors vous connectez au serveur avec SSH pour forcer la création de votre répertoire home. Faites ceci en vous connectant à nomDUtilisateur@cvs.sf.net soit avec Putty soit avec un SSH en ligne de commande.
+    </para>
+
+    <bridgehead renderas="sect3">Travailler sur un  nouveau projet</bridgehead>
+    <para>
+      Si vous travaillez sur un nouveau projet vous devez d'abord créer un nouveau module dans le référentiel.
+    </para>
+    <orderedlist>
+      <listitem>
+        <para>
+          Créez un répertoire avec le nom que vous voulez que le module ait.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Mettez les fichiers que vous voulez ajouter dans le répertoire.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Cliquez droit sur le répertoire, et choisissez <guimenuitem>Créer un module</guimenuitem> dans le sous menu CVS.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Remplissez la boite de dialogue comme décrit dans la section précédente. Remarquez que le nom du module est remplit pour vous.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Choisissez <guibutton>OK</guibutton>. Vous devrez entrer votre mot de passe deux fois, et le module sera fait pour vous.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Procédez à l'ajout des fichiers et répertoires en cliquant droit sur ceux-ci et en choisissant <guimenuitem>CVS Ajouter</guimenuitem>(Add) ou <guimenuitem>CVS Ajouter le contenu</guimenuitem>(Add All Recursively) dans le menu contextuel.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Pour plus d'informations lisez le <ulink url="http://www.tortoisecvs.org/docs/UserGuide_en/">Guide utilisateur TortoiseCVS</ulink>
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Fatigué de rentrer votre mot de passe tout le temps?</bridgehead>
+    <para>
+      Vous devez faire une paire de clé public/privé. La clé public va sur le serveur, et la clé privé reste sur votre disque dur. Ensuite, quand vous vous connectez le serveur peut vérifier qui vous êtes simplement parce que vous avez votre clé privé.
+    </para>
+    <para>
+      Pour plus de protection pour votre clé privé elle est crypté sur votre disque dur avec une passphrase. Vous pouvez toutefois choisir une passphrase vide, auquel cas vous n'avez jamais à entrer de mot de passe mais n'importe qui qui accède à votre ordinateur peut accéder à votre compte SSH. Ou vous pouvez utiliser un Agent SSH (comme Pageant) qui se rapellera de votre passphrase pour la durée d'une session, ainsi vous n'aurrez qu'à la rentrer une fois.
+    </para>
+    <para>
+      TortoiseCVS utilise une version de Plink comme client SSH. Cela signifie que vous pouvez utiliser PuTTYgen pour faire une paire de clé publique/privé, et que vous pouvez utiliser Pageant pour pointer vers la clé privé. D'abord téléchargez les tous les deux sur le site <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">PuTTY web site</ulink>.
+    </para>
+    <para>
+      Pour les informations sur comment les utiliser lisez la <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/putty/docs.html"> documentation PuTTY</ulink> sur PuTTYgen et Pageant. En particulier, soyez sûr de lire les sections "8.2: Using PuTTYgen, the PuTTY key generator" et "9.3.1 Making Pageant automatically load keys on startup".
+    </para>
+    <para>
+      Après avoir créer votre clé publique avec PuTTYgen vous devrez l'uploader en utilisant l'interface web de SourceForge.net. Connectez vous sur le site web SourceForge, et allez sur la page Account Preferences. En bas se trouve une section "Shell Account Information" avec une entrée "CVS/SSH Shared Authorized Keys". Vous devez ajouter votre clé publique ici. Attention, vous devez effectuer un copier-coller avec la souris de la clé publique qui se trouve dans le champ "Public key for pasting into authorized_keys file:". Il faut pas utiliser la clé dans un format multiligne du fichier enregistré à l'aide du bouton save public key. (C'est expliqué, mais en anglais).
+    </para>
+  </article>
+
+
+  <!-- ====== How CVS Differs from Microsoft Visual Source Safe ============== -->
+
+  <article id="tips.sourcesafe">
+    <title id="tips.sourcesafe-title">Qu'est ce qui diffère entre CVS et<productname>Microsoft Visual Source Safe</productname></title>
+    <para>
+      TortoiseCVS diffère de <productname>Visual Source Safe</productname> (VSS) de beaucoup de façons. La plus apparente différence doit être que TortoiseCVS ne nécessite pas que les utilisateurs verrouillent les fichiers sur lesquels ils travaillent, alors que VSS fait cela par défaut. En fait, la documentation CVS encourage les utilisateurs à ne pas utiliser le verrouillage de fichiers. Dans de rares occasions où plusierus personnes ont changé le même fichier en même temps, CVS sera normalement capable de fusionner leurs changements. Si deux ou plus développeurs ont changés les même lignes, TortoiseCVS rapportera un conflit, inserera des directives dans le fichier, et laissera aux développeurs la décision de quoi faire. De tels conflits sont très rares, car ils se produisent normalement comme un résultat de manque de communication entre les développeurs (ex. deux personnes essayant de résoudre le même problème).
+    </para>
+    <para>
+      Une autre différence importante est que VSS vous donne une vue serveur, tandis que TortoiseCVS présente une vue cliente. En pratique cela signifit que, contrairement à VSS, TortoiseCVS ne vous dira pas quels sont les changements dans le référentiel jusqu'à ce que vous actualisiez (update), ou validiez (commit).
+    </para>
+  </article>
+  
+  <!-- ====== Creating new icons for TortoiseCVS ============================= -->
+
+  <article id="tips.createicons">
+    <title id="tips.createicons-title">Créer des nouveaux icônes pour TortoiseCVS</title>
+    <para>
+      Les icônes de TortoiseCVS sont des fichiers icônes Windows qui recouvrent les icones de fichier code source dans l'explorateur pour montrer leurs statut dans CVS. La raison pour laquelle cette technique fonctionne est que la plupart de la surface des icônes TortoiseCVS est transparante, autorisant à l'icône source de se montrer à travers. Si vous dessinnez votre propre jeu d'icônes TortoiseCVS, vous devrez jouer attentivement sur la balance entre la visibilité du fichier original et la visibilité de l'éta CVS. Plusieurs jeu d'icônes réalisent cette balance en ajoutant une couleur distincte ou une forme à un coin de chaque icône; d'autres achèvent l'illusion en nuançant l'icône entier en alternant les pixels transparants avec les colorés. Vous pouvez de plus combiner ces deux idées de formes uniques et semi-transparantes nuancés; voyez le jeu d'icônes &#34;NG&#34; qui est compris avec TortoiseCVS comme exemple.
+      <orderedlist>
+        <listitem>
+	  <para>
+	    Créez votre jeu d'icônes en utilisant un éditeur graphique. Pour les meilleurs résultats visuels, vous devriez créer des versions 16x16 et 32x32 de chaque icône. Les éditeurs d'icônes fournits avec les compilateurs Borland et Microsoft peuvent remplir cette tâche facilement, comme le peuvent la plupart des shareware éditeurs d'icônes. Si vous préférez rester avec des logiciels free, vous pouvez utiliser <ulink url="http://www.gimp.org">The GIMP</ulink> pour créer un fichier PNG 16x16 and 32x32 pour chaque icône, et ensuite les combiner avec <ulink url="http://www.winterdrache.de/freeware/png2ico">png2ico</ulink>. 
+	  </para>
+
+</listitem>
+<listitem>
+<para>
+Soyez sûr que vous avez créer un icône correctement nommé pour chacun des six états possible CVS: TortoiseNotInCVS.ico, TortoiseInCVS.ico, TortoiseInCVSReadOnly.ico, TortoiseChanged.ico, TortoiseConflict.ico, and TortoiseIgnored.ico.
+	     </para>
+        </listitem>
+        <listitem>
+          <para>
+            Créez un repertoire dans le répertoire dans lequel vous avez installé TortoiseCVS, nommez le avec un nom représentatif pour votre jeu d'icônes, et copiez vos six nouveaux fichiers icônes dans le nouveau répertoire. 
+</para>
+</listitem>
+<listitem>
+<para>
+Ouvrez l'éditeur de base de registre (Cliquez Démarrer &#62;&#62; Exécuter et tapez &#34;regedit&#34;). Navigez dans HKEY_LOCAL_MACHINE\SOFTWARE\TortoiseCVS\CustomIcons. Dans cette clé, créez une nouvelle chaine valeur (string value). Pour le nom de cette nouvelle valeur, tapez le nom que vous voulez pour votre nouveau jeu d'icônes. Double cliquez sur la nouvelle valeur pour placer la nouvelle donnée, qui est le nom du répertoire que vous avez créer à l'étape 3.
+          </para>
+        </listitem>
+      </orderedlist>
+    </para>
+  </article>  
+  
+  <!-- ====== Creating new locale for TortoiseCVS ============================ -->
+
+  <article id="tips.createlocale">
+    <title id="tips.createlocale-title">Creating new locale for TortoiseCVS</title>
+    <para>
+
+    </para>
+  </article> 
+</part>
+</book>

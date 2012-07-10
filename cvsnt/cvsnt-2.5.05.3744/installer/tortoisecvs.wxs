@@ -1,0 +1,706 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="tortoisecvs">
+        <DirectoryRef Id="CvsntStartMenuFolder">
+            <Directory Id="TortoiseCvsStartMenuFolder" Name="TortoiseCvs" SourceName=".">
+                <Component Id="TortoiseCvsStartMenuDoc" Guid="4B8907D2-3F15-4dd5-A67C-59DA02F3FF78">
+                    <RegistryValue Id="TortoiseCvsMenuDocInstalled" Root="HKMU" Key="Software\TortoiseCvs\Msi" Name="MenuDoc" Type="string" Value="1" KeyPath="yes" />
+                    <CreateFolder />
+                    <RemoveFolder Id="TortoiseCvsStartMenuRemove" On="uninstall" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+        <DirectoryRef Id="COMMON_INSTALLDIR" FileSource="$(var.SYSFILES)\" >
+            <Component Id="libxml" Guid="70732A87-950C-422a-8B3E-E222AD8711C6" DiskId="1">
+                <File Id="libxml2.dll" Name="libxml2.dll" Source="$(var.SYSFILES)\libxml2-2.7.3.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="TORTOISECVS_INSTALLDIR" FileSource="$(var.TORTOISECVS_BASE)\">
+            <Directory Id="TortoiseCvsStuff" Name=".">
+                <Component Id="TortSimCvs" Guid="EEE0CF07-15CB-4102-9742-8F526B7BEC72" DiskId="4">
+                    <File Id="tcvs.exe" Name="cvs.exe" Source="$(var.CVSNT_BASE)\simcvs.exe" />
+                </Component>
+                <Component Id="TortoiseCvsFiles" Guid="81FDE819-9EC8-4b45-BF8C-9D848DC7E4A8" DiskId="4">
+		    <RegistryValue Id="TortoiseCvsFiles" Root="HKCU" Key="Software\TortoiseCvs\Msi" Name="TortoiseCvsFiles" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="TortoiseAct.exe" Name="TortoiseAct.exe" Source="$(var.TORTOISECVS_BASE)\TortoiseAct.exe">
+                        <Shortcut Id="TortoiseActPrefs" Advertise="no" Name="Preferences.lnk" Directory="TortoiseCvsStartMenuFolder" Arguments="CVSPrefs" />
+                        <Shortcut Id="TortoiseActAbout" Advertise="no" Name="About.lnk" Directory="TortoiseCvsStartMenuFolder" Arguments="CVSAbout" />
+                    </File>
+                    <File Id="TortoisePlink.exe" Name="TortoisePlink.exe" />
+                    <File Id="TortoiseShell.dll" Name="TortoiseShell.dll" />
+<!--
+		  <File Id="TortoiseShell64.dll" Name="TORTOI~2.DLL" LongName="TortoiseShell64.dll" /> 
+-->
+                    <File Id="TortoiseMenus.config" Name="TortoiseMenus.config" />
+                    <File Id="TortoiseCVS.Filetypes" Name="TortoiseCVS.Filetypes" />
+                    <File Id="TortoiseCVSError.wav" Name="TortoiseCVSError.wav" />
+                </Component>
+                <Component Id="TortoiseDoc" Guid="517EC99B-5C9F-46b7-99E4-02F41158A9AC" DiskId="4">
+		    <RegistryValue Id="keyTortoiseDoc" Root="HKCU" Key="Software\TortoiseCvs\Msi" Name="TortoiseDoc" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="UserGuide_en.chm" Name="UserGuide_en.chm">
+                        <Shortcut Id="UserGuide_en.chm" Advertise="no" Name="User Guide (English).lnk" Directory="TortoiseCvsStartMenuFolder" />
+                    </File>
+                    <File Id="UserGuide_fr.chm" Name="UserGuide_fr.chm">
+                        <Shortcut Id="UserGuide_fr.chm" Advertise="no" Name="User Guide (French).lnk" Directory="TortoiseCvsStartMenuFolder" />
+                    </File>
+                    <File Id="UserGuide_cn.chm" Name="UserGuide_cn.chm">
+                        <Shortcut Id="UserGuide_cn.chm" Advertise="no" Name="User Guide (Chinese).lnk" Directory="TortoiseCvsStartMenuFolder" />
+                    </File>
+                    <File Id="astronlicense.html" Name="astronlicense.html" />
+                    <File Id="faq.html" Name="faq.html" />
+                    <File Id="GPL.html" Name="GPL.html" />
+                    <File Id="Help.html" Name="Help.html">
+                        <Shortcut Id="Help.html" Advertise="no" Name="Help.lnk" Directory="TortoiseCvsStartMenuFolder" />
+                    </File>
+                    <File Id="legal.html" Name="legal.html" />
+                    <File Id="charlie.jpeg" Name="charlie.jpeg" />
+                    <File Id="pgsm.jpg" Name="philosophical-gnu-sm.jpg" />
+                    <File Id="ttChangelog.txt" Name="Changelog.txt" />
+                </Component>
+                <Component Id="TortoiseRegMachine" Guid="390AD545-38C3-430d-8629-AD744F3CA10A" DiskId="4">
+                    <Class Id="5d1cb710-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell.dll" />
+                    <Class Id="5d1cb711-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell.dll" />
+                    <Class Id="5d1cb712-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell.dll" />
+                    <Class Id="5d1cb713-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell.dll" />
+                    <Class Id="5d1cb714-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell.dll" />
+                    <Class Id="5d1cb715-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell.dll" />
+                    <Class Id="5d1cb716-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell.dll" />
+
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="Compression Level" Value="0" />
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="Icons" Value="TortoiseCVS" />
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="IgnoredList update interval" Value="100" />
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="External Merge Application" Value="[WINMERGE_INSTALLDIR]/WinMergeU.exe" />
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="External Diff Application" Value="[WINMERGE_INSTALLDIR]/WinMergeU.exe" />
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="LanguageIso" Value="[UserLanguageID]" />
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="Show Edit Options" Value="1" />
+
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS0" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS1" Type="string" Value="{5d1cb711-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS2" Type="string" Value="{5d1cb712-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS3" Type="string" Value="{5d1cb713-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS4" Type="string" Value="{5d1cb714-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS5" Type="string" Value="{5d1cb715-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS6" Type="string" Value="{5d1cb716-1c4b-11d4-bed5-005004b1f42f}" />
+
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb711-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb712-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb713-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb714-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb715-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+                    <RegistryValue Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb716-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+
+                    <RegistryValue Root="HKCR" Key="Directory\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="Directory\Background\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="Drive\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="Folder\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="*\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="InternetShortcut\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="lnkfile\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+
+                    <RegistryValue Root="HKCR" Key="*\shellex\PropertySheetHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="Folder\shellex\PropertySheetHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+
+                    <RegistryValue Root="HKCR" Key="*\shellex\{00021500-0000-0000-c000-000000000046}" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+                    <RegistryValue Root="HKCR" Key="Folder\shellex\{00021500-0000-0000-c000-000000000046}" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+
+                    <RegistryValue Root="HKCR" Key="Folder\shellex\ColumnHandlers\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" Type="string" Value="Tortoise CVS" />
+
+                    <RegistryValue Root="HKCR" Key="CVS" Type="string" Value="URL:CVS Protocol" />
+                    <RegistryValue Root="HKCR" Key="CVS" Type="string" Name="URL Protocol" Value="" />
+                    <RegistryValue Root="HKCR" Key="CVS\DefaultIcon" Type="string" Value="[!TortoiseAct.exe]" />
+                    <RegistryValue Root="HKCR" Key="CVS\shell\open\command" Type="string" Value="&quot;[!TortoiseAct.exe]&quot; -u &quot;%1&quot;" />
+
+                    <RegistryValue Root="HKLM" Key="Software\TortoiseCVS" Type="string" Name="RootDir" Value="[TORTOISECVS_INSTALLDIR]" />
+                </Component>
+<!--		
+		<Component Id="TortoiseRegMachine64" Guid="1E2BAE6A-E3EB-4d21-93F1-65EA6967F878" DiskId="4" Win64="yes">
+		  <Condition>VersionNT64</Condition>
+		  <Class Id="5d1cb710-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell64.dll" />
+		  <Class Id="5d1cb711-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell64.dll" />
+		  <Class Id="5d1cb712-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell64.dll" />
+		  <Class Id="5d1cb713-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell64.dll" />
+		  <Class Id="5d1cb714-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell64.dll" />
+		  <Class Id="5d1cb715-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell64.dll" />
+		  <Class Id="5d1cb716-1c4b-11d4-bed5-005004b1f42f" ThreadingModel="apartment" Description="TortoiseCvs" Context="InprocServer32" Server="TortoiseShell64.dll" />
+
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="Compression Level" Value="0" />
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="Icons" Value="TortoiseCVS" />
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="IgnoredList update interval" Value="100" />
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="External Merge Application" Value="[WINMERGE_INSTALLDIR]/WinMergeU.exe" />
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="External Diff Application" Value="[WINMERGE_INSTALLDIR]/WinMergeU.exe" />
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="string" Name="LanguageIso" Value="[UserLanguageID]" />		  		  
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="Show Edit Options" Value="1" />		  		  
+
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS0" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS1" Type="string" Value="{5d1cb711-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS2" Type="string" Value="{5d1cb712-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS3" Type="string" Value="{5d1cb713-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS4" Type="string" Value="{5d1cb714-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS5" Type="string" Value="{5d1cb715-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Explorer\ShellIconOverlayIdentifiers\TortoiseCVS6" Type="string" Value="{5d1cb716-1c4b-11d4-bed5-005004b1f42f}" />
+
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb711-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb712-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb713-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb714-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb715-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+		  <Registry Root="HKLM" Key="Software\Microsoft\Windows\CurrentVersion\Shell Extensions\Approved" Type="string" Name="{5d1cb716-1c4b-11d4-bed5-005004b1f42f}" Value="Tortoise CVS" />
+
+		  <Registry Root="HKCR" Key="Directory\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="Directory\Background\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="Drive\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="Folder\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="*\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="InternetShortcut\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="lnkfile\shellex\ContextMenuHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+
+		  <Registry Root="HKCR" Key="*\shellex\PropertySheetHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="Folder\shellex\PropertySheetHandlers\TortoiseCVS" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+
+		  <Registry Root="HKCR" Key="*\shellex\{00021500-0000-0000-c000-000000000046}" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+		  <Registry Root="HKCR" Key="Folder\shellex\{00021500-0000-0000-c000-000000000046}" Type="string" Value="{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" />
+
+		  <Registry Root="HKCR" Key="Folder\shellex\ColumnHandlers\{5d1cb710-1c4b-11d4-bed5-005004b1f42f}" Type="string" Value="Tortoise CVS" />
+
+		  <Registry Root="HKCR" Key="CVS" Type="string" Value="URL:CVS Protocol" />
+		  <Registry Root="HKCR" Key="CVS" Type="string" Name="URL Protocol" />
+		  <Registry Root="HKCR" Key="CVS\DefaultIcon" Type="string" Value="[!TortoiseAct.exe]" />
+		  <Registry Root="HKCR" Key="CVS\shell\open\command" Type="string" Value="&quot;[!TortoiseAct.exe]&quot; -u &quot;%1&quot;" />
+
+		  <Registry Root="HKLM" Key="Software\TortoiseCVS" Type="string" Name="RootDir" Value="[TORTOISECVS_INSTALLDIR]" />
+		</Component>
+-->
+                <Component Id="TortInstallKeys" Guid="C8FDF5EE-44E7-444c-B956-55687EEFE735" DiskId="1">
+                    <Condition>ALLUSERS=1</Condition>
+                    <RegistryValue Id="TortInstallPath" Root="HKLM" Key="Software\TortoiseCVS" Name="InstallPath" Type="string" Value="[TORTOISECVS_INSTALLDIR]" KeyPath="yes" />
+                </Component>
+
+                <Component Id="TortoiseRegUser" Guid="283B6F9C-956F-4f20-90E5-0309A28EBB48" DiskId="4">
+                    <RegistryValue Root="HKCU" Key="AppEvents\EventLabels\TCVS_Error" Type="string" Value="Error" />
+                    <RegistryValue Root="HKCU" Key="AppEvents\Schemes\Apps\TortoiseAct" Type="string" Value="TortoiseCVS" />
+
+                    <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="Compression Level" Value="0" />
+                    <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Prefs" Type="string" Name="Icons" Value="TortoiseCVS" />
+                    <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="IgnoredList update interval" Value="100" />
+                    <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Prefs" Type="string" Name="External Merge Application" Value="[WINMERGE_INSTALLDIR]/WinMergeU.exe" />
+                    <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Prefs" Type="string" Name="External Diff Application" Value="[WINMERGE_INSTALLDIR]/WinMergeU.exe" />
+                    <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Prefs" Type="string" Name="LanguageIso" Value="[UserLanguageID]" />
+                    <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Prefs" Type="integer" Name="Show Edit Options" Value="1" />
+                </Component>
+                <Directory Id="TortoiseIcons" Name="icons">
+                    <Directory Id="TortoiseIconsBarracudaDirectory" Name="Barracuda">
+                        <Component Id="TortoiseIconsBarracuda1" Guid="325A6279-EA7E-4a44-8877-05ADBBFB6A19" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Name="Barracuda" Value="Barracuda" />
+                        </Component>
+                        <Component Id="TortoiseIconsBarracuda2" Guid="BA504CCA-E75F-449e-8D34-A497BE27859A" DiskId="4">
+                            <File Id="Barracuda_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Barracuda_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Barracuda_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Barracuda_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Barracuda_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Barracuda_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Barracuda_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsBertelsDirectory" Name="Bertels">
+                        <Component Id="TortoiseIconsBertels1" Guid="C1D13FF0-CDE5-43ca-B137-23943D0C51E5" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Stefan Bertels" Name="Bertels" />
+                        </Component>
+                        <Component Id="TortoiseIconsBertels2" Guid="64640AA6-1FC4-4f3b-B78A-B262990AB976" DiskId="4">
+                            <File Id="Bertels_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Bertels_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Bertels_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Bertels_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Bertels_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Bertels_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Bertels_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsClassicDirectory" Name="Classic">
+                        <Component Id="TortoiseIconsClassic1" Guid="C5C6771B-F447-47b9-805F-446DC8A3E93D" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Classic icons" Name="Classic" />
+                        </Component>
+                        <Component Id="TortoiseIconsClassic2" Guid="EAB05E88-9661-450e-A58D-700259AAA359" DiskId="4">
+                            <File Id="Classic_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Classic_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Classic_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Classic_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Classic_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Classic_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Classic_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsCosminDirectory" Name="Cosmin">
+                        <Component Id="TortoiseIconsCosmin1" Guid="B1E9B9D7-1320-45e5-A056-D799E34C8536" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Cosmin Smeu" Name="Cosmin" />
+                        </Component>
+                        <Component Id="TortoiseIconsCosmin2" Guid="4B390551-E9CA-41b0-8E12-9B74B1AD3B8E" DiskId="4">
+                            <File Id="Cosmin_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Cosmin_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Cosmin_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Cosmin_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Cosmin_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Cosmin_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Cosmin_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsDanAlphaDirectory" Name="DanAlpha">
+                        <Component Id="TortoiseIconsDanAlpha1" Guid="677961ce-75ec-4e9c-840d-2300574006ec" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Dan Alpha" Name="DanAlpha" />
+                        </Component>
+                        <Component Id="TortoiseIconsDanAlpha2" Guid="dd811cac-0df3-4dca-aeaf-8baf1796e4af" DiskId="4">
+                            <File Id="DanAlpha_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="DanAlpha_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="DanAlpha_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="DanAlpha_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="DanAlpha_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="DanAlpha_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="DanAlpha_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsGregSearleDirectory" Name="GregSearle">
+                        <Component Id="TortoiseIconsGregSearle1" Guid="A5792637-9598-43ea-9053-8A98BD614518" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Greg Searle" Name="GregSearle" />
+                        </Component>
+                        <Component Id="TortoiseIconsGregSearle2" Guid="EED51E0A-8D5B-467b-B43C-19009BE918DA" DiskId="4">
+                            <File Id="GregSearle_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="GregSearle_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="GregSearle_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="GregSearle_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="GregSearle_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="GregSearle_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="GregSearle_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsNGDirectory" Name="NG">
+                        <Component Id="TortoiseIconsNG1" Guid="229C52A4-9CBA-42c1-9D0C-9AB73B888AA0" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Nikolai Giraldo" Name="NG" />
+                        </Component>
+                        <Component Id="TortoiseIconsNG2" Guid="32116ACC-964E-4a0d-9FCF-3A2ABF5121D7" DiskId="4">
+                            <File Id="NG_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="NG_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="NG_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="NG_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="NG_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="NG_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="NG_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsNikolaiDirectory" Name="Nikolai">
+                        <Component Id="TortoiseIconsNikolai1" Guid="39CDCAEB-4A66-47b0-A404-60BA2EB1D279" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Nikolai Devereaux" Name="Nikolai" />
+                        </Component>
+                        <Component Id="TortoiseIconsNikolai2" Guid="9E5E45C5-04B3-4118-ACFB-86C680A9A623" DiskId="4">
+                            <File Id="Nikolai_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Nikolai_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Nikolai_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Nikolai_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Nikolai_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Nikolai_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Nikolai_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsPierreOssmanDirectory" Name="PierreOssman">
+                        <Component Id="TortoiseIconsPierreOssman1" Guid="1DBF493D-4451-4dad-8772-40249C756BA3" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Pierre Ossman" Name="PierreOssman" />
+                        </Component>
+                        <Component Id="TortoiseIconsPierreOssman2" Guid="97584431-F6A9-44fe-B968-D790B6CB3CC5" DiskId="4">
+                            <File Id="PierreOssman_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="PierreOssman_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="PierreOssman_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="PierreOssman_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="PierreOssman_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="PierreOssman_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="PierreOssman_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsTbfDirectory" Name="Tbf">
+                        <Component Id="TortoiseIconsTbf1" Guid="70063422-B1B6-494b-8C2D-103AAE4E44BC" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Mathias Hasselmann" Name="Tbf" />
+                        </Component>
+                        <Component Id="TortoiseIconsTbf2" Guid="E36A1D8F-024E-4458-9706-30EE55354446" DiskId="4">
+                            <File Id="Tbf_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Tbf_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Tbf_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Tbf_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Tbf_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Tbf_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Tbf_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsTimoDirectory" Name="Timo">
+                        <Component Id="TortoiseIconsTimo1" Guid="D4E2FFE1-CCE0-4ebb-BEB4-103AAE4E44BC" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Timo Kauppinen" Name="Timo" />
+                        </Component>
+                        <Component Id="TortoiseIconsTimo2" Guid="1F6A0C0B-D517-4ca1-B7C5-4A9750924B95" DiskId="4">
+                            <File Id="Timo_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Timo_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Timo_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Timo_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Timo_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Timo_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Timo_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsTomasLehutaDirectory" Name="TomasLehuta">
+                        <Component Id="TortoiseIconsTomasLehuta1" Guid="CE8CFF7A-0C06-4633-BB47-C57846F47AD2" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Tomas Lehuta" Name="TomasLehuta" />
+                        </Component>
+                        <Component Id="TortoiseIconsTomasLehuta2" Guid="FF4E4102-6E00-4b71-AD9D-C3F520E39830" DiskId="4">
+                            <File Id="TomasLehuta_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="TomasLehuta_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="TomasLehuta_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="TomasLehuta_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="TomasLehuta_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="TomasLehuta_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="TomasLehuta_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsTortoiseCVSDirectory" Name="TortoiseCVS">
+                        <Component Id="TortoiseIconsTortoiseCVS1" Guid="7879B37A-E6F2-4774-82AA-C65C7B0AF976" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Name="TortoiseCVS" Value="TortoiseCVS" />
+                        </Component>
+                        <Component Id="TortoiseIconsTortoiseCVS2" Guid="61056236-9FCF-458b-927A-0F5F009F2AA6" DiskId="4">
+                            <File Id="TortoiseCVS_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="TortoiseCVS_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="TortoiseCVS_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="TortoiseCVS_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="TortoiseCVS_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="TortoiseCVS_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="TortoiseCVS_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsVisliDirectory" Name="Visli">
+                        <Component Id="TortoiseIconsVisli1" Guid="13607402-312D-43a8-9D94-73F3C9947EF3" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="Chinese Characters" Name="Visli" />
+                        </Component>
+                        <Component Id="TortoiseIconsVisli2" Guid="06DB9028-BDF7-4822-BDD7-0CE53C543B9C" DiskId="4">
+                            <File Id="Visli_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="Visli_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="Visli_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="Visli_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="Visli_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="Visli_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="Visli_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseIconsXPStyleRoundedDirectory" Name="XPStyleRounded">
+                        <Component Id="TortoiseIconsXPStyleRounded1" Guid="FDB828B7-0488-4992-9832-92811040C294" DiskId="4">
+                            <RegistryValue Root="HKCU" Key="Software\TortoiseCVS\Icons" Type="string" Value="XP-Style Rounded" Name="XPStyleRounded" />
+                        </Component>
+                        <Component Id="TortoiseIconsXPStyleRounded2" Guid="1C87243C-1164-4124-988A-38278254E156" DiskId="4">
+                            <File Id="XPStyleRounded_AddedIcon.ico" Name="AddedIcon.ico" />
+                            <File Id="XPStyleRounded_ModifiedIcon.ico" Name="ModifiedIcon.ico" />
+                            <File Id="XPStyleRounded_IgnoredIcon.ico" Name="IgnoredIcon.ico" />
+                            <File Id="XPStyleRounded_ConflictIcon.ico" Name="ConflictIcon.ico" />
+                            <File Id="XPStyleRounded_NormalIcon.ico" Name="NormalIcon.ico" />
+                            <File Id="XPStyleRounded_ReadOnlyIcon.ico" Name="ReadOnlyIcon.ico" />
+                            <File Id="XPStyleRounded_UnversionedIcon.ico" Name="UnversionedIcon.ico" />
+                        </Component>
+                    </Directory>
+                </Directory>
+                <Directory Id="TortoiseLocale" Name="locale">
+                    <!--Directory Id="TortoiseLocaleDirca_01" Name="ca_01">
+                        <Component Id="TortoiseLocaleca_01" Guid="2EA588D7-86B6-4b48-AF7D-FC5EFF02E2EB" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ca_ES" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ca_ES" Type="string" Name="Name" Value="Català" />
+                            <File Id="TortoiseLocaleca_01mo" Name="ca_ES.mo" />
+                        </Component>
+                    </Directory-->
+                    <!--Directory Id="TortoiseLocaleDircs_CZ" Name="cs_CZ">
+                        <Component Id="TortoiseLocalecs_CZ" Guid="527F041B-CCB7-49db-B483-6F7ACB025F2B" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\cs_CZ" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\cs_CZ" Type="string" Name="Name" Value="Ceský" />
+                            <File Id="TortoiseLocalecs_CZmo" Name="cs_CZ.mo" />
+                        </Component>
+                    </Directory-->
+                    <!--Directory Id="TortoiseLocaleDirda_DK" Name="da_DK">
+                        <Component Id="TortoiseLocaleda_DK" Guid="8A894D29-91FE-430b-AF00-C6E5CA2E9149" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\da_DK" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\da_DK" Type="string" Name="Name" Value="Dansk" />
+                            <File Id="TortoiseLocaleda_DKmo" Name="da_DK.mo" />
+                        </Component>
+                    </Directory-->
+                    <Directory Id="TortoiseLocaleDirde_DE" Name="de_DE">
+                        <Component Id="TortoiseLocalede_DE" Guid="76028B8F-61B4-4cf2-A0BC-722FE866850E" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\de_DE" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\de_DE" Type="string" Name="Name" Value="Deutsch" />
+                            <File Id="TortoiseLocalede_DEmo" Name="de_DE.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDiren_GB" Name="en_GB">
+                        <Component Id="TortoiseLocaleen_GB" Guid="9A9CF27F-1A5D-4127-B276-23F1E3347D26" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\en_GB" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\en_GB" Type="string" Name="Name" Value="English" />
+                            <File Id="TortoiseLocaleen_GBmo" Name="en_GB.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDires_ES" Name="es_ES">
+                        <Component Id="TortoiseLocalees_ES" Guid="D58C0078-8807-4129-8912-EC759F8F98C5" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\es_ES" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\es_ES" Type="string" Name="Name" Value="Español" />
+                            <File Id="TortoiseLocalees_ESmo" Name="es_ES.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirfr_FR" Name="fr_FR">
+                        <Component Id="TortoiseLocalefr_FR" Guid="03B7C6B5-D67B-471b-B0A7-34CAADE5BC44" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\fr_FR" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\fr_FR" Type="string" Name="Name" Value="Français" />
+                            <File Id="TortoiseLocalefr_FRmo" Name="fr_FR.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirhu_HU" Name="hu_HU">
+                        <Component Id="TortoiseLocalehu_HU" Guid="655B8D44-C6E0-4131-B799-44561929F80F" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\hu_HU" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\hu_HU" Type="string" Name="Name" Value="Magyar" />
+                            <File Id="TortoiseLocalehu_HUmo" Name="hu_HU.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirit_IT" Name="it_IT">
+                        <Component Id="TortoiseLocaleit_IT" Guid="6E11BCA9-42C2-4a0b-8301-80356EEB0907" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\it_IT" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\it_IT" Type="string" Name="Name" Value="Italiano" />
+                            <File Id="TortoiseLocaleit_ITmo" Name="it_IT.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirja_JP" Name="ja_JP">
+                        <Component Id="TortoiseLocaleja_JP" Guid="431620BC-942E-45af-96B3-71F785B50746" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ja_JP" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ja_JP" Type="string" Name="Name" Value="Japanese" />
+                            <File Id="TortoiseLocaleja_JPmo" Name="ja_JP.mo" />
+                        </Component>
+                    </Directory>
+                    <!--Directory Id="TortoiseLocaleDirka_GE" Name="ka_GE">
+                        <Component Id="TortoiseLocaleka_GE" Guid="D1192D53-008A-4574-8F8D-65A380F4CA98" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ka_GE" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ka_GE" Type="string" Name="Name" Value="Georgian" />
+                            <File Id="TortoiseLocaleka_GEmo" Name="ka_GE.mo" />
+                        </Component>
+                    </Directory-->
+                    <!--Directory Id="TortoiseLocaleDirko_KR" Name="ko_KR">
+                        <Component Id="TortoiseLocaleko_KR" Guid="4026B47C-87C6-4a4e-B123-23B7FBE18994" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ko_KR" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ko_KR" Type="string" Name="Name" Value="Korean" />
+                            <File Id="TortoiseLocaleko_KRmo" Name="ko_KR.mo" />
+                        </Component>
+                    </Directory-->
+                    <!--Directory Id="TortoiseLocaleDirnb_NO" Name="nb_NO">
+                        <Component Id="TortoiseLocalenb_NO" Guid="09E0650C-AD5E-4d40-B2CF-EA400BD456D3" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\nb_NO" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\nb_NO" Type="string" Name="Name" Value="Norsk (Bokmål)" />
+                            <File Id="TortoiseLocalenb_NOmo" Name="nb_NO.mo" />
+                        </Component>
+                    </Directory-->
+                    <Directory Id="TortoiseLocaleDirnl_NL" Name="nl_NL">
+                        <Component Id="TortoiseLocalenl_NL" Guid="A171FDF2-2F43-4406-BBBB-1B34B87F7CDD" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\nl_NL" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\nl_NL" Type="string" Name="Name" Value="Nederlands" />
+                            <File Id="TortoiseLocalenl_NLmo" Name="nl_NL.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirpl_PL" Name="pl_PL">
+                        <Component Id="TortoiseLocalepl_PL" Guid="91474D3C-6A40-4b0f-B4A7-C695701726A4" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\pl_PL" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\pl_PL" Type="string" Name="Name" Value="Polski" />
+                            <File Id="TortoiseLocalepl_PLmo" Name="pl_PL.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirpt_BR" Name="pt_BR">
+                        <Component Id="TortoiseLocalept_BR" Guid="2FCD4597-1679-4b15-9FDB-5313E5C0D625" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\pt_BR" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\pt_BR" Type="string" Name="Name" Value="Portugus" />
+                            <File Id="TortoiseLocalept_BRmo" Name="pt_BR.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirro_RO" Name="ro_RO">
+                        <Component Id="TortoiseLocalero_RO" Guid="B8F19402-550E-456c-940F-C6F03AAC8D84" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ro_RO" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ro_RO" Type="string" Name="Name" Value="Româna" />
+                            <File Id="TortoiseLocalero_ROmo" Name="ro_RO.mo" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="TortoiseLocaleDirru_RU" Name="ru_RU">
+                        <Component Id="TortoiseLocaleru_RU" Guid="3A065C72-8BDA-4123-A077-07EB8E16B8AC" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ru_RU" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\ru_RU" Type="string" Name="Name" Value="Ðóññêèé" />
+                            <File Id="TortoiseLocaleru_RUmo" Name="ru_RU.mo" />
+                        </Component>
+                    </Directory>
+                    <!--Directory Id="TortoiseLocaleDirsl_SI" Name="sl_SI">
+                        <Component Id="TortoiseLocalesl_SI" Guid="3A0B14BB-4371-421c-BCC9-EB3E817E9A5A" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\sl_SI" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\sl_SI" Type="string" Name="Name" Value="Slovenian" />
+                            <File Id="TortoiseLocalesl_SImo" Name="sl_SI.mo" />
+                        </Component>
+                    </Directory-->
+                    <!--Directory Id="TortoiseLocaleDirtr_TR" Name="tr_TR">
+                        <Component Id="TortoiseLocaletr_TR" Guid="B834C527-CD8E-486b-A465-E094AF0092E5" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\tr_TR" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\tr_TR" Type="string" Name="Name" Value="Türkçe" />
+                            <File Id="TortoiseLocaletr_TRmo" Name="tr_TR.mo" />
+                        </Component>
+                    </Directory-->
+                    <!--Directory Id="TortoiseLocaleDirzh_CN" Name="zh_CN">
+                        <Component Id="TortoiseLocalezh_CN" Guid="33EE5E4D-C20B-4a35-9C76-B20103706BC8" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\zh_CN" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\zh_CN" Type="string" Name="Name" Value="中文 (繁髗)" />
+                            <File Id="TortoiseLocalezh_CNmo" Name="zh_CN.mo" />
+                        </Component>
+                    </Directory-->
+                    <Directory Id="TortoiseLocaleDirzh_TW" Name="zh_TW">
+                        <Component Id="TortoiseLocalezh_TW" Guid="433B6B1E-B3BE-4932-B516-A3611F1BEB36" DiskId="4">
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\zh_TW" Type="integer" Name="Enabled" Value="1" />
+                            <RegistryValue Root="HKLM" Key="Software\TortoiseCVS\Languages\zh_TW" Type="string" Name="Name" Value="中文 (簡單)" />
+                            <File Id="TortoiseLocalezh_TWmo" Name="zh_TW.mo" />
+                        </Component>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </DirectoryRef>
+
+        <Feature Id="TortoiseCvs" Title="Tortoise Cvs" Description="TortoiseCvs provides integration with Windows Explorer" Display="expand" AllowAdvertise="no" Level="3">
+            <Condition Level="0">(not Privileged) Or TORTOISECVS=0</Condition>
+            <ComponentRef Id="TortoiseCvsStartMenuDoc" />
+            <ComponentRef Id="CvsntStartMenuFolder" />
+            <ComponentRef Id="libxml" />
+            <ComponentRef Id="TortoiseCvsFiles" />
+            <ComponentRef Id="TortSimCvs" />
+            <ComponentRef Id="TortoiseDoc" />
+            <ComponentRef Id="TortoiseRegMachine" />
+<!--
+      <ComponentRef Id="TortoiseRegMachine64" />
+-->
+            <ComponentRef Id="TortoiseRegUser" />
+            <ComponentRef Id="TortoiseIconsTortoiseCVS1" />
+            <ComponentRef Id="TortoiseIconsTortoiseCVS2" />
+            <ComponentRef Id="TortoiseLocaleen_GB" />
+            <ComponentRef Id="TortInstallKeys" />
+            <Feature Id="TortoiseIcons" Title="Custom Icons" Description="Custom overlay icons" AllowAdvertise="no" Level="3">
+                <Feature Id="Barracuda" Title="Barracuda" Description="Icons by Barracuda" Level="3">
+                    <ComponentRef Id="TortoiseIconsBarracuda1" />
+                    <ComponentRef Id="TortoiseIconsBarracuda2" />
+                </Feature>
+                <Feature Id="Bertels" Title="Bertels" Description="Icons by Stefan Bertels" Level="3">
+                    <ComponentRef Id="TortoiseIconsBertels1" />
+                    <ComponentRef Id="TortoiseIconsBertels2" />
+                </Feature>
+                <Feature Id="Classic" Title="Classic" Description="Classic Icons" Level="3">
+                    <ComponentRef Id="TortoiseIconsClassic1" />
+                    <ComponentRef Id="TortoiseIconsClassic2" />
+                </Feature>
+                <Feature Id="Cosmin" Title="Cosmin" Description="Icons by Cosmin Smeu" Level="3">
+                    <ComponentRef Id="TortoiseIconsCosmin1" />
+                    <ComponentRef Id="TortoiseIconsCosmin2" />
+                </Feature>
+                <Feature Id="DanAlpha" Title="DanAlpha" Description="Icons by Dan Alpha" Level="3">
+                    <ComponentRef Id="TortoiseIconsDanAlpha1" />
+                    <ComponentRef Id="TortoiseIconsDanAlpha2" />
+                </Feature>
+                <Feature Id="GregSearle" Title="GregSearle" Description="Icons by Greg Searle" Level="3">
+                    <ComponentRef Id="TortoiseIconsGregSearle1" />
+                    <ComponentRef Id="TortoiseIconsGregSearle2" />
+                </Feature>
+                <Feature Id="NG" Title="NG" Description="Icons by Nikolai Giraldo" Level="3">
+                    <ComponentRef Id="TortoiseIconsNG1" />
+                    <ComponentRef Id="TortoiseIconsNG2" />
+                </Feature>
+                <Feature Id="Nikolai" Title="Nikolai" Description="Icons by Nikolai Deveraux" Level="3">
+                    <ComponentRef Id="TortoiseIconsNikolai1" />
+                    <ComponentRef Id="TortoiseIconsNikolai2" />
+                </Feature>
+                <Feature Id="PierreOssman" Title="PierreOssman" Description="Icons by Pierre Ossman" Level="3">
+                    <ComponentRef Id="TortoiseIconsPierreOssman1" />
+                    <ComponentRef Id="TortoiseIconsPierreOssman2" />
+                </Feature>
+                <Feature Id="Tbf" Title="Tbf" Description="Icons by Mathias Hasselmann" Level="3">
+                    <ComponentRef Id="TortoiseIconsTbf1" />
+                    <ComponentRef Id="TortoiseIconsTbf2" />
+                </Feature>
+                <Feature Id="Timo" Title="Timo" Description="Icons by Timo Kauppinen" Level="3">
+                    <ComponentRef Id="TortoiseIconsTimo1" />
+                    <ComponentRef Id="TortoiseIconsTimo2" />
+                </Feature>
+                <Feature Id="TomasLehuta" Title="TomasLehuta" Description="Icons by Tomas Lehuta" Level="3">
+                    <ComponentRef Id="TortoiseIconsTomasLehuta1" />
+                    <ComponentRef Id="TortoiseIconsTomasLehuta2" />
+                </Feature>
+                <Feature Id="Visli" Title="Chinese Characters" Description="Icons by Visli" Level="3">
+                    <ComponentRef Id="TortoiseIconsVisli1" />
+                    <ComponentRef Id="TortoiseIconsVisli2" />
+                </Feature>
+                <Feature Id="XPStyleRounded" Title="XPStyleRounded" Description="Icons by XPStyleRounded" Level="3">
+                    <ComponentRef Id="TortoiseIconsXPStyleRounded1" />
+                    <ComponentRef Id="TortoiseIconsXPStyleRounded2" />
+                </Feature>
+            </Feature>
+            <Feature Id="TortoiseLanguages" Title="Languages" Description="Additional language support" AllowAdvertise="no" Level="3">
+                <!--Feature Id="TortoiseLangFeatCa_01" Title="Catalan" Description="Catalan" Level="3">
+                    <ComponentRef Id="TortoiseLocaleca_01" />
+                </Feature-->
+                <!--Feature Id="TortoiseLangFeatcs_CZ" Title="Czech" Description="Czech" Level="3">
+                    <ComponentRef Id="TortoiseLocalecs_CZ" />
+                </Feature-->
+                <!--Feature Id="TortoiseLangFeatda_DK" Title="Danish" Description="Danish" Level="3">
+                    <ComponentRef Id="TortoiseLocaleda_DK" />
+                </Feature-->
+                <Feature Id="TortoiseLangFeatde_DE" Title="German" Description="German" Level="3">
+                    <ComponentRef Id="TortoiseLocalede_DE" />
+                </Feature>
+                <Feature Id="TortoiseLangFeates_ES" Title="Spanish" Description="Spanish" Level="3">
+                    <ComponentRef Id="TortoiseLocalees_ES" />
+                </Feature>
+                <Feature Id="TortoiseLangFeatfr_FR" Title="French" Description="French" Level="3">
+                    <ComponentRef Id="TortoiseLocalefr_FR" />
+                </Feature>
+                <Feature Id="TortoiseLangFeathu_HU" Title="Hungarian" Description="Hungarian" Level="3">
+                    <ComponentRef Id="TortoiseLocalehu_HU" />
+                </Feature>
+                <Feature Id="TortoiseLangFeatit_IT" Title="Italian" Description="Italian" Level="3">
+                    <ComponentRef Id="TortoiseLocaleit_IT" />
+                </Feature>
+                <Feature Id="TortoiseLangFeatja_JP" Title="Japanese" Description="Japanese" Level="3">
+                    <ComponentRef Id="TortoiseLocaleja_JP" />
+                </Feature>
+                <!--Feature Id="TortoiseLangFeatka_GE" Title="Georgian" Description="Georgian" Level="3">
+                    <ComponentRef Id="TortoiseLocaleka_GE" />
+                </Feature-->
+                <!--Feature Id="TortoiseLangFeatko_KR" Title="Korean" Description="Korean" Level="3">
+                    <ComponentRef Id="TortoiseLocaleko_KR" />
+                </Feature-->
+                <!--Feature Id="TortoiseLangFeatnb_NO" Title="Norwegian" Description="Norwegian" Level="3">
+                    <ComponentRef Id="TortoiseLocalenb_NO" />
+                </Feature-->
+                <Feature Id="TortoiseLangFeatnl_NL" Title="Dutch" Description="Dutch" Level="3">
+                    <ComponentRef Id="TortoiseLocalenl_NL" />
+                </Feature>
+                <Feature Id="TortoiseLangFeatpl_PL" Title="Polish" Description="Polish" Level="3">
+                    <ComponentRef Id="TortoiseLocalepl_PL" />
+                </Feature>
+                <Feature Id="TortoiseLangFeatdpt_BR" Title="Portugese" Description="Portugese" Level="3">
+                    <ComponentRef Id="TortoiseLocalept_BR" />
+                </Feature>
+                <Feature Id="TortoiseLangFeatdro_RO" Title="Romanian" Description="Romanian" Level="3">
+                    <ComponentRef Id="TortoiseLocalero_RO" />
+                </Feature>
+                <Feature Id="TortoiseLangFeatru_RU" Title="Russian" Description="Russian" Level="3">
+                    <ComponentRef Id="TortoiseLocaleru_RU" />
+                </Feature>
+                <!--Feature Id="TortoiseLangFeatsl_SI" Title="Slovenian" Description="Slovenian" Level="3">
+                    <ComponentRef Id="TortoiseLocalesl_SI" />
+                </Feature-->
+                <!--Feature Id="TortoiseLangFeattr_TR" Title="Turkish" Description="Turkish" Level="3">
+                    <ComponentRef Id="TortoiseLocaletr_TR" />
+                </Feature-->
+                <!--Feature Id="TortoiseLangFeatzh_CN" Title="Simplified Chinese [GBK]" Description="Simplified Chinese [GBK]" Level="3">
+                    <ComponentRef Id="TortoiseLocalezh_CN" />
+                </Feature-->
+                <Feature Id="TortoiseLangFeatzh_TW" Title="Traditional Chinese [Big5]" Description="Traditional Chinese [Big5]" Level="3">
+                    <ComponentRef Id="TortoiseLocalezh_TW" />
+                </Feature>
+            </Feature>
+        </Feature>
+    </Fragment>
+</Wix>

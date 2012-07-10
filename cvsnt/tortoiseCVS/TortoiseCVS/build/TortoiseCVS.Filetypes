@@ -1,0 +1,28 @@
+# Using this configuration file, you can select the keyword expansion mode 
+# for newly added files. Put a copy of this file in your HOME folder
+# and customize it for your needs. Wildcards are not case sensitive.
+#
+# Format:
+# Wildcard  [binary|unicode|text|auto|dll DllName FunctionName]
+#
+# You can write your own plugin DLL to determine whether a file
+# is unicode, ascii text or binary. The DLL function must look like this:
+#
+# int __stdcall FunctionName(const char *filename)
+# {
+#   if (file_is_text(filename))
+#     return 1;
+#   if (file_is_unicode(filename))
+#     return 2;
+#   if (file_is_binary(filename))
+#     return 3;
+#   if (file_is_unknown(filename)) 
+#     return 0; // Tortoise uses its built-in detection algorithm
+# }
+#
+#
+#
+# Example
+# *.dfm    dll MyPlugin.dll CheckDfm
+# *.dll    binary
+# *.pas    text

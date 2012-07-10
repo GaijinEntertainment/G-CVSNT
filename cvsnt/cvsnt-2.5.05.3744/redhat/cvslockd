@@ -1,0 +1,83 @@
+#!/bin/bash
+#
+#	/etc/rc.d/init.d/cvslockd
+#
+# Starts the cvsnt lock daemon
+#
+# chkconfig: 345 95 5
+# description: Handles file level locking for the cvsnt server
+# processname: cvslockd
+
+# Source function library.
+. /etc/init.d/functions
+
+test -x /usr/bin/cvslockd || exit 0
+
+RETVAL=0
+
+#
+#	See how we were called.
+#
+
+prog="cvslockd"
+
+start() {
+	# Check if cvslockd is already running
+	if [ ! -f /var/lock/subsys/cvslockd ]; then
+	    echo -n $"Starting $prog: "
+	    daemon /usr/bin/cvslockd
+	    RETVAL=$?
+	    [ $RETVAL -eq 0 ] && touch /var/lock/subsys/cvslockd
+	    echo
+	fi
+	return $RETVAL
+}
+
+stop() {
+	echo -n $"Stopping $prog: "
+	killproc /usr/bin/cvslockd
+	RETVAL=$?
+	[ $RETVAL -eq 0 ] && rm -f /var/lock/subsys/cvslockd
+	echo
+        return $RETVAL
+}
+
+
+restart() {
+	stop
+	start
+}	
+
+reload() {
+	restart
+}	
+
+status_at() {
+ 	status /usr/bin/cvslockd
+}
+
+case "$1" in
+start)
+	start
+	;;
+stop)
+	stop
+	;;
+reload|restart)
+	restart
+	;;
+condrestart)
+	if [ -f /var/lock/subsys/cvslockd ]; then
+	    restart
+	fi
+	;;
+status)
+	status_at
+	;;
+*)
+	echo $"Usage: $0 {start|stop|restart|condrestart|status}"
+	exit 1
+esac
+
+exit $?
+exit $RETVAL

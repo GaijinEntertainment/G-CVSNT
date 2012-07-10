@@ -1,0 +1,12 @@
+service cvspserver
+{
+	disable = no
+	socket_type	= stream
+	wait		= no
+	user		= root
+	server		= /usr/bin/cvsnt
+	server_args	= authserver
+	groups		= yes
+	flags		= REUSE IPv6
+	mdns		= no	# Lockserver handles mdns broadcast
+}

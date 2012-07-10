@@ -1,0 +1,151 @@
+<!--#set var="title" value="Translations" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<!--#include virtual="lang_u_status.shtml" -->
+<!--#include virtual="lang_status.shtml" -->
+
+<h2>Translations</h2>
+<p>
+This page lists all the languages that TortoiseCVS have been (or are being) translated into. For each language, 
+the person(s) who contributed the translation (and their SourceForge user name) is given along with a percentage.
+<p>
+Note that only the texts in the program itself are translated; the User Guide has only been
+translated to French, Russian, and Chinese so far. You are of course very welcome to translate the documentation if you wish.
+<p>
+This percentage is calculated from the number of "fuzzy" and untranslated entries in the translation for 
+that language; i.e. if all entries are translated, and there are no fuzzy entries, that translation is regarded 
+as 100 % complete. (In this context, a "fuzzy" entry is a string that does not match any string in the source. 
+This typically means that the source code has been updated, but the translation has not).
+<p>
+When a contributor's name is <span class=orphan>grey</span>, it means that person is no longer actively maintaining 
+the translation. Contact bullestock@users.sourceforge.net if you would like to take over an unmaintained translation.
+<p>
+Note that translations that are less than 60 % complete are usually not included in the official releases.
+<p>
+For each language, percentages are given for the most recent stable and unstable releases.
+<p>
+These data are correct for the stable release <!--#echo encoding="none" var="release" -->
+and unstable release <!--#echo encoding="none" var="u_release" -->.
+<p>
+<table border="0" cellspacing="10" align="center">
+<tr><th>Language<th>Contributor<th>Status</th>
+
+<tr><td><i>Arabic</i>
+<td valign=top>Ikbal Majeri (mayike)
+<td valign=top>Stable: <!--#echo encoding="none" var="ar_TN_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_ar_TN_status" -->
+
+<tr><td>Català<br><i>Catalan</i>
+<td valign=top>Alex Guardiet (aguardiet)
+<td valign=top>Stable: <!--#echo encoding="none" var="ca_01_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_ca_01_status" -->
+
+<tr><td><br><i>Czech</i>
+<td valign=top>Vladimír Kloz (voloda)
+<td valign=top>Stable: <!--#echo encoding="none" var="cs_CZ_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_cs_CZ_status" -->
+
+<tr><td>Dansk<br><i>Danish</i>
+<td valign=top><span class=orphan display=inline>Claus G&aring;rde Henriksen (linuxuser42)</span>
+<td valign=top>Stable: <!--#echo encoding="none" var="da_DK_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_da_DK_status" -->
+
+<tr><td>Deutsch<br><i>German</i>
+<td valign=top>Armin Müller (arm_in)
+<td valign=top>Stable: <!--#echo encoding="none" var="de_DE_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_de_DE_status" -->
+
+<tr><td valign=top>English, Great Britain
+<td valign=top>This is not actually a translation,<br>but the "native" language of TortoiseCVS.
+<td valign=top>N/A
+
+<tr><td>Español<br><i>Spanish</i>
+<td valign=top><span class=orphan display=inline>Carlos Mendez (cmendez)</span>,<br>
+Juan Diego Gutiérrez Gallardo (enreas)
+<td valign=top>Stable: <!--#echo encoding="none" var="es_ES_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_es_ES_status" -->
+
+<tr><td>Français<br><i>French</i>
+<td valign=top><span class=orphan display=inline>Alexandre Ratti</span>,<br>
+Stephane Martin (stephanemartin)
+<td valign=top>Stable: <!--#echo encoding="none" var="fr_FR_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_fr_FR_status" -->
+
+<tr><td>?<br><i>Georgian</i>
+<td valign=top>Gia Shervashidze (giasher)
+<td valign=top>Stable: <!--#echo encoding="none" var="ka_GE_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_ka_GE_status" -->
+
+<tr><td>Italiano<br><i>Italian</i>
+<td valign=top>Tiziano Trevisan (ttrevisan)
+<td valign=top>Stable: <!--#echo encoding="none" var="it_IT_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_it_IT_status" -->
+
+<tr><td>&#26085;&#26412;&#35486;<br><i>Japanese</i>
+<td valign=top>Yutaka Yokokawa
+<td valign=top>Stable: <!--#echo encoding="none" var="ja_JP_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_ja_JP_status" -->
+
+<tr><td>&#54620;&#44397;&#50612;<br><i>Korean</i>
+<td valign=top>Lee Jae-Hong (pyrasis)
+<td valign=top>Stable: <!--#echo encoding="none" var="ko_KR_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_ko_KR_status" -->
+
+<tr><td valign="top">Magyar<br><i>Hungarian</i>
+<td valign=top>Balázs Márton (documan) and the<br>
+    <a href="http://documan.sourceforge.net/">Hungarian SourceForge translation project</a>
+<td valign=top>Stable: <!--#echo encoding="none" var="hu_HU_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_hu_HU_status" -->
+
+<tr><td>Nederlands<br><i>Dutch</i>
+<td valign=top>Frank Fesevur (ffes)
+<td valign=top>Stable: <!--#echo encoding="none" var="nl_NL_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_nl_NL_status" -->
+
+<tr><td>Norsk<br><i>Norwegian</i>
+<td valign=top><span class=orphan display=inline>Daniel Buchmann (avalon)</span>, Erik Bagge Ottosen (erikbagg)
+<td valign=top>Stable: <!--#echo encoding="none" var="nb_NO_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_nb_NO_status" -->
+
+<tr><td>Polski<br><i>Polish</i>
+<td valign=top>Leszek Tomanek (leht)
+<td valign=top>Stable: <!--#echo encoding="none" var="pl_PL_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_pl_PL_status" -->
+
+<tr><td>Português<br><i>Portuguese (Brazilian)</i>
+<td valign=top>Flávio Etrusco (etrusco), Victor Westmann
+<td valign=top>Stable: <!--#echo encoding="none" var="pt_BR_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_pt_BR_status" -->
+
+<tr><td>Rom&#226;n&#259;<br><i>Romanian</i>
+<td valign=top>Dumitru Pletosu (dimovich)
+<td valign=top>Stable: <!--#echo encoding="none" var="ro_RO_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_ro_RO_status" -->
+
+<tr><td>&#1056;&#1091;&#1089;&#1089;&#1082;&#1080;&#1081;<br><i>Russian</i>
+<td valign=top>Nikolay Ponomarenko (pnv82)
+<td valign=top>Stable: <!--#echo encoding="none" var="ru_RU_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_ru_RU_status" -->
+
+<tr><td>&#20013;&#25991; (&#31777;&#21934;)<br><i>Chinese (Simplified)</i>
+<td valign=top><span class=orphan>Rex Tsai</span>, "NetCobra"
+<td valign=top>Stable: <!--#echo encoding="none" var="zh_TW_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_zh_TW_status" -->
+
+<tr><td><br><i>Slovenian</i>
+<td valign=top>Martin Srebotnjak (filmsi)
+<td valign=top>Stable: <!--#echo encoding="none" var="sl_SI_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_sl_SI_status" -->
+
+<tr><td>&#20013;&#25991; (&#32321;&#39639;)<br><i>Chinese (Traditional)</i>
+<td valign=top>Liao Bin (liaobin)
+<td valign=top>Stable: <!--#echo encoding="none" var="zh_CN_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_zh_CN_status" -->
+
+<tr><td>Türkçe<br><i>Turkish</i>
+<td valign=top>Omer Koker (hyperk)
+<td valign=top>Stable: <!--#echo encoding="none" var="tr_TR_status" --><br>
+Unstable: <!--#echo encoding="none" var="u_tr_TR_status" -->
+
+</table>
+<!--#include virtual="wrapper_end.shtml" -->

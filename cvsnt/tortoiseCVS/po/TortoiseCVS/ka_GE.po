@@ -1,0 +1,4289 @@
+msgid ""
+msgstr ""
+"Project-Id-Version: TortoiseCVS\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2005-05-26 14:02+0300\n"
+"Last-Translator: Giasher <giasher@telenet.ge>\n"
+"Language-Team: GIA <giasher@telenet.ge>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Georgian\n"
+"X-Poedit-Country: GEORGIA\n"
+
+#: ContextMenus/DefaultMenus.cpp:43
+msgid "Syntax error"
+msgstr "სინტაქსური შეცდომა"
+
+#: ContextMenus/DefaultMenus.cpp:61
+msgid "Unexpected end of file"
+msgstr "ფაილის მოულოდნელი დასასრული"
+
+#: ContextMenus/DefaultMenus.cpp:187
+#, c-format
+msgid ""
+"Error while parsing config file\n"
+"(\"%s\" line %d): %s"
+msgstr ""
+"კონფიგურირების ფაილის დამუშავების შეცდომა\n"
+"(\"%s\" სტრიქონი %d): %s"
+
+#: CVSGlue/CVSAction.cpp:48
+msgid ""
+"Tortoise Tip:  Sometimes you get this error if you have the repository folder wrong in the Checkout dialog.  Make sure you have a slash at the start of the folder name, and that the case and path are correct.  Watch out for spurious trailing characters.\n"
+"\n"
+"Examples are:  \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/cvsgui\""
+msgstr ""
+"Tortoise რჩევა:  ეს შეცდომა ხანდახან წარმოიქმნება თუ არასწორედ მიუთითეთ საცავის დასტა 'გადმოტანის' დიალოგში. გადაამოწმეთ, რომ დასაწყისში გამოყენებულია უკუირიბი, შეამოწმეთ რეგისტრი და გეზის მართებულობა. გადაამოწმეთ ხომ არ არის საწყისი ხარეები.\n"
+"მაგალითები:  \"/cvsroot\", \"/usr/local/cvs-repository\", \"/cvsroot/cvsgui\""
+
+#: CVSGlue/CVSAction.cpp:369
+msgid ""
+"Tortoise Tip: Apparently you are using the :local: protocol, and you have an older version of CVSNT installed than the one included with TortoiseCVS. To resolve this problem, do one of the following:\n"
+"1) Don't use :local: - add the repository to your local CVSNT server\n"
+"   (Control Panel/CVS for NT/Repositories) and use a network protocol\n"
+"   (e.g. :pserver: or :sspi:) to access the repository.\n"
+"   This requires a fresh checkout.\n"
+"2) Remove your local CVSNT server installation if you don't need it.\n"
+"3) Update your local CVSNT server installation to the same version included\n"
+"   with TortoiseCVS."
+msgstr ""
+
+#: CVSGlue/CVSAction.cpp:404
+msgid "Internal error, CVSAction::DoCommand used twice within same process."
+msgstr "შიდა შეცდომა, CVSAction::DoCommand ერთი და იმავე პროცესში ორჯერ გამოიყენება."
+
+#: CVSGlue/CVSAction.cpp:523
+#, c-format
+msgid ""
+"In %s: %s\n"
+"CVSROOT=%s"
+msgstr ""
+"აქ - %s: %s\n"
+"CVSROOT=%s"
+
+#: CVSGlue/CVSAction.cpp:555
+#, c-format
+msgid ""
+"Trouble launching the CVS process:\n"
+"%s\n"
+"On folder: %s\n"
+"%s\n"
+"Please check there is a cvs.exe in the same folder as TortoiseCVS or on the path."
+msgstr ""
+"CVS პროცესის დაწყების პრობლემა:\n"
+"%s\n"
+"დასტაში:%s\n"
+"%s\n"
+"Проверьте, есть ли cvs.exe в том же каталоге что и TortoiseCVS или в системных путях."
+
+#: CVSGlue/CVSAction.cpp:608
+msgid "CVS operation aborted by user request"
+msgstr "CVS ოპერაცია გაუქმდა მომხმარებლის მოთხოვნით"
+
+#: CVSGlue/CVSAction.cpp:615
+msgid "Success, CVS operation completed"
+msgstr "დასრულდა, CVS ოპერაცია შედგა"
+
+#: CVSGlue/CVSAction.cpp:619
+msgid "Error, CVS operation failed"
+msgstr "შეცდომა, CVS ქმედება არ შედგა"
+
+#: CVSGlue/CVSAction.cpp:660
+msgid "Error, one of the CVS operations failed"
+msgstr "შეცდომა, ერთერთი CVS ქმედება ვერ განხორციელდა"
+
+#: CVSGlue/CVSAction.cpp:920
+#, fuzzy, c-format
+msgid ""
+"%s has been modified. Do you want to discard your local changes and revert to the most current version in the repository?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Unedit command (take no action)."
+msgstr ""
+"%s შეიცვალა. ნამდვილად გსურთ გააუქმოთ ადგილობრივი ცვლილებები და დაუბრუნდეთ სერვერის საცავის მიმდინარე ვერსიას?\n"
+"ცვლილებების გასაუქმებლად დაწკაპეთ \"დიახ\", ხოლო რედაქტირების გასაუქმებლად - \"არა\" (ქმედებები არ შესრულდება)."
+
+#: CVSGlue/CVSAction.cpp:935
+#, fuzzy
+msgid ""
+"You have altered files in this repository. See the main TortoiseCVS dialog for details.\n"
+"Do you want to discard your local changes?\n"
+"Select \"Yes\" to discard your changes, or \"No\" to cancel the Release command (take no action)."
+msgstr ""
+"%s შეიცვალა. ნამდვილად გსურთ გააუქმოთ ადგილობრივი ცვლილებები და დაუბრუნდეთ სერვერის საცავის მიმდინარე ვერსიას?\n"
+"ცვლილებების გასაუქმებლად დაწკაპეთ \"დიახ\", ხოლო რედაქტირების გასაუქმებლად - \"არა\" (ქმედებები არ შესრულდება)."
+
+#: CVSGlue/CVSAction.cpp:960
+#, c-format
+msgid ""
+"The server's host key is not cached in the registry.\n"
+"Key fingerprint: %s\n"
+"If you trust this host, hit \"Yes\" to add the key to the cache.\n"
+"If you want to connect just once, hit \"No\".\n"
+"If you don't trust this host, hit \"Cancel\".\n"
+msgstr ""
+
+#: CVSGlue/CVSAction.cpp:1500
+msgid "Retrying command with encryption disabled\n"
+msgstr ""
+
+#: CVSGlue/CVSAction.cpp:1513
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s on %s"
+msgstr ""
+"ამ დასტაში CVS საცავი არ არის :\n"
+"\n"
+"%s აქ %s"
+
+#: CVSGlue/CVSAction.cpp:1519
+#, c-format
+msgid ""
+"There is no CVS repository in this folder:\n"
+"\n"
+"%s"
+msgstr ""
+"ამ დასტაში CVS საცავი არ არის:\n"
+"\n"
+"%s"
+
+#: CVSGlue/CVSAction.cpp:1525
+msgid "If this is the wrong folder, correct it and try again. If you want to initialise a new repository with \"cvs init\" then check the box below and TortoiseCVS will try again."
+msgstr "თუ დასტა მცდარია, შეასწორეთ და კვლავ სცადეთ. თუ ახალი საცავის \"cvs init\" ბრძანებით ინიციალიზება გსურთ ჩართეთ ქვედა პარამეტრი და TortoiseCVS კვლავ შეეცდება."
+
+#: CVSGlue/CVSAction.cpp:1530
+msgid "&Initialise a new repository here (makes a CVSROOT folder)"
+msgstr "ახალი საცავის ინიციალიზება აქ (CVSROOT დასტის შექმნა)"
+
+#: CVSGlue/CvsEntries.cpp:572
+msgid "Ignored Folder"
+msgstr "იგნორირებული დასტა"
+
+#: CVSGlue/CvsEntries.cpp:574
+#, fuzzy
+msgid "Non-CVS Folder"
+msgstr "არა CVS დასტა"
+
+#: CVSGlue/CvsEntries.cpp:576 DialogsWxw/AddFilesDialog.cpp:2244
+#: DialogsWxw/AddFilesDialog.cpp:2284 TortoiseShell/ColumnProvider.cpp:234
+msgid "Folder"
+msgstr "დასტა"
+
+#: CVSGlue/CvsEntries.cpp:610 CVSGlue/CVSStatus.cpp:1649
+msgid "Ignored"
+msgstr "იგნორირებული"
+
+#: CVSGlue/CvsEntries.cpp:614
+#, fuzzy
+msgid "Non-CVS file"
+msgstr "არა CVS დასტა"
+
+#: CVSGlue/CvsEntries.cpp:618
+msgid "Conflict"
+msgstr ""
+
+#: CVSGlue/CvsEntries.cpp:622 CVSGlue/CVSStatus.cpp:1519
+msgid "Binary"
+msgstr "ორობითი"
+
+#: CVSGlue/CvsEntries.cpp:622
+#, fuzzy
+msgid "Mod. Binary"
+msgstr "ორობითი"
+
+#: CVSGlue/CvsEntries.cpp:626 DialogsWxw/AddFilesDialog.cpp:2302
+#: DialogsWxw/CommitDialog.cpp:951 DialogsWxw/HistoryDialog.cpp:403
+#: DialogsWxw/MakePatchDialog.cpp:540 DialogsWxw/ModuleBasicsPage.cpp:392
+msgid "File"
+msgstr "ფაილი"
+
+#: CVSGlue/CvsEntries.cpp:626
+#, fuzzy
+msgid "Mod. File"
+msgstr "მოდული"
+
+#: CVSGlue/CVSStatus.cpp:1434
+msgid "Normal"
+msgstr "ჩვეულებრივი"
+
+#: CVSGlue/CVSStatus.cpp:1440
+msgid "Only keyword names"
+msgstr ""
+
+#: CVSGlue/CVSStatus.cpp:1446
+msgid "Only keyword values"
+msgstr ""
+
+#: CVSGlue/CVSStatus.cpp:1452
+#, fuzzy
+msgid "Include locker"
+msgstr "თანდართული დასტები"
+
+#: CVSGlue/CVSStatus.cpp:1458
+msgid "Disabled"
+msgstr "ამორთულია"
+
+#: CVSGlue/CVSStatus.cpp:1464
+msgid "None"
+msgstr "არა"
+
+#: CVSGlue/CVSStatus.cpp:1470
+msgid "Custom"
+msgstr "მითითებული"
+
+#: CVSGlue/CVSStatus.cpp:1501
+msgid "Unknown"
+msgstr "უცნობი"
+
+#: CVSGlue/CVSStatus.cpp:1507
+msgid "Text/ASCII"
+msgstr "ტექსტი/ASCII"
+
+#: CVSGlue/CVSStatus.cpp:1513
+msgid "Text/Unicode"
+msgstr "ტექსტი/უნიკოდი"
+
+#: CVSGlue/CVSStatus.cpp:1536
+msgid "Binary diff"
+msgstr "ორობითი შედარება"
+
+#: CVSGlue/CVSStatus.cpp:1540
+msgid "Compressed"
+msgstr "შეკუმშული"
+
+#: CVSGlue/CVSStatus.cpp:1544
+msgid "UNIX line endings"
+msgstr "UNIX სტიქონების დაბოლოება"
+
+#: CVSGlue/CVSStatus.cpp:1548
+#, fuzzy
+msgid "Static file"
+msgstr "ბებკი ფაილები"
+
+#: CVSGlue/CVSStatus.cpp:1589 CVSGlue/CVSStatus.cpp:1637
+#: DialogsWxw/IconSetDialog.cpp:49
+msgid "Not in CVS"
+msgstr "არა CVS-ში"
+
+#: CVSGlue/CVSStatus.cpp:1595
+msgid "Unmodified r/o"
+msgstr "უცვლელი, მხოლოდ კითხვადი"
+
+#: CVSGlue/CVSStatus.cpp:1601
+msgid "Unmodified"
+msgstr "უცვლელი"
+
+#: CVSGlue/CVSStatus.cpp:1607
+#, fuzzy
+msgid "Edited"
+msgstr "რედაქტირება"
+
+#: CVSGlue/CVSStatus.cpp:1613
+#, fuzzy
+msgid "Edited r/o"
+msgstr "უცვლელი, მხოლოდ კითხვადი"
+
+#: CVSGlue/CVSStatus.cpp:1619 DialogsWxw/IconSetDialog.cpp:46
+msgid "Modified"
+msgstr "შეცვლილია"
+
+#: CVSGlue/CVSStatus.cpp:1625 DialogsWxw/IconSetDialog.cpp:47
+#: TortoiseShell/ColumnProvider.cpp:266
+msgid "Added"
+msgstr "დაემატა"
+
+#: CVSGlue/CVSStatus.cpp:1631 DialogsWxw/IconSetDialog.cpp:48
+msgid "Needs merge"
+msgstr "საჭიროებს შერწყმას"
+
+#: CVSGlue/CVSStatus.cpp:1643 DialogsWxw/CheckoutDialog.cpp:150
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102 DialogsWxw/MakeModuleDialog.cpp:66
+#: DialogsWxw/ModuleBasicsPage.cpp:213 DialogsWxw/ModuleBasicsPage.cpp:224
+msgid "Module"
+msgstr "მოდული"
+
+#: CVSGlue/CVSStatus.cpp:1655
+msgid "Removed"
+msgstr "ამოშლილია"
+
+#: CVSGlue/CVSStatus.cpp:1661
+#, fuzzy
+msgid "Renamed"
+msgstr "ამოშლილია"
+
+#: CVSGlue/CVSStatus.cpp:1667
+msgid "Missing"
+msgstr "გამოტოვებულია"
+
+#: CVSGlue/ndir.cpp:202
+#, c-format
+msgid "can't open folder `%s'."
+msgstr "ვერ ვხსნი დასტას `%s'."
+
+#: CVSGlue/ndir.cpp:211
+#, c-format
+msgid "done."
+msgstr "შესრულდა."
+
+#: DialogsWxw/AboutDialog.cpp:64
+msgid "TortoiseCVS - About"
+msgstr "TortoiseCVS - პროგრამის შესახებ"
+
+#: DialogsWxw/AboutDialog.cpp:77 DialogsWxw/LoginDialog.cpp:33
+#: DialogsWxw/MessageDialog.cpp:29 TortoiseAct/TortoisePreferences.cpp:87
+#: Utils/LaunchTortoiseAct.cpp:77 Utils/ProcessUtils.cpp:68
+#: Utils/TortoiseException.cpp:30 Utils/TortoiseException.cpp:47
+msgid "TortoiseCVS"
+msgstr "TortoiseCVS"
+
+#: DialogsWxw/AboutDialog.cpp:79
+msgid "UNSTABLE"
+msgstr ""
+
+#: DialogsWxw/AboutDialog.cpp:82
+msgid "DEBUG"
+msgstr "DEBUG"
+
+#: DialogsWxw/AboutDialog.cpp:85
+msgid "version"
+msgstr "ვერსია"
+
+#: DialogsWxw/AboutDialog.cpp:103 DialogsWxw/AddFilesDialog.cpp:497
+#: DialogsWxw/AnnotateDialog.cpp:218 DialogsWxw/BranchTagDlg.cpp:167
+#: DialogsWxw/CheckoutDialog.cpp:156 DialogsWxw/CheckQueryDlg.cpp:56
+#: DialogsWxw/CommandDialog.cpp:77 DialogsWxw/CommitDialog.cpp:416
+#: DialogsWxw/CreditsDialog.cpp:165 DialogsWxw/EditDialog.cpp:154
+#: DialogsWxw/GraphDialog.cpp:233 DialogsWxw/GraphSettingsDialog.cpp:117
+#: DialogsWxw/HistoryDialog.cpp:537 DialogsWxw/IconSetDialog.cpp:135
+#: DialogsWxw/LogConfigDialog.cpp:124 DialogsWxw/MakeModuleDialog.cpp:92
+#: DialogsWxw/MakePatchDialog.cpp:329 DialogsWxw/MergeDlg.cpp:154
+#: DialogsWxw/PreferencesDialog.cpp:378 DialogsWxw/ProgressDialog.cpp:187
+#: DialogsWxw/ReleaseDialog.cpp:143 DialogsWxw/RenameDialog.cpp:83
+#: DialogsWxw/UpdateDlg.cpp:175
+msgid "OK"
+msgstr "დიახ"
+
+#: DialogsWxw/AboutDialog.cpp:110
+#, fuzzy
+msgid "&Credits..."
+msgstr "მადლობები..."
+
+#: DialogsWxw/AboutDialog.cpp:128 DialogsWxw/AboutDialog.cpp:170
+#, fuzzy, c-format
+msgid "%s client version"
+msgstr "%s ვერსია"
+
+#: DialogsWxw/AboutDialog.cpp:129 DialogsWxw/AboutDialog.cpp:150
+#: DialogsWxw/AboutDialog.cpp:171 DialogsWxw/CommandDialog.cpp:61
+#: DialogsWxw/CommitDialog.cpp:338 DialogsWxw/CommitDialog.cpp:358
+#: DialogsWxw/CommitDialog.cpp:368 DialogsWxw/CommitDialog.cpp:768
+#: DialogsWxw/CreditsDialog.cpp:136 DialogsWxw/EditDialog.cpp:101
+#: DialogsWxw/EditDialog.cpp:112 DialogsWxw/EditDialog.cpp:127
+#: DialogsWxw/GraphDialog.cpp:396 DialogsWxw/GraphDialog.cpp:404
+#: DialogsWxw/GraphDialog.cpp:414 DialogsWxw/GraphDialog.cpp:424
+#: DialogsWxw/GraphDialog.cpp:435 DialogsWxw/GraphDialog.cpp:444
+#: DialogsWxw/GraphDialog.cpp:520 DialogsWxw/GraphDialog.cpp:527
+#: DialogsWxw/GraphDialog.cpp:535 DialogsWxw/GraphDialog.cpp:543
+#: DialogsWxw/GraphDialog.cpp:551 DialogsWxw/HistoryDialog.cpp:404
+#: DialogsWxw/HistoryDialog.cpp:410 DialogsWxw/HistoryDialog.cpp:415
+#: DialogsWxw/HistoryDialog.cpp:422 DialogsWxw/HistoryDialog.cpp:433
+#: DialogsWxw/HistoryDialog.cpp:439 DialogsWxw/HistoryDialog.cpp:445
+#: DialogsWxw/HistoryDialog.cpp:451 DialogsWxw/HistoryDialog.cpp:479
+#: DialogsWxw/HistoryDialog.cpp:1094 DialogsWxw/IconSetDialog.cpp:119
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101
+#: DialogsWxw/MakeModuleBasicsPage.cpp:102
+#: DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104 DialogsWxw/MakeModuleDialog.cpp:71
+#: DialogsWxw/ModuleBasicsPage.cpp:208 DialogsWxw/ModuleBasicsPage.cpp:209
+#: DialogsWxw/ModuleBasicsPage.cpp:210 DialogsWxw/ModuleBasicsPage.cpp:211
+#: DialogsWxw/ModuleBasicsPage.cpp:212 DialogsWxw/ModuleBasicsPage.cpp:213
+#: DialogsWxw/ModuleBasicsPage.cpp:214 DialogsWxw/ModuleBasicsPage.cpp:215
+#: DialogsWxw/ModuleBasicsPage.cpp:339 DialogsWxw/PreferencesDialog.cpp:459
+#: DialogsWxw/PreferencesDialog.cpp:873 DialogsWxw/RenameDialog.cpp:63
+#: TortoiseShell/PropSheet.cpp:215 TortoiseShell/PropSheet.cpp:218
+#: TortoiseShell/PropSheet.cpp:221 TortoiseShell/PropSheet.cpp:224
+#: TortoiseShell/PropSheet.cpp:227 TortoiseShell/PropSheet.cpp:230
+#: TortoiseShell/PropSheet.cpp:233 TortoiseShell/PropSheet.cpp:236
+#: TortoiseShell/PropSheet.cpp:239
+msgid ":"
+msgstr ":"
+
+#: DialogsWxw/AboutDialog.cpp:149
+#, fuzzy, c-format
+msgid "%s server version"
+msgstr "სერვერის ვერსია"
+
+#: DialogsWxw/AddFilesDialog.cpp:309
+msgid "Yes"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:311
+#, fuzzy
+msgid "No"
+msgstr "არა"
+
+#: DialogsWxw/AddFilesDialog.cpp:407
+msgid "TortoiseCVS - Add"
+msgstr "TortoiseCVS - დამატება"
+
+#: DialogsWxw/AddFilesDialog.cpp:442
+msgid "Confirm the files to add."
+msgstr "ფაილების დამატების დასტური."
+
+#: DialogsWxw/AddFilesDialog.cpp:444
+msgid "Hint: Right-click to change file format."
+msgstr "მინიშნება: ფაილის ფორმატის შესაცვლელად მარჯვენა წკაპი გამოიყენეთ."
+
+#: DialogsWxw/AddFilesDialog.cpp:448
+msgid "Show items in &subfolders"
+msgstr "ქვედასტებში ელემენტების ჩვენება"
+
+#: DialogsWxw/AddFilesDialog.cpp:464 DialogsWxw/CommitDialog.cpp:389
+#: DialogsWxw/ConflictListDialog.cpp:123 DialogsWxw/EditorListListCtrl.cpp:38
+#: DialogsWxw/HistoryDialog.cpp:1093 DialogsWxw/MakePatchDialog.cpp:308
+msgid "Filename"
+msgstr "ფაილის სახელი"
+
+#: DialogsWxw/AddFilesDialog.cpp:465
+msgid "Type"
+msgstr "ტიპი"
+
+#: DialogsWxw/AddFilesDialog.cpp:466
+#, fuzzy
+msgid "Add"
+msgstr "დაემატა"
+
+#: DialogsWxw/AddFilesDialog.cpp:467 DialogsWxw/AddFilesDialog.cpp:2481
+#: DialogsWxw/CommitDialog.cpp:391 DialogsWxw/ConflictListDialog.cpp:124
+msgid "Format"
+msgstr "ფორმატი"
+
+#: DialogsWxw/AddFilesDialog.cpp:468 DialogsWxw/AddFilesDialog.cpp:2454
+#: DialogsWxw/HistoryDialog.cpp:438 TortoiseShell/PropSheet.cpp:235
+msgid "Keywords"
+msgstr ""
+
+#: DialogsWxw/AddFilesDialog.cpp:499 DialogsWxw/BranchTagDlg.cpp:169
+#: DialogsWxw/CheckoutDialog.cpp:158 DialogsWxw/CommandDialog.cpp:79
+#: DialogsWxw/CommitDialog.cpp:418 DialogsWxw/EditDialog.cpp:156
+#: DialogsWxw/FindDialog.cpp:38 DialogsWxw/GraphSettingsDialog.cpp:119
+#: DialogsWxw/HistoryDialog.cpp:539 DialogsWxw/IconSetDialog.cpp:136
+#: DialogsWxw/LogConfigDialog.cpp:126 DialogsWxw/MakeModuleDialog.cpp:94
+#: DialogsWxw/MakePatchDialog.cpp:331 DialogsWxw/MergeDlg.cpp:156
+#: DialogsWxw/PreferencesDialog.cpp:380 DialogsWxw/ReleaseDialog.cpp:145
+#: DialogsWxw/RenameDialog.cpp:85 DialogsWxw/UpdateDlg.cpp:177
+#: DialogsWxw/YesNoAllDialog.cpp:81
+msgid "Cancel"
+msgstr "გაუქმება"
+
+#: DialogsWxw/AddFilesDialog.cpp:577 TortoiseAct/TortoiseAct.cpp:484
+msgid "Could not connect to server"
+msgstr "ვერ ვუკავშირდები სერვერს"
+
+#: DialogsWxw/AddFilesDialog.cpp:834 DialogsWxw/AddFilesDialog.cpp:2509
+#: DialogsWxw/CheckoutDialog.cpp:152 DialogsWxw/HistoryDialog.cpp:444
+#: DialogsWxw/MakeModuleDialog.cpp:80
+msgid "Options"
+msgstr "პარამეტრები"
+
+#: DialogsWxw/AddFilesDialog.cpp:858 DialogsWxw/CommitDialog.cpp:668
+#: DialogsWxw/ConflictListDialog.cpp:144 DialogsWxw/MakePatchDialog.cpp:431
+#, fuzzy, c-format
+msgid "%d file(s)"
+msgstr "%d შეცვლილი ფაილი"
+
+#: DialogsWxw/AddFilesDialog.cpp:922 DialogsWxw/AddFilesDialog.cpp:2403
+#: DialogsWxw/CommitDialog.cpp:146 DialogsWxw/MakePatchDialog.cpp:114
+msgid "Check"
+msgstr "არჩევა"
+
+#: DialogsWxw/AddFilesDialog.cpp:922 DialogsWxw/AddFilesDialog.cpp:2403
+msgid "Check item(s)"
+msgstr "ელემენტ(ებ)ის არჩევა"
+
+#: DialogsWxw/AddFilesDialog.cpp:924 DialogsWxw/AddFilesDialog.cpp:2405
+#: DialogsWxw/CommitDialog.cpp:147 DialogsWxw/MakePatchDialog.cpp:115
+msgid "Uncheck"
+msgstr "ამორთვა"
+
+#: DialogsWxw/AddFilesDialog.cpp:924 DialogsWxw/AddFilesDialog.cpp:2405
+msgid "Uncheck item(s)"
+msgstr "ელემენტ(ებ)ის ამორთვა"
+
+#: DialogsWxw/AddFilesDialog.cpp:926 DialogsWxw/AddFilesDialog.cpp:2407
+msgid "Autoignore"
+msgstr "ავტოიგნორირება"
+
+#: DialogsWxw/AddFilesDialog.cpp:926 DialogsWxw/AddFilesDialog.cpp:2407
+msgid "Ignore item(s) according to CVS ignore rules"
+msgstr "ელემენტ(ებ)ის იგნორირება CVS წესების მიხედვით"
+
+#: DialogsWxw/AddFilesDialog.cpp:932 DialogsWxw/AddFilesDialog.cpp:2415
+msgid "Check recursively"
+msgstr "რეკურსიული არჩევა"
+
+#: DialogsWxw/AddFilesDialog.cpp:933 DialogsWxw/AddFilesDialog.cpp:2416
+msgid "Check item(s) recursively"
+msgstr "ელემენტ(ებ)ის რეკურსიული არჩევა"
+
+#: DialogsWxw/AddFilesDialog.cpp:935 DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck recursively"
+msgstr "რეკურსიული ამორთვა"
+
+#: DialogsWxw/AddFilesDialog.cpp:936 DialogsWxw/AddFilesDialog.cpp:2418
+msgid "Uncheck item(s) recursively"
+msgstr "ელემენტ(ებ)ის რეკურსიული ამორთვა"
+
+#: DialogsWxw/AddFilesDialog.cpp:938 DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Autoignore recursively"
+msgstr "რეკურსიული ავტოიგნორირება"
+
+#: DialogsWxw/AddFilesDialog.cpp:939 DialogsWxw/AddFilesDialog.cpp:2420
+msgid "Ignore item(s) recursively according to CVS ignore rules"
+msgstr "ელემენტ(ებ)ის რეკურსიული იგნორირება CVS წესების მიხედვით"
+
+#: DialogsWxw/AddFilesDialog.cpp:946 DialogsWxw/AddFilesDialog.cpp:2522
+#: DialogsWxw/CommitDialog.cpp:204 DialogsWxw/ConflictListDialog.cpp:313
+#: DialogsWxw/EditorListListCtrl.cpp:133 DialogsWxw/MakePatchDialog.cpp:142
+msgid "Explorer"
+msgstr "ბროუზერი"
+
+#: DialogsWxw/AddFilesDialog.cpp:1093
+#, c-format
+msgid "Invalid file format: %s"
+msgstr "ფაილის მცდარი ფორმატი: %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:1095
+msgid "Please specify a valid file format for all files you want to add."
+msgstr "მიუთითეთ მართებული ფორმატი ყველა დასამატებელი ფაილისთვის."
+
+#: DialogsWxw/AddFilesDialog.cpp:2298 DialogsWxw/CommitDialog.cpp:949
+#: DialogsWxw/MakePatchDialog.cpp:536
+#, c-format
+msgid "%s File"
+msgstr "%s ფაილი"
+
+#: DialogsWxw/AddFilesDialog.cpp:2445
+#, fuzzy, c-format
+msgid "Set keyword expansion to %s"
+msgstr "პარამეტრების მითითება - %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:2469
+#, c-format
+msgid "Set format to %s"
+msgstr "ფორმატის მითითება - %s"
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect"
+msgstr "ავტოამოცნობა"
+
+#: DialogsWxw/AddFilesDialog.cpp:2480
+msgid "Autodetect file format"
+msgstr "ფაილის ფორმატის ავტოამოცნობა"
+
+#: DialogsWxw/AddFilesDialog.cpp:2500
+#, c-format
+msgid "Set options to %s"
+msgstr "პარამეტრების მითითება - %s"
+
+#: DialogsWxw/AnnotateDialog.cpp:160
+msgid "TortoiseCVS - Annotate"
+msgstr "TortoiseCVS - ანოტირება"
+
+#: DialogsWxw/AnnotateDialog.cpp:193
+msgid "Line"
+msgstr "სტრიქონი"
+
+#: DialogsWxw/AnnotateDialog.cpp:194 DialogsWxw/CheckoutDialog.cpp:151
+#: DialogsWxw/GraphDialog.cpp:395 DialogsWxw/HistoryDialog.cpp:467
+#: DialogsWxw/ModuleBasicsPage.cpp:393 TortoiseShell/PropSheet.cpp:223
+msgid "Revision"
+msgstr "ვერსია"
+
+#: DialogsWxw/AnnotateDialog.cpp:195 DialogsWxw/GraphDialog.cpp:413
+#: DialogsWxw/HistoryDialog.cpp:469
+msgid "Author"
+msgstr "ავტორი"
+
+#: DialogsWxw/AnnotateDialog.cpp:196 DialogsWxw/EditorListListCtrl.cpp:40
+#: DialogsWxw/GraphDialog.cpp:403 DialogsWxw/HistoryDialog.cpp:468
+#: DialogsWxw/ModuleBasicsPage.cpp:394
+msgid "Date"
+msgstr "თარიღი"
+
+#: DialogsWxw/AnnotateDialog.cpp:198 DialogsWxw/CommitDialog.cpp:357
+#: DialogsWxw/GraphDialog.cpp:434 DialogsWxw/HistoryDialog.cpp:471
+msgid "Bug Number"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:200
+msgid "Text"
+msgstr "ტექსტი"
+
+#: DialogsWxw/AnnotateDialog.cpp:221
+#, fuzzy
+msgid "&Find"
+msgstr "დამატება %s-ში დასრულდა"
+
+#: DialogsWxw/AnnotateDialog.cpp:425 DialogsWxw/AnnotateListCtrl.cpp:218
+msgid "Highlight by Author"
+msgstr "გამოყოფა ავტორით"
+
+#: DialogsWxw/AnnotateDialog.cpp:430 DialogsWxw/AnnotateListCtrl.cpp:220
+msgid "Highlight by Revision"
+msgstr "გამოყოფა ვერსიით"
+
+#: DialogsWxw/AnnotateDialog.cpp:435 DialogsWxw/AnnotateListCtrl.cpp:222
+msgid "Highlight by Date"
+msgstr "გამოყოფა თარიღით"
+
+#: DialogsWxw/AnnotateDialog.cpp:440 DialogsWxw/AnnotateListCtrl.cpp:224
+#, fuzzy
+msgid "Highlight by Bug Number"
+msgstr "გამოყოფა ავტორით"
+
+#: DialogsWxw/AnnotateDialog.cpp:445 DialogsWxw/AnnotateListCtrl.cpp:227
+msgid "Highlight by Age (Fixed)"
+msgstr "გამოყოფა ასაკით (ფიქსირებული)"
+
+#: DialogsWxw/AnnotateDialog.cpp:450 DialogsWxw/AnnotateListCtrl.cpp:229
+msgid "Highlight by Age (Scaled)"
+msgstr "გამოყოფა ასაკით (მასშტაბი)"
+
+#: DialogsWxw/AnnotateDialog.cpp:455 DialogsWxw/AnnotateListCtrl.cpp:214
+msgid "No Highlighting"
+msgstr "გამოყოფის გარეშე"
+
+#: DialogsWxw/AnnotateDialog.cpp:480
+#, c-format
+msgid "Annotate %s"
+msgstr "ანოტირება %s"
+
+#: DialogsWxw/AnnotateDialog.cpp:529 DialogsWxw/WxwHelpers.cpp:497
+#: TortoiseAct/TortoiseActUtils.cpp:186 TortoiseAct/TortoiseActUtils.cpp:296
+msgid "This file is new and has never been committed to the server or is an empty file on the server."
+msgstr "ეს ფაილი ახალია და არასდროს დაფიქსირებულა ან სერვერის შესაბამისი ფაილი ცარიელია."
+
+#: DialogsWxw/AnnotateDialog.cpp:637
+msgid "Continue search from the end of the file?"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:658
+msgid "Continue search from the beginning of the file?"
+msgstr ""
+
+#: DialogsWxw/AnnotateDialog.cpp:668
+#, fuzzy
+msgid "Search complete"
+msgstr "ტექსტის ნიმუში"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:202 DialogsWxw/GraphDialog.cpp:893
+#: DialogsWxw/HistoryDialog.cpp:1191
+msgid "&Diff (working file)"
+msgstr "შედარება (სამუშაო ფაილთან)"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:203 DialogsWxw/GraphDialog.cpp:894
+#: DialogsWxw/HistoryDialog.cpp:1192
+msgid "&View this revision"
+msgstr "ამ ვერსიის გადახედვა"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:204 DialogsWxw/GraphDialog.cpp:897
+#: DialogsWxw/HistoryDialog.cpp:1195
+msgid "&Annotate this revision"
+msgstr "ვერსიის ანოტირება"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:205 DialogsWxw/GraphDialog.cpp:898
+#: DialogsWxw/HistoryDialog.cpp:1196
+msgid "&Get this revision (sticky)"
+msgstr "ამ ვერსიის მიღება (მიბმა)"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:206 DialogsWxw/GraphDialog.cpp:903
+#: DialogsWxw/HistoryDialog.cpp:1201
+msgid "&Save this revision as..."
+msgstr "ამ ვერსიის შენსხვა როგორც..."
+
+#: DialogsWxw/AnnotateListCtrl.cpp:210
+#, fuzzy
+msgid "Show &log messages"
+msgstr "დახურვა თუ შეტყობინებები არაა"
+
+#: DialogsWxw/AnnotateListCtrl.cpp:324
+#, c-format
+msgid "Retrieving log messages for %s"
+msgstr ""
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Tag"
+msgstr "TortoiseCVS - ჭდე"
+
+#: DialogsWxw/BranchTagDlg.cpp:94
+msgid "TortoiseCVS - Create Branch"
+msgstr "TortoiseCVS - განშტოების შექმნა"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "&Tag:"
+msgstr "ჭდე:"
+
+#: DialogsWxw/BranchTagDlg.cpp:104
+msgid "New &branch name:"
+msgstr "განშტოების ახალი სახელი:"
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+msgid "Name of tag"
+msgstr "ჭდის სახელი"
+
+#: DialogsWxw/BranchTagDlg.cpp:109
+msgid "Name of branch"
+msgstr "განშტოების სახელი"
+
+#: DialogsWxw/BranchTagDlg.cpp:111 DialogsWxw/RevOptions.cpp:80
+#: DialogsWxw/UpdateDlg.cpp:389
+msgid "&Update list..."
+msgstr "სიის განახლება..."
+
+#: DialogsWxw/BranchTagDlg.cpp:112 DialogsWxw/MergeDlg.cpp:113
+#: DialogsWxw/RevOptions.cpp:83
+msgid "&Scan subfolders"
+msgstr "ქვედასტების სკანირება"
+
+#: DialogsWxw/BranchTagDlg.cpp:115 DialogsWxw/MergeDlg.cpp:122
+#: DialogsWxw/RevOptions.cpp:94 DialogsWxw/UpdateDlg.cpp:390
+msgid "Retrieves a list of tags and branches from the server, and puts them in the dropdown box"
+msgstr "სერვერიდან ჭდეებისა და განშტოებების სიის მიღება და მათი განთავსება ჩამოშლად დაფაზე"
+
+#: DialogsWxw/BranchTagDlg.cpp:124
+msgid "Check that the &files are unmodified"
+msgstr "ფაილების შეცვლის სტატუსის შემოწმება"
+
+#: DialogsWxw/BranchTagDlg.cpp:126
+msgid "Ensures there are no uncommitted changes before performing the operation"
+msgstr "ამ ქმედების შესრულებამდე გადაამოწმეთ, ხომ არ არის დაუფიქსირებელი ცვლილებები"
+
+#: DialogsWxw/BranchTagDlg.cpp:133
+msgid "&Create new tag"
+msgstr "ახალი ჭდის შექმნა"
+
+#: DialogsWxw/BranchTagDlg.cpp:134
+msgid "&Move existing tag"
+msgstr "არსებული ჭდის გადატანა"
+
+#: DialogsWxw/BranchTagDlg.cpp:135
+msgid "&Delete existing tag"
+msgstr "არსებული ჭდის წაშლა"
+
+#: DialogsWxw/BranchTagDlg.cpp:138
+msgid "The tag will be assigned to the repository versions nearest to your working sources. This happens directly to the repository."
+msgstr "ჭდე განეკუთვნება საცავის იმ ვერსიას რომელიც ყველაზე ახლოსაა თქვენს სამუშაო კოდებთან.  ეს მოხდება უშუალოდ საცავში."
+
+#: DialogsWxw/BranchTagDlg.cpp:144
+msgid "&Create new branch"
+msgstr "ახალი განშტოების შექმნა"
+
+#: DialogsWxw/BranchTagDlg.cpp:145
+msgid "&Move existing branch"
+msgstr "არსებული განშტოების გადატანა"
+
+#: DialogsWxw/BranchTagDlg.cpp:146
+msgid "&Delete existing branch"
+msgstr "არსებული განშტოების წაშლა"
+
+#: DialogsWxw/BranchTagDlg.cpp:150
+msgid "The branch will be applied to the repository versions nearest to your working sources. This happens directly to the repository, leaving your working sources on the original branch."
+msgstr "განშტოება განეკუთვნება საცავის იმ ვერსიას რომელიც ყველაზე ახლოსაა თქვენს სამუშაო კოდებთან.  ეს მოხდება უშუალოდ საცავში, ხოლო თქვენი სამუშაო კოდები საწყის განშტოებაში დარჩება."
+
+#: DialogsWxw/BranchTagDlg.cpp:158
+msgid ""
+"Tag and branch names can contain letters, digits, \"-\" (dash) and \"_\" (underscore) only. In particular, this means no dots, and no spaces.\n"
+"They must also start with a letter."
+msgstr ""
+"ჭდის ან განშტოების სახელი შეიძლება შეიცავდეს მხოლოდ ასო-ნიშნებს, \"-\" (დეფისს) და \"_\" (ხაზგასმას)\n"
+"კერძოდ, ეს ნიშნავს რომ არ შეიძლება წერტილებისა და ხარეს გამოყენება. სახელი უნდა დაიწყოს ასო-ნიშნით."
+
+#: DialogsWxw/BranchTagDlg.cpp:234
+msgid "No tags found."
+msgstr "ჭდეები ვერ მოიძებნა."
+
+#: DialogsWxw/CheckoutDialog.cpp:138
+msgid "TortoiseCVS - Checkout Module"
+msgstr "TortoiseCVS - მოდულის გადმოტანა"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:62
+msgid "Purpose of checkout"
+msgstr "გადმოტანის მიზანი"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:65
+msgid "Prevents creation of CVS admin folders"
+msgstr "CVS ადმინისტრაციული დასტების შექმნის აკრძალვა"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:67
+msgid "&Checkout - for working on the module"
+msgstr "გადმოტანა - მოდულთან სამუშაოდ"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:71
+msgid "&Export - for making a software release"
+msgstr "ექსპორტი - პროგრამის გამოცემის შესაქმნელად"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:81
+msgid "Normally TortoiseCVS will checkout files so they can be modified  If you check this, TortoiseCVS will set the files to read-only and you can use the Edit option to make them changeable."
+msgstr ""
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:84
+#, fuzzy
+msgid "Check out read only"
+msgstr "ფაილებისთვის მხოლოდ კითხვადი ატრიბუტის მოხსნა"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:89
+msgid "Name of folder to create"
+msgstr "შესაქმნელი დასტის სახელი"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:92
+msgid "Use this name instead of module name for the new folder"
+msgstr "ამ სახელის გამოყენება ახალ დასტაში მოდულის სახელის ნაცვლად"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:95
+msgid "Use &default folder name"
+msgstr "დასტის საწყისი სახელის გამოყენება"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:99
+msgid "Use &module name and tag/branch/revision as folder name"
+msgstr "მოდულის სახელის და ჭდის/განშტოების/ვერსიის გამოყენება დასტის სახელად"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:100
+msgid "Enter your own &folder name"
+msgstr "მიუთითეთ დასტის საკუთარი სახელი"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:107
+msgid "Custom folder name:"
+msgstr "დასტის მითითებული სახელი:"
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:121
+msgid "Normally, text files checked out on Windows will use CRLF as the line ending. If you check this, TortoiseCVS will use UNIX line endings (LF only)."
+msgstr "ჩვეულებრივ, Windows ტექსტური ფაილები სტრიქონის ბოლოს CRLF-ს იყენებენ. თუ ეს პარამეტრი არჩეულია TortoiseCVS გამოიყენებს Unix სტილის სტრიქონის დაბოლოებებს (მხოლოდ LF)."
+
+#: DialogsWxw/CheckoutOptionsPage.cpp:124
+msgid "Use UNIX &line endings"
+msgstr "Unix სტილის სტრიქონების დაბოლოებების გამოყენება"
+
+#: DialogsWxw/CheckQueryDlg.cpp:41 DialogsWxw/HistoryDialog.cpp:1052
+#: DialogsWxw/YesNoDialog.cpp:30
+msgid "TortoiseCVS Question"
+msgstr "TortoiseCVS კითხვა"
+
+#: DialogsWxw/CommandDialog.cpp:52
+#, fuzzy
+msgid "TortoiseCVS - Command"
+msgstr "TortoiseCVS - ფიქსირება"
+
+#: DialogsWxw/CommandDialog.cpp:60
+#, fuzzy
+msgid "Command"
+msgstr "კომენტარი"
+
+#: DialogsWxw/CommandDialog.cpp:64
+msgid "CVS command"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:148 DialogsWxw/MakePatchDialog.cpp:116
+#, fuzzy
+msgid "&Copy filename(s)"
+msgstr "ფაილის სახელ(ებ)ის კოპირება"
+
+#: DialogsWxw/CommitDialog.cpp:149 DialogsWxw/MakePatchDialog.cpp:117
+#, fuzzy
+msgid "Copy &filename(s) with folders"
+msgstr "ფაილის სახელ(ებ)ის დასტებთან ერთად კოპირება"
+
+#: DialogsWxw/CommitDialog.cpp:153
+#, fuzzy
+msgid "C&ommit selected files..."
+msgstr "რედაქტირებადი ფაილები არაა"
+
+#: DialogsWxw/CommitDialog.cpp:157
+#, fuzzy
+msgid "Get c&lean copy of selected files"
+msgstr "ამ განშტოების სუფთა ასლის მიღება (მიბმა)"
+
+#: DialogsWxw/CommitDialog.cpp:168 DialogsWxw/ConflictListDialog.cpp:295
+#: DialogsWxw/MakePatchDialog.cpp:128
+msgid "&Diff..."
+msgstr "შედარება..."
+
+#: DialogsWxw/CommitDialog.cpp:169 DialogsWxw/ConflictListDialog.cpp:296
+#: ../build/TortoiseMenus.config:195
+msgid "H&istory..."
+msgstr "ისტორია..."
+
+#: DialogsWxw/CommitDialog.cpp:170 DialogsWxw/ConflictListDialog.cpp:298
+#: TortoiseShell/PropSheet.cpp:242 ../build/TortoiseMenus.config:202
+msgid "Revision &Graph..."
+msgstr "ვერსიის გრაფი..."
+
+#: DialogsWxw/CommitDialog.cpp:183
+msgid "CVS &Web Log..."
+msgstr "CVS ვებ ჟურნალი..."
+
+#: DialogsWxw/CommitDialog.cpp:188
+#, fuzzy
+msgid "R&estore"
+msgstr "აღდგენა"
+
+#: DialogsWxw/CommitDialog.cpp:314
+msgid "TortoiseCVS - Commit"
+msgstr "TortoiseCVS - ფიქსირება"
+
+#: DialogsWxw/CommitDialog.cpp:333 DialogsWxw/ConflictListDialog.cpp:118
+#: DialogsWxw/EditorListDialog.cpp:95 DialogsWxw/MakePatchDialog.cpp:296
+#, c-format
+msgid "Folder: %s"
+msgstr "დასტა: %s "
+
+#: DialogsWxw/CommitDialog.cpp:337 DialogsWxw/EditDialog.cpp:100
+msgid "Comment History"
+msgstr "კომენტირების ისტორია"
+
+#: DialogsWxw/CommitDialog.cpp:342 DialogsWxw/EditDialog.cpp:105
+msgid "Previous comments (use Ctrl-Up and Ctrl-Down in the Comment field to select)"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:367 DialogsWxw/EditDialog.cpp:112
+#: DialogsWxw/GraphDialog.cpp:443 DialogsWxw/HistoryDialog.cpp:472
+#: DialogsWxw/HistoryDialog.cpp:478 DialogsWxw/MakeModuleDialog.cpp:70
+msgid "Comment"
+msgstr "კომენტარი"
+
+#: DialogsWxw/CommitDialog.cpp:390 DialogsWxw/MakePatchDialog.cpp:309
+#, fuzzy
+msgid "Filetype"
+msgstr "ფაილი"
+
+#: DialogsWxw/CommitDialog.cpp:392 DialogsWxw/ConflictListDialog.cpp:125
+#: DialogsWxw/HistoryDialog.cpp:421 DialogsWxw/MakePatchDialog.cpp:310
+#: TortoiseShell/PropSheet.cpp:214
+msgid "Status"
+msgstr "სტატუსი"
+
+#: DialogsWxw/CommitDialog.cpp:393 DialogsWxw/EditorListListCtrl.cpp:43
+#: DialogsWxw/ModuleBasicsPage.cpp:339
+msgid "Bug number"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:411 DialogsWxw/MakePatchDialog.cpp:324
+msgid "To see the changes you have made, double or right click on the files above."
+msgstr "თქვენს მიერ შეტანილი ცვლილებების სანახავად ორმაგად დაწკაპეთ შესაბამისი ფაილები."
+
+#: DialogsWxw/CommitDialog.cpp:423 DialogsWxw/EditDialog.cpp:108
+msgid "&Wrap lines"
+msgstr "სტრიქონების გადატანა"
+
+#: DialogsWxw/CommitDialog.cpp:427 DialogsWxw/EditDialog.cpp:138
+#: DialogsWxw/ModuleBasicsPage.cpp:345
+msgid "&Use Bug"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:432
+msgid "&Mark Bug"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:880
+msgid ""
+"You are attempting to commit but have written no comment.\n"
+"Do you wish to continue to commit without a comment?"
+msgstr ""
+
+#: DialogsWxw/CommitDialog.cpp:888
+msgid ""
+"You are attempting to commit but have no bug number.\n"
+"Do you wish to continue the commit without the bug number?"
+msgstr ""
+
+#: DialogsWxw/ConflictDialog.cpp:57
+msgid "TortoiseCVS - Merge Conflicts"
+msgstr "TortoiseCVS - კონფლიქტების შერწყმა"
+
+#: DialogsWxw/ConflictDialog.cpp:362
+msgid "Choose Merge Operation"
+msgstr "შერწყმის ოპერაციის არჩევა"
+
+#: DialogsWxw/ConflictDialog.cpp:371
+msgid "How would you like to merge the conflicts?"
+msgstr "როგორ გსურთ კონფლიქტების შერწყმა?"
+
+#: DialogsWxw/ConflictDialog.cpp:375
+msgid "Edit with default text editor"
+msgstr "რედაქტირება ძირითადი ტექსტური რედაქტორით"
+
+#: DialogsWxw/ConflictDialog.cpp:380
+msgid "Two-way merge"
+msgstr "ორმხრივი შერწყმა"
+
+#: DialogsWxw/ConflictDialog.cpp:385
+msgid "Three-way merge"
+msgstr "სამმხრივი შერწყმა"
+
+#: DialogsWxw/ConflictDialog.cpp:389
+msgid "Hint: Three-way merges are only possible if your merge application supports them."
+msgstr "მინიშნება: სამმხრივი შერწყმა მხოლოდ იმ შემთხვევაშია შესაძლებელი, თუ ამის საშუალებას შერწყმის პროგრამა იძლევა."
+
+#: DialogsWxw/ConflictDialog.cpp:433
+msgid "Perform Direct Merge"
+msgstr "პირდაპირი შერწყმა"
+
+#: DialogsWxw/ConflictDialog.cpp:442
+msgid "TortoiseCVS has created the following temporary merge file:"
+msgstr "TortoiseCVS-მ შერწყმისთვის შექმნა შემდეგი დროებითი ფაილი:"
+
+#: DialogsWxw/ConflictDialog.cpp:463
+msgid "Perform Two-Way Merge"
+msgstr "ორმხრივი შერწყმა"
+
+#: DialogsWxw/ConflictDialog.cpp:472 DialogsWxw/ConflictDialog.cpp:502
+msgid "TortoiseCVS has created the following temporary merge files:"
+msgstr "TortoiseCVS-მ შერწყმისთვის შექმნა შემდეგი დროებითი ფაილები:"
+
+#: DialogsWxw/ConflictDialog.cpp:493
+msgid "Perform Three-Way Merge"
+msgstr "სამმხრივი შერწყმა"
+
+#: DialogsWxw/ConflictListDialog.cpp:84
+msgid "TortoiseCVS - Resolve Conflicts"
+msgstr "TortoiseCVS - კონფლიქტების მოგვარება"
+
+#: DialogsWxw/ConflictListDialog.cpp:114
+msgid "CVS encountered conflicts when trying to merge your changes in the files below. Please merge your changes manually."
+msgstr "CVS წააწყდა კონფლიქტს ქვემოთმოყვანილ  ფაილებში თქვენი ცვლილებების შერწყმისას.  შერწყმა ხელით მოგიწევთ."
+
+#: DialogsWxw/ConflictListDialog.cpp:133
+msgid "To resolve the conflicts, double or right click on the files above."
+msgstr "კონფლიქტების მოსაგვარებლად ორმაგად დაწკაპეთ შესაბამისი ფაილები."
+
+#: DialogsWxw/ConflictListDialog.cpp:138 DialogsWxw/EditorListDialog.cpp:106
+msgid "Close"
+msgstr "დახურვა"
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+msgid "&Merge Conflicts..."
+msgstr "კონფლიქტების შერწყმა..."
+
+#: DialogsWxw/ConflictListDialog.cpp:281
+msgid "Merge conflicts manually"
+msgstr "ცვლილებების ხელით შერწყმა"
+
+#: DialogsWxw/ConflictListDialog.cpp:287
+msgid "&Discard local changes..."
+msgstr "ადგილობრივი ცვლილებების გაუქმება..."
+
+#: DialogsWxw/ConflictListDialog.cpp:288
+msgid "Delete file and get a clean copy from CVS..."
+msgstr "ფაილების წაშლა და CVS სუფთა ასლის მიღება..."
+
+#: DialogsWxw/ConflictListDialog.cpp:295
+msgid "Show differences to original revision"
+msgstr "საწყის ვერსიასთან განსხვავებების ჩვენება"
+
+#: DialogsWxw/ConflictListDialog.cpp:297
+msgid "Show history"
+msgstr "ისტორიის ჩვენება"
+
+#: DialogsWxw/ConflictListDialog.cpp:299
+msgid "Show revision graph"
+msgstr "ვერსიის გრაფის ჩვენება"
+
+#: DialogsWxw/CreditsDialog.cpp:46
+msgid "TortoiseCVS - Credits"
+msgstr "TortoiseCVS - მადლობები"
+
+#: DialogsWxw/CreditsDialog.cpp:63
+msgid "Better looking icons"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:64
+msgid "Persistent dialog size patch, Annotate feature, various bugfixes and improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:65
+msgid "Catalan translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:66
+msgid "French translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:67
+msgid "CVS columns in Explorer detailed list view"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:68
+msgid "German translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:69
+msgid "Branching, tagging and merging, menu config file, various user interface improvements and bug fixes"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:70
+msgid "64-bit Windows port"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:71 DialogsWxw/CreditsDialog.cpp:74
+#: DialogsWxw/CreditsDialog.cpp:96
+msgid "Spanish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:72
+msgid "French User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:73
+msgid "Danish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:75
+msgid "Norwegian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:76
+#, fuzzy
+msgid "Icons"
+msgstr "ხატების გარეშე"
+
+#: DialogsWxw/CreditsDialog.cpp:77
+msgid "Win32 native user interface (not used now, but provoked the migration from GTK to wxWindows)"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:78
+msgid "Romanian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:79
+msgid "Brazilian Portuguese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:80
+msgid "Project founder (no longer active), original code, Visual C++ and mingw32 compilation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:81
+msgid "Dutch translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:82
+#, fuzzy
+msgid "Revision Graph improvements"
+msgstr "ვერსიის გრაფი - %s"
+
+#: DialogsWxw/CreditsDialog.cpp:83
+msgid "Warn on empty commit comment patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:84
+msgid "Improved SSH support"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:85
+#, fuzzy
+msgid "Make new module patch"
+msgstr "ახალი მოდულის შექმნა..."
+
+#: DialogsWxw/CreditsDialog.cpp:86
+msgid "Improved treelist control"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:87
+msgid "Georgian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:88
+msgid "Core developer (no longer active)"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:89
+msgid "cvs.exe pipe code prototype, Borland compilation, various bug fixes"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:90
+msgid "Commit dialog patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:91
+msgid "Make New Module edit module path patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:92
+msgid "SSPI encryption patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:93
+msgid "CVS property page, context menu"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:94
+#, fuzzy
+msgid "Default icons"
+msgstr "მენიუს ხატები"
+
+#: DialogsWxw/CreditsDialog.cpp:95 DialogsWxw/CreditsDialog.cpp:108
+msgid "Various bug fixing patches"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:97
+msgid "History dialog patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:98 DialogsWxw/CreditsDialog.cpp:101
+msgid "Korean translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:99
+msgid "Polish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:100
+msgid "Traditional Chinese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:103
+msgid "Edit options dialog, repository browser, defect tracking integration, 64-bit development platform"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:104
+msgid "Project management, User Guide, domain name, various patches"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:105
+msgid "Slovenian translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:106
+msgid "CVS property page improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:107
+msgid "Charlie Vernon Smythe logo and icon"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:109
+msgid "Russian program translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:110
+msgid "Turkish translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:111
+msgid "rcsinfo patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:112
+msgid "Simplified Chinese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:113
+msgid "Simplified Chinese User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:114
+msgid "Automatic use of Unix line endings patch"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:115
+msgid "Borland compilation, bug fix, CVS property page improvements"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:116
+msgid "mingw32 compilation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:117
+msgid "Web site design"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:118
+msgid "Core developer, release manager, documentation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:119
+msgid "Czech translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:120
+msgid "Russian User Guide"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:121
+msgid "Japanese translation"
+msgstr ""
+
+#: DialogsWxw/CreditsDialog.cpp:135
+#, fuzzy
+msgid ""
+"People who have contributed to TortoiseCVS\n"
+"(mouse over name to see details)"
+msgstr "TortoiseCVS შემუშავებაში მონაწილე პიროვნებები:"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:55
+msgid "Remove"
+msgstr "ამოშლა"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:57
+msgid "Del"
+msgstr "Del"
+
+#: DialogsWxw/CvsRootListCtrl.cpp:62
+msgid "Remove All"
+msgstr "ყველას ამოშლა"
+
+#: DialogsWxw/EditDialog.cpp:89
+#, fuzzy
+msgid "TortoiseCVS - Edit"
+msgstr "TortoiseCVS - მადლობები"
+
+#: DialogsWxw/EditDialog.cpp:127
+msgid "Bug &Number"
+msgstr ""
+
+#: DialogsWxw/EditDialog.cpp:239
+msgid "You are attempting to edit but have no bug number. Do you wish to continue the edit without the bug number?"
+msgstr ""
+
+#: DialogsWxw/EditorListDialog.cpp:66
+#, fuzzy
+msgid "TortoiseCVS - List Editors"
+msgstr "TortoiseCVS - ისტორია %s"
+
+#: DialogsWxw/EditorListDialog.cpp:112
+#, fuzzy, c-format
+msgid "%d edited file(s)"
+msgstr "%d შეცვლილი ფაილი"
+
+#: DialogsWxw/EditorListListCtrl.cpp:39
+#, fuzzy
+msgid "Editors"
+msgstr "რედაქტირება"
+
+#: DialogsWxw/EditorListListCtrl.cpp:41
+msgid "Host"
+msgstr ""
+
+#: DialogsWxw/EditorListListCtrl.cpp:42
+msgid "Local path"
+msgstr ""
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Undo"
+msgstr "აღდგენა"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Redo"
+msgstr "გამეორება"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Cu&t"
+msgstr "ამოჭრა"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Copy"
+msgstr "კოპირება"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Paste"
+msgstr "ჩასმა"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "&Delete"
+msgstr "წაშლა"
+
+#: DialogsWxw/ExtTextCtrl.cpp:28
+msgid "Select &All"
+msgstr "ყველას მონიშვნა"
+
+#: DialogsWxw/FindDialog.cpp:28
+#, fuzzy
+msgid "TortoiseCVS - Find"
+msgstr "TortoiseCVS - დასრულდა"
+
+#: DialogsWxw/FindDialog.cpp:33
+msgid "Find what: "
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:36
+msgid "Find Next"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:37
+msgid "&Mark All"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:52
+msgid "Match &Case"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:54
+msgid "Search &Up"
+msgstr ""
+
+#: DialogsWxw/FindDialog.cpp:56
+#, fuzzy
+msgid "&Wrap Search"
+msgstr "სტრიქონების გადატანა"
+
+#: DialogsWxw/GraphDialog.cpp:108
+#, fuzzy, c-format
+msgid "Revision Graph for %s"
+msgstr "ვერსიის გრაფი - %s"
+
+#: DialogsWxw/GraphDialog.cpp:178
+#, fuzzy, c-format
+msgid "TortoiseCVS - Revision Graph for %s"
+msgstr "TortoiseCVS - ვერსიის გრაფი %s"
+
+#: DialogsWxw/GraphDialog.cpp:212 DialogsWxw/HistoryDialog.cpp:489
+#, fuzzy
+msgid "Show &tags"
+msgstr "ჭდეების ჩვენება"
+
+#: DialogsWxw/GraphDialog.cpp:215
+#, fuzzy
+msgid "&Collapse revisions"
+msgstr "ვერსიები სულ"
+
+#: DialogsWxw/GraphDialog.cpp:242
+msgid "Set &Limits..."
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:423
+msgid "Mergepoint"
+msgstr "შერწყმის წერტილი"
+
+#: DialogsWxw/GraphDialog.cpp:519
+msgid "Description"
+msgstr "აღწერილობა"
+
+#: DialogsWxw/GraphDialog.cpp:526
+msgid "File Format"
+msgstr "ფაილის ფორმატი"
+
+#: DialogsWxw/GraphDialog.cpp:534
+msgid "Keyword substitution"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:542
+#, fuzzy
+msgid "Storage options"
+msgstr "ფაილის ატრიბუტები"
+
+#: DialogsWxw/GraphDialog.cpp:550
+msgid "Total revisions"
+msgstr "ვერსიები სულ"
+
+#: DialogsWxw/GraphDialog.cpp:666
+#, c-format
+msgid "Revision graph for %s"
+msgstr "ვერსიის გრაფი - %s"
+
+#: DialogsWxw/GraphDialog.cpp:899 DialogsWxw/HistoryDialog.cpp:1197
+msgid "Get &clean copy of this revision (sticky)"
+msgstr "ამ ვერსიის სუფთა ასლის მიღება (მიბმა)"
+
+#: DialogsWxw/GraphDialog.cpp:900 DialogsWxw/HistoryDialog.cpp:1198
+#: ../build/TortoiseMenus.config:314
+msgid "&Tag..."
+msgstr "ჭდე..."
+
+#: DialogsWxw/GraphDialog.cpp:901 DialogsWxw/HistoryDialog.cpp:1199
+#: ../build/TortoiseMenus.config:321
+msgid "&Branch..."
+msgstr "განშტოება..."
+
+#: DialogsWxw/GraphDialog.cpp:908 DialogsWxw/HistoryDialog.cpp:1281
+msgid "&Diff (selected revisions)"
+msgstr "შედარება (შერჩეული ვერსიების)"
+
+#: DialogsWxw/GraphDialog.cpp:910 DialogsWxw/HistoryDialog.cpp:1283
+msgid "&Merge changes (selected revisions)"
+msgstr "ცვლილებების შერწყმა (შერჩეულ ვერსიებში)..."
+
+#: DialogsWxw/GraphDialog.cpp:912 DialogsWxw/HistoryDialog.cpp:1285
+msgid "&Undo changes (selected revisions)"
+msgstr "ცვლილებების აღდგენა (მონიშნულ ვერსიებში)..."
+
+#: DialogsWxw/GraphDialog.cpp:929 DialogsWxw/HistoryDialog.cpp:1221
+msgid "&Get this branch (sticky)"
+msgstr "ამ განშტოების მიღება (მიბმა)"
+
+#: DialogsWxw/GraphDialog.cpp:930 DialogsWxw/HistoryDialog.cpp:1222
+msgid "Get &clean copy of this branch (sticky)"
+msgstr "ამ განშტოების სუფთა ასლის მიღება (მიბმა)"
+
+#: DialogsWxw/GraphDialog.cpp:932
+msgid "Always &hide this branch"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:933
+msgid "&Only show this branch"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:946 DialogsWxw/HistoryDialog.cpp:1235
+msgid "&Return to HEAD branch"
+msgstr "მთავარ (HEAD) განშტოებაზე დაბრუნება"
+
+#: DialogsWxw/GraphDialog.cpp:947 DialogsWxw/HistoryDialog.cpp:1236
+msgid "R&eturn to clean copy of HEAD branch"
+msgstr "მთავარი (HEAD) განშტოების სუფთა ასლის შექმნა"
+
+#: DialogsWxw/GraphDialog.cpp:949
+msgid "Show &all branches"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:963
+msgid "Zoom &in (I)"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:964
+msgid "Zoom &out (O)"
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:966
+msgid "&Save graph as bitmap..."
+msgstr ""
+
+#: DialogsWxw/GraphDialog.cpp:1003 DialogsWxw/HistoryDialog.cpp:939
+#: TortoiseAct/TortoiseAct.cpp:1829
+#, c-format
+msgid "Finished tagging in %s"
+msgstr "დასრულდა ჭდეების მითითება %s"
+
+#: DialogsWxw/GraphDialog.cpp:1026 DialogsWxw/GraphDialog.cpp:1082
+#: DialogsWxw/HistoryDialog.cpp:961 DialogsWxw/HistoryDialog.cpp:1017
+#: TortoiseAct/TortoiseAct.cpp:1850 TortoiseAct/TortoiseAct.cpp:1907
+msgid "Internal error: Invalid action"
+msgstr "შიდა შეცდომა: უმართებლო ქმედება"
+
+#: DialogsWxw/GraphDialog.cpp:1033 DialogsWxw/HistoryDialog.cpp:968
+#: TortoiseAct/TortoiseAct.cpp:1856
+#, c-format
+msgid "Tagging in %s"
+msgstr "ჭდის მინიჭება - %s"
+
+#: DialogsWxw/GraphDialog.cpp:1054 DialogsWxw/HistoryDialog.cpp:989
+#: TortoiseAct/TortoiseAct.cpp:1877
+#, c-format
+msgid "Finished branching in %s"
+msgstr "დასრულდა განშტოებების მითითება %s"
+
+#: DialogsWxw/GraphDialog.cpp:1090 DialogsWxw/HistoryDialog.cpp:1024
+#: TortoiseAct/TortoiseAct.cpp:1913
+#, c-format
+msgid "Branching in %s"
+msgstr "განშტოება - %s"
+
+#: DialogsWxw/GraphDialog.cpp:1188 DialogsWxw/HistoryDialog.cpp:884
+msgid "Retrieving a clean copy deletes your changes."
+msgstr "სუფთა ასლის მიღებისას თქვენი ცვლილებები წაიშლება."
+
+#: DialogsWxw/GraphDialog.cpp:1188 DialogsWxw/HistoryDialog.cpp:884
+msgid "Warning"
+msgstr "გაფრთხილება"
+
+#: DialogsWxw/GraphDialog.cpp:1216
+#, fuzzy
+msgid "Bitmap files"
+msgstr "რედაქტირებული ფაილები:"
+
+#: DialogsWxw/GraphDialog.cpp:1218
+#, fuzzy
+msgid "Save Revision Graph"
+msgstr "ვერსიის გრაფი..."
+
+#: DialogsWxw/GraphDialog.cpp:1246
+msgid "Failed to save Revision Graph bitmap"
+msgstr ""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:65
+#, fuzzy
+msgid "TortoiseCVS - Revision Graph Settings"
+msgstr "TortoiseCVS - ვერსიის გრაფი %s"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:74
+#, fuzzy
+msgid "&Start date/time:"
+msgstr "თარიღის მიღება"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:75
+msgid "Do not show revisions/tags/branches before a specific date."
+msgstr ""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:77 DialogsWxw/UpdateDlg.cpp:407
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar.\n"
+"e.g.: \"1988-09-24\"  \"yesterday\"  \"24 Sep 20:05\""
+msgstr ""
+"შეარჩიეთ თარიღი კალენდრიდან და/ან შეასწორეთ თარიღის კალენდრის ზედა ველში.\n"
+"მაგ.: \"1988-09-24\"  \"yesterday\"  \"24 Sep 20:05\""
+
+#: DialogsWxw/GraphSettingsDialog.cpp:96
+#, fuzzy
+msgid "&End date/time:"
+msgstr "თარიღის მიღება"
+
+#: DialogsWxw/GraphSettingsDialog.cpp:97
+msgid "Do not show revisions/tags/branches after a specific date."
+msgstr ""
+
+#: DialogsWxw/HistoryDialog.cpp:100 DialogsWxw/HistoryDialog.cpp:328
+#, c-format
+msgid "History for %s"
+msgstr "ისტორია - %s"
+
+#: DialogsWxw/HistoryDialog.cpp:170
+#, fuzzy, c-format
+msgid "%d revision(s)"
+msgstr "ვერსიები სულ"
+
+#: DialogsWxw/HistoryDialog.cpp:371
+#, fuzzy, c-format
+msgid "TortoiseCVS - History for %s"
+msgstr "TortoiseCVS - ისტორია %s"
+
+#: DialogsWxw/HistoryDialog.cpp:409 DialogsWxw/MakeModuleBasicsPage.cpp:103
+#: DialogsWxw/ModuleBasicsPage.cpp:214 TortoiseShell/PropSheet.cpp:217
+msgid "CVSROOT"
+msgstr "CVSROOT"
+
+#: DialogsWxw/HistoryDialog.cpp:414
+msgid "Sticky tag"
+msgstr "მიბმული ჭდე"
+
+#: DialogsWxw/HistoryDialog.cpp:432 TortoiseShell/PropSheet.cpp:232
+msgid "File format"
+msgstr "ფაილის ფორმატი"
+
+#: DialogsWxw/HistoryDialog.cpp:450
+msgid "Other"
+msgstr ""
+
+#: DialogsWxw/HistoryDialog.cpp:470
+msgid "Changes"
+msgstr "ცვლილებები"
+
+#: DialogsWxw/HistoryDialog.cpp:540
+msgid "Apply"
+msgstr "გამოყენება"
+
+#: DialogsWxw/HistoryDialog.cpp:719
+msgid "Changing comment"
+msgstr "კომენტარების შეცვლა"
+
+#: DialogsWxw/HistoryDialog.cpp:757
+msgid "(None)"
+msgstr "(ცარიელი)"
+
+#: DialogsWxw/HistoryDialog.cpp:1050
+#, c-format
+msgid ""
+"You have changed the comment of revision %s.\n"
+"Do you want to save it?"
+msgstr ""
+
+#: DialogsWxw/HistoryDialog.cpp:1205
+#, fuzzy
+msgid "C&opy comment to clipboard"
+msgstr "ფაილის სახელ(ებ)ის ბუფერში კოპირება"
+
+#: DialogsWxw/IconSetDialog.cpp:44
+msgid "In CVS"
+msgstr "CVS-ში"
+
+#: DialogsWxw/IconSetDialog.cpp:45
+msgid "In CVS, read-only"
+msgstr "CVS-ში, მხოლოდ კითხვადი"
+
+#: DialogsWxw/IconSetDialog.cpp:50
+msgid "Ignored by CVS"
+msgstr "იგნორირება CVS მიერ"
+
+#: DialogsWxw/IconSetDialog.cpp:86
+msgid "TortoiseCVS - Icon sets"
+msgstr "TortoiseCVS - ხატების ნაკრები"
+
+#: DialogsWxw/IconSetDialog.cpp:94
+msgid "Please select an icon set to be used as overlay icons:"
+msgstr "ხატების ნაკრების შერჩევა, რომლებიც გამოიყენება როგორც გადაფარვები:"
+
+#: DialogsWxw/IconSetDialog.cpp:107
+msgid "Icon preview:"
+msgstr "ხატის ესკიზი:"
+
+#: DialogsWxw/IconSetDialog.cpp:166 DialogsWxw/PreferencesDialog.cpp:579
+#: DialogsWxw/PreferencesDialog.cpp:787
+msgid "No icons"
+msgstr "ხატების გარეშე"
+
+#: DialogsWxw/LogConfigDialog.cpp:80
+msgid "TortoiseCVS - Web Log Configuration"
+msgstr "TortoiseCVS - ვებ ჟურნალი"
+
+#: DialogsWxw/LogConfigDialog.cpp:97
+msgid "Web log URL &prefix:"
+msgstr "Web ჟურნალის მისამართის პრეფიქსი"
+
+#: DialogsWxw/LogConfigDialog.cpp:107
+msgid "&Suffix:"
+msgstr "სუფიქსი:"
+
+#: DialogsWxw/LogConfigDialog.cpp:116
+msgid "&Plain text log (if your server doesn't support web log)"
+msgstr "ჟურნალი ტექსტურ ფორმატში (თუ თქვენი სერვერი ვერ მუშაობს ვებ ტიპთან)"
+
+#: DialogsWxw/LogConfigDialog.cpp:120
+msgid "&Automatically scan the server for the URL (again)"
+msgstr "სერვერზე მისამართების ავტომატური სკანირება (კვლავ)"
+
+#: DialogsWxw/LoginDialog.cpp:32
+msgid "Password:"
+msgstr "პაროლი:"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:97 DialogsWxw/ModuleBasicsPage.cpp:208
+msgid "Protocol"
+msgstr "ოქმი"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:98 DialogsWxw/ModuleBasicsPage.cpp:209
+msgid "Protocol parameters"
+msgstr "ოქმის პარამეტრები"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:99 DialogsWxw/ModuleBasicsPage.cpp:210
+msgid "Server"
+msgstr "სერვერი"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:100 DialogsWxw/ModuleBasicsPage.cpp:211
+msgid "Repository folder"
+msgstr "საცავის დასტა"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:101 DialogsWxw/ModuleBasicsPage.cpp:212
+msgid "User name"
+msgstr "სახელი"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:104 DialogsWxw/ModuleBasicsPage.cpp:215
+msgid "Port"
+msgstr "პორტი"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:108 DialogsWxw/ModuleBasicsPage.cpp:221
+msgid "Previous CVSROOTs"
+msgstr "წინა CVSROOT-ები"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:148 DialogsWxw/ModuleBasicsPage.cpp:290
+msgid "Password server (:pserver:)"
+msgstr "პაროლის სერვერი (:pserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:149 DialogsWxw/ModuleBasicsPage.cpp:291
+msgid "Windows authentication (:sspi:)"
+msgstr "Windows აუთენტიფიცირება (:sspi:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:150 DialogsWxw/ModuleBasicsPage.cpp:293
+msgid "Secure shell (:ext:)"
+msgstr "უსაფრთხო გარემო (:ext:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:151 DialogsWxw/ModuleBasicsPage.cpp:295
+msgid "Secure shell (:ssh:)"
+msgstr "უსაფრთხო გარემო (:ssh:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:152 DialogsWxw/ModuleBasicsPage.cpp:296
+msgid "Remote shell (:server:)"
+msgstr "გარე გარემო (:server:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:153 DialogsWxw/ModuleBasicsPage.cpp:297
+msgid "Locally mounted folder (:local:)"
+msgstr "ადგილობრივი დასტა (:local:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:154 DialogsWxw/ModuleBasicsPage.cpp:298
+msgid "Kerberos (:gserver:)"
+msgstr "კერბეროსი (:gserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:155 DialogsWxw/ModuleBasicsPage.cpp:299
+msgid "SSL (:sserver:)"
+msgstr "SSL (:sserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:156
+msgid "Named pipe (:ntserver:)"
+msgstr "სახელობითი არხები (:ntserver:)"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:199 DialogsWxw/ModuleBasicsPage.cpp:375
+msgid "&Fetch list..."
+msgstr "&სიის გამოძახება..."
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:216 DialogsWxw/ModuleBasicsPage.cpp:173
+msgid "How your machine should connect to the CVS repository"
+msgstr "როგორ უკავშირდებით CVS საცავს"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:217 DialogsWxw/ModuleBasicsPage.cpp:174
+msgid "Parameters associated with this protocol"
+msgstr "ამ ოქმთან დაკავშირებული პარამეტრები"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:218 DialogsWxw/ModuleBasicsPage.cpp:175
+msgid "The computer that the CVS repository is on"
+msgstr "კომპიუტერი, სადაც CVS საცავია განთავსებული"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:219 DialogsWxw/ModuleBasicsPage.cpp:176
+msgid "Location of the repository on the server"
+msgstr "საცავის მისამართი სერვერზე"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:220 DialogsWxw/ModuleBasicsPage.cpp:177
+msgid "The user name that CVS should use"
+msgstr "მომხმარებლის სახელი, რომელიც CVS-მა უნდა გამოიყენოს"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:221
+msgid "The name of the module"
+msgstr "მოდულის სახელი"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:222 DialogsWxw/ModuleBasicsPage.cpp:179
+msgid "Technical details of the CVSROOT which TortoiseCVS is going to use"
+msgstr "CVSROOT ტექნიკური დეტალები, რომლის გამოყენებასაც TortoiseCVS აპირებს"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:223 DialogsWxw/ModuleBasicsPage.cpp:180
+msgid "Retrieves a list of modules from the server, and puts them in the dropdown box"
+msgstr "სერვერიდან მოდულების სიის მიღება და მათი განთავსება ჩამოშლად დაფაზე"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:224
+#, fuzzy
+msgid "The TCP port of your CVS server process"
+msgstr "CVS სერვერის პროცესის TCP პორტი"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:252 DialogsWxw/ModuleBasicsPage.cpp:446
+msgid "Click here and paste in the CVSROOT"
+msgstr "დაწკაპეთ აქ CVSROOT-ში ჩასასმელად"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:488
+#: DialogsWxw/ModuleBasicsPage.cpp:1009
+msgid "Module list not available for server"
+msgstr "მოდულების სია სერვერისთვის მიუწვდომელია"
+
+#: DialogsWxw/MakeModuleBasicsPage.cpp:493
+#: DialogsWxw/ModuleBasicsPage.cpp:1014
+msgid ""
+"Ask your administrator to either install a web browser interface on the server (CVSweb or ViewCVS) or add the modules to the CVSROOT/modules file.\n"
+"\n"
+"Meanwhile, you'll have to find the module name elsewhere."
+msgstr ""
+"სთხოვეთ ქსელის ადმინისტრატორს ჩადგას სერვერზე CVSWeb ან ViewCVS, ან საძიებო ფაილები დაამატოს CVSROOT/modules ფაილს.\n"
+"\n"
+"მანამდე კი მოდულის სახელ სადაც გინდათ იქ მოძებნეთ :)"
+
+#: DialogsWxw/MakeModuleDialog.cpp:56
+msgid "TortoiseCVS - Make New Module"
+msgstr "TortoiseCVS - ახალი მოდულის შექმნა"
+
+#: DialogsWxw/MakeModuleDialog.cpp:77
+msgid "Check out files read-only"
+msgstr "ფაილებისთვის მხოლოდ კითხვადი ატრიბუტის მოხსნა"
+
+#: DialogsWxw/MakeModuleDialog.cpp:79
+msgid "Run 'cvs watch on' on the new module so that files will be checked out read-only"
+msgstr "ახალი მოდულისთვის  'cvs watch on' გამოყენება, რათა ფაილები გადმოიტანოს როგორც მხოლოდ კითხვადი"
+
+#: DialogsWxw/MakePatchDialog.cpp:240
+#, fuzzy
+msgid "TortoiseCVS - Make Patch"
+msgstr "TortoiseCVS - განშტოების შექმნა"
+
+#: DialogsWxw/MakePatchDialog.cpp:302
+#, fuzzy
+msgid "&Add files..."
+msgstr "რედაქტირებადი ფაილების ჩვენება..."
+
+#: DialogsWxw/MakePatchDialog.cpp:566 TortoiseAct/TortoiseAct.cpp:631
+#, fuzzy
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS."
+msgstr ""
+"დასამატებელი არაფერია.\n"
+"\n"
+"ყველა მონიშნული ფაილი და დასტა თავიანთი შიგთავსით უკვე CVS საცავშია ან .cvsignore იგნორირების სიაში არიან."
+
+#: DialogsWxw/MakePatchDialog.cpp:569 TortoiseAct/TortoiseAct.cpp:634
+msgid ""
+"There is nothing to add.\n"
+"\n"
+"All the files, folders and their contents that you selected are already in CVS, or are specified in a .cvsignore file."
+msgstr ""
+"დასამატებელი არაფერია.\n"
+"\n"
+"ყველა მონიშნული ფაილი და დასტა თავიანთი შიგთავსით უკვე CVS საცავშია ან .cvsignore იგნორირების სიაში არიან."
+
+#: DialogsWxw/MakePatchDialog.cpp:592
+msgid "TortoiseCVS - Add files to patch"
+msgstr "TortoiseCVS - ფაილის ბებკიში დამატება"
+
+#: DialogsWxw/MakePatchDialog.cpp:593
+#, fuzzy
+msgid "Select files to add to the patch"
+msgstr "ბებკიში ფაილების დამატების დასტური"
+
+#: DialogsWxw/MergeDlg.cpp:75
+msgid "TortoiseCVS - Merge"
+msgstr "TortoiseCVS - შერწყმა"
+
+#: DialogsWxw/MergeDlg.cpp:88
+msgid "Start:"
+msgstr "დაწყება:"
+
+#: DialogsWxw/MergeDlg.cpp:96
+msgid "End:"
+msgstr "ბოლო:"
+
+#: DialogsWxw/MergeDlg.cpp:105 DialogsWxw/MergeDlg.cpp:106
+msgid "Name of revision/tag/branch to merge into your working folder."
+msgstr "ვერსიის/ჭდის/განშტოების სახელი რომლებიც შეირწყმება თქვენს სამუშაო დასტაში."
+
+#: DialogsWxw/MergeDlg.cpp:112
+msgid "&Update lists..."
+msgstr "სიების განახლება..."
+
+#: DialogsWxw/MergeDlg.cpp:115
+#, fuzzy
+msgid "Suppress keyword &expansion"
+msgstr "პარამეტრების მითითება - %s"
+
+#: DialogsWxw/MergeDlg.cpp:125
+msgid "Suppress expansion of keywords to avoid spurious conflicts"
+msgstr ""
+
+#: DialogsWxw/MergeDlg.cpp:135
+msgid "Create missing subfolders"
+msgstr "გამოტოვებული ქვედასტების შექმნა"
+
+#: DialogsWxw/MergeDlg.cpp:137 DialogsWxw/UpdateDlg.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:492
+msgid "Create any folders that exist in the repository if they are missing from the working folder."
+msgstr "საცავში არსებული ყველა დასტის შექმნა თუ ისინი სამუშაო დასტაში არა არიან."
+
+#: DialogsWxw/MergeDlg.cpp:146
+msgid ""
+"The changes between the specified revisions/tags/branches will be merged into your current working sources. If you want to merge an entire branch, enter the branch name in the first edit field and leave the second one blank.\n"
+"The repository is not altered until a commit is performed."
+msgstr ""
+"ცვლილებები მთითებულ ვერსიებს/ჭდეებს/განშტოებებს შორის შეერწყმება საწყის სამუშაო კოდებს. თუ განშტოების მთლიანად შერწყმა გსურთ, მიუთითეთ განშტოების სახელი პირველ ველში, ხოლო მეორე შეუვსებელი დატოვეთ.\n"
+"ცვლილებები საცავში არ შეიტანება შემდეგ ფიქსირებამდე."
+
+#: DialogsWxw/MergeDlg.cpp:163
+msgid "Merge changes between the following branches/tags/revisions:"
+msgstr "ცვლილებების შერწყმა შემდეგ განშტოებებში/ჭდეებში/ვერსიებში:"
+
+#: DialogsWxw/MergeDlg.cpp:198 DialogsWxw/RevOptions.cpp:203
+#: DialogsWxw/UpdateDlg.cpp:327
+msgid "No tags or branches found."
+msgstr "ჭდეები ან განშტოებები ვერ მოიძებნა."
+
+#: DialogsWxw/ModuleBasicsPage.cpp:178
+msgid "The name of the module, or full path of any file or folder in the module"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:181
+#, fuzzy
+msgid "The TCP port of your CVS server process (optional)"
+msgstr "CVS სერვერის პროცესის TCP პორტი"
+
+#: DialogsWxw/ModuleBasicsPage.cpp:182
+msgid "Do a CVS Edit on the file/folder after checkout"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:183
+msgid "Mark edit with bug number"
+msgstr ""
+
+#: DialogsWxw/ModuleBasicsPage.cpp:342 ../build/TortoiseMenus.config:133
+#: ../build/TortoiseMenus.config:223 ../build/TortoiseMenus.config:229
+msgid "&Edit"
+msgstr "რედაქტირება"
+
+#: DialogsWxw/PreferencesDialog.cpp:165 DialogsWxw/PreferencesDialog.cpp:361
+msgid "TortoiseCVS - Preferences"
+msgstr "TortoiseCVS - პარამეტრები"
+
+#: DialogsWxw/PreferencesDialog.cpp:169 DialogsWxw/PreferencesDialog.cpp:374
+msgid "Global"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:341
+msgid ""
+"You have selected a different icon set - it won't take effect until Windows Explorer is restarted.\n"
+"You can log off or reboot the system, or TortoiseCVS can simply restart the Explorer process for you.\n"
+"Do you want to restart the Explorer process?"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:483 DialogsWxw/PreferencesDialog.cpp:501
+#: DialogsWxw/PreferencesDialog.cpp:585
+msgid "Browse..."
+msgstr "ნუსხა..."
+
+#: DialogsWxw/PreferencesDialog.cpp:588
+msgid "Rebuild..."
+msgstr "კვლავ შექმნა..."
+
+#: DialogsWxw/PreferencesDialog.cpp:601
+msgid "Sample text"
+msgstr "ტექსტის ნიმუში"
+
+#: DialogsWxw/PreferencesDialog.cpp:608
+msgid "Select colour..."
+msgstr "ფერის არჩევა..."
+
+#: DialogsWxw/PreferencesDialog.cpp:799 TortoiseAct/TortoiseAct.cpp:3388
+msgid "Error rebuilding icons. You may not have the required permissions."
+msgstr "ხატების განახლების შეცდომა. შესაძლოა საკმარისი უფლებები არ გაქვთ."
+
+#: DialogsWxw/PreferencesDialog.cpp:810
+msgid "Cache has been cleared"
+msgstr "ბუფერი გასუფთავდა"
+
+#: DialogsWxw/PreferencesDialog.cpp:822
+msgid "Ignored files"
+msgstr "იგნორირებული ფაილები"
+
+#: DialogsWxw/PreferencesDialog.cpp:824
+msgid "Per-user list of cvsignore file name patterns"
+msgstr "იგნორირებადი ფაილების (cvsignore) შაბლონების სახელთა მომხმარებლის სია"
+
+#: DialogsWxw/PreferencesDialog.cpp:832
+msgid "Hint: To reset the list and include all files, enter a single exclamation mark (\"!\")."
+msgstr "მინიშნება: სიის გასანულებლად და ყველა ფაილის ჩასართავად მიუთითეთ ძახილის ნიშანი  (\"!\")."
+
+#: DialogsWxw/PreferencesDialog.cpp:838
+msgid "A list of files (or file name patterns like \"*.exe\") that CVS ignores when running certain operations. The entries must be separated by whitespace and are appended to the default built-in ignored list. A single exclamation mark (\"!\") resets the list. For details refer to the original CVS documentation."
+msgstr "ფაილების (ან ტიპების, მაგ. \"*.exe\") სია, რომელთა იგნორირებაც უნდა მოხდეს CVS–ის მიერ გარკვეული ტიპის ოპერაციების ჩატარებისას. თითოეული ტიპი ხარეთი უნდა გამოიყოს. ისინი დაემატება იგნორირებულთა ჩადგმულ სიას. ნიშანი (\"!\") ანულებს სიას. დაწვრილებით ნახეთ CVS დოკუმენტაციაში."
+
+#: DialogsWxw/PreferencesDialog.cpp:870
+msgid "Scope"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:872
+#, fuzzy
+msgid "Preference &scope"
+msgstr "პარამეტრები..."
+
+#: DialogsWxw/PreferencesDialog.cpp:875
+msgid "Whether to set preferences globally or for the current module"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:879
+msgid "Set global preferences"
+msgstr ""
+
+#: DialogsWxw/PreferencesDialog.cpp:894 DialogsWxw/PreferencesDialog.cpp:905
+#, c-format
+msgid "PrefControl index %d not found"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:150 ProgressDialogStub.cpp:36
+msgid "TortoiseCVS - Working"
+msgstr "TortoiseCVS - მუშაობს"
+
+#: DialogsWxw/ProgressDialog.cpp:159
+msgid "TortoiseCVS - Finished"
+msgstr "TortoiseCVS - დასრულდა"
+
+#: DialogsWxw/ProgressDialog.cpp:180
+msgid "Working..."
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:188
+msgid "Abort"
+msgstr "შეწყვეტა"
+
+#: DialogsWxw/ProgressDialog.cpp:205
+msgid "Close on completion"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:542
+msgid "TortoiseCVS - Aborting"
+msgstr "TortoiseCVS - შეწყვეტა"
+
+#: DialogsWxw/ProgressDialog.cpp:543
+#, fuzzy
+msgid "Aborting..."
+msgstr "პროგრამის შესახებ..."
+
+#: DialogsWxw/ProgressDialog.cpp:578
+msgid "TortoiseCVS - Aborted"
+msgstr "TortoiseCVS - შეწყდა"
+
+#: DialogsWxw/ProgressDialog.cpp:579
+#, fuzzy
+msgid "Aborted"
+msgstr "შეწყვეტა"
+
+#: DialogsWxw/ProgressDialog.cpp:585
+#, fuzzy
+msgid "Finished"
+msgstr "დამატება %s-ში დასრულდა"
+
+#: DialogsWxw/ProgressDialog.cpp:813
+msgid "Output"
+msgstr ""
+
+#: DialogsWxw/ProgressDialog.cpp:896
+#, fuzzy
+msgid "Copy"
+msgstr "კოპირება"
+
+#: DialogsWxw/ProgressDialog.cpp:903
+#, fuzzy
+msgid "Select All"
+msgstr "ყველას მონიშვნა"
+
+#: DialogsWxw/ReleaseDialog.cpp:43 TortoiseAct/TortoiseAct.cpp:4100
+msgid "multiple folders"
+msgstr "მრავალი დასტა"
+
+#: DialogsWxw/ReleaseDialog.cpp:44
+#, c-format
+msgid "Finished release in %s"
+msgstr "დასრულდა გამოქვეყნება %s"
+
+#: DialogsWxw/ReleaseDialog.cpp:76
+#, c-format
+msgid "CVS Release in %s will result in the following potentially destructive changes:"
+msgstr "CVS გამოქვეყნებამ აქ %s შესაძლოა შემდეგი მავნე ცვლილებები გამოიწვიოს:"
+
+#: DialogsWxw/ReleaseDialog.cpp:79
+#, c-format
+msgid "%d modified file(s)"
+msgstr "%d შეცვლილი ფაილი"
+
+#: DialogsWxw/ReleaseDialog.cpp:82
+#, c-format
+msgid "%d newly added file(s) that have not been committed"
+msgstr "%d ახლად დამატებული და არ დაფიქსირებული ფაილი "
+
+#: DialogsWxw/ReleaseDialog.cpp:86
+#, c-format
+msgid "%d removed file(s) that have not been committed"
+msgstr "%d ამოშლილი და არ დაფიქსირებული ფაილი "
+
+#: DialogsWxw/ReleaseDialog.cpp:90
+#, fuzzy, c-format
+msgid "%d renamed file(s) that have not been committed"
+msgstr "%d ამოშლილი და არ დაფიქსირებული ფაილი "
+
+#: DialogsWxw/ReleaseDialog.cpp:94
+#, c-format
+msgid "%d file(s) that are not under CVS control"
+msgstr "%d ფაილი, რომელიც/ებიც CVS კონტროლს არ ექვემდებარება"
+
+#: DialogsWxw/ReleaseDialog.cpp:97
+#, c-format
+msgid "%s will be deleted.  Are you sure you want to do this?"
+msgstr "%s წაიშლება. ნამდვილად გსურთ ამის გაკეთება?"
+
+#: DialogsWxw/ReleaseDialog.cpp:109
+msgid "Releasing in "
+msgstr "გამოქვეყნება აქ"
+
+#: DialogsWxw/ReleaseDialog.cpp:122
+msgid "TortoiseCVS - Release"
+msgstr "TortoiseCVS - გამოქვეყნება"
+
+#: DialogsWxw/ReleaseDialog.cpp:128
+msgid "Release Options:"
+msgstr "გამოქვეყნების პარამეტრები:"
+
+#: DialogsWxw/ReleaseDialog.cpp:133
+msgid "Delete files and folders that are under CVS control (-d)"
+msgstr "CVS დაქვემდებარების ფაილებისა და დასტების წაშლა (-d)"
+
+#: DialogsWxw/ReleaseDialog.cpp:134
+msgid "Delete contents of folders including non-cvs files (-d -f)"
+msgstr "დასტების შიგთავსის წაშლა არა-cvs ფაილების ჩათვლით (-d -f)"
+
+#: DialogsWxw/ReleaseDialog.cpp:135
+msgid "Delete CVS control files only (-e)"
+msgstr "მხოლოდ CVS საკონტროლო ფაილების წაშლა (-e)"
+
+#: DialogsWxw/RenameDialog.cpp:53
+#, fuzzy
+msgid "TortoiseCVS - Rename"
+msgstr "TortoiseCVS - გამოქვეყნება"
+
+#: DialogsWxw/RenameDialog.cpp:63
+#, fuzzy, c-format
+msgid "Rename '%s' to"
+msgstr "ფაილის სახელი"
+
+#: DialogsWxw/RenameDialog.cpp:105
+msgid "Rename to"
+msgstr ""
+
+#: DialogsWxw/RevOptions.cpp:65
+msgid "Branch or tag"
+msgstr "განშტოება ან ჭდე"
+
+#: DialogsWxw/RevOptions.cpp:68
+msgid "Use &HEAD branch"
+msgstr "მთავარი HEAD განშტოების გამოყენება"
+
+#: DialogsWxw/RevOptions.cpp:71
+msgid "&Choose branch or tag"
+msgstr "განშტოების ან ჭდის არჩევა"
+
+#: DialogsWxw/RevOptions.cpp:73
+msgid "Branch or tag name:"
+msgstr "განშტოების ან ჭდის სახელი:"
+
+#: DialogsWxw/RevOptions.cpp:87 TortoiseAct/TortoisePreferences.cpp:503
+msgid "If no matching revision is found, use the most recent one"
+msgstr "თუ შესაბამისი ვერსია ვერ მოიძებნა ბოლო ვერსიის გამოყენება"
+
+#: DialogsWxw/RevOptions.cpp:89 DialogsWxw/UpdateDlg.cpp:439
+#, fuzzy
+msgid "If you've specified a tag / branch / date, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr "თუ მიუთითეთ ჭდე / განშტოება / თარიღი და შესაბამისი ვერსია ვერ მოიძებნა, CVS მთავარ ვერსიას შეარჩევს."
+
+#: DialogsWxw/RevOptions.cpp:91
+msgid "Which tag or branch should be retrieved"
+msgstr "მისაღები ჭდე ან განშტოება"
+
+#: DialogsWxw/RevOptions.cpp:100
+msgid "Date and time"
+msgstr "თარიღი"
+
+#: DialogsWxw/RevOptions.cpp:105
+msgid ""
+"Choose a date from the calendar, and/or edit the date and time in the box above the calendar, e.g.\n"
+"  \"1988-09-24\"\n"
+"  \"yesterday\"\n"
+"  \"24 Sep 20:05\""
+msgstr ""
+"შეარჩიეთ თარიღი კალენდრიდან და/ან მიუთითეთ თარიღის ველში, მაგალითად\n"
+"  \"1988-09-24\"\n"
+"  \"გუშინ\"\n"
+"  \"24 სექ 20:05\""
+
+#: DialogsWxw/RevOptions.cpp:109
+msgid "Most &recent files"
+msgstr "ბოლო ფაილები"
+
+#: DialogsWxw/RevOptions.cpp:111
+msgid "Files at certain &time"
+msgstr "გარკვეული დროის ფაილები"
+
+#: DialogsWxw/RevOptions.cpp:112
+msgid "Date/time of files to get:"
+msgstr "მისაღები ფაილების თარიღი:"
+
+#: DialogsWxw/UpdateDlg.cpp:151
+msgid "TortoiseCVS - Update"
+msgstr "TortoiseCVS - განახლება"
+
+#: DialogsWxw/UpdateDlg.cpp:170
+msgid "Basic"
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:171 TortoiseAct/TortoisePreferences.cpp:45
+#: TortoiseAct/TortoisePreferences.cpp:280
+#: TortoiseAct/TortoisePreferences.cpp:297
+#: TortoiseAct/TortoisePreferences.cpp:304
+#: TortoiseAct/TortoisePreferences.cpp:316
+#: TortoiseAct/TortoisePreferences.cpp:324
+#: TortoiseAct/TortoisePreferences.cpp:332
+#: TortoiseAct/TortoisePreferences.cpp:338
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Advanced"
+msgstr "დეტალები"
+
+#: DialogsWxw/UpdateDlg.cpp:370
+msgid "Get &tag/branch/revision:"
+msgstr "ჭდის/განშტოების/ვერსიის მიღება:"
+
+#: DialogsWxw/UpdateDlg.cpp:372
+msgid "Switches your working copy to a specific branch/tag/revision. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "თქვენო სამუშაო ასლის გარკვეულ განშტოებაზე/ჭდეზე/ვერსიაზე გადართვა. იგულისხმება 'მიბმა', რათა შემდეგი განახლებები, ფიქსირებები და ა.შ. ამ ვერსიასთვის კვლავაც შესრულდეს."
+
+#: DialogsWxw/UpdateDlg.cpp:383
+msgid "Branch/Tag/Revision specifier"
+msgstr "განშტოების/ჭდის/ვერსიის მაჩვენებელი"
+
+#: DialogsWxw/UpdateDlg.cpp:394
+msgid "Scan subdirs"
+msgstr "ქვედასტების სკანირება"
+
+#: DialogsWxw/UpdateDlg.cpp:402
+msgid "Get &date/time:"
+msgstr "თარიღის მიღება"
+
+#: DialogsWxw/UpdateDlg.cpp:404
+msgid "Switches your working copy to the latest version before a specific date. Implies stickiness, so subsequent updates, commits etc. will operate on that version."
+msgstr "თქვენო სამუშაო ასლის მითითებულ თარიღთან უახლოესზე გადართვა. იგულისხმება 'მიბმა', რათა შემდეგი განახლებები, ფიქსირებები და ა.შ. ამ ვერსიასთვის კვლავაც შესრულდეს."
+
+#: DialogsWxw/UpdateDlg.cpp:427
+msgid "&Clean copy - WARNING:  this deletes your changes"
+msgstr "სუფთა ასლი - ყურადღება: ამით თქვენი ცვლილებები წაიშლება"
+
+#: DialogsWxw/UpdateDlg.cpp:429
+msgid ""
+"Overwrite any locally modified files during the update.\n"
+"They are backed up to .#file.revision in case you do this by mistake."
+msgstr ""
+"ყველა ადგილობრივი შეცვლილი ფაილის ზემოდან გადაწერა ამ განახლებისას.\n"
+"შეცდომით განახლებისას ისინი გადაიწერება .#file.revision. სამარაგო ფაილებში."
+
+#: DialogsWxw/UpdateDlg.cpp:432
+#, fuzzy
+msgid "Create missing &subfolders"
+msgstr "გამოტოვებული ქვედასტების შექმნა"
+
+#: DialogsWxw/UpdateDlg.cpp:437
+#, fuzzy
+msgid "If no &matching revision is found, use the most recent one"
+msgstr "თუ შესაბამისი ვერსია ვერ მოიძებნა ბოლო ვერსიის გამოყენება"
+
+#: DialogsWxw/UpdateDlg.cpp:462
+#, fuzzy
+msgid "Get &folder:"
+msgstr "საწყისი დასტა"
+
+#: DialogsWxw/UpdateDlg.cpp:464
+msgid "Perform the update on the specified folder only. Useful for getting a single new folder without getting all other new folders."
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:476
+#, fuzzy
+msgid "&Simulate update"
+msgstr "განახლების სიმულირება"
+
+#: DialogsWxw/UpdateDlg.cpp:477
+msgid "Do not execute anything that will change the disk."
+msgstr "დისკზე ფიზიკური ცვლილებების ქმედებების აკრძალვა."
+
+#: DialogsWxw/UpdateDlg.cpp:479
+#, fuzzy
+msgid "&Prune empty folders"
+msgstr "ცარიელი დასტების ამოშლა"
+
+#: DialogsWxw/UpdateDlg.cpp:480
+#, fuzzy
+msgid "Delete any folders that do not contain files."
+msgstr "CVS დაქვემდებარების ფაილებისა და დასტების წაშლა (-d)"
+
+#: DialogsWxw/UpdateDlg.cpp:482
+msgid "&Recurse"
+msgstr ""
+
+#: DialogsWxw/UpdateDlg.cpp:483
+#, fuzzy
+msgid "Update subfolders."
+msgstr "ქვედასტების სკანირება"
+
+#: DialogsWxw/YesNoAllDialog.cpp:63
+#, fuzzy
+msgid "TortoiseCVS - Question"
+msgstr "TortoiseCVS კითხვა"
+
+#: DialogsWxw/YesNoAllDialog.cpp:75
+msgid "&Yes"
+msgstr ""
+
+#: DialogsWxw/YesNoAllDialog.cpp:77
+msgid "&No"
+msgstr ""
+
+#: DialogsWxw/YesNoAllDialog.cpp:84
+msgid "Yes to &all"
+msgstr ""
+
+#: DialogsWxw/YesNoAllDialog.cpp:86
+msgid "N&o to all"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:314
+msgid "Unknown verb:"
+msgstr "უცნობი ზმნა:"
+
+#: TortoiseAct/TortoiseAct.cpp:326
+msgid ""
+"Too few arguments passed to TortoiseAct.\n"
+"\n"
+"TortoiseAct is designed to be run by the Explorer extension TrtseShl.dll. You don't need to run it yourself unless you have a special purpose.\n"
+"\n"
+"Command line arguments:\n"
+"TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"
+msgstr ""
+"TortoiseAct-ს ძალიან ბევრი არგუმენტი გადაეცა.\n"
+"\n"
+"TortoiseAct შემუშავებულია TrtseShl.dll გაფართოების გამოსაყენებლად. მისი ხელით დაწყება საჭირო არაა.\n"
+"\n"
+"ბრძანების პარამეტრები:\n"
+"TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"
+
+#: TortoiseAct/TortoiseAct.cpp:351
+#, fuzzy, c-format
+msgid "Invalid arguments passed to TortoiseAct (expected handle \"-h 0xXXXXXXXX\", got %s)"
+msgstr "TortoiseAct-ს მცდარი არგუმენტი გადაეცა (მოსალოდნელი იყო \"-h 0xXXXXXXXX\")"
+
+#: TortoiseAct/TortoiseAct.cpp:364
+msgid "File containing input filenames not found:"
+msgstr "ფაილის მითითებული სახელების შემცველი ფაილი ვერ მოიძებნა:"
+
+#: TortoiseAct/TortoiseAct.cpp:398
+msgid "Empty file list disallowed"
+msgstr "ფაილების ცარიელი სიის აკრძალვა"
+
+#: TortoiseAct/TortoiseAct.cpp:476
+#, c-format
+msgid "Finished add in %s"
+msgstr "დამატება %s-ში დასრულდა"
+
+#: TortoiseAct/TortoiseAct.cpp:568
+#, c-format
+msgid "Adding in %s"
+msgstr "დამატება აქ %s"
+
+#: TortoiseAct/TortoiseAct.cpp:654
+msgid "There is nothing to add or commit."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:712 TortoiseAct/TortoiseAct.cpp:727
+#, c-format
+msgid "Finished adding to .cvsignore in %s"
+msgstr "დამატება .cvsignore–ში დასრულდა - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:799 TortoiseAct/TortoiseAct.cpp:904
+#: TortoiseAct/TortoiseAct.cpp:3545
+#, c-format
+msgid "Finished checkout in %s"
+msgstr "დასრულდა გადმოტანა %s"
+
+#: TortoiseAct/TortoiseAct.cpp:813 TortoiseAct/TortoiseAct.cpp:3589
+msgid "No tag specified for Export, using HEAD"
+msgstr "საექსპორტო ჭდე არ მითითებულა, გამოიყენება HEAD"
+
+#: TortoiseAct/TortoiseAct.cpp:860 TortoiseAct/TortoiseAct.cpp:918
+#: TortoiseAct/TortoiseAct.cpp:3587
+#, c-format
+msgid "Checking out in %s"
+msgstr "გადმოტანა აქ - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:921
+msgid "You can now compile the TortoiseCVS code."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:923
+msgid "Create a patch file: If you fix some bugs or add some new features, please submit the changes for other users.  Right click on the changed files or folders and choose Make Patch from the CVS submenu."
+msgstr "ბებკის შექმნა: თუ გაასწორეთ შეცდომები ან დაუმატეთ ახალი შესაძლებლობები, წარუდგინეთ ისინი სხვა მომხმარებლებს. ამისთვის მარჯვენა ღილაკით დაწკაპეთ შეცვლილი ფაილები ან დასტები და CVS ქვემენიუში მიუთითეთ \"ბებკის შექმნა\"."
+
+#: TortoiseAct/TortoiseAct.cpp:943
+msgid "You should not create a module in the root folder of a drive."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:967
+#, c-format
+msgid "Finished make new module in %s"
+msgstr "დასრულდა ახლი მოდულის შექმნა %s"
+
+#: TortoiseAct/TortoiseAct.cpp:978
+msgid "Importing"
+msgstr "იმპორტი"
+
+#: TortoiseAct/TortoiseAct.cpp:998
+msgid "Checking out"
+msgstr "გადმოტანა"
+
+#: TortoiseAct/TortoiseAct.cpp:1010
+msgid "Enabling watch"
+msgstr "თვალთავლის ჩართვა"
+
+#: TortoiseAct/TortoiseAct.cpp:1015
+msgid ""
+"Tortoise Tip: The top-level folder has now been created in CVS.\n"
+"To add files and subfolders, invoke the CVS Add Contents command."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1056
+msgid ""
+"There is nothing to commit.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"დასაფიქსირებელი არაფერია.\n"
+"\n"
+"ყველა მონიშნული ფაილი და დასტა არ შეცვლილა ბოლო ფიქსირების შემდეგ."
+
+#: TortoiseAct/TortoiseAct.cpp:1104
+#, c-format
+msgid "Finished log in %s"
+msgstr "დასრულდა ჟურნალი %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1126
+#, c-format
+msgid "Logging in %s"
+msgstr "ჟურნალი - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1181
+#, c-format
+msgid "Are you sure that you want to CVS Remove all files in the folder '%s'?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1184
+#, c-format
+msgid "Are you sure that you want to CVS Remove '%s'?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1187
+#, c-format
+msgid "Are you sure that you want to CVS Remove these %d items?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1256
+#, fuzzy
+msgid "No files found that could be removed.\n"
+msgstr "ვერ მოიძებნა ფაილები რომელთა წაშლაც შეიძლება"
+
+#: TortoiseAct/TortoiseAct.cpp:1257
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, and then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1265
+#, c-format
+msgid "Finished remove in %s"
+msgstr "დასრულდა ამოშლა %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1324
+#, c-format
+msgid ""
+"The file\n"
+"\n"
+"%s\n"
+"is modified. Are you sure that you want to remove it and thus lose your changes?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1331
+#, c-format
+msgid ""
+"The files\n"
+"\n"
+"%s\n"
+"are modified. Are you sure that you want to remove them and thus lose your changes?"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1339 TortoiseAct/TortoiseAct.cpp:2428
+#, c-format
+msgid "Editing in %s"
+msgstr "რედაქტირება - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1356
+#, c-format
+msgid "Removing in %s"
+msgstr "ამოშლა - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1374
+#, c-format
+msgid ""
+"Couldn't rename file:\n"
+"%s to %s"
+msgstr ""
+"ვერ ვახერხებ ფაილის გადარქმევას:\n"
+"%s - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1409 TortoiseAct/TortoiseAct.cpp:1431
+#, c-format
+msgid ""
+"Couldn't rename file back:\n"
+"%s to %s"
+msgstr ""
+"ვერ ვახერხებ ფაილის სახელის აღდგენას:\n"
+"%s - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1459
+#, fuzzy
+msgid "Couldn't recycle"
+msgstr "ვერ ვასკანირებ დასტას %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1466
+msgid "No removable files found"
+msgstr "წაშლადი ფაილები ვერ მოიძებნა"
+
+#: TortoiseAct/TortoiseAct.cpp:1488
+#, fuzzy
+msgid ""
+"Tortoise Tip: Any removed files have been moved to the Recycle Bin.\n"
+"To undo the remove: Choose CVS Commit, right-click the file, and click Restore.\n"
+msgstr ""
+"Tortoise რჩევა: ნებისმიერი დაშორებული ფაილი ურნაში მოთავსდება.\n"
+"შეგიძლიათ გააუქმოთ ამოშლა და აღადგინოთ ფაილი ურნიდან CVS დამატება ბრძანების გამოყენებით."
+
+#: TortoiseAct/TortoiseAct.cpp:1490
+msgid "Note that CVS does not keep track of folders explicitly; if you wish to remove a folder, remove the files inside it, then do a CVS Update. This requires that the preference setting 'Prune empty folders' is enabled."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:1520
+#, fuzzy, c-format
+msgid "Finished rename in %s"
+msgstr "დასრულდა ამოშლა %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1540
+#, c-format
+msgid "Finished restoring in %s"
+msgstr "დასრულდა აღდგენა %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1583
+#, c-format
+msgid "Restoring in %s"
+msgstr "აღდგენა - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1661
+#, c-format
+msgid "Finished update in %s"
+msgstr "დასრულდა განახლება %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1715
+#, c-format
+msgid "Updating in %s"
+msgstr "განახლება - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1769
+#, fuzzy, c-format
+msgid "Finished clean update in %s"
+msgstr "დასრულდა განახლება %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1781
+#, fuzzy, c-format
+msgid "Doing clean update in %s"
+msgstr "დასრულდა განახლება %s"
+
+#: TortoiseAct/TortoiseAct.cpp:1979
+#, c-format
+msgid "Editing before merge in %s"
+msgstr "რედაქტირება შერწყმამდე - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2039
+#, c-format
+msgid "Finished merge in %s"
+msgstr "დასრულდა შერწყმა %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2058
+#, c-format
+msgid "Merging in %s"
+msgstr "შერწყმა - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2147
+msgid "unknown"
+msgstr "უცნობი"
+
+#: TortoiseAct/TortoiseAct.cpp:2203 TortoiseAct/TortoiseAct.cpp:3881
+msgid "Failed to reprocess file list"
+msgstr "ვერ ვახდენ ფაილების სიის ხელახლა დამუშავებას"
+
+#: TortoiseAct/TortoiseAct.cpp:2212
+#, c-format
+msgid "Finished making patch in %s"
+msgstr "დასრულდა ბებკის შექმნა %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2234
+#, c-format
+msgid "Making patch in %s"
+msgstr "ბებკის შექმნა - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2248
+msgid ""
+"There are no patches.\n"
+"\n"
+"All the files and folders that you selected are unchanged since you last performed a commit."
+msgstr ""
+"ბებკები არ არის.\n"
+"\n"
+"დასტაში შერჩული ყველა ფაილი არ შეცვლილა ბოლო ფიქსირების შემდეგ."
+
+#: TortoiseAct/TortoiseAct.cpp:2254
+msgid "Patch files"
+msgstr "ბებკი ფაილები"
+
+#: TortoiseAct/TortoiseAct.cpp:2256
+msgid "Text files"
+msgstr "ტექსტური ფაილები"
+
+#: TortoiseAct/TortoiseAct.cpp:2258 TortoiseAct/TortoiseAct.cpp:3251
+msgid "All files"
+msgstr "ყველა ფაილი"
+
+#: TortoiseAct/TortoiseAct.cpp:2261
+msgid "Save patch file"
+msgstr "ბებკი ფაილის შენახვა"
+
+#: TortoiseAct/TortoiseAct.cpp:2426
+#, c-format
+msgid "Finished edit in %s"
+msgstr "დასრულდა რედაქტირება %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2508
+#, c-format
+msgid "Finished unedit in %s"
+msgstr "დასრულდა რედაქტირების გაუქმება %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2522
+#, c-format
+msgid "Unediting in %s"
+msgstr "ცლილებების გაუქმება - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2539
+#, c-format
+msgid "Finished list editors in %s"
+msgstr "დასრულდა რედქტორების სია %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2827
+msgid "Merging changes in binary files is not allowed."
+msgstr "ცვლილებების შერწყმა ორობით ფაილებში დაუშვებელია."
+
+#: TortoiseAct/TortoiseAct.cpp:2897
+msgid "The selected file doesn't contain any conflict markers"
+msgstr "მონიშნული ფაილები არ შეიცავენ კონფლიქტის ნიშნულებს"
+
+#: TortoiseAct/TortoiseAct.cpp:2910
+#, c-format
+msgid ""
+"File containing your changes: %s\n"
+"File containing repository changes: %s\n"
+"Please merge your changes into: %s"
+msgstr ""
+"თქვენი ცვლილებების შემცველი ფაილი: %s\n"
+"საცავის ცვლილებების შემცველი ფაილი: %s\n"
+"თვენი ცვლილებების შერწყმა: %s"
+
+#: TortoiseAct/TortoiseAct.cpp:2946
+#, c-format
+msgid "Do you want to overwrite your working copy of \"%s\" with your merge results in \"%s\"?"
+msgstr "ნამდვილად გსურთ თქვენი სამუშაო დასტის \"%s\" ზემოდან გადაწერა შერწყმის შედეგებით \"%s\"?"
+
+#: TortoiseAct/TortoiseAct.cpp:2949
+msgid "Save merged file"
+msgstr "შერწყმული ფაილების შენახვა"
+
+#: TortoiseAct/TortoiseAct.cpp:2960
+#, c-format
+msgid "Failed to overwrite %s"
+msgstr "ვერ ვაწერ ზემოდან - %s"
+
+#: TortoiseAct/TortoiseAct.cpp:3250
+msgid "Save file revision"
+msgstr "ფაილის ვერსიის შენახვა"
+
+#: TortoiseAct/TortoiseAct.cpp:3351
+msgid "There are no conflicts to resolve"
+msgstr "მოსაგვარებელი კონფლიქტები არ არის"
+
+#: TortoiseAct/TortoiseAct.cpp:3461
+#, fuzzy, c-format
+msgid "Finished '%s' in %s"
+msgstr "დამატება %s-ში დასრულდა"
+
+#: TortoiseAct/TortoiseAct.cpp:3487
+msgid "Invalid cvs:// URL"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3497
+msgid "Invalid cvs:// URL: no module specified"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3510
+#, c-format
+msgid "Invalid CVSROOT %s specified in cvs:// URL"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3538
+msgid "Choose destination folder for CVS checkout"
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3539
+#, fuzzy
+msgid "Folders"
+msgstr "დასტა"
+
+#: TortoiseAct/TortoiseAct.cpp:3754
+msgid ""
+"The files you want to compare contain characters that cannot be represented in the current codepage.\n"
+"To prevent loss of information, the files will be temporarily converted to UTF-8."
+msgstr ""
+"ფაილები, რომელთა შედარებაც გსურთ შეიცავს სიმბოლოებს რომლებიც არ აისახება მიმდინარე კოდურ გვერდზე.\n"
+"ინფორმაციის დაკარგვის თავიდან ასაცილებლად ფაილები დროებით გარდაიქმნება UTF-8 კოდირებაში."
+
+#: TortoiseAct/TortoiseAct.cpp:3756
+msgid "UTF-8 conversion"
+msgstr "UTF-8 გარდაქმნა"
+
+#: TortoiseAct/TortoiseAct.cpp:3869
+msgid ""
+"You have tried to commit one or more renamed files without committing all changed\n"
+"(modified, added, or removed) files in the same folder.\n"
+"CVSNT does not currently support this. Please try again."
+msgstr ""
+
+#: TortoiseAct/TortoiseAct.cpp:3888
+#, c-format
+msgid "Finished commit in %s"
+msgstr "დასრულდა ფიქსირება %s"
+
+#: TortoiseAct/TortoiseAct.cpp:3986
+#, c-format
+msgid "Committing in %s"
+msgstr "ფიქსირება - %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:45
+msgid "Choose external diff application"
+msgstr "მიუთითეთ გარე პროგრამა შედარებისთვის"
+
+#: TortoiseAct/TortoiseActUtils.cpp:50
+msgid "Choose external merge application"
+msgstr "მიუთითეთ გარე პროგრამა შერყმისთვის"
+
+#: TortoiseAct/TortoiseActUtils.cpp:74 TortoiseAct/TortoisePreferences.cpp:364
+#: TortoiseAct/TortoisePreferences.cpp:401
+#: TortoiseAct/TortoisePreferences.cpp:439
+#: TortoiseAct/TortoisePreferences.cpp:454
+msgid "Executables"
+msgstr "პროგრამები"
+
+#: TortoiseAct/TortoiseActUtils.cpp:109 TortoiseAct/TortoiseActUtils.cpp:137
+#, c-format
+msgid "Finished diff in %s"
+msgstr "დასრულდა შედარება %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:111 TortoiseAct/TortoiseActUtils.cpp:139
+#, c-format
+msgid "Diffing in %s"
+msgstr "შედარება - %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:246 TortoiseAct/TortoiseActUtils.cpp:248
+#, fuzzy, c-format
+msgid "Viewing %s"
+msgstr "შედარება - %s"
+
+#: TortoiseAct/TortoiseActUtils.cpp:362
+msgid "Failed to launch external diff application"
+msgstr "ვერ ვიწყებ შედარების გარე პროგრამას"
+
+#: TortoiseAct/TortoiseActUtils.cpp:414
+msgid "Failed to launch external merge application"
+msgstr "ვერ ვიწყებ შერწყმის გარე პროგრამას"
+
+#: TortoiseAct/TortoisePreferences.cpp:41
+#: TortoiseAct/TortoisePreferences.cpp:177
+#: TortoiseAct/TortoisePreferences.cpp:189
+#: TortoiseAct/TortoisePreferences.cpp:199
+#: TortoiseAct/TortoisePreferences.cpp:214
+#: TortoiseAct/TortoisePreferences.cpp:221
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "Main"
+msgstr "მთავარი"
+
+#: TortoiseAct/TortoisePreferences.cpp:42
+#: TortoiseAct/TortoisePreferences.cpp:472
+#: TortoiseAct/TortoisePreferences.cpp:482
+#: TortoiseAct/TortoisePreferences.cpp:490
+#: TortoiseAct/TortoisePreferences.cpp:498
+#: TortoiseAct/TortoisePreferences.cpp:507
+#: TortoiseAct/TortoisePreferences.cpp:523
+#: TortoiseAct/TortoisePreferences.cpp:537
+#: TortoiseAct/TortoisePreferences.cpp:549
+#: TortoiseAct/TortoisePreferences.cpp:560
+#: TortoiseAct/TortoisePreferences.cpp:570
+msgid "Policy"
+msgstr "წესები"
+
+#: TortoiseAct/TortoisePreferences.cpp:43
+#: TortoiseAct/TortoisePreferences.cpp:588
+#: TortoiseAct/TortoisePreferences.cpp:597
+#: TortoiseAct/TortoisePreferences.cpp:606
+#, fuzzy
+msgid "Edit"
+msgstr "რედაქტირება"
+
+#: TortoiseAct/TortoisePreferences.cpp:44
+#: TortoiseAct/TortoisePreferences.cpp:361
+#: TortoiseAct/TortoisePreferences.cpp:368
+#: TortoiseAct/TortoisePreferences.cpp:381
+#: TortoiseAct/TortoisePreferences.cpp:398
+#: TortoiseAct/TortoisePreferences.cpp:404
+#: TortoiseAct/TortoisePreferences.cpp:418
+#: TortoiseAct/TortoisePreferences.cpp:434
+#: TortoiseAct/TortoisePreferences.cpp:442
+#: TortoiseAct/TortoisePreferences.cpp:450
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "Tools"
+msgstr "ხელსაწყოები"
+
+#: TortoiseAct/TortoisePreferences.cpp:46
+#: TortoiseAct/TortoisePreferences.cpp:665
+#: TortoiseAct/TortoisePreferences.cpp:672
+#: TortoiseAct/TortoisePreferences.cpp:679
+#: TortoiseAct/TortoisePreferences.cpp:686
+#: TortoiseAct/TortoisePreferences.cpp:693
+#: TortoiseAct/TortoisePreferences.cpp:700
+#: TortoiseAct/TortoisePreferences.cpp:707
+#: TortoiseAct/TortoisePreferences.cpp:714
+msgid "Appearance"
+msgstr "იერსახე"
+
+#: TortoiseAct/TortoisePreferences.cpp:47
+#: TortoiseAct/TortoisePreferences.cpp:725
+#: TortoiseAct/TortoisePreferences.cpp:732
+#: TortoiseAct/TortoisePreferences.cpp:739
+msgid "Cache"
+msgstr "ბუფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:49
+#: TortoiseAct/TortoisePreferences.cpp:620
+#: TortoiseAct/TortoisePreferences.cpp:627
+#: TortoiseAct/TortoisePreferences.cpp:635
+#: TortoiseAct/TortoisePreferences.cpp:646
+#: TortoiseAct/TortoisePreferences.cpp:651
+msgid "Debug"
+msgstr "გამართვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:85
+msgid "Error"
+msgstr "შეცდომა"
+
+#: TortoiseAct/TortoisePreferences.cpp:177
+msgid "&Progress dialog"
+msgstr "მიმდინარეობა"
+
+#: TortoiseAct/TortoisePreferences.cpp:178
+msgid "Automatically close the progress window when a command completes successfully.  You can hold Ctrl down while selecting a CVS command, or as one is finishing, to prevent this on a one off basis."
+msgstr "მიმდინარეობის ფანჯრის ავტომატური დახურვა, ქმედების წარმატებით განხორციელების შემთხვევაში. დაჭერილი Ctrl ღილაკით შეგიძლიათ აირჩიოთ CVS ბრძანება, ან თუ დასრულებულია მისი ინდივიდუალური დაბლოკვა."
+
+#: TortoiseAct/TortoisePreferences.cpp:183
+msgid "Close manually"
+msgstr "ხელით დახურვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:184
+msgid "Close if no messages"
+msgstr "დახურვა თუ შეტყობინებები არაა"
+
+#: TortoiseAct/TortoisePreferences.cpp:185
+msgid "Close if no errors"
+msgstr "დახურვა თუ შეცდომები არაა"
+
+#: TortoiseAct/TortoisePreferences.cpp:189
+msgid "Progress &messages"
+msgstr "მიმდინარეობის შეტყობინება"
+
+#: TortoiseAct/TortoisePreferences.cpp:190
+msgid "How detailed CVS is about what it is doing.  Errors are always printed, even at the most silent levels."
+msgstr "რამდენად დეტალურად გაცნობებთ CVS სამუშაოს მიმდინარეობას. შეცდომების ყოველთვის (ყველაზე დაბალ დონეზეც) ჩვენება."
+
+#: TortoiseAct/TortoisePreferences.cpp:193
+msgid "Loud"
+msgstr "დაწვრილებით"
+
+#: TortoiseAct/TortoisePreferences.cpp:194
+msgid "Quiet"
+msgstr "შეკუმშული"
+
+#: TortoiseAct/TortoisePreferences.cpp:195
+msgid "Really Quiet"
+msgstr "ძლიერ შეკუმშული"
+
+#: TortoiseAct/TortoisePreferences.cpp:199
+msgid "&Overlay icons"
+msgstr "ხატების გადაფარვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:200
+msgid "The set of overlay icons TortoiseCVS uses."
+msgstr "გადაფარვისთვის გამოყენებული ხატების ნაკრები"
+
+#: TortoiseAct/TortoisePreferences.cpp:201
+msgid "Changes won't take effect until you log off or reboot."
+msgstr "ცვლილებები ძალაში არ შევა სეანსის დამთავრებამდე ან პროგრამის ხელახლა გაშვებამდე"
+
+#: TortoiseAct/TortoisePreferences.cpp:210
+msgid "Don't change icon."
+msgstr "ხატების არ შეცვლა"
+
+#: TortoiseAct/TortoisePreferences.cpp:211
+msgid "Change icon when folder contains changed files."
+msgstr "დასტის ხატის შეცვლა თუ მასში ფაილები შეიცვალა."
+
+#: TortoiseAct/TortoisePreferences.cpp:212
+msgid "Change icon when folder or subfolders contain changed files."
+msgstr "ხატის შეცვლა თუ დასტაში ან მის ქვედასტებში ფაილები შეიცვალა."
+
+#: TortoiseAct/TortoisePreferences.cpp:214
+#, fuzzy
+msgid "Folder overlay icons"
+msgstr "დასტების ხატების გადაფარვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:215
+msgid "Change folder icon when folder or subfolders contain changed files."
+msgstr "დასტის ხატის შეცვლა თუ მასში ან მის ქვედასტებში ფაილები შეიცვალა."
+
+#: TortoiseAct/TortoisePreferences.cpp:221
+msgid "Autoload changed folder icons"
+msgstr "დასტების ხატებების ავტოგანახლება"
+
+#: TortoiseAct/TortoisePreferences.cpp:222
+msgid ""
+"Enabled: Changed folder icons are updated automatically.\n"
+"Disabled: Changed folder icons are only updated explicitly through the context menu."
+msgstr ""
+"ჩართულია: შეცვლილი ხატები ავტომატურად განახლდება.\n"
+"ამორთულია: შეცვლილი ხატები განახლდება მხოლოდ კონტექსტური მენიუს საშუალებით."
+
+#: TortoiseAct/TortoisePreferences.cpp:225
+msgid "Autoload folder icon overlays"
+msgstr "ხატებების გადაფარვის ავტოგანახლება"
+
+#: TortoiseAct/TortoisePreferences.cpp:230
+msgid "L&anguage"
+msgstr "ენა"
+
+#: TortoiseAct/TortoisePreferences.cpp:231
+msgid "The language used in TortoiseCVS dialogs and menus."
+msgstr "დიალოგებსა და მენიუებში გამოყენებული ენა."
+
+#: TortoiseAct/TortoisePreferences.cpp:257
+msgid "Windows default"
+msgstr "Windows საწყისი"
+
+#: TortoiseAct/TortoisePreferences.cpp:278
+msgid "<failed to calculate home folder>"
+msgstr "<ვერ ვითვლი საწყის დასტას>"
+
+#: TortoiseAct/TortoisePreferences.cpp:280
+msgid "Home folder"
+msgstr "საწყისი დასტა"
+
+#: TortoiseAct/TortoisePreferences.cpp:281
+msgid ""
+"The home folder is where the global .cvsignore file is stored. SSH connections also expect your .ssh folder with keys and known hosts to be in your home folder.\n"
+"By default, TortoiseCVS works out a home folder for you. It looks for folders in this order:\n"
+" - An environment variable called HOME\n"
+" - WinCVS specified home folder\n"
+" - My Documents.\n"
+"You can turn off this automatic calculation, and instead specify your own custom home folder below.\n"
+"Currently the calculation result is: "
+msgstr ""
+"სათაო დასტაში ინახება გლობალური .cvsignore ფაილი. SSH კავშირი ასევე გულისხმობს, რომ თქვენი .ssh გასაღებების დასტა და შესაბამისი სერვერები თქვენივე სათაო დასტაშია განთავსებული.\n"
+"საწყის რეჟიმში TortoiseCVS თავად უთითებს სათაო დასტას თქვენთვის. დასტები იძებნება შემდეგი რიგით:\n"
+" - გარემოს ცვლადი სახელად HOME\n"
+" - WinCVS მიერ მითითებული სათაო დასტა\n"
+" - ჩემი დოკუმენტები.\n"
+"შეგიძლიათ გამორთოთ ავტომატური ძებნა და სათაო დასტა ხელით მიუთითოთ.\n"
+"ამჟამად ძებნის შედეგია: "
+
+#: TortoiseAct/TortoisePreferences.cpp:293
+msgid "Always recalculate &home folder"
+msgstr "საწყისი დასტის ყოველთვის გათვლა"
+
+#: TortoiseAct/TortoisePreferences.cpp:297
+msgid "Custom home &folder"
+msgstr "მომხმარებლის ძირითადი დასტა"
+
+#: TortoiseAct/TortoisePreferences.cpp:298
+msgid "If you turn off automatic home folder calculation, you can enter an explicit path here."
+msgstr "თუ ამორთავთ საწყისი დასტის ავტომატურ გათვლას, შეგიძლიათ მიუთითოთ პირდაპირი მისამართი აქ. "
+
+#: TortoiseAct/TortoisePreferences.cpp:304
+msgid "&Network compression"
+msgstr "ქსელის გამტარობის შეკუმშვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:305
+msgid "Reduce network load by compressing traffic to and from the CVS server. High levels may be slow to calculate."
+msgstr "ქსელის დატვირთვის შემცირება CVS სერვერთან მონაცემთა გაცვლისას მათი შეკუმშვით. შეკუმშვის მაღალმა დონემ შესაძლოა შეანელოს მუშაობა."
+
+#: TortoiseAct/TortoisePreferences.cpp:308
+msgid "0 - None"
+msgstr "0 - არა"
+
+#: TortoiseAct/TortoisePreferences.cpp:309
+msgid "3 - Low"
+msgstr "3 - დაბალი"
+
+#: TortoiseAct/TortoisePreferences.cpp:310
+msgid "6 - Good"
+msgstr "6 - კარგი"
+
+#: TortoiseAct/TortoisePreferences.cpp:311
+msgid "9 - Best"
+msgstr "9 - საუკეთესო"
+
+#: TortoiseAct/TortoisePreferences.cpp:316
+msgid "&Excluded folders"
+msgstr "გამონაკლისი დასტები"
+
+#: TortoiseAct/TortoisePreferences.cpp:317
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are disabled."
+msgstr "დასტების წერტილ-მძიმით გაყოფილი სია, რომელთათვისაც ხატების გადაფარვები და კონტექსტური მენიუები ამორთულია."
+
+#: TortoiseAct/TortoisePreferences.cpp:324
+msgid "&Included folders"
+msgstr "თანდართული დასტები"
+
+#: TortoiseAct/TortoisePreferences.cpp:325
+msgid "Semicolon-delimited list of (absolute) folders for which overlay icons and context menus are enabled. An empty list enables all folders."
+msgstr "დასტების წერტილ-მძიმით გაყოფილი სია, რომელთათვისაც ხატების გადაფარვები და კონტექსტური მენიუები ჩართულია. ცარიელი სია ყველა დასტას ჩართავს."
+
+#: TortoiseAct/TortoisePreferences.cpp:332
+msgid "Menu icons"
+msgstr "მენიუს ხატები"
+
+#: TortoiseAct/TortoisePreferences.cpp:333
+msgid "Enable/disable"
+msgstr "ჩართვა/ამორთვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:335
+msgid "Enable menu &icons"
+msgstr "მენიუშI ხატების ჩართვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:339
+msgid "Maximum number of tags for graph"
+msgstr "ჭდეების მაქსიმალური რაოდენობა გრაფში"
+
+#: TortoiseAct/TortoisePreferences.cpp:340
+msgid "Controls how many tags the graph dialog will display per revision.  Enter -1 to show them all."
+msgstr "გრაფიკულ დიალოგში ნაჩვენები ჭდეების რაოდენობის განსაზღვრა. მიუთითეთ -1  - ყველას ჩვენება"
+
+#: TortoiseAct/TortoisePreferences.cpp:346
+msgid "Autodetect (default to DOS)"
+msgstr "ავტოამოცნობა (ძირითადი - DOS)"
+
+#: TortoiseAct/TortoisePreferences.cpp:347
+msgid "Autodetect (default to UNIX)"
+msgstr "ავტოამოცნობა (ძირითადი -  UNIX)"
+
+#: TortoiseAct/TortoisePreferences.cpp:348
+msgid "DOS"
+msgstr "DOS"
+
+#: TortoiseAct/TortoisePreferences.cpp:349
+msgid "UNIX"
+msgstr "UNIX"
+
+#: TortoiseAct/TortoisePreferences.cpp:351
+msgid "Sandbox DOS/UNIX"
+msgstr "DOS/UNIX 'ზარდახშა'"
+
+#: TortoiseAct/TortoisePreferences.cpp:352
+msgid "Use either LF (UNIX) or CRLF (DOS) line separators in text files."
+msgstr "ტექსტურ ფაილებში სტრიქონების გამყოფად LF (UNIX) ან CRLF (DOS) გამოყენება."
+
+#: TortoiseAct/TortoisePreferences.cpp:361
+msgid "&Diff application"
+msgstr "შედარების პროგრამა"
+
+#: TortoiseAct/TortoisePreferences.cpp:362
+msgid "Specify the program you use to compare files."
+msgstr "ფაილების შედარების პროგრამის მითითება."
+
+#: TortoiseAct/TortoisePreferences.cpp:368
+msgid "&Two-way diff parameters"
+msgstr "ორმხრივი შედარების პარამეტრები"
+
+#: TortoiseAct/TortoisePreferences.cpp:369
+msgid "Parameters for two-way diffs."
+msgstr "ორმხრივი შედარების პარამეტრები."
+
+#: TortoiseAct/TortoisePreferences.cpp:371
+#: TortoiseAct/TortoisePreferences.cpp:407
+#, fuzzy
+msgid "The default parameters are:"
+msgstr "სამმხრივი შედარების პარამეტრები"
+
+#: TortoiseAct/TortoisePreferences.cpp:373
+#: TortoiseAct/TortoisePreferences.cpp:374
+#: TortoiseAct/TortoisePreferences.cpp:387
+#: TortoiseAct/TortoisePreferences.cpp:389
+#: TortoiseAct/TortoisePreferences.cpp:391
+msgid "Name of file selected for diff."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:381
+msgid "T&hree-way diff parameters"
+msgstr "სამმხრივი შედარების პარამეტრები"
+
+#: TortoiseAct/TortoisePreferences.cpp:382
+msgid "Parameters for three-way diffs."
+msgstr "სამმხრივი შედარების პარამეტრები."
+
+#: TortoiseAct/TortoisePreferences.cpp:398
+msgid "&Merge application"
+msgstr "შერწყმის პროგრამა"
+
+#: TortoiseAct/TortoisePreferences.cpp:399
+msgid "Specify the program you use to merge files."
+msgstr "ფაილების შერწყმის პროგრამის მითითება."
+
+#: TortoiseAct/TortoisePreferences.cpp:404
+msgid "&Two-way merge parameters"
+msgstr "ორმხრივი შერწყმის პარამეტრები"
+
+#: TortoiseAct/TortoisePreferences.cpp:405
+msgid "Parameters for two-way merges."
+msgstr "ორმხრივი შერწყმის პარამეტრები."
+
+#: TortoiseAct/TortoisePreferences.cpp:409
+#: TortoiseAct/TortoisePreferences.cpp:424
+msgid "File containing my changes."
+msgstr "ჩემი ცვლილებების შემცველი ფაილი."
+
+#: TortoiseAct/TortoisePreferences.cpp:411
+#: TortoiseAct/TortoisePreferences.cpp:428
+msgid "File containing changes from repository."
+msgstr "საცავის ცვლილებების შემცველი ფაილი."
+
+#: TortoiseAct/TortoisePreferences.cpp:418
+msgid "T&hree-way merge parameters"
+msgstr "სამმხრივი შერწყმის პარამეტრები"
+
+#: TortoiseAct/TortoisePreferences.cpp:419
+msgid "Parameters for three-way merges."
+msgstr "სამმხრივი შერწყმის პარამეტრები."
+
+#: TortoiseAct/TortoisePreferences.cpp:422
+msgid ""
+"\n"
+"\n"
+"\"%mine\" \"%ancestor\" \"%yours\"\n"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:423
+#, c-format
+msgid ""
+"\n"
+"%mine: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:425
+#, c-format
+msgid ""
+"\n"
+"%ancestor: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:426
+#, fuzzy
+msgid "File containing common ancestor data."
+msgstr "ჩემი ცვლილებების შემცველი ფაილი."
+
+#: TortoiseAct/TortoisePreferences.cpp:427
+msgid ""
+"\n"
+"%yours: "
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:434
+msgid "SSH &application (:ext: only)"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:435
+msgid "Specify the CVS_EXT application (e.g. ssh.exe, plink.exe)"
+msgstr "CVS_EXT პროგრამის მითითება (მაგ., ssh.exe, plink.exe)"
+
+#: TortoiseAct/TortoisePreferences.cpp:442
+msgid "SSH &parameters (:ext: only)"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:443
+msgid "Parameters for the CVS_EXT application. The default parameters are:"
+msgstr "CVS_EXT პროგრამის პარამეტრები. საწყისი პარამეტრები:"
+
+#: TortoiseAct/TortoisePreferences.cpp:445
+msgid "CVS replaces %u with the username and %h with the hostname."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:450
+msgid "SSH &cvs server (:ext: only)"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:451
+#, fuzzy
+msgid "Specify the CVS_SERVER application (e.g. /usr/local/bin/cvsnt)"
+msgstr "CVS_EXT პროგრამის მითითება (მაგ., ssh.exe, plink.exe)"
+
+#: TortoiseAct/TortoisePreferences.cpp:457
+msgid "&Bug tracker URL"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:458
+#, c-format
+msgid "In the History and Revision Graph dialogs, TortoiseCVS can automatically create hyperlinks from log messages containing 'bug XXX' or '#XXX' where XXX is a number. This setting tells TortoiseCVS how to build that URL. %s will be replaced with the bug number."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:472
+msgid "Empty folders"
+msgstr "ცარიელი დასტები"
+
+#: TortoiseAct/TortoisePreferences.cpp:473
+msgid "Hide folders which contain no files. CVS doesn't directly manage folders, so the assumption here is that if you remove all the files from a folder you would like to remove the folder."
+msgstr "ცარიელი დასტების დამალვა. CVS პირდაპირ არ განკარგავს დასტებს, ამიტომ იგულისხმება, რომ დასტიდან ყველა ფაილის წაშლისას თქვენ იმავე დროს დასტასაც ამოშლით."
+
+#: TortoiseAct/TortoisePreferences.cpp:477
+msgid "Prune &empty folders"
+msgstr "ცარიელი დასტების ამოშლა"
+
+#: TortoiseAct/TortoisePreferences.cpp:482
+msgid "Read Only Default"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:483
+msgid "Checkout files read only by default, return files to read only with unedit and commit"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:485
+msgid "Read &Only Default"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:491
+#, fuzzy
+msgid "New folders"
+msgstr "საწყისი დასტა"
+
+#: TortoiseAct/TortoisePreferences.cpp:494
+msgid "Create new &folders on update"
+msgstr "ახალი დასტების შექმნა განახლების პროცესში"
+
+#: TortoiseAct/TortoisePreferences.cpp:499
+msgid "Force head revision"
+msgstr "მთავარი ვერსია"
+
+#: TortoiseAct/TortoisePreferences.cpp:500
+#, fuzzy
+msgid "If you've specified a tag/branch/date on checkout or update, and it matches no revision for a file, CVS will get you the head revision instead."
+msgstr "თუ გადმოტანისას ან განახლებისას მიუთითეთ ჭდე / განშტოება / თარიღი და შესაბამისი ვერსია არ არსებობს, CVS მთავარ ვერსიას აირჩევს."
+
+#: TortoiseAct/TortoisePreferences.cpp:508
+msgid "Automatic commit"
+msgstr "ავტომატური ფიქსირება"
+
+#: TortoiseAct/TortoisePreferences.cpp:509
+#, fuzzy
+msgid ""
+"If this is checked and you perform a 'CVS Add' and/or a 'CVS Remove', TortoiseCVS will automatically perform a commit of the file.\n"
+"It is recommended that you only enable this option if you work on documents, not source code, or if you are the only person working on the project."
+msgstr "თუ ეს პარამეტრი შერჩეულია და იყენებთ 'CVS დამატება'-ს, TortoiseCVS ავტომატურად დააფიქსირებს ფაილს. ამ პარამეტრის გამოყენება არაა რეკომენდებული!"
+
+#: TortoiseAct/TortoisePreferences.cpp:515
+#, fuzzy
+msgid "Do not automatically commit after Add/Remove"
+msgstr "დამატების შემდეგ ფაილების ავტოფიქსირება (არაა რეკომენდებული)"
+
+#: TortoiseAct/TortoisePreferences.cpp:516
+#, fuzzy
+msgid "Automatically commit after Add"
+msgstr "ფიქსირების შემდეგ რედაქტირების ნიშნულის ავტომატური ამოღება"
+
+#: TortoiseAct/TortoisePreferences.cpp:517
+#, fuzzy
+msgid "Automatically commit after Add and Remove"
+msgstr "დამატების შემდეგ ფაილების ავტოფიქსირება (არაა რეკომენდებული)"
+
+#: TortoiseAct/TortoisePreferences.cpp:524
+msgid "Allow Network Drives"
+msgstr "ქსელური დისკების დაშვება"
+
+#: TortoiseAct/TortoisePreferences.cpp:525
+#, fuzzy
+msgid ""
+"If this is checked, sandboxes on network mounted drives will be controlled by TortoiseCVS. It also suppresses CVS errors when accessing a repository via :local: on a network share.\n"
+"NOTE: Placing your sandbox or repository on a network drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr "თუ ეს პარამეტრი შერჩეულია, 'ზარდახშები' ქსელურ დისკებზე გაკონტროლდება TortoiseCVS-ის მიერ.  ამ დროს იბლოკება შეცდომათა შეტყობინება ქსელური დისკის საცავთან :local: ოქმით დაკავშირებისას. ეს შესაძლოა მრავალი პრობლემის მიზეზი გახდეს და არაა რეკომენდებული."
+
+#: TortoiseAct/TortoisePreferences.cpp:532
+#, fuzzy
+msgid "Permit sandboxes and repositories on &network (remote) drives"
+msgstr "ქსელურ (გარე) დისკებზე 'ზარდახშების' ნებადართვა (არაა რეკომენდებული)"
+
+#: TortoiseAct/TortoisePreferences.cpp:538
+msgid "Allow Removable Drives"
+msgstr "გარე დისკების დაშვება"
+
+#: TortoiseAct/TortoisePreferences.cpp:539
+#, fuzzy
+msgid ""
+"If this is checked, sandboxes on drives with removable media will be controlled by TortoiseCVS.\n"
+"NOTE: Placing your sandbox on a removable drive is known to cause many problems and is discouraged by the CVS developers."
+msgstr "თუ ეს პარამეტრი შერჩეულია, 'ზარდახშები' გარე დისკებზე გაკონტროლდება TortoiseCVS-ის მიერ.  ეს შესაძლოა მრავალი პრობლემის მიზეზი გახდეს და არაა რეკომენდებული."
+
+#: TortoiseAct/TortoisePreferences.cpp:544
+#, fuzzy
+msgid "Permit sandboxes on &removable drives"
+msgstr "გარე დისკებზე 'ზარდახშების' ნებადართვა (არაა რეკომენდებული)"
+
+#: TortoiseAct/TortoisePreferences.cpp:550
+#, fuzzy
+msgid "Add Ignored Files"
+msgstr "იგნორირებული ფაილები"
+
+#: TortoiseAct/TortoisePreferences.cpp:551
+msgid "If this is checked, the Add Contents dialog will include files listed in .cvsignore. Useful if you want to add files which are normally ignored, but makes the dialog more cluttered."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:555
+#, fuzzy
+msgid "Show .cvs&ignored files in the Add Contents dialog"
+msgstr "განახლებული ფაილების ფერი მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:561
+#, fuzzy
+msgid "Explorer Columns"
+msgstr "ბროუზერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:562
+msgid "If this is checked, Tortoise will show the CVS Explorer columns only for folders that are under CVS control"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:565
+msgid "Show columns only for CVS-controlled folders"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:571
+msgid "Empty comment check"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:572
+msgid "If this is checked, the Commit dialog will issue a warning if no commit comment has been provided by the user.  You can then either continue or abort the commit operation."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:575
+msgid "Issue &warning if no comment provided in commit dialog"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:582
+msgid "Do not use Edit/Unedit"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:583
+msgid "Concurrent editing"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:584
+msgid "Concurrent or exclusive editing"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:585
+msgid "Exclusive editing only"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:589
+msgid "Edit policy"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:590
+msgid "How to handle the CVS Edit and Unedit commands."
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:598
+#, fuzzy
+msgid "Edit options dialog"
+msgstr "პარამეტრების მითითება - %s"
+
+#: TortoiseAct/TortoisePreferences.cpp:599
+msgid "Whether to show the edit options dialog"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:602
+#, fuzzy
+msgid "Show edit &options dialog"
+msgstr "პარამეტრების მითითება - %s"
+
+#: TortoiseAct/TortoisePreferences.cpp:607
+msgid "Automatic unedit"
+msgstr "რედაქტირების ავტოგაუქმება"
+
+#: TortoiseAct/TortoisePreferences.cpp:608
+msgid "If this is checked and you run 'CVS Commit', TortoiseCVS will do a 'cvs unedit' in order to remove any edits you may have on files which you have not modified."
+msgstr "თუ ეს პარამეტრი შერჩეულია და იყენებთ 'CVS ფიქსირება'-ს, TortoiseCVS შეასრულებს 'cvs unedit' ოპერაციას და ამოიღებს რედაქტირების ყველა ატრიბუტს ფაილებიდან რომელთა შეცვლაც არ მომხდარა."
+
+#: TortoiseAct/TortoisePreferences.cpp:613
+msgid "Automatically &unedit after Commit"
+msgstr "ფიქსირების შემდეგ რედაქტირების ნიშნულის ავტომატური ამოღება"
+
+#: TortoiseAct/TortoisePreferences.cpp:621
+msgid "Main program"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:622
+msgid "Enable debug logs for TortoiseCVS main program"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:624
+#: TortoiseAct/TortoisePreferences.cpp:631
+#, fuzzy
+msgid "Enable debug logs"
+msgstr "მენიუშI ხატების ჩართვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:628
+#, fuzzy
+msgid "Shell extension"
+msgstr "გაფართოების იგნორირება"
+
+#: TortoiseAct/TortoisePreferences.cpp:629
+msgid "Enable debug logs for TortoiseCVS shell extension"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:636
+msgid "Debug logs"
+msgstr "გამართვის ჟურნალები"
+
+#: TortoiseAct/TortoisePreferences.cpp:637
+msgid "Write TortoiseCVS debug information into the folder specified below."
+msgstr "მითითებულ დასტაში TortoiseCVS გამართვის ინფორმაციის შექმნა"
+
+#: TortoiseAct/TortoisePreferences.cpp:640
+#, fuzzy
+msgid "Don't save debug logs"
+msgstr "გამართვის ჟურნალები"
+
+#: TortoiseAct/TortoisePreferences.cpp:641
+#, fuzzy
+msgid "Save debug logs"
+msgstr "გამართვის ჟურნალები"
+
+#: TortoiseAct/TortoisePreferences.cpp:642
+msgid "Save debug logs, no log file caching"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:646
+msgid "Debug log &folder"
+msgstr "გამართვის ჟურნალის დასტა"
+
+#: TortoiseAct/TortoisePreferences.cpp:647
+msgid "Debug log files will be created in this folder."
+msgstr "გამართვის ჟურნალები შეიქმნება ამ დასტაში."
+
+#: TortoiseAct/TortoisePreferences.cpp:651
+msgid "CVSNT logging"
+msgstr "CVSNT აღნუსხვა"
+
+#: TortoiseAct/TortoisePreferences.cpp:652
+msgid "Makes files cvsclient.log.in and cvsclient.log.out in the TortoiseCVS folder for debugging of the CVS protocol."
+msgstr "cvsclient.log.in და cvsclient.log.out შექმნა TortoiseCVS დასტაში CVS ოქმის გასამართად,"
+
+#: TortoiseAct/TortoisePreferences.cpp:655
+msgid "Create CVSNT client &debug logs"
+msgstr "CVSNT კლიენტის ჟურნალის შექმნა"
+
+#: TortoiseAct/TortoisePreferences.cpp:666
+msgid "Noise text colour"
+msgstr "კოდების ტექსტის ფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:667
+#: TortoiseAct/TortoisePreferences.cpp:669
+msgid "Colour for noise text in the progress dialog"
+msgstr "ტექნიკური ტექსტის ფერები მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:673
+msgid "Warning text colour"
+msgstr "გაფრთხილების ტექსტის ფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:674
+#: TortoiseAct/TortoisePreferences.cpp:676
+msgid "Colour for warning text in the progress dialog"
+msgstr "გამაფრთხილებელი ტექსტის ფერი მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:680
+msgid "Updated files colour"
+msgstr "განახლებული ფაილის ფერები"
+
+#: TortoiseAct/TortoisePreferences.cpp:681
+#: TortoiseAct/TortoisePreferences.cpp:683
+#: TortoiseAct/TortoisePreferences.cpp:690
+msgid "Colour for updated files in the progress dialog"
+msgstr "განახლებული ფაილების ფერი მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:687
+msgid "Modified files colour"
+msgstr "შეცვლილი ფაილების ფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:688
+msgid "Colour for modified files in the progress dialog"
+msgstr "შეცვლილი ფაილების ფერები მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:694
+msgid "Conflict files colour"
+msgstr "კონფლიქტური ფაილების ფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:695
+#: TortoiseAct/TortoisePreferences.cpp:697
+msgid "Colour for conflict files in the progress dialog"
+msgstr "კონფლიქტური ფაილების ფერები მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:701
+msgid "Files not in CVS colour"
+msgstr ""
+
+#: TortoiseAct/TortoisePreferences.cpp:702
+#: TortoiseAct/TortoisePreferences.cpp:704
+#, fuzzy
+msgid "Colour for files not in CVS in the progress dialog"
+msgstr "ტექნიკური ტექსტის ფერები მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:708
+msgid "Error text colour"
+msgstr "შეცდომის ტექსტის ფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:709
+#: TortoiseAct/TortoisePreferences.cpp:711
+msgid "Colour for error text in the progress dialog"
+msgstr "შეცდომების ტექსტის ფერები მიმდინარეობის დიალოგში"
+
+#: TortoiseAct/TortoisePreferences.cpp:715
+msgid "Tip text colour"
+msgstr "კარნახის ტექსტის ფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:716
+#: TortoiseAct/TortoisePreferences.cpp:718
+msgid "Colour for tip text"
+msgstr "კარნახის ტექსტის ფერი"
+
+#: TortoiseAct/TortoisePreferences.cpp:726
+msgid "Server version"
+msgstr "სერვერის ვერსია"
+
+#: TortoiseAct/TortoisePreferences.cpp:727
+msgid "Clear the cache that stores the CVS server version"
+msgstr "სერვერის ვერსიის შემცველი ბუფერის გასუფთავება"
+
+#: TortoiseAct/TortoisePreferences.cpp:729
+#: TortoiseAct/TortoisePreferences.cpp:736
+#: TortoiseAct/TortoisePreferences.cpp:743
+msgid "Clear cache"
+msgstr "ბუფერის გასუფთავება"
+
+#: TortoiseAct/TortoisePreferences.cpp:733
+msgid "Module list"
+msgstr "მოდულების სია"
+
+#: TortoiseAct/TortoisePreferences.cpp:734
+msgid "Clear the cache that stores the CVS module list"
+msgstr "მოდულების სიის შემცველი ბუფერის გასუფთავება"
+
+#: TortoiseAct/TortoisePreferences.cpp:740
+msgid "Branch/Tag list"
+msgstr "განშტოებების/ჭდეების სია"
+
+#: TortoiseAct/TortoisePreferences.cpp:741
+msgid "Clear the cache that stores the CVS branches and tags"
+msgstr "განშტოებებისა და ჭდეების სიის შემცველი ბუფერის გასუფთავება"
+
+#: TortoiseAct/TortoiseTip.cpp:70
+msgid ""
+"Tortoise Tip:  This error happens if you didn't enter a message at the top of the Notepad window when you performed a commit.  Please try again and enter some text, describing roughly what you changed.\n"
+"\n"
+"There is also a bug in CVS under Windows which can cause this to happen. If you save the file too quickly, CVS doesn't notice that it has changed.\n"
+"Try again, and wait a few seconds before saving the file!"
+msgstr ""
+"Tortoise რჩევა:  ამ შეცდომის მიზეზი შეიძლება იყოს თქვენს მიერ Notepad-ის დასაწყისში შეტყობინების არმითითება ფიქსირების მცდელობისას. სცადეთ კვლავ და მიუთითეთ ტექსტი, რომელიც აღწერს რა შეცვალეთ .\n"
+"\n"
+"ამის მიზეზი შეიძლება CVS-ის Windows-ში გამოყენების ბზიკიც იყოს. თუ ფაილს ძალიან სწრაფად ინახავთ, CVS ვერ ამჩნევს რომ იგი შეიცვალა.\n"
+"სცადეთ კვლავ და შენახვამდე დაელოდეთ რამდენიმე წამს!"
+
+#: TortoiseAct/TortoiseTip.cpp:81
+msgid ""
+"Tortoise Tip:  CVS tried to create a new file and discovered that the file already existed.   There can be several causes for this:\n"
+"1) You have created the file locally, and someone else added a file of the same name to CVS.\n"
+"2) Your sandbox has become corrupted (possibly due to interference from antivirus programs).\n"
+"To solve the problem: Rename or delete the affected files, then perform a CVS Update."
+msgstr ""
+
+#: TortoiseAct/TortoiseTip.cpp:91
+msgid "Tortoise Tip:  One or more of your files has a conflict.  This means that someone else has altered the same part of the file as you.  Look above for the files marked \"C \", and manually edit them to resolve the conflict."
+msgstr "Tortoise რჩევა: ერთი ან რამდენიმე ფაილი კონფლიქტურია. ეს ნიშნავს, რომ სხვამ შეცვალა ფაილის იგივე ნაწილი რაც თქვენ. იპოვეთ \"C \"-თი მონიშნული ფაილები და ხელით დაარედაქტირეთ კონფლიქტების მოსაგვარებლად."
+
+#: TortoiseAct/TortoiseTip.cpp:99
+msgid "Tortoise Tip:  This error can be caused by a folder called \"CVS\" which was made by you rather than by CVS.  If so, please rename the folder to something else such as \"cvswork\"."
+msgstr "Tortoise რჩევა: ამ შეცდომის მიზეზი შესაძლოა იყოს დასტა სახელით \"CVS\" რომელიც თქვენ და არა CVS-მა შექმნა.  თუ ასეა, გადაარქვით დასტას სახელი, მაგ., \"cvswork\"."
+
+#: TortoiseAct/TortoiseTip.cpp:107
+msgid "Tortoise Tip:  Someone else has committed a new version of one or more of the files you are trying to commit. You need to do a CVS Update and then try to commit again."
+msgstr "Tortoise რჩევა: ვიღაცამ დააფიქსირა ერთი ან რამდენიმე ფაილი რომელთა დაფიქსირებასაც თქვენც ცდილობთ. უნდა გამოიყენოთ 'CVS განახლება' და შემდეგ კიდევ ერთხელ სცადოთ ფიქსირება."
+
+#: TortoiseAct/TortoiseTip.cpp:115
+msgid ""
+"Tortoise Tip:  Unfortunately TortoiseCVS no longer supports RSH out of the box.  There are workarounds, as well as fairly easy ways to help us fix this for the next version.  For more information see the FAQ.\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+msgstr ""
+"Tortoise რჩევა: სამწუხაროდ TortoiseCVS აღარ მუშაობს RSH წესით. შესაძლოა ამის საშუალება შემდეგ ვერსიებში გამოჩნდეს. დაწვრილებით, ნახეთ FAQ.\n"
+"\n"
+"http://www.tortoisecvs.org/faq.html#rsh"
+
+#: TortoiseAct/TortoiseTip.cpp:124
+msgid ""
+"Tortoise Tip:  This error may be caused by having a folder and a file with the same name (apart from capitalization) in the repository. Such a repository CANNOT be checked out on a Windows file system.\n"
+"\n"
+"You can also get this error on SourceForge. You need to log into the server with SSH to force creation of your home folder. Do this by connecting to username@cvs.projectname.sf.net either with Putty or a command line SSH."
+msgstr ""
+"Tortoise რჩევა: ამ შეცდომის მიზეზი შესაძლოა იყოს საცავში ერთიდაიგივე სახელის დასტისა და ფაილის არსებობა. ასეთი საცავი ვერ გადმოიტანება Windows ფაილების სიტემით.\n"
+"\n"
+"ამგვარი შეცდომა SourceForge-ს შემთხვევაშიცაა შესაძლებელი. ამ შემთხევევაში სათაო დასტის შესაქმნელად სერვერზე შესვლა SSH წესითაა საჭირო. დაუკავშირდით username@cvs.projectname.sf.net ან Putty-ს ან SSH ბრძანების გამოყენებით."
+
+#: TortoiseAct/TortoiseTip.cpp:139
+msgid "Tortoise Tip: This error can be caused because there used to be a file in the repository with a name differing only by case from the one you are adding. For example TEST.EXE rather than test.exe. To fix this go into the repository, or get your administrator to, and rename that file to have the same case. It will be in the Attic folder underneath the folder you are in. You will also need to get the local sandbox folder you are in out of CVS again, as it may have bogus entries to the misspelt filename."
+msgstr "Tortoise რჩევა: ამ შეცდომის მიზეზი შესაძლოა იყოს საცავში ისეთი ფაილის არსებობა, რომელიც დასამატებლისგან მხოლოდ რეგისტრით განსხვავდება, მაგ., TEST.EXE და არა test.exe. ამ პრობლემის გადასაწყვეტად უნდა შეხვიდეთ საცავში და გადაარქვათ ფაილის სასურველი სახელი. იგი განთავსდება დასტაში Attic მიმდინარე დასტის მიმართ. ასევე, თქვენ კვლავ უნდა მიიღოთ ადგილობრივი ზარდახშის ასლი CVS-დან, რადგან შესაძლოა იქ დარჩა მცდარი მონაცემები ფაილის სახელის შესახებ."
+
+#: TortoiseAct/TortoiseTip.cpp:151
+msgid "Tortoise Tip: Someone else is editing the file you want to work on. If the file is binary, you must wait for the other user to commit the file before you can edit it. Otherwise, you may edit in parallel with the other user; CVS will eventually merge your changes with those of the other user. However, you might want to talk to the other user to ensure that you are not both working on the same lines of the file."
+msgstr "Tortoise რჩევა: ვირაც სხვა უკვე არედაქტირებს ფაილს რომელთანაც მუშაობა გსურთ. თუ ფაილი ორობითია უნდა დაიცადოთ ვიდრე მეორე მომხმარებელი ცვლილებებს დააფიქსირებს. წინააღმდეგა შემთხვევაში ცვლილებების შეტანა სხვა მომხმარებელთა ერთადაც შეგიძლიათ; საბოლოოდ CVS მოახდენს თქვენი და სხვა მომხმარებლის მიერ განხორციელებული ცვლილებების შერწყმას. მიუხედავად ამისა, სასურველია სხვა მომხმარებელთან განიხილოთ ცვლილებები."
+
+#: TortoiseAct/TortoiseTip.cpp:160
+msgid "Tortoise Tip: Use \"cvs commit\" on the folder that the file is in to remove it permanently."
+msgstr "Tortoise რჩევა: ბრძანება 'cvs ფიქსირება' გამოიყენეთ იმ დასტების საბოლოოდ ამოსაშლელად სადაც ფაილებაი მოთავსებული."
+
+#: TortoiseAct/WebLog.cpp:170
+msgid "Trying "
+msgstr "მცდელობა"
+
+#: TortoiseAct/WebLog.cpp:310
+msgid "Scanning for web log URL on server"
+msgstr "ვებ ჟურნალის მისამართის ძებნა სერვერზე"
+
+#: TortoiseAct/WebLog.cpp:418
+msgid "Please enter the URL where ViewCVS or CVSweb is."
+msgstr "მიუთითეთ URL სადაც ViewCVS ან CVSWeb-ია განთავსებული."
+
+#: TortoiseAct/WebLog.cpp:427
+#, c-format
+msgid "The URL %s responded with error code %d"
+msgstr "მისამართი %s პასუხობს შეცდომის კოდით %d"
+
+#: TortoiseAct/WebLog.cpp:440
+msgid "Sorry! The URL isn't responding, or is responding with an error."
+msgstr "უკაცრავად! მისამართი არ პასუხობს ან პასუხობს მცდარად."
+
+#: TortoiseAct/WebLog.cpp:444
+msgid ""
+"This could happen because you are not connected to the internet, because the server is down, or because the path is wrong. If you are behind a firewall which requires a proxy, TortoiseCVS is using the Internet Explorer proxy. You might want to set it and try again.\n"
+"\n"
+"Please either try entering the URL again, or choose the plain text log."
+msgstr ""
+"ამის მიზეზები შესაძლოა იყოს ის, რომ თქვენ არ ხართ ინტერნეტში, სერვერი მიუწვდომელია ან მითითებულია მცდარი გეზი. თუ ბრანდმაუერის  უკან იმყოფებით, რომელიც პროქსის ითხოვს, TortoiseCVS გამოიყენებს Internet Explorer-ის პარამეტრებს. შეეცადეთ ხელახლა მითითებას და სცადეთ კვლავ.\n"
+"\n"
+"გთხოვთ კიდევ ერთხელ მიუთითოთ მისამართი ან ჟურნალის ფორმატად მიუთითეთ 'ჩვეულებრივი ტექსტი'."
+
+#: TortoiseAct/WebLog.cpp:452
+msgid "TortoiseCVS couldn't find the URL on your server where ViewCVS or CVSweb is. Please enter the URL manually."
+msgstr "TortoiseCVSვერ პოულობს მისამართს სადაც განთავსებულია ViewCVS ან CVSWeb. მიუთითეთ ხელით."
+
+#: TortoiseAct/WebLog.cpp:460
+msgid "You might be able to find it by browsing on the project's web site for a web interface to CVS. Alternatively ask your server administrator. Then copy the top level URL into the prefix box below. Usually you can leave the suffix box blank - it adds extra options to the end of the URL."
+msgstr "მისი პოვნა შეგიძლიათ თუ მოინახულებთ პროექტის საიტს და იქ მოძებნით CVS ვებ ინტერფეისს. ან კითხეთ თქვენი ქსელის ადმინისტრატორს. შემდეგ დააკოპირეთ ზედა დონის მისამართი პრეფიქსების შეტანის ველში. ხშირ შემთხვევაში სუფიქსის მითითება საჭირო არაა."
+
+#: TortoiseAct/WebLog.cpp:466
+msgid "This dialog can also appear if you are trying to log a file that has never been committed."
+msgstr "ეს დიალოგი ასევე შესაძლოა გამოჩნდეს, თუ შეეცდებით არასოდეს დაფიქსირებულ ფაილთა ჟურნალის მიღებას."
+
+#: TortoiseShell/PropSheet.cpp:220
+msgid "Repository"
+msgstr "საცავი"
+
+#: TortoiseShell/PropSheet.cpp:226
+msgid "Sticky tag/date"
+msgstr "მიბმული ჭდე/თარიღი"
+
+#: TortoiseShell/PropSheet.cpp:229
+msgid "Revision date"
+msgstr "ვერსიის თარიღი"
+
+#: TortoiseShell/PropSheet.cpp:238
+msgid "File options"
+msgstr "ფაილის ატრიბუტები"
+
+#: TortoiseShell/PropSheet.cpp:241
+msgid "&History..."
+msgstr "ისტორია..."
+
+#: TortoiseShell/PropSheet.cpp:263
+msgid "Head"
+msgstr "მთავარი"
+
+#: TortoiseShell/QueryInfo.cpp:94
+msgid "CVS Status"
+msgstr "CVS სტატუსი"
+
+#: TortoiseShell/QueryInfo.cpp:96
+msgid "CVS Revision"
+msgstr "CVS ვერსია"
+
+#: TortoiseShell/QueryInfo.cpp:98
+msgid "CVS Sticky Tag"
+msgstr "CVS წებოვანი ჭდე"
+
+#: TortoiseShell/QueryInfo.cpp:100
+msgid "CVS File Format"
+msgstr "CVS ფაილის ფორმატი"
+
+#: Utils/LaunchTortoiseAct.cpp:74
+msgid "Failed to launch executable to perform action"
+msgstr "ვერ ვიწყებ პროგრამას ქმედების გასახორციელებლად"
+
+#: Utils/PathUtils.cpp:357
+msgid "Failed to find temporary path"
+msgstr "დროებითი დასტის გეზი ვერ მოიძებნა"
+
+#: Utils/PathUtils.cpp:372
+#, c-format
+msgid "Failed to generate temporary filename in '%s': error %d"
+msgstr "ვერ ვქმნი დროებით ფაილს აქ '%s': შეცდომა %d"
+
+#: Utils/PathUtils.cpp:398 Utils/PathUtils.cpp:589
+#, c-format
+msgid "Free space: %s KB"
+msgstr "თავისუფალი ადგილი: %s KB"
+
+#: Utils/PathUtils.cpp:401 Utils/PathUtils.cpp:592
+#, c-format
+msgid "Total space: %s KB"
+msgstr "ადგილი სულ: %s KB "
+
+#: Utils/PathUtils.cpp:404 Utils/PathUtils.cpp:595
+#, c-format
+msgid "Total free space: %s KB"
+msgstr "თავისუფალი ადგილი: %s KB"
+
+#: Utils/PathUtils.cpp:564
+#, fuzzy, c-format
+msgid "Failed to generate temporary folder in '%s': error %d"
+msgstr "ვერ ვქმნი დროებით ფაილს აქ '%s': შეცდომა %d"
+
+#: Utils/PathUtils.cpp:612 Utils/PathUtils.cpp:642
+#, c-format
+msgid "Couldn't scan folder %s"
+msgstr "ვერ ვასკანირებ დასტას %s"
+
+#: Utils/ProcessUtils.cpp:67
+#, c-format
+msgid "Failed to launch %s"
+msgstr "ვერ ვიწყებ პროგრამას %s"
+
+#: Utils/ProcessUtils.cpp:92
+#, fuzzy
+msgid "GetUserName() failed"
+msgstr "FindExecutable() ვერ შედგა"
+
+#: Utils/TortoiseDebug.cpp:235
+msgid "Something bad happened to TortoiseCVS, and it crashed. Would you like to save a crash dump file?"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:255
+#, c-format
+msgid "Saved dump file to '%s'"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:260
+#, fuzzy, c-format
+msgid "Failed to save dump file (error %d)"
+msgstr "ვერ ვქმნი დროებით ფაილს აქ '%s': შეცდომა %d"
+
+#: Utils/TortoiseDebug.cpp:266
+#, fuzzy, c-format
+msgid "Failed to create dump file (error %d)"
+msgstr "ვერ ვქმნი დროებით ფაილს აქ '%s': შეცდომა %d"
+
+#: Utils/TortoiseDebug.cpp:272
+msgid "DBGHELP.DLL too old"
+msgstr ""
+
+#: Utils/TortoiseDebug.cpp:277
+msgid "DBGHELP.DLL not found"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:64 ../build/TortoiseMenus.config:359
+#: ../build/TortoiseMenus.config:365
+msgid "Chec&kout..."
+msgstr "გადმოტანა..."
+
+#: ../build/TortoiseMenus.config:66 ../build/TortoiseMenus.config:361
+#: ../build/TortoiseMenus.config:367
+msgid "Retrieve a fresh module from a CVS repository"
+msgstr "ახალი/განახლებული მოდულის მიღება CVS საცავიდან"
+
+#: ../build/TortoiseMenus.config:71
+msgid "&Make New Module..."
+msgstr "ახალი მოდულის შექმნა..."
+
+#: ../build/TortoiseMenus.config:73
+msgid "Create a new module in the repository from the selected folder"
+msgstr "შერჩეული დასტიდან საცავში ახალი მოდულის შექმნა"
+
+#: ../build/TortoiseMenus.config:81
+#, fuzzy
+msgid "Apply &patch..."
+msgstr "ბებკის შექმნა..."
+
+#: ../build/TortoiseMenus.config:83
+#, fuzzy
+msgid "Applies a patch file"
+msgstr "ბებკი ფაილის შენახვა"
+
+#: ../build/TortoiseMenus.config:91
+msgid "Chec&kout TortoiseCVS"
+msgstr "გადმოტანა - TortoiseCVS"
+
+#: ../build/TortoiseMenus.config:93
+msgid "Fix bugs! Fetch the TortoiseCVS source code"
+msgstr "შეცდომების გასწორება! TortoiseCVS კოდების პირველწყაროს მიღება"
+
+#: ../build/TortoiseMenus.config:105
+msgid "&Diff"
+msgstr "შედარება"
+
+#: ../build/TortoiseMenus.config:107
+msgid "Shows you the changes you have made (hold down Ctrl to customise)"
+msgstr "თქვენს მიერ შეტანილი ცვლილებების ჩვენება (დააჭირეთ Ctrl-ს მორგებისათვის)"
+
+#: ../build/TortoiseMenus.config:112
+msgid "&Add..."
+msgstr "დამატება..."
+
+#: ../build/TortoiseMenus.config:114
+msgid "Marks a text or binary file for adding to the repository next time you commit"
+msgstr "ტექსტური ან ორობითი ფაილის საცავში დასამატებლად მონიშცნა ცვლილებების შემდეგი ფიქსირების დროს"
+
+#: ../build/TortoiseMenus.config:119
+msgid "&Ignore"
+msgstr "იგნორირება"
+
+#: ../build/TortoiseMenus.config:121
+msgid "Make CVS ignore this file by adding it to the .cvsignore file"
+msgstr "ამ ფაილის იგნორირების მითითება CVS-ისთვის .cvsignore სიაში შეტანით"
+
+#: ../build/TortoiseMenus.config:126
+msgid "&Update"
+msgstr "განახლება"
+
+#: ../build/TortoiseMenus.config:128
+msgid "Merges the latest version from the repository into your local copy (hold down Ctrl for more options)"
+msgstr "საცავის ბოლო ვერსიის თქვენს სამუშაო ასლთან შერწყმა (დააჭირეთ Ctrl-ს დამატებითი პარამეტრებისათვის)"
+
+#: ../build/TortoiseMenus.config:135
+msgid "Make the file writable so that it can be edited"
+msgstr "ფაილის ჩაწერადად მითითება შეცვლისა და რედაქტირებისათვის"
+
+#: ../build/TortoiseMenus.config:140
+msgid "E&xclusive Edit"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:142
+#, fuzzy
+msgid "Make the file writable so that it can be edited, and prevent any other users from editing it"
+msgstr "ფაილის ჩაწერადად მითითება შეცვლისა და რედაქტირებისათვის"
+
+#: ../build/TortoiseMenus.config:147 ../build/TortoiseMenus.config:154
+#: ../build/TortoiseMenus.config:161
+msgid "&Commit..."
+msgstr "დაფიქსირება..."
+
+#: ../build/TortoiseMenus.config:149 ../build/TortoiseMenus.config:156
+#: ../build/TortoiseMenus.config:163 ../build/TortoiseMenus.config:300
+msgid "Puts the changes you have made back into the repository"
+msgstr "თქვენი შეტანილი ცვლილებების უკან, საცავში დაბრუნება"
+
+#: ../build/TortoiseMenus.config:168
+msgid "Add C&ontents..."
+msgstr "შიგთავსის დამატება..."
+
+#: ../build/TortoiseMenus.config:170
+msgid "Adds files in the selection and subfolders which aren't yet in CVS"
+msgstr "უმატებს ფაილებს მონიშნულსა და ქვედასტებში, რომლებიც CVS–ში ჯერჯერობით არ არიან"
+
+#: ../build/TortoiseMenus.config:188
+msgid "&Web Log"
+msgstr "ვებ ჟყრნალი"
+
+#: ../build/TortoiseMenus.config:190
+msgid "Browse the file history with a web interface (hold down Ctrl to customise)"
+msgstr "ისტორიის გადახედვა ვებ ინტერფეისით (მორგებისთვის დაჭერილი გქონდეთ Ctrl)"
+
+#: ../build/TortoiseMenus.config:197
+msgid "Browse the file history"
+msgstr "ისტორიის გადახედვა"
+
+#: ../build/TortoiseMenus.config:204
+msgid "Show the file revision graph"
+msgstr "ფაილის ვერსიის გრაფის ჩვენება"
+
+#: ../build/TortoiseMenus.config:209
+msgid "Ann&otate..."
+msgstr "ანოტირება..."
+
+#: ../build/TortoiseMenus.config:211
+msgid "Shows the last revision each line was modified and by whom"
+msgstr "ბოლო ვერსიის თითოეული სტრიქონის ცვლილებისა და ავტორის ჩვენება"
+
+#: ../build/TortoiseMenus.config:216
+msgid "&Show edited files..."
+msgstr "რედაქტირებადი ფაილების ჩვენება..."
+
+#: ../build/TortoiseMenus.config:218
+msgid "Shows files which are being edited"
+msgstr "რედაქტირებადი ფაილების ჩვენება"
+
+#: ../build/TortoiseMenus.config:225 ../build/TortoiseMenus.config:231
+msgid "Make all files in the folder writable so that they can be edited"
+msgstr "ამ დასტის ყველა ფაილის ჩაწერადად მითითება რედაქტირებისთვის"
+
+#: ../build/TortoiseMenus.config:236 ../build/TortoiseMenus.config:242
+#: ../build/TortoiseMenus.config:248
+msgid "U&nedit"
+msgstr "ცვლილებების გაუქმება"
+
+#: ../build/TortoiseMenus.config:238
+msgid "Abandon edits to the file"
+msgstr "ფაილის რედაქტირების მიტოვება"
+
+#: ../build/TortoiseMenus.config:244 ../build/TortoiseMenus.config:250
+msgid "Abandon edits to all files in the folder"
+msgstr "დასტის ყველა ფაილის რედაქტირების მიტოვება"
+
+#: ../build/TortoiseMenus.config:254
+msgid "Ignore e&xtension"
+msgstr "გაფართოების იგნორირება"
+
+#: ../build/TortoiseMenus.config:256
+msgid "Make CVS ignore files with this extension by adding the extension to .cvsignore"
+msgstr "ამ გაფართოებების ფაილების იგნორირების მითითება CVS-ისთვის .cvsignore სიაში"
+
+#: ../build/TortoiseMenus.config:262 ../build/TortoiseMenus.config:298
+msgid "&Resolve conflicts..."
+msgstr "კონფლიქტების გადაწყვეტა..."
+
+#: ../build/TortoiseMenus.config:264
+msgid "Manually resolve conflicts resulting from an Update"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:270 ../build/TortoiseMenus.config:277
+msgid "&Make Patch..."
+msgstr "ბებკის შექმნა..."
+
+#: ../build/TortoiseMenus.config:272 ../build/TortoiseMenus.config:279
+msgid "Generate a patch file of changes that you have made"
+msgstr "თქვენი ცვლილებებიდან ბებკის ფაილის შექმნა"
+
+#: ../build/TortoiseMenus.config:291
+msgid "&Update Special..."
+msgstr "სპეციალური განახლება..."
+
+#: ../build/TortoiseMenus.config:293
+msgid "Perform an update to get a particular branch or tag, or to undo your local changes"
+msgstr "განახლება ცალკეული განშტოების ან ჭდის მისაღებად ან ადგილობრივი ცვლილებების გასაუქმებლად"
+
+#: ../build/TortoiseMenus.config:304
+msgid "&Refresh Folder Status"
+msgstr "დასტის სტატუსის განახლება"
+
+#: ../build/TortoiseMenus.config:306
+msgid "Refresh folder overlay icons to show recursive status"
+msgstr "დასტის ხატების განახლება რეკურსიული სტატუსის საჩვენებლად"
+
+#: ../build/TortoiseMenus.config:316
+msgid "Marks a version with a named tag so you can retrieve it again later, or delete an existing tag"
+msgstr "ვერსიის სახელობითი ჭდით მონიშვნა, ისე რომ მისი მოგვიანებით ხელახლა მიღება ან არსებული ჭდის წაშლა შეძლოთ"
+
+#: ../build/TortoiseMenus.config:323
+msgid "Forks a version off; you can then change the new branch and the original trunk independently"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:328
+msgid "&Merge..."
+msgstr "შერწყმა..."
+
+#: ../build/TortoiseMenus.config:330
+msgid "Merge changes into your working copy"
+msgstr "ცვლილებების შერწყმა სამუშაო ასლში"
+
+#: ../build/TortoiseMenus.config:338
+#, fuzzy
+msgid "R&ename..."
+msgstr "გამოქვეყნება..."
+
+#: ../build/TortoiseMenus.config:340
+#, fuzzy
+msgid "Rename a file"
+msgstr "ბებკი ფაილის შენახვა"
+
+#: ../build/TortoiseMenus.config:345
+msgid "&Remove"
+msgstr "ამოშლა"
+
+#: ../build/TortoiseMenus.config:347
+msgid "Marks files for removal from the repository next time you commit"
+msgstr "საცავში ფაილების წასაშლელად მონიშვნა ცვლილებების შემდეგი ფიქსირების დროს"
+
+#: ../build/TortoiseMenus.config:352
+msgid "&Release..."
+msgstr "გამოქვეყნება..."
+
+#: ../build/TortoiseMenus.config:354
+msgid "Release (and delete) your working copy; effectively undo a checkout"
+msgstr " თქვენი სამუშაო ასლის გამოქვეყნება (და წაშლა); გადმოტანის ეფექტური გაუქმება"
+
+#: ../build/TortoiseMenus.config:375
+#, fuzzy
+msgid "&Command..."
+msgstr "დაფიქსირება..."
+
+#: ../build/TortoiseMenus.config:377
+msgid "Run an arbitrary CVS command"
+msgstr ""
+
+#: ../build/TortoiseMenus.config:385
+msgid "&Preferences..."
+msgstr "პარამეტრები..."
+
+#: ../build/TortoiseMenus.config:387
+msgid "Customise TortoiseCVS"
+msgstr "TortoiseCVS–ის მორგება"
+
+#: ../build/TortoiseMenus.config:392
+msgid "&Help..."
+msgstr "დახმარება..."
+
+#: ../build/TortoiseMenus.config:394
+msgid "Basic usage instructions and FAQ for TortoiseCVS"
+msgstr "უმარტივესი ინსტრუქციები TortoiseCVS პროგრამისთვის"
+
+#: ../build/TortoiseMenus.config:399
+msgid "&About..."
+msgstr "პროგრამის შესახებ..."
+
+#: ../build/TortoiseMenus.config:401
+msgid "About TortoiseCVS"
+msgstr "TortoiseCVS–ს შესახებ"
+
+#, fuzzy
+#~ msgid "TortoiseCVS question"
+#~ msgstr "TortoiseCVS კითხვა"
+
+#, fuzzy
+#~ msgid "TortoiseCVS Security Alert"
+#~ msgstr "TortoiseCVS - მოდულის გადმოტანა"
+
+#, fuzzy
+#~ msgid "(Error %d)"
+#~ msgstr "შეცდომა"
+
+#~ msgid "Internal error, command line too long to be broken up."
+#~ msgstr "შიდა შეცდომა, ბრძანება ძალიან გრძელია დასაყოფად."
+
+#~ msgid "Couldn't create Win32 mutex"
+#~ msgstr "ვერ ვქმნი Win32 mutex–ს"
+
+#~ msgid "Couldn't close Win32 mutex"
+#~ msgstr "ვერ ვხურავ Win32 mutex–ს"
+
+#~ msgid "Couldn't lock Win32 mutex"
+#~ msgstr "ვერ ვბლოკავ Win32 mutex–ს"
+
+#~ msgid "Couldn't release Win32 mutex"
+#~ msgstr "ვერ ვაქვეყნებ Win32 mutex–ს"
+
+#~ msgid "Update creates missing folders"
+#~ msgstr "განახლებისას შეიქმნება გამოტოვებული დასტები"
+
+#~ msgid "Update doesn't execute anything that will change the disk."
+#~ msgstr "განახლებისას დისკზე ფიზიკური ცვლილებები არ მოხდება."
+
+#, fuzzy
+#~ msgid "Locked"
+#~ msgstr "დაწვრილებით"
+
+#, fuzzy
+#~ msgid "Tooltips"
+#~ msgstr "ხელსაწყოები"
+
+#~ msgid "&Browse"
+#~ msgstr "ნუსხა..."
+
+#~ msgid "(earlier messages cleared because too long)"
+#~ msgstr "(წინა შეტყობინებები წაიშალა სიგრძის გამო)"
+
+#~ msgid "Additional &files"
+#~ msgstr "დამატებითი ფაილები"
+
+#~ msgid "Check selected item(s)"
+#~ msgstr "მონიშნული ელემენტ(ებ)ის არჩევა"
+
+#~ msgid "Colour for link text"
+#~ msgstr "ბმის ტექსტის ფერი"
+
+#~ msgid "Copy qualified filename(s) to clipboard"
+#~ msgstr "სათანადო ფაილის სახელ(ებ)ის ბუფერში კოპირება"
+
+#~ msgid "Diff (working file)..."
+#~ msgstr "შედარება (სამუშაო ფაილთან)..."
+
+#~ msgid "Easy GUI library used by TortoiseCVS"
+#~ msgstr "მარტივი GUI ბიბლიოთეკა რომელსც TortoiseCVS იყენებს"
+
+#~ msgid "Everything completed OK."
+#~ msgstr "ყველაფერი წარმატებით დასრულდა"
+
+#~ msgid ""
+#~ "File '%s' already exists.\n"
+#~ "Do you want to replace it?"
+#~ msgstr ""
+#~ "ფაილი '%s' უკვე არსებობს.\n"
+#~ "გნებავთ მისი შეცვლა?"
+
+#~ msgid "Files"
+#~ msgstr "ფაილები"
+
+#~ msgid "Get this revision (sticky)"
+#~ msgstr "ამ ვერსიის მიღება (sticky)"
+
+#~ msgid "Hint"
+#~ msgstr "მინიშნება"
+
+#~ msgid "Link text colour"
+#~ msgstr "ბმის ტექსტის ფერი"
+
+#~ msgid "Logging in in %s"
+#~ msgstr "ჟურნალი - %s"
+
+#~ msgid "No template setup file to copy from: %s"
+#~ msgstr "ჩადგმის შაბლონის ფაილი ვერ მოიძებნა: %s"
+
+#~ msgid "Parse web logs"
+#~ msgstr "ვებ ჟურნალის გარჩევა"
+
+#~ msgid "Patched by TortoiseCVS:"
+#~ msgstr "TortoiseCVS ბებკი:"
+
+#~ msgid "Patched setup file already exists: %s"
+#~ msgstr "ჩადგმის ბებკი ფაილი უკვე არსებობს: %s"
+
+#~ msgid "Patching setup file..."
+#~ msgstr "ჩადგმის ფაილის ბებკი..."
+
+#~ msgid "Restore selected item(s)"
+#~ msgstr "შერჩეული ელემენტ(ებ)ის აღდგენა"
+
+#~ msgid "Retrieving revision"
+#~ msgstr "ვერსიის მიღება"
+
+#~ msgid "Save this revision as..."
+#~ msgstr "ვერსიის შენახვა როგორც..."
+
+#~ msgid "See comments below for details."
+#~ msgstr "დეტალებისთვის იხ. ქვედა კომენტარი."
+
+#~ msgid "Show web log"
+#~ msgstr "ვებ ჟურნალის ჩვენება"
+
+#~ msgid "TortoiseCVS copied and patched this file."
+#~ msgstr "TortoiseCVS დააკობირა და დაბებკა ეს ფაილი."
+
+#~ msgid "Uncheck selected item(s)"
+#~ msgstr "მონიშნული ელემენტ(ებ)ის ამორთვა"
+
+#~ msgid "Warning: Exactly three patches were not applied."
+#~ msgstr "გაფრთხილება: ზუსტად სამი ბებკი არ იქნა გამოყენებული."
+
+#~ msgid "XP-style rounded"
+#~ msgstr "XP სტილი"
+
+#~ msgid "You have selected a different icon set - it won't take effect until you log off or reboot"
+#~ msgstr "თქვენ ხატების სხვა ნაკრები შეარჩიეთ - ცვლილებები ძალაში მხოლოდ სეანსის დასრულების ან გადატვირთვის შემდეგ შევა"

@@ -1,0 +1,226 @@
+//Microsoft Developer Studio generated resource script.
+//
+#include "TortoiseShellRes.h"
+
+#define APSTUDIO_READONLY_SYMBOLS
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 2 resource.
+//
+#include "winresrc.h"
+#ifndef IDC_STATIC
+#define IDC_STATIC (-1)
+#endif
+/////////////////////////////////////////////////////////////////////////////
+#undef APSTUDIO_READONLY_SYMBOLS
+
+/////////////////////////////////////////////////////////////////////////////
+// German (Germany) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_DEU)
+#ifdef _WIN32
+LANGUAGE LANG_GERMAN, SUBLANG_GERMAN
+#pragma code_page(1252)
+#endif //_WIN32
+
+#ifndef _MAC
+/////////////////////////////////////////////////////////////////////////////
+//
+// Version
+//
+
+VS_VERSION_INFO VERSIONINFO
+ FILEVERSION 1,12,5,6
+ PRODUCTVERSION 1,12,5,6
+ FILEFLAGSMASK 0x3fL
+#ifdef _DEBUG
+ FILEFLAGS 0x1L
+#else
+ FILEFLAGS 0x0L
+#endif
+ FILEOS 0x40004L
+ FILETYPE 0x1L
+ FILESUBTYPE 0x0L
+BEGIN
+    BLOCK "StringFileInfo"
+    BEGIN
+        BLOCK "080904b0"
+        BEGIN
+            VALUE "Comments", "\0"
+            VALUE "CompanyName", "www.tortoisecvs.org\0"
+            VALUE "FileDescription", "TortoiseShell\0"
+            VALUE "FileVersion", "1.12.5.6\0"
+            VALUE "InternalName", "TortoiseShell\0"
+            VALUE "LegalCopyright", "Copyright © 2003\0"
+            VALUE "LegalTrademarks", "\0"
+            VALUE "OriginalFilename", "TortoiseShell.dll\0"
+            VALUE "PrivateBuild", "\0"
+            VALUE "ProductName", "TortoiseCVS TortoiseShell\0"
+            VALUE "ProductVersion", "1.12.5.6\0"
+            VALUE "SpecialBuild", "\0"
+        END
+    END
+    BLOCK "VarFileInfo"
+    BEGIN
+        VALUE "Translation", 0x809, 1200
+    END
+END
+
+#endif    // !_MAC
+
+#endif    // German (Germany) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+/////////////////////////////////////////////////////////////////////////////
+// English (U.S.) resources
+
+#if !defined(AFX_RESOURCE_DLL) || defined(AFX_TARG_ENU)
+#ifdef _WIN32
+LANGUAGE LANG_ENGLISH, SUBLANG_ENGLISH_US
+#pragma code_page(1252)
+#endif //_WIN32
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Dialog
+//
+
+REVISIONS DIALOGEX 0, 0, 224, 217
+STYLE WS_CHILD | WS_VISIBLE | WS_CAPTION
+CAPTION "Contents"
+FONT 8, "MS Sans Serif", 0, 0, 0x1
+BEGIN
+    LTEXT           "Status:",IDC_STATUS_H,10,9,80,12
+    EDITTEXT        IDC_STATUS,97,9,118,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,5,24,214,1
+    LTEXT           "CVSROOT:",IDC_CVSROOT_H,10,31,80,12
+    EDITTEXT        IDC_CVSROOT,10,42,205,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "Repository:",IDC_REPOSITORY_H,10,60,80,12
+    EDITTEXT        IDC_REPOSITORY,10,72,205,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "Revision:",IDC_REVISION_H,10,90,80,12
+    EDITTEXT        IDC_REVISION,97,90,118,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "Sticky tag:",IDC_TAG_H,10,105,80,12
+    EDITTEXT        IDC_TAG,97,105,118,12,ES_AUTOHSCROLL | ES_READONLY | NOT 
+                    WS_BORDER,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_STATIC,"Static",SS_ETCHEDHORZ,5,120,214,1
+    LTEXT           "Revision date:",IDC_TIMESTAMP_H,10,125,80,12
+    EDITTEXT        IDC_TIMESTAMP,97,125,118,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "File format:",IDC_FILEFORMAT_H,10,143,80,12
+    EDITTEXT        IDC_FILEFORMAT,97,143,118,12,ES_AUTOHSCROLL | ES_READONLY | 
+                    NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "Keyword expansion:",IDC_KEYWORD_H,10,161,80,12
+    EDITTEXT        IDC_KEYWORD,97,161,118,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER,WS_EX_TRANSPARENT
+    LTEXT           "Options:",IDC_OPTIONS_H,10,179,80,12
+    EDITTEXT        IDC_OPTIONS,97,179,118,12,ES_AUTOHSCROLL | 
+                    ES_READONLY | NOT WS_BORDER,WS_EX_TRANSPARENT
+    CONTROL         "",IDC_STATIC_FILEONLY,"Static",SS_ETCHEDHORZ,5,193,214,
+                    1
+    PUSHBUTTON      "&History...",IDC_HISTORY,30,202,74,14
+    PUSHBUTTON      "Revision &Graph...",IDC_REVISIONGRAPH,120,202,74,14
+END
+
+
+#ifdef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// TEXTINCLUDE
+//
+
+1 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "TortoiseShellRes.h\0"
+END
+
+2 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "#include ""winresrc.h""\r\n"
+    "#ifndef IDC_STATIC\r\n"
+    "#define IDC_STATIC (-1)\r\n"
+    "#endif\0"
+END
+
+3 TEXTINCLUDE DISCARDABLE 
+BEGIN
+    "\r\n"
+    "\0"
+END
+
+#endif    // APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// Icon
+//
+
+// Icon with lowest ID value placed first to ensure application icon
+// remains consistent on all systems.
+IDI_TORTOISE            ICON    DISCARDABLE     "../Icons/Tortoise.ico"
+IDI_ABOUT               ICON    DISCARDABLE     "../Icons/menuabout.ico"
+IDI_ADD                 ICON    DISCARDABLE     "../Icons/menuadd.ico"
+IDI_ANNOTATE            ICON    DISCARDABLE     "../Icons/menuannotate.ico"
+IDI_BRANCH              ICON    DISCARDABLE     "../Icons/menubranch.ico"
+IDI_BROWSE              ICON    DISCARDABLE     "../Icons/menubrowse.ico"
+IDI_CHECKOUT            ICON    DISCARDABLE     "../Icons/menucheckout.ico"
+IDI_COMMAND             ICON    DISCARDABLE     "../Icons/menucommand.ico"
+IDI_COMMIT              ICON    DISCARDABLE     "../Icons/menucommit.ico"
+IDI_COMPARE             ICON    DISCARDABLE     "../Icons/menucompare.ico"
+IDI_CONFLICT            ICON    DISCARDABLE     "../Icons/menuconflict.ico"
+IDI_DELETE              ICON    DISCARDABLE     "../Icons/menudelete.ico"
+IDI_HELP                ICON    DISCARDABLE     "../Icons/menuhelp.ico"
+IDI_IGNORE              ICON    DISCARDABLE     "../Icons/menuignore.ico"
+IDI_LOCK                ICON    DISCARDABLE     "../Icons/menulock.ico"
+IDI_LOG                 ICON    DISCARDABLE     "../Icons/menulog.ico"
+IDI_MAKEMOD             ICON    DISCARDABLE     "../Icons/menumakemod.ico"
+IDI_MERGE               ICON    DISCARDABLE     "../Icons/menumerge.ico"
+IDI_PATCH               ICON    DISCARDABLE     "../Icons/menupatch.ico"
+IDI_PATCH2              ICON    DISCARDABLE     "../Icons/menupatch2.ico"
+IDI_REFRESH             ICON    DISCARDABLE     "../Icons/menurefresh.ico"
+IDI_RELEASE             ICON    DISCARDABLE     "../Icons/menurelease.ico"
+IDI_REMOVE              ICON    DISCARDABLE     "../Icons/menudelete.ico"
+IDI_RENAME              ICON    DISCARDABLE     "../Icons/menurename.ico"
+IDI_RESOLVE             ICON    DISCARDABLE     "../Icons/menuresolve.ico"
+IDI_REVERT              ICON    DISCARDABLE     "../Icons/menurevert.ico"
+IDI_REVISIONGRAPH       ICON    DISCARDABLE     "../Icons/menurevisiongraph.ico"
+IDI_SETTINGS            ICON    DISCARDABLE     "../Icons/menusettings.ico"
+IDI_SHOWEDITS           ICON    DISCARDABLE     "../Icons/menushowedits.ico"
+IDI_TAG                 ICON    DISCARDABLE     "../Icons/menutag.ico"
+IDI_UPDATE              ICON    DISCARDABLE     "../Icons/menuupdate.ico"
+
+/////////////////////////////////////////////////////////////////////////////
+//
+// DESIGNINFO
+//
+
+#ifdef APSTUDIO_INVOKED
+GUIDELINES DESIGNINFO DISCARDABLE 
+BEGIN
+    "REVISIONS", DIALOG
+    BEGIN
+        HORZGUIDE, 35
+    END
+END
+#endif    // APSTUDIO_INVOKED
+
+#endif    // English (U.S.) resources
+/////////////////////////////////////////////////////////////////////////////
+
+
+
+#ifndef APSTUDIO_INVOKED
+/////////////////////////////////////////////////////////////////////////////
+//
+// Generated from the TEXTINCLUDE 3 resource.
+//
+
+
+/////////////////////////////////////////////////////////////////////////////
+#endif    // not APSTUDIO_INVOKED
+

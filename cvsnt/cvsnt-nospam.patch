@@ -1,0 +1,10 @@
+--- cvsnt-2.5.04.3236/./src/commit.cpp.org	2008-11-08 23:05:33.401026719 +0100
++++ cvsnt-2.5.04.3236/./src/commit.cpp	2008-11-08 23:07:03.518726764 +0100
+@@ -546,7 +546,6 @@
+ 	 */
+ 	if (use_editor)
+ 	{
+-		mhadvertise=1;
+ 	    do_editor (".", &saved_message, (char *)NULL, find_args.ulist);
+ 	}
+ 

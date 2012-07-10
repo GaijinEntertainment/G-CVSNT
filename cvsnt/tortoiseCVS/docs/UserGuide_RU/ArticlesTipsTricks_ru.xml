@@ -1,0 +1,452 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- $Revision: 1.1 $ -->
+<!-- ====== Articles, Tips and Tricks ========================================= -->
+
+<chapter id="tips">
+
+  <title id="tips-title">Статьи, Советы и секреты</title>
+
+
+  <!-- ====== Using TortoiseCVS with SourceForge ============================= -->
+
+  <section id="tips.sourceforge">
+
+    <title id="tips.sourceforge-title">Использование TortoiseCVS совместно с  SourceForge</title>
+
+    <bridgehead renderas="sect3">Установка клиентской части программы TortoiseCVS </bridgehead>
+    <para>
+       Данный документ предоставляет инструкции для установки и использования клиентской части           CVS - TortoiseCVS. Эти инструкции созданы для разработчиков проектов размещенных на 
+       SourceForge.net, которые используют 32-битную платформу Microsoft Windows. Для получения        предварительной информации вы должны прочитать другие доступные документы о CVS. 
+    </para>
+
+    <para>
+       TortoiseCVS имеет преймущества по сравнению с WinCVS для работы с SourceForge. Он имеет 
+       простой интерфейс который интегрирован в Windows Explorer. WinCVS имеет более сложный и 
+       высокоразвитый интерфейс. Для более сложных команд может быть проще или необходимо 
+       использовать WinCVS. 
+    </para>
+    <para>
+       Особая выгода состоит в том, что TortoiseCVS имеет встроенного клиента SSH, без               специальной настройки. Любой может легко помещать код в SourceForge.net проекты 
+       используя TortoiseCVS. 
+    </para>
+    
+    <bridgehead renderas="sect3">Установка TortoiseCVS</bridgehead>
+    <orderedlist>
+      <listitem>
+        <para>
+           Зайдите на <ulink url="http://www.tortoisecvs.org">http://tortoisecvs.org/</ulink> и            загрузите последнюю стабильную версию со страницы загрузки (Download).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+           Для установки, запустите выполняемый файл и следуйте инструкциям (на английском). 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Так как TortoiseCVS это расширение оболочки, для корректной работы, вы будете вынуждены 
+          выполнить перезагрузку вашей машины. 
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Извлечение (Checking out) существующего проекта</bridgehead>
+    <para>
+Если вы работаете над существующим проектом, вы должны сначала извлечь код из репозитория.
+    </para>
+<para><emphasis role="bold"> Примечание переводчика:</emphasis>
+Если вы хотите только получить код проекта, но не собираетесь его Фиксировать с помощью CVS, можете воспользоваться анонимным доступом.
+</para>
+
+    <orderedlist>
+      <listitem>
+        <para>
+Убедитесь что вы имеете учетную запись (account) в SourceForge.net, и что вы были добавлены как разработчик к проекту в котором вы хотите участвовать. Добавление должны сделать администраторы проекта. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+В Проводнике (Windows Explorer) перейдите в папку, в которую вы хотите извлечь код.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Из контекстного меню, вызываемому правой кнопкой мыши, выберите команду "CVS Checkout", появится диалог "Извлечение модуля".
+        </para>
+      </listitem>
+      <listitem>
+
+        <para>
+
+Вы должны указать ваше пользовательское имя (логин) на SourceForge.net, и UNIX имя проекта.  Заполните диалог в следующей последовательности:
+          <itemizedlist>
+            <listitem>
+              <para>
+                Протокол (Protocol): Безопасный шелл (:ext:) (Secure Shell (:ext:))
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Сервер (Server): cvs.sourceforge.net
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Каталог репозитария (Directory): /cvsroot/<emphasis>имя проекта</emphasis>
+              </para>
+            </listitem>
+            <listitem>
+              <para>
+                Имя пользователя (Username): <emphasis>логин на sourceforge.net</emphasis>
+              </para>
+            </listitem>
+          </itemizedlist>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Нажмите "Получить список... (Fetch List...)" для получения списка модулей. Вы должны будете ввести свой пароль в диалоге. Затем выберите модуль, который вам нужен.
+        </para>
+      </listitem>
+      <listitem>
+
+        <para>
+Нажмите OK.  TortoiseCVS начнет получать код. Вы снова должны ввести ваш пароль.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Сейчас вы можете изменять файлы и затем выбрать "CVS Commit" в директории верхнего 
+уровня для сохранения ваших изменений в репозитарии. Для более подробной информации, 
+прочитайте "Руководство пользователя по TortoiseCVS" (этот документ).
+        </para>
+      </listitem>
+    </orderedlist>
+
+    <bridgehead renderas="sect3">Получаете ошибку?</bridgehead>
+    <para>
+Если вы получаете ошибку говорящую что-то подобное <computeroutput>Could not chdir to home folder /home/users/r/rd/rdonkin: No such file or folder</computeroutput> тогда вы должны войти на сервер с использованием SSH для создания вашей домашней папки. Это делается соединением с <literal>username@cvs.sf.net</literal> через одно из двух: 
+Putty или командной строки SSH.
+    </para>
+
+    <bridgehead renderas="sect3">Работа над новым проектом</bridgehead>
+    <para>
+Если вы работаете над новым проектом, тогда вы сначала должны создать новый модуль в репозитории. 
+    </para>
+    <orderedlist>
+      <listitem>
+        <para>
+          Создайте папку с именем которое должен иметь модуль.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Поместите файлы которые вы ходите добавить в папку. 
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>
+Щелкните Правым щелчком на директории, и выберите <guimenuitem>Make New Module</guimenuitem> из подменю CVS.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Заполните диалог, как описано в предыдущей секции. Обратите внимание что имя модуля заполняется вами.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Нажмите <guibutton>OK</guibutton>.  Вы будете должны дважды ввести ваш пароль, и будет создан модуль. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Продолжайте добавлять файлы и папки правыми щелчками мышью и выбором <guimenuitem>CVS Add</guimenuitem> или <guimenuitem>CVS Add All Recursively</guimenuitem>  из контекстного меню.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Более подробную информацию читайте в <ulink url="http://www.tortoisecvs.org/docs/UserGuide_en/">
+Руководстве по ежедневному использованию TortoiseCVS (
+TortoiseCVS Daily User's Guide)</ulink>
+        </para>
+      </listitem>
+    </orderedlist>
+    <bridgehead renderas="sect3">Надоело вводить ваш пароль каждый раз?</bridgehead>
+
+    <para>
+Вы должны сделать пару ключей публичный/личный. Публичный ключ поместите на сервер,
+личный ключ расположите на вашем жестком диске. Сейчас, когда вы соеденяетесь с сервером, сервер может проверить кто вы, так как только вы  имеете ваш личный ключ. 
+    </para>
+
+    <para>
+Для дальнейшей защиты вашего личного ключа, он зашифрован на вашем жестком диске с помошью ключевой фразы. Вы можете однако выбрать пустую ключевую фразу, в этом случае вы никогда не вводите пароль, но любой кто имеет доступ к вашему компьютеру, может использовать вашу SSH CVS учетную запись . Либо вы можете использовать агента SSH (например Pageant) который запоминает вашу ключевую фразу во время одной сессии, так что вы вводите пароль один раз.
+    </para>
+
+    <para>
+TortoiseCVS использует версию Plink как собственный клиент SSH. Это означает что вы можете использовать PuTTYgen для генерации пар публичных/личных ключей, и вы можете использовать Pageant для указания где располагаются личные ключи. Сначала загрузите все с <ulink url="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html"> сайта PuTTY</ulink>.
+    </para>
+    <para>
+Информацию о том как их использовать читайте 
+<ulink url="http://www.chiark.greenend.org.uk/~sgtatham/putty/docs.html">документацию PuTTY </ulink> по PuTTYgen и Pageant. Особено убедитесь что прочитали раздел 
+"8.2: Using PuTTYgen, the PuTTY key generator" (Использование генератора ключей PuTTYgen) и "9.3.1 Making Pageant automatically load keys on startup" (настройка Pageant для автоматической загрузки ключей во время старта).
+    </para>
+
+    <para>
+После  изготовления вашего публичного ключа с помощью PuTTYgen вы должны загрузить его на SourceForge.net используя веб интерфейс. Зарегистрируйтесь на веб-сайте SourceForge, перейдите на вашу страницу Account Preferences (предпочтания учетной записи). Пролистайте в низ до раздела "Shell Account Information" в котором есть параметр "CVS/SSH Shared Authorized Keys". Здесь вы должны добавить ваш публичный ключ.
+    </para>
+  </section>
+
+
+  <!-- ====== How CVS Differs from Microsoft Visual Source Safe ============== -->
+
+  <section id="tips.sourcesafe">
+    <title id="tips.sourcesafe-title"> В чём отличие CVS от <productname>Microsoft Visual Source Safe</productname></title>
+    <para>
+      TortoiseCVS отличается от <productname>Visual Source Safe</productname>
+    (VSS) по многим критериям. Наиболее видимым отличием может быть то что TortoiseCVS не требует от  пользователя блокировать файлы когда работает с ними, а VSS делает это по умолчанию.
+ Фактически документация по CVS поощряет пользователей не использовать файловую блокировку. В редких случаях когда несколько человек делают изменения в одном файле одновременно, CVS будет обладать нормальной способностью объединить их изменения. Если двое или более разработчиков изменят несколько одних и тех же строк кода, TortoiseCVS сообщит об конфликте, вставит директивы в файл и оставит разаработчику право решать что делать. Такие конфликты очень редки, так как они обычно происходят как результат недостаточной коммуникации между разработчиками (например два человека пытаются решить одну и туже проблему).
+    </para>
+    <para>
+      Другим важным отличием является то что VSS управляет серверным представлением, тогда как TortoiseCVS отображает клиентское представление. На практике это означает что в отличие от VSS, TortoiseCVS  не говорит вам об изменениях в репозитории до тех пор, пока вы не обновите или явно запросите статус выбранных файлов. Изменения выдаваемые TortoiseCVS отображают изменения сделанные вами после последнего извлечения, обновления или фиксации.
+    </para>
+  </section>
+
+  <!-- ====== Creating new icons for TortoiseCVS ============================= -->
+
+  <section id="tips.createicons">
+    <title id="tips.createicons-title">Создание новых иконок для TortoiseCVS</title>
+    <para>
+      Иконки TortoiseCVS это файл иконок Windows который перегружает файл иконок Проводника для отображения статуса в CVS. Причина для этой технологии работы состоит в том, что большая часть области иконки TortoiseCVS прозрачна, позволяя исходной иконке быть видимой сквозь себя. Если вы создаёте свой собственный набор иконок для TortoiseCVS, вы нуждаетесь в достижении баланса между видимостью иконки оригинального файла и простого отображения состояния CVS. Некоторые наборы иконок добиваются баланса добавляя особые цвета или фигуры к одному из углов каждой иконки, другие достигают иллюзии тени внутри иконки перемежая прозрачные пиксели с закрашенными. Вы можете скомбинировать эти две идеи для уникальных фигур и полупрозрачных теней: посмотрите на набор иконок &#34;NG&#34;, который поставляется с TortoiseCVS как пример.
+    <orderedlist>
+       <listitem>
+	  <para>
+Создайте свой набор иконок используя графический редактор. Для лучшего результата, вы должны создать 16x16, 32x32 и 48x48 версии каждой иконки. Редактор иконок которые поставляются с 
+компиляторами Borland и Microsoft могут делать эту задачу проще, как могут большинство шароварных (shareware) редакторов иконок. Если вы предпочитаете пользоваться бесплатными программами, вы можете использовать <ulink url="http://www.gimp.org">The GIMP</ulink> для создания иконки каждого размера, а затем скомбинировать их вместе с помощью <ulink
+    url="http://www.winterdrache.de/freeware/png2ico">png2ico</ulink>.
+
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Убедитесь что вы создали одну правильно названную иконку для каждого из семи возможных состояний CVS:
+    <filename>TortoiseNotInCVS.ico</filename>, 
+    <filename>TortoiseInCVS.ico</filename>,
+    <filename>TortoiseInCVSReadOnly.ico</filename>,
+    <filename>TortoiseChanged.ico</filename>,
+    <filename>TortoiseConflict.ico</filename>,
+    <filename>TortoiseAdded.ico</filename>, и
+    <filename>TortoiseIgnored.ico</filename>. 
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Создайте папку внутри директории где вы установили TortoiseCVS, назовите ее как ни будь чтобы соответствовать теме вашего набора иконок, и скопируйте ваши семь иконок в новую папку.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Откройте Редактор Рееестра (нажмите на <guilabel>Пуск</guilabel> &rarr;
+    <guilabel>Выполнить</guilabel> и введите <literal>regedit</literal>). Перейдите к ключу
+    <literal>HKEY_LOCAL_MACHINE\SOFTWARE\TortoiseCVS\CustomIcons</literal>. Внутри этого ключа, создайте новое строковое значение. Для имени этого значения введите имя которое вы считаете подходящим набору. Дважды щелкните на вновь созданном значении для ввода имени папки которую вы создали предыдущем
+    </para>
+    </listitem>
+    </orderedlist>
+    </para>
+  </section>  
+
+  <!-- ====== Creating a new locale for TortoiseCVS ============================ -->
+
+  <section id="tips.createlocale">
+    <title id="tips.createlocale-title">Создание нового перевода для TortoiseCVS </title>
+
+    <section>
+    <title>Обзор</title>
+    <para>
+    TortoiseCVS внутри использует GNU библиотеку gettext для перевода сообщений.
+ Gettext работает примерно так:
+     </para>
+
+    <orderedlist>
+    <listitem>
+    <para>Все сообщения в исходном коде представлены на английском языке.</para>
+    </listitem>
+    <listitem>
+    <para> Инструмент (<literal>xgettext</literal>) автоматически извлекает сообщения в файл специального формата (<filename class='extension'>.po</filename> файл), Который может быть затем переведен.
+    </para>
+    </listitem>
+    <listitem>
+    <para>Файл с расширением <filename class='extension'>.po</filename> затем конвертируется в  <filename class='extension'>.mo</filename> файл, который используется исполняемым файлом TortoiseCVS.
+    </para>
+    </listitem>
+    <listitem>
+    <para>Когда текст изменяется в исходном коде, или когда добавляется новый текст, другая утилита (msgmerge), автоматически изменяет различные  .po файлы. Переводчик должен затем просмотреть любые  <firstterm>не определенные (fuzzy)</firstterm> входы (см. Gettext Guide ниже для объяснения этого.
+    </para>
+    </listitem>
+    </orderedlist>
+
+    </section>
+    <section>
+    <title>Документация по Gettext</title>
+    <para>
+    Это простое руководство <ulink url="http://www.tortoisecvs.org/gettextguide.shtml">Gettext Guide</ulink> предоставляет введение в gettext. Для полной истории, прочитайте <ulink url="http://www.gnu.org/software/gettext/manual/">the manual</ulink>.
+    </para>
+    </section>
+    <section>
+    <title>Как начать</title>
+    <orderedlist>
+    <listitem>
+    <bridgehead>Извлеките модуль po</bridgehead>
+
+    <para>
+    В диалоге извлечения, используйте CVSROOT
+<synopsis>:ext:<replaceable>your_sf_login</replaceable>@cvs.sourceforge.net:/cvsroot/tortoisecvs</synopsis> и имя модуля <computeroutput>po</computeroutput>.
+    </para>
+    </listitem>
+    <listitem>
+
+    <bridgehead>Установите правильный код страны/языка</bridgehead>
+
+    <para>По данным на  <ulink url="http://www.gnu.org/software/gettext/manual/html_chapter/gettext_15.html#SEC221">
+    этой странице</ulink> найдите код для вашего языка, затем по данным 
+    <ulink url="http://www.gnu.org/software/gettext/manual/html_chapter/gettext_16.html">этой страницы </ulink> найдите код страны.
+    Сложите их вместе через подчеркивание, например для разговорного Французского в Канаде вы должны выбрать <literal>fr_CA</literal>.
+    </para>
+    </listitem>
+
+    <listitem>
+    <bridgehead>Создайте новый .po файл</bridgehead>
+    <para>
+    Перейдите в папку TortoiseCVS, и скопируйте <filename>en_GB.po</filename> файл в новый файл, в нашем примере <filename>fr_CA.po</filename>.
+    </para>
+    </listitem>
+    <listitem>
+    <bridgehead>Переведите ваш новый файл</bridgehead>
+    <para>
+    используя текстовый редактор или один из доступных специальных инструментов. 
+    TODO: List tools.
+    </para>
+    </listitem>
+    <listitem>
+    <bridgehead>Скомпилируйте .po файл</bridgehead>
+    <para>
+    как описано в выше приведном руководстве. Для тестирования вы должны скопировать файл <filename>locale/en_GB</filename> в папке <filename>Program Files/TortoiseCVS</filename> (обратите внимание что он должен быть назван <filename>TortoiseCVS.mo</filename>).
+    </para>
+    </listitem>
+    </orderedlist>
+    </section>
+  </section> 
+
+  <!-- ====== Using PuTTY sessions ============================ -->
+
+  <section id="tips.puttysessions">
+    <title id="tips.puttysessions-title">Использование сессий PuTTY</title>
+    <para>
+    Если вы нуждаетесь в различных параметрах SSH для разных хостов, вы можете сделать это используя возможность <application>PuTTY</application> под названием <emphasis>sessions (сессии)</emphasis>
+    </para>
+
+    <orderedlist>
+    <listitem>
+    <para>
+    Загрузите PuTTY с <ulink
+    url="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">сайта
+    PuTTY</ulink>.
+     </para>
+    </listitem>
+    <listitem>
+    <para>
+    Запустите <filename>putty.exe</filename> и введите нужные параметры, затем введите соответствующее имя сессии ниже метки <guilabel>Saved
+    Sessions</guilabel>, затем нажмите <guilabel>Save</guilabel>.
+    </para>
+    </listitem>
+    <listitem>
+
+    <para>
+
+    В TortoiseCVS в <link linkend="dialogs.checkout"> диалоге "Извлечение" </link>,
+введите имя сессии вместо имени хоста.
+    </para>
+
+    </listitem>
+    </orderedlist>
+
+  </section> 
+
+  <!-- ====== Using Pageant ============================ -->
+
+  <section id="tips.pageant">
+    <title id="tips.pageant-title">Использование Pageant для предотвращения постоянного ввода пароля. </title>
+    <para>
+Когда используется SSH, вы обычно должны вводить пароль каждый раз, когда вы выполняете CVS операцию. Для предотвращения этого, пока поддерживается разумный уровень безопасности, вы можете использовать <emphasis>SSH Agent</emphasis>. SSH Agent в <application>PuTTY</application> называется <application>Pageant</application>.
+    </para>
+    <orderedlist>
+    <listitem>
+    <para>
+Загрузите PuTTY с <ulink
+    url="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">сайта 
+    PuTTY </ulink>.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Запустите <filename>pageant.exe</filename>. Щелкните правой кнопкой мыши на иконке
+    <inlinemediaobject>
+    <imageobject>
+    <imagedata fileref="figure/img0042.gif" format="GIF"></imagedata>
+    </imageobject>
+    </inlinemediaobject> 
+в системном трее и выберите <guilabel>Add Key</guilabel>, затем загрузите ваш личный ключевой файл. Если ключ защищен паролем, Pageant запросит его.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Для предотвращения выполнения этого каждый раз при загрузке компьютера создайте ярлык к 
+Pageant в your <guilabel>Программы</guilabel> &rarr; 
+    <guilabel>Автозагрузка</guilabel>( <guilabel>Programs</guilabel> &rarr; 
+    <guilabel>Startup</guilabel>) указав файл ключа как аргумент.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    TODO
+    </para>
+    </listitem>
+    </orderedlist>
+  </section> 
+
+  <!-- ====== Line Endings ============================ -->
+
+  <section id="tips.lineendings">
+    <title id="tips.lineendings-title">Как TortoiseCVS обрабатывает признак окончание строки</title>
+    <para>
+TortoiseCVS определяет по файлу CVS/Root какое окончание строки используется. Этот файл создается когда  модуль извлекается в первый раз, и обычно, не изменяется в дальнейшем. 
+Так когда вы отмечаете флажок "UNIX line endings" в диалоге Извлечение (Checkout), CVS создает файл Root с UNIX окончанием строки, и это указывает  TortoiseCVS использовать 
+UNIX окончание строк для всех последующих операций.
+    </para>
+    <para>
+Примечание переводчика. В UNIX признаком окончания строки служит байт с кодом $13 (CR), в Windows два байта $13$10 (CR LF). В соответствии с этим в зависимости от операционной системы TortoiseCVS автоматически перекодирует текстовые файлы для поддержания корректрой работы текстовых редакторов в IDE. 
+    </para>
+    <para>
+
+    TODO: write more
+    </para>
+  </section> 
+  <!-- ====== Command Line ============================ -->
+
+  <section id="tips.cmdline">
+    <title id="tips.cmdline-title">Использование других CVS клиентов</title>
+    <para>
+    Вы можете использовать другие клиентские программы для доступа к CVS, такие как WinCVS, Eclipse и т.д. в той же песочнице что и TortoiseCVS. Обратите внимание что различные клиенты CVS могут иметь различные ограничения, уточните их в документации для конкретного клиента если есть сомнения.
+    </para>
+    <para>
+    Конечно, вы можете непосредственно использовать клиента с поддержкой командной строки.
+Мы рекомендуем что вы <emphasis>не</emphasis> используете CVS клиента через Cygwin (см. TortoiseCVS FAQ). TortoiseCVS включает соответствующую версию CVSNT клиента с поддержкой командной строки. Для его использования вы просто должны добавить путь к папке с установленными TortoiseCVS в вашу переменную окружения <literal>PATH</literal>.
+    </para>
+    <para>
+   Для использование SSH из командной строки нужо слегка в больше: если вы хотите использовать  в командной строке клиента дружественного к пользователю TortoisePlink SSH клиента, вы должны установить дополнительную переменную окружения <literal>CVS_EXT</literal>. Значением переменной должна быть <literal>tortoiseplink.exe -l "%u" "%h"</literal>.
+    </para>
+  </section> 
+
+
+</chapter>

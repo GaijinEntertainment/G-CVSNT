@@ -1,0 +1,693 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- $Revision: 1.1 $ -->
+
+
+
+<!-- ====== Command Reference for TortoiseCVS ================================== -->
+
+<chapter id="ref">
+  <title id="ref-title">Справочник по командам TortoiseCVS</title>
+  <para>
+    Эта глава написана для иллюстрации большинства главных функциональных возможностей  TortoiseCVS. Она предполагает что: а) вы уже имеете понимание  CVS и б) вы имеете доступ к уже установленному серверу CVS с уже созданным репозиторием. Если вы новичок в CVS пожалуйста прочитайте  раздел "TortoiseCVS для новичков (TortoiseCVS for Beginners)".
+  </para>
+
+  <!-- ====== Installing TortoiseCVS =========================================== -->
+
+  <section id="ref.install">
+    <title id="ref.install-title">Установка TortoiseCVS</title>
+    <orderedlist>
+      <listitem>
+        <para>
+Скачайте (загрузите) последнюю версию TortoiseCVS с веб-сайта (<ulink
+  url="http://tortoisecvs.org/">http://tortoisecvs.org/</ulink>) и сохраните ее во временной папке на жестком диске.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Запустите инсталлятор. Если вы запускаете инсталляцию под Windows NT или 2000 (и более поздних версиях), вы должны иметь права администратора для правильной установки TortoiseCVS
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Выберите директорию куда будет установлен TortoiseCVS. По умолчанию это <filename>C:\Program Files\TortoiseCVS</filename>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Выберите тип инсталляции <guilabel>Полная (Full)</guilabel>,
+  <guilabel>Компактная (Compact)</guilabel>, или <guilabel>Пользовательская установка (Custom installation)</guilabel>. Если вам требуется многоязыковая поддержка, вы должны выбирать из <guilabel>Полная (Full)</guilabel> или <guilabel>Пользовательская установка (Custom installation)</guilabel>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          После того как установка завершится, вы должны перезагрузить компьютер для того, чтобы TortoiseCVS смог завершить установку.
+<footnote>
+              <para>
+Строго говоря, необходима перезагрузка только Проводника. Если вы чувствуете себя знающим, вы можете попытаться убить <literal>explorer.exe</literal> из Менеджера задач (Task Manager).
+В некоторых случаях <productname>Windows</productname> будет автоматически запускать новый экземпляр Проводника, в других случаях вы должны сделать это сами.
+              </para>
+            </footnote>.
+        </para>
+      </listitem>
+    </orderedlist>
+
+  </section>
+
+  <!-- ====== CVS Checkout ===================================================== -->
+
+  <section id="ref.checkout">
+    <title id="ref.checkout-title">Получение рабочей копии: CVS Извлечение... (CVS Checkout...)</title>
+    <abstract>
+      <para>
+        Создание локальной песочницы из репозитория CVS.
+      </para>
+    </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          Создайте папку для песочницы в Проводнике.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Щелкните правой кнопкой мыши на папке.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Из контекстного меню выберите <guimenuitem>CVS Извлечь... (CVS Checkout...)</guimenuitem>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Появится <link linkend="dialogs.checkout" endterm="dialogs.checkout-title"/>.
+Здесь вы можете ввести CVSROOT репозитария в поле <guilabel>CVSROOT</guilabel>, или собрать CVSROOT используя поля <guilabel>Protocol</guilabel>,  <guilabel>Server</guilabel>, <guilabel>Port</guilabel>, <guilabel>Repository name</guilabel>, и <guilabel>User name</guilabel>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Если вы знаете имя модуля, вы можете ввести его в поле <guilabel>Module</guilabel>.
+Вы также можете извлечь весь репозиторий введя точку (<command>.</command>) в поле 
+<guilabel>Module</guilabel>. Если вы не знаете имя модуля, вы можете нажать на
+<guibutton>Fetch list</guibutton> для заполнения выпадающего списка доступными модулями.
+Примечание: Некоторые сервера CVS не поддерживают эту возможность. Если вы не можете 
+заполнить этот список, вы должны будете связаться с администратором CVS сервера.
+        </para>
+        <para>
+Если вы извлекаете одиночный файл вы также можете указать номер дефекта (bug number) для 
+указания что эта работа соотносится с ней. 
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>
+Нажимите <guibutton>OK</guibutton> для извлечения песочницы.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+В зависимости от протокола и если это извлечение в первый раз с этого CVS репозитория, вам предложат ввести пароль. Введите пароль в диалоге и нажмите click <guibutton>OK</guibutton>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Появится <link linkend="dialogs.progress" endterm="dialogs.progress-title"/>, в котором отображаются подробное состояние файлов которые извлекаются из TortoiseCVS. По умолчанию, если не было ошибок, этот диалог закрывается после выполнения операции.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Update ======================================================= -->
+
+    <section id="ref.update">
+      <title id="ref.update-title">Получение изменений сделанных другими людьми:  CVS Update</title>
+      <abstract>
+        <para>
+          Синхронизация локальной песочницы с репозиторием CVS. См. также <link
+      linkend="ref.update.special">Обновить особо (Update Special)</link>.
+        </para>
+      </abstract>
+      <orderedlist>
+        <listitem>
+          <para>
+Для обновления папки выполните одно из двух: правый клик на ней или где либо в окне Проводника (но не на каком-нибудь конкретном файле, или для обновления одного или более файлов выберите их, и сделайте щелчок правой клавишей мыши на нем. 
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            Выберите <guimenuitem>CVS Update</guimenuitem> из контекстного меню.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+Появится <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> для отображения подробного состояния файлов которые были обновлены TortoiseCVS. По умолчанию, этот диалог закрывается после выполнения операции, если только не было ошибок.
+          </para>
+        </listitem>
+      </orderedlist>
+    </section>
+
+  <!-- ====== Update Special ================================================= -->
+
+  <section id="ref.update.special">
+    <title id="ref.update.special-title">Обновить особо... (CVS Update Special...)</title>
+      <abstract>
+        <para>
+          Синхронизация локальной песочницы с репозиторием CVS. См. также  <link linkend="ref.update">Обновить</link>
+        </para>
+      </abstract>
+
+    <orderedlist>
+      <listitem>
+        <para>
+Для обновления папки выполните одно из двух: правый клик на ней или где либо в окне Проводника (но не на каком-нибудь конкретном файле, или для обновления одного или более файлов выберите их, и сделайте щелчок правой клавишей мыши на нем. 
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>
+          Выберите из контекстного меню <guimenuitem>CVS &rarr; Обновить особо... (CVS &rarr; CVS Update Special...)</guimenuitem>.
+        </para>
+      </listitem>
+
+      <listitem>
+        <para>
+Появится <link linkend="dialogs.updatespecial">Update Special Dialog</link>. Введите в поле ввода помеченое <guilabel>Get tag/revision/branch:</guilabel> Номер ревизии (т.е. <literal>1.3</literal>), Метку (Tag) (например <filename>release_1_1_0</filename>), или Имя Ветви (Branch (например <filename>vendorx_branch</filename>) для изменения вашей локальной песочницы.
+        </para>
+      </listitem>
+      <listitem>        <para>
+Появится <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> для отображения подробного состояния файлов которые были обновлены TortoiseCVS. По умолчанию, если не было ошибок, этот диалог закрывается после выполнения операции.
+        </para>
+      </listitem>
+
+    </orderedlist>
+  </section>
+
+
+  <!-- ====== CVS Commit ======================================================= -->
+
+  <section id="ref.commit">
+    <title id="ref.commit-title">Гениальность в массы: CVS Commit...</title>
+      <abstract>
+        <para>
+          Размещение в репозитории CVS ваших локальных изменений.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+          Для фиксации изменений щелкните правой кнопкой мыши на папке и/или файлах.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Выберите из контекстного меню <guimenuitem>CVS Commit...</guimenuitem>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Появится <link linkend="dialogs.commit" endterm="dialogs.commit-title"/>, в котором вы можете ввести комментарий для операции фиксации. Дополнительно, вы можете выбрать какие изменения будут зафиксированы, отметив нужные файлы в списке. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Нажмите на <guibutton>OK</guibutton> (или нажмите <keycap>Ctrl-Enter</keycap>) после ввода комментария и выбора изменений для фиксации.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Появится <link linkend="dialogs.progress"  endterm="dialogs.progress-title"/>
+для отображения детального состояния процесса фиксации, выполняемого TortoiseCVS. По умолчанию, если не было ошибок, этот диалог закрывается после выполнения операции.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Add and Add Recursively ====================================== -->
+
+  <section id="ref.add">
+    <title id="ref.add-title">Добавление новых файлов: CVS Add and CVS Add Contents...</title>
+      <abstract>
+        <para>
+Добавление локальных файлов и/или папок в репозиторий CVS.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+Для добавления файлов или папок в CVS выделите файлы или папки которые хотите добавить, и щелкните правой клавишей мыши. Эти файлы должны иметь CVS статус "Не в CVS".
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Если вы выбрали папку, в контекстном меню появится пункт <guimenuitem>Add Recursively</guimenuitem>. Этот пункт позволяет добавить все файлы в выбранных папках и их подпапках. В противном случае, для добавления только выбранных файлов и папок выберите <guimenuitem>Add</guimenuitem> из контекстного меню.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Появится <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> отображающий подробное состояние процесса добавления выполняемого TortoiseCVS.
+        </para>
+        <para>
+TortoiseCVS добавит файлы и отобразит подсказку-напоминание что вы должны зафиксировать добавленные файлы для завершения процесса.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Remove =========================================================== -->
+
+  <section id="ref.remove">
+    <title id="ref.remove-title">Избавление от старых файлов: CVS Remove</title>
+    <abstract>
+      <para>
+        Удаление файла из текущей ветви. Файл остается доступным когда извлекают старые ревизии или метки.
+      </para>
+    </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+Для удаления одного или более файлов из репозитория CVS, выберите файлы и/или папки которые хотите удалить, и щелкните правой кнопкой мыши.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Из контекстного меню выберите <guimenuitem>CVS &rarr; Remove </guimenuitem>. TortoiseCVS выполнит удаление, и отобразит подсказку-напоминание что вы должны выполнить фиксацию удаления для завершения процесса.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+В конце выполните команду <guimenuitem>CVS Commit</guimenuitem> в папке или родительской папке.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Когда другой пользователь выполнит обновление, CVS выполнит удаление файла(-ов) из песочницы.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Rename =========================================================== -->
+
+  <section id="ref.rename">
+    <title id="ref.rename-title">Переименование или Перемещение файлов: CVS Rename</title>
+    <abstract>
+      <para>
+Переименование файла и/или перемещение его в новое место. Файл остается доступным под старым именем и на старом месте когда извлекается старая ревизия или метка.
+      </para>
+    </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+Для переименования одного или нескольких файлов выберите нужные файлы и/или папки, и сделайте щелчок правой кнопкой мыши.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Из контекстного меню выберите <guimenuitem>CVS &rarr; Rename</guimenuitem>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Введите новое имя и/или расположение (как относительный путь) файлов (если вы выбрали более одного файла, вы должны ввести путь).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Нажмите <guilabel>OK</guilabel>.
+TortoiseCVS  выполнит переименование и отобразит подсказку-напоминание, что для завершения операции нужно выполнить фиксацию.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+В конце, выполните команду фиксации <guimenuitem>CVS Commit</guimenuitem> в папке (или папке верхнего уровня).
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Когда другой пользователь выполнит Обновление, CVS переименует и/или переместит файл(-ы) в песочнице.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== CVS Diff ========================================================= -->
+
+  <section id="ref.diff">
+    <title id="ref.diff-title">Нахождение что было изменено: CVS Diff...</title>
+      <abstract>
+        <para>
+Сравнение локального файла с версией в репозитарии CVS.
+        </para>
+      </abstract>
+      <orderedlist>
+        <listitem>
+          <para>
+Для сравнения файла на отличия от репозитория CVS, выберите требуемый файл, и щелкните правой клавишей мыши на нем.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>
+Выберите из контекстного меню <guimenuitem>CVS &rarr; Diff </guimenuitem>.
+	  </para>
+        </listitem>
+
+        <listitem>
+          <para>
+Если вы используете возможность TortoiseCVS's Diff в первый раз, вас попросят указать внешнюю программу показывающую различия. <ulink   url="http://winmerge.sf.net">WinMerge</ulink> и <ulink url="http://www.prestosoft.com/ps.asp?page=edp_examdiff">ExamDiff</ulink> доступны бесплатно и хорошо подходят для текстовых исходных кодов. Если вы разрабатываете на языке программирования LabVIEW, вы можете использовать <ulink   url="http://meta-diff.sf.net/lvdiff.html">LVDiff</ulink> для визуального сравнения ваших блок-диаграмм. <ulink url="http://www.componentsoftware.com/products/csdiff/download.htm">CSDiff</ulink> создан для сравнения различных версий документов Word. Для использования комбинации утилит сравнения основанных на типе файлов, попробуйте <ulink url="http://meta-diff.sf.net">meta-diff</ulink>.(To use 	  a combination of diff tools based on the file type you are 	  comparing, try <ulink url="http://meta-diff.sf.net">meta-diff</ulink>.) 
+	  </para>
+        </listitem>
+	
+	<listitem>
+	  <para>
+TortoiseCVS запустит инструмент сравнения (diff tool), который вы выбрали и сравнит вашу локальную копию выбранных файлов с версией из репозитория. Для более сложных возможностей сравнения (таких как сравнение со старой копией репозитория или сравнение двух старых версий друг с другом) см. <link linkend="advanced.history" endterm="advanced.history-title"/>.
+	  </para>
+	</listitem>
+      </orderedlist>
+  </section>
+
+  <!-- ====== Tagging ========================================================== -->
+
+  <section id="ref.tags">
+    <title id="ref.tags-title">Изготовление моментального снимка (Snapshot): CVS Tag...</title>
+      <abstract>
+        <para>
+          Изготовление снимка проекта во времени для дальнейшего извлечения.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+        Для создания метки (tag), выберите необходимые файлы и/или папки для пометки и сделайте щелчок на них правой клавишей мыши. Примечание: Метка обычно применяется к папке, как правило к корневой папке песочницы.
+
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Выберите из контекстного меню <guimenuitem>CVS &rarr; Tag</guimenuitem>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+         Введите понравившееся имя. Обратите внимание что CVS налагает некоторые ограничения в имя метки. Эти ограничения отображаются в низу диалога. Для просмотра меток уже использованных в этой папке, нажмите кнопку <guibutton>Update list...</guibutton>. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+По умолчанию флажок <guilabel>Check that the files are unmodified</guilabel> установлен. Это уберегает вас от применения метки если вы не зафиксировали изменения. В особых ситуациях вам может быть понадобиться снять его. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Если метка уже существует, CVS не будет удалять ее, если только вы не выбрали 
+	<guilabel>Move existing tag</guilabel>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Для удаления метки которую вы применили по ошибке, или в которой вы больше не нуждаетесь выберите <guilabel>Delete existing tag</guilabel>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+В конце нажмите <guibutton>OK</guibutton>.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Create Branch ==================================================== -->
+
+  <section id="ref.branch">
+    <title id="ref.branch-title">Линии разработки: CVS Branch...</title>
+      <abstract>
+        <para>
+Создание ветви (разветвления) для разделения разработки по разным направлениям.
+        </para>
+      </abstract>
+    <orderedlist>
+      <listitem>
+        <para>
+Для создания ветви, выберите необходимые файлы и/или папки и щелкните правой клавишей мыши. Примечание Ветвь обычно создается внутри папки, как правило корневой папки песочницы.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Из контекстного меню выберите <guimenuitem>CVS &rarr; Branch</guimenuitem>
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Введите имя ветви. Обратите внимание что CVS налагает ограничения на имя ветви. Эти ограничения отображаются в низу диалога. Для просмотра какие ветви уже есть в этой папке, нажмите на кнопку <guibutton>Update list...</guibutton>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+По умолчанию флажок <guilabel>Check that the files are unmodified</guilabel> установлен. Это уберегает вас от создания ветви если вы имеете не зафиксированные изменения. В особых случаях вы можете снять этот флажок, и запретить это поведение.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Если ветвь уже существует, CVS не перемещает ее до тех пор, пока вы не выберите 
+	<guilabel>Move existing branch</guilabel>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Для удаления ветви которую вы создали по ошибке, или больше не нужную, выберите <guilabel>Delete existing branch</guilabel>. Вы должны быть очень внимательны когда делаете удаление.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+В конце нажмите <guibutton>OK</guibutton>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+Обратите внимание что ваша песочница автоматически не изменяется когда вы работаете над вновь созданной ветвью. Чтобы сделать это см. 	<link linkend="advanced.branching.selecting" endterm="advanced.branching.selecting-title"/>.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+
+  <!-- ====== Merge ======================================================== -->
+
+  <section id="ref.merge">
+    <title id="ref.merge-title">Слияние: CVS Merge...</title>
+      <abstract>
+        <para>
+          Обновление одной ветви изменениями сделаными в другой ветви.
+        </para>
+      </abstract>
+      <para>
+      Смотрите <xref linkend="advanced.branching.merging"/>.
+      </para>
+  </section>
+
+  <!-- ====== Making a New Module ============================================== -->
+
+  <section>
+    <title>Создание нового модуля: CVS Make New Module</title>
+      <abstract>
+        <para>
+          Создание нового модуля (проекта) в CVS репозитории.
+        </para>
+      </abstract>
+      <para>
+      Смотрите <xref linkend="advanced.newmodule"/>.
+      </para>
+  </section>
+
+  <!-- ====== Watching & Locking =============================================== -->
+
+  <section>
+    <title>Ожидание и блокирование (Watching And Locking)</title>
+      <abstract>
+        <para> 
+      Отслеживание кто редактирует эти файлы
+        </para>
+      </abstract>
+      <para>
+      См. <xref linkend="advanced.cvswatch"/>.
+      </para>
+  </section>
+
+  <!-- ====== Annotate =============================================== -->
+
+  <section id="cmd.annotate">
+    <title>Нахождение крайнего: CVS Annotate</title>
+    <para>
+Когда иногда что-то перестает работать, бывает полезно найти кто точно ответственен за изменение. Для этого существует <guilabel>CVS Annotate</guilabel>
+    </para>
+    <figure>
+        <title>Диалог Описание (Annotate Dialog)</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0043.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase> Диалог Описание </phrase>
+          </textobject>
+        </mediaobject>
+    </figure>
+    <para>
+Для каждой линии в файле диалог отображает
+    <orderedlist>
+    <listitem>
+    <para>
+    From which revision that line originates (e.g. lines marked as
+    <literal>1.1</literal> have not been changed since the first revision of the file).
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Автора строки, т.е. человека кто сделал последнее изменение.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Время и дату последнего изменения строки.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Текущее содержимое строки.
+    </para>
+    </listitem>
+    </orderedlist>
+    </para>
+    <para>
+Если вы щелкните правой кнопкой мыши на строке в диалоге, вы получите возможность выбрать из различных команд, включая просмотр аннотации для конкретной ревизии. 
+    </para>    
+    <para>
+Также вы можете изменить внешний вид диалога выбирая между различными опциями подстветки.
+    </para>
+  </section>
+
+  <!-- ====== CVS Columns =============================================== -->
+
+  <section id="cmd.columns">
+    <title id="cmd.columns-title">Отображение большей информации: CVS Explorer Columns</title>
+    <para>
+В режиме Детальный TortoiseCVSможет отображать CVS-зависимые столбцы в Проводнике (только на  Windows 2000 и старше). Вот доступные столбцы
+    <itemizedlist>
+    <listitem><para>CVS Ревизия (CVS Revision)</para></listitem>
+    <listitem><para>CVS Липкая метка (CVS Sticky Tag)</para></listitem>
+    <listitem><para>CVS Статус (CVS Status)</para></listitem>
+    <listitem><para>CVS Формат файла (CVS File Format)</para></listitem>
+    </itemizedlist>
+    </para>
+    <para>
+Для выбора какие столбцы отображать, Щелкните правой клавишей мыши на заголовке, как показано на рисунке ниже. Выберите <guilabel>More...</guilabel>, вы увидите диалог с перечнем всех доступных в вашей системе столбцов. Найдите "CVS" столбцы и выберите нужные. 
+    </para>
+    <figure>
+        <title>Выбор столбцов для отображения </title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0045.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Выбор столбцов для отображения</phrase>
+          </textobject>
+        </mediaobject>
+    </figure>
+  </section>
+
+  <!-- ====== Keyboard Shortcuts =============================================== -->
+
+  <section id="cmd.keys">
+    <title id="cmd.keys-title">Клавиатурные сокращения</title>
+    <para>
+    TODO: This section will explain how to use TortoiseCVS without the mouse.
+    </para>
+  </section>
+
+  <!-- ====== Web Log URL Autodetection ======================================== -->
+
+  <section id="cmd.weblog">
+    <title id="cmd.weblog-title">Как Web лог определяет адреса(URL) серверов</title>
+    <para>
+Как упомянуто в <link linkend="advanced.weblog"
+    endterm="advanced.weblog-title"/>, TortoiseCVS  во многих случаях может автоматически определить URL используемый вашим сервером <application>ViewCVS</application> или
+    <application>CVSweb</application>. Это делается используя следующий алгоритм:
+
+    TODO: Update as per RFE [1038747] "Avoid fetching more than one Modules list".
+
+    <orderedlist>
+    <listitem>
+    <para>
+Начиная с имени CVS сервера с префикса a <literal>http://</literal>
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Добавляется одно занчение из списка
+    <itemizedlist>
+    <listitem><para><literal>/cgi-bin</literal></para></listitem>
+    <listitem><para><literal>/viewcvs</literal></para></listitem>
+    <listitem><para><literal>/cvsweb</literal></para></listitem>
+    <listitem><para><literal>/bin</literal></para></listitem>
+    <listitem><para>(the empty string)</para></listitem>
+    </itemizedlist>
+И значение из списка
+    <itemizedlist>
+    <listitem><para><literal>/viewcvs.cgi</literal></para></listitem>
+    <listitem><para><literal>/viewcvs</literal></para></listitem>
+    <listitem><para><literal>/cvsweb.cgi</literal></para></listitem>
+    <listitem><para><literal>/cvsweb.pl</literal></para></listitem>
+    <listitem><para><literal>/cvsweb</literal></para></listitem>
+    </itemizedlist>
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Дополнение относительного пкти для файла или папки (т.е. значение 'Repository' отображаемое в диалоге CVS Properties).
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Если итоговый URL не работает, добавляется <literal>?cvsroot=</literal> следующий за именем модуля и попытка повторяется.
+    </para>
+    </listitem>
+    </orderedlist>
+Выше перечисленные шаги выполняются для всех возможных подстановок различных префиксов и суфиксов. Если URL найден (HTTP статус возвращает 200 (OK)), поиск останавливается. Если данный URL не найден и URL найден с HTTP статусом 401 (Denied) or 403 (Forbidden), значит URL используется (основывается на предположении что пользователю будет предоставлен доступ после авторизации на веб-сервере).
+    </para>
+  </section>
+
+  <!-- ====== Fetch list ====================================================== -->
+
+  <section id="cmd.modulelist">
+    <title id="cmd.modulelist-title">Как 'Fetch list...' находит список модулей</title>
+
+    <para>
+
+В <link linkend="dialogs.checkout">диалоге Извлечение</link>, есть кнопка названая
+<guilabel>Fetch list...</guilabel>. При ее нажатии TortoiseCVS делает попытку определить какие модули существуют на выбранном CVS сервере. TortoiseCVS делает это по следующему алгоритму:
+
+    <orderedlist>
+    <listitem>
+    <para>
+Запускает команду <command>cvs co -c</command> для получения  содержимого <filename>CVSROOT/modules</filename>. Обратите внимание что администратор CVS должен поддерживать этот файл в ручную, так что он может быть устаревшим или пустым.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Запускает команду <command>cvs ls</command> для получения всех существующих модулей. 
+Это надежный путь получить список модулей, но он только работает если запущенный сервер 
+CVSNT или последние версии cvshome.org CVS.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+Пытается угадать адрес Web Лога (см. <link linkend="cmd.weblog"
+    endterm="cmd.weblog-title"/>) и определить доступные модули разбирая ответ сервера Web Log.
+Это конечно работает если CVS сервер предоставляет Web Log.
+    </para>
+    </listitem>
+    </orderedlist>
+
+    </para>
+
+    </section>
+
+</chapter>

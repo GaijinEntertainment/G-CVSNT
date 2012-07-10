@@ -1,0 +1,1164 @@
+﻿<?xml version="1.0" encoding="utf-8"?>
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Id="{CB509245-1245-4867-8BD4-6B2C5A734504}" Codepage="1252" Language="1033" Manufacturer="Microsoft Corporation" Name="Windows Installer XML Toolset 3.5" UpgradeCode="{3618724B-2523-44F9-A908-866AA619504D}" Version="3.5.2519.0">
+        <Package Comments="Windows Installer XML Toolset Visual Studio Package" Compressed="yes" Description="Windows Installer XML Toolset Visual Studio Package" InstallerVersion="200" Keywords="Database, Installer" Languages="1033" Manufacturer="Microsoft Corporation" Platform="x86" />
+        <Condition Message="An administrator must approve or install [ProductName].">Privileged</Condition>
+        <CustomAction Id="CA_SetLatestDevenv_2005" Property="LATEST_DEVENV_EXE" Value="[VS2005DEVENV]" />
+        <CustomAction Id="CA_SetLatestDevenv_2008" Property="LATEST_DEVENV_EXE" Value="[VS90DEVENV]" />
+        <CustomAction Id="CA_SetLatestDevenvCommand_2005" Property="LATEST_DEVENV_EXE_COMMAND" Value="&amp;Open in Visual Studio 2005" />
+        <CustomAction Id="CA_SetLatestDevenvCommand_2008" Property="LATEST_DEVENV_EXE_COMMAND" Value="&amp;Open in Visual Studio 2008" />
+        <CustomAction Id="CA_SetLatestDevenv_2010" Property="LATEST_DEVENV_EXE" Value="[VS2010DEVENV]" />
+        <CustomAction Id="CA_SetLatestDevenvCommand_2010" Property="LATEST_DEVENV_EXE_COMMAND" Value="&amp;Open in Visual Studio 2010" />
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Component Id="VSSchema2005" Guid="{7150C0A6-5626-48B6-AA4C-671754E22706}" KeyPath="yes">
+                <CopyFile Id="CopyWixSchema2005" FileId="wix.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyWixLocSchema2005" FileId="wixloc.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdComplus2005" FileId="complus.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdDifxApp2005" FileId="difxapp.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdFirewall2005" FileId="firewall.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdGaming2005" FileId="gaming.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdIis2005" FileId="iis.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdMsmq2005" FileId="msmq.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdNetFx2005" FileId="netfx.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdPS2005" FileId="ps.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdSql2005" FileId="sql.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdUtil2005" FileId="util.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdVS2005" FileId="vs.xsd" DestinationProperty="VS2005_SCHEMAS_DIR" />
+                <CreateFolder Directory="TARGETDIR" />
+            </Component>
+            <Component Id="VSSchema2008" Guid="{E6580580-99B6-4473-842D-689830655DA1}" KeyPath="yes">
+                <CopyFile Id="CopyWixSchemas2008" FileId="wix.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyWixLocSchema2008" FileId="wixloc.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdComplus2008" FileId="complus.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdDifxApp2008" FileId="difxapp.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdFirewall2008" FileId="firewall.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdGaming2008" FileId="gaming.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdIis2008" FileId="iis.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdMsmq2008" FileId="msmq.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdNetFx2008" FileId="netfx.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdPS2008" FileId="ps.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdSql2008" FileId="sql.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdUtil2008" FileId="util.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdVS2008" FileId="vs.xsd" DestinationProperty="VS90_SCHEMAS_DIR" />
+                <CreateFolder Directory="TARGETDIR" />
+            </Component>
+            <Component Id="VSSchema2010" Guid="{528BE30A-E6CC-4B95-8053-5C094863C2FB}" KeyPath="yes">
+                <CopyFile Id="CopyWixSchemas2010" FileId="wix.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyWixLocSchema2010" FileId="wixloc.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdComplus2010" FileId="complus.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdDifxApp2010" FileId="difxapp.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdFirewall2010" FileId="firewall.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdGaming2010" FileId="gaming.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdIis2010" FileId="iis.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdNetFx2010" FileId="netfx.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdMsmq2010" FileId="msmq.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdPS2010" FileId="ps.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdSql2010" FileId="sql.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdUtil2010" FileId="util.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CopyFile Id="CopyExtensionXsdVS2010" FileId="vs.xsd" DestinationProperty="VS2010_SCHEMAS_DIR" />
+                <CreateFolder Directory="TARGETDIR" />
+            </Component>
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="APPLICATIONFOLDER" Name="Windows Installer XML v3.5" ShortName="_taqrvw2">
+                    <Component Id="ProductInformation" Guid="{8A0EC6E0-5AAF-439B-99BF-A8997BFA8BC8}">
+                        <RegistryKey Id="regADA32CDEDF043618964A7BD1326ACE09" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\Windows Installer XML\3.5" Root="HKLM" />
+                        <RegistryValue Id="reg5097ED0B3B456F902E4F7CB964E30963" Root="HKLM" Key="SOFTWARE\Microsoft\Windows Installer XML\3.5" Name="InstallRoot" Value="[BinDir]" Type="string" KeyPath="yes" />
+                        <RegistryValue Id="reg984C20A9F70E81DBDCBAD0D2FC35A9A9" Root="HKLM" Key="SOFTWARE\Microsoft\Windows Installer XML\3.5" Name="ProductVersion" Value="[ProductVersion]" Type="string" />
+                        <RemoveFolder Id="CleanupShortcutFolder" Directory="WixShortcutFolder" On="uninstall" />
+                    </Component>
+                    <Component Id="Licensing" Guid="{A96136F8-E684-4281-A127-3417FBA25A67}">
+                        <File Id="CPL.TXT" Name="CPL.TXT" KeyPath="yes" DiskId="1" Source="SourceDir\File\CPL.TXT" />
+                    </Component>
+                    <Directory Id="BinDir" Name="bin">
+                        <Component Id="CandleBinaries" Guid="{FBD4BCFB-F1B7-4B6D-B07C-E999A24521CF}">
+                            <File Id="candle.exe" Name="candle.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\candle.exe" />
+                        </Component>
+                        <Component Id="CandleConfig" Guid="{2DE5487F-CB2B-4F26-AF95-ACDEC2D024E1}">
+                            <File Id="candle.exe.config" Name="candle.exe.config" KeyPath="yes" ShortName="lt0x6ngl.con" Checksum="yes" DiskId="1" Source="SourceDir\File\candle.exe.config" />
+                        </Component>
+                        <Component Id="DarIceCube" Guid="{98D9CF0F-31BA-4790-BAF8-CABC2AD17E81}">
+                            <File Id="darice.cub" Name="darice.cub" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\darice.cub" />
+                        </Component>
+                        <Component Id="DarkBinaries" Guid="{810E1FAD-A3C0-45B7-84D1-736118406F20}">
+                            <File Id="dark.exe" Name="dark.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\dark.exe" />
+                        </Component>
+                        <Component Id="DarkConfig" Guid="{F55931CA-AF4B-4B70-A130-A884EAAA903A}">
+                            <File Id="dark.exe.config" Name="dark.exe.config" KeyPath="yes" ShortName="jpbbdrsm.con" Checksum="yes" DiskId="1" Source="SourceDir\File\dark.exe.config" />
+                        </Component>
+                        <Component Id="HeatBinaries" Guid="{3AF1FDDC-E697-45D0-812D-8BBDA56BEBE8}">
+                            <File Id="heat.exe" Name="heat.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\heat.exe" />
+                        </Component>
+                        <Component Id="HeatConfig" Guid="{4C60E3B5-C41C-4A4A-929D-70315AC6DD03}">
+                            <File Id="heat.exe.config" Name="heat.exe.config" KeyPath="yes" ShortName="mkglequp.con" Checksum="yes" DiskId="1" Source="SourceDir\File\heat.exe.config" />
+                        </Component>
+                        <Component Id="InsigniaBinaries" Guid="{F1B19D82-88C6-45D5-882E-EE3A95FF4F78}">
+                            <File Id="insignia.exe" Name="insignia.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\insignia.exe" />
+                        </Component>
+                        <Component Id="InsigniaConfig" Guid="{1C284E60-A247-4AA8-A0FC-CFF2F686A300}">
+                            <File Id="insignia.exe.config" Name="insignia.exe.config" KeyPath="yes" ShortName="tygoyfxx.con" Checksum="yes" DiskId="1" Source="SourceDir\File\insignia.exe.config" />
+                        </Component>
+                        <Component Id="LightBinaries" Guid="{953F7B4C-36C7-4BDD-8EA6-048630F779FB}">
+                            <File Id="light.exe" Name="light.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\light.exe" />
+                        </Component>
+                        <Component Id="LightConfig" Guid="{7B76E85A-D3B6-4258-AE23-EAACABAA3947}">
+                            <File Id="light.exe.config" Name="light.exe.config" KeyPath="yes" ShortName="yrcps9o6.con" Checksum="yes" DiskId="1" Source="SourceDir\File\light.exe.config" />
+                        </Component>
+                        <Component Id="LitBinaries" Guid="{D33FFA86-8C03-43A0-AED4-000D33ADD6AA}">
+                            <File Id="lit.exe" Name="lit.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\lit.exe" />
+                        </Component>
+                        <Component Id="LitConfig" Guid="{8B849034-B724-4656-ADF5-97DC794901B4}">
+                            <File Id="lit.exe.config" Name="lit.exe.config" KeyPath="yes" ShortName="yyvljnkw.con" Checksum="yes" DiskId="1" Source="SourceDir\File\lit.exe.config" />
+                        </Component>
+                        <Component Id="MeltBinaries" Guid="{221E008E-FFC6-407C-A0CE-1A29C79F2F9D}">
+                            <File Id="melt.exe" Name="melt.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\melt.exe" />
+                        </Component>
+                        <Component Id="MeltConfig" Guid="{A95A7D06-18EF-49A3-B453-E86B97C81F41}">
+                            <File Id="melt.exe.config" Name="melt.exe.config" KeyPath="yes" ShortName="zwkq5njj.con" Checksum="yes" DiskId="1" Source="SourceDir\File\melt.exe.config" />
+                        </Component>
+                        <Component Id="MergeModCube" Guid="{56BBF52F-048F-43A4-932D-0773A31CA9C1}">
+                            <File Id="mergemod.cub" Name="mergemod.cub" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\mergemod.cub" />
+                        </Component>
+                        <Component Id="MergeModBinaries" Guid="{AAF02F71-9684-4F4F-8EEA-FC99A61EAA9A}">
+                            <File Id="mergemod.dll" Name="mergemod.dll" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\mergemod.dll" />
+                        </Component>
+                        <Component Id="MSPatchCBinaries" Guid="{D108F858-7364-490E-83A4-C94EF3469B00}">
+                            <File Id="mspatchc.dll" Name="mspatchc.dll" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\mspatchc.dll" />
+                        </Component>
+                        <Component Id="NAntTasks" Guid="{D12399DB-3FAB-4A46-96CE-454B5F3BCB75}">
+                            <File Id="Microsoft.Tools.WindowsInstallerXml.NAntTasks.dll" Name="Microsoft.Tools.WindowsInstallerXml.NAntTasks.dll" KeyPath="yes" ShortName="3h0euokm.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\Microsoft.Tools.WindowsInstallerXml.NAntTasks.dll" />
+                        </Component>
+                        <Component Id="PyroBinaries" Guid="{A33CCD8E-A85A-4149-BBB4-11F4C43B9205}">
+                            <File Id="pyro.exe" Name="pyro.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\pyro.exe" />
+                        </Component>
+                        <Component Id="PyroConfig" Guid="{AE90E5F8-B7B0-4964-9C7A-3730DD0251FE}">
+                            <File Id="pyro.exe.config" Name="pyro.exe.config" KeyPath="yes" ShortName="8amnbtjy.con" Checksum="yes" DiskId="1" Source="SourceDir\File\pyro.exe.config" />
+                        </Component>
+                        <Component Id="SmokeBinaries" Guid="{48A05B14-C22E-454B-92B7-97200629BCEC}">
+                            <File Id="smoke.exe" Name="smoke.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\smoke.exe" />
+                        </Component>
+                        <Component Id="SmokeConfig" Guid="{24F0A281-B01F-4CD1-960B-7DE7EFA07470}">
+                            <File Id="smoke.exe.config" Name="smoke.exe.config" KeyPath="yes" ShortName="50ctg24v.con" Checksum="yes" DiskId="1" Source="SourceDir\File\smoke.exe.config" />
+                        </Component>
+                        <Component Id="TorchBinaries" Guid="{D9496C8B-825A-4464-92C7-8B8E258CA364}">
+                            <File Id="torch.exe" Name="torch.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\torch.exe" />
+                        </Component>
+                        <Component Id="TorchConfig" Guid="{0650236E-8279-4234-83AD-A33C17131741}">
+                            <File Id="torch.exe.config" Name="torch.exe.config" KeyPath="yes" ShortName="b_03bxu9.con" Checksum="yes" DiskId="1" Source="SourceDir\File\torch.exe.config" />
+                        </Component>
+                        <Component Id="WConsoleBinaries" Guid="{E687C3DB-8819-4849-A165-81DED7120A41}">
+                            <File Id="wconsole.dll" Name="wconsole.dll" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\wconsole.dll" />
+                        </Component>
+                        <Component Id="WixBinaries" Guid="{2179AE82-9B26-4102-9F3B-255EE7DB8BDF}">
+                            <Environment Id="WIXenv" Name="WIX" Value="[APPLICATIONFOLDER]" Action="set" System="yes" />
+                            <File Id="wix.dll" Name="wix.dll" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\wix.dll" />
+                        </Component>
+                        <Component Id="WixInteropBinaries" Guid="{E0574698-5BFD-4C85-BA0B-EB36B833E6CE}">
+                            <File Id="winterop.dll" Name="winterop.dll" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\winterop.dll" />
+                        </Component>
+                        <Component Id="WixCopBinaries" Guid="{E98CA3C7-2016-4FD9-827B-87A2EE6353C3}">
+                            <File Id="WixCop.exe" Name="WixCop.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\WixCop.exe" />
+                        </Component>
+                        <Component Id="WixUnitBinaries" Guid="{526851FE-DE69-40C2-A1DB-D8B757A0FCAB}">
+                            <File Id="WixUnit.exe" Name="WixUnit.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\WixUnit.exe" />
+                        </Component>
+                        <Component Id="WixUnitConfig" Guid="{C71FD147-2A3D-4560-87BE-025459931800}">
+                            <File Id="WixUnit.exe.config" Name="WixUnit.exe.config" KeyPath="yes" ShortName="nswlmecl.con" Checksum="yes" DiskId="1" Source="SourceDir\File\WixUnit.exe.config" />
+                        </Component>
+                        <Component Id="WuiBinaries" Guid="{C66AE68D-427C-4515-A1EA-70295930275F}">
+                            <File Id="wui.dll" Name="wui.dll" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\wui.dll" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.WindowsInstaller.Wix" Guid="{A95DB27C-DB3E-41CC-8CB9-40F286F304EC}">
+                            <File Id="Microsoft.Deployment.WindowsInstaller.dll_Wix" Name="Microsoft.Deployment.WindowsInstaller.dll" KeyPath="yes" ShortName="lbn8zebx.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.dll_Wix" />
+                        </Component>
+                        <Component Id="ComPlusExt" Guid="{AE46D16E-35EA-48F4-B539-7DFE27A75099}">
+                            <File Id="WixComPlusExtension.dll" Name="WixComPlusExtension.dll" KeyPath="yes" ShortName="beangq7q.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixComPlusExtension.dll" />
+                        </Component>
+                        <Component Id="DifxAppExt" Guid="{1B2303F6-9A78-417C-B96F-A8EE9AD0F9CA}">
+                            <File Id="WixDifxAppExtension.dll" Name="WixDifxAppExtension.dll" KeyPath="yes" ShortName="mkwhltmu.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixDifxAppExtension.dll" />
+                            <File Id="difxapp_x86.wixlib" Name="difxapp_x86.wixlib" ShortName="jw73wflb.wix" DiskId="1" Source="SourceDir\File\difxapp_x86.wixlib" />
+                            <File Id="difxapp_x64.wixlib" Name="difxapp_x64.wixlib" ShortName="qsijw3sy.wix" DiskId="1" Source="SourceDir\File\difxapp_x64.wixlib" />
+                            <File Id="difxapp_ia64.wixlib" Name="difxapp_ia64.wixlib" ShortName="1pcdjiea.wix" DiskId="1" Source="SourceDir\File\difxapp_ia64.wixlib" />
+                        </Component>
+                        <Component Id="DirectXExt" Guid="{DB6FDFC7-37BD-4D2E-8138-773EFD9F5959}">
+                            <File Id="WixDirectXExtension.dll" Name="WixDirectXExtension.dll" KeyPath="yes" ShortName="gbbwamxr.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixDirectXExtension.dll" />
+                        </Component>
+                        <Component Id="FirewallExt" Guid="{302FC4C7-086B-4F08-B99B-652836015FFB}">
+                            <File Id="WixFirewallExtension.dll" Name="WixFirewallExtension.dll" KeyPath="yes" ShortName="uorv_jwy.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixFirewallExtension.dll" />
+                        </Component>
+                        <Component Id="GamingExt" Guid="{58561FD3-AFE1-4333-9D72-FD2889B4DB1C}">
+                            <File Id="WixGamingExtension.dll" Name="WixGamingExtension.dll" KeyPath="yes" ShortName="vpsx09mj.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixGamingExtension.dll" />
+                        </Component>
+                        <Component Id="IisExt" Guid="{C6180B6E-D43E-4C50-AF51-8E777E466C36}">
+                            <File Id="WixIIsExtension.dll" Name="WixIIsExtension.dll" KeyPath="yes" ShortName="bq6m-qgt.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixIIsExtension.dll" />
+                        </Component>
+                        <Component Id="MsmqExt" Guid="{D1CB050B-2C96-43E6-A289-4DB49CE689C0}">
+                            <File Id="WixMsmqExtension.dll" Name="WixMsmqExtension.dll" KeyPath="yes" ShortName="r16xdqpz.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixMsmqExtension.dll" />
+                        </Component>
+                        <Component Id="NetFxExt" Guid="{E0E8C41F-CD1F-4748-9426-CA7D79AC59AC}">
+                            <File Id="WixNetFxExtension.dll" Name="WixNetFxExtension.dll" KeyPath="yes" ShortName="u3ypu23n.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixNetFxExtension.dll" />
+                        </Component>
+                        <Component Id="PSExt" Guid="{314E32F5-A6A4-4A79-91BB-8EA8A0D5D435}">
+                            <File Id="WixPSExtension.dll" Name="WixPSExtension.dll" KeyPath="yes" ShortName="a5dpk4yq.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixPSExtension.dll" />
+                        </Component>
+                        <Component Id="SqlExt" Guid="{E44D227D-E9BC-4A65-A3B4-FFC558389E05}">
+                            <File Id="WixSqlExtension.dll" Name="WixSqlExtension.dll" KeyPath="yes" ShortName="bnalabul.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixSqlExtension.dll" />
+                        </Component>
+                        <Component Id="UIExt" Guid="{14707444-6B6D-4500-9682-3DB806728723}">
+                            <File Id="WixUIExtension.dll" Name="WixUIExtension.dll" KeyPath="yes" ShortName="p3awsjjm.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixUIExtension.dll" />
+                        </Component>
+                        <Component Id="UtilExt" Guid="{F322AA8C-D8C0-4071-AEA5-143F3910AAB7}">
+                            <File Id="WixUtilExtension.dll" Name="WixUtilExtension.dll" KeyPath="yes" ShortName="pytte_rv.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixUtilExtension.dll" />
+                        </Component>
+                        <Component Id="VSExt" Guid="{296D9B35-8F06-4E88-8E93-7CC58CB8E08F}">
+                            <File Id="WixVSExtension.dll" Name="WixVSExtension.dll" KeyPath="yes" ShortName="dg2dahcx.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\WixVSExtension.dll" />
+                        </Component>
+                        <Component Id="BootstrapperBinaries" Guid="{04867F11-D8F5-4B08-84D3-7B154BF2D4C2}">
+                            <File Id="setup.exe" Name="setup.exe" KeyPath="yes" DiskId="1" Source="SourceDir\File\setup.exe" />
+                        </Component>
+                        <Component Id="SetupBuilderBinaries" Guid="{ABC668D9-EBC2-42F2-93D9-B9B8235C5F9F}">
+                            <File Id="SetupBuilder.dll" Name="SetupBuilder.dll" KeyPath="yes" ShortName="svgg3zwu.dll" DiskId="1" Source="SourceDir\File\SetupBuilder.dll" />
+                        </Component>
+                        <Component Id="SetupBldBinaries" Guid="{AB1CE8C4-B249-44BD-892E-518009755431}">
+                            <File Id="setupbld.exe" Name="setupbld.exe" KeyPath="yes" DiskId="1" Source="SourceDir\File\setupbld.exe" />
+                        </Component>
+                        <Component Id="VisualStudioPackageCommon35" Guid="{D687F08D-EA59-471B-8547-3EC822A461A8}">
+                            <File Id="ProjectFile.ico" Name="ProjectFile.ico" KeyPath="yes" ShortName="dnus205s.ico" DiskId="1" Source="SourceDir\File\ProjectFile.ico" />
+                            <File Id="ProductFile.ico" Name="ProductFile.ico" ShortName="d6frj7uf.ico" DiskId="1" Source="SourceDir\File\ProductFile.ico" />
+                            <File Id="IncludeFile.ico" Name="IncludeFile.ico" ShortName="euv6vevk.ico" DiskId="1" Source="SourceDir\File\IncludeFile.ico" />
+                            <File Id="LocalizationFile.ico" Name="LocalizationFile.ico" ShortName="af9xpqmt.ico" DiskId="1" Source="SourceDir\File\LocalizationFile.ico" />
+                            <File Id="WixLibraryFile.ico" Name="WixLibraryFile.ico" ShortName="ge62pkyz.ico" DiskId="1" Source="SourceDir\File\WixLibraryFile.ico" />
+                            <RegistryValue Id="reg8418B59EDC046F6738B52020C9D5E6C7" Root="HKCR" Key="WindowsInstallerXml.wixprojfile.3.5\shell\Open" Value="[LATEST_DEVENV_EXE_COMMAND]" Type="string" />
+                            <RegistryValue Id="reg4340D7059E93B0EFFBF9C2BED68027A6" Root="HKCR" Key="WindowsInstallerXml.wixprojfile.3.5\shell\Open\command" Value="&quot;[LATEST_DEVENV_EXE]&quot; &quot;%1&quot;" Type="string" />
+                            <RegistryValue Id="regDD209903A24980B72BE8E744573D333B" Root="HKCR" Key=".wixproj" Value="WindowsInstallerXml.wixprojfile.3.5" Type="string" />
+                            <RegistryValue Id="regB2E483D8E3818A026D73AD999159F25D" Root="HKCR" Key=".wixproj" Name="Content Type" Value="text/plain" Type="string" />
+                            <RegistryValue Id="reg169870EF81F690540C96B36C285E416C" Root="HKCR" Key="WindowsInstallerXml.wixprojfile.3.5" Value="WiX Project File" Type="string" />
+                            <RegistryValue Id="reg870C7CE19189C76E41C6D2BD231E51DF" Root="HKCR" Key="WindowsInstallerXml.wixprojfile.3.5\DefaultIcon" Value="&quot;[#ProjectFile.ico]&quot;" Type="string" />
+                            <RegistryValue Id="reg42C219E611452F052A266777EDDB9F2C" Root="HKCR" Key="WindowsInstallerXml.wxsfile.3.5\shell\Open" Value="[LATEST_DEVENV_EXE_COMMAND]" Type="string" />
+                            <RegistryValue Id="reg2F9BB797241C52B12EE8C860588C17F9" Root="HKCR" Key="WindowsInstallerXml.wxsfile.3.5\shell\Open\command" Value="&quot;[LATEST_DEVENV_EXE]&quot; &quot;%1&quot;" Type="string" />
+                            <RegistryValue Id="regBA749CC3CD99E2173D1A86D7EBFEBCDA" Root="HKCR" Key=".wxs" Value="WindowsInstallerXml.wxsfile.3.5" Type="string" />
+                            <RegistryValue Id="regA8DECA2EC55602E014B0903F0B8C32F1" Root="HKCR" Key=".wxs" Name="Content Type" Value="text/xml" Type="string" />
+                            <RegistryValue Id="reg880FEFEE8CC48C34F6C5C6E2EBF6440B" Root="HKCR" Key="WindowsInstallerXml.wxsfile.3.5" Value="WiX Source File" Type="string" />
+                            <RegistryValue Id="reg8F815E66128DC5525BB754B2C807A170" Root="HKCR" Key="WindowsInstallerXml.wxsfile.3.5\DefaultIcon" Value="&quot;[#ProductFile.ico]&quot;" Type="string" />
+                            <RegistryValue Id="reg1EE953FA81DF2FF5701B8C7E43FCEE97" Root="HKCR" Key="WindowsInstallerXml.wxifile.3.5\shell\Open" Value="[LATEST_DEVENV_EXE_COMMAND]" Type="string" />
+                            <RegistryValue Id="reg913AC1C178FF4B0F60F74FB56C41C16D" Root="HKCR" Key="WindowsInstallerXml.wxifile.3.5\shell\Open\command" Value="&quot;[LATEST_DEVENV_EXE]&quot; &quot;%1&quot;" Type="string" />
+                            <RegistryValue Id="regBC156DA717D608FD17B169B3AF8CF63D" Root="HKCR" Key=".wxi" Value="WindowsInstallerXml.wxifile.3.5" Type="string" />
+                            <RegistryValue Id="regDA7513BE75048930EA2FFFFCD3E2898F" Root="HKCR" Key=".wxi" Name="Content Type" Value="text/xml" Type="string" />
+                            <RegistryValue Id="reg56C0520E5081A15CDC140CDF4D492CE5" Root="HKCR" Key="WindowsInstallerXml.wxifile.3.5" Value="WiX Include File" Type="string" />
+                            <RegistryValue Id="regD934FEA64272A860EDC5B877EE22A526" Root="HKCR" Key="WindowsInstallerXml.wxifile.3.5\DefaultIcon" Value="&quot;[#IncludeFile.ico]&quot;" Type="string" />
+                            <RegistryValue Id="reg2C6DDB555476612633C9F077AACCF6C3" Root="HKCR" Key="WindowsInstallerXml.wxlfile.3.5\shell\Open" Value="[LATEST_DEVENV_EXE_COMMAND]" Type="string" />
+                            <RegistryValue Id="regF7B74660D95CD0740F125A0F5C8C3F6D" Root="HKCR" Key="WindowsInstallerXml.wxlfile.3.5\shell\Open\command" Value="&quot;[LATEST_DEVENV_EXE]&quot; &quot;%1&quot;" Type="string" />
+                            <RegistryValue Id="regA3C97612912DC4DCA68E7DBED7045393" Root="HKCR" Key=".wxl" Value="WindowsInstallerXml.wxlfile.3.5" Type="string" />
+                            <RegistryValue Id="regB25973299D796AE97C9A60A93E3F5DDF" Root="HKCR" Key=".wxl" Name="Content Type" Value="text/xml" Type="string" />
+                            <RegistryValue Id="reg0FFFD998DACD55EE3FCFA9C4D0530FC8" Root="HKCR" Key="WindowsInstallerXml.wxlfile.3.5" Value="WiX Localization File" Type="string" />
+                            <RegistryValue Id="reg0BAAF67FA0C77B6B0AA3B027C331E41B" Root="HKCR" Key="WindowsInstallerXml.wxlfile.3.5\DefaultIcon" Value="&quot;[#LocalizationFile.ico]&quot;" Type="string" />
+                            <RegistryValue Id="regD2977AE74634152C7897825BFD9EB0F0" Root="HKCR" Key=".wixlib" Value="WindowsInstallerXml.wixlibfile.3.5" Type="string" />
+                            <RegistryValue Id="regADA5F2944714BF2E1F66B87C2F2D8154" Root="HKCR" Key=".wixlib" Name="Content Type" Value="text/xml" Type="string" />
+                            <RegistryValue Id="reg045A09370A7B1D14539F358FA6757EBF" Root="HKCR" Key="WindowsInstallerXml.wixlibfile.3.5" Value="WiX Library File" Type="string" />
+                            <RegistryValue Id="reg131CF8AE7F1C051B23DE3E4EFE014487" Root="HKCR" Key="WindowsInstallerXml.wixlibfile.3.5\DefaultIcon" Value="&quot;[#WixLibraryFile.ico]&quot;" Type="string" />
+                        </Component>
+                        <Component Id="VisualStudioPackageSconce2005" Guid="{7FB8DF74-9448-46AF-97D6-CEEDCD6AF731}">
+                            <File Id="sconce2005.dll" Name="sconce2005.dll" KeyPath="yes" ShortName="ohj_ygkl.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\sconce2005.dll" />
+                        </Component>
+                        <Component Id="VisualStudioPackageSconce2008" Guid="{1CAF6D5D-3A8C-413A-881C-69CA93661B74}">
+                            <File Id="sconce2008.dll" Name="sconce2008.dll" KeyPath="yes" ShortName="rdzxxdyw.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\sconce2008.dll" />
+                        </Component>
+                        <Component Id="VisualStudioPackage2005" Guid="{E1195461-0D02-443B-BCF8-888ECE01E017}">
+                            <CreateFolder Directory="BinDir" />
+                            <File Id="votive2005.dll" Name="votive2005.dll" KeyPath="yes" ShortName="tzrbj4ov.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\votive2005.dll" />
+                            <RegistryKey Id="regFFD3F0FEC3C281CE44D48087CEBF6CAC" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\8.0\InstalledProducts\WiX" Root="HKLM" />
+                            <RegistryKey Id="regA43C48FD42A0A0918A4358FD50BF0349" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\8.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Root="HKLM" />
+                            <RegistryKey Id="regEFBE9D60C4D927C7851BD885D8B9024A" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Root="HKLM" />
+                            <RegistryKey Id="reg37D695F692FE63A865E1A28338A34A90" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Root="HKLM" />
+                            <RegistryValue Id="regEE8E57C149E2E1BFDF1667B78577185F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxs" Value="40" Type="integer" />
+                            <RegistryValue Id="regECB94A7B2646F33087D1E83BC6F4586B" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxi" Value="40" Type="integer" />
+                            <RegistryValue Id="reg6F9D33C2B250A773721D9034303F0010" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxl" Value="40" Type="integer" />
+                            <RegistryValue Id="reg5A9BD396E84ED0B5A6670729F33D7D7E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\InstalledProducts\WiX" Name="Package" Value="{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Type="string" />
+                            <RegistryValue Id="regFBE298D4B7EBDFB7727CCE871AC0065D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\InstalledProducts\WiX" Name="ToolsDirectory" Value="[BinDir]" Type="string" />
+                            <RegistryValue Id="reg49F55E01A6CDEEDC2F642579A6540C15" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\InstalledProducts\WiX" Name="UseInterface" Value="1" Type="integer" />
+                            <RegistryValue Id="reg4B199EED8F5BEADC1D865F677F345559" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Value="Windows Installer XML" Type="string" />
+                            <RegistryValue Id="reg41FAC428570182074BCC09A35DD59E1B" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Name="SortPriority" Value="30" Type="integer" />
+                            <RegistryValue Id="reg6DE1D916BEE5632A76741BBDE441C9D8" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Name="TemplatesDir" Value="[VsProjectTemplatesWixDir2005]" Type="string" />
+                            <RegistryValue Id="reg2C8BF550F07C9C4A82F9731F2B332E74" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Value="WiX Project Package" Type="string" />
+                            <RegistryValue Id="reg3C99383B17EC462F9D95D3A3E0DBDD2D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="Assembly" Value="" Type="string" />
+                            <RegistryValue Id="regE84FF5E3C553D317CC719CE62289FA9E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.WixPackage" Type="string" />
+                            <RegistryValue Id="reg16A5443E99EBD3C834578A1A7151F471" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="CodeBase" Value="[#votive2005.dll]" Type="string" />
+                            <RegistryValue Id="reg7CD0F572AB4E588C80C9B39A3B766242" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="CompanyName" Value="Microsoft" Type="string" />
+                            <RegistryValue Id="reg8605501D0B76883D41CDBDAEF6496DBB" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ID" Value="150" Type="integer" />
+                            <RegistryValue Id="regEC1BB616F18DB4720C62FF8563A16501" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg46D198D7491FB5BA055502E7382FAC71" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="MinEdition" Value="Standard" Type="string" />
+                            <RegistryValue Id="reg2BC9EF135398CB83A5D8D2764E1216A4" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ProductName" Value="Votive" Type="string" />
+                            <RegistryValue Id="reg56F643D8F6778E9D4186F7B8D1997C92" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ProductVersion" Value="3.0" Type="string" />
+                            <RegistryValue Id="reg82077B479F361186F2855EF200855F1E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Value="WixProjectFactory" Type="string" />
+                            <RegistryValue Id="reg60E9CBFA0EB6119884314AE207840BB9" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DefaultProjectExtensions" Value="wixproj" Type="string" />
+                            <RegistryValue Id="reg63CF708E42A97C075FBD3D879A5A2722" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DisplayName" Value="WiX" Type="string" />
+                            <RegistryValue Id="reg4557A261ACE380D9C69F50DEF2A3930D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DisplayProjectFileExtensions" Value="#100" Type="string" />
+                            <RegistryValue Id="reg38F791CD9DE5F2C8180AF2F2DE324766" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="ItemTemplatesDir" Value="[VsItemTemplatesWixDir2005]" Type="string" />
+                            <RegistryValue Id="regDDB7B05ABB727E3ED1787600A3D0F490" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="Language(VsTemplate)" Value="WiX" Type="string" />
+                            <RegistryValue Id="reg3E2D762697FB7262FEFE725F9E9AFE04" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="Package" Value="{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Type="string" />
+                            <RegistryValue Id="reg8EFEE3C9766B46A206E5E11135AB9AD2" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="PossibleProjectExtensions" Value="wixproj" Type="string" />
+                            <RegistryValue Id="reg993502041076AF0533F4460502E9422B" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="ProjectTemplatesDir" Value="[VsProjectTemplatesWixDir2005]" Type="string" />
+                            <RegistryValue Id="reg0F2E5FB4325F0CD43E1F6D00B52659B2" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Value="#101" Type="string" />
+                            <RegistryValue Id="regB8FFD69C29995CD581C3BDFBCA6CDD37" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Name="CommonOpenFilesFilter" Value="1" Type="integer" />
+                            <RegistryValue Id="reg0123FACDF89FF764CE0020828DAF5489" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Name="SortPriority" Value="1000" Type="integer" />
+                            <RegistryValue Id="reg64432C8E0835C0557BD89796C4AB58A3" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixInstallerPropertyPage" Type="string" />
+                            <RegistryValue Id="reg6CFF517438DB2627ED66554C64EF84D2" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixInstallerPropertyPage" Type="string" />
+                            <RegistryValue Id="regEAF539F7C47C57B15A2DD94C0ECD5F1D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="CodeBase" Value="[#votive2005.dll]" Type="string" />
+                            <RegistryValue Id="regAE01892FAC46FB4134F6989DEAA3DF0A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg10F6BFCC4D4710F0FAB2ECE798C861BC" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg89681B9F64CE2D2F2A438F2C82A3504F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildEventsPropertyPage" Type="string" />
+                            <RegistryValue Id="regE0D74D5B046B04668884911C9412863F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildEventsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg156E58CD7AE9990EC3E2CD1699C05A00" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="CodeBase" Value="[#votive2005.dll]" Type="string" />
+                            <RegistryValue Id="reg3D488BF227178512B1FE98ED46F807FE" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="regE3769AFA8ECA36E8327E91649871E1D8" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="regA8890E70B4A9AF7785AD89426B9CDA91" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildPropertyPage" Type="string" />
+                            <RegistryValue Id="regB8B6547703A7E12CAD1848212AA5DA89" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildPropertyPage" Type="string" />
+                            <RegistryValue Id="reg0F5158C79D4DAD6F5F676F577A10F60A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="CodeBase" Value="[#votive2005.dll]" Type="string" />
+                            <RegistryValue Id="reg7A13BEB454EEAEBFDBF2F9F985A2D6D9" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg742E87EC9DB9AB0E7ADDAD6AF3CE4F6A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg4B94F5545AEBC5AE2EFF1A4DF2D66141" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixPathsPropertyPage" Type="string" />
+                            <RegistryValue Id="regC95AABF5C59D7997CA0745B135686097" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixPathsPropertyPage" Type="string" />
+                            <RegistryValue Id="regED0F3F8CC86525781E974ABE10D4590C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="CodeBase" Value="[#votive2005.dll]" Type="string" />
+                            <RegistryValue Id="regB1FE088208E020C542C66920CD1D5D3A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="regA2B4AE2094CBFA0F873744BC3F9CAE0A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg34B3C3211A65F7C9FD7DAB0AF016CB4A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixToolsSettingsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg67698CC030CE3FB3421ABFBEE5216FA3" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixToolsSettingsPropertyPage" Type="string" />
+                            <RegistryValue Id="regF8CB79883F069A5BADF7358D50BD7CAA" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="CodeBase" Value="[#votive2005.dll]" Type="string" />
+                            <RegistryValue Id="reg55F78C5CC3D73879C1C5C2913A1DAC80" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg9C0F7E5FB68A855F33478F3015D908F8" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg488A12E5E4CD0ECD4347307836F99F99" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\MSBuild\SafeImports" Name="wix.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix.targets" Type="string" />
+                            <RegistryValue Id="regD61F0EC44F92880EBCB2D701C5B21944" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\MSBuild\SafeImports" Name="wix200x.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix200x.targets" Type="string" />
+                            <RegistryValue Id="regAE55AC241FB21653E73852822A463C1E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\MSBuild\SafeImports" Name="wix2010.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix2010.targets" Type="string" />
+                            <RegistryValue Id="reg717D6C09D3A18AF47CAE7748C3F04AF7" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\8.0\MSBuild\SafeImports" Name="wix.ca.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix.ca.targets" Type="string" />
+                            <RestartResource Id="wrr54E165D1A5D742CA3F9D11B34DF44135" Path="[VS2005DEVENV]" xmlns="http://schemas.microsoft.com/wix/UtilExtension" />
+                        </Component>
+                        <Component Id="VisualStudioPackage2008" Guid="{AD022E4C-71A5-4C1D-8F61-E09B3C2BFC2F}">
+                            <CreateFolder Directory="BinDir" />
+                            <File Id="votive2008.dll" Name="votive2008.dll" KeyPath="yes" ShortName="ckypeoqb.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\votive2008.dll" />
+                            <RegistryKey Id="reg4577EA050B497FA4ED98C577D0F2CA0F" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\9.0\InstalledProducts\WiX" Root="HKLM" />
+                            <RegistryKey Id="reg7BF0BEFC3535860D4418D8573F145E85" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\9.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Root="HKLM" />
+                            <RegistryKey Id="regE722DEC15C0E12A13AF3E8F312980675" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Root="HKLM" />
+                            <RegistryKey Id="regE367EE8B8F628B104845E7756E7C0CB8" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Root="HKLM" />
+                            <RegistryValue Id="reg01ED2E661949005F245067149E62719F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxs" Value="40" Type="integer" />
+                            <RegistryValue Id="regCC9016F89B14A56955B2ADC47208E3E8" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxi" Value="40" Type="integer" />
+                            <RegistryValue Id="reg0C6D21A075AF81D6E4F89D489CC95609" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxl" Value="40" Type="integer" />
+                            <RegistryValue Id="reg7CFCB92578B30028421D902C2B03C949" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\InstalledProducts\WiX" Name="Package" Value="{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Type="string" />
+                            <RegistryValue Id="reg5AF4232132BD2373978A8F05B73E3BB7" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\InstalledProducts\WiX" Name="ToolsDirectory" Value="[BinDir]" Type="string" />
+                            <RegistryValue Id="regB28C8BA105DB6C6C0584BABA508BFA2A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\InstalledProducts\WiX" Name="UseInterface" Value="1" Type="integer" />
+                            <RegistryValue Id="regC6335D5FD343FDBFADA9C6032E7AF86B" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Value="Windows Installer XML" Type="string" />
+                            <RegistryValue Id="regD7A111237B83A70CDC86DC63D36970CB" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Name="SortPriority" Value="30" Type="integer" />
+                            <RegistryValue Id="regF8DDAEE22D5A4C9AFBE62B258EC28909" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Name="TemplatesDir" Value="[VsProjectTemplatesWixDir2008]" Type="string" />
+                            <RegistryValue Id="reg4BB227F952A930E417C79588F4C668C5" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Value="WiX Project Package" Type="string" />
+                            <RegistryValue Id="regAE7EA075C2BCF24491D1D5FE73924060" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="Assembly" Value="" Type="string" />
+                            <RegistryValue Id="reg0395055D33DDA8C7B8DF1FCD8A298F2F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.WixPackage" Type="string" />
+                            <RegistryValue Id="regC2BE7890C9353F011C53F4CCE5006C8E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="CodeBase" Value="[#votive2008.dll]" Type="string" />
+                            <RegistryValue Id="reg05F287A3BAC40B0EEF575CF980350A9F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="CompanyName" Value="Microsoft" Type="string" />
+                            <RegistryValue Id="regBE51880704FB75D80ABA5CF8FA8B22E5" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ID" Value="150" Type="integer" />
+                            <RegistryValue Id="regDA35F1FB3528FF779F6D1A088574D66C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="regFF6E34480D6729028B16EC8EF0FFD9E7" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="MinEdition" Value="Standard" Type="string" />
+                            <RegistryValue Id="regE9B97DC0B104113A1ECD58B74BC9B205" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ProductName" Value="Votive" Type="string" />
+                            <RegistryValue Id="reg4D45A6EDB9494096725CCD26A0B597BC" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ProductVersion" Value="3.0" Type="string" />
+                            <RegistryValue Id="regB0870A83E55946B661FD8E7E3FC773F5" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Value="WixProjectFactory" Type="string" />
+                            <RegistryValue Id="reg95D2249C8AC3FD3B3E650D381625F9FE" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DefaultProjectExtensions" Value="wixproj" Type="string" />
+                            <RegistryValue Id="regD93590A4EB280909B1FB0AD96D10888C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DisplayName" Value="WiX" Type="string" />
+                            <RegistryValue Id="regF8EF71F437E747D6BFE7CC0C361297EB" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DisplayProjectFileExtensions" Value="#100" Type="string" />
+                            <RegistryValue Id="regFCDFCC5AC7086DE9B1BB6DA669E4FD13" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="ItemTemplatesDir" Value="[VsItemTemplatesWixDir2008]" Type="string" />
+                            <RegistryValue Id="reg6BC0677D3689D90CC493AE5826982E5F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="Language(VsTemplate)" Value="WiX" Type="string" />
+                            <RegistryValue Id="reg859BD40843A18688C17E9BCB72BED7C5" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="Package" Value="{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Type="string" />
+                            <RegistryValue Id="reg6D6F68F274CB9623C79DC4A974957C0D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="PossibleProjectExtensions" Value="wixproj" Type="string" />
+                            <RegistryValue Id="reg44E076584586107094AA2392B12131C0" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="ProjectTemplatesDir" Value="[VsProjectTemplatesWixDir2008]" Type="string" />
+                            <RegistryValue Id="reg94009B481AE5085FC9D20E60755CD72D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Value="#101" Type="string" />
+                            <RegistryValue Id="reg43F6C3D7AE8AB2225C71B6E617700BD0" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Name="CommonOpenFilesFilter" Value="1" Type="integer" />
+                            <RegistryValue Id="reg675C757CADDA5E6E0CAC45770BAC315C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Name="SortPriority" Value="1000" Type="integer" />
+                            <RegistryValue Id="reg7AC6635B9B82FCEA7BEA92D3F2811ADC" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixInstallerPropertyPage" Type="string" />
+                            <RegistryValue Id="reg67E92DCA4DC0C4D8B2FA5A3683B5BF3D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixInstallerPropertyPage" Type="string" />
+                            <RegistryValue Id="regB54F5C7D8CA838736F7F2CB2F2724469" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="CodeBase" Value="[#votive2008.dll]" Type="string" />
+                            <RegistryValue Id="reg42E028787B0AAE60B4BB2F3580CE4924" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="regE05D487956CE211B6E77E695FA68D7B5" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg9F93C1097BF9E9CE24424BE73681D476" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildEventsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg7AA25D5B103B12BFA616D837759FBE52" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildEventsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg9C5593F313E35F7B8937950CA72379EF" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="CodeBase" Value="[#votive2008.dll]" Type="string" />
+                            <RegistryValue Id="reg5E550A076D118934666CE8F9C244AD08" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="regA1899ECF37B9D01B60ACA5644FF12C1D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="regB7B7015778ADF8DF82D5D361DD74EC04" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildPropertyPage" Type="string" />
+                            <RegistryValue Id="reg1CED14E0818C46BE35E4E7583A578A1A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildPropertyPage" Type="string" />
+                            <RegistryValue Id="regF339D8004986A935E20FC435CFA4A548" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="CodeBase" Value="[#votive2008.dll]" Type="string" />
+                            <RegistryValue Id="reg60A379E1F5793644F37FA2D5C8DA6DBF" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg1E994A926217194198F4359943309A4D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg37E667D1F88CA7AB3B24A92895AA9456" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixPathsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg90EA1E6A7C3E4E68397AB5109EA4DBB0" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixPathsPropertyPage" Type="string" />
+                            <RegistryValue Id="regAB8EEC4E61FA8C877271A10687B1D743" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="CodeBase" Value="[#votive2008.dll]" Type="string" />
+                            <RegistryValue Id="reg0576E594F4ECD7A97435F66C0E9E1454" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="regECC7BED5BFBEC0041544824692E6A24D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg3557911219D901BF639BDB43C7C36899" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixToolsSettingsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg9D2B812D51EA6BC606C29EC42A02F755" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixToolsSettingsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg933EDED8382D45F155A19C3406DC626F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="CodeBase" Value="[#votive2008.dll]" Type="string" />
+                            <RegistryValue Id="regD2FC4EA5D2313842922F7E8A042FD688" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg5FC4C294C3670C9CA8D93CD5F87D69DC" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg24339996AD6EE51858E83912FD8FF78D" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\MSBuild\SafeImports" Name="wix.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix.targets" Type="string" />
+                            <RegistryValue Id="reg2A0453A9E23BB417823F810A076992F0" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\MSBuild\SafeImports" Name="wix200x.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix200x.targets" Type="string" />
+                            <RegistryValue Id="regCD4679CDB3425E29333148FB79B77607" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\MSBuild\SafeImports" Name="wix2010.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix2010.targets" Type="string" />
+                            <RegistryValue Id="reg1595B59260D132068829A61FF33B9A38" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\9.0\MSBuild\SafeImports" Name="wix.ca.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix.ca.targets" Type="string" />
+                            <RestartResource Id="wrr20F0661DAC1F66BF00CDD494C0DB5562" Path="[VS90DEVENV]" xmlns="http://schemas.microsoft.com/wix/UtilExtension" />
+                        </Component>
+                        <Component Id="VisualStudioPackageSconce2010" Guid="{89A9AA9B-EDC2-4206-AB98-3FF75E705AB9}">
+                            <File Id="sconce2010.dll" Name="sconce2010.dll" KeyPath="yes" ShortName="kt5lkmy7.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\sconce2010.dll" />
+                        </Component>
+                        <Component Id="VisualStudioPackage2010" Guid="{C8D37529-F79E-46B4-89FD-EA7BC6654770}">
+                            <CreateFolder Directory="BinDir" />
+                            <File Id="votive2010.dll" Name="votive2010.dll" KeyPath="yes" ShortName="4zkhrcu9.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\votive2010.dll" />
+                            <RegistryKey Id="regA68773992CCE89F405A0910D9BD03C02" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\10.0\InstalledProducts\WiX" Root="HKLM" />
+                            <RegistryKey Id="reg3A9A620CF78D5DBC2F0B77E7F10A8220" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\10.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Root="HKLM" />
+                            <RegistryKey Id="regE1BAC1E1895854EA0ADCBE5ADD481DEC" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Root="HKLM" />
+                            <RegistryKey Id="reg6235077E5E8BD92CDE7A574165D0979C" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Root="HKLM" />
+                            <RegistryValue Id="reg5E7BBF2ABF7015759485CB899F2AEB91" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxs" Value="40" Type="integer" />
+                            <RegistryValue Id="reg88B3D457FE467D7679CA61E26B00DFC1" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxi" Value="40" Type="integer" />
+                            <RegistryValue Id="reg6C29D6766CFD1B2933573C2EBB0DD39B" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Editors\{FA3CD31E-987B-443A-9B81-186104E8DAC1}\Extensions" Name="wxl" Value="40" Type="integer" />
+                            <RegistryValue Id="reg76A8CDAC8E5537B580AD3F8CA99A79D9" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\InstalledProducts\WiX" Name="Package" Value="{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Type="string" />
+                            <RegistryValue Id="reg9F64248C759662D451BABA5855CC2155" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\InstalledProducts\WiX" Name="ToolsDirectory" Value="[BinDir]" Type="string" />
+                            <RegistryValue Id="regDFF439044C6F6AEE6EF8B9E438BE1A86" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\InstalledProducts\WiX" Name="UseInterface" Value="1" Type="integer" />
+                            <RegistryValue Id="reg5D9D9604B5D9B323B0A7489811B7E2AC" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Value="Windows Installer XML" Type="string" />
+                            <RegistryValue Id="reg557E54089C15CA7C08900F3BC58A1B18" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Name="SortPriority" Value="30" Type="integer" />
+                            <RegistryValue Id="reg95C6AC2CBBD5521D4865165C2CCC3D6A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\NewProjectTemplates\TemplateDirs\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}\/1" Name="TemplatesDir" Value="[VsProjectTemplatesWixDir2010]" Type="string" />
+                            <RegistryValue Id="reg20B78C5A8BFBFA66F7518DB8074A9471" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Value="WiX Project Package" Type="string" />
+                            <RegistryValue Id="reg29C61213FEF8561C7474968698915448" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="Assembly" Value="" Type="string" />
+                            <RegistryValue Id="reg5CCC04C423F62739F4821683158AE448" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.WixPackage" Type="string" />
+                            <RegistryValue Id="reg04C9899D83B5B6E7939290F752B0A3A7" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="CodeBase" Value="[#votive2010.dll]" Type="string" />
+                            <RegistryValue Id="reg3198E7545C500A95AD1F5FE2C97135CB" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="CompanyName" Value="Microsoft" Type="string" />
+                            <RegistryValue Id="reg3443DD1AE5D161318701550CD3D98312" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ID" Value="150" Type="integer" />
+                            <RegistryValue Id="reg937508FF2442E3D50AFD064D82735F91" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg557C67A984365A8F193A1942B45AD636" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="MinEdition" Value="Standard" Type="string" />
+                            <RegistryValue Id="reg6D07D2ABC28B0D41E62E16D48B75898E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ProductName" Value="Votive" Type="string" />
+                            <RegistryValue Id="regE4B5B37A4BDAF8FF07B34FE6AC132531" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Packages\{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Name="ProductVersion" Value="3.0" Type="string" />
+                            <RegistryValue Id="reg631B48E6E822E79FA7F876766239A016" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Value="WixProjectFactory" Type="string" />
+                            <RegistryValue Id="reg8C9B60ADA2546D79CAAB01E913809E55" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DefaultProjectExtensions" Value="wixproj" Type="string" />
+                            <RegistryValue Id="reg7941395A9C452C7ECDA283C8652D8803" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DisplayName" Value="WiX" Type="string" />
+                            <RegistryValue Id="regA9FB72F0A0475EC89F63F2874A499CE9" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="DisplayProjectFileExtensions" Value="#100" Type="string" />
+                            <RegistryValue Id="regD993999537C8C252E959C5C5EC94454E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="ItemTemplatesDir" Value="[VsItemTemplatesWixDir2010]" Type="string" />
+                            <RegistryValue Id="reg8402731851CA96D54DE901AD9F18B823" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="Language(VsTemplate)" Value="WiX" Type="string" />
+                            <RegistryValue Id="reg9082B6CC136CA2ADD0643CB341F7F0AC" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="Package" Value="{E0EE8E7D-F498-459E-9E90-2B3D73124AD5}" Type="string" />
+                            <RegistryValue Id="regBF7013B0D0680B137372E829813EC52C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="PossibleProjectExtensions" Value="wixproj" Type="string" />
+                            <RegistryValue Id="reg5019DAA21C72233CADD6881816491F77" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}" Name="ProjectTemplatesDir" Value="[VsProjectTemplatesWixDir2010]" Type="string" />
+                            <RegistryValue Id="reg236052BCB64151ABADE2A030B3CB60DF" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Value="#101" Type="string" />
+                            <RegistryValue Id="regB404E661E1B766BC6620290D300CDD0C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Name="CommonOpenFilesFilter" Value="1" Type="integer" />
+                            <RegistryValue Id="reg8F4C746473B231773C2B8771C3CB1F90" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\Projects\{930C7802-8A8C-48F9-8165-68863BCCD9DD}\Filters\WiX Files" Name="SortPriority" Value="1000" Type="integer" />
+                            <RegistryValue Id="reg304DB765CD80A68A2BCB09058B749796" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixInstallerPropertyPage" Type="string" />
+                            <RegistryValue Id="reg52C7679C4DAD9225F2FFC1F0D3500FBD" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixInstallerPropertyPage" Type="string" />
+                            <RegistryValue Id="regBD8010F1F6FF12365C44D6AB08FD421A" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="CodeBase" Value="[#votive2010.dll]" Type="string" />
+                            <RegistryValue Id="regF46996923D693E057185135836C268F5" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg04B18BAE9C1179BB393052CA2A53CF32" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3C50BD5E-0E85-4306-A0A8-5B39CCB07DA0}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="regB41F54263D07B28B23E33C354445B394" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildEventsPropertyPage" Type="string" />
+                            <RegistryValue Id="regCA9D13D69FB2490FF3E5A17EEE52AE94" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildEventsPropertyPage" Type="string" />
+                            <RegistryValue Id="regB63F01AE9310ADE1BDDE14701D838C93" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="CodeBase" Value="[#votive2010.dll]" Type="string" />
+                            <RegistryValue Id="regA5761F8AFBCA91B1C0131553DF352E70" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg37FF51A098510A1114386FB6D9EE61C8" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{A71983CF-33B9-4241-9B5A-80091BCE57DA}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg22DB6D53CA5774DEA92007DF876E2B83" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildPropertyPage" Type="string" />
+                            <RegistryValue Id="regF699E3B4086B599237FC3E1EC1612B86" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixBuildPropertyPage" Type="string" />
+                            <RegistryValue Id="regAF8D632708207D78E1392418F4D0E88C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="CodeBase" Value="[#votive2010.dll]" Type="string" />
+                            <RegistryValue Id="regC699C918EDE81E3782A3AF1D9BE711AC" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg749BF1B0EA7F42A37C0F70ED21A455B5" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{E26242E0-4175-48e7-821E-FD0B17603811}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg055BA41D68C878D36B3D4567D8E2F6A4" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixPathsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg41AE9E7B2716309065C924C858879EAA" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixPathsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg1C0EB29AB441F1DD4F3B72FAAA3EF40F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="CodeBase" Value="[#votive2010.dll]" Type="string" />
+                            <RegistryValue Id="reg081FCC153A2E4214602387934EE15A9F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg780A9A4E6A174678D82501756B1624A7" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{3ED6B659-F2FA-4252-8B3A-3736B04BFC4D}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="regF93F4A53ABD7399E8D8B6059D9F2B60F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixToolsSettingsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg2619608E49AF4AA7447123199C8C4321" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="Class" Value="Microsoft.Tools.WindowsInstallerXml.VisualStudio.PropertyPages.WixToolsSettingsPropertyPage" Type="string" />
+                            <RegistryValue Id="reg4D53FFB4F5036B5C862CAF274C0D3819" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="CodeBase" Value="[#votive2010.dll]" Type="string" />
+                            <RegistryValue Id="reg51375B67E465D142D762A75972DF6E74" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="InprocServer32" Value="[SystemFolder]mscoree.dll" Type="string" />
+                            <RegistryValue Id="reg2FE16D78AB15BB98DA50EB129D993061" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\CLSID\{37DA98B6-C5F4-4ce6-867F-553EBE590ABE}" Name="ThreadingModel" Value="Both" Type="string" />
+                            <RegistryValue Id="reg9E91A08DF5A62FED82EB6524CCB14CAD" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\MSBuild\SafeImports" Name="wix.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix.targets" Type="string" />
+                            <RegistryValue Id="regFF0A77A30A96EAE2EF90D0CA7213184E" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\MSBuild\SafeImports" Name="wix200x.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix200x.targets" Type="string" />
+                            <RegistryValue Id="regA154C82ABA1392C2A03506297CBF6A1F" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\MSBuild\SafeImports" Name="wix2010.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix2010.targets" Type="string" />
+                            <RegistryValue Id="reg03D290B5D707935D91D7C5EE96A1062C" Root="HKLM" Key="SOFTWARE\Microsoft\VisualStudio\10.0\MSBuild\SafeImports" Name="wix.ca.targets.3.5" Value="[Dir_MSBuildMSWix3x]wix.ca.targets" Type="string" />
+                            <RestartResource Id="wrrC71FD92AE4659A78ABE15BB005F56480" Path="[VS2010DEVENV]" xmlns="http://schemas.microsoft.com/wix/UtilExtension" />
+                        </Component>
+                        <Component Id="lux.exe" Guid="{7B7174CB-FCF3-47B8-9E05-B3F5EEB5DF26}">
+                            <File Id="lux.exe" Name="lux.exe" KeyPath="yes" DiskId="1" Source="SourceDir\File\lux.exe" />
+                        </Component>
+                        <Component Id="lux.exe.config" Guid="{6A9B5D60-EA71-4810-9917-60965E0876E9}">
+                            <File Id="lux.exe.config" Name="lux.exe.config" KeyPath="yes" ShortName="plpiasg9.con" DiskId="1" Source="SourceDir\File\lux.exe.config" />
+                        </Component>
+                        <Component Id="nit.exe" Guid="{1F16AE42-84D9-4484-8BEB-85B159291621}">
+                            <CopyFile Id="DupDtf" FileId="Microsoft.Deployment.WindowsInstaller.dll" DestinationDirectory="Dir_MSBuildMSWix3x" />
+                            <File Id="nit.exe" Name="nit.exe" KeyPath="yes" DiskId="1" Source="SourceDir\File\nit.exe" />
+                        </Component>
+                        <Component Id="nit.exe.config" Guid="{DBAF8230-218D-44BB-B34B-7B26FD144454}">
+                            <File Id="nit.exe.config" Name="nit.exe.config" KeyPath="yes" ShortName="xq652o3z.con" DiskId="1" Source="SourceDir\File\nit.exe.config" />
+                        </Component>
+                        <Component Id="WixLuxExtension.dll" Guid="{341BD660-7249-42DD-9744-DBEF0776AD52}">
+                            <File Id="WixLuxExtension.dll" Name="WixLuxExtension.dll" KeyPath="yes" ShortName="eyhmfrp3.dll" DiskId="1" Source="SourceDir\File\WixLuxExtension.dll" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="DocDir" Name="doc">
+                        <Component Id="ChmDocumentation" Guid="{6AA2591A-B5F8-44D9-91F4-3D7CD95635E0}">
+                            <File Id="WiX.chm" Name="WiX.chm" KeyPath="yes" DiskId="1" Source="SourceDir\File\WiX.chm" />
+                            <Shortcut Id="WixChmShortcut" Directory="WixShortcutFolder" Name="WiX Documentation" ShortName="_ybpayqv" Icon="WixSetupIcons.ico" IconIndex="0" Advertise="yes" />
+                        </Component>
+                        <Component Id="MsiSdkChm" Guid="{9B102980-0606-4656-AADE-B277402D7359}">
+                            <File Id="msi.chm" Name="msi.chm" KeyPath="yes" DiskId="1" Source="SourceDir\File\msi.chm" />
+                            <Shortcut Id="MsiChmShortcut" Directory="WixShortcutFolder" Name="MSI SDK Documentation" ShortName="djqb12j3" Icon="WixSetupIcons.ico" IconIndex="0" Advertise="yes" />
+                        </Component>
+                        <Component Id="WixSchemas" Guid="{F41EA941-DCCC-4638-BB7E-A722EF7F2F5D}">
+                            <File Id="wix.xsd" Name="wix.xsd" KeyPath="yes" DiskId="1" Source="SourceDir\File\wix.xsd" />
+                            <File Id="wixloc.xsd" Name="wixloc.xsd" DiskId="1" Source="SourceDir\File\wixloc.xsd" />
+                        </Component>
+                        <Component Id="ExtensionXsds" Guid="{D6176999-AE97-49FE-ADB5-2DF354A4AC5E}">
+                            <File Id="util.xsd" Name="util.xsd" KeyPath="yes" DiskId="1" Source="SourceDir\File\util.xsd" />
+                            <File Id="complus.xsd" Name="complus.xsd" DiskId="1" Source="SourceDir\File\complus.xsd" />
+                            <File Id="difxapp.xsd" Name="difxapp.xsd" DiskId="1" Source="SourceDir\File\difxapp.xsd" />
+                            <File Id="firewall.xsd" Name="firewall.xsd" DiskId="1" Source="SourceDir\File\firewall.xsd" />
+                            <File Id="gaming.xsd" Name="gaming.xsd" DiskId="1" Source="SourceDir\File\gaming.xsd" />
+                            <File Id="iis.xsd" Name="iis.xsd" DiskId="1" Source="SourceDir\File\iis.xsd" />
+                            <File Id="msmq.xsd" Name="msmq.xsd" DiskId="1" Source="SourceDir\File\msmq.xsd" />
+                            <File Id="netfx.xsd" Name="netfx.xsd" DiskId="1" Source="SourceDir\File\netfx.xsd" />
+                            <File Id="ps.xsd" Name="ps.xsd" DiskId="1" Source="SourceDir\File\ps.xsd" />
+                            <File Id="sql.xsd" Name="sql.xsd" DiskId="1" Source="SourceDir\File\sql.xsd" />
+                            <File Id="vs.xsd" Name="vs.xsd" DiskId="1" Source="SourceDir\File\vs.xsd" />
+                        </Component>
+                        <Component Id="DTF.chm" Guid="{E4F01700-B813-41FC-9E8A-D935AC891337}">
+                            <File Id="DTF.chm" Name="DTF.chm" KeyPath="yes" DiskId="1" Source="SourceDir\File\DTF.chm" />
+                            <Shortcut Id="DtfChmShortcut" Directory="WixShortcutFolder" Name="DTF Documentation" ShortName="9_i9t8w8" Icon="WixSetupIcons.ico" IconIndex="0" Advertise="yes" />
+                        </Component>
+                        <Component Id="DTFAPI.chm" Guid="{3F9B418C-87E1-4E75-B791-C9AE67D3F168}">
+                            <File Id="DTFAPI.chm" Name="DTFAPI.chm" KeyPath="yes" DiskId="1" Source="SourceDir\File\DTFAPI.chm" />
+                        </Component>
+                        <Component Id="lux.xsd" Guid="{FF25C132-1196-4B04-A176-29C22A8D30C6}">
+                            <File Id="lux.xsd" Name="lux.xsd" KeyPath="yes" DiskId="1" Source="SourceDir\File\lux.xsd" />
+                        </Component>
+                    </Directory>
+                    <Directory Id="SdkDir" Name="SDK">
+                        <Component Id="DocCompiler" Guid="{47168F22-10AC-4D4B-867E-A27BF93BECC7}">
+                            <File Id="DocCompiler.exe" Name="DocCompiler.exe" KeyPath="yes" ShortName="nmq4prj6.exe" Checksum="yes" DiskId="1" Source="SourceDir\File\DocCompiler.exe" />
+                        </Component>
+                        <Component Id="MsgGen" Guid="{5A7280EB-ED53-40B7-906B-010272E49CA3}">
+                            <File Id="MsgGen.exe" Name="MsgGen.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\MsgGen.exe" />
+                        </Component>
+                        <Component Id="XsdGen" Guid="{1A02B996-B159-409F-ACDD-D1E64D15C0F2}">
+                            <File Id="XsdGen.exe" Name="XsdGen.exe" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\XsdGen.exe" />
+                        </Component>
+                        <Component Id="XsdStitch" Guid="{8C205460-3ADF-4F6A-8913-A0F900CB66A8}">
+                            <File Id="XsdStitch.exe" Name="XsdStitch.exe" KeyPath="yes" ShortName="i-yqu3s9.exe" Checksum="yes" DiskId="1" Source="SourceDir\File\XsdStitch.exe" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.Compression" Guid="{7459B739-5F67-4A34-9D52-65CA65D1B0AD}">
+                            <File Id="Microsoft.Deployment.Compression.dll" Name="Microsoft.Deployment.Compression.dll" KeyPath="yes" ShortName="074oj8ug.dll" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Compression.dll" />
+                            <File Id="Microsoft.Deployment.Compression.xml" Name="Microsoft.Deployment.Compression.xml" ShortName="6glwe0c8.xml" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Compression.xml" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.Compression.Cab" Guid="{2076207A-F327-44A3-B95E-93E964C5B123}">
+                            <File Id="Microsoft.Deployment.Compression.Cab.dll" Name="Microsoft.Deployment.Compression.Cab.dll" KeyPath="yes" ShortName="22_qzkbe.dll" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Compression.Cab.dll" />
+                            <File Id="Microsoft.Deployment.Compression.Cab.xml" Name="Microsoft.Deployment.Compression.Cab.xml" ShortName="p9rapdep.xml" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Compression.Cab.xml" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.Compression.Zip" Guid="{0A49DB5E-D7DF-46AF-BA19-6D524AE7BEC0}">
+                            <File Id="Microsoft.Deployment.Compression.Zip.dll" Name="Microsoft.Deployment.Compression.Zip.dll" KeyPath="yes" ShortName="uaa568be.dll" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Compression.Zip.dll" />
+                            <File Id="Microsoft.Deployment.Compression.Zip.xml" Name="Microsoft.Deployment.Compression.Zip.xml" ShortName="qk3cv1bk.xml" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Compression.Zip.xml" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.Resources" Guid="{1366890F-15E8-4DD8-8947-4EBBA1979670}">
+                            <File Id="Microsoft.Deployment.Resources.dll" Name="Microsoft.Deployment.Resources.dll" KeyPath="yes" ShortName="wbtxy4lr.dll" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Resources.dll" />
+                            <File Id="Microsoft.Deployment.Resources.xml" Name="Microsoft.Deployment.Resources.xml" ShortName="jrym3jpj.xml" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.Resources.xml" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.WindowsInstaller" Guid="{6B3BD9A5-C29D-44A7-9246-D31CC5E51364}">
+                            <File Id="Microsoft.Deployment.WindowsInstaller.dll" Name="Microsoft.Deployment.WindowsInstaller.dll" KeyPath="yes" ShortName="bajnywqh.dll" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.dll" />
+                            <File Id="Microsoft.Deployment.WindowsInstaller.xml" Name="Microsoft.Deployment.WindowsInstaller.xml" ShortName="eaxgdvnx.xml" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.xml" />
+                            <RegistryKey Id="WixAssemblyFoldersReg" Action="createAndRemoveOnUninstall" Key="SOFTWARE\Microsoft\.NETFramework\AssemblyFolders\WiX 3.5" Root="HKLM" />
+                            <RegistryValue Id="WixAssemblyFoldersRegValue" Root="HKLM" Key="SOFTWARE\Microsoft\.NETFramework\AssemblyFolders\WiX 3.5" Value="[SdkDir]" Type="string" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.WindowsInstaller.Linq" Guid="{F381E246-8720-4167-8612-D4008839EB8A}">
+                            <File Id="Microsoft.Deployment.WindowsInstaller.Linq.dll" Name="Microsoft.Deployment.WindowsInstaller.Linq.dll" KeyPath="yes" ShortName="6rabbrgi.dll" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.Linq.dll" />
+                            <File Id="Microsoft.Deployment.WindowsInstaller.Linq.xml" Name="Microsoft.Deployment.WindowsInstaller.Linq.xml" ShortName="ixxh-_de.xml" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.Linq.xml" />
+                        </Component>
+                        <Component Id="Microsoft.Deployment.WindowsInstaller.Package" Guid="{9C48F4AB-4DA7-4FFC-AB60-8276FCBA2150}">
+                            <File Id="Microsoft.Deployment.WindowsInstaller.Package.dll" Name="Microsoft.Deployment.WindowsInstaller.Package.dll" KeyPath="yes" ShortName="6rbdn9dj.dll" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.Package.dll" />
+                            <File Id="Microsoft.Deployment.WindowsInstaller.Package.xml" Name="Microsoft.Deployment.WindowsInstaller.Package.xml" ShortName="eqqx7ix0.xml" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.Package.xml" />
+                        </Component>
+                        <Component Id="MakeSfxCA" Guid="{2F322198-0AE7-4FBD-B965-2C165A54376A}">
+                            <File Id="MakeSfxCA.exe" Name="MakeSfxCA.exe" KeyPath="yes" ShortName="2u7rsgwu.exe" DiskId="1" Source="SourceDir\File\MakeSfxCA.exe" />
+                        </Component>
+                        <Component Id="MakeSfxCAConfig" Guid="{1F422198-2AE7-4FBD-B965-2C175A84376A}">
+                            <File Id="MakeSfxCA.exe.config" Name="MakeSfxCA.exe.config" KeyPath="yes" ShortName="uaviu2dm.con" DiskId="1" Source="SourceDir\File\MakeSfxCA.exe.config" />
+                        </Component>
+                        <Directory Id="SdkIncDir" Name="inc">
+                            <Component Id="SdkHeaders" Guid="{332DBDA4-0459-40B3-A1C0-24163C04B3B6}">
+                                <File Id="dutil.h" Name="dutil.h" KeyPath="yes" DiskId="1" Source="SourceDir\File\dutil.h" />
+                                <File Id="aclutil.h" Name="aclutil.h" DiskId="1" Source="SourceDir\File\aclutil.h" />
+                                <File Id="buffutil.h" Name="buffutil.h" DiskId="1" Source="SourceDir\File\buffutil.h" />
+                                <File Id="cabcutil.h" Name="cabcutil.h" DiskId="1" Source="SourceDir\File\cabcutil.h" />
+                                <File Id="cabutil.h" Name="cabutil.h" DiskId="1" Source="SourceDir\File\cabutil.h" />
+                                <File Id="certutil.h" Name="certutil.h" DiskId="1" Source="SourceDir\File\certutil.h" />
+                                <File Id="conutil.h" Name="conutil.h" DiskId="1" Source="SourceDir\File\conutil.h" />
+                                <File Id="dictutil.h" Name="dictutil.h" DiskId="1" Source="SourceDir\File\dictutil.h" />
+                                <File Id="dirutil.h" Name="dirutil.h" DiskId="1" Source="SourceDir\File\dirutil.h" />
+                                <File Id="fileutil.h" Name="fileutil.h" DiskId="1" Source="SourceDir\File\fileutil.h" />
+                                <File Id="gdiputil.h" Name="gdiputil.h" DiskId="1" Source="SourceDir\File\gdiputil.h" />
+                                <File Id="inetutil.h" Name="inetutil.h" DiskId="1" Source="SourceDir\File\inetutil.h" />
+                                <File Id="jsonutil.h" Name="jsonutil.h" DiskId="1" Source="SourceDir\File\jsonutil.h" />
+                                <File Id="locutil.h" Name="locutil.h" DiskId="1" Source="SourceDir\File\locutil.h" />
+                                <File Id="logutil.h" Name="logutil.h" DiskId="1" Source="SourceDir\File\logutil.h" />
+                                <File Id="memutil.h" Name="memutil.h" DiskId="1" Source="SourceDir\File\memutil.h" />
+                                <File Id="metautil.h" Name="metautil.h" DiskId="1" Source="SourceDir\File\metautil.h" />
+                                <File Id="osutil.h" Name="osutil.h" DiskId="1" Source="SourceDir\File\osutil.h" />
+                                <File Id="pathutil.h" Name="pathutil.h" DiskId="1" Source="SourceDir\File\pathutil.h" />
+                                <File Id="perfutil.h" Name="perfutil.h" DiskId="1" Source="SourceDir\File\perfutil.h" />
+                                <File Id="procutil.h" Name="procutil.h" DiskId="1" Source="SourceDir\File\procutil.h" />
+                                <File Id="resrutil.h" Name="resrutil.h" DiskId="1" Source="SourceDir\File\resrutil.h" />
+                                <File Id="reswutil.h" Name="reswutil.h" DiskId="1" Source="SourceDir\File\reswutil.h" />
+                                <File Id="rssutil.h" Name="rssutil.h" DiskId="1" Source="SourceDir\File\rssutil.h" />
+                                <File Id="sqlutil.h" Name="sqlutil.h" DiskId="1" Source="SourceDir\File\sqlutil.h" />
+                                <File Id="strutil.h" Name="strutil.h" DiskId="1" Source="SourceDir\File\strutil.h" />
+                                <File Id="thmutil.h" Name="thmutil.h" DiskId="1" Source="SourceDir\File\thmutil.h" />
+                                <File Id="timeutil.h" Name="timeutil.h" DiskId="1" Source="SourceDir\File\timeutil.h" />
+                                <File Id="uriutil.h" Name="uriutil.h" DiskId="1" Source="SourceDir\File\uriutil.h" />
+                                <File Id="userutil.h" Name="userutil.h" DiskId="1" Source="SourceDir\File\userutil.h" />
+                                <File Id="wiutil.h" Name="wiutil.h" DiskId="1" Source="SourceDir\File\wiutil.h" />
+                                <File Id="xmlutil.h" Name="xmlutil.h" DiskId="1" Source="SourceDir\File\xmlutil.h" />
+                                <File Id="wcautil.h" Name="wcautil.h" DiskId="1" Source="SourceDir\File\wcautil.h" />
+                                <File Id="wcawow64.h" Name="wcawow64.h" DiskId="1" Source="SourceDir\File\wcawow64.h" />
+                                <File Id="wcawrapquery.h" Name="wcawrapquery.h" ShortName="x0bgvpad.h" DiskId="1" Source="SourceDir\File\wcawrapquery.h" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="SdkLibDir" Name="lib">
+                            <Component Id="Dutil_2005_x86" Guid="{0D6A3AA7-2955-5D01-B276-B935B834874B}">
+                                <File Id="dutil_2005.lib" Name="dutil_2005.lib" KeyPath="yes" ShortName="sifnyoaf.lib" DiskId="2" Source="SourceDir\File\dutil_2005.lib" />
+                            </Component>
+                            <Component Id="Dutil_2005_x64" Guid="{3B3F868A-A976-5B69-92DC-23C3BF68823A}">
+                                <File Id="dutil_2005_x64.lib" Name="dutil_2005_x64.lib" KeyPath="yes" ShortName="mymuejmj.lib" DiskId="2" Source="SourceDir\File\dutil_2005_x64.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2005_x86" Guid="{436F522A-D0F0-55E6-864A-EE8A6C482387}">
+                                <File Id="wcautil_2005.lib" Name="wcautil_2005.lib" KeyPath="yes" ShortName="us9ckguo.lib" DiskId="2" Source="SourceDir\File\wcautil_2005.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2005_x64" Guid="{7F06B52C-FF3A-5113-86B4-31D51C4E0E0A}">
+                                <File Id="wcautil_2005_x64.lib" Name="wcautil_2005_x64.lib" KeyPath="yes" ShortName="xy8sig5_.lib" DiskId="2" Source="SourceDir\File\wcautil_2005_x64.lib" />
+                            </Component>
+                            <Component Id="Dutil_2005_ia64" Guid="{04BC3365-5849-577C-A17B-CB9B486612C5}">
+                                <File Id="dutil_2005_ia64.lib" Name="dutil_2005_ia64.lib" KeyPath="yes" ShortName="pk8-kfwp.lib" DiskId="2" Source="SourceDir\File\dutil_2005_ia64.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2005_ia64" Guid="{C4AD12A8-F30F-598A-9514-DA3BB5262F1A}">
+                                <File Id="wcautil_2005_ia64.lib" Name="wcautil_2005_ia64.lib" KeyPath="yes" ShortName="v8iqri5p.lib" DiskId="2" Source="SourceDir\File\wcautil_2005_ia64.lib" />
+                            </Component>
+                            <Component Id="Dutil_2008_x86" Guid="{5E3E62F6-73D0-58CF-91C4-E00E441C3832}">
+                                <File Id="dutil_2008.lib" Name="dutil_2008.lib" KeyPath="yes" ShortName="-mquuc5o.lib" DiskId="2" Source="SourceDir\File\dutil_2008.lib" />
+                            </Component>
+                            <Component Id="Dutil_2008_x64" Guid="{3FB1A5DC-90AE-5529-A7C4-61E9F9BEA165}">
+                                <File Id="dutil_2008_x64.lib" Name="dutil_2008_x64.lib" KeyPath="yes" ShortName="l7ecvafh.lib" DiskId="2" Source="SourceDir\File\dutil_2008_x64.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2008_x86" Guid="{C555C651-B9F0-5695-9DF3-EBC3402F64C6}">
+                                <File Id="wcautil_2008.lib" Name="wcautil_2008.lib" KeyPath="yes" ShortName="ykyhzvlt.lib" DiskId="2" Source="SourceDir\File\wcautil_2008.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2008_x64" Guid="{71652D44-DDA3-57A5-8CBB-845BEABA2CAD}">
+                                <File Id="wcautil_2008_x64.lib" Name="wcautil_2008_x64.lib" KeyPath="yes" ShortName="cn8g-j3b.lib" DiskId="2" Source="SourceDir\File\wcautil_2008_x64.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2008_ia64" Guid="{05898A87-0C3F-5FAA-8555-B00159931620}">
+                                <File Id="wcautil_2008_ia64.lib" Name="wcautil_2008_ia64.lib" KeyPath="yes" ShortName="yexsdupu.lib" DiskId="2" Source="SourceDir\File\wcautil_2008_ia64.lib" />
+                            </Component>
+                            <Component Id="Dutil_2008_ia64" Guid="{2F8A697B-FAB4-57E1-8EC5-8CCA76366198}">
+                                <File Id="dutil_2008_ia64.lib" Name="dutil_2008_ia64.lib" KeyPath="yes" ShortName="hnm8166g.lib" DiskId="2" Source="SourceDir\File\dutil_2008_ia64.lib" />
+                            </Component>
+                            <Component Id="Dutil_2010_x86" Guid="{3727DC41-3B07-5DD8-8315-F8B39E8A7BCE}">
+                                <File Id="dutil_2010.lib" Name="dutil_2010.lib" KeyPath="yes" ShortName="tfdm6ny8.lib" DiskId="2" Source="SourceDir\File\dutil_2010.lib" />
+                            </Component>
+                            <Component Id="Dutil_2010_x64" Guid="{670B3B57-0AF5-5533-B6C3-24864067C04E}">
+                                <File Id="dutil_2010_x64.lib" Name="dutil_2010_x64.lib" KeyPath="yes" ShortName="etmqw1e8.lib" DiskId="2" Source="SourceDir\File\dutil_2010_x64.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2010_x86" Guid="{EF8CA2DF-E701-5DAE-B1A2-20044A87EA47}">
+                                <File Id="wcautil_2010.lib" Name="wcautil_2010.lib" KeyPath="yes" ShortName="u97_lyvg.lib" DiskId="2" Source="SourceDir\File\wcautil_2010.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2010_x64" Guid="{654CC7CD-69CC-5817-879D-E5A25BF3CBDD}">
+                                <File Id="wcautil_2010_x64.lib" Name="wcautil_2010_x64.lib" KeyPath="yes" ShortName="_lbcz7u_.lib" DiskId="2" Source="SourceDir\File\wcautil_2010_x64.lib" />
+                            </Component>
+                            <Component Id="Dutil_2010_ia64" Guid="{A39F1C37-B1F0-5831-8FBB-1A2E302724B5}">
+                                <File Id="dutil_2010_ia64.lib" Name="dutil_2010_ia64.lib" KeyPath="yes" ShortName="2iyhadwp.lib" DiskId="2" Source="SourceDir\File\dutil_2010_ia64.lib" />
+                            </Component>
+                            <Component Id="Wcautil_2010_ia64" Guid="{28F1F371-11B5-50F9-B82C-0E30DD1CC93F}">
+                                <File Id="wcautil_2010_ia64.lib" Name="wcautil_2010_ia64.lib" KeyPath="yes" ShortName="bbdtpkum.lib" DiskId="2" Source="SourceDir\File\wcautil_2010_ia64.lib" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="SdkDir_x86" Name="x86">
+                            <Component Id="sfxca.dll_x86" Guid="{E528C5E0-0FAD-4C81-8257-BE27ECE2D922}">
+                                <File Id="sfxca.dll_x86" Name="sfxca.dll" KeyPath="yes" DiskId="1" Source="SourceDir\File\sfxca.dll_x86" />
+                            </Component>
+                        </Directory>
+                        <Directory Id="SdkDir_x64" Name="x64">
+                            <Component Id="sfxca.dll_x64" Guid="{37BF2D6C-2FF2-4D38-9EB7-9E42FCC1233A}">
+                                <File Id="sfxca.dll_x64" Name="sfxca.dll" KeyPath="yes" DiskId="1" Source="SourceDir\File\sfxca.dll_x64" />
+                            </Component>
+                        </Directory>
+                    </Directory>
+                </Directory>
+                <Directory Id="ProgramMenuFolder" Name="ProgMenu">
+                    <Directory Id="WixShortcutFolder" Name="Windows Installer XML Toolset 3.5" ShortName="cvm02dta" />
+                </Directory>
+                <Directory Id="Dir_MSBuild" Name="MSBuild">
+                    <Directory Id="Dir_MSBuildMS" Name="Microsoft" ShortName="u_q27hcl">
+                        <Directory Id="Dir_MSBuildMSWix" Name="WiX">
+                            <Directory Id="Dir_MSBuildMSWix3x" Name="v3.x">
+                                <Component Id="Microsoft.Deployment.WindowsInstaller.MSBuild35" Guid="{317E2430-33B4-4E90-BBB9-91E80550E1A1}">
+                                    <File Id="Microsoft.Deployment.WindowsInstaller.dll_MSBuild" Name="Microsoft.Deployment.WindowsInstaller.dll" KeyPath="yes" ShortName="tovajfq7.dll" Checksum="yes" DiskId="1" Source="SourceDir\File\Microsoft.Deployment.WindowsInstaller.dll_MSBuild" />
+                                </Component>
+                                <Component Id="WixMSBuildBinaries35" Guid="{2CB1EA5F-2542-4AFF-A05B-FAF576265F89}">
+                                    <File Id="WixTasks.dll" Name="WixTasks.dll" KeyPath="yes" Checksum="yes" DiskId="1" Source="SourceDir\File\WixTasks.dll" />
+                                    <File Id="wix.targets" Name="wix.targets" ShortName="rb5zkfqj.tar" DiskId="1" Source="SourceDir\File\wix.targets" />
+                                    <File Id="wix200x.targets" Name="wix200x.targets" ShortName="hhmpqhaf.tar" DiskId="1" Source="SourceDir\File\wix200x.targets" />
+                                    <File Id="wix2010.targets" Name="wix2010.targets" ShortName="7ppj2eoc.tar" DiskId="1" Source="SourceDir\File\wix2010.targets" />
+                                    <File Id="wix.ca.targets" Name="wix.ca.targets" ShortName="mfowjjtv.tar" DiskId="1" Source="SourceDir\File\wix.ca.targets" />
+                                </Component>
+                                <Component Id="lux.targets" Guid="{169EDC0F-DBC3-414E-9A4C-C218646B8C78}">
+                                    <File Id="lux.targets" Name="lux.targets" KeyPath="yes" ShortName="oj-gftpg.tar" DiskId="1" Source="SourceDir\File\lux.targets" />
+                                </Component>
+                                <Component Id="LuxTasks.dll" Guid="{46FFEA5D-8EB5-46E2-BED5-72BAA654B739}">
+                                    <CopyFile Id="DupWixDll" FileId="wix.dll" DestinationDirectory="Dir_MSBuildMSWix3x" />
+                                    <CopyFile Id="DupWixLuxExtension" FileId="WixLuxExtension.dll" DestinationDirectory="Dir_MSBuildMSWix3x" />
+                                    <File Id="LuxTasks.dll" Name="LuxTasks.dll" KeyPath="yes" DiskId="1" Source="SourceDir\File\LuxTasks.dll" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+            <Directory Id="VisualStudio2005Folder" Name="Visual Studio 8" ShortName="qgislymt">
+                <Directory Id="Common7Vs2005" Name="Common7">
+                    <Directory Id="IDEVs2005" Name="IDE">
+                        <Directory Id="VS2005_ITEMTEMPLATES_DIR">
+                            <Directory Id="VsItemTemplatesWixDir2005" Name="WiX">
+                                <Component Id="VsProjectItems2005" Guid="{7C9FC36D-F037-4311-B58D-4906CC1440EE}">
+                                    <File Id="IncludeFile2005.zip" Name="IncludeFile.zip" KeyPath="yes" ShortName="vf3e3pmv.zip" DiskId="1" Source="SourceDir\File\IncludeFile2005.zip" />
+                                    <File Id="BlankFile2005.zip" Name="BlankFile.zip" ShortName="lnt27gy8.zip" DiskId="1" Source="SourceDir\File\BlankFile2005.zip" />
+                                    <File Id="LocalizationFile2005.zip" Name="LocalizationFile.zip" ShortName="qn1ckz0m.zip" DiskId="1" Source="SourceDir\File\LocalizationFile2005.zip" />
+                                    <File Id="TextFile2005.zip" Name="TextFile.zip" DiskId="1" Source="SourceDir\File\TextFile2005.zip" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="VS2005_PROJECTTEMPLATES_DIR">
+                            <Directory Id="VsProjectTemplatesWixDir2005" Name="WiX">
+                                <Component Id="VsProjects2005" Guid="{B717AF39-94A3-41AC-A038-00C42485F1BA}">
+                                    <File Id="WixProject2005.zip" Name="WixProject.zip" KeyPath="yes" ShortName="xomkn9f7.zip" DiskId="1" Source="SourceDir\File\WixProject2005.zip" />
+                                    <File Id="WixLibrary2005.zip" Name="WixLibrary.zip" ShortName="eghaeu1w.zip" DiskId="1" Source="SourceDir\File\WixLibrary2005.zip" />
+                                    <File Id="WixMergeModule2005.zip" Name="WixMergeModule.zip" ShortName="o5neicbg.zip" DiskId="1" Source="SourceDir\File\WixMergeModule2005.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2005_CustomActionCPP" Guid="{90AAEAB2-0F62-4FB3-9A58-9E9514044721}" Transitive="yes">
+                                    <Condition>VS2005_IDE_VC_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionCPP_2005.zip" Name="CustomActionCPP.zip" KeyPath="yes" ShortName="l6qco1uf.zip" DiskId="1" Source="SourceDir\File\CustomActionCPP_2005.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2005_CustomActionCS" Guid="{E5B4D43F-2E57-41F5-AB70-BFC8112203B6}" Transitive="yes">
+                                    <Condition>VS2005_IDE_VCSHARP_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionCS_2005.zip" Name="CustomActionCS.zip" KeyPath="yes" ShortName="vzg-arxn.zip" DiskId="1" Source="SourceDir\File\CustomActionCS_2005.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2005_CustomActionVB" Guid="{54FE9732-EF87-45E4-998B-15836B07F762}" Transitive="yes">
+                                    <Condition>VS2005_IDE_VB_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionVB_2005.zip" Name="CustomActionVB.zip" KeyPath="yes" ShortName="bsz6yky5.zip" DiskId="1" Source="SourceDir\File\CustomActionVB_2005.zip" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+            <Directory Id="VisualStudio2008Folder" Name="Visual Studio 9.0" ShortName="o-detfeh">
+                <Directory Id="Common7Vs2008" Name="Common7">
+                    <Directory Id="IDEVs2008" Name="IDE">
+                        <Directory Id="VS90_ITEMTEMPLATES_DIR">
+                            <Directory Id="VsItemTemplatesWixDir2008" Name="WiX">
+                                <Component Id="VsProjectItems2008" Guid="{4BBC4C91-DA19-4AE2-8968-C9D8ECC1E748}">
+                                    <File Id="IncludeFile2008.zip" Name="IncludeFile.zip" KeyPath="yes" ShortName="6cd-ekjq.zip" DiskId="1" Source="SourceDir\File\IncludeFile2008.zip" />
+                                    <File Id="BlankFile2008.zip" Name="BlankFile.zip" ShortName="qcxxzk6o.zip" DiskId="1" Source="SourceDir\File\BlankFile2008.zip" />
+                                    <File Id="LocalizationFile2008.zip" Name="LocalizationFile.zip" ShortName="usatfkcb.zip" DiskId="1" Source="SourceDir\File\LocalizationFile2008.zip" />
+                                    <File Id="TextFile2008.zip" Name="TextFile.zip" DiskId="1" Source="SourceDir\File\TextFile2008.zip" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="VS90_PROJECTTEMPLATES_DIR">
+                            <Directory Id="VsProjectTemplatesWixDir2008" Name="WiX">
+                                <Component Id="VsProjects2008" Guid="{EB67DA36-2D25-42B9-A59E-F9E19700B430}">
+                                    <File Id="WixProject2008.zip" Name="WixProject.zip" KeyPath="yes" ShortName="xyobwvjd.zip" DiskId="1" Source="SourceDir\File\WixProject2008.zip" />
+                                    <File Id="WixLibrary2008.zip" Name="WixLibrary.zip" ShortName="1xhxkylv.zip" DiskId="1" Source="SourceDir\File\WixLibrary2008.zip" />
+                                    <File Id="WixMergeModule2008.zip" Name="WixMergeModule.zip" ShortName="euyccqet.zip" DiskId="1" Source="SourceDir\File\WixMergeModule2008.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2008_CustomActionCPP" Guid="{43FD6CC8-1C43-43CB-AAFD-571A47F27A25}" Transitive="yes">
+                                    <Condition>VS90_IDE_VC_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionCPP_2008.zip" Name="CustomActionCPP.zip" KeyPath="yes" ShortName="lu0rfkcq.zip" DiskId="1" Source="SourceDir\File\CustomActionCPP_2008.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2008_CustomActionCS" Guid="{BF5DA64D-6298-472D-827A-C4509C916AB6}" Transitive="yes">
+                                    <Condition>VS90_IDE_VCSHARP_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionCS_2008.zip" Name="CustomActionCS.zip" KeyPath="yes" ShortName="rleumgmv.zip" DiskId="1" Source="SourceDir\File\CustomActionCS_2008.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2008_CustomActionVB" Guid="{FB25F44C-6D20-4BE7-85AD-01EB61DBEBF8}" Transitive="yes">
+                                    <Condition>VS90_IDE_VB_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionVB_2008.zip" Name="CustomActionVB.zip" KeyPath="yes" ShortName="1vcff2nl.zip" DiskId="1" Source="SourceDir\File\CustomActionVB_2008.zip" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+            <Directory Id="VisualStudio2010Folder" Name="Visual Studio 10.0" ShortName="9zlhkuoi">
+                <Directory Id="Common7Vs2010" Name="Common7">
+                    <Directory Id="IDEVs2010" Name="IDE">
+                        <Directory Id="VS2010_ITEMTEMPLATES_DIR">
+                            <Directory Id="VsItemTemplatesWixDir2010" Name="WiX">
+                                <Component Id="VsProjectItems2010" Guid="{B104DB88-C954-448F-A5D6-9427D961F2A5}">
+                                    <File Id="IncludeFile2010.zip" Name="IncludeFile.zip" KeyPath="yes" ShortName="6phg-ryr.zip" DiskId="1" Source="SourceDir\File\IncludeFile2010.zip" />
+                                    <File Id="BlankFile2010.zip" Name="BlankFile.zip" ShortName="lqmw3c5c.zip" DiskId="1" Source="SourceDir\File\BlankFile2010.zip" />
+                                    <File Id="LocalizationFile2010.zip" Name="LocalizationFile.zip" ShortName="cw1e55qr.zip" DiskId="1" Source="SourceDir\File\LocalizationFile2010.zip" />
+                                    <File Id="TextFile2010.zip" Name="TextFile.zip" DiskId="1" Source="SourceDir\File\TextFile2010.zip" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                        <Directory Id="VS2010_PROJECTTEMPLATES_DIR">
+                            <Directory Id="VsProjectTemplatesWixDir2010" Name="WiX">
+                                <Component Id="VsProjects2010" Guid="{939E573A-7A00-45B3-974D-B5F9883CFCCA}">
+                                    <File Id="WixProject2010.zip" Name="WixProject.zip" KeyPath="yes" ShortName="2ur2mxqj.zip" DiskId="1" Source="SourceDir\File\WixProject2010.zip" />
+                                    <File Id="WixLibrary2010.zip" Name="WixLibrary.zip" ShortName="f9fpvhih.zip" DiskId="1" Source="SourceDir\File\WixLibrary2010.zip" />
+                                    <File Id="WixMergeModule2010.zip" Name="WixMergeModule.zip" ShortName="lskuwjwv.zip" DiskId="1" Source="SourceDir\File\WixMergeModule2010.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2010_CustomActionCPP" Guid="{637D8CC0-1C43-43CB-AAFD-571A57F27A25}" Transitive="yes">
+                                    <Condition>VS2010_IDE_VC_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionCPP_2010.zip" Name="CustomActionCPP.zip" KeyPath="yes" ShortName="vegdi2xw.zip" DiskId="1" Source="SourceDir\File\CustomActionCPP_2010.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2010_CustomActionCS" Guid="{7F58A64E-6298-472D-827A-C4509C016A06}" Transitive="yes">
+                                    <Condition>VS2010_IDE_VCSHARP_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionCS_2010.zip" Name="CustomActionCS.zip" KeyPath="yes" ShortName="5fldzz9q.zip" DiskId="1" Source="SourceDir\File\CustomActionCS_2010.zip" />
+                                </Component>
+                                <Component Id="DtfProjectTemplate2010_CustomActionVB" Guid="{9B05FA4C-6D2A-4BE2-85AD-012B314B5BF8}" Transitive="yes">
+                                    <Condition>VS2010_IDE_VB_PROJECTSYSTEM_INSTALLED</Condition>
+                                    <File Id="CustomActionVB_2010.zip" Name="CustomActionVB.zip" KeyPath="yes" ShortName="qmnntg09.zip" DiskId="1" Source="SourceDir\File\CustomActionVB_2010.zip" />
+                                </Component>
+                            </Directory>
+                        </Directory>
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+        <Feature Id="Feature_WiX" Absent="disallow" AllowAdvertise="no" Description="Windows Installer XML toolset" Display="expand" Level="1" Title="WiX Toolset">
+            <ComponentRef Id="ProductInformation" />
+            <ComponentRef Id="Licensing" />
+            <ComponentRef Id="CandleBinaries" />
+            <ComponentRef Id="CandleConfig" />
+            <ComponentRef Id="DarIceCube" />
+            <ComponentRef Id="DarkBinaries" />
+            <ComponentRef Id="DarkConfig" />
+            <ComponentRef Id="HeatBinaries" />
+            <ComponentRef Id="HeatConfig" />
+            <ComponentRef Id="InsigniaBinaries" />
+            <ComponentRef Id="InsigniaConfig" />
+            <ComponentRef Id="LightBinaries" />
+            <ComponentRef Id="LightConfig" />
+            <ComponentRef Id="LitBinaries" />
+            <ComponentRef Id="LitConfig" />
+            <ComponentRef Id="MeltBinaries" />
+            <ComponentRef Id="MeltConfig" />
+            <ComponentRef Id="MergeModCube" />
+            <ComponentRef Id="MergeModBinaries" />
+            <ComponentRef Id="MSPatchCBinaries" />
+            <ComponentRef Id="PyroBinaries" />
+            <ComponentRef Id="PyroConfig" />
+            <ComponentRef Id="SmokeBinaries" />
+            <ComponentRef Id="SmokeConfig" />
+            <ComponentRef Id="TorchBinaries" />
+            <ComponentRef Id="TorchConfig" />
+            <ComponentRef Id="WConsoleBinaries" />
+            <ComponentRef Id="WixBinaries" />
+            <ComponentRef Id="WixInteropBinaries" />
+            <ComponentRef Id="WixCopBinaries" />
+            <ComponentRef Id="WixUnitBinaries" />
+            <ComponentRef Id="WixUnitConfig" />
+            <ComponentRef Id="WuiBinaries" />
+            <ComponentRef Id="Microsoft.Deployment.WindowsInstaller.Wix" />
+            <ComponentRef Id="ComPlusExt" />
+            <ComponentRef Id="DifxAppExt" />
+            <ComponentRef Id="DirectXExt" />
+            <ComponentRef Id="FirewallExt" />
+            <ComponentRef Id="GamingExt" />
+            <ComponentRef Id="IisExt" />
+            <ComponentRef Id="MsmqExt" />
+            <ComponentRef Id="NetFxExt" />
+            <ComponentRef Id="PSExt" />
+            <ComponentRef Id="SqlExt" />
+            <ComponentRef Id="UIExt" />
+            <ComponentRef Id="UtilExt" />
+            <ComponentRef Id="VSExt" />
+            <ComponentRef Id="ExtensionXsds" />
+            <ComponentRef Id="BootstrapperBinaries" />
+            <ComponentRef Id="SetupBuilderBinaries" />
+            <ComponentRef Id="SetupBldBinaries" />
+        </Feature>
+        <Feature Id="Feature_VS2005" AllowAdvertise="no" Description="Votive package and schema files for IntelliSense in the Visual Studio 2005 editor" Display="expand" Level="0" Title="Visual Studio 2005 Integration">
+            <Condition Level="1">VS2005DEVENV OR VS2005_ROOT_FOLDER OR REMOVE</Condition>
+            <Feature Id="Feature_IS2005" AllowAdvertise="no" Description="Schema files for IntelliSense in the Visual Studio 2005 editor" Display="expand" Level="0" Title="IntelliSense">
+                <ComponentRef Id="ComPlusExt" />
+                <ComponentRef Id="DifxAppExt" />
+                <ComponentRef Id="DirectXExt" />
+                <ComponentRef Id="FirewallExt" />
+                <ComponentRef Id="GamingExt" />
+                <ComponentRef Id="IisExt" />
+                <ComponentRef Id="MsmqExt" />
+                <ComponentRef Id="NetFxExt" />
+                <ComponentRef Id="PSExt" />
+                <ComponentRef Id="SqlExt" />
+                <ComponentRef Id="UIExt" />
+                <ComponentRef Id="UtilExt" />
+                <ComponentRef Id="VSExt" />
+                <ComponentRef Id="ExtensionXsds" />
+                <ComponentRef Id="VSSchema2005" />
+                <Condition Level="1">VS2005DEVENV OR VS2005_ROOT_FOLDER OR REMOVE</Condition>
+            </Feature>
+            <Feature Id="Feature_Votive2005" AllowAdvertise="no" Description="Votive Package for Visual Studio 2005" Display="expand" Level="0" Title="Project Templates">
+                <ComponentRef Id="WixMSBuildBinaries35" />
+                <ComponentRef Id="ComPlusExt" />
+                <ComponentRef Id="DifxAppExt" />
+                <ComponentRef Id="DirectXExt" />
+                <ComponentRef Id="FirewallExt" />
+                <ComponentRef Id="GamingExt" />
+                <ComponentRef Id="IisExt" />
+                <ComponentRef Id="MsmqExt" />
+                <ComponentRef Id="NetFxExt" />
+                <ComponentRef Id="PSExt" />
+                <ComponentRef Id="SqlExt" />
+                <ComponentRef Id="UIExt" />
+                <ComponentRef Id="UtilExt" />
+                <ComponentRef Id="VSExt" />
+                <ComponentRef Id="ExtensionXsds" />
+                <ComponentRef Id="VisualStudioPackageCommon35" />
+                <ComponentRef Id="VisualStudioPackageSconce2005" />
+                <ComponentRef Id="VisualStudioPackage2005" />
+                <ComponentRef Id="VsProjectItems2005" />
+                <ComponentRef Id="VsProjects2005" />
+                <Condition Level="1">( VS2005DEVENV AND VS2005PROJECTAGGREGATOR2 ) OR REMOVE</Condition>
+            </Feature>
+        </Feature>
+        <Feature Id="Feature_VS2008" AllowAdvertise="no" Description="Votive package and schema files for IntelliSense in the Visual Studio 2008 editor" Display="expand" Level="0" Title="Visual Studio 2008 Integration">
+            <Condition Level="1">VS90DEVENV OR VS90_ROOT_FOLDER OR REMOVE</Condition>
+            <Feature Id="Feature_IS2008" AllowAdvertise="no" Description="Schema files for IntelliSense in the Visual Studio 2008 editor" Display="expand" Level="0" Title="IntelliSense">
+                <ComponentRef Id="ComPlusExt" />
+                <ComponentRef Id="DifxAppExt" />
+                <ComponentRef Id="DirectXExt" />
+                <ComponentRef Id="FirewallExt" />
+                <ComponentRef Id="GamingExt" />
+                <ComponentRef Id="IisExt" />
+                <ComponentRef Id="MsmqExt" />
+                <ComponentRef Id="NetFxExt" />
+                <ComponentRef Id="PSExt" />
+                <ComponentRef Id="SqlExt" />
+                <ComponentRef Id="UIExt" />
+                <ComponentRef Id="UtilExt" />
+                <ComponentRef Id="VSExt" />
+                <ComponentRef Id="ExtensionXsds" />
+                <ComponentRef Id="VSSchema2008" />
+                <Condition Level="1">VS90DEVENV OR VS90_ROOT_FOLDER OR REMOVE</Condition>
+            </Feature>
+            <Feature Id="Feature_Votive2008" AllowAdvertise="no" Description="Votive Package for Visual Studio 2008" Display="expand" Level="0" Title="Project Templates">
+                <ComponentRef Id="WixMSBuildBinaries35" />
+                <ComponentRef Id="ComPlusExt" />
+                <ComponentRef Id="DifxAppExt" />
+                <ComponentRef Id="DirectXExt" />
+                <ComponentRef Id="FirewallExt" />
+                <ComponentRef Id="GamingExt" />
+                <ComponentRef Id="IisExt" />
+                <ComponentRef Id="MsmqExt" />
+                <ComponentRef Id="NetFxExt" />
+                <ComponentRef Id="PSExt" />
+                <ComponentRef Id="SqlExt" />
+                <ComponentRef Id="UIExt" />
+                <ComponentRef Id="UtilExt" />
+                <ComponentRef Id="VSExt" />
+                <ComponentRef Id="ExtensionXsds" />
+                <ComponentRef Id="VisualStudioPackageCommon35" />
+                <ComponentRef Id="VisualStudioPackageSconce2008" />
+                <ComponentRef Id="VisualStudioPackage2008" />
+                <ComponentRef Id="VsProjectItems2008" />
+                <ComponentRef Id="VsProjects2008" />
+                <Condition Level="1">VS90DEVENV OR REMOVE</Condition>
+            </Feature>
+        </Feature>
+        <Feature Id="Feature_VS2010" AllowAdvertise="no" Description="Votive package and schema files for IntelliSense in the Visual Studio 2010 editor" Display="expand" Level="0" Title="Visual Studio 2010 Integration">
+            <Condition Level="1">VS2010DEVENV OR VS2010_ROOT_FOLDER OR REMOVE</Condition>
+            <Feature Id="Feature_IS2010" AllowAdvertise="no" Description="Schema files for IntelliSense in the Visual Studio 2010 editor" Display="expand" Level="0" Title="IntelliSense">
+                <ComponentRef Id="ComPlusExt" />
+                <ComponentRef Id="DifxAppExt" />
+                <ComponentRef Id="DirectXExt" />
+                <ComponentRef Id="FirewallExt" />
+                <ComponentRef Id="GamingExt" />
+                <ComponentRef Id="IisExt" />
+                <ComponentRef Id="MsmqExt" />
+                <ComponentRef Id="NetFxExt" />
+                <ComponentRef Id="PSExt" />
+                <ComponentRef Id="SqlExt" />
+                <ComponentRef Id="UIExt" />
+                <ComponentRef Id="UtilExt" />
+                <ComponentRef Id="VSExt" />
+                <ComponentRef Id="ExtensionXsds" />
+                <ComponentRef Id="VSSchema2010" />
+                <Condition Level="1">VS2010DEVENV OR VS2010_ROOT_FOLDER OR REMOVE</Condition>
+            </Feature>
+            <Feature Id="Feature_Votive2010" AllowAdvertise="no" Description="Votive Package for Visual Studio 2010" Level="0" Title="Project Templates">
+                <ComponentRef Id="WixMSBuildBinaries35" />
+                <ComponentRef Id="ComPlusExt" />
+                <ComponentRef Id="DifxAppExt" />
+                <ComponentRef Id="DirectXExt" />
+                <ComponentRef Id="FirewallExt" />
+                <ComponentRef Id="GamingExt" />
+                <ComponentRef Id="IisExt" />
+                <ComponentRef Id="MsmqExt" />
+                <ComponentRef Id="NetFxExt" />
+                <ComponentRef Id="PSExt" />
+                <ComponentRef Id="SqlExt" />
+                <ComponentRef Id="UIExt" />
+                <ComponentRef Id="UtilExt" />
+                <ComponentRef Id="VSExt" />
+                <ComponentRef Id="ExtensionXsds" />
+                <ComponentRef Id="VisualStudioPackageCommon35" />
+                <ComponentRef Id="VisualStudioPackageSconce2010" />
+                <ComponentRef Id="VisualStudioPackage2010" />
+                <ComponentRef Id="VsProjectItems2010" />
+                <ComponentRef Id="VsProjects2010" />
+                <Condition Level="1">VS2010DEVENV OR REMOVE</Condition>
+            </Feature>
+        </Feature>
+        <Feature Id="Feature_NAnt" AllowAdvertise="no" Description="Custom tasks for the NAnt build tool" Display="expand" Level="1" Title="NAnt Support">
+            <ComponentRef Id="NAntTasks" />
+        </Feature>
+        <Feature Id="Feature_MSBuild" AllowAdvertise="no" Description="Custom tasks for the MSBuild build tool" Display="expand" Level="1" Title="MSBuild Support">
+            <ComponentRef Id="Microsoft.Deployment.WindowsInstaller.MSBuild35" />
+            <ComponentRef Id="WixMSBuildBinaries35" />
+        </Feature>
+        <Feature Id="Feature_SDK" AllowAdvertise="no" Description="Headers, libraries, and tools for building WiX extensions and custom actions" Display="expand" Level="1" Title="WiX SDK">
+            <ComponentRef Id="DocCompiler" />
+            <ComponentRef Id="MsgGen" />
+            <ComponentRef Id="XsdGen" />
+            <ComponentRef Id="XsdStitch" />
+            <ComponentRef Id="SdkHeaders" />
+            <ComponentRef Id="Dutil_2005_x86" />
+            <ComponentRef Id="Dutil_2005_x64" />
+            <ComponentRef Id="Wcautil_2005_x86" />
+            <ComponentRef Id="Wcautil_2005_x64" />
+            <ComponentRef Id="Dutil_2005_ia64" />
+            <ComponentRef Id="Wcautil_2005_ia64" />
+            <ComponentRef Id="Dutil_2008_x86" />
+            <ComponentRef Id="Dutil_2008_x64" />
+            <ComponentRef Id="Wcautil_2008_x86" />
+            <ComponentRef Id="Wcautil_2008_x64" />
+            <ComponentRef Id="Wcautil_2008_ia64" />
+            <ComponentRef Id="Dutil_2008_ia64" />
+            <ComponentRef Id="Dutil_2010_x86" />
+            <ComponentRef Id="Dutil_2010_x64" />
+            <ComponentRef Id="Wcautil_2010_x86" />
+            <ComponentRef Id="Wcautil_2010_x64" />
+            <ComponentRef Id="Dutil_2010_ia64" />
+            <ComponentRef Id="Wcautil_2010_ia64" />
+            <ComponentRef Id="Microsoft.Deployment.Compression" />
+            <ComponentRef Id="Microsoft.Deployment.Compression.Cab" />
+            <ComponentRef Id="Microsoft.Deployment.Compression.Zip" />
+            <ComponentRef Id="Microsoft.Deployment.Resources" />
+            <ComponentRef Id="Microsoft.Deployment.WindowsInstaller" />
+            <ComponentRef Id="Microsoft.Deployment.WindowsInstaller.Linq" />
+            <ComponentRef Id="Microsoft.Deployment.WindowsInstaller.Package" />
+            <ComponentRef Id="MakeSfxCA" />
+            <ComponentRef Id="MakeSfxCAConfig" />
+            <ComponentRef Id="sfxca.dll_x86" />
+            <ComponentRef Id="sfxca.dll_x64" />
+            <ComponentRef Id="DtfProjectTemplate2005_CustomActionCPP" />
+            <ComponentRef Id="DtfProjectTemplate2005_CustomActionCS" />
+            <ComponentRef Id="DtfProjectTemplate2005_CustomActionVB" />
+            <ComponentRef Id="DtfProjectTemplate2008_CustomActionCPP" />
+            <ComponentRef Id="DtfProjectTemplate2008_CustomActionCS" />
+            <ComponentRef Id="DtfProjectTemplate2008_CustomActionVB" />
+            <ComponentRef Id="DtfProjectTemplate2010_CustomActionCPP" />
+            <ComponentRef Id="DtfProjectTemplate2010_CustomActionCS" />
+            <ComponentRef Id="DtfProjectTemplate2010_CustomActionVB" />
+            <ComponentRef Id="lux.exe" />
+            <ComponentRef Id="lux.exe.config" />
+            <ComponentRef Id="nit.exe" />
+            <ComponentRef Id="nit.exe.config" />
+            <ComponentRef Id="WixLuxExtension.dll" />
+            <ComponentRef Id="lux.xsd" />
+            <ComponentRef Id="lux.targets" />
+            <ComponentRef Id="LuxTasks.dll" />
+        </Feature>
+        <Feature Id="Feature_Doc" AllowAdvertise="no" Description="Compiled help and schema files for WiX and MSI" Display="expand" Level="1" Title="WiX Documentation">
+            <ComponentRef Id="ChmDocumentation" Primary="yes" />
+            <ComponentRef Id="MsiSdkChm" Primary="yes" />
+            <ComponentRef Id="WixSchemas" />
+            <ComponentRef Id="DTF.chm" Primary="yes" />
+            <ComponentRef Id="DTFAPI.chm" />
+        </Feature>
+        <Icon Id="WixIcon" SourceFile="FILE NOT EXPORTED, USE THE dark.exe -x OPTION TO EXPORT BINARIES" />
+        <Icon Id="WixSetupIcons.ico" SourceFile="FILE NOT EXPORTED, USE THE dark.exe -x OPTION TO EXPORT BINARIES" />
+        <MajorUpgrade DowngradeErrorMessage="A later version of [ProductName] is already installed." Schedule="afterInstallValidate" />
+        <Media Id="1" Cabinet="WiX.cab" EmbedCab="yes" />
+        <Media Id="2" Cabinet="WiXLib.cab" EmbedCab="yes" />
+        <Property Id="WixAppFolder" Value="WixPerMachineFolder" />
+        <Property Id="ALLUSERS" Value="1" />
+        <Property Id="ARPHELPLINK" Value="http://sourceforge.net/support/getsupport.php?group_id=105970" />
+        <Property Id="ARPPRODUCTICON" Value="WixIcon" />
+        <Property Id="ARPURLINFOABOUT" Value="http://wix.sourceforge.net" />
+        <Property Id="ARPURLUPDATEINFO" Value="http://wix.sourceforge.net" />
+        <Property Id="ApplicationFolderName" Value="Windows Installer XML v3.5" />
+        <Property Id="VS2005_IDE_VB_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS2005_IDE_VC_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS2005_IDE_VCSHARP_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS2005_ITEMTEMPLATES_DIR" Secure="yes" />
+        <Property Id="VS2005_PROJECTTEMPLATES_DIR" Secure="yes" />
+        <Property Id="VS2005_ROOT_FOLDER" Secure="yes" />
+        <Property Id="VS2005_SCHEMAS_DIR" Secure="yes" />
+        <Property Id="VS2005DEVENV" Secure="yes" />
+        <Property Id="VS2005PROJECTAGGREGATOR2" Secure="yes" />
+        <Property Id="VS2010_IDE_VB_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS2010_IDE_VC_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS2010_IDE_VCSHARP_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS2010_ITEMTEMPLATES_DIR" Secure="yes" />
+        <Property Id="VS2010_PROJECTTEMPLATES_DIR" Secure="yes" />
+        <Property Id="VS2010_ROOT_FOLDER" Secure="yes" />
+        <Property Id="VS2010_SCHEMAS_DIR" Secure="yes" />
+        <Property Id="VS2010DEVENV" Secure="yes" />
+        <Property Id="VS90_IDE_VB_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS90_IDE_VC_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS90_IDE_VCSHARP_PROJECTSYSTEM_INSTALLED" Secure="yes" />
+        <Property Id="VS90_ITEMTEMPLATES_DIR" Secure="yes" />
+        <Property Id="VS90_PROJECTTEMPLATES_DIR" Secure="yes" />
+        <Property Id="VS90_ROOT_FOLDER" Secure="yes" />
+        <Property Id="VS90_SCHEMAS_DIR" Secure="yes" />
+        <Property Id="VS90DEVENV" Secure="yes" />
+        <Property Id="WIX_DOWNGRADE_DETECTED" Secure="yes" />
+        <Property Id="WIX_UPGRADE_DETECTED" Secure="yes" />
+        <UI>
+            <ProgressText Action="VS2005Setup" Template="[1]">Updating Visual Studio 2005 registration</ProgressText>
+            <ProgressText Action="VS90Setup" Template="[1]">Updating Visual Studio 2008 registration</ProgressText>
+            <ProgressText Action="VS2010Setup" Template="[1]">Updating Visual Studio 2010 registration</ProgressText>
+            <Dialog Id="PrerequisitesDlg" X="50" Y="50" Width="320" Height="120" Title="[ProductName] Prerequisites">
+                <Control Id="OK" Type="PushButton" X="186" Y="93" Width="56" Height="17" Text="OK" TabSkip="no" Default="yes">
+                    <Publish Event="EndDialog" Value="Return">1</Publish>
+                </Control>
+                <Control Id="Cancel" Type="PushButton" X="254" Y="93" Width="56" Height="17" Text="Cancel" TabSkip="no" Cancel="yes">
+                    <Publish Event="SpawnDialog" Value="CancelDlg">1</Publish>
+                </Control>
+                <Control Id="NoVSPackages" Type="Text" X="10" Y="10" Width="300" Height="60" Text="Votive, the WiX project and editor package for Visual Studio, cannot be installed because Visual Studio 2005, 2008, or 2010 Standard Edition or higher is not installed." TabSkip="yes" Hidden="yes" Transparent="yes" NoPrefix="yes">
+                    <Condition Action="show">NOT VS2005DEVENV AND NOT VS90DEVENV AND NOT VS2010DEVENV AND NOT VS2005_SCHEMAS_DIR AND NOT VS90_SCHEMAS_DIR AND NOT VS2010_SCHEMAS_DIR</Condition>
+                </Control>
+                <Control Id="YesExpress" Type="Text" X="10" Y="10" Width="300" Height="60" Text="Votive, the WiX project and editor package for Visual Studio, cannot be installed because Visual Studio 2005, 2008, or 2010 Standard Edition or higher is not installed. However, the WiX schema files can be integrated into Visual Studio Express Editions to enhance editing without project support." TabSkip="yes" Hidden="yes" Transparent="yes" NoPrefix="yes">
+                    <Condition Action="show">(NOT VS2005DEVENV AND NOT VS90DEVENV AND NOT VS2010DEVENV) AND                          ( (VS2005_SCHEMAS_DIR AND VS2005_ROOT_FOLDER) OR (VS90_SCHEMAS_DIR AND VS90_ROOT_FOLDER) )</Condition>
+                </Control>
+                <Control Id="YesExpress2010" Type="Text" X="10" Y="10" Width="300" Height="60" Text="Votive, the WiX project and editor package for Visual Studio, cannot be installed because Visual Studio 2010  Professional or higher is not installed. However, the WiX schema files can be integrated into Visual Studio Express Editions to enhance editing without project support." TabSkip="yes" Hidden="yes" Transparent="yes" NoPrefix="yes">
+                    <Condition Action="show">(NOT VS2010DEVENV AND NOT VS2005DEVENV AND NOT VS90DEVENV) AND                          (VS2010_SCHEMAS_DIR AND VS2010_ROOT_FOLDER) AND NOT                          ( (VS2005_SCHEMAS_DIR AND VS2005_ROOT_FOLDER) OR (VS90_SCHEMAS_DIR AND VS90_ROOT_FOLDER) )</Condition>
+                </Control>
+                <Control Id="MissingAggregator" Type="Text" X="10" Y="10" Width="300" Height="60" Text="Votive, the WiX project and editor package for Visual Studio, cannot be installed for Visual Studio 2005 because the required project aggregator is not installed. To install Votive for Visual Studio 2005, download ProjectAggregator2.msi from http://wix.sourceforge.net, install it, and start the WiX installer again." TabSkip="yes" Hidden="yes" Transparent="yes" NoPrefix="yes">
+                    <Condition Action="show">VS2005DEVENV AND NOT VS2005PROJECTAGGREGATOR2</Condition>
+                </Control>
+            </Dialog>
+        </UI>
+        <UIRef Id="WixUI_Advanced" />
+        <InstallExecuteSequence>
+            <Custom Action="CA_SetLatestDevenv_2005" After="CostFinalize">VS2005DEVENV AND NOT VS90DEVENV AND NOT VS2010DEVENV</Custom>
+            <Custom Action="CA_SetLatestDevenv_2008" After="CA_SetLatestDevenv_2005">VS90DEVENV AND NOT VS2010DEVENV</Custom>
+            <Custom Action="CA_SetLatestDevenv_2010" After="CA_SetLatestDevenv_2008">VS2010DEVENV</Custom>
+            <Custom Action="CA_SetLatestDevenvCommand_2005" After="CA_SetLatestDevenv_2010">VS2005DEVENV AND NOT VS90DEVENV AND NOT VS2010DEVENV</Custom>
+            <Custom Action="CA_SetLatestDevenvCommand_2008" After="CA_SetLatestDevenvCommand_2005">VS90DEVENV AND NOT VS2010DEVENV</Custom>
+            <Custom Action="CA_SetLatestDevenvCommand_2010" After="CA_SetLatestDevenvCommand_2008">VS2010DEVENV</Custom>
+        </InstallExecuteSequence>
+        <InstallUISequence>
+            <Show Dialog="PrerequisitesDlg" Sequence="1294">(NOT Installed AND NOT VS2005DEVENV AND NOT VS90DEVENV AND NOT VS2010DEVENV) OR (VS2005DEVENV AND NOT VS2005PROJECTAGGREGATOR2)</Show>
+            <LaunchConditions Sequence="100" />
+            <FindRelatedProducts Sequence="99" />
+            <ValidateProductID Sequence="700" />
+            <CostInitialize Sequence="800" />
+            <FileCost Sequence="900" />
+            <CostFinalize Sequence="1000" />
+            <MigrateFeatureStates Sequence="1200" />
+            <ExecuteAction Sequence="1300" />
+        </InstallUISequence>
+    </Product>
+</Wix>

@@ -1,0 +1,63 @@
+<!--#set var="title" value="Goals" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Project goals, a personal account by Francis</h2>
+<p>
+These are my basic goals for TortoiseCVS.  
+
+<ul>
+<li>For Windows users to be able to do all their everyday work with
+TortoiseCVS.  For example, I don't have any other CVS client installed on
+my main computer.  However, for complex and rare operations I use the
+command line from another machine.
+<li>To keep the interface very simple for the user.  This means not having 
+configuration dialogs that you have to go to before things work, and instead
+asking questions where the answers are needed for the first time.  It means
+doing as much as possible automatically, by being clever rather than bloating
+the user with extra options to worry about.
+</ul>
+
+<p>Different people on the development team may have different goals,
+and so might you.  That doesn't mean we aren't interested in each other's
+code.  Goals can change.  
+
+<h3>Why do I work on TortoiseCVS for free?</h3>
+
+<p><b>Initial motivations</b>
+<ul>
+<li>Had an itch to scratch.  Saw a way to improve the interface to CVS on Windows, so did it.
+<li>My contribution improves my work environment (i.e. useful for my work, but not essential)
+<li>Technically entertaining, challenging and amusing to modify
+Explorer, especially with GPL code.
+</ul>
+
+<p><b>My hand was forced</b>
+<ul>
+<li>Based on GPL code from WinCVS, so it had to be open source
+<li>Nobody would pay for it, as a good free alternative existed
+</ul>
+
+<p><b>Later motivations</b>
+<ul>
+<li>It's fun to work on something that thousands of people use
+<li>An opportunity to learn non-programming skills, such as project management, publicity
+<li>Work with and get to know interesting, bright people from all over
+the world
+<li>Doing a good job of everything that I do
+<li>Good <a href="http://www.flourish.org/cv">CV</a> material for
+getting a job related to open source software 
+</ul>
+
+<p><b>Philosophical motivations</b>
+<ul>
+<li>Politically and emotionally I like open source software, and this is a practical expression of that
+<li>Much more satisfying to write code that I still own, rather than as a serf for a company where the code gets lost eventually
+</ul>
+
+<p align=center><img src="tortoise-peace.jpeg" alt="[ Ekaa akyekyere ne
+nwa nko a nka tuo nnto hamu da.  'If it were only the tortoise and the
+snail, the gun would never be fired.' A symbol of peace ]">
+<br><small><i>Sign spotted at Kakum National Park, Ghana</i></small>
+</p>
+
+<!--#include virtual="wrapper_end.shtml" -->

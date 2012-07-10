@@ -1,0 +1,95 @@
+<!--#set var="title" value="Development" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h1>Small Guide to GNU gettext</h1>
+<p>
+This is a quick description of the gettext system.
+<p>
+For more complete, definitive information, see <a href="http://www.gnu.org/software/gettext/manual/">the manual</a>.
+
+
+<h2>Basic .po file format</h2>
+<p>
+.po files are human-editable text files.  A comment is begun by a '#'
+character in the first column, and extends until the end of the line.
+Comment lines are also used by gettext's programs to indicate special
+"flags" and useful information.
+<p>
+All .po files contain "entries", one entry for each string to be
+translated.  Entries should be separated from each other by a single
+blank line.
+<p>
+A typical entry looks like:
+
+<pre>
+	#: DialogsWxw/AddFilesDialog.cpp:1124
+	#, c-format
+	msgid "Set format to %s"
+	msgstr "Setze Format auf %s"
+</pre>
+<p>
+The first line of the entry, which begins with "#:", is a list of all the
+places in the source code that contains the string being translated.
+There may be several of these lines.
+<p>
+The second line, which begins with "#,", contains "flags".  The flags line
+is not always present.  In this case a single flag (", c-format") is
+specified - this means that the string being translated is a C format
+string, i.e. it contains markers such as <tt>%s</tt> and <tt>%d</tt> which will
+be replaced with other text when the program runs.
+<p>
+Note that a few of the strings in the Setup folder contains the marker <tt>%n</tt> - 
+this is a special marker used by the installer to indicate a line break.
+<p>
+The third line, which begins with "msgid", is the English-language string
+being translated.  It may span more than one line, as in:
+
+<pre>
+	#: CVSGlue/CVSAction.cpp:919
+	#, c-format
+	msgid ""
+	"The server's host key is not cached in the registry.\n"
+	"Key fingerprint: %s\n"
+	"If you trust this host, hit \"Yes\" to add the key to the cache.\n"
+	"If you want to connect just once, hit \"No\".\n"
+	"If you don't trust this host, hit \"Cancel\".\n"
+</pre>
+
+<p>
+The fourth line, which begins with "msgstr", is the translated string.  It
+may also span more than one line.
+<p>
+In the text above, the sequence <tt>\n</tt> indicates a line break. You will usually want to keep
+the line breaks at the same places in the translated string.
+
+
+<h2>How to check your .po file</h2>
+<p>
+To check for errors in the .po file, run the checkconsistency.pl script 
+located in the same folder as the .po files. (You will need Perl installed to do this).
+
+<h2><a name="fuzzy">Fuzzy entries</a></h2>
+<p>
+<p>When the messages in the TortoiseCVS source code are changed, or new messages are added, 
+the existing PO files are automatically updated.
+<p>If a message has been added to the source code, it is simply inserted into the PO files without a translation.
+<p>If a message has changed since the translation was made, several things happen:
+<ul>
+<li>The English-language message is updated.
+<li>The translation is not changed.
+<li>The <b>fuzzy</b> flag is added to the entry (see explanation of flags above).
+</ul>
+<p>
+When you next check the translation, search for any entries marked as "fuzzy". Then, 
+update the translation as required, and remove the "fuzzy" flag. Be careful here: If there are no other flags,
+simply remove the entire line. If there are other flags, e.g.
+<pre>
+	#, fuzzy, c-format
+</pre>
+remove only the "fuzzy" flag:
+<pre>
+	#, c-format
+</pre>
+
+
+<!--#include virtual="wrapper_end.shtml" -->

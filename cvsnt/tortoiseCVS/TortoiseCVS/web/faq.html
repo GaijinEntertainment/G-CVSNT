@@ -1,0 +1,869 @@
+<html>
+
+<head>
+<title>TortoiseCVS FAQ</title>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon">
+<link rel="StyleSheet" href="local.css">
+</head>
+
+<body>
+
+<h1><a name="questions">TortoiseCVS FAQ</a></h1>
+<p>
+<p>
+<h3>Project questions</h3>
+
+<br><a href="#whatistortoisecvs">What is TortoiseCVS?</a>
+<br><a href="#love">I love TortoiseCVS, how do I give some money towards it?</a>
+<br><a href="#charlie">Who is Charlie?</a>
+
+<p>
+<h3>Installation issues</h3>
+
+<br><a href="#whynocontextmenuentries">Why are there no context menu entries?</a>
+<br><a href="#whydonticonsappear">Why are there no icon overlays?</a>
+<br><a href="#whydontalliconsappear">Why are only some icon overlays shown?</a>
+<br><a href="#whyisiconcachebuggy">Why do the overlay icons sometimes change to random graphics?</a>
+<br><a href="#problemsonnt4">Why can't I get it to work on NT 4.0?</a>
+<br><a href="#win9x">What about Windows 98?</a>
+<br><a href="#vista">And how about Windows Vista and Windows 7?</a>
+<br><a href="#termserver">Does TortoiseCVS work with Windows Terminal Server?</a>
+<br><a href="#howchangedefaulticons">Yeuch! Those icons are grotesque, I want better ones!</a>
+<br><a href="#win2kservice">On Win2K, I get an error about a missing entry point in MSVCRT.dll</a>
+<br><a href="#windowsdesktopupdate">How do I install the Windows Desktop Update on NT 4.0 / Win95?</a>
+<br><a href="#uninstallation">How do I uninstall TortoiseCVS?</a>
+
+<p>
+<h3>Daily use questions</h3>
+
+<br><a href="#ooopsundeletion">Ooops!  I accidentally removed a file - how can I get it back?</a>
+<br><a href="#commitremove">When I remove a file it vanishes, how do I commit it?</a>
+<br><a href="#undocheckout">How do I discard a change, reverting to the version in the repository? (Undo Checkout in Sourcesafe)</a>
+<br><a href="#recommenddiff">Can you recommend an external diff program?</a>
+<br><a href="#changediff">How do I change the external diff program?</a>
+<br><a href="#mixandmatch">Can I mix and match with WinCVS or the command line?</a>
+<br><a href="#sharelinux">Can I share my sandbox with Linux or Cygwin?</a>
+<br><a href="#brokenlineendings">Why do my text files suddenly have an additional &lt;CR&gt; at the end of each line?</a>
+<br><a href="#lotsofmodules">Can I work on lots of modules from different
+repositories at once?</a>
+<br><a href="#columns">How can I automatically display the CVS columns in Explorer for each CVS-controlled folder?</a>
+<br><a href="#slowshell">TortoiseCVS seems to slow down Windows Explorer. What can I do?</a>
+<br><a href="#wrongoverlaystatus">Why do the overlay icons sometimes show the wrong status?</a>
+
+<p>
+<h3>Protocol problems</h3>
+
+<br><a href="#ssh">How does TortoiseCVS work with SSH?</a>
+<br><a href="#sshext">What is the difference between :ssh: and :ext:?</a>
+<br><a href="#puttysessions">How do I use SSH to work with different servers that need different SSH parameter sets?</a> 
+<br><a href="#ssh2">Does TortoiseCVS support SSH v2.0?</a>
+<br><a href="#sourceforge">Any tips for working with SourceForge?</a>
+<br><a href="#sshkeys">When using SSH, how do I make it so I don't need to enter the password every time I do anything?</a>
+<br><a href="#sshcygwin">I'm using TortoiseCVS with Cygwin's SSH, why doesn't it work?</a>
+<br><a href="#sshport">I need to specify a different SSH port but TortoiseCVS won't let me?</a>
+<br><a href="#rsh">Why is RSH (.rhosts) no longer supported, and what do I do about it?</a>
+<br><a href="#eclipse">Using TortoiseCVS together with Eclipse</a>
+<br><a href="#localnetworkrepo">How do I use the <tt>:local:</tt> protocol when the repository is
+on a network drive?</a>
+<br><a href="#changecvsroot">The IP address of the server has changed</a>
+
+<p>
+<h3>Powerful features</h3>
+
+<br><a href="#exclusive">How do I enable exclusive locking or announcing edits?</a>
+<br><a href="#binary">How does TortoiseCVS handle binary files?</a>
+<br><a href="#cvsinit">How do I set up a personal repository to use without a server?</a>
+<br><a href="#vss">How do I migrate from Visual SourceSafe?</a>
+<br><a href="#flags">Can I customise the flags sent to CVS?</a>
+
+<p>
+<h3>Obtaining support</h3>
+
+<br><a href="#serverversion">How do I find out which version of CVS the server is running?</a>
+
+
+<h2 class="faq"><a name="whatistortoisecvs">What is TortoiseCVS?</a></h2>
+<p>
+<p>TortoiseCVS lets you work with files under <a
+href="http://www.cvshome.org">CVS</a> version control directly from
+Windows Explorer.  It is freely available under the GPL open source
+license.  Most of this FAQ answers technical questions about
+problems with the software, or about how to use it.  For more
+general information and screen shots, go to <a
+href="http://www.tortoisecvs.org">tortoisecvs.org</a>.
+
+<h2 class="faq"><a name="love">I love TortoiseCVS, how do I give some money towards it?</a></h2>
+<p>Thank you for offering!  You've got three choices:
+<ul>
+	<li>If you want to give a substantial amount of money, and there is
+	a particular improvement to TortoiseCVS that you would like, you can
+	try to find someone to pay to make that improvement.
+	Send a mail to the <a href="http://sourceforge.net/mailarchive/forum.php?forum_name=tortoisecvs-users">mailing list</a>
+	with your request.
+	</li>
+	<li>If you would like to help promote TortoiseCVS then we are
+	happy to take donations to advertise on Google, or any other
+	suggestions that you have.
+	</li>
+	<li>You can show your appreciation by giving money to Francis's (the creator of TortoiseCVS)
+	favourite charity, <a
+	href="http://www.oxfam.org/eng/donate.htm">Oxfam</a>.  This
+	will make us happy and glowy, retripling our efforts to make
+	TortoiseCVS the most enjoyable version control client.
+	<br>&nbsp;
+	<br>Oxfam helps people help themselves out of poverty.  There
+	are hundreds of millions of people without sufficient food, clean
+	water, shelter or security.  Only by them improving their situation can
+	we build a completely civilised world, safer for everyone.
+	</li>
+</ul>
+
+<h2 class="faq"><a name="charlie">Who is Charlie?</a></h2>
+<p>Charlie is the the lovable TortoiseCVS mascot. His full name is Charlie Vernon Smythe (CVS).</p> 
+<p>Charlie isn't very technical (as he is a only a tortoise), so support
+questions should be directed to the <a href="http://sourceforge.net/mail/?group_id=48103">mailing list</a>.
+
+<h2 class="faq"><a name="whynocontextmenuentries">Why are there no context menu entries?</a></h2>
+<ul>
+<li> If you are using Windows 95 or NT, you have to install the Windows desktop update that 
+comes with IE4 or later (see <a href="#windowsdesktopupdate">
+How do I install the Windows Desktop Update on NT 4.0 / Win95?</a>).</li>
+<li> Is your current directory on a network share or on a removable drive? TortoiseCVS is by default
+disabled for those, due to performance reasons. To enable it, go to Preferences &rarr; Policy.</li>
+<li> Does the current file / folder have the "system" attribute? TortoiseCVS ignores those 
+files. Run "attrib -s &lt;filename&gt;" from the command line to remove the system attribute. </li>
+<li>Is your current directory in your Excluded folders list? 
+If your Excluded folders list is empty, is your current 
+directory in your Included folders list? Try making both 
+lists empty (CVS &rarr; Preferences &rarr; Advanced).</li>
+
+</ul>
+
+<h2 class="faq"><a name="whydonticonsappear">Why are there no icon overlays?</a></h2>
+
+<ul>
+<li>If you are using Windows 95 the icon overlays won't work.  You can try the instructions
+for Windows NT below if you like, but it may just cause you pain.
+<li>On Windows NT, support for icon overlays will be there after having installed
+the Windows desktop update that comes with IE4 or later (see <a href="#windowsdesktopupdate">
+How do I install the Windows Desktop Update on NT 4.0 / Win95?</a>). 
+<p>However, its implementation is fairly buggy, and TortoiseCVS enables overlays only 
+for Explorer windows that belong to the first instance of explorer.exe (observe 
+the task manager process list to find out when a second instance of
+explorer.exe is started).
+
+<p>You may override that behaviour by creating a new DWORD registry value "OverlayIconStatus" under
+HKEY_CURRENT_USER\Software\TortoiseCVS and set it to one of the following values:
+<ul>
+<li>0: Disable icon overlays
+<li>1: Enable icon overlays only in the first instance of explorer.exe
+<li>2: Enable icon overlays
+</ul>
+<p>
+But if you use it to unconditionally enable icon overlays on NT, you'll often
+get access violations when closing processes.
+
+<li><p>Still having trouble on NT?  Try running Explorer from a DOS box.
+Kill explorer.exe from Task Manager and run a new one by just typing
+<tt>explorer</tt> in the DOS box.
+
+<p>Or, try this.  The shortcut labelled Win NT Explorer on your start
+menu probably points to <tt>C:\WINNT\explorer.scf</tt> and
+<b>doesn't</b> get the overlays.  <p>Create a new shortcut to
+<br><tt>%windir%\Explorer.exe /n, /e</tt> <br>and it may get the overlays.
+
+<li>If you're using an IntelliPoint mouse driver, and launching Explorer
+via a mouse click, you need to upgrade from version 3 to version 3.2 of
+IntelliPoint.  Strangely, launching Explorer from the Start menu gives
+icons in this case, but not when launched from the mouse.
+
+</ul>
+
+<h2 class="faq"><a name="whydontalliconsappear">Why are only some icon overlays shown?</a></h2>
+<p>
+The number of overlays allowed by Windows is limited to 15 in total. Windows itself
+uses 4 of those, leaving the remaining 11 to be used by other applications. 
+If you have other software installed that uses icon overlays, the limit may be exceeded, causing
+some overlays not to be shown.
+<p>
+To resolve this problem, either uninstall the other software altogether, or manually remove
+one of the other icon overlay handlers. This can be done by editing the registry. Use at your own risk!
+
+You can delete [unused] entries at
+<tt>HKLM/SOFTWARE/Microsoft/Windows/CurrentVersion/Explorer/ShellIconOverlayIdentifiers</tt>.
+<p>
+
+<h2 class="faq"><a name="wrongoverlaystatus">Why do the overlay icons sometimes show the wrong status?</a></h2>
+<p>
+Sometimes you find that the overlays don't reflect the real status of files and/or folders. Usually, hitting the F5 key
+is enough to make the overlays appear correctly.
+<p>
+The treeview on the left side of Explorer is a whole other story. It won't update the overlays, no matter how many times
+you hit the F5 key. That's a problem with Explorer and outside of TortoiseCVS's reach.
+<p>
+A short explanation:
+<p>
+The treeview always shows the whole Explorer tree, including network drives and other namespace extensions. 
+Since these can be very slow (e.g. slow network drives), Explorer doesn't ask the overlay extensions for updated
+overlays all the time. Even if you tell Explorer that a folder has changed and it should update the overlays accordingly,
+it doesn't do so. It first checks itself if the folder really has changed and only updates the overlays if it thinks
+the folder really has changed.
+<p>
+Now, since the CVS status of a folder has nothing to do with the folder itself, the folder itself never really changes
+(only some file inside the CVS folder, but not the folder itself), and Explorer therefore doesn't update the overlays.
+<p>
+There are some tricks and workarounds to make the explorer refresh the overlays even on the left treeview, but those are
+tricks and workarounds, which obviously don't work all the time.
+<p>
+<h2 class="faq"><a name="whyisiconcachebuggy">Why do the overlay icons sometimes
+change to random graphics?</a></h2>
+<p>
+The Windows icon cache is a fairly
+buggy creature.   You can solve this in one of the following ways:
+
+<ul>
+<li>Rebuild the icon cache by using the Rebuild Icons command on the CVS submenu.
+<li>Or increase the icon cache size. Go to
+HKEY_LOCAL_MACHINE\Software\Microsoft\Windows\CurrentVersion\Explorer and
+add a new String Value called "Max Cached Icons". The default value is 500 -
+try increasing it to 2048 (see
+<a href="http://support.microsoft.com/support/kb/articles/Q132/6/68.asp">
+http://support.microsoft.com/support/kb/articles/Q132/6/68.asp</a> for more details).
+<li>Or delete the file called ShellIconCache in your Windows directory.  And reboot.
+</ul>
+
+<h2 class="faq"><a name="problemsonnt4">Why can't I get it to work on NT 4.0?</a></h2>
+<p>
+Try installing a recent version of MS Internet Explorer (5.5 or higher should work). <br>
+<i>Important:</i> Make sure you install the Windows desktop update that comes with Internet Explorer
+(see <a href="#windowsdesktopupdate">How do I install the Windows Desktop Update on NT 4.0 / Win95?</a>).
+<p>
+Note that releases later than 1.8.32 do not support Windows NT.
+
+<h2 class="faq"><a name="win9x">What about Windows 98?</a></h2>
+<p>
+It is getting harder and harder to support Windows 95/98/ME, as neither Microsoft nor the CVSNT client officially
+support those systems. In addition, none of the TortoiseCVS developers have access to a Windows 9x platform.
+<p>
+For those reasons, the 1.8.32 release is the last to support Windows 95/98/ME.
+
+<h2 class="faq"><a name="vista">And how about Windows Vista/7?</a></h2>
+<p>
+The TortoiseCVS team does not use Vista or Windows 7 and does not have access to a Vista development system. This means that no testing
+is done on Vista. Some users do report success using TortoiseCVS on Vista/Windows 7; if you experience problems, ask on the 
+<a href="http://sourceforge.net/mailarchive/forum.php?forum_name=tortoisecvs-users">mailing list</a>.
+<p>
+<b>Note</b> that the CVS-specific Explorer columns are <b>not</b> available on Windows Vista and Windows 7. Microsoft has decided to remove
+the <tt>IColumnProvider</tt> interface that TortoiseCVS relies on. Instead, Microsoft suggests to use the new <i>property system</i>.
+Unfortunately, the property system only supports adding handlers for specific file extensions, and can therefore not be used for 
+this purpose.
+<p>
+
+<h2 class="faq"><a name="termserver">Does TortoiseCVS work with Windows Terminal Server?</a></h2>
+<p>
+Yes. However, one user has reported an issue where overlay icons were not displayed except for the domain administrator.
+This was eventually resolved: "After upgrading there were still no overlay icons shown in Windows
+Explorer. However, we happened to update our mandatory user profile (due to
+other reasons) these days and since that profile update all overlay icons
+from TortoiseCVS are displayed correctly."
+<p>
+
+<h2 class="faq"><a name="howchangedefaulticons">Yeuch! Those icons are grotesque, I want better ones!</a></h2>  
+<p>
+<p>A number of alternative icon sets are available for use with TortoiseCVS. 
+You can easily change these icons from the "Preferences Dialog" under the "Main" tab. 
+Simply click the "Browse" button to see and select from the wonderful assortment of icon sets.</p>
+
+<h2 class="faq"><a name="win2kservice">On Win2K, I get an error about a missing
+entry point in MSVCRT.dll</a></h2> 
+<p>You can fix this by upgrading to Windows 2000 service pack 2.
+
+<h2 class="faq"><a name="windowsdesktopupdate">How do I install the Windows Desktop Update on NT 4.0 / Win95?</a></h2> 
+
+<p>To get the Windows desktup update, install IE4, and choose Yes to install the active desktop.
+Don't worry, you can turn off the actual active desktop later by right
+clicking on it.  It's the new version of Explorer that we are after.
+
+<p>If you've already installed IE5, you must either: <ol> <li>Uninstall
+IE5 and then install IE4 with desktop extensions, and then install IE5
+again. What a palaver.  <li>Run IE5 setup with command line switches to
+install the IE4 desktop (shell) extensions.  This may cause problems, <a
+href="http://groups.google.com/groups?hl=en&safe=off&th=a141d6286e4b302a,4&seekm=OlDwT17y%24GA.280%40cppssbbsa04#p">read
+this usenet thread</a> for the source of this information.  <p>The
+command must be run from the folder that contains the ie5setup.exe file.
+Some users have reported that the browser was initially unstable
+afterwards, but was fixed by reinstalling the browser only, others
+simply used the IE5 repair procedure.
+
+<p>For Win95: ie5setup.exe /c:"ie5wzd /e:IE4Shell WIN /I:Y"
+
+<p>For WinNT: ie5setup.exe /c:"ie5wzd /e:IE4Shell NTx86 /I:Y" </ol>
+
+<p>For IE6: <ul> <li>Run IE6 setup with command line switches to install
+the IE4 desktop (shell) extensions. The same caveats apply as for IE5.
+<p>The command must be run from the folder that contains the
+ie6setup.exe file.
+
+<p>For WinNT: ie6setup.exe /c:"ie6wzd /e:IE4Shell NTx86 /I:Y" </ul>
+
+
+
+
+<h2 class="faq"><a name="uninstallation">How do I uninstall TortoiseCVS?</a></h2>
+<p>Simply uninstall from Add/Remove Programs in the Windows
+control panel.</p>
+<p>
+<h2 class="faq"><a name="ooopsundeletion">Ooops! I accidentally removed a file - how can I get it back?</a></h2>
+
+<p>The removed file has been moved to the Recycle Bin (unless you have turned off the Recycle Bin).</p> 
+<p>If you have already committed the removed file, you can simple undo the delete from the 
+Recycle Bin, then add the file again. </p>
+If you haven't committed the removed file yet, you have two options:
+<ul>
+<li>Commit the removed file (i.e. commit the directory), rename the backup 
+copy and add it again.</li>
+<li>Right-click on the removed file in the commit dialog and undo the removal.</li>
+</ul>
+<p>
+<h2 class="faq"><a name="commitremove">When I remove a file it vanishes, how do I commit it?</a></h2>
+<p>
+Easy, you commit the whole directory!  Right click
+in the Explorer window next to the file, and choose commit.  It is often easiest to 
+always commit things from the top level directory as it is recursive
+throughout the whole project.
+
+<h2 class="faq"><a name="undocheckout">How do I discard a change, reverting to the
+version in the repository? (Undo Checkout in Sourcesafe)</a></h2>
+<p>
+Use the Update Special command on the CVS submenu and select the 'Clean
+copy' option.  This works on directories as well as individual files.
+
+<p>You can also delete files or folders, and then just use a normal CVS
+Update on the folder above to get the latest version out again.
+
+<h2 class="faq"><a name="recommenddiff">Can you recommend an external diff
+program?</a></h2>
+<p>
+The freeware
+<a href="http://www.prestosoft.com/ps.asp?page=edp_examdiff">ExamDiff</a> is
+brilliant, and works well with TortoiseCVS.  The open source
+<a href="http://winmerge.sourceforge.net/">WinMerge</a> is also great.
+<p>
+Many people also like <a href="http://www.scootersoftware.com/home.php">Beyond Compare</a>, which is not free but not expensive either.
+Note that if you use version 3, you will need to add <tt>/solo</tt> to the Diff parameters.
+<p>
+If you need different diff programs for different file types (one for text files,
+one for binary word processor documents...) you should use <a
+href="http://meta-diff.sourceforge.net/">meta-diff</a>.
+<p>
+<h2 class="faq"><a name="changediff">How do I change the external diff
+program?</a></h2>
+<p>
+Open the Preferences dialog, you can find it on the
+start menu.  You can also hold down Control while you click on the CVS
+Diff menu option.
+
+<h2 class="faq"><a name="mixandmatch">Can I mix and match with WinCVS or the command
+line?</a></h2> 
+<p>
+Yes, you can check out a module with WinCVS and use it in
+TortoiseCVS or vice versa.  If you've installed CVSNT as command line client
+you can also mix with that.
+
+<p>Some CVS clients work incorrectly with daylight saving time or time
+zones in general under Windows.  You should use
+<a href="http://www.cvsnt.org">CVSNT</a> or a sufficiently recent version
+of WinCVS with TortoiseCVS version 1.4+, especially on NTFS file
+systems.
+
+<h2 class="faq"><a name="sharelinux">Can I share my sandbox with Linux or Cygwin?</a></h2> 
+<p>
+Unless you know exactly what you're doing, do <b>not</b> do that.
+It's highly recommended not to access your repository (that was checked out 
+with TortoiseCVS, CVSNT or WinCVS) using UNIX-style CVS clients (like Linux's 
+or Cygwin's) because of line ending incompatibilities.
+See also <a href="#brokenlineendings">here</a>.
+</p>
+
+<h2 class="faq"><a name="brokenlineendings">Why do my text files suddenly have an additional 
+&lt;CR&gt; at the end of each line?</a></h2>
+<p>
+The reason for this is CVS committing DOS-style text files (i.e. with &lt;CR&gt;&lt;LF&gt; line endings) 
+as UNIX-style text files (with &lt;LF&gt; line endings).
+There are many ways how this can happen, so first some general rules:
+</p>
+<ul>
+<li>You should <b>only</b> access a repository using CVSNT, either directly from the command line or through 
+wrapper applications like WinCVS or TortoiseCVS that use CVSNT internally.</li>
+<li>It's highly recommended not to access your sandbox (that was checked out 
+with TortoiseCVS, CVSNT or WinCVS) using other CVS clients, especially not with UNIX-style CVS clients (like Linux's 
+or Cygwin's) because of line ending incompatibilities. </li>
+<li>
+It's highly recommended to use TortoiseCVS <b>only</b> for sandboxes that were checked out with TortoiseCVS, WinCVS or CVSNT - for example,
+files checked out with the Eclipse CVS client may be treated as UNIX files by TortoiseCVS, which causes the additional &lt;CR&gt;.</li>
+<li>Furthermore, you have to be careful when you've checked out a module using UNIX line endings. You must not
+edit those files with a Windows text editor that overwrites the UNIX line endings with DOS line endings, or
+else you'll eventually get that additional &lt;CR&gt; at the end of each line.
+</li>
+</ul>
+
+<p>
+If the above satisfies you, stop here.
+If you'd like to know the details, continue reading.
+</p>
+<p>
+<h3>The technical details</h3>
+<p>
+Okay, I've warned you ;)
+</p> 
+<p>
+In Windows, text file line endings consist of the byte sequence &lt;CR&gt;&lt;LF&gt; ($0D$0A),
+while UNIX line endings only consist of a single &lt;LF&gt; ($0A). Loading a UNIX-style 
+text file on Windows (or vice versa) may cause errors. Therefore, to 
+be able to share text files across platforms, line endings have to be converted. 
+</p>
+<p>
+CVS internally stores line endings in UNIX style. So when committing a Windows-style
+text file to CVS, &lt;CR&gt;&lt;LF&gt; has to be converted to &lt;LF&gt; before storing it on the CVS server. 
+The opposite when updating: When a text file is downloaded from the CVS server, 
+&lt;LF&gt; has to be converted to &lt;CR&gt;&lt;LF&gt; before writing it to a sandbox on a Windows system.
+CVSNT by default does all those conversions automatically.
+</p>
+<p>
+But other CVS clients don't do those conversions. Now, assume you commit a 
+Windows-style text file using a non-CVSNT client. As this CVS client won't
+convert the line endings before uploading the file to CVS, the server 
+repository will contain &lt;CR&gt;&lt;LF&gt; line endings instead of &lt;LF&gt;. This leads to the 
+following problems:
+</p>
+<ul>
+<li>If you check out the file on UNIX (where no conversion is performed), the 
+line endings will be &lt;CR&gt;&lt;LF&gt; and not &lt;LF&gt;, which is wrong.</li>
+<li>If you check out the file on Windows using CVSNT, it will convert each &lt;LF&gt; 
+to a &lt;CR&gt;&lt;LF&gt; to set the correct line endings for Windows. Unfortunately, the server
+copy of the file already <b>had</b> a &lt;CR&gt; before the &lt;LF&gt;. As a result, the local line
+endings will be &lt;CR&gt;&lt;CR&gt;&lt;LF&gt; - the file is totally screwed up.
+</li>
+</ul>
+<p>
+BTW: The above applies only to text files - binary files (keyword expansion -kb) 
+are never converted.
+</p>
+
+<p>
+<h3>UNIX line endings on Windows</h3>
+<p>
+As you might know, TortoiseCVS has the option to check out modules using UNIX line endings. 
+When the user modifies and commits a file in a UNIX sandbox, TortoiseCVS assumes that this file has UNIX line
+endings, and passes a "--lf" to CVSNT on the commandline, which instructs CVSNT to treat the file as one with 
+UNIX line endings.
+</p>
+<p>
+To detect whether a module was checked out with UNIX line endings, TortoiseCVS looks at the CVS administrative files
+in the CVS subdirectory: If the line endings for those files are in UNIX style, a UNIX sandbox is assumed. 
+Unfortunately, there are some CVS clients (e.g. Eclipse) which create those files without a 
+single line ending, so TortoiseCVS cannot detect them as UNIX sandbox. There's a preference setting that instructs
+TortoiseCVS whether to default to DOS or UNIX in such cases.
+</p>
+
+
+<h2 class="faq"><a name="lotsofmodules">Can I work on lots of modules from different
+repositories at once?</a></h2>
+<p>
+Yes, you can.  This is a standard feature
+of CVS.  Each directory which was checked out of CVS remembers where it
+came from (look at the files in the local subfolder called CVS to find
+out how).  You can even multiply select modules which came from
+different places, and update or commit them all at once.
+
+<p>Some people have been known to reboot between changing repositories
+to change their CVSROOT environment variable.  You do <b>not</b> need to
+do this!  You don't even need to set a CVSROOT environment variable.
+
+<h2 class="faq"><a name="columns">How can I automatically display the CVS columns in Explorer for each CVS-controlled folder?</a></h2>
+<p>
+TortoiseCVS already tells Explorer to always display the CVS columns, but 
+it may not always work due to your Explorer settings. 
+<p>
+If you use the "Remember each folder's view settings" folder option, the colums displayed 
+in a particular shell view may be restored from the registry, so in this 
+case the CVS columns may not be visible. Resetting the all 
+folder view settings should allow the CVS columns to be on by default. You can 
+do this in the Folder Options dialog in Explorer (or through Control Panel).
+<p>
+<h2 class="faq"><a name="slowshell">TortoiseCVS seems to slow down Windows Explorer. What can I do?</a></h2>
+<p>
+CVS wasn't originally designed to provide file status information for large 
+amounts of files in minimal time, so TortoiseCVS has to do quite a bit of work 
+before it can tell Explorer which overlay icons to display and what to write
+in the additional CVS columns in case they're enabled.
+<p>
+We recommend that you generally disable TortoiseCVS for as many folders as 
+possible. You probably only need TortoiseCVS's features for a few sandbox folders
+on your PC, so there is no point in having it turned on for the remaining folders, 
+thereby decreasing overall system performance:
+</p>
+
+<ul>
+<li>You can disable TortoiseCVS for removable drives and network shares in 
+Preferences &rarr; Policy. (This is already disabled by default).
+</li>
+<li>You can exclude additional folders in Preferences &rarr; Advanced, or even 
+better selectively include only the folders that actually contain 
+CVS-controlled files.<br>
+For example, set "Included folders" to "C:\mysandbox1;D:\mysandbox2" to
+selectively enable TortoiseCVS only for those folders (and subfolders).
+</li>
+</ul>
+
+<p>
+<h2 class="faq"><a name="ssh">How does TortoiseCVS work with SSH?</a></h2>
+<p>
+SSH is supported transparently via TortoiseCVS. If you
+checkout a CVSROOT using the "Secure shell (:ext:)" protocol TortoiseCVS
+will attempt to connect to the server using "PuTTy". The SSH support
+works as follows:
+
+<ul>
+
+<li>On your first connection to an SSH
+server you will be prompted to add the server to the local registry of
+"known hosts". If you trust the server you're connecting to, then select
+"Yes". The message box will not appear again for any actions to this
+server and you will be able to continue with your action. If you choose
+"No" you will be able to continue with the action, but this message box
+will appear for every CVS action you perform. If you choose "Cancel"
+then the entire operation will be cancelled.</li>
+
+<li> Every time you connect you will be prompted to provide your password.
+See the next question if this annoys you.</li>
+
+</ul>
+
+<h2 class="faq"><a name="sshext">What is the difference between :ssh: and :ext:?</a></h2>
+<p>
+Both these protocols normally use the SSH (Secure Shell) protocol to communicate with the CVS server, meaning that
+your passwords and data are safe from eavesdroppers (although :ext: can be configured to use other protocols as well).
+<p>
+The difference is that :ssh: uses an SSH client built into CVSNT, while :ext: relies on an external SSH client.
+<p>
+If you use CVS from the command line, :ssh: has the advantage that you do not need any other software. Since TortoiseCVS
+already comes with its own SSH client, there is nothing gained from preferring :ssh:. Additionally, at least some versions
+of CVSNT have problems communicating with non-CVSNT servers, such as those used on the majority of UNIX servers.
+<p>
+Another important point is that it is not possible to configure :ssh: to use another port etc. in the Preferences dialog
+of TortoiseCVS. That dialog applies only to :ext:. Therefore, we recommend that you always use :ext: instead of :ssh:.
+
+<p>
+<h2 class="faq"><a name="puttysessions">How do I use SSH to work with different servers that need different SSH parameter sets?</a></h2><p>
+The "SSH parameters" in the "Preferences Dialog" are global settings, i.e. TortoiseCVS uses them for every SSH connection. 
+This can be a problem if you need to use different SSH parameter sets for different servers.
+For example if server1 needs to be accessed through a proxy, and server2 doesn't, 
+or server1 needs a different private key file than server2.<p>
+<p>You can handle that by creating different PuTTY sessions:
+<ul>
+<li>Download PuTTY from the 
+<a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">PuTTY
+website</a>.</li>
+<li>Use PuTTY to create separate PuTTY sessions for each SSH server. Set the session parameters 
+(server name, SSH version etc.) as you need them. Don't forget to save the session settings.</li>
+<li>Try to connect to your server using PuTTY and the newly created PuTTY session. If you're not able to establish a connection, 
+TortoiseCVS won't be either.</li>
+<li>When doing a "CVS Checkout", specify the PuTTY session name instead of the actual servername. TortoiseCVS will connect 
+to the server specified in the PuTTY session using the session's connection parameters.</li>
+</ul>
+
+
+<h2 class="faq"><a name="ssh2">Does TortoiseCVS support SSH v2.0?</a></h2>
+<p>
+Yes. In "SSH parameters" in the "Preferences Dialog" 
+under the "SSH" tab, add <tt>-2</tt>, or <a href="#puttysessions">create a PuTTY session</a> and 
+change the SSH configuration settings accordingly.
+
+<h2 class="faq"><a name="sourceforge">Any tips for working with SourceForge?</a></h2>
+<p>
+<ul>
+<li>The SourceForge staff maintains an official document on using TortoiseCVS with SourceForge
+<a href="http://apps.sourceforge.net/trac/sitedocs/wiki/TortoiseCVS%20instructions">here</a>.
+<li>There is a detailed article available in the <a href="UserGuide_en.chm">User Guide</a>.
+<li>Alistair Bayley has contributed <a href="ssh.shtml">this explanation</a>.
+<li>The <a href="#sshkeys">following question</a> explains how to use SourceForge without having to type
+ in the password every time you do something.
+<li>If you get an error saying something like
+"<i>Could not chdir to home directory /home/users/r/rd/rdonkin: No such file or directory</i>" then
+you need to log into the server with SSH to force creation of your home directory.  Do this by connecting
+to <tt>username@cvs.projectname.sf.net</tt> either with PuTTY or a command line SSH.
+</ul>
+
+<h2 class="faq"><a name="sshkeys">When using SSH, how do I make it so I don't need
+to enter the password every time I do anything?</a></h2>
+
+<p>You need to make a public/private key pair.  The public key goes on
+the server, and the private key sits on your hard drive.  Now, when you
+connect the server can verify who you are because only you have your
+private key.
+
+<p>To further protect your private key it is encrypted on your hard disk
+with a passphrase.  You can however choose an empty passphrase, in which
+case you never have to enter a password but anyone with access to your
+computer can access your SSH CVS account.  Or you can use an SSH Agent
+(such as Pageant) which will remember your passphrase for the duration
+of one session, so you only have to enter it once.
+
+<p>TortoiseCVS uses a version of Plink as its SSH client.  This means
+you can use PuTTYgen to make a public/private key pair, and you can use
+Pageant to point to where the private key is.  First of all download
+them both from the
+<a
+href="http://www.chiark.greenend.org.uk/~sgtatham/putty/download.html">PuTTY
+website</a>.
+
+<p>For information on how to use them read the
+<a href="http://www.chiark.greenend.org.uk/~sgtatham/putty/docs.html">PuTTY
+documentation</a> on PuTTYgen and Pageant.
+In particular, make sure you read the sections "8.2: Using PuTTYgen,
+the PuTTY key generator" and "9.3.1 Making Pageant automatically load
+keys on startup".
+
+<p><b>Using SourceForge?</b>  After making your public key with PuTTYgen
+you need to upload it using the web interface.  Log into the SourceForge
+web site, and go to your Account Options page.  Down at the bottom
+is a section "Host Access Information" with a link titled "Edit SSH Keys for Shell/CVS".  
+You need to add your public key there.
+<p>
+You may need to force Plink to use SSH protocol version 2. To do this, add <tt>-2</tt>
+at the end of the "SSH parameters" in Preferences.
+<p>
+<b>Too lazy to do all this?</b>  There is an alternative solution, which is
+insecure as it keeps your password in plaintext on your machine.
+Go to TortoiseCVS Preferences -&gt; SSH -&gt; SSH parameters and set
+the value to <tt>-pw <i>password</i></tt>. But really, that would be an
+abuse of SSH.  So if anyone asks, I didn't tell you about it, OK?
+And <b>please</b> don't ask for us to add password caching to TortoiseCVS. We won't do it.
+<p>
+<h2 class="faq"><a name="sshcygwin">I'm using TortoiseCVS with Cygwin's SSH, why
+doesn't it work?</a></h2>
+<p>
+If you've got spaces, quotes, or other non-alphabetical characters in your global 
+HOME environment variable, then Cygwin may not cope.  You need to change it.
+<p>
+<h2 class="faq"><a name="sshport">I need to specify a different SSH port but TortoiseCVS won't let me?</a></h2>
+<p>
+The reason is because CVSNT, which TortoiseCVS relies on for all CVS actions, does not
+allow specifying the port for using the SSH protocol in the CVSROOT like other protocols.
+To setup TortoiseCVS to use a different SSH port go to TortoiseCVS 
+Preferences &rarr; SSH &rarr; SSH parameters and set the value to 
+<tt>-P <i>portnumber</i></tt>, or <a href="#puttysessions">create a PuTTY session</a> and 
+change the SSH configuration settings accordingly.
+<p>
+<h2 class="faq"><a name="rsh">Why is RSH (.rhosts) no longer supported, and what do
+I do about it?</a></h2>
+<p>
+TortoiseCVS does not support RSH using the :server: protocol.  
+This is because it uses <a href="http://www.cvsnt.org">CVSNT</a>
+rather than the main version of CVS.  We've made several attempts to resolve
+this but have been unable to do so easily, and have found no support from
+anyone who uses RSH.  You have a choice on how to deal with this:
+
+<ul>
+<li><b>Change to using another protocol.</b> Since RSH is very insecure
+anyway, you will be in an environment where pserver could be used
+instead.  Many more people use pserver, and persuading your server
+administrator to change may be worthwhile.  On an NT domain you will
+find :sspi: much more convenient.
+<li><b>Use :ext: with an rsh.exe. </b> Go to TortoiseCVS preferences and
+on the SSH page change the SSH application to point to an instance of
+rsh.exe.  Then checkout your module using SSH protocol.
+<p>There is a shareware rsh.exe which works with this that is called
+<a href="http://www.ataman.com/archives/arshd95_cv.zip">ARSHD95</a>
+(thanks to Daniel Jackson for pointing this out). You want the client
+from in that package, not the server. If you find an open source rsh.exe
+that works with this, please 
+<a href="http://sourceforge.net/mailarchive/forum.php?forum_name=tortoisecvs-users">mail us</a> so we can tell others
+here, and add support via :ext: (see below).
+<li><b>Use a different cvs.exe. </b>  Don't do this, unless you want to
+get into trouble with daylight saving time issues.  Only CVSNT properly
+deals with them, and TortoiseCVS now relies on this.
+<li><b>Add support to CVSNT and/or TortoiseCVS. </b>  This is much
+easier to do than it sounds, and there are two slightly different ways
+of doing it.
+	<ul>
+	<li>Change TortoiseCVS to use the new ext protocol syntax :ext:{ssh}foo@bar:/usr/local/cvs.
+	Doing this requires a quality rsh.exe - please tell us what rsh.exe you have used!
+	<li>Create a new server_protocol.dll, probably based on the pserver one.  Grab the source code
+	for the main version of CVS, and steal rcmd.c from it and the :server: code that calls that.  Use
+	this to make native RSH support inside a server_protocol.dll.
+	</ul>
+Of course if you do any of this, <a href="http://sourceforge.net/mailarchive/forum.php?forum_name=tortoisecvs-users">let us know</a>.
+</ul>
+<p>
+<h2 class="faq"><a name="eclipse">Using TortoiseCVS together with Eclipse</a></h2>
+<p>
+The <a href="http://www.eclipse.org/">Eclipse</a> IDE has a built-in SSH client, activated in its CVS browser by
+using the "extssh" protocol string. It's functionally equivalent to using
+the "ext" protocol string, but eliminates the need for an external SSH
+client. This is fine when only Eclipse is used, but as Tortoise doesn't
+support the protocol, only its offline features will be available.
+<p>
+The <a href="http://dev.eclipse.org/viewcvs/index.cgi/platform-vcm-home/docs/online/html-cvs/cvs-compatibility.html?rev=1.5">
+official Eclipse documentation</a> notes that "extssh" is incompatible with all other clients than Eclipse.
+The suggested solution is to configure "ext" to work in the same manner as "extssh" inside Eclipse, and then use "ext". 
+See the link for details.
+<p>
+<h2 class="faq"><a name="localnetworkrepo">How do I use the <tt>:local:</tt> protocol when the repository is
+on a network drive?</a></h2>
+<p>
+First, you should really not do this. You have a high risk of ending up with a corrupt repository.
+If you still really want to do this (and don't say that we haven't warned you), you need to know the following:
+<ul>
+<li>Traditionally, CVS has used <i>lock files</i> to prevent simultaneous modification of files in the repository.
+<li>For quite some time, CVSNT has defaulted to using a <i>lock server</i> instead, as this has a number of advantages.
+When you use the <tt>:local:</tt> protocol, CVSNT automatically starts the lock server if it is not already running.
+<li>Recently, CVSNT was changed to <b>not</b> start the lock server when the repository is on a network drive. 
+This is because the previous behaviour would mean that each user would have his own local lock server. As each lock 
+server would have no knowledge of the other lock servers, simultaneous modification of files would
+<b>not</b> be prevented, thus leading to certain repository corruption.
+</ul>
+<p>
+The bottom line is that if you use <tt>:local:</tt> with the repository on a network drive, you must 
+set up your repository as described in
+<a href="http://www.cvsnt.org/pipermail/cvsnt/2005-August/020838.html">this CVSNT posting</a>.
+<p>
+But you should really set up a CVS server.
+<p>
+<h2 class="faq"><a name="changecvsroot">The IP address of the server has changed</a></h2>
+<p>
+First, this would not be a problem if you had used the host name of the server instead of its IP address (even if you
+do not have a DNS server, you can use the <a href="http://support.microsoft.com/?kbid=105997">HOSTS</a> file to simulate one). That
+won't help you now, of course.
+<p>
+You have several options:
+<ol>
+<li>Install <a href="http://wincvs.org">WinCVS</a> and use the 'change CVSROOT' macro that comes with it.
+<li>Edit all the <tt>Root</tt> files inside the <tt>CVS</tt> folders in your sandbox
+(you can also edit one of them and then copy that over the other ones, since they all have identical content.
+<li>Check out the sandbox again using the new CVSROOT, and copy any modified files from the old sandbox to the new.
+</ol>
+<p>
+<h2 class="faq"><a name="exclusive">How do I enable exclusive locking or announcing edits?</a></h2>
+<p>
+<p>
+Here's a brief overview of how it works:
+<ul>
+<li>You must have set 'cvs watch on' for the repository (you only have to do this manually
+if you have previously used another client to add files, otherwise TortoiseCVS will have
+done it for you).
+<li>When you do a CVS Checkout or CVS Update, the working files will be created as read-only.
+<li>To change a file, use the command 'CVS Edit'. This command works slightly differently
+depending on whether the file is text or binary.
+<li>For <i>binary</i> files (such as .doc), TortoiseCVS first checks if another user is
+already editing the file. If this is the case, you will not be allowed to edit it.
+<li>For <i>text</i> files (such as .txt or .cpp), you may work on the file even if another user
+is already working on it; in this case, TortoiseCVS will notify you of that fact.
+<li>When you are done working on the file, just use 'CVS Commit' as usual.
+<li>If you decide that you do not want to change the file after all, use 'CVS Unedit'.
+TortoiseCVS will ask you if you want to revert the file to the original version (thus
+losing your changes).
+<li>To see which files are currently being edited and by whom, use the command
+'Show edited files' on the CVS submenu.
+</ul>
+<p>
+<h2 class="faq"><a name="binary">How does TortoiseCVS handle binary files?</a></h2>
+<p>
+CVS can automatically merge text files if two people change them at the same time,
+but it doesn't do so with binary files.  It simply says there is a conflict,
+gives you a copy of both files, and lets you resolve it.  Because of this
+you may want to use text files wherever possible.  For example, use HTML
+or persuade Word to save as a text XML file.
+</p>
+
+<p>
+TortoiseCVS tries to automatically detect whether a file is binary or text when
+you add it:
+<ul>
+<li>
+Files with certain extensions, such as .doc and .exe, are always assumed to be binary. 
+Other extensions, such as .cpp and .txt, are always assumed to be text.
+TortoiseCVS' built-in list of binary extensions includes most common extensions; to customize the list, 
+copy the file TortoiseCVS.Filetypes into your HOME folder and edit it.
+(You can even write a custom DLL for detecting the type of a file - see TortoiseCVS.Filetypes for details).
+<li>
+For other files TortoiseCVS examines the first few bytes of a file to determine the type.
+If the file type cannot be detected with confidence, TortoiseCVS will force you to decide.
+</ul>
+In all cases, the Add Files dialog presents the files you are about to add and the type
+of each one, so that you have a chance to correct the choices made.
+<p>
+Binary files are stored unchanged by CVS.  Text files have their
+line end characters converted for different operating systems, and <a
+href="http://cvshome.org/docs/manual/cvs_12.html#SEC98">keywords expanded</a>
+so you can easily tell who last changed a file and when.
+</p>
+<p>
+If you want extra confidence than the automatic binary/text detection, read the
+section about <a href="http://cvshome.org/docs/manual/cvs_9.html#SEC80">binary
+files</a> in the CVS manual.  Then add an entry to the cvswrappers file to
+ensure files with specific extensions are stored as binary.  This won't
+stop TortoiseCVS prompting you, but it will ensure that even if you
+accidentally choose text the wrappers file will override this for binary
+file extensions.
+</p>
+<p>
+<h2 class="faq"><a name="cvsinit">How do I set up a personal repository to use
+without a server?</a></h2>
+<p>
+You don't need any other software installed to make a local
+repository.  Simply follow these steps:
+
+<ol>
+<li>Prepare a folder with the files you want under version control.
+<li>Right click on the folder and choose Make New Module from the CVS submenu.
+<li>Select the "Locally mounted directory" protocol.
+<li>In the directory section, enter where you would like your repository to be.
+<li>After selecting OK, you will be asked to confirm creation of a new
+repository.  Select the checkbox to confirm this, and click OK.
+<li>You can now add the files within your folder to CVS, and work with
+it as described in the <a href="UserGuide_en.chm">User's Guide</a>.
+</ol>
+
+<p>TortoiseCVS can also offer to initialise a new repository on a
+remote server, provided you have permissions.
+<p>
+<h2 class="faq"><a name="vss">How do I migrate from Visual SourceSafe?</a></h2>
+<p>
+Check out <a href="http://www.shredzone.net/articles/howto/vss2cvs/">this page</a>.
+<p>
+<h2 class="faq"><a name="flags">Can I customise the flags sent to CVS?</a></h2>
+<p>
+To some extent you can.  Make a file in your home directory called <i>.cvsrc</i>.
+You can find where the home directory is by doing CVS &rarr; Preferences.  The format of <i>.cvsrc</i>
+is <a href="http://cvsnt.org/manual/html/cvsrc.html">explained here</a>.
+
+<p>For example, if you want to use -F on all tag commands so it moves tags, add the
+line "tag -F" to <i>.cvsrc</i>.
+<p>
+
+<h2 class="faq"><a name="serverversion">How do I find out which version of CVS the server is running?</a></h2>
+<p>
+Go into your sandbox and select CVS &rarr; About.
+
+<!-- spacing hack -->
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+<h2 class="faq"></h2>
+
+</body>
+</html>

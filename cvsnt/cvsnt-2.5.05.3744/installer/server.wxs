@@ -1,0 +1,238 @@
+<?xml version="1.0" encoding="utf-8"?><Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="server">
+
+        <CustomAction Id="RunGenkey" Impersonate="yes" FileKey="genkey.exe" ExeCommand="&quot;[CVSNT_INSTALLDIR]cvsnt-default.pem&quot;" Execute="immediate" />
+        <CustomAction Id="RunPostinst" Impersonate="yes" FileKey="postinst.exe" ExeCommand="" Execute="immediate" />
+
+        <DirectoryRef Id="SystemFolder" FileSource="$(var.CVSNT_BASE)\">
+            <Component Id="OldCvsnt_Cleanup" Guid="8f20c064-5277-43ae-a365-e49c7a3b551d" DiskId="1">
+                <RemoveFile Id="cvsnt.cpl_sys" On="install" Name="cvsnt.cpl" />
+            </Component>
+            <Component Id="ServiceSysFiles" Guid="40E257F1-9832-401b-8E0B-4E0D8D9CCB0F" DiskId="1">
+                <Condition>not VersionNT64</Condition>
+                <File Id="setuid.dll" Name="setuid.dll" KeyPath="yes" />
+                <RegistryValue Id="Setuid" Action="append" Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Lsa" Name="Authentication Packages" Type="multiString" Value="setuid" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="System64Folder" FileSource="$(var.CVSNT_BASE)\">
+            <Component Id="ServiceSysFiles64" Guid="6C298846-B7D3-4540-93BE-0B665987C083" DiskId="1">
+                <Condition>VersionNT64</Condition>
+                <File Id="setuid64.dll" Name="setuid64.dll" KeyPath="yes" Source="$(var.CVSNT64_BASE)\" />
+                <RegistryValue Id="Setuid64" Action="append" Root="HKLM" Key="SYSTEM\CurrentControlSet\Control\Lsa" Name="Authentication Packages" Type="multiString" Value="setuid" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="COMMON_INSTALLDIR" FileSource="$(var.SYSFILES)\">
+            <Component Id="DbLibMysql" Guid="33d83599-360b-4563-9ccf-f94a1a183a25" DiskId="1">
+                <File Id="libmysql.dll" Name="libmysql.dll" />
+            </Component>
+            <Component Id="DbLibSqlite" Guid="e51e664a-43b0-4ec0-a65a-82f86b024e99" DiskId="1">
+                <File Id="sqlite3.dll" Name="sqlite-3.6.16.dll" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="CvsntStuff" FileSource="$(var.CVSNT_BASE)\">
+            <Directory Id="CvsntSqlStuff" Name="sql">
+                <Component Id="SqlScripts" Guid="75A66575-E689-4157-B88E-D72850D8B809" DiskId="1">
+                    <File Id="create_tables_mssql.sql" Name="create_tables_mssql.sql" />
+                    <File Id="create_tables_mysql.sql" Name="create_tables_mysql.sql" />
+                    <File Id="create_tables_sqlite.sql" Name="create_tables_sqlite.sql" />
+                    <File Id="create_tables_db2.sql" Name="create_tables_db2.sql" />
+<!--                    <File Id="create_tables_oracle.sql" Name="create_tables_oracle.sql" /> -->
+                    <File Id="create_tables_postgres.sql" Name="create_tables_postgres.sql" />
+                    <File Id="upgrade_1_mssql.sql" Name="upgrade_1_mssql.sql" />
+                    <File Id="upgrade_1_mysql.sql" Name="upgrade_1_mysql.sql" />
+                    <File Id="upgrade_1_sqlite.sql" Name="upgrade_1_sqlite.sql" />
+                    <File Id="upgrade_1_db2.sql" Name="upgrade_1_db2.sql" />
+<!--                    <File Id="upgrade_1_oracle.sql" Name="upgrade_1_oracle.sql" /> -->
+                    <File Id="upgrade_1_postgres.sql" Name="upgrade_1_postgres.sql" />
+                    <File Id="upgrade_2_mssql.sql" Name="upgrade_2_mssql.sql" />
+                    <File Id="upgrade_2_db2.sql" Name="upgrade_2_db2.sql" />
+                    <File Id="upgrade_2_postgres.sql" Name="upgrade_2_postgres.sql" />
+                    <File Id="upgrade_2_mysql.sql" Name="upgrade_2_mysql.sql" />
+                    <File Id="upgrade_2_sqlite.sql" Name="upgrade_2_sqlite.sql" />
+<!--                    <File Id="upgrade_2_oracle.sql" Name="upgrade_2_oracle.sql" /> -->
+                </Component>
+            </Directory>
+            <Directory Id="CvsntTriggerStuff" Name="triggers">
+                <Component Id="DefaultTrigger" Guid="BB650A8A-1D5D-48d4-8443-AA0D1D68D318" DiskId="1">
+                    <File Id="default_trigger.dll" Name="info.dll" />
+                </Component>
+                <Component Id="ScriptTrigger" Guid="4C06AFF8-5B9F-42aa-B64C-914962807A58" DiskId="1">
+                    <File Id="script_trigger.dll" Name="script.dll">
+                        <TypeLib Id="DDF02ADA-D57C-48C7-B099-75ED3ABD845C" MajorVersion="1" Language="0" />
+                    </File>
+                </Component>
+                <Component Id="EmailTrigger" Guid="B5BFD092-BF98-457c-883A-A9519C4B1E7B" DiskId="1">
+                    <File Id="email_trigger.dll" Name="email.dll" />
+                </Component>
+                <Component Id="AuditTrigger" Guid="2F636629-B76C-47eb-9634-0AA3A97216CC" DiskId="1">
+                    <File Id="audit_trigger.dll" Name="audit.dll" />
+                </Component>
+                <Component Id="CheckoutTrigger" Guid="E40FB381-7219-44c2-98D0-BF9C78D51DEF" DiskId="1">
+                    <File Id="checkout_trigger.dll" Name="checkout.dll" />
+                </Component>
+            </Directory>
+            <Directory Id="CvsntDatabaseStuff" Name="database">
+                <Component Id="Db2Database" Guid="6ba45479-b23a-4419-8cbb-2d9a0d2a39bf" DiskId="1">
+                    <File Id="db2.dll" Name="db2.dll" />
+                </Component>
+                <Component Id="MssqlDatabase" Guid="ab6a82f2-a10d-45db-8db6-7dc8da6ddda7" DiskId="1">
+                    <File Id="mssql.dll" Name="mssql.dll" />
+                </Component>
+                <Component Id="MysqlDatabase" Guid="15072c1b-7390-49bb-a4e6-e0760c36fcbd" DiskId="1">
+                    <File Id="mysql.dll" Name="mysql.dll" />
+                </Component>
+                <Component Id="OdbcDatabase" Guid="8ce6d5f9-c586-45dc-b513-9d95fff459d8" DiskId="1">
+                    <File Id="odbc.dll" Name="odbc.dll" />
+                </Component>
+<!--                <Component Id="OracleDatabase" Guid="5c215972-6129-4ab0-b1df-c2dfb9e7e046" DiskId="1">
+                    <File Id="oracle.dll" Name="oracle.dll" />
+                </Component> -->
+                <Component Id="PostgresDatabase" Guid="a56b95f9-f7ac-4d2e-b673-097d829e196f" DiskId="1">
+                    <File Id="postgres.dll" Name="postgres.dll" />
+                </Component>
+                <Component Id="SqliteDatabase" Guid="53251af3-30c0-4c3e-9cd5-98d3b245c757" DiskId="1">
+                    <File Id="sqlite.dll" Name="sqlite.dll" />
+                </Component>
+            </Directory>
+            <Component Id="ServiceFilesCpl" Guid="BB38B847-2956-4f27-ACB0-2E8177616BC6" DiskId="1">
+		<RegistryValue Id="keyServiceFilesCpl" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="ServiceFilesCpl" Type="string" Value="1" KeyPath="yes" />
+                <File Id="cvsntcpl.cpl" Name="cvsntcpl.cpl">
+                    <Shortcut Id="cvsnt.cpl" Advertise="no" Directory="CvsntStartMenuFolder" Name="CVSNT Low Performance Community Server" Icon="cvsnt.exe" IconIndex="0" />
+                </File>
+                <File Id="cvsntcpl.dll" Name="cvsntcpl.dll" />
+                <RegistryValue Id="cvsntcpl.cpl" Action="write" Root="HKLM" Key="SOFTWARE\Microsoft\Windows\CurrentVersion\Control Panel\Cpls" Name="CVSNT Low Performance Community Server" Type="string" Value="[!cvsntcpl.cpl]" />
+            </Component>
+            <Component Id="ServiceFilesCvs" Guid="AAE84A25-BC9C-48C6-BA70-9D8A2C9B3801" DiskId="1">
+                <File Id="cvsservice.exe" Name="cvsservice.exe" KeyPath="yes" />
+                <File Id="cvsservice.dll" Name="cvsservice.dll" />
+                <ServiceControl Id="cvs" Name="cvs" Remove="install" Stop="install" Wait="yes" />
+                <ServiceInstall Id="cvsservice.exe" Name="cvsnt" DisplayName="CVSNT Low Performance Dispatch service $(var.CVSNT_VERSION)" Type="ownProcess" Interactive="yes" Start="auto" ErrorControl="normal" Description="This service handles connections from clients and dispatches CVSNT server processes to handle them.  A high performance version is also available in CVS Suite." />
+                <ServiceControl Id="cvsnt" Name="cvsnt" Start="install" Stop="both" Remove="uninstall" Wait="no" />
+            </Component>
+            <Component Id="ServiceFilesCvsLock" Guid="A99AEB5E-0434-42f6-A0EB-B7986B59C921" DiskId="1">
+		<!-- Horrible hack, due to wix deficiency... -->
+                <File Id="sscvslock.exe" Name="_sscvslck.exe" Source="$(var.CVSNT_BASE)\cvslock.exe" KeyPath="yes" />
+                <File Id="sscvslock.dll" Name="_sscvslck.dll" Source="$(var.CVSNT_BASE)\cvslock.dll" />
+                <ServiceInstall Id="cvslock.exe" Name="cvslock" DisplayName="CVSNT Locking Service $(var.CVSNT_VERSION)" Type="ownProcess" Start="auto" ErrorControl="normal" Description="This service handles locking for the CVSNT servers that use it" />
+                <ServiceControl Id="cvslock" Name="cvslock" Start="install" Stop="both" Remove="uninstall" Wait="no" />
+            </Component>
+            <Component Id="CommandLineServerFiles" Guid="32baa066-a64a-46ba-9274-7912dbff7bf9" DiskId="1">
+                <File Id="postinst.exe" Name="postinst.exe" />
+                <File Id="genkey.exe" Name="genkey.exe" />
+            </Component>
+            <Directory Id="CvsntXdiffStuff" Name="xdiff" FileSource="$(var.CVSNT_BASE)\xdiff\">
+                <Component Id="ext_xdiff" Guid="D89436EF-1912-4bf8-B52D-30EF52A12773" DiskId="1">
+                    <File Id="ext_xdiff.dll" Name="ext.dll" />
+                </Component>
+            </Directory>
+            <Component Id="RCSFiles" Guid="DD66FFBB-19D6-48EB-8860-6F1254EE5489" DiskId="1">
+                <File Id="rlog.exe" Name="rlog.exe" />
+                <File Id="rlog.dll" Name="rlog.dll" />
+                <File Id="rcsdiff.exe" Name="rcsdiff.exe" />
+                <File Id="rcsdiff.dll" Name="rcsdiff.dll" />
+                <File Id="co.exe" Name="co.exe" />
+                <File Id="co.dll" Name="co.dll" />
+            </Component>
+            <Directory Id="CvsntProtoStuff" Name="protocols" FileSource="$(var.CVSNT_BASE)\protocols\">
+                <Component Id="Enum" Guid="B8538524-CF3A-4abb-B0EC-92D99E841B25" DiskId="1">
+                    <File Id="enum_protocol.dll" Name="enum.dll" />
+                </Component>
+            </Directory>
+            <Component Id="SServer_Registry" Guid="1b58b18d-c07f-4807-b0ad-4cc888731b7c" DiskId="1">
+                <Condition>SSERVERKEYS=0 And &amp;ServerComponents=3 and $SServer_Registry=3</Condition>
+                <RegistryValue Id="CertificateFile" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="CertificateFile" Type="string" Value="[CVSNT_INSTALLDIR]cvsnt-default.pem" />
+                <RegistryValue Id="PrivateKeyFile" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="PrivateKeyFile" Type="string" Value="[CVSNT_INSTALLDIR]cvsnt-default.pem" />
+            </Component>
+        </DirectoryRef>
+        <DirectoryRef Id="CvsntProtoFolder" FileSource="$(var.CVSNT_BASE)\protocols\">
+        </DirectoryRef>
+
+        <FeatureRef Id="Cvsnt">
+                <FeatureRef Id="Protocols">
+	            <Feature Id="Enum" Title="Enum" Description="CVSNT Remote enumeration protocol" AllowAdvertise="no" Level="3">
+        	        <ComponentRef Id="Enum" />
+	            </Feature>
+                </FeatureRef>
+            <Feature Id="ServerComponents" Title="CVSNT Server" Description="CVSNT Low Performance Server components" AllowAdvertise="no" Level="3">
+                <Condition Level="0">(Not Privileged) Or (SERVER=0)</Condition>
+                <Condition Level="4">SERVER=3</Condition>
+                <ComponentRef Id="OldCvsnt_Cleanup" />
+                <ComponentRef Id="ServiceFilesCvs" />
+                <ComponentRef Id="CommandLineServerFiles" />
+                <ComponentRef Id="CommandLineLock" />
+                <ComponentRef Id="ServiceFilesCvsLock" />
+                <ComponentRef Id="ServiceFilesCpl" />
+                <ComponentRef Id="ServiceSysFiles" />
+                <ComponentRef Id="ServiceSysFiles64" />
+                <ComponentRef Id="DefaultTrigger" />
+                <ComponentRef Id="SServer_Registry" />
+                <ComponentRef Id="CvsntStartMenuFolder" />
+
+                <Feature Id="Triggers" Title="Extension libraries" Description="Server extension libraries" AllowAdvertise="no" Level="3">
+                    <Feature Id="ScriptTrigger" Title="ActiveScript support" Description="ActiveScript scripting support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="ScriptTrigger" />
+                    </Feature>
+                    <Feature Id="EmailTrigger" Title="Email notification" Description="Send formatted email on commit/tag/notify" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="EmailTrigger" />
+                    </Feature>
+                    <Feature Id="AuditTrigger" Title="Audit logging" Description="Audit repository events to a database" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="AuditTrigger" />
+                        <ComponentRef Id="SqlScripts" />
+                    </Feature>
+                    <Feature Id="checkoutTrigger" Title="Automatic checkout" Description="Audit repository events to a database" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="CheckoutTrigger" />
+                    </Feature>
+                </Feature>
+                <Feature Id="Databases" Title="Database support" Description="Server database support" AllowAdvertise="no" Level="3">
+                    <Feature Id="Db2Database" Title="Db2" Description="Db2 database support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="Db2Database" />
+                    </Feature>
+                    <Feature Id="MssqlDatabase" Title="Mssql" Description="MS Sql Server database support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="MssqlDatabase" />
+                    </Feature>
+                    <Feature Id="MysqlDatabase" Title="Mysql" Description="Mysql database support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="MysqlDatabase" />
+                        <ComponentRef Id="DbLibMysql" />
+                    </Feature>
+                    <Feature Id="OdbcDatabase" Title="Odbc" Description="Odbc generic database support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="OdbcDatabase" />
+                    </Feature>
+<!--                    <Feature Id="OracleDatabase" Title="Oracle" Description="Oracle database support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="OracleDatabase" />
+                    </Feature> -->
+                    <Feature Id="PostgresDatabase" Title="Postgresql" Description="Postgresql database support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="PostgresDatabase" />
+                    </Feature>
+                    <Feature Id="SqliteDatabase" Title="SQLite" Description="SQLite database support" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="SqliteDatabase" />
+                        <ComponentRef Id="DbLibSqlite" />
+                    </Feature>
+                </Feature>
+
+                <Feature Id="Xdiff" Title="Xdiff handlers" Description="Handlers for cvs xdiff command" AllowAdvertise="no" Level="3">
+                    <Condition Level="0">(Not Privileged) Or (SERVER=0)</Condition>
+                    <Condition Level="4">SERVER=3</Condition>
+                    <Feature Id="Ext_xdiff" Title="ext" Description="xdiff using external commands" AllowAdvertise="no" Level="3">
+                        <ComponentRef Id="ext_xdiff" />
+                    </Feature>
+                </Feature>
+            </Feature>
+            <Feature Id="RCSWrappers" Title="RCS Wrappers" Description="Wrappers to allow some applications to treat CVSNT repositories as RCS files" AllowAdvertise="no" Level="4">
+                <Condition Level="0">SERVER=0</Condition>
+                <Condition Level="4">SERVER=3</Condition>
+                <ComponentRef Id="RCSFiles" />
+            </Feature>
+        </FeatureRef>
+
+        <Icon Id="cvsnt.exe" SourceFile="$(var.CVSNT_BASE)\cvsntcpl.dll" />
+
+        <Property Id="SSERVERKEYS" Value="0">
+            <RegistrySearch Id="SSKeysExist" Root="HKLM" Key="SOFTWARE\CVS\PServer" Name="PrivateKeyFile" Type="raw" />
+        </Property>
+
+        <InstallExecuteSequence>
+            <Custom Action="RunGenkey" After="RunPostinst">&amp;ServerComponents=3 and $SServer_Registry=3</Custom>
+        </InstallExecuteSequence>
+
+    </Fragment>
+</Wix>

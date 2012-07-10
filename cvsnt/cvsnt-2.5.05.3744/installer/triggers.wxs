@@ -1,0 +1,25 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="triggers">
+        <DirectoryRef Id="CVSNT_INSTALLDIR" FileSource="$(var.MARCH_HARE)">
+            <Directory Id="TriggersStuff" Name="triggers">
+                <Component Id="bug_trigger" Guid="302D9BA6-B6C3-41b1-B513-7A1B433A3963" DiskId="5">
+                    <File Id="bugzilla.dll" Name="bugzilla.dll" />
+                </Component>
+                <Component Id="make_trigger" Guid="58E8C088-644D-4b25-9045-643FA634503E" DiskId="5">
+                    <File Id="make.dll" Name="make.dll" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+
+        <FeatureRef Id="Triggers">
+            <Feature Id="BugTrigger" Title="Bugzilla integration" Description="March-Hare Bugzilla integration trigger" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="bug_trigger" />
+            </Feature>
+            <Feature Id="MakeTrigger" Title="Make integration" Description="March-Hare Make integration trigger" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="make_trigger" />
+            </Feature>
+        </FeatureRef>
+    </Fragment>
+</Wix>

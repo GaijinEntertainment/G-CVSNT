@@ -1,0 +1,6 @@
+{
+  Description     = "CVSNT Lock Server";
+  Provides        = ("cvslockd");
+  Requires        = ("Network");
+  OrderPreference = "Late";
+}

@@ -1,0 +1,20 @@
+#!/bin/bash
+
+if [ "x$1" == "x" -o "x$2" == "x" ]; then
+  echo Usage: $0 source version
+  exit -1
+fi
+
+BUILD=$2
+
+sed "s/__VERSION__/$BUILD/" <$1.dbk >$1.tmp
+
+rm -rf $1-$BUILD-doc
+mkdir $1-$BUILD-doc
+mkdir $1-$BUILD-doc/html
+xsltproc -stringparam chunker.output.encoding UTF8 -stringparam use.id.as.filename 1 -output $1-$BUILD-doc/html/ /usr/share/xml/docbook/stylesheet/nwalsh/html/chunk.xsl $1.tmp
+dblatex -t pdf -o $1-$BUILD-doc/$1.pdf $1.tmp
+dblatex -t ps -o $1-$BUILD-doc/$1.ps $1.tmp
+rm $1.tmp
+tar czf $1-$BUILD-doc.tar.gz $1-$BUILD-doc/ 
+rm -rf $1-$BUILD-doc/

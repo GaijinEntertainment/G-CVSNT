@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="workspacemanager">
+        <DirectoryRef Id="TOOLS_INSTALLDIR" FileSource="$(var.MARCH_HARE)\">
+            <Directory Id="WorkspaceManagerStuff" Name=".">
+                <Component Id="WorkspaceManager" Guid="7A652787-168E-4e25-ADE3-65BA6B267B05" DiskId="5">
+		    <RegistryValue Id="WorkspaceManage" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="WorkspaceManage" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="WMFreer.exe" Name="WMFree.exe">
+                        <Shortcut Id="WMFreeLnk.exe" Name="CVS Suite Studio" Directory="CvsntStartMenuFolder" Advertise="no" />
+                    </File>
+                </Component>
+            </Directory>
+        </DirectoryRef>
+
+            <Feature Id="WorkspaceManager" Title="CVS Suite Studio" Description="CVS Suite Studio" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="WorkspaceManager" />
+                <ComponentRef Id="CvsntStartMenuFolder" />
+            </Feature>
+    </Fragment>
+</Wix>

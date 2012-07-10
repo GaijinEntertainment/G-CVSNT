@@ -1,0 +1,115 @@
+# TortoiseCVS - enjoyable version control
+# http://www.tortoisecvs.org
+# Spanish language .po-file
+msgid ""
+msgstr ""
+"Project-Id-Version: Setup\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2008-04-13 18:09+0100\n"
+"Last-Translator: Juan Diego Gutiérrez Gallardo <enreas@gmail.com>\n"
+"Language-Team: es_ES <spanish.localization@gmail.com>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"X-Poedit-Language: Spanish\n"
+"X-Poedit-Country: SPAIN\n"
+
+#: ../build/TortoiseCVS.iss:63
+msgid "Main Files"
+msgstr "Archivos principales"
+
+#: ../build/TortoiseCVS.iss:64
+msgid "Custom Icons"
+msgstr "Iconos personalizados"
+
+#: ../build/TortoiseCVS.iss:75
+#: ../build/TortoiseCVS.iss:315
+msgid "XP-style rounded"
+msgstr "Estilo XP redondeado"
+
+#: ../build/TortoiseCVS.iss:76
+#: ../build/TortoiseCVS.iss:316
+msgid "Classic TortoiseCVS"
+msgstr "Clásico de TortoiseCVS"
+
+#: ../build/TortoiseCVS.iss:77
+msgid "Daniel Jackson DanAlpha"
+msgstr "Daniel Jackson DanAlpha"
+
+#: ../build/TortoiseCVS.iss:78
+#: ../build/TortoiseCVS.iss:318
+msgid "Chinese characters"
+msgstr "Caracteres chinos"
+
+#: ../build/TortoiseCVS.iss:79
+msgid "Translations"
+msgstr "Traducciones"
+
+#: ../build/TortoiseCVS.iss:100
+msgid "Pageant SSH agent"
+msgstr "Agente SSH Pageant"
+
+#: ../build/TortoiseCVS.iss:321
+msgid "Error"
+msgstr "Error"
+
+#: ../build/TortoiseCVS.iss:394
+msgid "Help"
+msgstr "Ayuda"
+
+#: ../build/TortoiseCVS.iss:395
+msgid "User Guide (English)"
+msgstr "Manual de usuario (inglés)"
+
+#: ../build/TortoiseCVS.iss:396
+msgid "User Guide (French)"
+msgstr "Manual de usuario (francés)"
+
+#: ../build/TortoiseCVS.iss:397
+msgid "User Guide (Russian)"
+msgstr "Manual de usuario (ruso)"
+
+#: ../build/TortoiseCVS.iss:398
+msgid "User Guide (Simplified Chinese)"
+msgstr "Manual de usuario (chino simplificado)"
+
+#: ../build/TortoiseCVS.iss:399
+msgid "Preferences"
+msgstr "Preferencias"
+
+#: ../build/TortoiseCVS.iss:400
+msgid "About"
+msgstr "Acerca de"
+
+#: ../build/TortoiseCVS.iss:415
+msgid "Preparing for installation"
+msgstr "Preparando la instalación"
+
+#: ../build/TortoiseCVS.iss:416
+msgid "TortoiseCVS is already installed, so Windows Explorer needs to be restarted."
+msgstr "TortoiseCVS ya está instalado, es necesario reiniciar el explorador de Windows."
+
+#: ../build/TortoiseCVS.iss:417
+msgid "The installer can do this for you now, or you can restart Windows instead at the end of the installation."
+msgstr "El programa de instalación puede hacerlo, otra opción es reiniciar Windows al terminar."
+
+#: ../build/TortoiseCVS.iss:418
+msgid "Restart Windows Explorer"
+msgstr "Reiniciar el explorador de Windows"
+
+#: ../build/TortoiseCVS.iss:419
+msgid "Finishing the installation"
+msgstr "Finalizando la instalación"
+
+#: ../build/TortoiseCVS.iss:420
+msgid "To finish the installation, Windows Explorer needs to be restarted."
+msgstr "Para terminar la instalación es necesario reiniciar el explorador de Windows."
+
+#: ../build/TortoiseCVS.iss:421
+msgid "The installer can do this for you now, or you can restart Windows instead."
+msgstr "El programa de instalación puede hacerlo, otra opción es reiniciar Windows."
+
+#, fuzzy
+#~ msgid "This release of TortoiseCVS does not support 64-bit Windows.%nYou will only be able to use TortoiseCVS from the 32-bit Explorer.%nYou should download the x64 installer instead.%nProceed with the installation?"
+#~ msgstr "Oficialmente, esta versión de TortoiseCVS no funciona en Windows de 64 bits.%nSólo podrá utilizar TortoiseCVS desde el explorador de 32 bits.%n¿Desea realizar la instalación?"
+

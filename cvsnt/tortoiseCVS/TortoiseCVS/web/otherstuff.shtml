@@ -1,0 +1,20 @@
+<!--#set var="title" value="Related Projects" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Related Projects</h2>
+<p>
+TortoiseCVS was originally based on the source code for <a
+href="http://www.wincvs.org">WinCVS</a>, a more comprehensive but complex to
+use client.  Many thanks to them!
+<p>
+Do you like TortoiseCVS, but prefer using <A HREF="http://subversion.tigris.org/">Subversion</A>?
+Check out <a href="http://tortoisesvn.tigris.org/">TortoiseSVN</a>, which was inspired by TortoiseCVS.
+<p>
+Similarly, there is <a href="http://tortoisehg.sourceforge.net/">TortoiseHg</a> for the <a href="http://www.selenic.com/mercurial/">Mercurial</a>
+distributed version control system, and <a href="http://tortoisedarcs.sourceforge.net/">TortoiseDarcs</a> for <a href="http://darcs.net/">darcs</a>.
+<p>
+TortoiseCVS is closely coupled with the <a href="http://www.cvsnt.org/wiki/">CVSNT</a> CVS command line client. 
+CVSNT is maintained by <a href="http://www.march-hare.com/">March Hare</a>, who also offer commercial support for both CVSNT and TortoiseCVS.
+
+
+<!--#include virtual="wrapper_end.shtml" -->

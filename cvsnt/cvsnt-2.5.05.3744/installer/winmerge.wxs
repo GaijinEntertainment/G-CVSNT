@@ -1,0 +1,113 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="winmerge">
+
+        <DirectoryRef Id="CvsntStartMenuFolder">
+            <Directory Id="WinMergeStartMenuFolder" Name="WinMerge" />
+        </DirectoryRef>
+        <DirectoryRef Id="WINMERGE_INSTALLDIR" FileSource="$(var.WINMERGE_BASE)\">
+            <Directory Id="WinMergeStuff" Name=".">
+                <Component Id="WinMergeFiles" Guid="4B2F32FE-CBC7-43d6-8EE0-47558683A4E6" DiskId="3">
+		    <RegistryValue Id="WinMergeFiles" Root="HKCU" Key="Software\Thingamahoochie\WinMerge\Msi" Name="WinMergeFiles" Type="string" Value="1" KeyPath="yes" />
+                    <File Id="WinMerge.exe" Name="WinMerge.exe" />
+                    <File Id="WinMerge.man" Name="WinMerge.exe.manifest" />
+                    <File Id="WinMergeU.exe" Name="WinMergeU.exe">
+                        <Shortcut Id="WinMergeU.exe" Name="WinMerge.lnk" Advertise="no" Directory="WinMergeStartMenuFolder" />
+                    </File>
+                    <File Id="WinMergeU.man" Name="WinMergeU.exe.manifest" />
+                    <File Id="register.bat" Name="register.bat" />
+                    <File Id="unregist.bat" Name="unregister.bat" />
+                    <File Id="Contributors.txt" Name="contributors.txt" />
+                    <File Id="ReadMe.txt" Name="ReadMe.txt" />
+                    <File Id="Files.txt" Name="Files.txt" />
+                </Component>
+                <Component Id="WinMergeRegistry" Guid="C061B398-2DCE-4791-A564-14611F913936" DiskId="3">
+                    <RegistryValue Root="HKCU" Key="Software\Thingamahoochie\WinMerge\Settings" Type="integer" Name="UnpackerMode" Value="1" />
+                </Component>
+                <Directory Id="WinMergeLangs" Name="Languages">
+                    <Component Id="WinMergeLangs" Guid="5DEEBD4F-EE34-4ec6-ADFA-8D6C49BDC237" DiskId="3">
+                        <File Id="MergeBrazilian.lang" Name="MergeBrazilian.lang" />
+                        <File Id="MergeBulgarian.lang" Name="MergeBulgarian.lang" />
+                        <File Id="MergeCatalan.lang" Name="MergeCatalan.lang" />
+                        <File Id="MergeChineseSimplified.lang" Name="MergeChineseSimplified.lang" />
+                        <File Id="MergeChineseTraditional.lang" Name="MERGEC~3.LAN" />
+                        <File Id="MergeCzech.lang" Name="MergeCzech.lang" />
+                        <File Id="MergeDanish.lang" Name="MergeDanish.lang" />
+                        <File Id="MergeDutch.lang" Name="MergeDutch.lang" />
+                        <File Id="MergeFrench.lang" Name="MergeFrench.lang" />
+                        <File Id="MergeGerman.lang" Name="MergeGerman.lang" />
+                        <File Id="MergeHungarian.lang" Name="MergeHungarian.lang" />
+                        <File Id="MergeItalian.lang" Name="MergeItalian.lang" />
+                        <File Id="MergeJapanese.lang" Name="MergeJapanese.lang" />
+                        <File Id="MergeKorean.lang" Name="MergeKorean.lang" />
+                        <File Id="MergeNorwegian.lang" Name="MergeNorwegian.lang" />
+                        <File Id="MergePolish.lang" Name="MergePolish.lang" />
+                        <File Id="MergeRussian.lang" Name="MergeRussian.lang" />
+                        <File Id="MergeSlovak.lang" Name="MergeSlovak.lang" />
+                        <File Id="MergeSpanish.lang" Name="MergeSpanish.lang" />
+                        <File Id="MergeSwedish.lang" Name="MergeSwedish.lang" />
+                        <File Id="MergeTurkish.lang" Name="MergeTurkish.lang" />
+                    </Component>
+                </Directory>
+                <Directory Id="WinMergeFilters" Name="Filters">
+                    <Component Id="WinMergeFilters" Guid="2B0BD40E-9BD9-49c5-840C-062FB22851D8" DiskId="3">
+                        <File Id="ADAMulti.flt" Name="ADAMulti.flt" />
+                        <File Id="FileFilt.tmp" Name="FileFilter.tmpl" />
+                        <File Id="MASM.flt" Name="MASM.flt" />
+                        <File Id="Merge_GnuC_loose.flt" Name="Merge_GnuC_loose.flt" />
+                        <File Id="Merge_VB_loose.flt" Name="Merge_VB_loose.flt" />
+                        <File Id="Merge_VC_loose.flt" Name="Merge_VC_loose.flt" />
+                        <File Id="XML_html.flt" Name="XML_html.flt" />
+                    </Component>
+                </Directory>
+                <Directory Id="WinMergePlugins" Name="MergePlugins">
+                    <Component Id="WinMergePlugins" Guid="66CB8AFE-9DBB-4c67-9E9E-796FF924091D" DiskId="3">
+                        <File Id="CompareMSExcelFiles.dll" Name="CompareMSExcelFiles.dll" />
+                        <File Id="CompareMSWordFiles.dll" Name="CompareMSWordFiles.dll" />
+                        <File Id="CompareMSPowerpointFiles.dll" Name="CompareMSPowerpointFiles.dll" />
+                        <File Id="DisplayBinaryFiles.dll" Name="DisplayBinaryFiles.dll" />
+                        <File Id="DisplayXMLFiles.dll" Name="DisplayXMLFiles.dll" />
+                        <!--	            <File Id="editor_addin.sct" Name="EDITOR~1.SCT" LongName="editor addin.sct" /> -->
+                        <File Id="IgnoreColumns.dll" Name="IgnoreColumns.dll" />
+                        <File Id="IgnoreCommentsC.dll" Name="IgnoreCommentsC.dll" />
+                        <File Id="IgnoreFieldsComma.dll" Name="IgnoreFieldsComma.dll" />
+                        <File Id="IgnoreFieldsTab.dll" Name="IgnoreFieldsTab.dll" />
+                        <!--	            <File Id="insert_datetime.sct" Name="INSERT~1.SCT" LongName="insert datetime.sct" /> -->
+                        <File Id="list.txt" Name="list.txt" />
+                        <File Id="Plugins.txt" Name="Plugins.txt" />
+                        <File Id="readme_users.txt" Name="readme_users.txt" />
+                        <File Id="UnpackDFM.dll" Name="UnpackDFM.dll" />
+                    </Component>
+                </Directory>
+                <Component Id="WinMergeShellA" Guid="A42696CE-6AFB-417f-905C-1A1A0F3EBD47" DiskId="3">
+                    <File Id="ShellExtension_Ansi.dll" Name="ShellExtension.dll" />
+                </Component>
+                <Component Id="WinMergeShellU" Guid="EDE60825-E005-43ff-AF57-BB8297AA7B28" DiskId="3">
+                    <File Id="ShellExtension_Unicode.dll" Name="ShellExtensionU.dll" SelfRegCost="1" />
+                </Component>
+                <Component Id="WinMergeStartMenuDoc" Guid="2281DBFD-C88C-42df-AA3B-07643DD5E1F5" DiskId="3">
+		    <RegistryValue Id="keyWinMergeStartMenuDoc" Root="HKCU" Key="Software\Thingamahoochie\WinMerge\Msi" Name="WinMergeStartMenuDoc" Type="string" Value="1" KeyPath="yes" />
+                    <RemoveFolder Id="wmstartmenu" Directory="WinMergeStartMenuFolder" On="uninstall" />
+                    <File Id="winmerge.url" Name="winmerge.url" Source="./winmerge.url">
+                        <Shortcut Id="winmerge.url" Advertise="no" Name="WinMerge on the web.url" Directory="WinMergeStartMenuFolder" />
+                    </File>
+                </Component>
+            </Directory>
+        </DirectoryRef>
+
+        <Feature Id="WinMerge" Title="WinMerge" Description="WinMerge allows interactive resolution of file conflicts" Display="expand" AllowAdvertise="no" Level="3">
+            <Condition Level="0">WINMERGE=0</Condition>
+            <ComponentRef Id="WinMergeStartMenuDoc" />
+            <ComponentRef Id="CvsntStartMenuFolder" />
+            <ComponentRef Id="WinMergeFiles" />
+            <ComponentRef Id="WinMergeRegistry" />
+            <ComponentRef Id="WinMergeLangs" />
+            <ComponentRef Id="WinMergeFilters" />
+            <ComponentRef Id="WinMergePlugins" />
+            <ComponentRef Id="WinMergeShellA" />
+            <ComponentRef Id="WinMergeShellU" />
+        </Feature>
+    </Fragment>
+</Wix>
+

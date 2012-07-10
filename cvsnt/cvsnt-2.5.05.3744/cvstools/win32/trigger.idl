@@ -1,0 +1,190 @@
+[
+	uuid(2BDF7A65-0BFE-4b1a-9205-9AB900C7D0DA),
+	version(1.0),
+	helpstring("CVSNT 2.x Type Library")
+]
+library CVSNT
+{
+	importlib("stdole2.tlb");
+
+	[uuid(11704CFC-36D8-43a5-AF9B-46788A9515FB)]
+	struct ChangeInfoStruct 
+	{
+		BSTR filename;
+		BSTR rev_new;
+		BSTR rev_old;
+		char type;
+		BSTR tag;
+		BSTR bugid;
+	};
+
+	[uuid(0F190D85-8752-49a3-8BD3-264A9DD19301)]
+	struct PropertyInfoStruct 
+	{
+		BSTR property;
+		BSTR value;
+		char isglobal;
+	};
+
+	[
+		uuid(3773FADE-FDE3-4228-BF16-8E2F46AA3517),
+		version(1.0),
+		helpstring("CVSNT 2.x Info callbacks v4")
+	]
+	interface ICvsInfo4 : IUnknown
+	{
+		short init(
+			[in] BSTR command,
+			[in] BSTR date,
+			[in] BSTR hostname,
+			[in] BSTR virtual_repository,
+			[in] BSTR physical_repository,
+			[in] BSTR sessionid,
+			[in] BSTR editor,
+			[in] SAFEARRAY(BSTR) uservar,
+			[in] SAFEARRAY(BSTR) userval,
+			[in] BSTR client_version
+		);
+
+		short close(
+		);
+
+		short pretag(
+			[in] BSTR message,
+			[in] BSTR directory,
+			[in] SAFEARRAY(BSTR) name_list,
+			[in] SAFEARRAY(BSTR) version_list,
+			[in] char tag_type,
+			[in] BSTR action,
+			[in] BSTR tag
+		);
+
+		short verifymsg(
+			[in] BSTR directory,
+			[in] BSTR filename
+		);
+
+		short loginfo(
+			[in] BSTR message,
+			[in] BSTR status,
+			[in] BSTR directory,
+			[in] SAFEARRAY(struct ChangeInfoStruct) change_list
+		);
+
+		short history(
+			[in] char type,
+			[in] BSTR workdir,
+			[in] BSTR revs,
+			[in] BSTR name
+		);
+
+		short notify(
+			[in] BSTR message,
+			[in] BSTR bugid,
+			[in] BSTR directory,
+			[in] BSTR notify_user,
+			[in] BSTR tag,
+			[in] BSTR type,
+			[in] BSTR file
+		);
+
+		short precommit(
+			[in] SAFEARRAY(BSTR) name_list,
+			[in] BSTR message,
+			[in] BSTR directory
+		);
+
+		short postcommit(
+			[in] BSTR directory
+		);
+
+		short precommand(
+			[in] SAFEARRAY(BSTR) argv
+		);
+
+		short postcommand(
+			[in] BSTR directory
+		);
+
+		short premodule(
+			[in] BSTR module_name
+		);
+
+		short postmodule(
+			[in] BSTR module_name
+		);
+
+		short get_template(
+			[in] BSTR directory,
+			[out] BSTR *template_ptr
+		);
+	}
+	[
+		uuid(6341E835-3A3B-46bc-B2DA-DC5FB8C5A567),
+		version(1.0),
+		helpstring("CVSNT 2.x Info callbacks v5")
+	]
+	interface ICvsInfo5 : ICvsInfo4
+	{
+		short parse_keyword(
+			[in] BSTR keyword,
+			[in] BSTR directory,
+			[in] BSTR file,
+			[in] BSTR branch,
+			[in] BSTR author,
+			[in] BSTR printable_date,
+			[in] BSTR rcs_date,
+			[in] BSTR locker,
+			[in] BSTR state,
+			[in] BSTR name,
+			[in] BSTR version,
+			[in] BSTR bugid,
+			[in] BSTR commitid,
+			[in] SAFEARRAY(struct PropertyInfoStruct) props,
+			[out] BSTR *value
+		);
+	}
+	[
+		uuid(FD54A017-9F85-4162-8764-DAB38B4A3AAC),
+		version(1.0),
+		helpstring("CVSNT 2.x Info callbacks v6")
+	]
+	interface ICvsInfo6 : ICvsInfo5
+	{
+		short history(
+			[in] char type,
+			[in] BSTR workdir,
+			[in] BSTR revs,
+			[in] BSTR name,
+			[in] BSTR bugid,
+			[in] BSTR message
+		);
+
+		short prercsdiff(
+			[in] BSTR file,
+			[in] BSTR directory,
+			[in] BSTR oldfile,
+			[in] BSTR newfile,
+			[in] BSTR type,
+			[in] BSTR options,
+			[in] BSTR oldversion,
+			[in] BSTR newversion,
+			[in] long added,
+			[in] long removed
+		);
+
+		short rcsdiff(
+			[in] BSTR file,
+			[in] BSTR directory,
+			[in] BSTR oldfile,
+			[in] BSTR newfile,
+			[in] BSTR diff,
+			[in] BSTR type,
+			[in] BSTR options,
+			[in] BSTR oldversion,
+			[in] BSTR newversion,
+			[in] long added,
+			[in] long removed
+			);
+	}
+}

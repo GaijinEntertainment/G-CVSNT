@@ -1,0 +1,61 @@
+#!/bin/bash
+BuildPackage=1
+if [ "$1" = "--nopackage" ]; then
+	BuildPackage=0
+	shift
+fi
+SourceRoot="${1-`pwd`}"
+InstallerFiles=$SourceRoot/cvsnt/osx/InstallerFiles
+Distribution_Dir=$SourceRoot/Distribution_folder
+InstallerFilesInfo=$Distribution_Dir/Info.plist
+InstallerFilesDescription=$Distribution_Dir/Description.plist
+InstallerResources=$Distribution_Dir/Resources
+InstallerRoot=$Distribution_Dir/Package_Root
+PackageMakerPath=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
+
+export DYLD_LIBRARY_PATH=$InstallerRoot/usr/lib
+
+rm -rf $Distribution_Dir
+
+SAVEDIR=`pwd`
+cd $SourceRoot/cvsnt
+make distclean
+./configure --prefix=/usr --with-config-dir=/private/etc/cvsnt CC="gcc -arch ppc -arch i386" CXX="g++ -arch ppc -arch i386" CPP="gcc -E" CXXCPP="g++ -E" CXXFLAGS="-isysroot /Developer/SDKs/MacOSX10.4u.sdk" CFLAGS="-isysroot /Developer/SDKs/MacOSX10.4u.sdk" LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
+rm -rf $InstallerRoot/* 
+make DESTDIR=$InstallerRoot
+make install-strip DESTDIR=$InstallerRoot
+cd $SAVEDIR
+
+if [ $BuildPackage -eq 1 ]; then
+	BUILD=`$InstallerRoot/usr/bin/cvsnt ver -q`
+	ShortVer=`echo $BUILD | sed s/'\.[0-9]*$'//`
+
+	BaseName=cvsnt-$BUILD-multi
+	InstallerPackageName=$SourceRoot/$BaseName.pkg
+	DmgFileName=$SourceRoot/$BaseName.dmg
+	
+	rm -rf $InstallerPackageName
+	rm -rf $DmgFileName
+	
+	cp -r $InstallerFiles/private $InstallerRoot
+	cp -r $InstallerFiles/Library $InstallerRoot
+	cp -r $InstallerFiles/InstallerResources $InstallerResources
+	
+	sed "s/%CVSNT_VERSION%/$BUILD/g" <$InstallerFiles/Info.plist |
+	sed "s/%CVSNT_SHORTVERSION%/$ShortVer/g" >$InstallerFilesInfo
+	sed "s/%CVSNT_VERSION%/$BUILD/g" <$InstallerFiles/Description.plist |
+	sed "s/%CVSNT_SHORTVERSION%/$ShortVer/g" >$InstallerFilesDescription
+	
+	find $InstallerRoot -name .DS_Store -exec rm -f {} \; 2>/dev/null
+	find $InstallerRoot -type d -name CVS -exec rm -rf {} \; 2>/dev/null
+	
+	$PackageMakerPath -build -p $InstallerPackageName -f $InstallerRoot -r $InstallerResources -i $InstallerFilesInfo -d $InstallerFilesDescription
+	
+	hdiutil create -fs HFS+ -format UDZO -volname $BaseName -imagekey zlib-level=9 -ov -srcfolder $InstallerPackageName $DmgFileName
+	rm -rf $Distribution_Dir
+	rm -rf $InstallerPackageName
+fi
+# Makefile for XCode 2.1 dual platform binaries
+
+make clean
+#!/bin/sh

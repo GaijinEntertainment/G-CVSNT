@@ -1,0 +1,412 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- $Revision: 1.1 $ -->
+
+<!-- ====== Dialog Reference for TortoiseCVS =================================== -->
+<chapter id="dialogs">
+  <title id="dialogs-title">Описание диалогов в TortoiseCVS</title>
+  <para>
+    Это глава описывает подробности каждого диалога в TortoiseCVS.
+  </para>
+
+  <section id="dialogs.add">
+    <title id="dialogs.add-title">Диалог Добавить</title>
+    <figure>
+      <title>Диалог Добавить (Add)</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0022.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Добавить (Add)</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.checkout">
+    <title id="dialogs.checkout-title">Диалог Извлечение (Checkout)</title>
+    <figure>
+      <title>Диалог Извлечение - Вкладка Module</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0023.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Извлечение - Вкладка Module</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Диалог Извлечение - Вкладка Ревизия (Revision)</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0024.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Извлечение - Вкладка Ревизия (Revision)</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Диалог Извлечение - Вкладка Опции (Options)</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0025.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Извлечение - Вкладка Опции (Options)</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.updatespecial">
+    <title id="dialogs.updatespecial-title">Update Special Dialog</title>
+    <figure>
+      <title>Диалог Update Special</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0014.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Update Special</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.commit">
+    <title id="dialogs.commit-title">Диалог Фиксации (Commit)</title>
+    <figure>
+      <title>Диалог Фиксация</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0032.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Фиксация</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.branch">
+    <title id="dialogs.branch-title">Диалог Ветвь (Branch)</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.newmodule">
+    <title id="dialogs.newmodule-title">Диалог Make New Module</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.progress">
+    <title id="dialogs.progress-title">Диалог Progress</title>
+    <figure>
+      <title>Диалог Progress</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="figure/img0035.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Progress</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+
+    <para>
+Этот диалог отображается для каждой выполняющейся команды TortoiseCVS, для отображения любой информации, ошибок или предупреждений Генерируемых CVS. Различные типы сообщений имеют разный цвет (вы можете настроить эти цвета используя вкладку 
+<link linkend="dialogs.preferences.appearance">Appearance</link> диалога Preferences).
+    </para>
+
+    <para>
+Во время <link linkend="basic.update">Update</link>, диалог Progress отображает был или нет файл изменен в CVS или на локальном компьютере, используя следующие однобуквенные коды:
+    
+
+    <glosslist>
+
+      <glossentry>
+
+        <glossterm>C</glossterm>
+        <glossdef>
+          <para>
+
+Файл был изменен как локально так и в CVS. TortoiseCVS пытался объединить оба набора изменений, но не смог (Обычно потому что оба изменения были сделаны над одной частью файла). Более подробную информацию читайте в <link linkend="basic.conflict" endterm="basic.conflict-title"/>.
+
+	  </para>
+	</glossdef>
+
+      </glossentry>
+
+      <glossentry>
+        <glossterm>M</glossterm>
+	<glossdef>
+          <para>
+Файл был изменен только в песочнице. TortoiseCVS ничего не делает.
+(	  The file has only changed on the local PC.  TortoiseCVS will not change the local copy.)
+	  </para>
+	</glossdef>
+      </glossentry>
+
+      <glossentry>
+        <glossterm>P</glossterm>
+	<glossdef>
+	  <para>
+Файл был изменен в CVS, и TortoiseCVS изменил локальную копию для соответствия.
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+        <glossterm>U</glossterm>
+	<glossdef>
+	  <para>
+Файл существует в CVS, но не на локальной машине. TortoiseCVS создал этот файл на локальной машине. Вы также можете видеть это сообщение для файлов которые были изменены в CVS (как <glossterm>P</glossterm>).
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+	<glossterm>A</glossterm>
+	<glossdef>
+	  <para>
+Файл был добавлен в CVS, но не зафиксирован.
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+        <glossterm>R</glossterm>
+	<glossdef>
+	  <para>
+Файл был удален из CVS, но не зафиксирован.
+	  </para>
+	</glossdef>
+      </glossentry>
+    </glosslist>
+    </para>
+
+    <para>
+На закладке <link linkend="dialogs.preferences.main">Main</link> диалога Preferences вы можете настроить поведение закрытия этого диалога. Это поведение может быть перекрыто на основе случай к случаю (case-to-case basis) используя флажок <guilabel>Close on completion</guilabel>
+    </para>
+
+  </section>
+
+  <section id="dialogs.tags">
+    <title id="dialogs.tags-title">Диалог Метка (Tag)</title>
+      <figure>
+      <title>Диалог Метка</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0012.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Метка</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+  </section>
+
+  <section id="dialogs.preferences">
+    <title id="dialogs.preferences-title">Диалог Настройка (Preferences)</title>
+    <figure>
+      <title id="dialogs.preferences.main">Диалог Настройка - Main Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0026.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - Main Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    TODO: Describe notebook pages    
+    </para>
+    <figure>
+      <title id="dialogs.preferences.policy">Диалог Настройка - Policy Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0027.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - Policy Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+
+    </para>
+    <figure>
+      <title id="dialogs.preferences.tools">Диалог Настройка - Tools Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0028.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - Tools Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+
+    </para>
+    <figure id="dialogs.preferences.advanced">
+      <title id="dialogs.preferences.advanced-title">Диалог Настройка - Advanced Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0029.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - Advanced Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    </para>
+    <figure id="dialogs.preferences.appearance">
+      <title id="dialogs.preferences.appearance-title">Диалог Настройка - Appearance Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0037.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - Appearance Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    </para>
+    <figure>
+      <title id="dialogs.preferences.cache">Диалог Настройка - Cache Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0038.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - Cache Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    </para>
+    <figure>
+      <title id="dialogs.preferences.ignored">Диалог Настройка - Ignored Files Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0030.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - .cvsignore Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    TODO: Figure is cropped wrong
+    </para>
+    <figure id="dialogs.preferences.iconchooser">
+      <title id="dialogs.preferences.iconchooser-title">Диалог Настройка - Iconset Chooser</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0031.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Настройка - Iconset Chooser</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    </para>
+  </section>
+
+  <section id="dialogs.merge">
+    <title id="dialogs.merge-title">Диалог Слияние (Merge)</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.history">
+    <title id="dialogs.history-title">Диалог История History</title>
+    <figure>
+      <title>Диалог История</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0033.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог История</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+  
+  <section id="dialogs.revision">
+    <title id="dialogs.revision-title">Диалог Дерево ревизий (Revision Graph)</title>
+    <figure>
+      <title>Диалог Дерево ревизий (Revision Graph)</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0034.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Дерево ревизий</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write.
+
+Unless the file is an executable,
+      you can also select <emphasis>view</emphasis> to view that revision using 
+      the default application for the file type in question.
+    </para></note>
+  </section>  
+
+  <section id="dialogs.rename">
+    <title id="dialogs.rename-title">Диалог Переименование (Rename)</title>
+    <figure>
+      <title>Диалог Переименование (Rename)</title>
+      <mediaobject>
+        <imageobject>
+
+<!--
+TODO: Use correct image
+-->
+
+        <imagedata fileref="figure/img0001.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог Переименование (Rename)</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    TODO: Write
+    </para>
+    <para>
+    TODO: Describe and show dialog with and without CVS server version
+    </para>
+  </section>  
+
+  <section id="dialogs.about">
+    <title id="dialogs.about-title">About Dialog</title>
+    <figure>
+      <title>Диалог О программе (About)</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0041.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Диалог О программе (About)</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+Диалог о программе отображает версию TortoiseCVS, используемого клиента CVS и какой SSH вы настроили.
+    </para>
+    <para>
+    TODO: Describe and show dialog with and without CVS server version
+    </para>
+  </section>  
+
+</chapter>

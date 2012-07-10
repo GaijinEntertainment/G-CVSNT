@@ -1,0 +1,234 @@
+<!--#set var="title" value="Development" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Development resources and tips</h2>
+<p>
+<a name="intro"><h3>Introduction</h3></a>
+<p>
+Never worked on an open source software project before?  Read Havoc Pennington's article 
+<a href="http://www106.pair.com/rhp/hacking.html">Working on Free Software</a> to find
+out what it's like.  
+<p>
+Making changes or suggestions about the user interface?  Before you do, read Havoc's article <a href="http://www106.pair.com/rhp/free-software-ui.html">Free software and good user interfaces</a>.
+<p>
+<ul>
+<li><a href="http://sourceforge.net/projects/tortoisecvs">SourceForge Project</a> </li>
+<li><a href="http://tortoisecvs.cvs.sourceforge.net/tortoisecvs/">
+Browse the source code online</a></li>
+<li><a href="http://sourceforge.net/cvs/?group_id=48103">Anonymous CVS access</a></li>
+<li><a href="contributors.shtml">List of contributors</a> - find out
+    whom to ask about different areas of the code</li>
+<li><a href="translation.shtml">Translator's guide</a></li>
+</ul>
+<p>
+<a name="testrel"><h3><a name="testpilot">Test releases</a></h3></a>
+<p>
+If you cannot or do not want to compile TortoiseCVS yourself, you might want to 
+try out one of the test releases. These are built by the TortoiseCVS developers
+fairly often from the code currently in CVS. Only one test release is kept at any time; 
+you can find it at <a href="http://testpilot.tortoisecvs.org/">this site</a>.
+</td></tr></table>
+<p>
+<h3>Modifying TortoiseCVS</h3>
+<p>TortoiseCVS is an interesting program. It is the most Windows of things,
+ an Explorer shell extension implemented as several OLE classes. It is also
+ the most Open Source of things, with a <a href="http://www.wxwidgets.org">wxWidgets</a> interface,
+ GPL license and because it is a CVS tool!
+<p>
+Because of this, it might take a small amount of effort to get it
+compiling and to debug it. Please persevere as it's fun and rewarding!
+If you get stuck then ask for help on the
+<a href="http://sourceforge.net/mail/?group_id=48103">TortoiseCVS mailing list</a>.
+Here are some pointers.
+<p>
+<b>Structure:</b> TortoiseCVS consists of two programs.  TortoiseShell.dll
+is the Explorer shell extension.  TortoiseAct.exe actually does the work - it
+gets launched by the shell extension for each command that you activate.
+You might like to look at a
+<a href="http://www.flourish.org/cinclude2dot">dependency graph</a> of
+the source code.
+<p>
+<a name="compiler"><b>Compiler:</b></a> TortoiseCVS can be compiled with <b>Visual C++ 8.0/9.0</b> or MinGW.
+The developers currently use Visual C++ 8.0 (also known as Visual Studio .NET 2005). 
+Gabriel Genellina has contributed <a href="vc9notes.shtml">these instructions</a> for compiling using the Express Edition of 
+Visual C++ 9.0 (also known as Visual Studio 2008).
+<p>
+We use <a href="http://cmake.org">CMake</a> (currently 2.6.2) to generate solutions. 
+This means that you need to install CMake from <a href="http://cmake.org/HTML/Download.html">here</a>; 
+then go to the <tt>build</tt> folder and run the <tt>runcmake</tt> script for the compiler you are using. You only need to do this once.
+<p>
+Patches to improve building with different compilers are welcomed.  If you do get
+something to work better, please submit a patch to the 
+SourceForge <a href="http://sourceforge.net/tracker/?group_id=48103&atid=451974">patch tracker</a>.
+<p>
+<b>wxWidgets:</b> The GUI library
+<a href="http://www.wxwidgets.org">wxWidgets</a> is used when compiling TortoiseAct.  This
+is a cross-platform library, but in TortoiseCVS it isn't used for that reason.
+It is used because it is much easier to code in than raw Win32 or MFC calls.
+TortoiseAct links statically to wxWidgets.  
+<p>You may wish to compile the wxWidgets source code if you want to debug inside wxWidgets, but this is
+easy to do.
+When you compile wxWidgets with Visual C++, make sure you set these values (in <tt>lib/vc_lib/msw*/wx/setup.h</tt>):
+<p>wxUSE_DEBUG_NEW_ALWAYS to 0
+<br>wxUSE_MEMORY_TRACING to 0
+<br>wxUSE_GLOBAL_MEMORY_OPERATORS to 0
+<br>wxUSE_STL to 1
+<p>Otherwise wxWidgets is incompatible with templates, and adds memory debugging
+features that Visual C++ has already anyway.  To set the values, edit the configuration
+file as described in the wxWidgets installation instructions.
+<p>TortoiseCVS currently uses version 2.8.9 of wxWidgets.
+<p>
+<b>Flex/Bison:</b> There is some parsing code in the cvstree folder which
+uses the tools Flex and Bison.  You will have to download these two packages from <a href="http://gnuwin32.sourceforge.net/packages.html">GnuWin32</a>
+and install them in a directory named <tt>GnuWin32</tt> located in the root directory of the drive where the TortoiseCVS source code
+is located (i.e. normally <tt>C:\GnuWin32</tt>).
+<p>
+<a name="tortoiseact"><b>TortoiseAct Parameters:</b></a> TortoiseAct.exe takes some parameters.  You can
+use these when you run it in the debugger.  The
+first is the verb to execute,  e.g. CVSCheckOut, CVSDiff.
+Following this, specify -l and the filenames to perform the action on.
+Alternatively, you can use -f and then specify a file.  The file contains a list of the files to
+perform the action on, one on each line.  You can also pass a window
+handle with -h.  This is used for refreshing the Explorer view after
+changes, and for the properties dialog updating.
+Example:
+<pre>
+	CVSCheckOut -l c:\mydirectory\myfile1.cpp c:\mydirectory\myfile2.cpp.
+</pre>
+<p><b>The build script:</b> You can build TortoiseAct.exe and TortoiseShell.dll directly using the CMake-generated solution file,
+but before you can build the RunTimeInstaller project, you need to run the <tt>autobuild</tt> script as described below.
+
+<p><a name="running"><b>Running DLL:</b></a> It's not easy running a shell extension. Where possible, do
+all your debugging in TortoiseAct.exe.  When you change TortoiseShell.dll, you'll want
+ to link it directly to the place where TortoiseCVS
+ is installed. Unfortunately, if Explorer is already loaded you won't be
+ able to overwrite the DLL file. There are several ways round this.<br>
+<ul>
+  <li>Read Microsoft's article <a href="http://msdn.microsoft.com/library/default.asp?url=/library/en-us/shellcc/platform/Shell/programmersguide/shell_basics/shell_basics_programming/debugging.asp">
+  Debugging with the Shell</a>.  It explains the DesktopProcess and AlwaysUnloadDll registry settings.
+   Note that AlwaysUnloadDll is just a key, it doesn't have a value, it just
+  needs to exist.  Under NT 4.0 the DesktopProcess key broke Explorer on my machine, so double clicking
+  on anything would curiously launch the Visual Studio Dependency Walker.
+  <li>Use Ctrl+Alt+Del or Task Manager to kill and restart Explorer. Then
+overwrite the DLL file and restart Explorer again.  This only works on some
+systems - the ones where Explorer only loads TortoiseShell.dll when you first open an
+Explorer window, not when the Start bar appears.</li>
+  <li>Change your shell. Edit system.ini and replace "shell=Explorer.exe"
+ with "shell=winfile.exe" or "shell=progman.exe". When you restart, you will
+ get part of the old Windows 3.1 shell. From here, you can launch Explorer
+ from the File|Run menu. You can easily close it like any other application,
+ and then change the DLL.</li>
+  <li>Windows NT/2000: It's possible to kill Explorer from the Task Manager and
+ it won't respawn itself. Do this, and then compile the DLL in Visual Studio.
+ You can restart Explorer from the debugger (see below) or with the File|Run menu
+on Task Manager.  Shift+Ctrl+Escape is a useful shortcut to open the Task
+Manager.
+<li>You can use <a href="http://www.sysinternals.com/Utilities/processexplorer.html">Process Explorer</a> 
+under NT/2000 to find out which process has the DLL still open.  Often it has been loaded by the File|Open
+dialog of an application.
+<li>Another trick I've had to use on Windows 2000.  TortoiseShell.dll
+was mysteriously being held open by something; I suspect the dll loader's 
+caching mechanism.  You can solve this by <i>renaming</i> the file.
+Open up a Cygwin or DOS window, kill Explorer and then do something
+like <tt>mv TortoiseShell.dll not.dll</tt>.  Like other proper file
+systems, NTFS lets you do that even if the file is in use.  Then make
+a new TortoiseShell.dll file, and restart Explorer.  This technique
+is very fiddly, you often have to have several differently named
+not*.dll files, and you should delete them whenever you can.  Sometimes
+you get Explorer instances running the wrong version of the DLL, which
+can usually be solved by killing and restarting them. Persevere though,
+after a bit it becomes second nature. <b>Update:</b> Stephane Lajoie has provided
+this <a href="replacedll.bat">batch file</a> to do this. It uses <tt>taskkill.exe</tt>,
+which is part of  Microsoft's NT Support Tools. You could also use <tt>pskill.exe</tt>
+from the superb <a href="http://sysinternals.com/ntw2k/freeware/pstools.shtml">PsTools suite</a>.
+</li>
+</ul>
+<p>Shortcut key tip:  In Windows NT/2000/XP you can press
+Shift+Ctrl+Escape to bring up Task Manager directly.  You can then get
+quite quick at killing Explorer entirely with the keyboard.
+<p><a name="debugging"><b>Debugging DLL:</b></a> To debug the DLL you need to use one of the methods
+ described in running above that kills Explorer completely. When Explorer isn't
+running, launch it directly from Visual Studio like this: Under
+Project|Settings|Debug choose explorer.exe
+ as your <i>Executable for debug session</i>. Then start a debug session
+ and Explorer will launch, loading your DLL into the debugger. You can then
+ set breakpoints and debug as normal.
+ <p>
+ Another trick that you might find useful in Visual C++ is
+to add an ASSERT(false) near where you want to start your debugging.
+When the assert dialog pops up, press Retry then Cancel and the debugger will
+attach.  If that doesn't work, try explicitly attaching the debugger to
+the process before pressing Retry.
+<p>
+<a name="i18n"><b>Localisation:</b></a> TortoiseCVS uses GNU gettext markers to indicate
+text which needs translating.  Whenever you add a string constant to
+the code, please mark it in one of the following ways:
+<ul>
+<li> If it always requires translation, wrap it in the <tt>_</tt> macro.  For
+example, <tt>_("This is some funky text")</tt>
+<li> If it is text that CVS has <i>output</i> and you are parsing, wrap it in
+the <tt>CVSPARSE</tt> macro, for example <tt>CVSPARSE("No CVSROOT
+specified!")</tt>.  The language to which this text is translated depends on
+the version of cvs.exe in use, and moreover the text must be translated identically to in cvs.exe.
+<li> Otherwise the string is in computerese, leave it unmarked.
+</ul>
+<p>
+<a name="installer"><h3>Building the installer</h3></a>
+<p>
+If you want to build the installer, you need <a href="http://cygwin.com">Cygwin</a> installed 
+in addition to an appropriate compiler. Then go to the top folder and run <tt>build/autobuild -h</tt>.
+This will show you the possible parameters you can use to customize the build process.
+<p>
+<a name="custom"><h4>Custom Builds</h4></a>
+<p>
+The installer supports <em>custom builds</em>, which is a way of inserting your own modifications into the build process.
+To make a custom build, you must create a file named <tt>buildinfo.txt</tt> in the folder <tt>build/custom</tt>.
+You may also put a custom icon set in <tt>build/custom/icons</tt>.
+To insert additional registry entries, put them in <tt>build/custom/registry.txt</tt> (in 
+<a href="http://innosetup.org/isinfo.php">Inno Setup</a> format).
+<p>
+The following preprocessor defines are used for conditional compilation (currently these can only be set by modifying
+the project files):
+<p>
+<b><tt>MARCH_HARE_BUILD</tt></b>
+<p>
+When this is defined, various features that are not found in the TortoiseCVS builds distributed from
+<a href="http://tortoisecvs.org">tortoisecvs.org</a> and <http://sourceforge.net>SourceForge</http://sourceforge.net>,
+but only in the TortoiseCVS builds included in the CVS Suite from <a href="http://march-hare.com">March Hare</a>,
+are enabled.
+<p>
+You are of course welcome to enable these features in your own build, but do not expect support from the TortoiseCVS
+team for them.
+<p>
+The exact features are:
+<ul>
+<li>Checking out a module read-only without setting 'watch on'
+</ul>
+<p>
+<h3>Things to Do</h3>
+<p>
+There are quite a few things to do. Search for TODO in the 
+source code to find some glaring holes. Or read the
+<a href="http://sourceforge.net/tracker/?group_id=48103">Bugs & Feature trackers</a> on the SourceForge project site.
+<p>
+<a name="patches"><h3>Contributing patches</h3></a>
+<p>
+We welcome any additions or bug fixes that you make! Please
+remember though that TortoiseCVS is meant to have a simple interface. Options
+should be as unobtrusive and internally clever as possible.
+<p>
+<b>Style issues:</b> The code in TortoiseCVS stems from a diverse set of contributors. 
+Therefore it may differ in style. These are the conventions that I (Torsten) try to enforce:
+<ul>
+<li>Indentation is four spaces (no tab characters used).
+<li>There is a space after keywords like <tt>if</tt> and the following parentheses, but there are no spaces
+neither before nor after the parentheses in a function call.
+<li>Hungarian notation is <b>not</b> used.
+<li>Ordinary member variables are prefixed with 'my', static member variables are prefixed with 'our'.
+<li>Use PascalCase for classes and functions, use camelCase for variables.
+<li>The <tt>*</tt> in a pointer type is part of the type, i.e. <tt>int* p</tt> and not <tt>int *p</tt>. The same applies for references.
+<li>Variables are declared and initialized at their first point of use.
+<li>Use plain <tt>0</tt> instead of <tt>NULL</tt>.
+</ul>
+
+<!--#include virtual="wrapper_end.shtml" -->

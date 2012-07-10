@@ -1,0 +1,32 @@
+From: [email]
+To: [email]
+Subject: Cvs Commit: [module]
+Content-Type: text/html
+
+<html>
+<head></head>
+<body bgcolor="white">
+<table width="60%" border="1" bgcolor="#c0c0ff">
+<tr><td>CVSROOT</td><td>[repository]</td></tr>
+<tr><td>Module name</td><td>[module]</td></tr>
+<tr><td>Changes by</td><td><a href="mailto:[email]">[email]</a> on [date]</td></tr>
+<tr><td>On host:</td><td>hostname</td></tr>
+</table>
+<br>
+[begin_directory]
+<font color="blue">Directory: [directory]</font><br>
+<table width="90%" bgcolor="#8080ff" border="1">
+<tr><td>Type</td><td>Filename</td><td>Tag</td><td>Old Rev</td><td>New Rev</td><td>BugId</td></tr>
+[begin_file]
+<tr><td>[change_type]</td><td>[filename]</td><td>[tag]</td><td>[old_revision]</td><td>[new_revision]</td><td>[bugid]</td></tr>
+[end_file]
+</table>
+<br>
+[end_directory]
+
+<font color="blue">Log message:</font><br>
+<table width="90%" bgcolor="#c0c0ff" border="1">
+<tr><td><pre>[message]</pre></td></tr>
+</table>
+</body>
+</html>

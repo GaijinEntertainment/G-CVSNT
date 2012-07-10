@@ -1,0 +1,15 @@
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define PROJECTNAME "cvsntcpl"
+#define PROJECTDESCRIPTION "cvsnt Control Panel"
+#define PROJECTFILENAME "cvsnt.cpl"
+#include "..\windows-NT\VersionInfoCommon.rc2"

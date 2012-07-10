@@ -1,0 +1,19 @@
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+
+#include "..\cvsservice\ServiceMsg.rc"
+
+#define PROJECTNAME "cvs95"
+#define PROJECTDESCRIPTION "cvsnt Windows 95 Compatible version"
+#define PROJECTFILENAME "cvs95.exe"
+#include "..\windows-NT\VersionInfoCommon.rc2"
+

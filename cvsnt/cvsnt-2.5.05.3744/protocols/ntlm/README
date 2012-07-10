@@ -1,0 +1,96 @@
+Libntlm README -- important introductory notes
+Copyright (C) 2002, 2003, 2005 Simon Josefsson
+Copyright (C) 1999 Grant Edwards
+See the end for copying conditions.
+
+This directory contains sources for a library which provides
+routines to manipulate the structures used for the client end
+of Microsoft NTLM authentication.
+
+This code was initially taken mostly from the Samba project and was
+initially intended for use with Microsoft Exchange Server when it is
+configured to require NTLM authentication for clients of it's IMAP
+server.  Today, libntlm contain re-written code, so that the license
+is now LGPL instead of the GPL that would be inherited from the Samba
+files.
+
+Build instructions are in INSTALL.  Typically, the following is
+sufficient:
+
+ $ ./configure
+ $ make
+ $ make check
+ $ make install
+
+USAGE  
+  
+The application program must convert these structures to/from
+base64 which is used to transfer data for IMAP authentication.
+For example usage see the sources for the mutt MUA or the
+fetchmail package.
+
+In general the usage is something like shown below (no, I don't
+know if this code even compiles, but you get the idea
+hopefully):
+
+
+#include <ntlm.h>
+
+extern char *seqTag;  /* IMAP sequence number */
+
+int imap_auth_ntlm(char *user, char *domain, char *pass)
+{
+  tSmbNtlmAuthRequest   request;              
+  tSmbNtlmAuthChallenge challenge;
+  tSmbNtlmAuthResponse  response;
+  char buffer[512];
+  char tmpstr[32];
+  
+  writeToServer("%s AUTHENTICATE NTLM\r\n",seqTag);
+  readFromServer(buffer)
+  
+  /* buffer should be "+", but we won't show code to check */
+
+  /* 
+   * prepare the request, convert to base64, and send it to
+   * the the server.  My server didn't care about domain, and NULL
+   * worked fine.
+   */
+
+  buildSmbNtlmAuthRequest(&request,user,domain);
+  convertToBase64(buffer, &request, SmbLength(&request));
+  writeToServer("%s\r\n",buffer);
+  
+  /* read challange data from server, convert from base64 */
+  
+  readFromServer(buffer);
+  
+  /* buffer should contain the string "+ [base 64 data]" */
+  
+  convertFromBase64(&challenge, buffer+2);
+  
+  /* prepare response, convert to base64, send to server */
+  
+  buildSmbNtlmAuthResponse(&challenge, &response, user, pass);
+  convertToBase64(buffer,&response,SmbLength(&response));
+  writeToServer("%s\r\n",buffer);
+  
+  /* read line from server, it should be "[seq] OK blah blah blah" */
+  
+  readFromServer(buffer);
+  
+  sprintf(tmpstr,"%s OK",seqTag);
+  
+  if (strncmp(buffer,tmpstr,strlen(tmpstr)))
+  {
+    /* login failed */
+    return -1;
+  }
+  
+  return 0;
+}
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

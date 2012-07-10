@@ -1,0 +1,4 @@
+cd cvsnt-2.5.05.3744
+bash configure
+make
+sudo make install

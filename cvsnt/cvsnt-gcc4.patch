@@ -1,0 +1,22 @@
+--- cvsnt-2.5.04.3236/cvsapi/cvs_string.h~	2008-07-01 05:31:35.000000000 +0200
++++ cvsnt-2.5.04.3236/cvsapi/cvs_string.h	2009-07-03 10:55:48.141029816 +0200
+@@ -23,6 +23,7 @@
+ #include <queue>
+ #include <stdarg.h>
+ #include <string.h>
++#include <cstdio>
+ 
+ #include "ServerIO.h"
+ 
+--- cvsnt-2.5.04.3236/src/filesubr.cpp~	2006-08-17 23:33:30.000000000 +0200
++++ cvsnt-2.5.04.3236/src/filesubr.cpp	2009-07-03 15:05:48.195587407 +0200
+@@ -1230,7 +1230,7 @@
+ /* Return a pointer into PATH's last component.  */
+ const char *last_component (const char *path)
+ {
+-    char *last = strrchr (path, '/');
++    char *last = strrchr ((char *)path, '/');
+     
+     if (last && (last != path))
+         return last + 1;
+

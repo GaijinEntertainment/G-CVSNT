@@ -1,0 +1,71 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Manufacturer="March Hare Software" Id="*" Language="1033" Codepage="65001" Name="CVSNT Community $(var.CVSNT_VERSION) Edition" Version="$(var.CVSNT_VERSION)" UpgradeCode="7351a992-52d6-43bb-b18a-2a8a004e3567">
+        <Package Keywords="CVS,CVSNT,Installer,Version Control,VSS" Description="CVSNT Version Control System" Comments="Commercial Support And Training available From March Hare Software.  See http://www.march-hare.com/cvspro.  The contents of this package are licensed under the GNU GPL." Manufacturer="March Hare Software" InstallerVersion="300" Languages="1033" Compressed="yes" SummaryCodepage="1252" />
+        <Upgrade Id="7351a992-52d6-43bb-b18a-2a8a004e3567">
+            <UpgradeVersion MigrateFeatures="yes" Maximum="$(var.CVSNT_VERSION)" IncludeMaximum="yes" Property="UC7351A99252D643BBB18A2A8A004E3567" />
+        </Upgrade>
+
+        <Condition Message="This Product Does not run on Windows 95 or Windows 98">not Version9X</Condition>
+        <Condition Message="This Product requires at least Windows 2000">VersionNT &gt;= 500</Condition>
+
+        <Media Id="1" EmbedCab="yes" CompressionLevel="high" Cabinet="cvsnt.cab" />
+<!--        <Media Id="5" EmbedCab="yes" CompressionLevel="high" Cabinet="marchhar.cab" /> -->
+
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="SystemFolder" />
+            <Directory Id="System64Folder" />
+            <Directory Id="WindowsFolder" />
+            <Directory Id="ProgramMenuFolder" />
+            <Directory Id="CommonFilesFolder">
+                <Directory Id="MarchHare" Name="March Hare Software Ltd">
+                    <Directory Id="COMMON_INSTALLDIR" />
+                </Directory>
+            </Directory>
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="CVSNT_BASEDIR" Name="CVSNT">
+                    <Directory Id="CVSNT_INSTALLDIR" />
+                </Directory>
+            </Directory>
+        </Directory>
+
+        <DirectoryRef Id="ProgramMenuFolder">
+            <Directory Id="CvsntStartMenuFolder" Name="CVSNT">
+                <Component Id="CvsntStartMenuFolder" Guid="7CF530AD-2263-4e6c-AF9C-409D9EB780A1" DiskId="1">
+		    <RegistryValue Id="keyCvsntStartMenuFolder" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsntStartMenuFolder" Type="string" Value="1" KeyPath="yes" />
+                    <RemoveFolder Id="CvsntStartMenuFolder" On="uninstall" />
+                </Component>
+                <Directory Id="CvsntDocumentationFolder" Name="Documentation">
+                    <Component Id="CvsntDocumentationFolder" Guid="46C5E98E-4F21-4bf6-AF60-9D14D0D38F31" DiskId="1">
+		        <RegistryValue Id="keyCvsntDocumentationFolder" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsntDocumentationFolder" Type="string" Value="1" KeyPath="yes" />
+                        <RemoveFolder Id="CvsntDocumentationFolder" On="uninstall" />
+                    </Component>
+                </Directory>
+            </Directory>
+        </DirectoryRef>
+
+	<FeatureRef Id="Cvsnt" />
+
+        <UIRef Id="standard_ui" />
+
+        <AdminExecuteSequence />
+        <InstallExecuteSequence>
+            <Custom Action="RegisterInstall" Before="WriteRegistryValues">$CommandLineFiles &gt; 2</Custom>
+            <Custom Action="RegisterUninstall" Before="RemoveRegistryValues" >$CommandLineFiles = 2</Custom>
+            <StopServices>Privileged</StopServices>
+            <RemoveExistingProducts Before="InstallInitialize" />
+            <BindImage />
+        </InstallExecuteSequence>
+
+        <Property Id="CVSNT_INSTALLTYPE">client</Property>
+        <Property Id="ARPHELPLINK">http://www.march-hare.com/cvspro</Property>
+        <Binary Id="dlgbmp" SourceFile="Binary\dlgbmp.bmp" />
+        <Binary Id="License" SourceFile="gpl.rtf" />
+        <Binary Id="Installer" SourceFile="$(var.CVSNT_BASE)\installer.dll" />
+        <CustomAction Id="RegisterInstall" BinaryKey="Installer" DllEntry="CustomActionInstall" Impersonate="yes" />
+        <CustomAction Id="RegisterSerial"  BinaryKey="Installer" DllEntry="CustomActionSerial" Impersonate="no" />
+        <CustomAction Id="RegisterUninstall" BinaryKey="Installer" DllEntry="CustomActionUninstall" Impersonate="yes" />
+    </Product>
+</Wix>

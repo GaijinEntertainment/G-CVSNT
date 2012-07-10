@@ -1,0 +1,28 @@
+if [ ! -f release ] ; then
+  echo release file missing!
+  exit -1
+fi
+RELEASE=`cat release`
+if [ -d cvsnt-$RELEASE ] ; then
+  echo Cleaning up...
+  rm -rf cvsnt-$RELEASE
+fi
+TAG=CVSNT_`echo $RELEASE | sed 's/\./_/g'`
+MAJOR=`sed 's/\([0-9]*\.[0-9]*\)\..*/\1/' release`
+echo release=$MAJOR, tag=$TAG
+cvs -d :pserver:cvs@cvs.cvsnt.org:/usr/local/cvs co -d cvsnt-$RELEASE -r $TAG cvsnt
+( cd cvsnt-$RELEASE; autoconf -f; automake )
+( cd cvsnt-$RELEASE/doc; chmod 755 build )
+tar czf cvsnt-$RELEASE.tar.gz cvsnt-$RELEASE
+( cd cvsnt-$RELEASE/doc; ./build cvsclient $RELEASE; ./build cvs $RELEASE; mv *.tar.gz ../.. )
+md5sum *$RELEASE* >MD5SUM-$RELEASE
+gpg --clearsign MD5SUM-$RELEASE
+mv MD5SUM-$RELEASE.asc MD5SUM-$RELEASE
+scp *$RELEASE*.gz *$RELEASE*.exe *$RELEASE*.msi *$RELEASE*.zip *$RELEASE*.dmg *$RELEASE*.u3p MD5SUM-$RELEASE tmh@paris.nodomain.org:/var/www/cvsnt.org/archive
+scp cvs.chm cvs-$RELEASE-doc.tar.gz tmh@paris.nodomain.org:/var/www/cvsnt.org/manual_testing_$MAJOR
+scp release tmh@paris.nodomain.org:/var/www/cvsnt.org/${MAJOR}_testing
+scp release_tag tmh@paris.nodomain.org:/var/www/cvsnt.org/${MAJOR}_testing_tag
+if [ -d cvsnt-$RELEASE ] ; then
+  echo Cleaning up...
+  rm -rf cvsnt-$RELEASE
+fi

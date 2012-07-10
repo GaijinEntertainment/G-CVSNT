@@ -1,0 +1,114 @@
+import "oaidl.idl";
+import "ocidl.idl";
+
+[
+	uuid(DDF02ADA-D57C-48c7-B099-75ED3ABD845C),
+	version(1.0),
+	helpstring("CVSNT Script Trigger Server Object")
+]
+library Server
+{
+	importlib("stdole2.tlb");
+
+	[uuid(E08BD508-8327-4b08-A858-0DB788F6548B)]
+	coclass Server
+	{
+		interface IServer;
+		interface IChangeInfoStruct;
+		interface IItemListStruct;
+		interface IChangeInfoCollection;
+		interface IItemListCollection;
+	}
+
+	[
+		uuid(696C482D-A7F6-44f3-A8C5-6874FAC6B4A9),
+		version(1.0),
+		dual,
+		helpstring("CVSNT Script Trigger Loginfo change structure"),
+		nonextensible
+	]
+	interface IChangeInfoStruct : IDispatch
+	{
+		[propget] BSTR filename();
+		[propget] BSTR rev_new();
+		[propget] BSTR rev_old();
+		[propget] BSTR type();
+		[propget] BSTR tag();
+		[propget] BSTR bugid();
+	};
+
+	[
+		uuid(CFA4C966-6595-43dd-AB34-298031FFB187),
+		version(1.0),
+		dual,
+		helpstring("CVSNT Script Loginfo change collection"),
+		nonextensible
+	]
+	interface IChangeInfoCollection  : IDispatch
+	{
+		[id(DISPID_NEWENUM), restricted, propget] HRESULT _NewEnum([out, retval] IUnknown** ppUnk);
+        [id(DISPID_VALUE), propget] HRESULT Item([in] long Index, [out, retval] IDispatch** ppVal);
+        [id(0x00000001), propget] HRESULT Count([out, retval] long* pVal);
+	};
+
+	[
+		uuid(0B8A8717-33F8-48ec-8E71-1F517C116CF1),
+		version(1.0),
+		dual,
+		helpstring("CVSNT Script Item List structure"),
+		nonextensible
+	]
+	interface IItemListStruct  : IDispatch
+	{
+		[propget] BSTR name();
+		[propget] BSTR value();
+	};
+
+
+	[
+		uuid(2770C948-1DE7-4f7b-BC68-8C32C36E9E9A),
+		version(1.0),
+		dual,
+		helpstring("CVSNT Script Item List collection"),
+		nonextensible
+	]
+	interface IItemListCollection  : IDispatch
+	{
+		[id(DISPID_NEWENUM), restricted, propget] HRESULT _NewEnum([out, retval] IUnknown** ppUnk);
+        [id(DISPID_VALUE), propget] HRESULT Item([in] long Index, [out, retval] IDispatch** ppVal);
+        [id(0x00000001), propget] HRESULT Count([out, retval] long* pVal);
+	};
+
+	enum
+	{
+		IDTRACE = 1000,
+		IDWARNING,
+		IDERROR
+	};
+
+	[
+		uuid(EDF1E101-186D-4a21-B44C-C537389AFEC9),
+		version(1.0),
+		dual,
+		helpstring("CVSNT Script Trigger Server Object"),
+		nonextensible
+	]
+	interface IServer : IDispatch
+	{
+		[id(IDTRACE),helpstring("Send a trace message")]
+		HRESULT Trace(
+			[in] short Level, 
+			[in] BSTR Text
+			);
+
+		[id(IDWARNING),helpstring("Warn or notify the user")]
+		HRESULT Warning(
+			[in] BSTR Text
+			);
+
+		[id(IDERROR),helpstring("Notify the user of an error")]
+		HRESULT Error(
+			[in] BSTR Text
+			);
+	}
+}

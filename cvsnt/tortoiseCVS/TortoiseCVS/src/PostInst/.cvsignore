@@ -1,0 +1,9 @@
+release
+Debug
+*.~*
+PostInst.plg
+udebug
+*.user
+Release
+x64
+ReleaseD

@@ -1,0 +1,49 @@
+NTLM Request:
+      Ident = NTLMSSP
+      mType = 1
+      Flags = 0000b207
+       User = myuser
+     Domain = mydomain
+4e 54 4c 4d 53 53 50 00 01 00 00 00 07 b2 00 00 
+06 00 06 00 20 00 00 00 08 00 08 00 26 00 00 00 
+6d 79 75 73 65 72 6d 79 64 6f 6d 61 69 6e 
+NTLM Request:
+      Ident = NTLMSSP
+      mType = 1
+      Flags = 0000b207
+       User = Test_!
+     Domain = xXxX.&
+4e 54 4c 4d 53 53 50 00 01 00 00 00 07 b2 00 00 
+06 00 06 00 20 00 00 00 06 00 06 00 26 00 00 00 
+54 65 73 74 5f 21 78 58 78 58 2e 26 
+NTLM Challenge:
+      Ident = NTLMSSP
+      mType = 2
+     Domain = mydomain
+      Flags = 00000000
+  Challenge = 01 02 03 04 f5 c3 b2 82 
+4e 54 4c 4d 53 53 50 00 02 00 00 00 10 00 10 00 
+30 00 00 00 00 00 00 00 01 02 03 04 f5 c3 b2 82 
+00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 00 
+6d 00 79 00 64 00 6f 00 6d 00 61 00 69 00 6e 00 
+NTLM Response:
+      Ident = NTLMSSP
+      mType = 3
+     LmResp = 0b b9 cb bf f6 94 ce ac c6 91 a5 74 bb c6 c8 50 83 a1 dc 55 5f 17 a9 99 
+     NTResp = 94 6e 80 ff da a9 78 43 8f 5c ca a5 19 68 3f e2 72 4f 1e b2 29 6d 92 c8 
+     Domain = mydomain
+       User = otheruser
+        Wks = otheruser
+       sKey = 
+      Flags = 00000000
+4e 54 4c 4d 53 53 50 00 03 00 00 00 18 00 18 00 
+74 00 00 00 18 00 18 00 8c 00 00 00 10 00 10 00 
+40 00 00 00 12 00 12 00 50 00 00 00 12 00 12 00 
+62 00 00 00 00 00 00 00 a4 00 00 00 00 00 00 00 
+6d 00 79 00 64 00 6f 00 6d 00 61 00 69 00 6e 00 
+6f 00 74 00 68 00 65 00 72 00 75 00 73 00 65 00 
+72 00 6f 00 74 00 68 00 65 00 72 00 75 00 73 00 
+65 00 72 00 0b b9 cb bf f6 94 ce ac c6 91 a5 74 
+bb c6 c8 50 83 a1 dc 55 5f 17 a9 99 94 6e 80 ff 
+da a9 78 43 8f 5c ca a5 19 68 3f e2 72 4f 1e b2 
+29 6d 92 c8 

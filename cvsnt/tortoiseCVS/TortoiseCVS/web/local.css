@@ -1,0 +1,31 @@
+
+body {
+	color: #666;
+	font: 11px/15px "trebuchet ms", "arial", "helvetica", sans-serif;
+	margin-left: 200px;
+	width: 550px;
+}
+
+h1, h2, h3, h4, h5, h6 {
+	margin: 0;
+	padding: 0;
+}
+
+h2.faq {
+	padding-top: 100px;
+}
+
+a {
+	background: transparent;
+	color: #990;
+	text-decoration: none;
+}
+
+a:hover {
+	background: transparent;
+	color: #cc0;
+}
+
+a img {
+	border: 0;
+}

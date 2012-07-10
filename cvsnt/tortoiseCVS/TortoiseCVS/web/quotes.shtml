@@ -1,0 +1,87 @@
+<!--#set var="title" value="Quotes" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>Unsolicited quotes from satisfied users</h2>
+
+<p>"It is not often that you find a small tool that can revolutionize your
+workday."
+<br><i>Mikael Lindberg, Netch Technologies AB</i>
+
+<p>"Whenever I open up the right menu and see the TortoiseCVS
+extension a smile comes over my face."
+<br><i>Nicklas Norling</i>
+
+<p>"It's like Christmas every time I install a new version."
+<br><i>Matt Plaumann</i>
+
+<p>"TortoiseCVS is the best revision-control system I've used.
+ It beats the pants off the expensive commercial solutions
+ we tried, and you can't beat the price!"
+<br><i>Ian Dees</i>
+
+<p>"This rocks so hard, all other CVS shells rot compared to this. You make it too easy!"
+<br><i>Nik Martin</i>
+
+<p>"We just completed our Software Project at university. We started out
+using WinCVS which made our lives very difficult and most of the teams
+ended up hating CVS due to that. When a friend recommended tortoise, I
+could not believe how easy this made things for us. For the later half
+of our project, people actually started enjoying using CVS and our CVS
+activity had gone up to about 95% as compared to 10% before TortoiseCVS.
+Integration into the Windows explorer is the best idea ever. I now
+recommend this software to anyone who asks about CVS tools."
+<br><i>Arun Acharya</i>
+
+<p>"This extension is brilliant and so useful I'm becoming addicted."
+<br><i>Jonas Beckman</i>
+
+<p>"Our whole company uses TortoiseCVS on a day to day basis.  It is so
+easy and efficient that even our CEO uses it!"
+<br><i>Florian Clever &lt;fclever@verinform.com&gt;</i>
+
+<p>"I just downloaded and installed TortoiseCVS for the first time (I've
+used WinCVS for years).  It's awesome -- I love it!  Please keep up the
+good work."
+<br><i>Gregory S. Woodward &lt;greg.woodward@blueiguana.com&gt;</i>
+
+<p>"Just wanted to drop you a line and let you know that our development
+teams now use TortoiseCVS exclusively for version management.  Its
+stable, reliable, incredibly easy to use and an absolute requirement for
+any developers!"
+<br><i>Evan Davey &lt;evandavey@optushome.com.au&gt;</i>
+
+<p>"I wanted to say that I was blown away by TortoiseCVS from the moment I
+finished the install.  I was amazed how easy it was to setup and how
+much easier it is to use.  And the icon overlays left me speechless.
+TortoiseCVS is no doubt the best Win32 CVS!"
+<br><i>Kirby Turner &lt;kirby@thecave.com&gt;</i>
+
+<p>"Hello!  Just dropping you a line to express my sincere gratitude for
+your work on TortoiseCVS.  I'm feeling much more at home with it than
+WinCVS, and both your design goals and the execution of them are
+excellent.  Please be encouraged to continue this development!"
+<br><i>Matthew Saunders &lt;matzie@squarerainbow.net&gt;</i>
+
+<p>"TortoiseCVS is the most convenient Win32 CVS client around."
+<br><i>Ralph</i>
+
+<p>"Just wanted to say thanks very much for a super program. I have over
+20 active consultants now using this client and I find it by far and
+away the best cvs client out there."
+<br><i>Eoin Lane &lt;eoin.lane@valtech.co.uk&gt;</i>
+
+<p>"It's a very useful program if you are stuck doing development on a Windows
+box.  I like my guis as unobtrusive as possible and TortoiseCVS is the king in
+that realm."
+<br><i>Douglas Seifert &lt;doug@cacas.org&gt;</i>
+
+<p>"Thankyouthankyouthankyouthankyouthankyouthankyouthankyouthankyou"
+<br><i>Baron Schwartz</i>
+
+<p>"I am implementing CVS at work, and your app has basically removed the
+'pain barrier' for our windows users..thanks!"
+<br><i>Tyson Lloyd Thwaites</i>
+
+
+
+<!--#include virtual="wrapper_end.shtml" -->

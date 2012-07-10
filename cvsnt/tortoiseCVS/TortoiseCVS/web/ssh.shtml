@@ -1,0 +1,194 @@
+<!--#set var="title" value="SSH Tips" -->
+<!--#include virtual="wrapper_start.shtml" -->
+<html>
+
+<body>
+
+<h1>SSH Tips</h1>
+<p>
+<p>
+
+by Alistair Bayley
+<p>
+There seem to be three separate pieces of software at work (there are
+probably more,
+but these are the major players I can identify).
+<ul>
+<li>TortoiseCVS  (the view over our code)
+<li>CVS client  (in our case CVSNT)
+<li>SSH client  (in our case TortoisePlink, but I've used PuTTY's plink.exe
+below)
+</ul>
+
+TortoiseCVS doesn't actually do anything directly with the CVS server;
+it invokes CVSNT, which in turn uses SSH (TortoisePlink) if you specify
+the :ext: protocol. SSH is required for sf.net CVS access.
+<p>
+Note: as of version 1.6.7, TortoisePlink supports HTTP proxy just like
+plink.
+I wrote these instructions when I could only use plink, but I believe
+everything I've said about plink is true for TortoisePlink.
+
+<h2>Firewalls and proxy servers</h2>
+
+I have to work from behind a firewall.
+I only have access to the internet (web browsing) via a proxy server.
+It took a while to figure out how to get SSH working.
+<p>
+The problem:
+ssh uses port 22. This is typically blocked by firewalls (fair enough).
+You can tell ssh to use another port with the -P option.
+SourceForge provides ssh servers on ports 80 and 443 on cvs-ssh.sf.net,
+specifically for users with these firewall restrictions.
+Many organisations open these ports for internet access
+(port 80 is the typical port used for HTTP i.e. standard web browser
+requests; port 443 is the default port for HTTPS - secure HTTP).
+<p>
+Fine, you say; use port 80. However, I do not have direct access to the
+internet at all
+(i.e. to me all ports appear blocked). I must use a proxy server to access
+the internet,
+and so I need an SSH client that supports HTTP Proxy tunnelling.
+Fortunately both PuTTY and TortoisePlink now both do this.
+<p>
+We must create a PuTTY session that uses HTTP proxy,
+and save it with a name. Plink uses the saved session details
+to connect to SourceForge via the proxy.
+<p>
+The steps below are summarised as:
+<ol>
+<li>Create PuTTY saved session and activate account
+<li>Create and post SSH keys
+<li>Start and test Pageant
+<li>Test that plink uses Pageant
+<li>Invoke plink from TortoiseCVS
+</ol>
+
+
+<h3>Step 1</h3>
+
+After getting a sf.net account, you are meant to say:
+<pre>
+	ssh -l username cvs.sf.net
+</pre>
+to activate your account (using the same password as with your web-browser).
+That is, you log in via SSH just once to activate your account.
+SourceForge allows you to log in, and then spits you out immediately.
+<p>
+You'll need to install PuTTY; I got it from
+  <a href="http://the.earth.li/~sgtatham/putty/0.54/x86/putty.zip">here</a>.
+I just unzipped and copied the files into the TortoiseCVS folder
+(because I'm lazy). Puttygen.exe is the only clash/update.
+<p>
+Run putty.exe:
+<blockquote>
+<table>
+<tr><td colspan=3>Session:
+<tr><td>&nbsp;&nbsp;&nbsp;<td>Host name:<td>cvs-ssh.sf.net
+<tr><td><td>Port:<td>80
+<tr><td><td>Saved sessions:<td>cvs-ssh
+<tr><td><td>Close window on exit:<td>Never
+<tr><td colspan=3>Connection:
+<tr><td><td>Auto-login username:<td>&lt;<i>your sf.net username</i>&gt;
+<tr><td colspan=3>Connection / Proxy:
+<tr><td><td>Proxy type:<td>HTTP
+<tr><td><td>Proxy hostname:<td>&lt;<i>proxy address/name</i>&gt;
+<tr><td><td>Port:<td>&lt;<i>proxy port</i>&gt;
+</table>
+</blockquote>
+<p>
+
+Click Save (to save the session with name "cvs-ssh").
+Test by clicking Open. It should log on to SourceForge
+(so type your password) and then close immediately.
+
+
+<h3>Step 2</h3>
+
+Run puttygen.exe and create public and private keys.
+Save them on a local drive (safer), with a passphrase.
+Copy the public key to your clipboard, from the field in puttygen
+labelled "Public key for pasting into OpenSSH authorized keys file:".
+Don't copy the key from the public key file; it's in the wrong
+format for SourceForge.
+Use the Account Maintenance page to post the public key to SourceForge:
+<blockquote>
+<a href="http://sourceforge.net/account/">http://sourceforge.net/account/</a>
+</blockquote>
+I've waited for up to 90 minutes for keys to be updated on the CVS servers,
+so be patient.
+
+
+<h3>Step 3</h3>
+
+Run Pageant; it doesn't appear to do anything, but a new icon will
+appear in the system tray (taskbar). Right-click and Add Key
+(to add the private key you just created); you'll have to enter the
+passphrase.
+<p>
+Right click on the Pageant icon again and Saved Sessions -&gt; &lt;<i>your session</i>&gt;.
+It should connect with your SSH key i.e. no password.
+
+
+
+<h3>Step 4</h3>
+
+Invoke plink from the NT (*not* Cygwin) command line:
+<pre>
+	plink.exe <sessionname>
+</pre>
+Or:
+<pre>
+	plink.exe -l <username> <sessionname>
+</pre>
+
+Due to some obscure bug, plink won't use Pageant keys if invoked
+from a Cygwin shell.
+
+
+
+<h3>Step 5</h3>
+
+Configure Tortoise to use plink.exe. The command line parameters are empty.
+The CVSROOT will be something like:
+<pre>
+	:ext:<username>@<sessionname>:/cvsroot/haskell-libs
+</pre>
+
+
+
+
+<h2>Further hints and tips</h2>
+
+<h3>Module path</h3>
+
+What module path to specify isn't obvious. Trial and error reveals
+that the module name is the bit after the project name from:
+<pre>
+	http://project.cvs.sourceforge.net/viewcvs.py/&lt;project&gt;/&lt;module-name&gt;
+</pre>
+So this URL:
+<pre>
+	http://haskell-libs.cvs.sourceforge.net/viewcvs.py/haskell-libs/libs/takusen/
+</pre>
+would relate to:
+<pre>
+	CVSROOT=:ext:<username>@cvs-ssh.sf.net:/cvsroot/haskell-libs
+	module=libs/takusen
+</pre>
+(Note that there's no leading slash on the module name.)
+This might seem obvious now but it wasn't at first.
+
+
+<h3>Make new module</h3>
+
+Put your new module in a new folder.
+Inside the new folder right-click -&gt; CVS -&gt; Make New Module...
+In the module field put: libs/&lt;my-new-module&gt;.
+You aren't <b>required</b> to maintain the same module structure as the CVS
+server
+on your own filesystem (CVS keeps track of which module the files were
+checked out from), but it might be wise to do so, to avoid confusion.
+
+</body>
+</html>

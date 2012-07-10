@@ -1,0 +1,133 @@
+<!--#set var="title" value="Contributors" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h2>People and companies who have contributed to TortoiseCVS</h2>
+
+<p>This might be useful when you want to find out whom to ask about something,
+or you're navigating round the source.  The list is
+in reverse chronological order of first contribution.  Send a patch or
+do something cool to see your name glowing at the top of the list ;)
+
+<p>Thanks to all the beta testers and users whose contribution is invaluable,
+and who are too numerous to keep track of here.
+
+<p><b>Gabriel Genellina</b> - Support for Visual Studio 2008
+
+<p><b>Stephane Martin</b> - French translation
+
+<p><b><a href="http://www.aoemedia.de/typo3-frankfurt.html">TYPO3 Frankfurt</a></b> - &euro;500 donation to Oxfam
+
+<p><b>Ilya Slobodin</b> - Commit dialog patch
+
+<p><b>Gottfried Ganssauge</b> - Windows Vista patch
+
+<p><b>Nick Buse</b> - Various bug fixing patches
+
+<p><b>March Hare</b> - 64-bit development system
+
+<p><b>Guru Kathiresan</b> - Improved treelist control
+
+<p><b>Adam Strzelecki</b> - Better looking icons
+
+<p><b>Vladimír Kloz</b> - Czech translation
+
+<p><b>Vladimir Serdyuk</b> - Russian User Guide
+
+<p><b><a href="http://www.march-hare.com/">March Hare</a></b> - Repository browser, bug number support, edit dialog
+
+<p><b>Juan Diego Gutiérrez Gallardo</b> - Spanish translation
+
+<p><b>Bruno Jouhier</b> - 64-bit Windows port
+
+<p><b><a href="http://iwantdoesntget.blogspot.com/">Syed Asif</a></b> - New website design
+
+<p><b>Friedrich Brunzema</b> - Warn on empty commit comment patch
+
+<p><b>Jordan Ilchev</b> - Default icons
+
+<p><b>Lee Jae-Hong, Kwon Tai-in</b> - Korean translation
+
+<p><b>Simon Elén</b> - Automatic use of Unix line endings patch
+
+<p><b>Rex Tsai</b> - Traditional Chinese translation
+
+<p><b>Leszek Tomanek</b> - Polish translation
+
+<p><b>Fl&aacute;vio Etrusco</b> - Portuguese translation
+
+<p><b>David Pinelo</b> - Spanish translation
+
+<p><b>Nikolay Ponomarenko</b> - Russian translation
+
+<p><b>Alexandre Ratti</b> - French translation
+
+<p><b>Frank Fesevur</b> - Dutch translation
+
+<p><b>Liao Bin</b> - Chinese translation
+
+<p><b>Keith D. Zimmerman</b> - History dialog patch
+
+<p><b>Frank Listing</b> - Revision Graph improvements
+
+<p><b>Stephane Lajoie</b> - mingw32 compilation
+
+<p><b>Jason Mills</b> - Make New Module edit module path patch
+
+<p><b>Radoslav Paskalev</b> - rcsinfo patch
+
+<p><b>Hartmut Honisch</b> <i>(Hartmut_Honisch@web.de)</i> - dialog patches, many bug fixes, lots of new features
+
+<p><b>Alan Dabiri</b> - persistent dialog size patch, various bug fixes and improvements
+
+<p><b>Stefan Hoffmeister</b> <i>(Stefan.Hoffmeister@Econos.de)</i> - Borland
+compilation, bug fix, CVS property page improvements
+
+<p><b>Armin Müller</b> - TortoiseRegistry patch
+
+<p><b>Joakim Beijar</b> - SSPI encryption patch
+
+<p><b>Matt Powers</b> - CVS property page improvements 
+(this code has now been moved to the history dialog)
+
+<p><b>Georgi Beloev</b> - Make new module patch
+
+<p><b>Juan Carlos Arevalo-Baeza</b> - Various bug fixing patches
+
+<p><b>Geoff Beier</b> <i>(geoff@caradas.com)</i> - Improved SSH support
+
+<p><b>Andy Hird</b> <i>(andyhird@hotmail.com)</i> - CVS columns in Explorer detailed list view</p>
+
+<p><b>Martin Crawford</b> <i>(musicstar)</i> - Project management, domain name, various patches
+
+<p><b>Torsten Martinsen</b> <i>(bullestock)</i> - 
+Project maintainer and release manager. Lock, watch and edit
+commands. History and Revision Graph dialogs.
+
+<p><b>Nathan Thomas</b> - Charlie Vernon Smythe logo and icon
+
+<p><b>Jon Rowlands</b> <i>(rowlands@ti.com)</i> - CVS property page, context menu
+in directory background
+
+<p><b>Ian Dees</b> <i>(undees@users.sourceforge.net)</i> -
+cvs.exe pipe code prototype, Borland compilation, various bug fixes
+
+<p><b>Didier Trosset-Moreau</b> <i>(dtrosset, dtrosset@hotmail.com)</i> -
+Win32 native user interface (not used now, but provoked me
+to migrate from GTK to wxWindows)
+
+<p><b>Ben Campbell</b> <i>(bcampbell, ben.campbell@ntlworld.com)</i> -
+Branching, tagging and merging, menu config file, various user
+interface improvements and bug fixes
+
+<p><b><a href="http://www.flourish.org">Francis Irving</a></b> <i>(frabcus, firving or cbuilder,
+	francis@flourish.org)</i> -
+Project founder (no longer active), original code, Visual C++ and
+mingw32 compilation
+
+<p>For more details, check out the <a href="changelog.shtml">change
+	log</a>.
+
+Have fun developing!
+
+
+<!--#include virtual="wrapper_end.shtml" -->

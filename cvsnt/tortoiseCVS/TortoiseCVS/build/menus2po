@@ -1,0 +1,27 @@
+#!/bin/bash
+shopt -s igncr #
+
+function stripthirdline()
+{
+	let X 0
+	while read REPLY
+	do
+		let X="$X + 1"
+		if [ "$X" != "1" ] &&  [ "$X" != "4" ]
+		then
+			echo $REPLY
+		fi
+		if [ "$X" = "4" ]
+		then
+			let X=0
+		fi
+	done
+}
+
+
+FILENAME=`echo "$1" | sed "s/\//\\\\\\\\\\\\//g"`
+grep -n "^[^#]*\"" "$1" | stripthirdline | \
+	sed -n "s/^\([^:]*\): *\(\"[^\"]*\"\)/#: "$FILENAME":\1\nmsgid \2\nmsgstr \"\"\n/gp" | \
+	msguniq
+exit 0
+

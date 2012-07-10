@@ -1,0 +1,105 @@
+#!/bin/bash
+BuildPackage=1
+BuildIntel=0
+BuildODBC=0
+CvsSuite=0
+PackageName="cvsnt"
+
+if [ "$1" = "--ODBC" ]; then
+	BuildODBC=1
+	echo "Cannot build ODBC on native Mac OS 10.4 - ignoring."
+	shift
+fi
+if [ "$1" = "--nopackage" ]; then
+	BuildPackage=0
+	shift
+fi
+if [ "$1" = "--intel" ]; then
+	BuildIntel=1
+	shift
+fi
+if [ "$1" = "--suite" ]; then
+	CvsSuite=1
+	PackageName="cvs-suite"
+	shift
+fi
+
+SourceRoot="${1-`pwd`}"
+Distribution_Dir=$SourceRoot/Distribution_folder
+InstallerResources=$Distribution_Dir/Resources
+InstallerRoot=$Distribution_Dir/Package_Root
+InstallerFilesInfo=$Distribution_Dir/Info.plist
+InstallerFilesDescription=$Distribution_Dir/Description.plist
+InstallerFiles=$SourceRoot/cvsnt/osx/InstallerFiles
+PackageMakerPath=/Developer/Applications/Utilities/PackageMaker.app/Contents/MacOS/PackageMaker
+
+if [ $CvsSuite -eq 1 ]; then
+	InstallerFiles2=$SourceRoot/cvsnt/osx/InstallerFiles/mh
+else
+	InstallerFiles2=$SourceRoot/cvsnt/osx/InstallerFiles
+fi
+export DYLD_LIBRARY_PATH=$InstallerRoot/usr/lib
+
+rm -rf $Distribution_Dir
+
+SAVEDIR=`pwd`
+cd $SourceRoot/cvsnt
+make distclean
+# Need to jump through a few hoops to get a binary compiled on 10.4 to run on 10.3.. so much for backward compatibility.
+if [ $BuildIntel -eq 1 ]; then
+./configure --prefix=/usr --with-config-dir=/private/etc/cvsnt CC=gcc CPP="gcc -E" CXX=g++ --with-internal-zlib CXXFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" CFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" --disable-odbc
+else
+./configure --prefix=/usr --with-config-dir=/private/etc/cvsnt CC=gcc-3.3 CPP="gcc-3.3 -E" CXX=g++-3.3 --with-internal-zlib CXXFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" CFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" --disable-odbc
+fi
+rm -rf $InstallerRoot/* 
+make DESTDIR=$InstallerRoot
+make install DESTDIR=$InstallerRoot
+cd $SAVEDIR
+
+if [ $CvsSuite -eq 1 ]; then
+	SAVEDIR=`pwd`
+	cd $SourceRoot/march-hare/triggers
+	make distclean
+	if [ $BuildIntel -eq 1 ]; then
+		./configure --with-cvsnt=$SourceRoot/cvsnt --prefix=/usr --with-config-dir=/private/etc/cvsnt CC=gcc CPP="gcc -E" CXX=g++ CXXFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" CFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`"
+	else
+		./configure --with-cvsnt=$SourceRoot/cvsnt --prefix=/usr --with-config-dir=/private/etc/cvsnt CC=gcc-3.3 CPP="gcc-3.3 -E" CXX=g++-3.3 CXXFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" CFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`"
+	fi
+	make DESTDIR=$InstallerRoot
+	make install DESTDIR=$InstallerRoot
+	cd $SAVEDIR
+fi
+
+if [ $BuildPackage -eq 1 ]; then
+	BUILD=`$InstallerRoot/usr/bin/cvsnt ver -q`
+	ShortVer=`echo $BUILD | sed s/'\.[0-9]*$'//`
+
+	BaseName=$PackageName-$BUILD
+	InstallerPackageName=$SourceRoot/$BaseName.pkg
+	if [ $BuildIntel -eq 1 ]; then
+		DmgFileName=$SourceRoot/$BaseName-intel.dmg
+	else
+		DmgFileName=$SourceRoot/$BaseName.dmg
+	fi
+	
+	rm -rf $InstallerPackageName
+	rm -rf $DmgFileName
+	rm -rf $InstallerResources
+	
+	cp -r $InstallerFiles/private $InstallerRoot
+	cp -r $InstallerFiles/Library $InstallerRoot
+	cp -r $InstallerFiles2/InstallerResources $InstallerResources
+	
+	sed "s/%CVSNT_VERSION%/$BUILD/g" <$InstallerFiles2/Info.plist |
+	sed "s/%CVSNT_SHORTVERSION%/$ShortVer/g" >$InstallerFilesInfo
+	sed "s/%CVSNT_VERSION%/$BUILD/g" <$InstallerFiles2/Description.plist |
+	sed "s/%CVSNT_SHORTVERSION%/$ShortVer/g" >$InstallerFilesDescription
+	
+	find $InstallerRoot -name .DS_Store -exec rm -f {} \; 2>/dev/null
+	find $InstallerRoot -type d -name CVS -exec rm -rf {} \; 2>/dev/null
+	
+	$PackageMakerPath -build -p $InstallerPackageName -f $InstallerRoot -r $InstallerResources -i $InstallerFilesInfo -d $InstallerFilesDescription
+	
+	hdiutil create -fs HFS+ -format UDZO -volname $BaseName -imagekey zlib-level=9 -ov -srcfolder $InstallerPackageName $DmgFileName
+	rm -rf $InstallerPackageName
+fi

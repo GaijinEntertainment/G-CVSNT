@@ -1,0 +1,222 @@
+# ---------------------------------------------------------------------------
+!if !$d(BCB)
+BCB = $(MAKEDIR)\..
+!endif
+
+# ---------------------------------------------------------------------------
+# IDE MANAGED SECTION
+# ---------------------------------------------------------------------------
+# The following section of the project makefile is managed by the BCB IDE.
+# It is recommended to use the IDE to change any of the values in this
+# section.
+# ---------------------------------------------------------------------------
+
+VERSION = BCB.04.04
+# ---------------------------------------------------------------------------
+PROJECT = ..\Release\TortoiseShell.dll
+OBJFILES = Release\TortoiseShell.obj Release\CvsEntries.obj Release\CVSStatus.obj \
+  Release\FileTraversal.obj Release\getline.obj Release\ndir.obj \
+  Release\PreserveChdir.obj Release\TextBinary.obj Release\ustr.obj \
+  Release\CrapLexer.obj Release\PathUtils.obj Release\TimeUtils.obj \
+  Release\TortoiseRegistry.obj Release\TortoiseUtils.obj \
+  Release\UnicodeStrings.obj Release\DefaultMenus.obj Release\HasMenu.obj \
+  Release\MenuDescription.obj Release\ContextMenu.obj Release\IconOverlay.obj \
+  Release\PropSheet.obj Release\ShellExt.obj
+RESFILES = Release\TortoiseShell.res
+RESDEPEN = $(RESFILES)
+LIBFILES = 
+IDLGENFILES =
+IDLFILES =
+LIBRARIES =
+SPARELIBS =
+PACKAGES = VCL40.bpi VCLX40.bpi bcbsmp40.bpi dclocx40.bpi dclusr40.bpi
+DEFFILE = ShellExt.def
+# ---------------------------------------------------------------------------
+PATHCPP = .;..\CVSGlue;..\Utils;..\ContextMenus
+PATHPAS = .;
+PATHRC = .;
+PATHASM = .;
+DEBUGLIBPATH = $(BCB)\lib\debug
+RELEASELIBPATH = $(BCB)\lib\release
+SYSDEFINES = _NO_VCL;_ASSERTE;NO_STRICT
+USERDEFINES = HAVE_ERRNO_H;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;OLD_VERSION
+# ---------------------------------------------------------------------------
+CFLAG1 = -I..\DialogsWxw;..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\include;$(BCB)\include\ATL \
+  -WD -O2 -w -Tkh30000 -a8 -k -vi -D$(SYSDEFINES);$(USERDEFINES) -q -tWM -c -tWD
+IDLCFLAGS = -I$(BCB)\include
+PFLAGS = -U..\DialogsWxw;..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\lib;$(RELEASELIBPATH) \
+  -I..\DialogsWxw;..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\include;$(BCB)\include\ATL \
+  -N2Release -N0Release \
+  -DHAVE_ERRNO_H;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;OLD_VERSION -$YD
+RFLAGS = -i..\DialogsWxw;..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\include;$(BCB)\include\ATL \
+  -DHAVE_ERRNO_H;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;OLD_VERSION /l 0x409 /d \
+  "NDEBUG" /i$(BCB)\include;$(BCB)\include\mfc
+AFLAGS = /i..\DialogsWxw /i..\ContextMenus /i..\Utils /i..\CVSGlue /i$(BCB)\include \
+  /i$(BCB)\include\ATL /dHAVE_ERRNO_H /dWIN32 /dNDEBUG /d_WINDOWS /d_MBCS \
+  /d_USRDLL /dOLD_VERSION /mx /w2 /zd
+LFLAGS = -L..\DialogsWxw;..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\lib;$(RELEASELIBPATH) \
+  -aa -Tpd -x -Gi -v -q
+IFLAGS =
+# ---------------------------------------------------------------------------
+ALLOBJ = c0d32.obj $(OBJFILES)
+ALLRES = $(RESFILES)
+ALLLIB = $(LIBFILES) $(LIBRARIES) UUID.LIB import32.lib cw32mt.lib
+# ---------------------------------------------------------------------------
+!ifdef IDEOPTIONS
+
+[Version Info]
+IncludeVerInfo=0
+AutoIncBuild=0
+MajorVer=1
+MinorVer=0
+Release=0
+Build=0
+Debug=0
+PreRelease=0
+Special=0
+Private=0
+DLL=0
+Locale=1033
+CodePage=1252
+
+[Version Info Keys]
+CompanyName=
+FileDescription=
+FileVersion=1.0.0.0
+InternalName=
+LegalCopyright=
+LegalTrademarks=
+OriginalFilename=
+ProductName=
+ProductVersion=1.0.0.0
+Comments=
+
+[HistoryLists\hlIncludePath]
+Count=2
+Item0=..\DialogsWxw;..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\include;$(BCB)\include\ATL
+Item1=..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\include;$(BCB)\include\ATL
+
+[HistoryLists\hlLibraryPath]
+Count=2
+Item0=..\DialogsWxw;..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\lib
+Item1=..\ContextMenus;..\Utils;..\CVSGlue;$(BCB)\lib
+
+[HistoryLists\hlConditionals]
+Count=3
+Item0=HAVE_ERRNO_H;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;OLD_VERSION
+Item1=HAVE_ERRNO_H;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL;OLDVERSION
+Item2=HAVE_ERRNO_H;WIN32;NDEBUG;_WINDOWS;_MBCS;_USRDLL
+
+[HistoryLists\hlIntOutputDir]
+Count=1
+Item0=Release
+
+[HistoryLists\hlFinalOutputDir]
+Count=4
+Item0=..\Release
+Item1=..\ReleaseItem1=..\ReleaseItem1=..\Release[Debugging]
+Item2=
+Item3=
+
+[Debugging]
+DebugSourceDirs=
+
+[Parameters]
+RunParams=
+HostApplication=
+RemoteHost=
+RemotePath=
+RemoteDebug=0
+
+[Compiler]
+InMemoryExe=0
+ShowInfoMsgs=0
+
+!endif
+
+# ---------------------------------------------------------------------------
+# MAKE SECTION
+# ---------------------------------------------------------------------------
+# This section of the project makefile is not used by the BCB IDE.  It is for
+# the benefit of building from the command-line using the MAKE utility.
+# ---------------------------------------------------------------------------
+
+.autodepend
+# ---------------------------------------------------------------------------
+!if !$d(BCC32)
+BCC32 = bcc32
+!endif
+
+!if !$d(CPP32)
+CPP32 = cpp32
+!endif
+
+!if !$d(DCC32)
+DCC32 = dcc32
+!endif
+
+!if !$d(TASM32)
+TASM32 = tasm32
+!endif
+
+!if !$d(LINKER)
+LINKER = ilink32
+!endif
+
+!if !$d(BRCC32)
+BRCC32 = brcc32
+!endif
+# ---------------------------------------------------------------------------
+!if $d(PATHCPP)
+.PATH.CPP = $(PATHCPP)
+.PATH.C   = $(PATHCPP)
+!endif
+
+!if $d(PATHPAS)
+.PATH.PAS = $(PATHPAS)
+!endif
+
+!if $d(PATHASM)
+.PATH.ASM = $(PATHASM)
+!endif
+
+!if $d(PATHRC)
+.PATH.RC  = $(PATHRC)
+!endif
+# ---------------------------------------------------------------------------
+$(PROJECT): $(OBJFILES) $(RESDEPEN) $(DEFFILE)
+   $(BCB)\BIN\$(LINKER) @&&! 
+   $(LFLAGS) + 
+   $(ALLOBJ), + 
+   $(PROJECT),, + 
+   $(ALLLIB), + 
+   $(DEFFILE), + 
+   $(ALLRES) 
+!
+# ---------------------------------------------------------------------------
+
+.pas.hpp:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.pas.obj:
+    $(BCB)\BIN\$(DCC32) $(PFLAGS) {$< }
+
+.cpp.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) -n$(@D) {$< }
+
+.c.obj:
+    $(BCB)\BIN\$(BCC32) $(CFLAG1) -n$(@D) {$< }
+
+.c.i:
+    $(BCB)\BIN\$(CPP32) $(CFLAG1) -n. {$< }
+
+.cpp.i:
+    $(BCB)\BIN\$(CPP32) $(CFLAG1) -n. {$< }
+
+.asm.obj:
+    $(BCB)\BIN\$(TASM32) $(AFLAGS) $<, $@
+
+.rc.res:
+    $(BCB)\BIN\$(BRCC32) $(RFLAGS) -fo$@ $<
+# ---------------------------------------------------------------------------
+ 4

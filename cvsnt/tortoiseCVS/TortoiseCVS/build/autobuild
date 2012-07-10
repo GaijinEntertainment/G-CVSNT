@@ -1,0 +1,368 @@
+#!/bin/bash
+# Copyright 2002 Francis Irving 
+# Copyright 2006 Torsten Martinsen
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# You should have received a copy of the GNU General Public License
+# along with this program; if not, write to the Free Software
+# Foundation, Inc., 59 Temple Place - Suite 330, Boston, MA  02111-1307, USA.
+#
+# Automated build script for TortoiseCVS.  To use it you need the
+# following installed:
+#
+# - Recent version of Cygwin
+# - Perl (this can be installed with cygwin now)
+#
+# To run it, do the following:
+#
+# 1. Make sure you have closed Visual C++ (if the script's CVS Update
+#       alters a project file, you would otherwise lose changes)
+# 2. Run cygwin bash, and cd to the checked out TortoiseCVS folder
+# 3. Make a file build/testpilotpassword with the line:
+#       TESTPILOT_PASSWORD=<you need to ask us for the password>
+#       (this is so we don't commit the password to CVS)
+# 4. Type one of
+#
+#       build/autobuild
+#
+#          Builds from latest CVS, makes installer, and runs it.
+#
+#       build/autobuild sc[ratch]
+#
+#           Builds from latest CVS, updates VersionNumber.inc,
+#           commits changes, and makes installer.
+#
+#       build/autobuild rc <rcnumber>
+#
+#          Intended to be run from a tree checked out from the stable
+#          branch. Builds from latest STABLE branch, and makes installer.
+#
+#       build/autobuild re[lease]
+#
+#          Builds from latest CVS, updates ChangeLog.txt and VersionNumber.inc,
+#          commits changes, and makes installer
+#
+#       build/autobuild d[ebug]
+#
+#          Build debug executables from latest CVS, makes installer, and runs it.
+#
+#       build/autobuild c[ustom]
+#
+#          Builds clean release executables from local machine, makes installer with
+#          customizations from build/custom directory
+#
+#       build/autobuild u[pdatelangstatus]
+#
+#          Updates web/lang_status.shtml
+#
+#       build/autobuild s[ource]
+#
+#          Checks out source (excluding wxWidgets) corresponding to current tag and zips it.
+#
+#       build/autobuild w[xwidgets]
+#
+#          Checks out wxWidgets headers and libraries corresponding to current tag and zips it.
+#
+# Options:
+#
+#       -i      Do not increment release number when building release version
+#       -c      Do not run "cvs commit"
+#       -u      Do not run "cvs update"
+#       -r      Perform a clean build
+#       -w      Unicode
+#       -v      Verbose (currently no effect)
+#       -n      Do not perform a clean build when building release version
+#       -b	Do not build executables, only build installer
+#       -mingw  Use gcc on MinGW for building
+#       -vc80   Use MS Visual C++ 8.0 for building
+#       -vc90   Use MS Visual C++ 9.0 for building (default)
+#       -iscc   Use InnoSetup (default)
+#       -noiscc Do not use InnoSetup
+
+# Stop on any error
+set -e
+# For debugging, turn this on
+#set -x
+
+echo
+echo TortoiseCVS autobuild script
+echo
+
+CVSDir="build/"
+
+TortoiseWinDir=$(regtool get '\machine\Software\TortoiseCVS\RootDir' 2> /dev/null) || true
+TortoiseDir=$TortoiseWinDir
+if [ "$TortoiseDir" != "" ]
+then
+  TortoiseDir="`cygpath \"$TortoiseDir"`"
+fi
+
+CVS_EXT="\"$TortoiseWinDir\\tortoiseplink.exe\" -l \"%u\" \"%h\""
+
+export PATH=$PATH:$TortoiseDir:$CVSDir
+
+source utils.sh
+source vc8.sh
+source mingw.sh
+source buildinstaller.sh
+
+
+[ -e Readme.Overview.txt ] || die "Please run from top level folder by typing:  build/autobuild"
+[ -e ../po ]   || die "Error: No po module found (must be checked out at same level as TortoiseCVS)"
+[ -e ../docs ] || die "Error: No docs module found (must be checked out at same level as TortoiseCVS)"
+
+if [ "$EDITOR" == "" ]
+then
+    EDITOR=notepad
+fi
+
+# Command line parameters
+RELEASE=0
+STABLE=0
+INCREL=1
+INCBUILD=1
+COMMIT=1
+CLEAN=0
+DOISCC=1
+NOCLEAN=0
+DEBUG=0
+CUSTOM=0
+VERBOSE=0
+UPDATE=1
+MINGW=0
+VC80=0
+VC90=1
+MAKECLEAN=0
+SAVEDBGINFO=0
+NOCOMPILE=0
+UNICODE=0
+
+# Handle options and commands. Simple commands get handled entirely by this function.
+parseoptions $*
+
+if [ "$UPDATE" == "1" ]
+then
+    echo "Update to latest code"
+    cvs -Q update -dP
+    echo "Update to latest translations"
+    (cd ../po; cvs -Q update)
+fi
+
+# Check the user has committed - they can enter their own comment if they aren't
+if [ "$COMMIT" == "1" ]
+then
+    echo "Committing changes"
+    cvs -Q commit
+fi
+
+OLD_BUILD=`cat src/BuildInfo | sed -n "1p" | sed "s/\./ /g"`
+buildnumparse $OLD_BUILD
+DESC_VER=`cat src/BuildInfo | sed -n "2p"`
+if [ "$RELEASE" == "1" ]
+then
+    CUSTOM_VERSION_INFO=
+else
+    if [ "$STABLE" == "1" ]
+    then
+        CUSTOM_VERSION_INFO="RC $RCNUM"
+        DESC_VER="RC $RCNUM"
+    else
+        if [ "$DESC_VER" ]
+        then
+            CUSTOM_VERSION_INFO="$DESC_VER "
+        fi
+        CUSTOM_VERSION_INFO="$CUSTOM_VERSION_INFO""plus test fixes built on "`date +%c`
+    fi
+fi
+if [ "$CUSTOM" == "1" ]
+then
+    CUSTOM_VERSION_INFO=`cat build/custom/buildinfo.txt | tr -d "\r"`
+fi
+
+NEW_VERSION=0
+if [ "$INCREL" == "1" ]
+then
+    if [ "$RELEASE" == "1" ]
+    then
+        echo "Increment release number"
+        let RELEASE_VER=RELEASE_VER+1
+        BUILD_VER=0
+    fi
+    NEW_VERSION=1
+fi
+
+if [ "$INCBUILD" == "1" ]
+then
+    echo "Increment build number"
+    let BUILD_VER=BUILD_VER+1
+    NEW_VERSION=1
+fi
+
+    
+echo "Generate new version number"
+if [ "$RELEASE" == "1" ]
+then
+    BUILD=$MAJOR_VER.$MINOR_VER.$RELEASE_VER
+else
+    BUILD="$MAJOR_VER.$MINOR_VER.$RELEASE_VER $CUSTOM_VERSION_INFO"
+fi
+BUILD_TAG=`echo $BUILD | sed -e s/\\\\./-/g`
+
+get_targetpaths
+
+if [ "$NOCOMPILE" == "0" ]
+then
+
+  echo "Updating version to '$BUILD'"
+  echo -n "\"" > src/VersionNumber.inc
+  echo -n "$BUILD" >> src/VersionNumber.inc
+  echo "\"" >> src/VersionNumber.inc
+  echo "$MAJOR_VER.$MINOR_VER.$RELEASE_VER.$BUILD_VER" > src/BuildInfo
+  echo "$DESC_VER" >> src/BuildInfo
+
+  bash -o igncr ./build/setresourceversion src/TortoiseAct/TortoiseAct $MAJOR_VER.$MINOR_VER.$RELEASE_VER.$BUILD_VER "$CUSTOM_VERSION_INFO"
+  bash -o igncr ./build/setresourceversion src/TortoiseShell/TortoiseShell $MAJOR_VER.$MINOR_VER.$RELEASE_VER.$BUILD_VER "$CUSTOM_VERSION_INFO"
+  bash -o igncr ./build/setresourceversion src/TortoisePlink/TortoisePlink $MAJOR_VER.$MINOR_VER.$RELEASE_VER.$BUILD_VER "$CUSTOM_VERSION_INFO"
+  touch src/TortoisePlink/PLINK.RC
+
+  if [ "$CLEAN" == "1" ]
+  then
+      MAKECLEAN=1
+  fi    
+  if [ "$NOCLEAN" == "1" ]
+  then
+    MAKECLEAN=0
+  fi    
+
+  build
+
+fi
+
+if [ "$RELEASE" == "1" ]
+then
+    cd web
+    mv -f ChangeLog.txt ChangeLog.old
+    PRETTY_DATE=`date +"%d %b %Y"`
+    cat <<EOF > awkscript
+{
+   if (\$0 ~ /^Changes .+/) 
+   {
+      if (!done)
+      {
+         printf("Changes for $BUILD ($PRETTY_DATE):\n--"); 
+         done = 1
+      }
+      else
+         print
+   }
+   else
+   {
+      print
+   }
+}
+EOF
+    awk -f awkscript ChangeLog.old | unix2dos > ChangeLog.txt
+    rm -f awkscript
+    echo "Readied changelog for version $BUILD - please check it looks good"
+    $EDITOR ChangeLog.txt
+    cd ..
+fi
+
+if [ "$COMMIT" == "1" ] || [ "$RELEASE" == "1" ]
+then
+    echo "Committing new version number and changelog"
+    cvs -Q commit -m "Autobuild updated version to $BUILD" \
+        web/ChangeLog.txt src/VersionNumber.inc src/BuildInfo src/TortoiseAct/TortoiseAct.rc \
+        src/TortoiseShell/TortoiseShell.rc src/TortoisePlink/TortoisePlink.rc
+fi
+
+if [ "$RELEASE" == "1" ]
+then
+    echo "Tagging the release in CVS as tortoisecvs-$BUILD_TAG:"
+    echo "- source"
+    cvs -Q tag tortoisecvs-$BUILD_TAG
+    pushd ../po
+    echo "- translations"
+    cvs -Q tag tortoisecvs-$BUILD_TAG
+    popd
+fi
+
+buildpofiles
+
+cd build
+
+# add custom options to the build
+if [ "$CUSTOM" == "1" ]
+then
+    # if an icon set is included, change the source location for the .ico files
+    if [ -d custom/icons ]
+    then
+        echo "Customizing Icons."
+        # double escapes are needed because of bash and sed
+        tr "\r" "\n" < TortoiseCVS.iss | sed -e "/^Source:/s/\\.\\.\\\\src\\\\icons/custom\\\\icons/g" - | tr "\n" "\r\n" > TortoiseCVS.ist
+        mv TortoiseCVS.ist TortoiseCVS.iss
+    fi
+    # If custom registry entries are included, insert those in the ISS script
+    # (this place seems OK... it's rather arbitrary though.)
+    if [ -e custom/registry.txt ]
+    then
+        echo "Customizing registry entries."
+        CUSTOM_REG_ENTRIES=`cat custom/registry.txt | tr "\n" "\r"`
+        tr "\r" "\n" <TortoiseCVS.iss | sed -e "/^; Support for cvs:/{x;s/.*/$CUSTOM_REG_ENTRIES/;G;}" - | tr "\n" "\r\n" > TortoiseCVS.ist
+        mv TortoiseCVS.ist TortoiseCVS.iss
+    fi
+fi
+
+if [ "$DOISCC" == "1" ]
+then
+    buildinstaller
+    INSTALLER=$retval
+fi
+
+if [ "$RELEASE" == "1" ]; then
+    cd ../web
+    mv -f ChangeLog.txt ChangeLog.old
+    echo "Changes available only in CVS:" > ChangeLog.new
+    echo "-----------------------------" >> ChangeLog.new
+    echo >> ChangeLog.new
+    cat ChangeLog.new ChangeLog.old | unix2dos > ChangeLog.txt
+    rm -f ChangeLog.new ChangeLog.old
+    echo Ready changelog for between versions - please check it looks good
+    $EDITOR ChangeLog.txt
+    cvs -Q commit -m "Autobuild readied changelog for next build"
+    cd ../build
+fi
+
+cd ..
+
+if [ "$RELEASE" == "1" ]
+then
+    echo "Updating translation status"
+    updatelangstatus
+    cvs -Q commit -m "Updated for $BUILD" web/lang_status.shtml
+    echo "Uploading stable changelog"
+    cd web
+    # Ensure no sticky tag on stablechangelog.txt
+    cvs -Q up -A stablechangelog.txt
+    # Check out latest version on stable branch into stablechangelog.txt
+    cvs -Q up -p -r tortoisecvs-1-10-x ChangeLog.txt > stablechangelog.txt
+    # Commit it so it will be added to the web site
+    cvs -Q commit -m "Stable changelog updated" stablechangelog.txt
+    cd ..
+fi
+
+echo Build complete.
+
+if [ "$RELEASE" == "0" ] && [ "$CUSTOM" == "0" ]; then
+    echo "Installing..."
+    ./build/$INSTALLER /log=installer.log
+fi

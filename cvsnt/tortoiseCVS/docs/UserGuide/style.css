@@ -1,0 +1,48 @@
+BODY, P, TABLE, TD, TR, TH {
+  color: black; background: white;
+  font-family: arial, helvetica, sans-serif;
+  font-size: 10pt;
+}
+DL		{ margin-left: 3ex; }
+TT		{ font-family: monospace; }
+PRE		{ font-family: monospace; }
+CODE		{ font-family: monospace; }
+A		{ text-decoration: none }
+A:link		{ color: #0000FF }
+A:visited	{ color: #0000AA }
+A:hover		{ text-decoration: underline; color: red }
+H1, H2, H3, H4, H5 {
+  font-weight: bold; font-style: oblique;
+  padding-bottom: 0; margin-bottom: 0
+}
+P {
+  padding-top: 0; margin-top:10;
+  padding-bottom: 0; margin-bottom: 10
+}
+
+//OL, UL, DL	{
+  padding-top: 0; margin-top: 5;
+  padding-bottom: 0; margin-bottom: 10
+}
+
+H1		{  }
+H2		{  }
+H3		{  }
+SMALL		{  }
+.MARKERPEN	{ background: #FFFF60 }
+.FLASH		{ background: #F0E0E0; color: #FF0000; }
+.PSHORT		{
+  padding-top: 0pt;
+  padding-bottom: 0pt;
+  margin-top: 2pt;
+  margin-bottom: 5pt;
+  line-height: 100%;
+}
+.column		{ text-align: justify }
+.menuitem	{ font-style: italic; text-decoration: underline;
+		  color: #228822 }
+.pathhighlight	{ color: #33AA11 }
+.docref		{ color: #AA00DD; text-align: right; }
+.docrefinline	{ color: #AA00DD }
+A:link.docref	{ color: #AA00DD; text-align: right; }
+A:visited.docref{ color: #AA00DD; text-align: right; }

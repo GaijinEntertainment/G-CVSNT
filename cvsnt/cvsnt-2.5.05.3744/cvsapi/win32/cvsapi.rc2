@@ -1,0 +1,16 @@
+#ifdef APSTUDIO_INVOKED
+	#error this file is not editable by Microsoft Visual C++
+#endif //APSTUDIO_INVOKED
+
+
+/////////////////////////////////////////////////////////////////////////////
+// Add manually edited resources here...
+
+/////////////////////////////////////////////////////////////////////////////
+
+/////////////////////////////////////////////////////////////////////////////
+
+#define PROJECTNAME "cvsapi"
+#define PROJECTDESCRIPTION "cvsnt generic API"
+#define PROJECTFILENAME "cvsapi.dll"
+#include "..\windows-NT\VersionInfoCommon.rc2"

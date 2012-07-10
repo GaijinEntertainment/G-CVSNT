@@ -1,0 +1,61 @@
+<!--#set var="title" value="Development" -->
+<!--#include virtual="wrapper_start.shtml" -->
+
+<h1>Translation resources and tips</h1>
+
+<p>
+
+<h2>Overview</h2>
+
+TortoiseCVS uses <b>GNU gettext</b> for translating messages. 
+Gettext works like this:
+<ul>
+<li>All messages are present in English in the source code.
+<li>A tool (xgettext) automatically extracts the messages
+into a file (a <tt><b>.po</b></tt> file), which can then be translated (using a text editor or a special-purpose
+tool such as <a href="http://www.poedit.org/">poEdit</a>).
+<li>The <tt>.po</tt> file is finally converted to a <tt><b>.mo</b></tt> file, 
+which is used by the TortoiseCVS executable.
+<li>When texts are updated in the source code, or when new texts are added,
+another tool (msgmerge) automatically updates the various .po files. The translator will then
+have to review any <b>fuzzy</b> entries (see the Gettext Guide below for an explanation of this).
+</ul>
+<p>
+<h2>Gettext Documentation</h2>
+<p>
+
+This simple <a href="gettextguide.shtml">Gettext Guide</a> gives an introduction to gettext.
+For the full story, go to <a href="http://www.gnu.org/software/gettext/manual/">the manual</a>.
+<p>
+<h2>How to start</h2>
+<ol>
+<li><b>Join the translators mailing list</b> - see how
+<a href="https://lists.sourceforge.net/lists/listinfo/tortoisecvs-translators">here.</a>
+<li><b>Check out the po module:</b> In the Checkout dialog, use the CVSROOT</br>
+	&nbsp;&nbsp;&nbsp;<tt>:ext:<i>your_sf_login</i>@tortoisecvs.cvs.sourceforge.net:/cvsroot/tortoisecvs</tt></br>
+	and the module name <tt>po</tt>. <b>Note:</b> To be able to do this, you must be a member of the 
+TortoiseCVS project.
+<li><b>Determine the correct language/country code:</b> Go to 
+<a href="http://www.gnu.org/software/gettext/manual/html_chapter/gettext_15.html#Language-Codes">this page</a> to find the code
+for your language, and to
+<a href="http://www.gnu.org/software/gettext/manual/html_chapter/gettext_16.html#Country-Codes">this page</a> to find your country code.
+Put the two together with an underscore between; i.e. for French as spoken in Canada you would choose "fr_CA".
+<li><b>Create a new .po file:</b> Go into the TortoiseCVS folder, and copy the <tt>en_GB.po</tt> file to a new file; 
+in our example this would be <tt>fr_CA.po</tt>. Add it to CVS.
+<li><b>Translate your new file</b> using a text editor or one of the special tools available. 
+If you use a text editor, make sure that it uses UTF-8 encoding.
+<li><b>Compile the .po file</b> as described in the above references. For testing, you can just copy the file to 
+the <tt>locale/en_GB</tt> folder under <tt>Program Files/TortoiseCVS</tt> (note that it <b>must</b>
+ be named <tt>TortoiseCVS.mo</tt>).
+<li><b>Repeat the last three steps</b> for the Setup folders. The messages in the TortoiseCVS folder are
+those used in the program itself; the ones in the Setup folder are used by the installer.
+<li><b>Add the native name of your translation</b> to the file <tt>NativeLanguageNames.po</tt> in the Common folder. 
+This is used in the installer, when the user chooses which language to use. 
+In our example, we would add these two lines:
+<pre>
+msgid "French"
+msgstr "Français"
+</pre>
+<li><b>Commit</b> your .po files.
+</ol>
+<!--#include virtual="wrapper_end.shtml" -->

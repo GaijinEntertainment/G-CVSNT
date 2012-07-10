@@ -1,0 +1,19 @@
+01 Jun 2008:
+
+Merge 1.10.x to HEAD.
+Tag 1.10.x with tortoisecvs-1-10-6-merge-to-head.
+
+20 Jul 2008:
+
+Merge tortoisecvs-1-10-6-merge-to-head to HEAD.
+Tag 1.10.x with tortoisecvs-1-10-8-merge-to-head.
+
+22 Nov 2008:
+
+Merge tortoisecvs-1-10-8-merge-to-head to HEAD.
+Tag 1.10.x with tortoisecvs-1-10-9-merge-to-head.
+
+28 Feb 2009:
+
+Merge tortoisecvs-1-10-9-merge-to-head to HEAD.
+Tag 1.10.x with tortoisecvs-1-10-10-merge-to-head.

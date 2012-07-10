@@ -10,6 +10,6 @@
 *.lai
 *.la
 *.a
-CVS/*
+CVS
 log1
 log2

@@ -1,0 +1,79 @@
+<html>
+<head><title>TortoiseCVS 1.0.0 - enjoyable version control</title>
+<link rel="shortcut icon" href="favicon.ico" type="image/x-icon"> 
+</head>
+<body>
+<h1>TortoiseCVS 1.0.0 - enjoyable version control</h1>
+
+<p>The TortoiseCVS development team is proud to announce version 1.0.0 of an enjoyable CVS client for Windows. 
+
+<p><a href="http://www.tortoisecvs.org">TortoiseCVS</a> integrates CVS version control directly into Windows Explorer.  You can right click on files and folders to commit, update and fully use CVS.  Icons are highlighted in different colours to show they are in CVS or that you have changed them.
+
+<p>It's freely available <a
+href="http://www.tortoisecvs.org/download.shtml">for download</a> under
+the GPL.
+
+<p>There are lots of bug fixes and new features since the last stable release; for full details see the <a href="http://www.tortoisecvs.org/changelog.shtml">change log</a>.  Here are some changes that we are particularly proud of:
+
+<ul>
+
+<li><p> <b>Seamless SSH support.</b>  Anyone can now use SourceForge, even your CEO. <a href="http://www.tortoisecvs.org/faq.html#ssh">Find out more</a>.
+
+<li><p> <b>Optional exclusive locking.</b>  No more fear of binary file merging.
+<a href="http://www.tortoisecvs.org/faq.shtml#exclusive">Find out more</a>.
+
+<li><p> <b>Columns on Windows 2000 and XP.</b>  At last you can sort by CVS status.
+  When in detail view in Explorer, go to a folder which is under CVS
+  control.  Right click on the header and select the More... option.
+  There are now various CVS columns to choose from.
+
+<li><p> <b>Autolaunch a conflict editor.</b>  Those "C " hunting blues gone away.
+  Go to preferences for TortoiseCVS on the start menu.  Then specify
+  your favourite text editor, or perhaps a special <a href="http://sourceforge.net/projects/conflicteditor/">conflict editor</a>.
+
+<li><p> <b>Automatically initialise new repositories.</b>  You can now use
+  TortoiseCVS for personal use without a server or any other software.
+  <a href="http://www.tortoisecvs.org/faq.shtml#cvsinit">Find out more</a>.
+
+<li><p> <b>Support for Kerberos and SSPI.</b>  TortoiseCVS uses and comes with
+   <a href="http://www.cvsnt.org">CVSNT</a>'s client.
+
+<li><p> <b>Numerous bug fixes.</b>  Of course, we're most proud of these ;)
+
+</ul>
+
+<p>There are three things you may need to know before installing.
+
+<ul>
+<li><p><b>Why all your files will suddenly look red, and what to do about it:</b>
+
+TortoiseCVS now works correctly as your computer passes in and out
+of summertime, or across timezones.  In order to do this date stamps
+in your sandbox are stored differently, so after installation it may
+appear that all files have been modified.  To fix this perform a CVS
+Update on the top level directory.
+
+<li><p><b>For users of :ntserver: protocol:</b>
+
+TortoiseCVS no longer supports :ntserver: because CVSNT does not. You
+now need to use the :sspi: protocol, which also provides windows 
+authentication.  This may require you to update CVSNT on your server.
+For more info see <a href="http://www.tortoisecvs.org/faq.shtml#ntserver">this FAQ entry</a>.
+
+<li><p><b>For users of RSH or .rhosts authentication:</b>
+
+TortoiseCVS no longer supports RSH out of the box.  For further
+details on why this is and what to do about it 
+see <a href="http://www.tortoisecvs.org/faq.shtml#rsh">this FAQ entry</a>.
+
+</ul>
+
+<p>We hope you continue to enjoy TortoiseCVS as much as we do.
+
+<p>Check it out,
+
+<p>Charlie Vernon Smythe
+<br>On behalf of the TortoiseCVS development team
+
+</body>
+</html>

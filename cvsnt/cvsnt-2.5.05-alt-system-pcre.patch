@@ -1,0 +1,37 @@
+diff -ur cvsnt-2.5.05.3744/configure.in cvsnt-2.5.05.3744.new/configure.in
+--- cvsnt-2.5.05.3744/configure.in	2009-11-24 17:52:22.000000000 +0300
++++ cvsnt-2.5.05.3744.new/configure.in	2011-10-13 22:02:12.947770545 +0400
+@@ -369,19 +369,10 @@
+ AC_SUBST(LIBXML_LIBS)
+ 
+ # Check for pcre posix library
+-saved_libs="$LIBS"
+-LIBS=""
+-AC_SEARCH_LIBS(pcre_compile, pcreposix, [AC_MSG_CHECKING([for PCRE posix library])
+-     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pcreposix.h>]], [[int i;]])],[ac_cv_have_pcre="yes"],[])
+-     AC_MSG_RESULT($ac_cv_have_pcre)], ac_cv_have_pcre="no")
+-PCRE_LIBS="$LIBS"
+-LIBS="$saved_libs"
++PKG_CHECK_MODULES(PCRE, libpcreposix)
++AC_SUBST(PCRE_CFLAGS)
+ AC_SUBST(PCRE_LIBS)
+ 
+-if test x$ac_cv_have_pcre = xno; then
+-  AC_MSG_ERROR([requires pcre])
+-fi
+-
+ dnl Some implementations make the second argument of iconv non-const for no
+ dnl sane reason
+ AC_MSG_CHECKING([whether iconv uses const])
+diff -ur cvsnt-2.5.05.3744/cvsapi/Makefile.am cvsnt-2.5.05.3744.new/cvsapi/Makefile.am
+--- cvsnt-2.5.05.3744/cvsapi/Makefile.am	2009-08-12 18:16:14.000000000 +0400
++++ cvsnt-2.5.05.3744.new/cvsapi/Makefile.am	2011-10-13 22:02:43.335772564 +0400
+@@ -10,7 +10,7 @@
+ 
+ SUBDIRS=db $(MDNS_SUBDIR)
+ 
+-pcre_inc = 
++pcre_inc = @PCRE_CFLAGS@
+ pcre_lib = @PCRE_LIBS@
+ libxml_lib = @LIBXML_LIBS@
+ zlib_lib = @ZLIB_LIBS@

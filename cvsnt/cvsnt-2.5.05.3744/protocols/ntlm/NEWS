@@ -1,0 +1,92 @@
+Libntlm NEWS -- history of user-visible changes.                -*- outline -*-
+Copyright (C) 2002, 2003, 2004, 2005 Simon Josefsson
+Copyright (C) 1999 Grant Edwards
+See the end for copying conditions.
+
+* Version 0.3.8 (released 2005-09-27)
+
+** New: buildSmbNtlmAuthRequest_noatsplit, buildSmbNtlmAuthResponse_noatsplit.
+These functions can be used when your username contains '@' and you do
+not wish that the remainder of the string is treated as a REALM value.
+Suggested by David Leonard <davidl@vintela.com>.
+
+** Uses memset instead of bzero.
+
+** Fix license typo in libntlm.spec.
+
+** Made the COPYING file contain LGPL, not GPL.
+
+** Updated gnulib files.
+
+** API and ABI modifications.
+buildSmbNtlmAuthRequest_noatsplit: ADD.
+buildSmbNtlmAuthResponse_noatsplit: ADD.
+
+* Version 0.3.7 (released 2005-07-15)
+
+** A RPM *.spec file is included.
+
+** Fix compiler warnings, contributed by Frediano Ziglio.
+
+** Gnulib is used, currently only to provide more robust ntlm_check_version.
+
+** Address in license was updated to reflect the new FSF postal address.
+
+* Version 0.3.6 (released 2004-09-30)
+
+** Some code cleanup and improvements, contributed by Frediano Ziglio.
+
+** Slight changes in output vectors, contributed by Frediano Ziglio.
+
+* Version 0.3.5 (released 2004-09-23)
+
+** Make it compile on C89 platforms.
+
+* Version 0.3.4 (released 2004-09-23)
+
+** The license has been changed from GPL to LGPL.
+Thanks to a rewrite of several files, contributed by Frediano Ziglio.
+
+** The output may now be slightly different, due to a bug in earlier versions.
+Unused parts of the output string are now initialized to 0 consistently.
+
+* Version 0.3.3 (released 2004-09-18)
+
+** Use const for buildSmbNtlmAuthRequest() and buildSmbNtlmAuthResponse().
+
+** Source code is indented according to GNU Coding Standard.
+
+* Version 0.3.2 (released 2003-03-17)
+
+** Further build cleanups.
+
+* Version 0.3.1 (released 2002-10-19)
+
+** Uses automake 1.7, gnits and pkg-config.  Still no code changes.
+
+* Version 0.3.0 (released 2002-10-01)
+
+** Added autoconf, automake and libtool support.  Unofficial release made
+** by Simon Josefsson.
+
+* Revsion 0.21 (released 1999-10-07)
+
+** Added support for usernames with embedded domain strings of the
+** format username@domain.  If present, the domain will override the
+** domain that is returned by the host in the challenge.
+
+* Version 0.2 (released 1999-10-06)
+
+** Fixed another byte-order problem in unicode routine in smbutil.c.
+** Added a copy of GPL to the distribution.  Added test driver
+** program directory.
+
+* Version 0.1 (released 1999-10-05)
+
+** Fixed usage of byte-order macros in smbutil.c.  Hopefully this
+** will make it work on SPARC machines...
+
+----------------------------------------------------------------------
+Copying and distribution of this file, with or without modification,
+are permitted in any medium without royalty provided the copyright
+notice and this notice are preserved.

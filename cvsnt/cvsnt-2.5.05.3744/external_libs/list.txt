@@ -1,0 +1,4 @@
+libiconv
+sqlite3 (not required)
+openssl
+Bonjour SDK (dns_sd)

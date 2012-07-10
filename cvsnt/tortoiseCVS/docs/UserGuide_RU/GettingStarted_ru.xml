@@ -1,0 +1,102 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- $Revision: 1.1 $ -->
+<!-- ====== Getting Started ==================================================== -->
+<chapter id="begin" lang="ru">
+  <title id="begin-title">Начальные сведенья (приступая к работе)</title>
+
+  <!-- ====== What is CVS? ===================================================== -->
+  <section id="begin.whatcvs">
+    <title id="begin.whatcvs-title">Что такое <acronym>CVS</acronym>?</title>
+    <para>
+<acronym>CVS</acronym> (сокращение от Concurrent Versioning System (Система Параллельных Версий)), это система управления версиями. Система управления версиями обычно используются как часть цикла разработки программ, для записи и согласования изменений в исходных кодах среди команды разработчиков.
+    </para>
+
+    <para>Например, при изменении программы иногда появляется ошибка, и вы можете не обнаружить эту ошибку в течении длительного времени. С помощью <acronym>CVS</acronym> вы можете просто извлечь старую версию кода для поиска точных изменений,  вызывавших ошибку. Иногда это бывает очень полезным. 
+</para>
+
+    <para>
+    Конечно, вы можете сохранять каждую версию, каждого файла которые вы создали. Однако такой вариант хранения вызывает напрасную трату дискового пространства. <acronym>CVS</acronym> сохраняет все версии файла в одном файле остроумным способом, который сохраняет только отличия между версиями.
+    </para>
+    <para>
+    <acronym>CVS</acronym> также помогает вам, если вы член группы людей работающей над одним проектом. В этом случае все слишком просто могут переписывать изменения друг друга, если только не проявляют чрезвычайной внимательности. Некоторые редакторы, подобно GNU Emacs, пытаются сделать так, что один файл никогда не редактируется двумя людьми в одно и тоже время. К сожалению, если кто-нибудь использует другой редактор, эта защита не срабатывает. <acronym>CVS</acronym> решает эту проблему, изолируя различных разработчиков друг от друга. Каждый разработчик работает в своей собственной песочнице (sandbox), и <acronym>CVS</acronym> объединяет результаты работы каждого разработчика, когда она сделана с работой других.
+    </para>
+  </section>
+
+  <!-- ====== What is TortoiseCVS? ============================================= -->
+
+  <section id="begin.whattortoisecvs">
+    <title id="begin.whattortoisecvs-title">Что такое TortoiseCVS?</title>
+    <para>
+      TortoiseCVS это клиентская программа (front-end client) делающая использование <acronym>CVS</acronym> проще и более интуитивным. TortoiseCVS позволяет разработчикам работать с 
+упраляемыми через <acronym>CVS</acronym> файлами  прямо из <productname>Windows Explorer (Проводник)</productname>. 
+    </para>
+    <para>
+      Одним из больших недостатков <acronym>CVS</acronym> это предоставляемый им интерфейс командной строки. В настоящее время многие разработчики привыкли к графическим интегрированным средам разработки (<acronym>IDEs</acronym>). TortoiseCVS стремиться к обеспечению окружения "указал и нажал" ("point-and-click") остроумным и интуитивным путем.
+( TortoiseCVS aims to provide that "point-and-click" environment in a clever and intuitive way.) 
+    </para>
+    <para>
+    Заметьте что TortoiseCVS это CVS <emphasis>клиент</emphasis>, не <emphasis>сервер</emphasis>. Этот документ предполагает что вы знаете либо как установить и настроить свой сервер, либо что вы используете сервер, который настроил ктолибо другой. Если вы хотите изучить как устанавливать CVS сервер, смотите <xref linkend="resources.cvsbook"/>.
+    </para>
+  </section>
+
+  <!-- ====== Where to Begin? =================================================== -->
+
+  <section id="begin.wherebegin">
+    <title id="begin.wherebegin-title">Откуда начать?</title>
+    <orderedlist>
+      <listitem>
+        <para>
+          Лучший путь изучить как использовать TortoiseCVS это использовать его. Начните с 
+<link linkend="ref.install">Установки TortoiseCVS</link>. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Если вы новичок в CVS  начните со следующей темы <link linkend="basic" endterm="basic-title"/>.
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          После того, как вы изучите основные методы работы, изучите  
+          <link linkend="advanced" endterm="advanced-title"/>. 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          Для полноты картины, глава <link linkend="ref"
+  endterm="ref-title"/> и <link linkend="dialogs" endterm="dialogs-title"/> помогут вам получить
+  большинство выходов в TortoiseCVS. 
+(          For pure reference, the chapters <link linkend="ref"
+  endterm="ref-title"/> and <link linkend="dialogs" endterm="dialogs-title"/>
+  will help you get the most out of TortoiseCVS.) 
+        </para>
+      </listitem>
+      <listitem>
+        <para>
+          И, наконец, прочитайте <link linkend="tips" endterm="tips-title"/> для полного и
+          приятного использования системы управления версиями.
+        </para>
+      </listitem>
+    </orderedlist>
+  </section>
+  <section id="begin.bugs">
+  <title id="begin.bugs-title">Ошибки и пропуски в этом Руководстве</title>
+  <para>
+  Это руководство не совершенно, хотя мы постоянно пытались сделать его лучше. Если вы нашли что-либо, что по вашему мнению неправильно, или если вы думаете что это пропущено в руководстве пожалуйста <ulink url="https://sourceforge.net/tracker/?func=add&amp;group_id=48103&amp;atid=451972">сообщите нам</ulink>.
+  (Пожалуйста установите <guilabel>Категорию (Category)</guilabel>) в <literal>Documentation (Документация)</literal>;
+  вы не обязаны включать версию вашей ОС  и CVSROOT).
+</para>
+
+
+  <para>
+<emphasis role="bold">Примечание переводчика 1</emphasis>
+ Ссылка в предыдущем параграфе для английской версии документации. 
+  </para>
+  <para><emphasis role="bold">Примечание переводчика 2. </emphasis>
+Перевод делался "под себя", по этому некоторые разделы пока не переведены, или качество перевода оставляет желать лучшего (машинный подстрочник). Если вы имеете лучший вариант 
+перевода, пожалуйста, пришлите мне его. Вы будете добавлены в соавторы перевода. 
+Об ошибках и не точностях русского перевода, пожалуйста, сообщайте мне на vserd@users.sourceforge.net или еще лучше вносите правки прямо в CVS репозиторий проекта TortoiseCVS с помощью TortoiseCVS!!!.
+</para>
+  </section>
+  
+</chapter>

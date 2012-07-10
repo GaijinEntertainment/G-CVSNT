@@ -1,0 +1,28 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="scci">
+        <DirectoryRef Id="CVSNT_INSTALLDIR" FileSource="$(var.MARCH_HARE)\">
+            <Directory Id="ScciStuff" Name=".">
+                <Component Id="Scci" Guid="B56AE4DD-FFE4-47c1-BD3E-F67C110DABB6" DiskId="4">
+                    <File Id="cvsscci.dll" Name="cvsscci.dll" />
+                    <File Id="scccfg.exe" Name="scccfg.exe">
+                        <Shortcut Id="scccfg.exe" Advertise="no" ShortName="VSNETSCC.LNK" Name="VS.NET &amp; SCCI Integration Preferences.lnk" Directory="CvsntStartMenuFolder" />
+                    </File>
+                    <RegistryValue Id="Scci1" Root="HKLM" Type="string" Key="SOFTWARE\March Hare Software Ltd\Scci Provider" Name="SCCServerName" Value="CVS Suite for CVSNT Server" />
+                    <RegistryValue Id="Scci2" Root="HKLM" Type="string" Key="SOFTWARE\March Hare Software Ltd\Scci Provider" Name="SCCServerPath" Value="[!cvsscci.dll]" />
+                    <RegistryValue Id="Scci3" Root="HKLM" Type="string" Key="SOFTWARE\SourceCodeControlProvider" Name="ProviderRegKey" Value="SOFTWARE\March Hare Software Ltd\Scci Provider" />
+                    <RegistryValue Id="Scci4" Root="HKLM" Type="string" Key="SOFTWARE\SourceCodeControlProvider\InstalledSCCProviders" Name="CVS Suite for CVSNT Server" Value="SOFTWARE\March Hare Software Ltd\Scci Provider" />
+                </Component>
+            </Directory>
+        </DirectoryRef>
+
+        <FeatureRef Id="Cvsnt">
+            <Feature Id="Scci" Title="SCC Plugin" Description="Source control plugin for Visual Studio.NET" AllowAdvertise="no" Level="3">
+                <ComponentRef Id="Scci" />
+                <ComponentRef Id="Msvcr71" />
+                <ComponentRef Id="CvsntStartMenuFolder" />
+            </Feature>
+        </FeatureRef>
+    </Fragment>
+</Wix>

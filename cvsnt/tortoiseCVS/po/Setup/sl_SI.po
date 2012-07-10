@@ -1,0 +1,126 @@
+# TortoiseCVS - enjoyable version control
+# http://www.tortoisecvs.org
+# Slovenian (sl) language .po-file
+#
+# Martin Srebotnjak <miles@filmsi.net>
+msgid ""
+msgstr ""
+"Project-Id-Version: TortoiseCVS Setup\n"
+"POT-Creation-Date: \n"
+"PO-Revision-Date: 2009-04-13 16:34+0100\n"
+"Last-Translator: Martin Srebotnjak  <milrs@filmsi.net>\n"
+"Language-Team: Martin Srebotnjak <miles@filmsi.net>\n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=utf-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=4; plural=(n%100==1 ? 1 : n%100==2 ? 2 : n%100==3 || n%100==4 ? 3 : 0);\n"
+"X-Poedit-Language: Slovenian\n"
+"X-Poedit-Country: SLOVENIA\n"
+"X-Poedit-SourceCharset: iso-8859-1\n"
+
+#: ../build/TortoiseCVS.iss:63
+msgid "Main Files"
+msgstr "Glavne datoteke"
+
+#: ../build/TortoiseCVS.iss:64
+msgid "Custom Icons"
+msgstr "Ikone po meri ..."
+
+#: ../build/TortoiseCVS.iss:75
+#: ../build/TortoiseCVS.iss:348
+msgid "XP-style rounded"
+msgstr "Zaobljene v slogu XP"
+
+#: ../build/TortoiseCVS.iss:76
+#: ../build/TortoiseCVS.iss:349
+msgid "Classic TortoiseCVS"
+msgstr "Klasični TortoiseCVS"
+
+#: ../build/TortoiseCVS.iss:77
+msgid "Daniel Jackson DanAlpha"
+msgstr "Daniel Jackson DanAlpha"
+
+#: ../build/TortoiseCVS.iss:78
+#: ../build/TortoiseCVS.iss:351
+msgid "Chinese characters"
+msgstr "Kitajski znaki"
+
+#: ../build/TortoiseCVS.iss:79
+msgid "Translations"
+msgstr "Prevodi"
+
+#: ../build/TortoiseCVS.iss:101
+msgid "Pageant SSH agent"
+msgstr "Agent Pageant SSH"
+
+#: ../build/TortoiseCVS.iss:354
+msgid "Error"
+msgstr "Napaka"
+
+#: ../build/TortoiseCVS.iss:410
+msgid "Help"
+msgstr "Pomoč"
+
+#: ../build/TortoiseCVS.iss:411
+msgid "User Guide (English)"
+msgstr "Uporabniški vodnik (angleški)"
+
+#: ../build/TortoiseCVS.iss:412
+msgid "User Guide (French)"
+msgstr "Uporabniški vodnik (francoski)"
+
+#: ../build/TortoiseCVS.iss:413
+msgid "User Guide (Russian)"
+msgstr "Uporabniški vodnik (ruski)"
+
+#: ../build/TortoiseCVS.iss:414
+msgid "User Guide (Simplified Chinese)"
+msgstr "Uporabniški vodnik (kitajski, poenostavljeno)"
+
+#: ../build/TortoiseCVS.iss:415
+msgid "Preferences"
+msgstr "Nastavitve"
+
+#: ../build/TortoiseCVS.iss:416
+msgid "About"
+msgstr "O programu"
+
+#: ../build/TortoiseCVS.iss:430
+msgid "Are you sure you want to completely remove %1 and all of its components?%n%nPLEASE NOTE that uninstalling requires a reboot. If you want to install another version of TortoiseCVS, there is no need to uninstall first."
+msgstr "Ste prepričani, da želite popolnoma odstraniti %1 in vse njegove komponente?%n%nUPOŠTEVAJTE, da odstranitev zahteva ponoven zagon sistema. Če želite namestiti drugo različico TortoiseCVS, ni potrebe po predhodni odstranitvi."
+
+#: ../build/TortoiseCVS.iss:433
+msgid "Preparing for installation"
+msgstr "Priprava na namestitev"
+
+#: ../build/TortoiseCVS.iss:434
+msgid "As part of the installation, Windows Explorer needs to be restarted.%nThe installer can do this for you, or you can restart Windows instead at the end of the installation."
+msgstr "Kot del namestitve je potrebno ponovno zagnati Raziskovalca.%nNamestitveni program lahko to naredi namesto vas takoj ali pa ponovno zaženite Windows po koncu namestitve."
+
+#: ../build/TortoiseCVS.iss:435
+msgid "Restart Windows Explorer when necessary"
+msgstr "Ponovno poženi Raziskovalca, če je potrebno"
+
+#: ../build/TortoiseCVS.iss:436
+msgid "Restart Windows after installation"
+msgstr "Po namestitvi ponovno zaženi sistem"
+
+#: ../build/TortoiseCVS.iss:437
+msgid "Finishing the installation"
+msgstr "Dokončanje namestitve"
+
+#: ../build/TortoiseCVS.iss:438
+msgid "Restarting Windows Explorer"
+msgstr "Ponovno poganjanje Raziskovalca"
+
+#~ msgid "TortoiseCVS is already installed, so Windows Explorer needs to be restarted."
+#~ msgstr "TortoiseCVS je že nameščen, tako da je potrebno ponovno pognati Raziskovalca."
+#~ msgid "To finish the installation, Windows Explorer needs to be restarted."
+#~ msgstr "Za dokončanje namestitve je potrebno ponovno zagnati Raziskovalca."
+#~ msgid "The installer can do this for you now, or you can restart Windows instead."
+#~ msgstr "Namestitveni program lahko naredi to namesto vas ali pa ponovno zaženite Windows."
+
+#, fuzzy
+#~ msgid "This release of TortoiseCVS does not support 64-bit Windows.%nYou will only be able to use TortoiseCVS from the 32-bit Explorer.%nYou should download the x64 installer instead.%nProceed with the installation?"
+#~ msgstr "Ta izdaja TortoiseCVS uradno ne podpira 64-bitni Windows.%nTortoiseCVS boste lahko uporabljali le v 32-bitnem Raziskovalcu.%nŽelite nadaljevati z namestitvijo?"
+

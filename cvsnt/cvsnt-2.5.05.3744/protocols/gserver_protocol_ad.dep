@@ -1,0 +1,31 @@
+# Microsoft Developer Studio Generated Dependency File, included by gserver_protocol_ad.mak
+
+.\common.c : \
+	"..\src\cvsroott.h"\
+	"..\windows-NT\config.h"\
+	".\common.h"\
+	".\protocol_interface.h"\
+	"c:\program files\microsoft sdk\include\basetsd.h"\
+	"c:\program files\microsoft sdk\include\guiddef.h"\
+	"c:\program files\microsoft sdk\include\propidl.h"\
+	"c:\program files\microsoft sdk\include\reason.h"\
+	"c:\program files\microsoft sdk\include\stralign.h"\
+	"c:\program files\microsoft sdk\include\tvout.h"\
+	"c:\program files\microsoft sdk\include\winefs.h"\
+	"c:\program files\microsoft sdk\include\wspiapi.h"\
+	
+
+.\pserver.c : \
+	"..\src\cvsroott.h"\
+	"..\windows-NT\config.h"\
+	".\common.h"\
+	".\protocol_interface.h"\
+	".\scramble.h"\
+	"c:\program files\microsoft sdk\include\basetsd.h"\
+	"c:\program files\microsoft sdk\include\guiddef.h"\
+	"c:\program files\microsoft sdk\include\propidl.h"\
+	"c:\program files\microsoft sdk\include\reason.h"\
+	"c:\program files\microsoft sdk\include\stralign.h"\
+	"c:\program files\microsoft sdk\include\tvout.h"\
+	"c:\program files\microsoft sdk\include\winefs.h"\
+	

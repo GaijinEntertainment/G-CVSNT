@@ -1,0 +1,109 @@
+HOWTO for CVSNT Helpfile compilation on Windows (Win32)
+----------------------------------------------------------------
+Bo Berglund 2005-02-13
+
+
+This is a list of the things I had to do in order to compile the CVSNT helpfiles.
+The steps below resulted in a working system which could compile the helpfiles correctly.
+
+
+1.  The cvsnt source module must be checked out fom cvs.cvsnt.org
+    Obviously this step is done if you are reading this message.
+
+2.  Now a number of GNU files must be downloaded. I managed with these:
+2.1 sed
+    http://sed.sourceforge.net/grabbag/ssed/sed-3.59.zip
+    Extract the exe file into a dir on your path and rename it to sed.exe
+    For example you can use C:\OpenSource\bin
+
+2.2 xsltproc
+    ftp://xmlsoft.org/win32/libxslt-1.1.12.win32.zip
+    Extract it into a dir like C:\OpenSource\
+    Rename the resulting folder to C:\OpenSource\libxslt to keep paths shorter
+
+2.3 zlib
+    ftp://xmlsoft.org/win32/zlib-1.2.1.win32.zip  
+    Extract it into a dir like C:\OpenSource\
+    Rename the resulting folder to C:\OpenSource\zlib to keep paths shorter
+   
+2.4 libxml2
+    ftp://xmlsoft.org/win32/libxml2-2.6.17.win32.zip
+    Extract it into a dir like C:\OpenSource\
+    Rename the resulting folder to C:\OpenSource\libxml2 to keep paths shorter
+
+2.5 Support files from docbook-xsl-1.68.0.zip:
+    http://prdownloads.sourceforge.net/docbook/docbook-xsl-1.68.0.zip?download
+    Extract it into a dir like C:\OpenSource\
+    Rename the resulting folder to C:\OpenSource\docbook-xsl to keep paths shorter
+
+3   The help compiler is also needed
+3.1 hhc.exe and hha.dll
+    This is the html help compiler from Microsoft. It is sometimes distributed
+    along with other dev tools so you might already have it, otherwise it apparently
+    can be downloaded from Microsoft. Copy it into a dir on your path
+    You can use C:\OpenSource\bin for example
+    Note that the hha.dll file must also be copied, it is usually located in system32
+   
+4.  ENVIRONMENT VARIABLES
+4.1 Add a variable DOCBOOK to your environment with the value = <path to docbook-xsl>:
+    DOCBOOK=C:\OpenSource\docbook-xsl
+
+4.2 PATH variable
+    Add the following to your path (modify according to where you put the files):
+    C:\OpenSource\bin  (for sed and possibly hhc)
+    C:\OpenSource\libxslt\bin
+    C:\OpenSource\zlib\bin
+    C:\OpenSource\libxml2\bin
+    
+
+5.  Build file
+    The build.bat file from the cvsnt module is not working right off the bat because it uses
+    cygwin in order to unixify the commands. But I have modified so it works provided
+    the measures above are taken. The modified build.bat file is checked in as buildchm.bat
+    and contains this:
+    
+@echo off
+rem Check that we have the needed environment variable and command line arguments
+if '%1'=='' goto errorparm1
+if '%2'=='' goto errorparm2
+if '%DOCBOOK%'=='' goto errordocbook
+
+echo Removing and recreating temp folder with contents
+rmdir /q /s _tmp
+mkdir _tmp
+cd _tmp
+echo Running sed on the %1.dbk file
+sed "s/__VERSION__/%2/" <..\%1.dbk >%1.dbk
+echo Now processing with xsltproc.exe
+xsltproc %DOCBOOK%\htmlhelp\htmlhelp.xsl %1.dbk
+echo Compiling the help file
+hhc htmlhelp.hhp
+echo Copy result to final file %1.chm
+copy htmlhelp.chm ..\%1.chm
+cd ..
+rem rmdir /q /s _tmp
+goto exit
+
+:errorparm1
+echo Missing parameter1 specifying which dbk file to process
+goto exit
+
+:errorparm2
+echo Missing parameter2 specifying which version number to embed in help file
+goto exit
+
+:errordocbook
+echo Missing variable DOCBOOK specifying where to find the docbook templates
+goto exit
+
+:exit
+
+6.  Running the help compilation
+    The buildchm.bat file is called from a command window inside the cvsnt/doc folder:
+    buildchm.bat cvs 2.0.62
+    where the first argument is the name (without extension) of the dbk file to convert
+    and the second argument is the version string to embed in the help file.
+    
+    There are two dbk files to convert, cvs.dbk and cvsclient.dbk so there are 2 runs
+    needed.
+    

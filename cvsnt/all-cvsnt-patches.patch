@@ -1,0 +1,142 @@
+Index: cvsnt-2.5.05.3744/configure.in
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/configure.in,v
+retrieving revision 1.1
+diff -u -r1.1 configure.in
+--- cvsnt-2.5.05.3744/configure.in	8 Feb 2012 10:46:40 -0000	1.1
++++ cvsnt-2.5.05.3744/configure.in	8 Feb 2012 10:50:53 -0000
+@@ -369,18 +369,9 @@
+ AC_SUBST(LIBXML_LIBS)
+ 
+ # Check for pcre posix library
+-saved_libs="$LIBS"
+-LIBS=""
+-AC_SEARCH_LIBS(pcre_compile, pcreposix, [AC_MSG_CHECKING([for PCRE posix library])
+-     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <pcreposix.h>]], [[int i;]])],[ac_cv_have_pcre="yes"],[])
+-     AC_MSG_RESULT($ac_cv_have_pcre)], ac_cv_have_pcre="no")
+-PCRE_LIBS="$LIBS"
+-LIBS="$saved_libs"
++PKG_CHECK_MODULES(PCRE, libpcreposix)
++AC_SUBST(PCRE_CFLAGS)
+ AC_SUBST(PCRE_LIBS)
+-
+-if test x$ac_cv_have_pcre = xno; then
+-  AC_MSG_ERROR([requires pcre])
+-fi
+ 
+ dnl Some implementations make the second argument of iconv non-const for no
+ dnl sane reason
+Index: cvsnt-2.5.05.3744/cvsapi/Makefile.am
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/cvsapi/Makefile.am,v
+retrieving revision 1.1
+diff -u -r1.1 Makefile.am
+--- cvsnt-2.5.05.3744/cvsapi/Makefile.am	8 Feb 2012 10:46:40 -0000	1.1
++++ cvsnt-2.5.05.3744/cvsapi/Makefile.am	8 Feb 2012 10:50:53 -0000
+@@ -10,7 +10,7 @@
+ 
+ SUBDIRS=db $(MDNS_SUBDIR)
+ 
+-pcre_inc = 
++pcre_inc = @PCRE_CFLAGS@
+ pcre_lib = @PCRE_LIBS@
+ libxml_lib = @LIBXML_LIBS@
+ zlib_lib = @ZLIB_LIBS@
+Index: cvsnt-2.5.05.3744/cvsapi/cvs_string.h
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/cvsapi/cvs_string.h,v
+retrieving revision 1.1
+diff -u -r1.1 cvs_string.h
+--- cvsnt-2.5.05.3744/cvsapi/cvs_string.h	8 Feb 2012 10:46:40 -0000	1.1
++++ cvsnt-2.5.05.3744/cvsapi/cvs_string.h	8 Feb 2012 10:50:53 -0000
+@@ -24,6 +24,7 @@
+ #include <queue>
+ #include <stdarg.h>
+ #include <string.h>
++#include <cstdio>
+ 
+ #include "ServerIO.h"
+ 
+Index: cvsnt-2.5.05.3744/lockservice/server.cpp
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/lockservice/server.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 server.cpp
+--- cvsnt-2.5.05.3744/lockservice/server.cpp	8 Feb 2012 10:46:42 -0000	1.1
++++ cvsnt-2.5.05.3744/lockservice/server.cpp	8 Feb 2012 10:50:54 -0000
+@@ -325,7 +325,7 @@
+ 		NotifySCM(SERVICE_RUNNING, 0, 0);
+ #endif
+ 
+-	while(!g_bStop && listen_sock.accept(1000))
++	while(!g_bStop && listen_sock.accept(15000))
+ 	{
+ 		for(size_t n=0; n<listen_sock.accepted_sockets().size(); n++)
+ 			start_thread(listen_sock.accepted_sockets()[n].Detach());
+Index: cvsnt-2.5.05.3744/src/commit.cpp
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/src/commit.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 commit.cpp
+--- cvsnt-2.5.05.3744/src/commit.cpp	8 Feb 2012 10:46:46 -0000	1.1
++++ cvsnt-2.5.05.3744/src/commit.cpp	8 Feb 2012 10:50:56 -0000
+@@ -555,7 +555,6 @@
+ 	 */
+ 	if (use_editor)
+ 	{
+-		mhadvertise=1;
+ 	    do_editor (".", &saved_message, (char *)NULL, find_args.ulist);
+ 	}
+ 
+Index: cvsnt-2.5.05.3744/src/filesubr.cpp
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/src/filesubr.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 filesubr.cpp
+--- cvsnt-2.5.05.3744/src/filesubr.cpp	8 Feb 2012 10:46:46 -0000	1.1
++++ cvsnt-2.5.05.3744/src/filesubr.cpp	8 Feb 2012 10:50:56 -0000
+@@ -1229,7 +1229,7 @@
+ /* Return a pointer into PATH's last component.  */
+ const char *last_component (const char *path)
+ {
+-    char *last = strrchr (path, '/');
++    char *last = strrchr ((char *)path, '/');
+     
+     if (last && (last != path))
+         return last + 1;
+Index: cvsnt-2.5.05.3744/src/server.cpp
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/src/server.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 server.cpp
+--- cvsnt-2.5.05.3744/src/server.cpp	8 Feb 2012 10:46:47 -0000	1.1
++++ cvsnt-2.5.05.3744/src/server.cpp	8 Feb 2012 10:50:57 -0000
+@@ -2749,6 +2749,12 @@
+  */
+ static int check_command_legal_p (const char *cmd_name)
+ {
++/*
++ * GAIJIN: disable watch
++ */
++if (cmd_name && (strcmp(cmd_name, "edit")==0 || strcmp(cmd_name, "unedit")==0 || strcmp(cmd_name, "watch")==0))
++    return 0;
++
+     /* Right now, only pserver notices illegal commands -- namely,
+      * write attempts by a read-only user.  Therefore, if CVS_Username
+      * is not set, this just returns 1, because CVS_Username unset
+Index: cvsnt-2.5.05.3744/src/subr.cpp
+===================================================================
+RCS file: /cvs/cvsnt/cvsnt-2.5.05.3744/src/subr.cpp,v
+retrieving revision 1.1
+diff -u -r1.1 subr.cpp
+--- cvsnt-2.5.05.3744/src/subr.cpp	8 Feb 2012 10:46:47 -0000	1.1
++++ cvsnt-2.5.05.3744/src/subr.cpp	8 Feb 2012 10:50:57 -0000
+@@ -1239,7 +1239,7 @@
+ 		if(err==EWOULDBLOCK)
+ 		{
+ 			fd_set fds;
+-			struct timeval tv = { 0,1000 };
++			struct timeval tv = { 15000,0 };
+ 			FD_ZERO(&fds);
+ 			FD_SET(sock,&fds);
+ 			err = select(sock,NULL,&fds,NULL,&tv);

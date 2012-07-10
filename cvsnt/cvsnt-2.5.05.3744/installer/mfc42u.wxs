@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="mfc42u">
+        <DirectoryRef Id="COMMON_INSTALLDIR" FileSource="$(var.CVSNT_BASE)\sysfiles\">
+            <Component Id="Mfc42u" Guid="cf0a2ef0-03ae-40ed-9e96-1222c6a80087" DiskId="1">
+                <File Id="mfc42u.dll" Name="mfc42u.dll" />
+            </Component>
+        </DirectoryRef>
+    </Fragment>
+</Wix>
+

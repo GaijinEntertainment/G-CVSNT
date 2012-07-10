@@ -1,0 +1,525 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- $Revision: 1.1 $ -->
+
+<!-- ====== Basic Usage of TortoiseCVS ========================================= -->
+
+<chapter id="basic">
+  <title id="basic-title">Основы использования TortoiseCVS</title>
+
+    <!-- ====== Sandboxes ====================================================== -->
+
+    <section id="basic.sandbox">
+      <title id="basic.sandbox-title">Песочницы (Sandboxes)</title>
+      <para>
+        CVS имеет уникальный метод работы, отличный от большинства других систем управления версиями, в котором разработчики могут редактировать одни и те же файлы одновременно. Сначала вы
+<link linkend="basic.checkout"><emphasis>Извлекаете (Checkout)</emphasis></link> версию исходного 
+кода из хранилища в локальную копию на вашем компьютере. Эта локальная копия называется 
+<emphasis>песочницей (sandbox)</emphasis>.
+      </para>
+      <para>
+Затем вы можете просто редактировать файлы которые хотите изменить. Вы можете <link
+      linkend="basic.add"><emphasis>Добавить</emphasis></link> новые файлы или удалить 
+файлы в которых вы больше не нуждаетесь. Когда вы все сделаете, вы <link
+      linkend="basic.commit"><emphasis>Фиксируете (Commit)</emphasis></link> изменения в репозитории.
+      </para>
+      <para>
+Если кто-либо еще изменил тот же файл, пока вы работали  над ним, сохранение не пройдет.
+Вы должны будете <link linkend="basic.update"><emphasis>Обновить (Update)</emphasis></link> 
+все файлы исходного кода из репозитория. В этом случае произойдет автоматическое объединение 
+изменений сделаных другими разработчиками с вашими, в вашей копии файла.
+      </para>
+      <para>
+Иногда CVS не может сделать это автоматически, например если оба разработчика изменили одну и туже строку кода. Такая ситуация называется <link linkend="basic.conflict"><emphasis>Конфликтом (Conflict)</emphasis></link>. Конфликты возникают менее часто чем вы можете ожидать. CVS помещает обе версии конфликтного кода в файл, маркирует и разделяет их. Затем вы вручную редактируете файл  для разрешения конфликта перед сохранением изменений.
+      </para>
+      <para>
+Этот метод работы имеет множество преимуществ. Каждый разработчик живет в своей песочнице. Изменения, которые делают другие разработчики, изолированы от ваших до тех пор, пока вы не сохраните свои изменения. Это предотвращает ситуацию "бутылочное горлышко", когда человек не может сделать сохранение изменений, потому что кто-то другой занял файл для редактирования. Любой разработчик может работать с файлами без прямого доступа к серверу, он нуждается в соединении только для обновлений или сохранения.  
+      </para>
+    </section>
+
+    <!-- ====== Checking out a Module ========================================== -->
+
+    <section id="basic.checkout">
+      <title id="basic.checkout-title">Извлечение модуля</title>
+      <para>
+        Для получение модуля из сервера CVS в первый раз, называемое также извлечением (checkout). Извлечение модуля из репозитория создает локальную песочницу. 
+      </para>
+      <figure>
+        <title>Диалог Извлечение (Checkout) </title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0001.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Извлечение (Checkout)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Для выполнения извлечения, щелкните правой клавишей мыши на папке, в которую вы хотите поместить модуль, выберите  <guimenuitem>CVS Checkout...</guimenuitem> из всплывающего меню. Появится <link linkend="dialogs.checkout" endterm="dialogs.checkout-title"/>  со следующими полями:
+      </para>
+      <itemizedlist>
+        <listitem>
+          <para>
+            <guilabel>Протокол (Protocol)</guilabel> Протокол который используется для связи с удаленным CVS репозитории.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Параметры протокола (Protocol parameters)</guilabel> Это поле доступно только для некоторых протоколов, на данный момент <literal>:sserver:</literal> и <literal>:sspi:</literal>. В некоторых комбинациях различных версий CVS клиента и сервера или ограничений firewall-ов, возможно, возникнет необходимость ввести дополнительную информацию в это поле для обеспечения возможности соединения с CVS сервером. Ваш администратор CVS сервера должен очень хорошо знать когда это нужною.
+          </para>
+          <para>
+Обратите внимание что для  протокола <literal>:ext:</literal> здесь не возможно указать дополнительные параметры. Это техническое ограничение, из-за того что <literal>:ext:</literal> был так сделан. Вместо ввода параметров в это поле, параметры могут быть установлены в диалоге  
+Preferences на вкладке <link linkend="dialogs.preferences.tools">Tools</link>.
+          </para>
+        </listitem>
+
+        <listitem>
+          <para>
+            <guilabel>Сервер (Server)</guilabel> Имя сервера накотором расположено удаленный репозиторий CVS.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Порт (Port)</guilabel> Порт для удаленного репозитория CVS. Обычно не требуется.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Каталог репозитория (Repository Directory)</guilabel>Расположение CVS репозитория на удаленным сервере.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Имя пользователя (User name)</guilabel>Имя вашей учетной записи для CVS репозитория.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>CVSROOT</guilabel> Полная строка для соединения, составлена из всех вышеперечисленных полей. Часто вы получаете строку подключения в этом формате, вы можете вставить ее здесь.
+          </para>
+        </listitem>
+        <listitem>
+          <para>
+            <guilabel>Модуль (Module)</guilabel> Имя модуля который вы хотите получить. Имя модуля регистро-чувствительное.
+          </para>
+        </listitem>
+      </itemizedlist>
+      <para>
+        Вы должны узнать эту информацию в движении. (
+You will need to know this information in advance.) Многие проекты должны иметь некоторую документацию (часто в online) о том как соединиться и извлечь их модули. Дополнительно, ваш ведущий программист или менеджер проекта должны предоставить вам эту информацию.
+      </para>
+      <para>
+      Исключение из этого, это имя модуля - в зависимости установок от вашего сервера CVS, вы можете найти имя модуля в раскрывающемся списке после того, как нажмете на <guilabel>Получить список... (Fetch list...)</guilabel> (более детально смотри <link linkend="cmd.modulelist" endterm="cmd.modulelist-title"/>).
+      </para>
+      <para>
+        <emphasis role="bold">Примечание</emphasis>: Намного проще выбрать настройки извлечения сейчас, чем позже перемещать ваш проект на другой сервер или другой протокол. Например, если ваш сервер предлагает два различных CVS протокола, убедитесь что вы выбрали один, который лучше всего подходит для ваших целей.
+      </para>
+      <para>
+        При извлечении модуля, внутри папки извлечения, будет создана папка с именем модуля, так что вы можете сохранять все ваши извлеченные (checked out) модули в одной папке, даже если они относятся к разным проектам.
+(        A folder named after the module will be created within the folder you checkout to, so you can keep all your checked out modules in the same folder, even if they are for different projects.) 
+      </para>
+      <para>
+        Более подробно смотри <link linkend="ref.checkout" endterm="ref.checkout-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Windows Explorer and TortoiseCVS =============================== -->
+
+    <section id="basic.winexplorer">
+      <title id="basic.winexplorer-title">Проводник Windows (Windows Explorer) и TortoiseCVS</title>
+      <para>
+        Имея извлеченный модуль мы можем исследовать как TortoiseCVS работает с <productname>Windows</productname>. Вы заметили что ваши файлы отображаются в Проводнике с различными иконками. Дополнительно, если вы используете <productname>Windows 2000</productname> или <productname>Windows XP</productname> вы можете видеть новые столбцы CVS в <emphasis>виде Таблицы (Detail View)</emphasis> (смотри <link linkend="cmd.columns" endterm="cmd.columns-title"/>).
+      </para>
+      <figure>
+        <title>TortoiseCVS и Проводник Windows</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0021.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>TortoiseCVS и Проводник Windows</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Иконки отображают статус папки или файла в CVS. Следующая таблица поясняет статусы каждой иконки. 
+<footnote>
+      <para>Следующая таблица отображает иконки по умолчанию, TortoiseCVS может быть настроен на использование альтернативных наборов иконок &mdash; смотри 
+      <link linkend="customizing.icons" endterm="customizing.icons-title"/>.
+      </para>
+      </footnote>:
+      </para>
+      <table frame="all">
+      <title>Пояснение иконок (Icon Overlays)</title>
+      <tgroup cols="3">
+      <tbody>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0002.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Иконка "Не изменен" </phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Не изменен</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Файл или папка соответствуют версии хранящемуся в CVS репозитории.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0003.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Иконка "Изменен"</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Изменен</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Файл или папка отличаются от версии находящейся в репозитрии (был изменён).
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0039.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Иконка "Добавлен"</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Добавлен</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Файл или папка был добавлен в CVS, но изменения не сохранены (commited).
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0004.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Иконка "Конфликт"</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Конфликт</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Файл или папка имею конфликт с текущей версией, хранящейся в CVS.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0005.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Иконка "Не в CVS"</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Не в CVS</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Файл или папка не находятся в репозитории CVS.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0006.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>CVS Watch Icon Overlay</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>CVS Watch Icon Overlay</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Файл или папка управляется CVS Watch (The file or folder is controlled under CVS Watch).
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0016.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Иконка "Игнорировать"</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              <emphasis>Игнорировать</emphasis>
+            </para>
+          </entry>
+          <entry>
+            <para>
+              Файл или папка игнорируются CVS.
+            </para>
+          </entry>
+        </row>
+      </tbody>
+      </tgroup>
+      </table>
+      <para>
+        Вы взаимодействуете с TortoiseCVS Через контекстное меню, вызываемое щелчком правой клавиши мыши. С файлами и папками операция выполняется в зависимости от того, что вы выделили и какую команду вы выбрали:
+      </para>
+      <table frame="all">
+      <title>Контекст правой мыши в зависимости от выделения</title>
+      <tgroup cols="2">
+      <tbody>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0008.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Выделеный(-е) файл(-ы)</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              Выделен один или больше файлов, операция выполняется над этими файлами.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0009.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>Выделена(-ы) папка(-и)</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              Выделены одна или более папок, операция выполняется над этими папками и файлами или папками содержащихся в них.
+            </para>
+          </entry>
+        </row>
+        <row>
+          <entry>
+            <mediaobject>
+              <imageobject>
+              <imagedata fileref="figure/img0010.gif" format="GIF"></imagedata>
+              </imageobject>
+              <textobject>
+                <phrase>В любом другом месте окна Проводника</phrase>
+              </textobject>
+            </mediaobject>
+          </entry>
+          <entry>
+            <para>
+              Где ни будь в пределах окна Проводника, операция выполняется над всеми файлами и папками в пределах представления. (Anywhere else within the Explorer pane, the operation is performed the operation on all files and folders within the view).
+            </para>
+          </entry>
+        </row>
+      </tbody>
+      </tgroup>
+      </table>
+    </section>
+
+    <!-- ====== Total Commander and TortoiseCVS =============================== -->
+
+    <section id="basic.wincommander">
+      <title id="basic.wincommander-title">Total Commander and TortoiseCVS</title>
+      <para>
+Популярный файловый менеджер <productname>Total Commander</productname> ранее известный как Windows Commander также работает с TortoiseCVS. Мы рекомендуем чтобы вы вошли в меню настроек, и установили выделение мышью на "Левой кнопкой (как принято в Windows)".
+      </para>
+    </section>
+
+    <!-- ====== Updating your Sandbox ========================================== -->
+
+    <section id="basic.update">
+      <title id="basic.update-title">Обновление вашей Песочницы</title>
+      <para>
+        Время от времени вы хотите получить изменения сделанные другими разработчиками, и интегрировать их в вашу локальную рабочую копию. Процесс получения изменений от сервера в вашу локальную копию известен как <link linkend="ref.update">Обновление (Updating)</link>. Обновление может быть сделано над одним файлом, набором выделенных файлов или рекурсивно по всей иерархии папок. Для обновления выделите нужные файлы или папки, из контекстного меню выберите  <guimenuitem>CVS Обновить (CVS Update)</guimenuitem>. Появится диалог <link linkend="dialogs.progress" endterm="dialogs.progress-title"/> отображающий процесс обновления.
+      </para>
+      <figure>
+        <title>Обновление файлов и папок</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0011.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Обновление файлов и папок</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Изменения сделанные другими будут объединены в ваши файлы, сохраняя любые изменения, которые в сделали в этих файлах. Репозиторий <emphasis>НЕ </emphasis> затрагивается во время операции обновления.
+      </para>
+      <para>
+        Если вы получаете уведомление об конфликте во время обновления, пожалуйста прочитайте 
+      <link linkend="basic.conflict" endterm="basic.conflict-title"/>.
+      </para>
+      <para>
+        Более подробно смотри <link linkend="ref.update" endterm="ref.update-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Committing your Changes to the Repository ====================== -->
+
+    <section id="basic.commit">
+      <title id="basic.commit-title">Сохранение ваших изменений в Репозитории</title>
+      <para>
+        Передача локальных изменений в хранилище именуется  
+      <emphasis>Фиксацией (committing)</emphasis> изменений. Перед сохранением вы должны обновить локальную копию, для того, чтобы убедиться в отсутствии конфликтов (с.м. 
+<link linkend="basic.update" endterm="basic.update-title"/>). 
+      </para>
+      <para>
+        Для фиксации ваших изменений начните с выделения файла(-ов) или папки(-ок) которые вы хотите зафиксировать. Сделайте правый щелчок мышью на выделении и выберите пункт меню <guimenuitem>CVS Зафиксировать (CVS Commit...)</guimenuitem> 
+      </para>
+      <figure>
+        <title>Диалог Зафиксировать (Commit)</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0007.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Зафиксировать (Commit)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Вам будет показан <link linkend="dialogs.commit" endterm="dialogs.commit-title"/> где вы можете ввести краткое описание что вы изменили.
+Вы также можете исключить файлы из операции сохранения, сняв флажок. После того, как вы удовлетворены тем что вы сохраняете, нажмите <guibutton>OK</guibutton> в диалоге для начала операции сохранения.
+      </para>
+      <para>
+  Пожалуйста запомните что сохранение изменений, автоматически не добавляет новые файлы, которые вы создали, в репозитарий. Смотри <link linkend="basic.add" endterm="basic.add-title"/> для добавления файлов. 
+      </para>
+      <para>
+        Более подробно смотри  <link linkend="ref.commit" endterm="ref.commit-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Resolving Conflicts ================= -->
+
+    <section id="basic.conflict">
+      <title id="basic.conflict-title">Разрешение конфликтов (Resolving Conflicts)</title>
+      <para>
+Иногда, при обновлении файлов из репозитория, CVS сервер будет уведомлять о конфликтах. Конфликт возникает когда двое или более разработчиков делают изменения в одних и тех же строках файла. Так как CVS ничего не знает об вашем проекте, он предоставляет разрешение конфликтов разработчику.
+      </para>
+      <para>
+      Каждый конфликтный файл помечается  "C" в диалоге прогресса (с.м. <link linkend="dialogs.progress" endterm="dialogs.progress-title"/>). Когда обновление завершено, отображается диалог Разрешения конфликтов: 
+      </para>
+      <figure>
+        <title>Диалог Разрешение конфликтов (Resolve Conflicts)</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0044.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Разрешение конфликтов (Resolve Conflicts)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      Правый щелчок на файлах с конфликтами и выберите <guimenuitem>Merge Conflicts...(вставить название русского меню)</guimenuitem>. TortoiseCVS вызовет программу слияния, которую вы указали в <link linkend="dialogs.preferences.tools"> CVS &rarr; Настройки &rarr; Вспомогательные приложения  &rarr; Приложение для слияния (CVS &rarr; Preferences &rarr; Tools &rarr; Merge application</link>.
+Исправив каждый конфликт, сохраните итоговый файл, и выйдите из приложения слияния.
+TortoiseCVS потребует подтверждения о том, что вы хотите сохранить результаты слияния.
+      </para>
+      <para>
+      Вы также можете вызвать этот диалог после закрытия диалога прогресса щелкнув правой клавишей мыши на песочнице и выбрав пункт меню <guimenuitem>CVS &rarr; Resolve Conflicts...  (CVS &rarr;(вставить название русского меню)</guimenuitem>.
+      </para>
+    </section>
+
+    <!-- ====== Adding Files and Directories to the Repository ================= -->
+
+    <section id="basic.add">
+      <title id="basic.add-title">Добавление файлов и папок в репозиторий</title>
+      <para>
+        Если вы создали новые файлы или папки вы увидите что они отображаются с иконкой статуса <emphasis>(Не в CVS) Not In CVS </emphasis>(смотри <link linkend="basic.winexplorer"
+      endterm="basic.winexplorer-title"/>). Для помещения новых файлов или папок под контроль CVS выберите элементы которые вы хотите добавить, и выберите из контекстного меню <guimenuitem>CVS Добавить (CVS Add) </guimenuitem>.  Отобразиться <link linkend="dialogs.add" endterm="dialogs.add-title"/> так что вы можете проверить файлы которые вы добавляете.
+      </para>
+      <figure>
+        <title>Диалог Добавить (Add)</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0017.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Добавить (Add)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Вы не должны беспокоиться о том, какого типа файл, Текстовый ASCII,
+      Текстовый Unicode, или двоичный так, как TortoiseCVS автоматически определяет тип. Для более подробными пояснениями  как TortoiseCVS управляет этим см. <link linkend="advanced.binary" endterm="advanced.binary-title"/>. 
+      </para>
+      <para>
+        После того как операция добавления будет выполнена, иконка файла или файлов отображается как "измененный". Это потому, что добавление выполнено как локальное изменение, и не применено к хранилищу до тех пор, пока вы не выполните операцию <link linkend="basic.commit"><emphasis>Фиксации (Commit)</emphasis></link>.
+      </para>
+      <para>
+      Дополнительно, вы можете добавить несколько файлов и папок к CVS используя команду <guimenuitem>CVS Добавить содержимое... (CVS Add Contents...)</guimenuitem>. Эта операция рекурсивно спускается по структуре папок, и отображает все не добавленные файлы в диалоге Добавления. Здесь вы можете пометить или снять пометки с файлов которые вы хотите добавить в CVS.
+      </para>
+      <figure>
+        <title>Диалог Добавить содержимое (Add Contents)</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0036.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Добавить содержимое (Add Contents)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Более подробно смотри <link linkend="ref.add" endterm="ref.add-title"/>.
+      </para>
+    </section>
+</chapter>

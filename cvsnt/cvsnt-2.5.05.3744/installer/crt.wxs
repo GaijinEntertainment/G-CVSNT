@@ -1,0 +1,11 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Fragment Id="crt">
+        <DirectoryRef Id="COMMON_INSTALLDIR">
+            <Merge Id="CRT" Language="0" FileCompression="yes" DiskId="1" SourceFile="$(var.MERGEFILES)/Microsoft_VC80_CRT_x86.msm" />
+            <Merge Id="CRTPolicy" Language="0" FileCompression="yes" DiskId="1" SourceFile="$(var.MERGEFILES)/policy_8_0_Microsoft_VC80_CRT_x86.msm" />
+        </DirectoryRef>
+    </Fragment>
+</Wix>
+

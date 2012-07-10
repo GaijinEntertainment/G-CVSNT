@@ -1,0 +1,24 @@
+From: [email]
+To: [to_user]
+Subject: Notification
+
+User: [user]
+Email: [email]
+Date: [date]
+Hostname: [hostname]
+Repository: [repository]
+CommitId: [commitid]
+Server: [server_hostname]
+Message: [message]
+
+[begin_directory]
+Directory: [directory]
+
+[begin_file]
+Filename: [filename]
+Bugid: [bugid]
+Tag: [tag]
+Notify type: [notify_type]
+
+[end_file]
+[end_directory]

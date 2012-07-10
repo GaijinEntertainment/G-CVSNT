@@ -1,0 +1,16 @@
+#!/bin/sh
+
+if [ -z `grep ^CVSLOCKD /etc/hostconfig` ]; then
+  echo CVSLOCKD=-YES- >>/etc/hostconfig
+fi
+
+ln -sf cvsnt /usr/bin/cvs
+
+# The package installer sets the wrong owner on the files, so we set them here
+chown -R root.wheel /etc/cvsnt /etc/pam.d/cvsnt /etc/xinetd.d/cvspserver /Library/StartupItems/cvslockd /usr/bin/cvsnt /usr/lib/cvsnt /usr/lib/licvsapi*
+
+# Start the services.  I'm assuming server install here (client would
+# use MacCvsX?)
+SystemStarter start cvslockd
+service cvspserver start
+exit 0

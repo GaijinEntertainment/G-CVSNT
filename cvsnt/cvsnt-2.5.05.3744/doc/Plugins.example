@@ -1,0 +1,16 @@
+# This file contains information about the state of the various protocols and external
+# plugins that are available.
+#
+# By default protocols are enabled, and other plugins are disabled.
+
+#EnumProtocol=1			# Remote enumeration (info -r)
+#GserverProtocol=1		# GSSAPI
+#PserverProtocol=1		# Original pserver
+#SserverProtocol=1		# SSL encrypted pserver
+#SspiProtocol=1			# SSPI (via Winbind, if configured)
+#SyncProtocol=1			# Server sync
+
+#AuditTrigger=0			# Audit events to database
+#EmailTrigger=0			# Send emails
+#CheckoutTrigger=0		# Enable CVSROOT/shadow
+

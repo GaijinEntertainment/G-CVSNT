@@ -1,0 +1,481 @@
+<?xml version="1.0" encoding="windows-1251"?>
+<!-- $Revision: 1.1 $ -->
+
+<!-- ====== Advanced Usage of TortoiseCVS ====================================== -->
+
+<chapter id="advanced">
+  <title id="advanced-title">Расширенное использование TortoiseCVS</title>
+
+    <!-- ====== Make New Module ================================================ -->
+
+    <section id="advanced.newmodule">
+      <title id="advanced.newmodule-title">Создание нового Хранилища или Модуля</title>
+      <para>
+        Обычно Системный Администратор устанавливает CVS хранилище на удаленном сервере. TortoiseCVS, однако может конфигурировать хранилища и модули как локально, так и удаленно (если вы имеете правильные права).
+      </para>
+      <para>
+        Для создания нового хранилища и/или модуля, подготовьте папки и файлы локально, как новую песочницу. На папке верхнего уровня для вашего нового модуля или хранилища вызовите контекстное меню, и выберите пункт <guimenuitem>CVS &rarr; Создать новый модуль... (CVS &rarr; Make New Module...)</guimenuitem>. Появится диалог  
+<link linkend="dialogs.newmodule" endterm="dialogs.newmodule-title"/>. Введите подробности для нового или существующего хранилища CVS как вы вводили для <link linkend="basic.checkout"><emphasis>Извлечения</emphasis></link>. Для создания новго модуля нажмите на кнопку <guibutton>OK</guibutton>. 
+      </para>
+      <figure>
+        <title>Диалог Создать новой модуль (Make New Module)</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0019.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Создать новой модуль (Make New Module)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Если вы используете протокол <literal>:local:</literal>, и репозиторий CVS не существует, вам будет показан запрос со следующим вопросом:
+
+      </para>
+      <figure>
+        <title>Запрос на создание нового репозитория </title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0020.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Запрос на создание нового репозитория (Make New Repository Question)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Для создания нового хранилища отметьте чекбокс <guilabel>Инициализировать новый репозиторий здесь (создать папку CVSROOT) (Initialise a new repository here)</guilabel> и нажмите на <guibutton>OK</guibutton>. Если вы имеете правильные права на удаленном сервере, TortoiseCVS создаст новой репозиторий.
+      </para>
+      <para>
+        После того как TortoiseCVS либо создаст новое хранилище, либо подключится к существующему, будет создан новый модуль. По умолчанию TortoiseCVS использует имя выбранной папки для имени нового модуля, но вы можете изменить это модифицировав значение в поле <guilabel>Модуль (Module)</guilabel> 
+      </para>
+    </section>
+
+    <!-- ====== CVS Watch & Edit =============================================== -->
+
+    <section id="advanced.cvswatch">
+      <title id="advanced.cvswatch-title">Наблюдение (Watch), Редактирование (Edit) и Отказ от редактирования (Unedit)</title>
+      <para>
+        CVS  также может следовать семантике  <emphasis>Блокировки/ разблокировки (Lock/Unlock)</emphasis> которую используют большинство систем контроля версий, не смотря на то, что CVS вызывает <emphasis>Edit/Unedit</emphasis>. Однако, эта возможность не активирована по умолчанию, так что вы в случае необходимости должны активировать <emphasis>Watch</emphasis>.
+      </para>
+      <para>
+        Вы можете активировать Наблюдение (Watch) используя TortoiseCVS когда вы <link linkend="advanced.newmodule"> <emphasis>Создаете новый модуль</emphasis></link> активировав чекбокс <guilabel>Check files read-only</guilabel> (на вкладке <guilabel>Options</guilabel>). Если вы желаете разрешить наблюдение в существующем модуле, вы должны выполнить следующую команду (используя Командную строку) в корне (ROOT) модуля: 
+      <programlisting>
+         cvs watch on
+      </programlisting>
+      </para>
+      <para>
+      Когда Наблюдение активировано, и выполняется команда <link linkend="basic.checkout"><emphasis>Извлечение (Checkout)</emphasis></link> или <link linkend="basic.update"><emphasis>Обновление (Update)</emphasis></link> рабочие файлы будут созданы с атрибутом только для чтения. Для изменения одного или больше файлов, выберите папку, файл или файлы которые вы хотите изменить, щелкните правой клавишей мыши на выделении, и выберите 
+пункт меню <guimenuitem>CVS Edit</guimenuitem>. Эта команда работает немного по разному в зависимости от того, файл бинарный или текстовый. Для бинарных файлов (таких как <filename>.doc</filename>), TortoiseCVS выполняет <emphasis>Обновление (Update)</emphasis> для файла и затем проверяет редактирует ли файл другой пользователь.  В этом случае, вам не разрешается изменять его. Для текстовых файлов (таких как <filename>.txt</filename> или <filename>.cpp</filename>), вы можете работать с ними даже если другой пользователь уже работает с ним, в этом случае TortoiseCVS уведомит вас об этом факте.
+      </para>
+      <para>
+      Когда вы закончите работать с файлом или файлами <link linkend="basic.commit"><emphasis>Зафиксируйте (Commit)</emphasis></link> их как обычно. Если однако, вы принимаете решение что вы не хотите делать изменения в выбранном файле или файлах: Щелкните правой клавишей на этом выделении и выберите пункт меню <guimenuitem>CVS &rarr; Unedit</guimenuitem>. TortoiseCVS спросит у вас действительно ли вы хотите вернуть файл в первоначальное состояние (это означает потерю ваших изменений).
+      </para>
+      <para>
+      Если вы хотите посмотреть какие файлы в данный момент редактируются и кем, щелкните правой клавишей мыши где либо в Проводнике и выберите пункт меню <guimenuitem>CVS &rarr; Show edited files</guimenuitem>
+      </para>
+    </section>
+
+    <!-- ====== Tagging ======================================================== -->
+
+    <section id="advanced.tagging">
+      <title id="advanced.tagging-title">Пометка (Tagging) and Labeling</title>
+      <para>
+        At a given stage of development, giving one or more files a common
+      label that refers to their revisions, is known as tagging those
+      files. 
+Пометка обычно используется  внутри модуля, так что текущее состояние модуля может быть востановлено в будущем. Этот вид пометки должен быть всегда сделан в проектах подлежащих сдаче и перед началом больших изменений.
+      </para>
+      <para>
+        Для пометки одного или нескольких файлов или директорий меткой (label), выберите директории, файл или файлы которые вы хотите пометить. Щелкните правой кнопкой мыши на выделении, и выберите пункт меню <guimenuitem> CVS &rarr; Метка..." (CVS &rarr; Tag...)</guimenuitem>  
+      </para>
+      <figure>
+        <title>Диалог Метка</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0012.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Метка</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+Вам будет показан <link linkend="dialogs.tags"
+      endterm="dialogs.tags-title"/>. 
+Здесь вы можете ввести метку в поле  <guilabel>Метка (Tag)</guilabel>. CVS Очень ограничивает какие символы может содержать метка. Метка должна начинаться с буквы, и может содержать только буквы (английские), цифры, "-" (дефис) и "_" (подчеркивание). Метка не может содержать точек и пробелов. Если вы хотите включить номер версии в метку, замените точки на дефисы. Два имени меток зарезервированы, они имеют специальное значение в CVS: "HEAD" ("главный") ссылается на самую последнюю версию, доступную в репозитории и "BASE" -- ссылается на последнюю версию, извлеченную в локальную папку.
+      </para>
+      <para>
+Когда метка будет введена, нажмите кнопку <guibutton>OK</guibutton>. В отличиие от большинства операций в CVS, метка немедленно применяется к репозиторию, и не требует фиксации. 
+      </para>
+      <para>
+        Более подробно смотри: <link linkend="ref.tags" endterm="ref.tags-title"/>.
+      </para>
+    </section>
+
+    <!-- ====== Reverting ====================================================== -->
+
+    <section id="advanced.reverting">
+      <title id="advanced.reverting-title">Возврат к cтарой версии файла</title>
+      <para>
+        Разработчики время от времени нуждаются в отмене изменений которые уже были сохранены в репозитарии. Переход назад к указанной версии файла в TortoiseCVS очень простой:
+        <orderedlist>
+          <listitem>
+	    <para>
+               Сделайте правый щелчок мышью на файле и выберите <guimenuitem>CVS &rarr; History</guimenuitem>. Появится диалог <link linkend="dialogs.history" endterm="dialogs.history-title" />.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+              Правый щелчок мышью на ревизии в которой вы нуждаетесь и выберите "Save this revision as...".
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Когда появится диалог Сохранить как... (Save As...), не нажимайте кнопку "Сохранить", вместо этого, сделайте двойной щелчок на имени файла в отображаемом списке.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Ответьте "Да" ("Yes") когда TortoiseCVS спросит переписать файл или нет. 
+	    </para>
+	  </listitem>
+	</orderedlist>
+      </para>
+    </section>
+
+    <!-- ====== Renaming ====================================================== -->
+
+    <section id="advanced.renaming">
+      <title id="advanced.renaming-title">Переименование или перемещение файла</title>
+      <para>
+Иногда файл может быть добавлен в CVS с неверным именем или в неверное место. Последние ревизии
+<ulink url="http://www.cvsnt.org/wiki">CVSNT</ulink> поддерживают переименование. Если ваш CVS сервер не поддерживает переименования, вы должны скопировать файл с новым именем, и затем выполнить CVS добавление (CVS Add) и CVS удаление (CVS Remove), с последующей фиксацией (CVS Commit).
+      </para>
+      <para>
+Если ваш CVS сервер поддерживает переименование, переименовать файл очень просто:
+        <orderedlist>
+          <listitem>
+	    <para>
+Щелкните правой клавишей мыши на файле и выберите <guimenuitem>CVS &rarr; Переименовать (CVS &rarr; Rename)</guimenuitem>. Отобразится
+	      <link linkend="dialogs.rename" endterm="dialogs.rename-title" />.
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+Введите имя которое вы хотите дать файлу (если вы перемещаете файл, введите нужный относительный путь к файлу).
+	    </para>
+	  </listitem>
+	  <listitem>
+	    <para>
+	      Нажмите <guilabel>OK</guilabel>.
+	    </para>
+	  </listitem>
+	</orderedlist>
+      </para>
+    </section>
+
+    <!-- ====== Branching And Merging ========================================== -->
+
+    <section id="advanced.branching">
+      <title id="advanced.branching-title"> Ветвление и Объединение (Branching And Merging)</title>
+      <para>
+Одно из  свойств систем контроля версий, это возможность изолировать изменения в отдельную линию для разработки. Эта линия известна как <emphasis>Ветвь (Branch)</emphasis>.
+      </para>
+      <para>
+Ветвление полезно для управлением изменениями в процессе жизненого цикла програмного проекта. Например, предположим вы сделали первый релиз вашего програмного проекта под версией 1.0. Вы начали добавлять новые возможности для подготовки следующей версии 2.0. Между вашей начальной версией и новой версией вы нашли ошибку в программе. Текущая ревизия исходных кодов
+находится в не согласованном состоянии, и не будет стабильной как ожидается еще месяц, и нет ни какой возможности сделать исправленый релиз основанный на новейшем коде.
+      </para>
+      <para>
+Вместо попытки сделать исправления в текущей версии или в <emphasis>головной (HEAD)</emphasis> ветке, вы должны создать ветку (branch) в дереве ревизий для всех файлов которые были вовлечены в релиз 1.0. Вы можете затем сделать модификации в ветке без беспокойства о головной ветке. Когда вы закончите изменения, вы можете внедрить их в головную ветку, или оставить их в ветке 1.0 
+      </para>
+
+      <section id="advanced.branching.creating">
+        <title id="advanced.branching.creating-title">Создание Ветки</title>
+      <para>
+Для создания ветки, выберите директорию или файлы которые вы хотите поместить в ветку. Щелчком правой кнопки мыши на выделении вызовите контекстное меню, затем выберите <guimenuitem>CVS
+      &rarr; Ветка... (CVS 
+      &rarr; Branch...)</guimenuitem>
+
+      </para>
+      <figure>
+        <title>Диалог Создать Ветку </title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0013.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Создать Ветку</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+Отобразиться <link linkend="dialogs.branch" endterm="dialogs.branch-title"/>. 
+Где вы можете ввести название в поле <guilabel>Новое имя ветки: (Branch)</guilabel>. Теже самы ограничения которые применяются к <link linkend="advanced.tagging"><emphasis>Меткам (Tags)</emphasis></link>, применяются к веткам. Когда вы ввели желаемое имя ветки нажмите на 
+<guibutton>OK</guibutton>.
+В отличиие от большинства операций в CVS, ветка (branch) немедленно применяется к репозиторию, и не требует фиксации. Однако ветка только применима к репозиторию. Для начала работы над вновь соданной веткой <link linkend="advanced.branching.selecting">выберите ветку для работы</link>. 
+      </para>
+      </section>
+
+      <section id="advanced.branching.selecting">
+        <title id="advanced.branching.selecting-title">Выбор ветки для работы</title>
+      <para>
+Для начала работы над веткой, отличной от линии разработки по умолчанию, вы должны связать вашу локальную копию с веткой. Это нужно для того, чтобы убедиться что такие действия как обновления, фиксация и т.д. работают с веткой, отличной от основной линии разработки.
+      </para>
+      <para>
+Для перемещения вашей локальной копии в другую ветку, выберите папку верхнего уровня проекта. Вы также должны выбрать точную папку и файлы которые являются частью нужной ветки если вы знаете эту информацию. Правый клик на выделении, и выберите <guimenuitem>CVS &rarr;  Обновить особо... (CVS &rarr; Update Special...)</guimenuitem>.
+      </para>
+      <figure>
+        <title>Диалог Обновить особо...</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0014.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Обновить особо...</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+Появится диалог <link linkend="dialogs.updatespecial" endterm="dialogs.updatespecial-title"/>.
+В котором вы можете ввести имя ветви, которую вы хотите выбрать, в поле <guilabel>Get Tag/Branch/Revision</guilabel>. Нажмите кнопку <guibutton>OK</guibutton>, и TortoiseCVS начнет обновление вашей рабочей копии в выбраную ветвь. Обновление может также включать добавление или удаление файлов, в зависимости от состояния ветви.
+      </para>
+      <para>
+        TortoiseCVS помещает так называемые липкие метки (sticky tags) в файлы которые затрагивают ветвь. Для удаления липких меток вы должны <link
+      linkend="advanced.branching.head">вернуться обратно в главную ветвь</link>. 
+      </para>
+      </section>
+
+      <section id="advanced.branching.merging">
+        <title id="advanced.branching.merging-title">Слияние из ветви (Merging from a Branch)</title>
+      <para>
+Когда вы удовлетворены изменениями которые вы сделали в ветви, вы возможно захотите чтобы они были доступны в главной ветви разработки. Внедрение изменений из одной ветви в другую называется слиянием (merging).
+      </para>
+      <para>
+Для слияния из одной ветви, переместите вашу локальную копию в ветвь, в которую вы хотите поместить слияние. Смотрите <link linkend="advanced.branching.selecting"
+      endterm="advanced.branching.selecting-title"/> или <link
+      linkend="advanced.branching.head" endterm="advanced.branching.head-title"/>. 
+Выберите корневую папку проекта. Вы также можете выбрать конкретные папки и файлы которые являются частью нужной ветви, если вы знаете эту информацию. Щелкните правой кнопки мыши на выделении и выберите       <guimenuitem>CVS &rarr; Merge...</guimenuitem>. 
+
+      </para>
+      <figure>
+        <title>Диалог Слияние </title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0015.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Слияние</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+Будет показан <link linkend="dialogs.merge" endterm="dialogs.merge-title"/>.
+В нем вы можете ввести имя ветви из которой вы хотите произвести слияние (в поле <guilabel>Branch to merge from</guilabel>). Нажмите <guibutton>OK</guibutton> и TortoiseCVS выполнит слияние ветви которую вы указали в вашу локальную копию. Ваши изменения не будут выполнены в репозитории до тех пор пока вы не выполните фиксацию.
+      </para>
+      <para>
+Данное слияние  будет пытаться объеденить изменения с начала ветви. Если вы выполнятете операцию во воторой раз (для слияния изменений, сделаных в вети после последнего объедеинения), слияние с начала ветви не является тем, что вы хотите и может вызывать проблемы. Для избежания этой проблемы, вы должны давать ветви новую метку (tag) после каждого слияния, и использовать новую метку когда называете ветвь для последовательных объединений.
+      </para>
+      <para id="advanced.branching.merging.mergepoints" xreflabel="Mergepoints">
+
+      <emphasis>Примечание: </emphasis>выше приведенный параграф применим только для стандартных Unix CVS (таких как cvshome.org CVS). Если ваш сервер CVSNT, вы можете использовать преймущества специальной возможности <emphasis>Точки слияния (merge points)</emphasis>. Это значит что CVS сохраняет след вашего последнего слияния, так что вы можете легко объединять из одной ветви неоднократно. Более подробно об этой возможности см. <ulink
+      url="http://www.cvsnt.org/wiki/MergePoint">CVSNT Wiki </ulink> и
+      the <xref linkend="resources.cvsnt-manual"/>.
+      </para>
+      </section>
+
+      <section id="advanced.branching.head">
+        <title id="advanced.branching.head-title">Возврат в главную ветвь</title>
+        <para>
+Если вы хотите остановить работу над ветвью и переместить вашу локальную копию назад, в главную линию разаработки, вы должны указать TortoiseCVS удалить все липкие метки.
+        </para>
+        <para>
+Для удаления липких меток и, таким образом, обновления вашей локальной копии до основной линии разработки, выберите корневую папку проекта. Вы также можете выбрать конкретные папки и файлы которые являются частью нужной ветви, если вы знаете эту информацию. Щелкните правой кнопкой мыши на выделении и выберите <guimenuitem>CVS &rarr; Update Special...</guimenuitem>.
+        </para>
+        <para>
+Появится диалог  <link linkend="dialogs.updatespecial" endterm="dialogs.updatespecial-title"/>. 
+Выберите чекбокс <guilabel>Return to main (HEAD) branch</guilabel> и нажмите кнопку <guibutton>OK</guibutton>. TortoiseCVS начнет выполнять все необходимые изменения для перемещения вашей рабочей копии назад в главную ветвь.
+        </para>
+      </section>
+    </section>
+
+    <!-- ====== Binary And Unicode Detection =================================== -->
+
+    <section id="advanced.binary">
+      <title id="advanced.binary-title">Обнаружение Двоичных данных и Юникода (Unicode)</title>
+      <para>
+        TortoiseCVS пытается автоматически определить тип файла который вы добавляете в CVS хранилище. Он может определить является ли файл <emphasis>Text/ASCII</emphasis>, <emphasis>Text/Unicode</emphasis>, или <emphasis>Binary</emphasis>. TortoiseCVS сначала проверяет расширение файла, для определения файл двоичный или текстовый. Например <filename>.doc</filename> и <filename>.exe</filename> всегда предполагается двоичным, тогда как другие расширения, Такие как <filename>.cpp</filename> и <filename>.txt</filename>, всегда предполагаются текстовыми. TortoiseCVS делает это используя встроенный список Двоичных и Текстовых расширений, который включает большинство общих расширений файлов. Для изменения этого списка, вы можете скопировать файл <filename>TortoiseCVS.FileTypes</filename> из установочной директории TortoiseCVS в вашу домашнюю директорию, и внести изменения в которых вы нуждаетесь.
+      </para>
+      <para>
+        По умолчанию, TortoiseCVS также проверяет первые 4000 байт файла для определения типа. Это используется если расширение файла не известно. Эти первые несколько  байт также используются для определения является файл текстовым ASCII или текстовым Unicode. 
+      </para>
+      <para>
+        TortoiseCVS также обеспечивает сложный механизм плугинов, так что вы можете реализовать DLL для выполнения определения типа файла. Подробности этого интерфейса плугинов также находятся в <filename>FileTypes.config</filename>. 
+      </para>
+      <para>
+        В любом случае, <link linkend="dialogs.add" endterm="dialogs.add-title"/> отображает файлы которые вы хотите добавить с их типами, так что вы имеете возможность скорректировать выбор.
+      </para>
+    </section>
+
+    <!-- ====== History ======================================================= -->
+
+    <section id="advanced.history">
+      <title id="advanced.history-title">История ревизий файла (File Revision History)</title>
+      <para>
+        TortoiseCVS обеспечивает два метода реферирования и 
+работы с историей файла. Первый через <link linkend="dialogs.history" endterm="dialogs.history-title"/>.
+      </para>  
+      <section id="advanced.history.history">
+      <title id="advanced.history.history-title">Диалог истрорий</title>
+      <para>   
+Вы можете просмотреть историю файла выбрав из контекстного меню <guimenuitem>CVS &rarr; История (CVS &rarr;
+      History)</guimenuitem>. 
+   
+      </para>  
+      <figure>
+        <title>Диалог историй</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0033.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог историй</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Диалог Истории отображает записи(log) ревизий (revisions), меток(tags) и ветвей (branches) для выбранного файла. 
+      It will also offer you the opportunity,
+      by right-clicking on a specific revision, tag, or branch, to
+      <emphasis>diff</emphasis>, <emphasis>save</emphasis> the revision
+      locally, or <emphasis>update</emphasis> with sticky tags (an advanced
+      CVS concept; usually, the <emphasis>save</emphasis> option is preferable
+      to a sticky <emphasis>update</emphasis>).  Unless the file is an executable,
+      you can also select <emphasis>view</emphasis> to view that revision using 
+      the default application for the file type in question.
+
+      Вы также можете редактировать любое текущее или предыдущее сообщение при фиксации (commit message) указав ревизию и введя текст в низу окна.
+      </para>
+      <para>
+      When you click on a revision, detailed information on that revision is shown
+      at the top of the dialog. This includes the file format (text, binary, etc.) and the
+      keyword expansion mode. With older CVS servers, this information will be the same
+      for every revision of a file, but newer servers allow it to be set specifically
+      for each revision.
+      </para>
+      <para>
+      The current <emphasis>filename</emphasis> is also shown; if the file has been renamed
+      at some point, you can see what its name has been for each revision.
+      </para>
+      <para>
+      To simplify the view, you can deselect the <guilabel>Show Tags</guilabel> checkbox.
+      When you do this, only branches are shown in the dialog.
+      </para>
+      </section>
+      <section id="advanced.history.graph">
+      <title id="advanced.history.graph-title">Диалог Дерево ревизий (Revision Graph Dialog)</title>
+      <para>
+        TortoiseCVS также предоставляет <link linkend="dialogs.revision"
+      endterm="dialogs.revision-title"/> для графического отображения истории файла. 
+Вы можете просмотреть дерево ревизий файла выбрав его, и из контекстного меню вызвав команду 
+<guimenuitem>CVS &rarr; Revision Graph</guimenuitem>.
+      </para>
+      <figure>
+        <title>Диалог Дерево ревизий </title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0034.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Дерево ревизий</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+        Подобно диалогу Историй, диалог Дерево ревизий позволяет вам видеть детали и выполнять операции CVS на любой ревизии, метке, или ветви.
+      </para>
+      <para>
+      Ревизии, где файл был удален, помечены красными линиями.  
+      </para>
+      <para>
+      Если ваш CVS сервер -- CVSNT, вы также можете видеть, кем операция соединения была выполнена в файле: Пурпурная стрелка рисуется из исходной ревизии в конечную ревизию (с.м. <xref linkend="advanced.branching.merging.mergepoints"/>).
+      </para>
+      </section>
+    </section>
+
+    <!-- ====== Web Log ======================================================== -->
+
+    <section id="advanced.weblog">
+      <title id="advanced.weblog-title">Web лог (Web Log)</title>
+      <para>
+      Web лог предлагает туже самую функциональность как и <link
+      linkend="advanced.history">Диалоги История и Дерево ревизий</link>.
+      Одно важное отличие состоит в том, что Web лог это не часть TortoiseCVS, он зависит от специального программного обеспечения которое должно быть установлено на сервере CVS который вы используете. Два популярных пакета для обеспечения функциональности Web-лога это <application>ViewCVS</application> и
+      <application>CVSweb</application> &mdash; спросите у вашего администратора CVS какой из них доступен.
+      </para>
+      <para>
+     Для просмотра  Web лога вы открываете специальный URL используя веб-браузер. TortoiseCVS знает большинство общих URL используемых для этого и во многих случаях может правильно определить его автоматически. <footnote>
+      <para>
+      Подробности о автоматическом определении URL, с.м. <link linkend="cmd.weblog" endterm="cmd.weblog-title"/>.
+      </para>
+      </footnote>. 
+Если ваша конфигурация не стандартная, вы можете быть вынуждены в превый раз ввести URL в ручную, в следующие разы  TortoiseCVS будет помнить его.
+      </para>
+      <para>
+      Вы можете просмотреть Web-лог для файла или папки, выбрав его и выполнив команду  <guimenuitem>CVS &rarr; Web Log</guimenuitem> из контекстного меню. Если TortoiseCVS не удается определить URL, диалог появится вновь .
+
+      </para>
+      <figure>
+        <title>Диалог Настройка Web лога (Web Log)</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/img0040.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Настройка Web лога (Web Log)</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      Введите правильный URL и нажмите ОК. Если URL на сервере Web лога был изменен, вы можете указать TortoiseCVS снова выполнить автоматический поиск.
+      </para>
+      <para>
+      Вы также можете вызвать этот диалог удерживая нажатой клавишу <keycap>Ctrl</keycap> при выборе команды <guimenuitem>Web Log</guimenuitem>. Это полезно если ваш сервер Web лога был перемещен на другую машину.
+      </para>
+    </section>
+
+
+    <!-- ====== Make Patch ==================================================== -->
+
+    <section id="advanced.patch">
+      <title id="advanced.patch-title">Изготовление файла корректировки (Patch File)</title>
+      <para>
+      Часто вы можете иметь доступ к CVS хранилищу или модулю в режиме только для чтения, но не иметь прав на запись. Проекты с открытым кодом (Open source) обычно работают именно так, для поддержания качественного управления для всеми предложениями вносимыми в проект. Простейший и более надежный путь для внесения изменения в такие проекты -- создание <emphasis>Файла корректировки (Patch File)</emphasis> для последующей передачи в проект.
+      </para>
+      <para>
+      В TortoiseCVS это делается путем выбора папок с изменениями которые вы хотите включить в файл корректировки. Затем из контекстного меню выберите <guimenuitem>CVS &rarr; Make Patch...</guimenuitem>. TortoiseCVS определяет, какие файлы были изменены и перечисляет их в диалоге Make Patch:
+      </para>
+      <figure>
+        <title>Диалог Make Patch</title>
+        <mediaobject>
+          <imageobject>
+          <imagedata fileref="figure/patchdialog.gif" format="GIF"></imagedata>
+          </imageobject>
+          <textobject>
+            <phrase>Диалог Make Patch</phrase>
+          </textobject>
+        </mediaobject>
+      </figure>
+      <para>
+      Если вы хотите исключить некоторые файлы из корректировки, просто снимите выделение(deselect) на них в этом диалоге.
+      </para>
+      <para>
+      Иногда ваш вклад включает добавление новых файлов, которые пока еще не в CVS. TortoiseCVS не может предположить что вы хотите чтобы они были включены в корректировку, но в диалоге Make Patch вы можете нажать кнопку <guibutton>Add files...</guibutton> для показа диалога Добавить. Здесь вы можете выбрать файлы, которые должны быть включены в корректировку.
+      </para>
+      <para>
+Когда вы удовлетворены вашим выделением, нажмите на кнопку <guibutton>OK</guibutton>. 
+Появится диалог Сохранения, для указания куда сохранять ваш файл корректировки. В конце TortoiseCVS откроет новый файл корректировки в Блокноте, где вы сможете проверить ваши изменения.
+      </para>
+    </section>
+
+</chapter>

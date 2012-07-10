@@ -1,0 +1,553 @@
+#!/cygdrive/c/Perl/bin/perl -w
+
+eval 'exec /usr/bin/perl -w -S $0 ${1+"$@"}'
+    if 0; # not running under some shell
+use strict;
+
+# $Id: ftp-upload,v 1.1 2012/03/04 01:06:31 aliot Exp $
+#
+# Roderick Schertler <roderick@argon.org>
+
+# Copyright (C) 1999 Roderick Schertler
+#
+# This program is free software; you can redistribute it and/or modify
+# it under the terms of the GNU General Public License as published by
+# the Free Software Foundation; either version 2 of the License, or (at
+# your option) any later version.
+#
+# This program is distributed in the hope that it will be useful,
+# but WITHOUT ANY WARRANTY; without even the implied warranty of
+# MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE.  See the GNU
+# General Public License for more details.
+#
+# For a copy of the GNU General Public License write to the Free Software
+# Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA 02111-1307 USA
+
+use sigtrap qw(die normal-signals);	# do END processing upon signals
+
+use File::Basename	qw(basename dirname);
+use Getopt::Long	  ();
+use Net::FTP		  ();
+
+sub TMP_NONE	() { 0 }
+sub TMP_SAMEDIR	() { 1 }
+sub TMP_DIFFDIR	() { 2 }
+
+my # new line required for makemaker
+    $VERSION = '1.2';
+
+my $Account	= undef;
+my @As		= ();
+my $Debug	= 0;
+my @Dir		= ();		# array for multiple chdirs between files
+my $Exit	= 0;
+my $Force_passive = 0;
+my $Full_path	= 0;
+my $Ftp		= undef;	# Net::FTP object
+my $Host	= undef;
+my $Ignore_quit_failure = 0;
+my $Ls		= 0;
+my $Me		= basename $0;
+my $Password	= undef;
+my $Password_fd	= undef;
+my $Tmp_dir	= undef;
+my $Tmp_strategy = TMP_NONE;
+my $Transfer_type = 'I';
+my $User	= undef;
+my $Verbose	= 0;
+
+my @Option_once = (
+    'account=s'		=> \$Account,
+    'debug!'		=> \$Debug,
+    'help'		=> sub { usage() },
+    'host|h=s'		=> \$Host,
+    'ignore-quit-failure!' => \$Ignore_quit_failure,
+    'passive'		=> \$Force_passive,
+    'password-fd=i'	=> \$Password_fd,
+    'password-stdin|s'	=> sub { $Password_fd = fileno STDIN },
+    'password=s'	=> \$Password,
+    'user|u=s'		=> \$User,
+    'verbose|v'		=> \$Verbose,
+    'version'		=> sub { print "$Me version $VERSION\n"; exit },
+);
+
+my @Option_repeatable = (
+    'as=s@'		=> \@As,
+    'ascii|a'		=> sub { $Transfer_type = 'A' },
+    'binary|b'		=> sub { $Transfer_type = 'I' },
+    'dir=s@'		=> \@Dir,
+    'full-path!'	=> \$Full_path,
+    'ls!'		=> \$Ls,
+    # XXX work around bogus warning from Getopt::Long by using 2 specs
+    'l'			=> \$Ls,
+    'L'			=> sub { $Ls = 0 },
+    'tmp-dir=s'		=> sub { $Tmp_strategy = TMP_DIFFDIR;
+				    $Tmp_dir = $_[1] },
+    'tmp-none'		=> sub { $Tmp_strategy = TMP_NONE },
+    'tmp-samedir'	=> sub { $Tmp_strategy = TMP_SAMEDIR },
+);
+
+my $Usage = <<EOF;
+usage: $Me [any-switch]... {[repeatable-switch]... file...}...
+
+initial switches:
+        --debug			turn debugging on
+        --help			show this and then die
+    	--ignore-quit-failure	don't choke if the QUIT fails
+    -v, --verbose		print informational messages to stdout
+        --version		show the version and exit
+
+initial remote specification switches:
+        --account account	no default
+    -h, --host host		no default
+    	--passive		force transfers to use passive mode
+        --password pw		default is email address
+    -s,	--password-stdin	read password from stdin
+        --password-fd fd	read password from file descriptor fd
+    -u, --user user		default is anonymous
+
+repeatable switches (these can be interspersed with the file names, they
+affect transfers of files which follow):
+    	--as remote-name	name next file remote-name remotely
+    -a, --ascii			transfer files in ASCII mode
+    -b, --binary		transfer files in binary mode (default)
+    -d, --dir dir		chdir to dir
+    	--full-path		use local file name for remote, including dirs
+	--no-full-path		rescind --full-path (default)
+    -l, --ls			try to do dir on files after transfer
+    -L, --no-ls			don't do dir on files after transfer (default)
+        --tmp-none		upload files directly (default)
+        --tmp-samedir		upload to tmp names, rename when done
+        --tmp-dir dir		upload to given dir, rename when done
+
+See the man page or \`perldoc $Me\' for the full documentation.
+EOF
+
+sub xwarndie_mess {
+    my @mess = ("$Me: ", @_);
+    $mess[$#mess] =~ s/:$/: $!\n/;      # XXX loses if it's really /:\n/
+    return @mess;
+}
+
+sub xdie {
+    die xwarndie_mess @_;
+}
+
+sub xwarn {
+    warn xwarndie_mess @_;
+    $Exit ||= 1;
+}
+
+sub usage {
+    xwarn @_ if @_;
+    print STDERR $Usage;
+    # Use exit() rather than die(), as Getopt::Long does eval().
+    exit 1;
+}
+
+sub verbose {
+    print @_, "\n"
+	if $Verbose;
+}
+
+sub ftp_warndie_mess {
+    my $text = join '', @_;
+    my $code = $Ftp->code;
+    my $message = $Ftp->message;
+    chomp $message;
+    "$text ($code $message)\n";
+}
+
+sub ftp_warn {
+    xwarn ftp_warndie_mess @_;
+}
+
+sub ftp_die {
+    xdie ftp_warndie_mess @_;
+}
+
+# Getopt::Long has some really awful defaults.  This function loads it
+# then configures it to use more sane settings.
+
+sub configure_getopt {
+    Getopt::Long->import(2.11);
+
+    # I'm setting this environment variable lest he sneaks more bad
+    # defaults into the module.
+    local $ENV{POSIXLY_CORRECT} = 1;
+    Getopt::Long::config qw(
+        default
+        no_autoabbrev
+        no_getopt_compat
+        require_order
+        bundling
+        no_ignorecase
+    );
+}
+
+# Getopt::Long 2.11 triggers a warning with the args I give it, so
+# disable warnings when calling it.
+
+sub getopt {
+    local $^W;
+    # Technically, this works because I'm in the same package as my
+    # caller or because I'm not using globals to store the options.
+    # Using magic goto here doesn't work because the localized version
+    # of $^W is backed out before the transfer.
+    return Getopt::Long::GetOptions(@_);
+}
+
+sub init {
+    my (@arg);
+
+    # Unbuffer since I generate little output, it's line oriented, and
+    # I'll often be outputting to a log file or pipe.
+    $| = 1;
+
+    configure_getopt;
+    getopt -bundle, @Option_once, @Option_repeatable or usage if @ARGV;
+
+    defined $Host or xdie "no --host specified\n";
+
+    if (defined $Password_fd) {
+	if ($Password_fd == fileno STDIN) {
+	    $Password = <STDIN>;
+	}
+	else {
+	    open PASSWORD, "<&=$Password_fd"
+		or xdie "can't fdopen $Password_fd to read password:";
+	    $Password = <PASSWORD>;
+	    close PASSWORD
+		or xdie "error closing fd $Password_fd:";
+	}
+	defined $Password
+	    or xdie "can't read password from fd $Password_fd:";
+	chomp($Password);
+    }
+
+    @arg = ($Host);
+    push @arg, Debug => 1 if $Debug;
+    push @arg, Passive => 1 if $Force_passive;
+    verbose "open $Host";
+    $Ftp = Net::FTP->new(@arg)
+	or xdie "can't connect to $Host: $@\n";
+
+    verbose "user ", defined $User ? $User : 'anonymous';
+    @arg = ($User, $Password, $Account);
+    pop @arg while @arg && !defined $arg[-1];
+    $Ftp->login(@arg)
+	or ftp_die "can't login to $Host";
+}
+
+sub main {
+    init;
+    @ARGV or xdie "no files specified\n";
+
+    while (@ARGV) {
+	if ($ARGV[0] =~ /^-/) {
+	    getopt -bundle, @Option_repeatable
+		or xdie "aborting\n";
+	    @ARGV or xdie "non-sensical trailing switches specified\n";
+	    next;
+	}
+
+	if (defined $Transfer_type) {
+	    verbose "type $Transfer_type";
+	    $Ftp->type($Transfer_type)
+		or ftp_die "can't set transfer type to $Transfer_type";
+	    $Transfer_type = undef;
+	}
+
+	if (@Dir) {
+	    for (@Dir) {
+		verbose "cd $_";
+		$Ftp->cwd($_) or ftp_die "can't chdir to $_";
+	    }
+	    @Dir = ();
+	}
+
+	@As > 1 and xdie "multiple --as switches given without",
+	    	    	    " intervening filename\n";
+
+	my $local	= shift @ARGV;
+	my $remote	= @As ? shift @As
+			    : $Full_path ? $local : basename $local;
+	my $remote_base = basename $remote;
+	my $remote_diff	= $remote ne $local;
+
+	if ($Tmp_strategy == TMP_NONE) {
+	    verbose "put $local", $remote_diff ? " $remote" : '';
+	    defined $Ftp->put($local, $remote)
+		or ftp_die "error storing $local",
+		    	$remote_diff ? " as $remote" : '';
+	}
+
+	elsif ($Tmp_strategy == TMP_SAMEDIR) {
+	    my $remote_dir = dirname $remote;
+	    my $tmp_want = ($remote_dir ne '.' ? "$remote_dir/" : '')
+			    . "tmp.$remote_base";
+	    verbose "put_unique $local $tmp_want";
+	    defined(my $tmp_got = $Ftp->put_unique($local, $tmp_want))
+		or ftp_die "error storing $local as $tmp_want uniquely";
+	    verbose "rename $tmp_got $remote";
+	    $Ftp->rename($tmp_got, $remote)
+		or ftp_die "error renaming $tmp_got to $remote";
+	}
+
+    	elsif ($Tmp_strategy == TMP_DIFFDIR) {
+	    my $tmp_want = "$Tmp_dir/$remote_base";
+	    verbose "put $local $tmp_want";
+	    defined($Ftp->put($local, $tmp_want))
+		or ftp_die "error storing $local as $tmp_want";
+	    verbose "rename $tmp_want $remote";
+	    $Ftp->rename($tmp_want, $remote)
+		or ftp_die "error renaming $tmp_want to $remote";
+	}
+
+	else {
+	    xdie "invalid \$Tmp_strategy $Tmp_strategy\n";
+	}
+
+	if ($Ls) {
+	    my @l = $Ftp->dir($remote);
+	    if (!@l) {
+		xwarn "no data returned doing dir of $remote\n";
+	    }
+	    else {
+		print join "\n", @l, '';
+	    }
+	}
+    }
+
+    return 0;
+}
+
+END {
+    if (defined $Ftp) {
+	verbose 'quit';
+	$Ftp->abort;
+	unless ($Ftp->quit || $Ignore_quit_failure) {
+	    ftp_warn "error logging out from $Host";
+	    $? ||= 1;
+	}
+    }
+}
+
+$Exit = main || $Exit;
+$Exit = 1 if $Exit && !($Exit % 256);
+exit $Exit;
+
+__END__
+
+=head1 NAME
+
+ftp-upload - batch transfer local files to an FTP server
+
+=head1 SYNOPSIS
+
+B<ftp-upload> [I<any-switch>]... {[I<repeatable-switch>]... I<file>...}...
+
+=head1 DESCRIPTION
+
+B<ftp-upload> is used to send local files to an FTP server.  It isn't
+interactive, it's meant to be used from scripts.  It is disciplined
+about its exit value and it doesn't output informational messages by
+default.
+
+There are two kinds of switches.  Initial switches have to appear before
+any filenames, they affect the session as a whole.  Repeatable switches
+can appear interspersed with the file names, they affect the transfer of
+the files which appear after them on the command line.
+
+=head1 OPTIONS
+
+=head2 Initial switches
+
+These have to be used before any file names listed on the command line.
+
+=over 4
+
+=item B<--debug>
+
+Turn debugging on.
+
+=item B<--help>
+
+Show the usage message and die.
+
+=item B<--ignore-quit-failure>
+
+Don't complain or set a failure exit code just because the QUIT command
+fails.  This can be necessary because some servers, in blatant disregard
+of RFC 959, close the command channel when you send them an ABOR command.
+
+=item B<-v>, B<--verbose>
+
+Print informational messages to stdout.
+
+=item B<--version>
+
+Show the version number and exit.
+
+=back
+
+=head2 Initial switches which specify connection information
+
+These also have to be used before any file names listed on the command
+line.  They specify the information used to set up the FTP connection.
+
+=over 4
+
+=item B<--account> I<account>
+
+This specifies the account to be used when logging into the remote
+system.  This is distinct from the user name used to log in.  Few
+systems need this.  There is no default.
+
+=item B<-h>, B<--host> I<host>
+
+Specify the host to which to connect.  There is no default, you have to
+specify this switch.
+
+=item B<--passive>
+
+Force the use of passive (PASV) transfers.  Passive transfers are
+required with some firewall configurations, but if you have such
+you'd do better to configure Net::FTP so that it knows when to use
+them (see L<Net::Config>).  If you need to use passive transfers with
+certain (broken) servers, however, this switch is your best bet.
+Alternatively, you can set $FTP_PASSIVE to 1 in the environment (see
+L<Net::FTP>).
+
+=item B<--password> I<pw>
+
+This gives the password which will be used to login.  The default is your
+email address.
+
+Note that you should not specify a real (secret) password this way, as
+on most systems anybody on the machine can see the arguments you pass to
+your commands.  Use one of other password-setting switches instead.
+
+=item B<-s>, B<--password-stdin>
+
+This tells B<ftp-upload> to read the password from standard input.  No
+prompt will be printed, and a single line will be read.  Most people
+will use this switch to specify the password.  Eg,
+
+    echo 3x9sjJJh | ftp-upload -sh $host -u $user $file
+
+Using echo this way is safe where the B<--password> switch isn't if the
+echo command is built in to the shell.
+
+=item B<--password-fd> I<fd>
+
+This is like B<--password-stdin> except that it reads the password from
+the file descriptor numbered I<fd>.
+
+    ftp-upload -h $host -u $user --password-fd=3 3<$pw_file $file
+
+=item B<-u>, B<--user> I<user>
+
+Specify the user name to use when logging in.  The default is C<anonymous>.
+
+=back
+
+=head2 Repeatable switches
+
+These switches can be used anywhere on the command line (except after
+the last file name).  They affect the transfer of files listed after
+them.
+
+=over 4
+
+=item B<--as> I<remote-name>
+
+Normally a file is transferred using the same name it has locally.  If you
+use this switch the next file transferred will be called I<remote-name> on
+the other host instead.
+
+    ftp-upload --host $host --as index.htm index.html
+
+=item B<-a>, B<--ascii>
+
+Perform transfers in ASCII mode.
+
+=item B<-b>, B<--binary>
+
+Perform transfers in binary mode.  This is the default.
+
+=item B<-d>, B<--dir> I<dir>
+
+Change directory to I<dir> on the FTP server before continuing.  You can
+use this multiple times between files, B<ftp-upload> will chdir once for
+each time you specify it.  Using C<..> as the I<dir> will cause an FTP
+C<CDUP> to be done rather than a C<CWD>.
+
+=item B<--full-path>
+
+Normally uploaded files go into the current directory on the remote
+host, even when the local file name given contains slashes.  Eg, if you
+say
+
+    ftp-upload -h $host /etc/motd
+
+B<ftp-upload> will upload the file as F<motd>, not F</etc/motd>.  This
+differs from how the standard B<ftp> program works, and it also differs
+with how B<ftp-upload> worked before version 1.3.
+
+If you specify B<--full-path>, you'll get the other behavior.  A request
+to upload F<dir/file> will tell the server to store F<dir/file> rather
+than F<file>.
+
+When you use B<--as> the B<--full-path> setting doesn't matter.
+B<--full-path> only tells the program what name to use when it's
+choosing the name.
+
+=item B<--no-full-path>
+
+Disable B<--full-path>.  This is the default.
+
+=item B<-l>, B<--ls>
+
+Try to get a remote directory listing of files after transferring them.
+I say "try" because there's no guaranteed way to do this with the FTP
+protocol.  The command I run is C<LIST I<file>>.  This will generally
+work if I<file> doesn't contain any special characters.
+
+=item B<-L>, B<--no-ls>
+
+Disable the B<--ls> behavior.
+
+=item B<--tmp-none>
+
+Transfer files directly, don't do anything special to try to ensure that
+they don't appear under their real names on the remote machine until the
+transfer is finished.  Each file is transferred with a single simple
+C<STOR>.  This is the default.
+
+=item B<--tmp-samedir>
+
+Transfer files to the remote machine using a temporary name, then rename
+them when the transfer finishes.  This won't work if the remote server
+doesn't give a recognizable response to the C<STOU> command.
+
+If the server's response to C<STOU> isn't recognized by Net::FTP but
+is reasonable, Graham Barr might be willing to change Net::FTP to
+recognize it.  If you like you can send the C<--debug> output to me
+and I'll coordinate such requests.
+
+=item B<--tmp-dir> I<dir>
+
+Transfer files to I<dir> on the remote host, then rename them when the
+transfer is complete.  This is safer than B<--tmp-samedir> because it
+doesn't use C<STOU> and so it works with more servers.
+
+    ftp-upload -h $host --tmp-dir incoming $file
+
+=back
+
+=head1 AUTHOR
+
+Roderick Schertler <roderick@argon.org>
+
+=cut

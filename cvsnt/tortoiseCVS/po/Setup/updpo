@@ -1,0 +1,9 @@
+#!/bin/sh
+shopt -s igncr #
+for lang in `ls *.po | grep -v en_GB\.po | sed -e s/\.po//g`
+do
+  echo "Updating $lang.po"
+  cp $lang.po $lang-old.po
+  msgmerge -o $lang.po --no-wrap $lang-old.po en_GB.po
+  rm $lang-old.po
+done

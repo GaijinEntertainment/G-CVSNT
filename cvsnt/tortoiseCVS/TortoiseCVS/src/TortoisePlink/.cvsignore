@@ -1,0 +1,7 @@
+Debug
+release
+*.plg
+*.~*
+*.user
+Release
+x64

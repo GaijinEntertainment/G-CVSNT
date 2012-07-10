@@ -1,0 +1,99 @@
+<?xml version="1.0" encoding="utf-8"?>
+
+<Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
+    <Product Manufacturer="March Hare Software" Id="*" Language="1033" Codepage="65001" Name="CVSNT Community $(var.CVSNT_VERSION) Graphical Client" Version="$(var.CVSNT_VERSION)" UpgradeCode="294DEDA4-ECF0-4a21-8567-38A8B6A7E20D">
+        <Package Keywords="CVS,CVSNT,Installer,Version Control,VSS" Description="CVS Suite client components" Comments="This package is Copyright 2005 March Hare Software Ltd.  CVSNT Support And Training available From March Hare Software.  See http://www.march-hare.com/cvspro.  Workspace Manager and Release Manager are Copyright March Hare Software Ltd.  CVSNT, WinMerge and TortoiseCVS are licensed under the GNU General Public License." Manufacturer="March Hare Software" InstallerVersion="300" Languages="1033" Compressed="yes" SummaryCodepage="1252" />
+        <Upgrade Id="294DEDA4-ECF0-4a21-8567-38A8B6A7E20D">
+            <UpgradeVersion MigrateFeatures="yes" Maximum="$(var.CVSNT_VERSION)" IncludeMaximum="yes" Property="UC294DEDA4ECF04A21856738A8B6A7E20D" />
+        </Upgrade>
+
+        <Condition Message="This Product requires at least a Pentium Pro">Intel &gt; 5</Condition>
+        <Condition Message="This Product Does not run on Windows 95 or Windows 98">not Version9X</Condition>
+        <Condition Message="This Product requires at least NT4 Service Pack 6">WindowsBuild &lt;&gt; 1381 or ServicePackLevel &gt;= 6</Condition>
+
+        <Media Id="1" EmbedCab="yes" CompressionLevel="high" Cabinet="cvsnt.cab" />
+        <Media Id="2" EmbedCab="yes" CompressionLevel="high" Cabinet="wincvs.cab" />
+        <Media Id="3" EmbedCab="yes" CompressionLevel="high" Cabinet="winmerge.cab" />
+        <Media Id="4" EmbedCab="yes" CompressionLevel="high" Cabinet="tortoise.cab" />
+        <Media Id="5" EmbedCab="yes" CompressionLevel="high" Cabinet="marchhar.cab" />
+
+        <Directory Id="TARGETDIR" Name="SourceDir">
+            <Directory Id="SystemFolder" />
+            <Directory Id="System64Folder" />
+            <Directory Id="WindowsFolder" />
+            <Directory Id="ProgramMenuFolder" />
+            <Directory Id="CommonFilesFolder">
+                <Directory Id="MarchHare" Name="March Hare Software Ltd">
+                    <Directory Id="COMMON_INSTALLDIR" />
+                </Directory>
+            </Directory>
+            <Directory Id="ProgramFilesFolder">
+                <Directory Id="CVSNT_BASEDIR" Name="CVSNT Community">
+                    <Directory Id="WinCvsDir" Name="WinCvs">
+                        <Directory Id="WINCVS_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="WinMergeDir" Name="WinMerge">
+                        <Directory Id="WINMERGE_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="TortoiseDir" Name="TortoiseCVS">
+                        <Directory Id="TORTOISECVS_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="CvsntDir" Name="CVSNT Tools">
+                        <Directory Id="CVSNT_INSTALLDIR" />
+                    </Directory>
+                    <Directory Id="SuiteTools" Name="Suite Tools">
+                        <Directory Id="TOOLS_INSTALLDIR" />
+                    </Directory>
+                </Directory>
+            </Directory>
+        </Directory>
+
+        <DirectoryRef Id="ProgramMenuFolder">
+            <Directory Id="CvsntStartMenuFolder" Name="CVSNT Community Edition">
+                <Component Id="CvsntStartMenuFolder" Guid="7CF530AD-2263-4e6c-AF9C-409D9EB780A1" DiskId="1">
+		    <RegistryValue Id="keyCvsntStartMenuFolder" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsntStartMenuFolder" Type="string" Value="1" KeyPath="yes" />
+                    <RemoveFolder Id="CvsntStartMenuFolder" On="uninstall" />
+                </Component>
+                <Directory Id="CvsntDocumentationFolder" Name="Documentation">
+                    <Component Id="CvsntDocumentationFolder" Guid="46C5E98E-4F21-4bf6-AF60-9D14D0D38F31" DiskId="1">
+		        <RegistryValue Id="keyCvsntDocumentationFolder" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsntDocumentationFolder" Type="string" Value="1" KeyPath="yes" />
+                        <RemoveFolder Id="CvsntDocumentationFolder" On="uninstall" />
+                    </Component>
+                </Directory>
+            </Directory>
+        </DirectoryRef>
+
+	<FeatureRef Id="Cvsnt" />
+	<FeatureRef Id="WorkspaceManager" />
+	<FeatureRef Id="Wincvs" />
+	<FeatureRef Id="WinMerge" />
+	<FeatureRef Id="TortoiseCvs" />
+	<FeatureRef Id="ebooktrial" />
+
+        <UIRef Id="standard_ui" />
+
+        <AdminExecuteSequence />
+        <InstallExecuteSequence>
+            <Custom Action="RegisterInstall" Before="WriteRegistryValues">$CommandLineFiles &gt; 2</Custom>
+            <Custom Action="RegisterUninstall" Before="RemoveRegistryValues" >$CommandLineFiles = 2</Custom>
+            <StopServices>Privileged</StopServices>
+            <RemoveExistingProducts Before="InstallInitialize" />
+            <BindImage />
+            <ScheduleReboot Sequence="1550">&amp;TortoiseCvs=3 Or IsScheduleReboot=1 Or ProductScheduleReboot=1</ScheduleReboot>
+        </InstallExecuteSequence>
+
+        <Property Id="CVSNT_INSTALLTYPE">clienttrial</Property>
+        <Property Id="SERVER">0</Property>
+        <Property Id="WINCVS">1</Property>
+        <Property Id="WINMERGE">1</Property>
+        <Property Id="TORTOISECVS">1</Property>
+        <Property Id="RELEASEMANAGER">1</Property>
+        <Property Id="ARPHELPLINK">http://www.march-hare.com/cvspro</Property>
+        <Binary Id="dlgbmp" SourceFile="Binary\dlgbmp-suite.bmp" />
+        <Binary Id="License" SourceFile="gpl.rtf" />
+        <Binary Id="Installer" SourceFile="$(var.CVSNT_BASE)\installer.dll" />
+        <CustomAction Id="RegisterInstall" BinaryKey="Installer" DllEntry="CustomActionInstall" Impersonate="yes" />
+        <CustomAction Id="RegisterSerial"  BinaryKey="Installer" DllEntry="CustomActionSerial" Impersonate="no" />
+        <CustomAction Id="RegisterUninstall" BinaryKey="Installer" DllEntry="CustomActionUninstall" Impersonate="yes" />
+    </Product>
+</Wix>

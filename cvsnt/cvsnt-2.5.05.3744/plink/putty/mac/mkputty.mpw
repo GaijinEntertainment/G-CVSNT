@@ -1,0 +1,15 @@
+# $Id: mkputty.mpw,v 1.1.2.2 2005/04/26 14:07:44 tmh Exp $
+
+Set makefile Makefile.mpw
+
+#	Run Make, then execute its output.
+
+Echo "# `Date -t` ----- Analyzing dependencies."
+Begin
+	Echo "Set Echo 1"
+	Make {"Parameters"} -f "{makefile}"
+End > make.out
+Echo "# `Date -t` ----- Executing build commands."
+make.out
+Delete make.out
+Echo "# `Date -t` ----- Done."

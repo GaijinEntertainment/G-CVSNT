@@ -1,0 +1,535 @@
+<!-- ====== Dialog Reference for TortoiseCVS =================================== -->
+<chapter id="dialogs">
+  <title id="dialogs-title">Dialog Reference for TortoiseCVS</title>
+  <para>
+    This chapter details every dialog within TortoiseCVS.
+  </para>
+
+  <section id="dialogs.add">
+    <title id="dialogs.add-title">Add Dialog</title>
+    <figure>
+      <title>Add Dialog</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0022.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Add Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.checkout">
+    <title id="dialogs.checkout-title">Checkout Dialog</title>
+    <figure>
+      <title>Checkout Dialog - Module Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/checkoutdialogmodule.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Checkout Dialog - Module Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Checkout Dialog - Revision Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/checkoutdialogrevision.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Checkout Dialog - Revision Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <figure>
+      <title>Checkout Dialog - Options Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/checkoutdialogoptions.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Checkout Dialog - Options Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.updatespecial">
+    <title id="dialogs.updatespecial-title">Update Special Dialog</title>
+    <figure>
+      <title>Update Special Dialog</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0014.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Update Special Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.commit">
+    <title id="dialogs.commit-title">Commit Dialog</title>
+    <figure>
+      <title>Commit Dialog</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/commitdialog.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Commit Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+
+  <section id="dialogs.branch">
+    <title id="dialogs.branch-title">Branch Dialog</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.newmodule">
+    <title id="dialogs.newmodule-title">Make New Module Dialog</title>
+    <figure>
+      <title>Make new module Dialog - Module Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/makemoduledialogmodule.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Make new module Dialog - Module Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    The main tab in this dialog is used exactly like that in the <link linkend="dialogs.checkout">Checkout</link>
+    dialog; please see the detailed description on that page.
+    </para>
+    <figure>
+      <title>Make new module Dialog - Options Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/makemoduledialogoptions.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Make new module Dialog - Options Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    The <guilabel>Options</guilabel> tab has two fields:
+    </para>
+    <itemizedlist>
+    <listitem>
+    <para>
+    The <guilabel>Comment</guilabel> field allows you to enter a description of the new module.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    The <guilabel>Check out files read-only</guilabel> options causes a <glossterm>watch</glossterm> 
+    to be set for the module. See <xref linkend="advanced.cvswatch"/> for more information.
+    </para>
+    </listitem>
+    </itemizedlist>
+  </section>
+
+  <section id="dialogs.progress">
+    <title id="dialogs.progress-title">Progress Dialog</title>
+    <figure>
+      <title>Progress Dialog</title>
+      <mediaobject>
+        <imageobject>
+          <imagedata fileref="figure/img0035.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Progress Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    This dialog shows each CVS command that TortoiseCVS executes, as well as
+    any information, errors, or warnings generated by CVS. The different
+    types of messages are highlighted in different colours (you can
+    customize these colours using the <link
+    linkend="dialogs.preferences.appearance">Appearance</link> tab in the
+    Preferences dialog).
+    </para>
+
+    <para>
+    During an <link linkend="basic.update">Update</link>, the Progress
+    Dialog indicates whether or not each file has changed in CVS or on the
+    local PC, using the following single-letter codes:
+    <glosslist>
+      <glossentry>
+        <glossterm>C</glossterm>
+        <glossdef>
+          <para>
+	  The file has changed both in CVS and locally.  TortoiseCVS
+	  attempted to merge both sets of changes into the local copy, but could
+	  not (probably because both changes were made to the same part of the
+	  file).  For more information, see <link linkend="basic.conflict"
+	  endterm="basic.conflict-title"/>.
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+        <glossterm>M</glossterm>
+	<glossdef>
+          <para>
+	  The file has only changed on the local PC.  TortoiseCVS will not change the local copy.
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+        <glossterm>P</glossterm>
+	<glossdef>
+	  <para>
+	  The file has changed in CVS, and TortoiseCVS has updated the local copy to match.
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+        <glossterm>U</glossterm>
+	<glossdef>
+	  <para>
+	  The file exists in CVS, but not on the local machine.
+	  TortoiseCVS will create a copy on the local PC.
+	  You will also see this for files which have changed in CVS (as
+	  for <glossterm>P</glossterm>.
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+	<glossterm>A</glossterm>
+	<glossdef>
+	  <para>
+	  The file has been added to CVS, but not yet committed.
+	  </para>
+	</glossdef>
+      </glossentry>
+      <glossentry>
+        <glossterm>R</glossterm>
+	<glossdef>
+	  <para>
+	  The file has been removed from CVS, but not yet committed.
+	  </para>
+	</glossdef>
+      </glossentry>
+    </glosslist>
+    </para>
+
+    <para>
+    On the <link linkend="dialogs.preferences.main">Main</link> tab in the
+    Preferences dialog, you can customize the closing behaviour of the dialog. This behaviour can also
+    be overridden on a case-to-case basis using the <guilabel>Close on completion</guilabel> checkbox.
+    </para>
+  </section>
+
+  <section id="dialogs.tags">
+    <title id="dialogs.tags-title">Tag Dialog</title>
+      <figure>
+      <title>Tag Dialog</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0012.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Tag Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+  </section>
+
+  <section id="dialogs.preferences">
+    <title id="dialogs.preferences-title">Preferences Dialog</title>
+    <para>
+    The preference dialog is divided into tabs. Each tab contains a group of related preferences.
+    </para>
+    <figure>
+      <title id="dialogs.preferences.main">Preferences Dialog - Main Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogmain.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Main Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    The <guilabel>Main</guilabel> tab offers access to the most basic settings.
+    </para>
+    <itemizedlist>
+    <listitem>
+    <para>
+    The <guilabel>Progress dialog</guilabel> setting controls if the progress dialog will close itself automatically.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    The <guilabel>Overlay icons</guilabel> setting allows you to change the set of overlay icons used. 
+    The <guilabel>Browse...</guilabel> button causes the icon chooser dialog to be shown:
+    </para>
+    </listitem>
+    </itemizedlist>
+    <figure id="dialogs.preferences.iconchooser">
+      <title id="dialogs.preferences.iconchooser-title">Preferences Dialog - Iconset Chooser</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/iconchooser.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Iconset Chooser</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    The <guilabel>Rebuild...</guilabel> button rebuilds <productname>Windows</productname> Explorer's icon cache.
+    This can sometimes be necessary if the overlay icons are not showing correctly.
+    </para>
+    <itemizedlist>
+    <listitem>
+    <para>
+    The <guilabel>Folder overlay icons</guilabel> setting controls if and how the overlay icon for a folder
+    reflects the state of the files and folders inside it.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    The <guilabel>Autoload changed folder icons</guilabel> setting (only applicable if you have selected something
+    else than "Don't change icon" above) determines if the folder status is updated automatically, or only when you
+    select <guimenuitem>Refresh folder status</guimenuitem> from the CVS context menu in Explorer.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    Finally, the <guilabel>Language</guilabel> setting allows you to change the language used for menus and dialogs.
+    </para>
+    </listitem>
+    </itemizedlist>
+    <para>
+    The <guilabel>Policy</guilabel> tab...
+    </para>
+    <figure>
+      <title id="dialogs.preferences.policy">Preferences Dialog - Policy Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogpolicy.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Policy Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+
+    </para>
+    <figure>
+      <title id="dialogs.preferences.edit">Preferences Dialog - Edit Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogedit.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Edit Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+
+    </para>
+    <figure>
+      <title id="dialogs.preferences.tools">Preferences Dialog - Tools Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogtools.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Tools Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+
+    </para>
+    <figure id="dialogs.preferences.advanced">
+      <title id="dialogs.preferences.advanced-title">Preferences Dialog - Advanced Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogadvanced.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Advanced Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    The <guilabel>Advanced</guilabel> tab contains settings that the typical user does not need to change.
+    </para>
+    <itemizedlist>
+    <listitem>
+    <para id="dialogs.preferences.advanced.sandbox" xreflabel="Sandbox DOS/UNIX preference setting">
+    The <guilabel>Sandbox DOS/UNIX</guilabel> setting controls how line endings are preserved when doing CVS
+    operations in an existing sandbox (as opposed to the <guilabel>Use UNIX line endings</guilabel> checkbox
+    in the <link linkend="dialogs.checkout">Checkout</link> and 
+    <link linkend="dialogs.newmodule">Make new module</link> dialogs, which controls how the sandbox 
+    is initially created).
+    </para>
+    <itemizedlist>
+    <listitem>
+    <para>
+    <guilabel>Autodetect (default to DOS)</guilabel> and <guilabel>Autodetect (default to UNIX)</guilabel>: 
+    TortoiseCVS checks which line ending format is used and gives the appropriate options to CVS so that the existing
+    line ending format is preserved.
+    </para>
+    </listitem>
+    <listitem>
+    <para>
+    <guilabel>DOS</guilabel> and <guilabel>UNIX</guilabel>: 
+    TortoiseCVS ignores the existing line ending format and forces CVS to create the specified line ending format.
+    </para>
+    </listitem>
+    </itemizedlist>
+    </listitem>
+    </itemizedlist>
+    <figure id="dialogs.preferences.appearance">
+      <title id="dialogs.preferences.appearance-title">Preferences Dialog - Appearance Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogappearance.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Appearance Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    </para>
+    <figure>
+      <title id="dialogs.preferences.cache">Preferences Dialog - Cache Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogcache.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - Cache Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    </para>
+    <figure>
+      <title id="dialogs.preferences.ignored">Preferences Dialog - Ignored Files Tab</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/prefsdialogignored.png" format="PNG"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Preferences Dialog - .cvsignore Tab</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+  </section>
+
+  <section id="dialogs.merge">
+    <title id="dialogs.merge-title">Merge Dialog</title>
+    <note><para>TODO: Write... Screenshot</para></note>
+  </section>
+
+  <section id="dialogs.history">
+    <title id="dialogs.history-title">History Dialog</title>
+    <figure>
+      <title>History Dialog</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0033.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>History Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write</para></note>
+  </section>
+  
+  <section id="dialogs.revision">
+    <title id="dialogs.revision-title">Revision Graph Dialog</title>
+    <figure>
+      <title>Revision Graph Dialog</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0034.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Revision Graph Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <note><para>TODO: Write.
+Unless the file is an executable,
+      you can also select <emphasis>view</emphasis> to view that revision using 
+      the default application for the file type in question.
+    </para></note>
+  </section>  
+
+  <section id="dialogs.rename">
+    <title id="dialogs.rename-title">Rename Dialog</title>
+    <figure>
+      <title>Rename Dialog</title>
+      <mediaobject>
+        <imageobject>
+<!--
+TODO: Use correct image
+-->
+        <imagedata fileref="figure/img0001.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>Rename Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    TODO: Write
+    </para>
+    <para>
+    TODO: Describe and show dialog with and without CVS server version
+    </para>
+  </section>  
+
+  <section id="dialogs.about">
+    <title id="dialogs.about-title">About Dialog</title>
+    <figure>
+      <title>About Dialog</title>
+      <mediaobject>
+        <imageobject>
+        <imagedata fileref="figure/img0041.gif" format="GIF"></imagedata>
+        </imageobject>
+        <textobject>
+          <phrase>About Dialog</phrase>
+        </textobject>
+      </mediaobject>
+    </figure>
+    <para>
+    The About dialog shows the version of TortoiseCVS itself as well as the
+    CVS client it uses, and the SSH application you have configured.
+    </para>
+    <para>
+    When invoked in a sandbox, the About dialog shows the version of the CVS server as well.
+    </para>
+    <para>
+    It also has a <guilabel>Credits...</guilabel> button, which opens another dialog
+    listing the people who have contributed to TortoiseCVS development. If you hold the mouse
+    over a name, a tooltip will show what that person has contributed.
+    </para>
+  </section>  
+  
+</chapter>

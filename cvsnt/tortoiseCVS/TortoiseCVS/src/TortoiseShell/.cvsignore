@@ -1,0 +1,9 @@
+Release
+Debug
+*.plg
+*.~*
+*.aps
+*.ilk
+x64
+*.user
+ReleaseD
