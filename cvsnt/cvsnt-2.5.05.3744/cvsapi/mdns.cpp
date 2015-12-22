@@ -35,7 +35,7 @@ CMdnsHelperBase* CMdnsHelperBase::CreateHelper(const char *type, const char *dir
 	cvs::string tmp = type;
 	tmp+=SHARED_LIBRARY_EXTENSION;
 	if(!la.Load(tmp.c_str(),dir))
-		return false;
+		return NULL;
 	pNewMdnsHelper = (CMdnsHelperBase*(*)())la.GetProc("CreateHelper");
 	if(!pNewMdnsHelper)
 		return NULL;

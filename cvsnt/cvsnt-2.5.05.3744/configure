@@ -16701,6 +16701,10 @@ $as_echo "#define HAVE_LTDL 1" >>confdefs.h
 	;;
 esac
 INCLTDL="$LTDLINCL"
+case $host_os in
+  darwin*) LIBLTDL=
+        ;;
+esac
 
 # Report our decision...
 { $as_echo "$as_me:${as_lineno-$LINENO}: checking where to find libltdl headers" >&5
@@ -19352,7 +19356,7 @@ return pcre_compile ();
   return 0;
 }
 _ACEOF
-for ac_lib in '' pcreposix; do
+for ac_lib in '' pcreposix pcre; do
   if test -z "$ac_lib"; then
     ac_res="none required"
   else

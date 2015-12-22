@@ -815,7 +815,7 @@ dir_file_pathname (dir, file)
   char const *p = filename_lastdirchar (dir);
   return concat (dir, "/" + (p && !p[1]), file);
 }
-
+
 void
 debug_script (sp)
      struct change *sp;

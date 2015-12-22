@@ -35,7 +35,7 @@ CSqlConnection* CSqlConnection::CreateConnection(const char *db, const char *dir
 
 	CServerIo::trace(3,"Connecting to %s",db);
 	if(!la.Load(name.c_str(),dir))
-		return false;
+		return NULL;
 	pNewSqlConnection = (CSqlConnection*(*)())la.GetProc("CreateConnection");
 
 	if(!pNewSqlConnection)

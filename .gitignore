@@ -2,6 +2,9 @@
 *.slo
 *.lo
 *.o
+.deps
+.libs
+Distribution_folder
 
 # Compiled Dynamic libraries
 *.so

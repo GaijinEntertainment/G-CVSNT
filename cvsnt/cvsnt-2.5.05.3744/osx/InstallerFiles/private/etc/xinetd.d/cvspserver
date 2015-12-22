@@ -4,7 +4,7 @@ service cvspserver
 	socket_type	= stream
 	wait		= no
 	user		= root
-	server		= /usr/bin/cvsnt
+	server		= /usr/local/bin/cvsnt
 	server_args	= authserver
 	groups		= yes
 	flags		= REUSE IPv6

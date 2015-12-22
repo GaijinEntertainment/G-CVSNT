@@ -36,17 +36,6 @@ public:
 	CVSAPI_EXPORT static bool addParam(CXmlNodePtr params, const char *name, int value);
 	CVSAPI_EXPORT static bool addParam(CXmlNodePtr params, const char *name, rpcObject *obj);
 
-	template<typename _Ty>
-		static bool addParamVector(CXmlNodePtr params, std::vector<_Ty>& ar)
-		{
-			CXmlNodePtr array = params->NewNode("array",NULL);
-			CXmlNodePtr data = array->NewNode("data", NULL);
-			for(size_t n=0; n<ar.size(); n++)
-				if(!addParam(data,NULL,&ar[n]))
-					return false;
-			return true;
-		}
-
 	CVSAPI_EXPORT static bool rpcInt(CXmlNodePtr param, const char *name, int& value);
 	CVSAPI_EXPORT static bool rpcString(CXmlNodePtr param, const char *name, cvs::string& value);
 	CVSAPI_EXPORT static bool rpcArray(CXmlNodePtr param, const char *name, CXmlNodePtr& node);

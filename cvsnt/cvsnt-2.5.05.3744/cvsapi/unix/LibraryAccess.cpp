@@ -23,7 +23,24 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
+#ifdef HAVE_LTDL
 #include <ltdl.h>
+
+#elif defined(__APPLE__)
+#include <dlfcn.h>
+#include <string.h>
+
+typedef void *lt_dlhandle;
+
+#define lt_dlinit()
+#define lt_dlexit()
+#define lt_dlclose dlclose
+#define lt_dlerror dlerror
+#define lt_dlsym   dlsym
+#define lt_dlopenext(P) dlopen(P, RTLD_LAZY)
+
+#endif
+
 #include <glob.h>
 
 #include <config.h>
@@ -42,13 +59,13 @@ namespace
 	static char save_oracle_home[200], new_oracle_home[200];
 	static void *save_m_lib;
 
-	static int dlref()
+	static void dlref()
 	{
 	if(!initcount++)
 		lt_dlinit();
 	}
 
-	static int dlunref()
+	static void dlunref()
 	{
 	if(!--initcount)
 		lt_dlexit();

@@ -90,6 +90,7 @@ CVSAPI_EXPORT char *wnt_ctime(const time_t *t);
 #define CompareFileChar(c,d) (((c)==(d))?0:tolower(c)-tolower(d))
 #define fncmp strcasecmp
 #define fnncmp strncasecmp
+#define SHARED_LIBRARY_EXTENSION ".so"
 
 /* OSX has a utf8 filesystem so we need to use that always */
 #define UTF8_CLIENT 1
