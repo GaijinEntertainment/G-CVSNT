@@ -26,7 +26,7 @@ static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bo
     stream.avail_out = zlen;
     zbuf = xmalloc(zlen+4);
     stream.next_out = (Bytef*)((char*)zbuf)+4;
-    *(unsigned long *)zbuf=htonl(len);
+    *(unsigned*)zbuf=htonl(len);
     if(deflate(&stream, Z_FINISH)==Z_STREAM_END)
     {
       zlen = 4 + (zlen - stream.avail_out);
