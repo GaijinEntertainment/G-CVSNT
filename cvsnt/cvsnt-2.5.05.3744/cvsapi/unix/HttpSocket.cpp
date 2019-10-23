@@ -70,7 +70,8 @@ bool CHttpSocket::_setUrl(const char *urlHost)
 		return false;
 
 	cvs::string url_string = urlHost;
-	char *address,*port,*p;
+	char *address,*p;
+	const char *port;
 
 	address=(char*)(url_string.data()+7);
 	p=strpbrk(address,":/");
@@ -78,7 +79,7 @@ bool CHttpSocket::_setUrl(const char *urlHost)
 	{
 		*p='\0';
 		port=p+1;
-		p=strchr(port,'/');
+		p=strchr(p+1,'/');
 	}
 	else
 		port="80";

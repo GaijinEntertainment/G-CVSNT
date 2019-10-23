@@ -52,7 +52,7 @@ encodeAppleSingle( const char * inFile, const char * outFile, long wantedEntries
 #define AS_COMMENT      4 /* standard Mac comment */
 #define AS_ICONBW       5 /* Mac black & white icon */
 #define AS_ICONCOLOR    6 /* Mac color icon */
-      /*              7       /* not used */
+/*                    7*/ /* not used */
 #define AS_FILEDATES    8 /* file dates; create, modify, etc */
 #define AS_FINDERINFO   9 /* Mac Finder info & extended info */
 #define AS_MACINFO      10 /* Mac file info, attributes, etc */

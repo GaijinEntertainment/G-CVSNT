@@ -386,7 +386,7 @@ static int tcp_connect_socks5(const cvsroot *cvsroot)
 		{
 			tcp_read(&resp[5],resp[4]+2);
 			memcpy(addr,&resp[5],resp[4]);
-			addr[resp[4]='\0'];
+			addr[resp[4]]='\0';
 		}
 		else
 		{
@@ -650,7 +650,7 @@ int tcp_shutdown()
 	return 0;
 }
 
-int tcp_printf(char *fmt, ...)
+int tcp_printf(const char *fmt, ...)
 {
 	char temp[1024];
 	va_list va;
@@ -821,14 +821,14 @@ int run_command(const char *cmd, int* in_fd, int* out_fd, int *err_fd)
 #else
 int run_command(const char *cmd, int* in_fd, int* out_fd, int* err_fd)
 {
-  char **argv;    
+  const char **argv;
   char *argbuf;
   int pid;
   int to_child_pipe[2];
   int from_child_pipe[2];
   int err_child_pipe[2];
 
-  argv=(char**)malloc(256*sizeof(char*));
+  argv=(const char**)malloc(256*sizeof(char*));
   argbuf=(char*)malloc(strlen(cmd)+128); 
   argv[0]="/bin/sh";
   argv[1]="-c";
@@ -873,7 +873,7 @@ int run_command(const char *cmd, int* in_fd, int* out_fd, int* err_fd)
       if (err_fd && dup2 (err_child_pipe[1], 2) < 0)
           server_error (1, "cannot dup2 pipe");
 
-      execvp (argv[0], argv);
+      execvp (argv[0], (char * const*)argv);
       server_error (1, "cannot exec %s", cmd);
   }
   if (close (to_child_pipe[0]) < 0)

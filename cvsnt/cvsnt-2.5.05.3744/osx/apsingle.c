@@ -16,11 +16,7 @@
 #define CVS_CHANGES
 
 /* struct definitions from RFC1740 */
-#if TARGET_API_MAC_CARBON
-#pragma options align=mac68k
-#elif PRAGMA_ALIGN_SUPPORTED
-#pragma options align=mac68k
-#endif
+#pragma options align=packed
 
 typedef struct ASHeader /* header portion of AppleSingle */ 
 {
@@ -60,11 +56,7 @@ typedef struct ASFileDates      /* entry ID 8, file dates info */
 } ASFileDates; /* ASFileDates */
 
 
-#if TARGET_API_MAC_CARBON
 #pragma options align=reset
-#elif PRAGMA_ALIGN_SUPPORTED
-#pragma options align=reset
-#endif
 
 /* Prototypes */
 OSErr decodeFileDates( ASEntry inEntry, FILE * inFile, const FSRef * ioSpec );
@@ -74,7 +66,7 @@ OSErr encodeComment(FILE * outfp, Str255 comment );
 OSErr encodeFileDates(FILE * outfp, const FSCatalogInfo * info);
 OSErr encodeFinderInfo( FILE * outfp, const FSCatalogInfo * cinfo);
 OSErr encodeMacInfo( FILE * outfp, const FSCatalogInfo * cinfo);
-OSErr macFileToFileStream( FILE * outfp, SInt16 refNum, UInt32 bytesExpected); 
+OSErr macFileToFileStream( FILE * outfp, FSIORefNum refNum, UInt32 bytesExpected); 
 OSErr encodeDataFork( FILE * outfp, const FSRef * inFile, UInt32 bytesExpected);
 OSErr encodeResourceFork( FILE * outfp, const FSRef * inFile, UInt32 bytesExpected);
 
@@ -82,7 +74,7 @@ OSErr encodeResourceFork( FILE * outfp, const FSRef * inFile, UInt32 bytesExpect
  * Blasts the bytes specified in the entry to already opened Mac file
  */
 static OSErr
-asEntryToMacFile( ASEntry inEntry, FILE * inFile, SInt16 inRefNum)
+asEntryToMacFile( ASEntry inEntry, FILE * inFile, FSIORefNum inRefNum)
 {
 #define BUFFER_SIZE 8192
 
@@ -115,7 +107,7 @@ asEntryToMacFile( ASEntry inEntry, FILE * inFile, SInt16 inRefNum)
 static OSErr
 decodeDataFork( ASEntry inEntry, FILE * inFile, const FSRef * ioSpec )
 {
-	SInt16	refNum;
+	FSIORefNum	refNum;
 	OSErr err;
 	HFSUniStr255 forkName;
 	
@@ -141,7 +133,7 @@ decodeDataFork( ASEntry inEntry, FILE * inFile, const FSRef * ioSpec )
 static OSErr
 decodeResourceFork( ASEntry inEntry, FILE * inFile, const FSRef * ioSpec )
 {
-	SInt16	refNum;
+	FSIORefNum	refNum;
 	OSErr err;
 	HFSUniStr255 forkName;
 	
@@ -497,7 +489,7 @@ encodeRealName(FILE * outfp, const FSRef * inSpec )
 	if(err != noErr)
 		return err;
 
-	if ( fwrite( &(inFSSpec.name[1]), 1, inFSSpec.name[0], outfp) < 0 )
+	if ( fwrite( &(inFSSpec.hidden[7]), 1, inFSSpec.hidden[6], outfp) < 0 )
 		return ioErr;
 	return noErr;
 }
@@ -552,7 +544,7 @@ encodeMacInfo( FILE * outfp, const FSCatalogInfo * cinfo )
 #endif
 
 OSErr
-macFileToFileStream( FILE * outfp, SInt16 refNum, UInt32 bytesExpected)
+macFileToFileStream( FILE * outfp, FSIORefNum refNum, UInt32 bytesExpected)
 {
 #define BUFFER_SIZE 8192
 
@@ -576,7 +568,7 @@ macFileToFileStream( FILE * outfp, SInt16 refNum, UInt32 bytesExpected)
 OSErr
 encodeDataFork( FILE * outfp, const FSRef * inFile, UInt32 bytesExpected)
 {
-	short refNum;
+	FSIORefNum refNum;
 	OSErr err;
 	HFSUniStr255 forkName;
 
@@ -597,7 +589,7 @@ encodeDataFork( FILE * outfp, const FSRef * inFile, UInt32 bytesExpected)
 OSErr
 encodeResourceFork( FILE * outfp, const FSRef * inFile, UInt32 bytesExpected)
 {
-	short refNum;
+	FSIORefNum refNum;
 	OSErr err;
 	HFSUniStr255 forkName;
 
@@ -719,7 +711,7 @@ encodeAppleSingle(const char * inFile, const char * outFile, long wantedEntries)
 	{
 		entry.entryID = AS_REALNAME;
 		entry.entryOffset = availableOffset;
-		entry.entryLength = inFSSpec.name[0];
+		entry.entryLength = inFSSpec.hidden[6];
 		if ( fwrite( &entry, 1, sizeof(ASEntry), outfp) < 0 )
 			goto fail;
 		availableOffset += entry.entryLength;

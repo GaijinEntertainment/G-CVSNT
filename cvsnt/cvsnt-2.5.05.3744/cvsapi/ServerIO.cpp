@@ -108,7 +108,7 @@ int CServerIo::trace(int level, const char *fmt, ...)
 
 int CServerIo::default_output(const char *str, size_t len)
 {
-	return printf("%-*.*s",len,len,str);
+	return printf("%-*.*s",int(len),int(len),str);
 }
 
 int CServerIo::default_trace(int level, const char *str)

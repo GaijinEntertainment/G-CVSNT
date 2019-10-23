@@ -111,7 +111,7 @@ struct ForkInfo
 	
 	ForkInfo& operator = (const ForkInfo& inRhs)
 	{
-		BlockMoveData(inRhs.forkName.unicode, forkName.unicode, inRhs.forkName.length * sizeof(UniChar));
+		memmove(forkName.unicode, inRhs.forkName.unicode, inRhs.forkName.length * sizeof(UniChar));
 		forkName.length = inRhs.forkName.length;
 		forkSize = inRhs.forkSize;
 		return *this;
@@ -127,47 +127,6 @@ struct ForkInfo
 		return forkName.length < inRhs.forkName.length;
 	}
 };
-
-static OSErr FSGetVRefNum(	const FSRef		*ref,
-							FSVolumeRefNum	*vRefNum)
-{
-	FSCatalogInfo	catalogInfo;
-	OSErr			err = ( ref != NULL && vRefNum != NULL ) ? OSErr(noErr) : OSErr(paramErr);
-	
-	if( err == noErr )	/* get the volume refNum from the FSRef */
-		err = FSGetCatalogInfo(ref, kFSCatInfoVolume, &catalogInfo, NULL, NULL, NULL);
-	if( err == noErr )
-		*vRefNum = catalogInfo.volume;
-	
-	mycheck_noerr( err );
-	
-	return err;
-}
-
-static OSErr FSGetVolParms(	FSVolumeRefNum			volRefNum,
-							UInt32					bufferSize,
-							GetVolParmsInfoBuffer	*volParmsInfo,
-							UInt32					*actualInfoSize)		/*	Can Be NULL	*/
-{
-	HParamBlockRec	pb;
-	OSErr			err = ( volParmsInfo != NULL ) ? OSErr(noErr) : OSErr(paramErr);
-	
-	if( err == noErr )
-	{
-		pb.ioParam.ioNamePtr = NULL;
-		pb.ioParam.ioVRefNum = volRefNum;
-		pb.ioParam.ioBuffer = (Ptr)volParmsInfo;
-		pb.ioParam.ioReqCount = (SInt32)bufferSize;
-		err = PBHGetVolParmsSync(&pb);
-	}
-	/* return number of bytes the file system returned in volParmsInfo buffer */
-	if( err == noErr && actualInfoSize != NULL)
-		*actualInfoSize = (UInt32)pb.ioParam.ioActCount;
-	
-	mycheck_noerr( err );	
-	
-	return ( err );
-}
 
 const char* ForkNameAsCString(const HFSUniStr255& forkName)
 {
@@ -218,8 +177,8 @@ OSStatus CollectForks(const FSRef& inFile, std::set<ForkInfo>& outForkList)
 
 /* Writes the fork from the source, references by srcRefNum, to the destination fork	*/
 /* references by destRefNum																*/
-OSStatus WriteFork(	SInt16	srcRefNum,
-					SInt16	destRefNum,
+OSStatus WriteFork(	FSIORefNum	srcRefNum,
+					FSIORefNum	destRefNum,
 					SInt64	forkSize,
 					UInt32	bufferSize,
 					void*	buffer,
@@ -311,7 +270,7 @@ OSStatus CopyForks(const FSRef& inSrcFile,
 		}
 		
 		if ( err == noErr  &&  ( i->forkSize > 0  ||  foundDestFork != forksToRemove.end() ) ) {
-			SInt16			srcRefNum(0), destRefNum(0);
+			FSIORefNum	srcRefNum(0), destRefNum(0);
 			/* Open the destination fork	*/
 			err = FSOpenFork(&inDestFile, i->forkName.length, i->forkName.unicode, fsWrPerm, &destRefNum);
 			if ( err == noErr ) {
@@ -349,76 +308,6 @@ OSStatus CopyForks(const FSRef& inSrcFile,
 	return err;
 }
 
-/* Calculate an appropriate copy buffer size based on the volumes		*/
-/* rated speed.  Our target is to use a buffer that takes 0.25			*/
-/* seconds to fill.  This is necessary because the volume might be		*/
-/* mounted over a very slow link (like ARA), and if we do a 256 KB		*/
-/* read over an ARA link we'll block the File Manager queue for			*/
-/* so long that other clients (who might have innocently just			*/
-/* called PBGetCatInfoSync) will block for a noticeable amount of time.	*/
-/*																		*/
-/* Note that volumeBytesPerSecond might be 0, in which case we assume	*/
-/* some default value.													*/
-static UInt32 BufferSizeForVolSpeed(UInt32 volumeBytesPerSecond)
-{
-	ByteCount bufferSize;
-	
-	if (volumeBytesPerSecond == 0)
-		bufferSize = kDefaultCopyBufferSize;
-	else
-	{	/* We want to issue a single read that takes 0.25 of a second,	*/
-		/* so devide the bytes per second by 4.							*/
-		bufferSize = volumeBytesPerSecond / 4;
-	}
-
-	/* Round bufferSize down to 512 byte boundary. */
-	bufferSize &= ~0x01FF;
-
-	/* Clip to sensible limits. */
-	if (bufferSize < kMinimumCopyBufferSize)
-	bufferSize = kMinimumCopyBufferSize;
-	else if (bufferSize > kMaximumCopyBufferSize)
-	bufferSize = kMaximumCopyBufferSize;
-
-	return bufferSize;
-}
-
-/* This routine calculates the appropriate buffer size for				*/
-/* the given vRefNum.  It's a simple composition of FSGetVolParms		*/
-/* BufferSizeForVolSpeed.												*/
-static UInt32 BufferSizeForVol(FSVolumeRefNum vRefNum)
-{
-	GetVolParmsInfoBuffer	volParms;
-	ByteCount				volumeBytesPerSecond = 0;
-	UInt32					actualSize;
-	OSErr					err;
-	
-	err = FSGetVolParms( vRefNum, sizeof(volParms), &volParms, &actualSize );
-	if( err == noErr )
-	{
-		/* Version 1 of the GetVolParmsInfoBuffer included the vMAttrib		*/
-		/* field, so we don't really need to test actualSize.  A noErr		*/
-		/* result indicates that we have the info we need.  This is			*/
-		/* just a paranoia check.											*/
-		
-		mycheck(actualSize >= offsetof(GetVolParmsInfoBuffer, vMVolumeGrade));
-		
-		/* On the other hand, vMVolumeGrade was not introduced until		*/
-		/* version 2 of the GetVolParmsInfoBuffer, so we have to explicitly	*/
-		/* test whether we got a useful value.								*/
-		
-		if( ( actualSize >= offsetof(GetVolParmsInfoBuffer, vMForeignPrivID) ) &&
-			( volParms.vMVolumeGrade <= 0 ) ) 
-		{
-			volumeBytesPerSecond = -volParms.vMVolumeGrade;
-		}
-	}
-	
-	mycheck_noerr( err );	
-	
-	return BufferSizeForVolSpeed(volumeBytesPerSecond);
-}
-
 #pragma mark ----- Calculate Buffer Size -----
 
 /* Calculates the optimal buffer size for both the source	*/
@@ -427,27 +316,8 @@ static OSErr CalculateBufferSize(	const FSRef& source,
 									const FSRef& destDir,
 									ByteCount& outBufferSize )
 {
-	FSVolumeRefNum	sourceVRefNum,
-	destVRefNum;
-	ByteCount		tmpBufferSize = 0;
 	OSErr			err(noErr);
-	
-	if( err == noErr )
-		err = FSGetVRefNum( &source, &sourceVRefNum );
-	if( err == noErr )
-		err = FSGetVRefNum( &destDir, &destVRefNum);
-	if( err == noErr)
-	{
-		tmpBufferSize = BufferSizeForVol(sourceVRefNum);
-		if (destVRefNum != sourceVRefNum)
-		{
-			ByteCount tmp = BufferSizeForVol(destVRefNum);
-			if (tmp < tmpBufferSize)
-				tmpBufferSize = tmp;
-		}
-	}
-	
-	outBufferSize = tmpBufferSize;
+	outBufferSize = 128<<10;
 	
 	mycheck_noerr( err );	
 	
@@ -493,7 +363,7 @@ OSStatus CopyFile(const FSRef& source,
 	bool					isSymLink;
 	bool					destFileExists(false);
 	void*					buffer = NULL;
-	UInt32					bufferSize;
+	ByteCount				bufferSize;
 
 	err = CalculateBufferSize( source, destDir, bufferSize);
 	if ( err == noErr ) {
@@ -502,7 +372,7 @@ OSStatus CopyFile(const FSRef& source,
 	}
 	
 	if( err == noErr ) {		/* get needed info about the source file */
-		if ( newName ) BlockMoveData(newName, &newFileName, sizeof(newFileName));
+		if ( newName ) memmove(&newFileName, newName, sizeof(newFileName));
 		err = FSGetCatalogInfo( &source, kFSCatInfoSettableInfo, &sourceCatInfo, newName ? NULL : &newFileName, NULL, NULL );
 	}
 
@@ -539,8 +409,8 @@ OSStatus CopyFile(const FSRef& source,
 	/* going to create otherwise FSCreateFileUnicode will return				*/
 	/* -5000 (afpAccessDenied), and the FSRef returned will be invalid, yet		*/
 	/* the file is created (size 0k)... bug?									*/
-	originalPermissions = *((FSPermissionInfo*)sourceCatInfo.permissions);
-	((FSPermissionInfo*)sourceCatInfo.permissions)->mode |= kRWXUserAccessMask;
+	originalPermissions = sourceCatInfo.permissions;
+	sourceCatInfo.permissions.mode |= kRWXUserAccessMask;
 
 	if( err == noErr && !destFileExists ) /* attempt to create the new file */
 		err = FSCreateFileUnicode(&destDir, newFileName.length, newFileName.unicode, kFSCatInfoSettableInfo, &sourceCatInfo, &dest, isSymLink ? &tmpSpec : NULL );
@@ -556,29 +426,9 @@ OSStatus CopyFile(const FSRef& source,
 	{
 		((FInfo *) &sourceCatInfo.finderInfo)->fdType = originalFileType;
 		sourceCatInfo.nodeFlags  = originalNodeFlags;
-		*((FSPermissionInfo*)sourceCatInfo.permissions) = originalPermissions;
+		sourceCatInfo.permissions = originalPermissions;
 		
-		/* 2796751, FSSetCatalogInfo returns -36 when setting the Finder Info	*/
-		/* for a symlink.  To workaround this, when the file is a				*/
-		/* symlink (slnk/rhap) we will finish the copy in two steps. First		*/
-		/* setting everything but the Finder Info on the file, then calling		*/
-		/* FSpSetFInfo to set the Finder Info for the file. I would rather use	*/
-		/* an FSRef function to set the Finder Info, but FSSetCatalogInfo is	*/
-		/* the only one...  catch-22...											*/
-		/*																		*/
-		/* The Carbon File Manager always sets the type/creator of a symlink to	*/
-		/* slnk/rhap if the file is a symlink we do the two step, if it isn't	*/
-		/* we use FSSetCatalogInfo to do all the work.							*/
-		if ( isSymLink )
-		{								/* Its a symlink							*/
-			/* set all the info, except the Finder info	*/
-			err = FSSetCatalogInfo(&dest, kFSCatInfoNodeFlags | kFSCatInfoPermissions, &sourceCatInfo);
-			if ( err == noErr )			/* set the Finder Info to that file			*/
-				err = FSpSetFInfo( &tmpSpec, ((FInfo *) &sourceCatInfo.finderInfo) );
-		}
-		else {							/* its a regular file 						*/
-			err = FSSetCatalogInfo(&dest, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo | kFSCatInfoPermissions, &sourceCatInfo);
-		}
+		err = FSSetCatalogInfo(&dest, kFSCatInfoNodeFlags | kFSCatInfoFinderInfo | kFSCatInfoPermissions, &sourceCatInfo);
 	}
 
 	/* If we created the file and the copy failed, try to clean up by			*/
@@ -644,6 +494,7 @@ OSStatus _split_path(const char* path, FSRef *outParentFolder, HFSUniStr255 *out
 	return err;
 }
 
+#if DEBUG
 struct CarbonWDFixup
 {
 	short		savedVRefNum;
@@ -669,6 +520,7 @@ struct CarbonWDFixup
 		HSetVol(NULL, savedVRefNum, savedDirID);
 	}
 };
+#endif
 
 } // end of anonymous namespace
 
@@ -725,4 +577,5 @@ int mac_copy_file(const char* from, const char* to, int force_overwrite, int mus
 	// now copy all forks
 	err = CopyFile(fromRef, toParentRef, NULL, &toName);
 	if ( err ) error (1, 0, "error while trying to copy file %s to %s: error %d", from, to, (int)err);
+	return 0;
 }

@@ -48,6 +48,12 @@ OSStatus PathToFSRef(const char *filename, FSRef * res)
 	return FSPathMakeRef((UInt8 *)filename, res, 0L);
 }
 
+static void c2pstrcpy(Str255 dest, const char *src)
+{
+  dest[0] = strlen(src);
+  memcpy(&dest[1], src, dest[0]);
+}
+
 OSStatus StrToUnicode(const char *str, UniChar *ustr, SInt32 *uniLen,
 					  TextEncoding *outEncoder)
 {
@@ -578,8 +584,8 @@ void set_file_type(const char *outfile, Boolean warnOnFail)
 
 	if (err != noErr)
 	{
-		if (warnOnFail)
-			error(0, err, "WARNING: Internet Config cannot map file %s", outfile);
+		//if (warnOnFail)
+		//	error(0, err, "WARNING: Internet Config cannot map file %s", outfile);
 		return;
 	}
 

@@ -29,7 +29,7 @@ rm -rf $Distribution_Dir
 SAVEDIR=`pwd`
 cd $SourceRoot/..
 make distclean
-./configure --prefix=/usr/local --with-config-dir=/private/etc/cvsnt CC="clang" CPP="clang -E" CXX="clang++" LDFLAGS="-m32" CPPFLAGS="-m32" --with-internal-zlib CXXFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" CFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" --disable-odbc --disable-ltdl
+./configure --prefix=/usr/local --with-config-dir=/private/etc/cvsnt CC="clang" CPP="clang -E" CXX="clang++" LDFLAGS="-m64" CPPFLAGS="-m64" --with-internal-zlib CXXFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" CFLAGS="-D__DARWIN_OS__=`uname -r | sed s/'\.[0-9,\.]*$'//`" --disable-odbc --disable-ltdl
 rm -rf $InstallerRoot/* 
 make DESTDIR=$InstallerRoot
 make install DESTDIR=$InstallerRoot

@@ -242,7 +242,7 @@ int add (int argc, char **argv)
 		int nonbranch;
 		char *rcsdir;
 		char *p;
-		char *update_dir;
+		const char *update_dir;
 		/* This is some mungeable storage into which we can point
 		   with p and/or update_dir.  */
 		char *filedir;

@@ -1592,7 +1592,7 @@ int __parse_info_line(const char *line, options *generic_options, options *spec_
 			size_t n = 0;
 			if(!only_uservar)
 			{
-				for(n; env_info[n].env; n++)
+				for(n=0; env_info[n].env; n++)
 				{
 					if(!strcmp(env_info[n].env,tmp.c_str()) && env_info[n].val)
 					{

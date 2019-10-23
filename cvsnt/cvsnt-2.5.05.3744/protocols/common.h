@@ -51,7 +51,7 @@ int set_encrypted_channel(int encrypt);
 
 /* TCP/IP helper functions */
 int get_tcp_fd();
-int tcp_printf(char *fmt, ...);
+int tcp_printf(const char *fmt, ...);
 int tcp_connect(const cvsroot *cvsroot);
 int tcp_connect_bind(const char *servername, const char *remote_port, int min_local_port, int max_local_port);
 int tcp_disconnect();

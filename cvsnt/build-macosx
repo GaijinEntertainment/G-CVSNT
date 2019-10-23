@@ -1,0 +1,6 @@
+cd cvsnt-2.5.05.3744/osx
+sudo mkdir /usr/local/include
+sudo tar -xzf usr_local_include_pcre.tar.gz -C /usr/local/include
+./build-mac
+cd ../..
+cp cvsnt-2.5.05.3744/osx/cvsnt-2.*.tar.gz .

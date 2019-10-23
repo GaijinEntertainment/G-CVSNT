@@ -333,7 +333,7 @@ OSErr HQXEncode(const char *filename, HQXSink dst, long refcon) {
 	FInfo ioFlFndrInfo;
 	UInt32 ioFlLgLen, ioFlRLgLen;
 	HFSUniStr255 forkName;
-	SInt16 forkRefNum;
+	FSIORefNum forkRefNum;
 	char path[1024];
 
 #ifdef CVS_CHANGES
@@ -584,7 +584,7 @@ OSErr HQXDecode(HQXSource src, const char *fname, Boolean can_replace, Boolean h
 	FInfo info;
 	long zero, data_length, rsrc_length;
 	ByteCount bytecount, actcount;
-	short refnum;
+	FSIORefNum refnum;
 	Str255 name;
 	Boolean file_exists;
 	HQXDecVarsPtr decv;

@@ -130,7 +130,7 @@ dumpBuffer (FILE * fp, uint32 offset, uint32 len, char *structPtr,
   if (offset < buf_start || offset > buf_len + buf_start
       || offset + len > buf_len + buf_start)
     len = 0;
-  dumpRaw (fp, structPtr + offset, len);
+  dumpRaw (fp, (const unsigned char*)structPtr + offset, len);
 }
 
 static char *
@@ -221,7 +221,7 @@ dumpSmbNtlmAuthRequest (FILE * fp, tSmbNtlmAuthRequest * request)
 void
 dumpSmbNtlmAuthChallenge (FILE * fp, tSmbNtlmAuthChallenge * challenge)
 {
-  unsigned char buf[NTLM_BUFSIZE];
+  char buf[NTLM_BUFSIZE];
   fprintf (fp, "NTLM Challenge:\n"
 	   "      Ident = %.8s\n"
 	   "      mType = %d\n"
@@ -238,7 +238,7 @@ dumpSmbNtlmAuthChallenge (FILE * fp, tSmbNtlmAuthChallenge * challenge)
 void
 dumpSmbNtlmAuthResponse (FILE * fp, tSmbNtlmAuthResponse * response)
 {
-  unsigned char buf1[NTLM_BUFSIZE], buf2[NTLM_BUFSIZE], buf3[NTLM_BUFSIZE];
+  char buf1[NTLM_BUFSIZE], buf2[NTLM_BUFSIZE], buf3[NTLM_BUFSIZE];
   fprintf (fp, "NTLM Response:\n"
 	   "      Ident = %.8s\n"
 	   "      mType = %d\n"
@@ -330,7 +330,7 @@ buildSmbNtlmAuthResponse (tSmbNtlmAuthChallenge * challenge,
 {
   const char *p = strchr (user, '@');
   size_t user_len = strlen (user);
-  unsigned char buf[NTLM_BUFSIZE];
+  char buf[NTLM_BUFSIZE];
   const char *domain = GetUnicodeString (challenge, uDomain, buf);
 
   if (p)
@@ -348,7 +348,7 @@ buildSmbNtlmAuthResponse_noatsplit (tSmbNtlmAuthChallenge * challenge,
 				    tSmbNtlmAuthResponse * response,
 				    const char *user, const char *password)
 {
-  unsigned char buf[NTLM_BUFSIZE];
+  char buf[NTLM_BUFSIZE];
   const char *domain = GetUnicodeString (challenge, uDomain, buf);
 
   buildSmbNtlmAuthResponse_userlen (challenge, response,

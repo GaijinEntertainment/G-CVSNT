@@ -247,7 +247,11 @@ cvs::string CFileAccess::tempdir()
 
 cvs::string CFileAccess::tempfilename(const char *prefix)
 {
-	return tempnam(tempdir().c_str(),prefix);
+	size_t name_len = strlen(tempdir().c_str())+1+strlen(prefix)+8+1;
+	char *name = (char*)malloc(name_len+1);
+	snprintf(name, name_len, "%s/%sXXXXXXXX", tempdir().c_str(), prefix);
+	mktemp(name);
+	return name;
 }
 
 bool CFileAccess::remove(const char *file, bool recursive /* = false */)
