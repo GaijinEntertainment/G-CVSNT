@@ -43,7 +43,7 @@ buf_initialize (int (*input) (void *, char *, int, int, int *), int (*output) (v
 void
 buf_free (struct buffer *buf)
 {
-    if (buf->data != NULL)
+    if (buf && buf->data != NULL)
     {
 	if(buf->last)
 	buf->last->next = free_buffer_data;

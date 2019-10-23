@@ -53,6 +53,13 @@ extern int server_io_socket;
 
 static bool have_local_root = true;
 
+// Avoid doing cleanup twice. This occasionally happened on some
+// errors and signals when main_cleanup() was called after server_cleanup()
+// and tried to error() which would call server_cleanup() too. This has
+// caused useless segfaults since memory has already been freed and
+// pointers have become invalid.
+static bool server_cleanup_already_done = false;
+
 // Size above which checksums are used rather than sending the file if a timestamp difference is detected
 int server_checksum_threshold = 1048576*5; // 5MB
 
@@ -3015,9 +3022,12 @@ free_args_and_return:
 /* Called by error_exit() to flush final error messages before closedown */
 void server_error_exit()
 {
-    buf_output0 (buf_to_net, "error  \n");
-    set_block (buf_to_net);
-    buf_flush (buf_to_net, 1);
+	if (buf_to_net)
+	{
+		buf_output0 (buf_to_net, "error  \n");
+		set_block (buf_to_net);
+		buf_flush (buf_to_net, 1);
+	}
 }
 
 /* This variable commented in server.h.  */
@@ -4636,6 +4646,9 @@ static void serve_valid_requests (char *arg)
 
 void server_cleanup (int sig)
 {
+  if (server_cleanup_already_done)
+    return;
+
     /* Do "rm -rf" on the temp directory.  */
     int status;
     int save_noexec;
@@ -4656,14 +4669,17 @@ void server_cleanup (int sig)
 	   when the client shuts down its buffer.  Then, after we have
 	   generated any final output, we shut down BUF_TO_NET.  */
 
-	status = buf_shutdown (buf_from_net);
-	buf_from_net = NULL;
-	if (status != 0)
+	if (buf_from_net)
 	{
-	    error (0, status, "shutting down buffer from client");
-	    buf_flush (buf_to_net, 1);
+		status = buf_shutdown (buf_from_net);
+		buf_from_net = NULL;
+		if (status != 0)
+		{
+			error (0, status, "shutting down buffer from client");
+			buf_flush (buf_to_net, 1);
+		}
 	}
-    }
+		}
 
     if (dont_delete_temp)
     {
@@ -4697,6 +4713,8 @@ void server_cleanup (int sig)
 
 	CProtocolLibrary lib;
 	lib.UnloadProtocol(server_protocol);
+
+  server_cleanup_already_done = true;
 }
 
 int server_active = 0;
@@ -4831,6 +4849,8 @@ int server (int argc, char **argv)
 	    }
 	}
     }
+
+  server_cleanup_already_done = false; // Set it explicitly just in case.
 
 #ifdef SIGABRT
     (void) SIG_register (SIGABRT, server_cleanup);
