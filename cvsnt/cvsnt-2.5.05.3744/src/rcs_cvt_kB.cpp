@@ -628,7 +628,7 @@ static void RCS_convert_to_new_binary(RCSNode *rcs)
     if((expand.flags&KFLAG_BINARY) && !(expand.flags&KFLAG_BINARY_DELTA))
     {
       struct stat s;
-      if (CVS_STAT (rcs->path, &s) < 0 || s.st_size <= (128<<10))
+      if (CVS_STAT (rcs->path, &s) < 0 || s.st_size <= 0)
         return; // no gain in converting
 
       if (expand.flags & KFLAG_COMPRESS_DELTA)
