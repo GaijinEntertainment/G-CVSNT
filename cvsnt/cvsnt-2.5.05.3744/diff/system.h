@@ -199,6 +199,7 @@ void *memchr ();
 extern int errno;
 #endif
 
+#ifndef __cplusplus
 #ifdef min
 #undef min
 #endif
@@ -207,6 +208,7 @@ extern int errno;
 #endif
 #define min(a,b) ((a) <= (b) ? (a) : (b))
 #define max(a,b) ((a) >= (b) ? (a) : (b))
+#endif
 
 /* This section contains Posix-compliant defaults for macros
    that are meant to be overridden by hand in config.h as needed.  */
