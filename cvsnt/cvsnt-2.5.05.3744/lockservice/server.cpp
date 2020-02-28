@@ -196,11 +196,10 @@ static void *mdns_thread_proc(void* param)
 }
 #endif
 
-static int start_thread(CSocketIO* sock)
+static void start_thread(CSocketIO* sock)
 {
 #ifdef _WIN32
 	_beginthread(thread_proc,0,(void*)sock);
-	return 0;
 #elif HAVE_PTHREAD_H
 	pthread_t         a_thread = 0;
 	pthread_create( &a_thread, NULL, thread_proc, 
@@ -212,11 +211,10 @@ static int start_thread(CSocketIO* sock)
 }
 
 #ifdef HAVE_MDNS
-static int start_mdns_thread()
+static void start_mdns_thread()
 {
 #ifdef _WIN32
 	_beginthread(mdns_thread_proc,0,NULL);
-	return 0;
 #elif HAVE_PTHREAD_H
 	pthread_t         a_thread = 0;
 	pthread_create( &a_thread, NULL, mdns_thread_proc, NULL);	

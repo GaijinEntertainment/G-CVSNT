@@ -52,6 +52,7 @@
 #include <netinet/in.h>
 #include <arpa/inet.h>
 #include <unistd.h>
+#include <stdlib.h>
 #ifdef HAVE_SYS_UIO_H
 #include <sys/uio.h>
 #endif

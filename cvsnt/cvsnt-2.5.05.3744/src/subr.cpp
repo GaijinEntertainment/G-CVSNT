@@ -1129,7 +1129,7 @@ void cvs_printf(const char *fmt, ...)
 
 void cvs_putchar(int c)
 {
-	char s[2]={c,0};
+	char s[2]={(char)c,'\0'};
 	cvs_output(s,1);
 }
 
