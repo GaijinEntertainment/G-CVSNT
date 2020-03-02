@@ -20,7 +20,28 @@
 #define CVS_STRING__H
 
 #include <cstdio>
+// Workaround for
+// https://bugzilla.redhat.com/show_bug.cgi?id=1546704
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=24196
+// https://gcc.gnu.org/bugzilla/show_bug.cgi?id=16612
 #include <string>
+#ifdef __GLIBCXX__
+#if __cplusplus >= 201103L
+#if defined(_GLIBCXX_USE_CXX11_ABI) && _GLIBCXX_USE_CXX11_ABI == 0
+#include <ext/vstring.h>
+#define STD_STR_CLASS __gnu_cxx::__versa_string
+#endif
+#else // __cplusplus
+#if defined(_GLIBCXX_FULLY_DYNAMIC_STRING) && _GLIBCXX_FULLY_DYNAMIC_STRING == 0
+#include <ext/vstring.h>
+#define STD_STR_CLASS __gnu_cxx::__versa_string
+#endif
+#endif // __cplusplus
+#endif // __GLIBCXX__
+#ifndef STD_STR_CLASS
+#define STD_STR_CLASS std::basic_string
+#endif
+
 #include <queue>
 #include <stdarg.h>
 #include <string.h>
@@ -77,7 +98,7 @@ namespace cvs
 		static CVSAPI_EXPORT const char*find( const char* s, size_t n, char a ) { for(; n>0; n--,s++) if(!CompareUserChar(*s,a)) return s; return NULL; }
 	};
 
-	typedef std::basic_string<char, filename_char_traits> filename;
+	typedef STD_STR_CLASS<char, filename_char_traits> filename;
 
 	/* Unfortunately you can't do this in char_traits due to a bug in the compare handlers...
 	   inheriting from a template is OK only as long as you don't add member variables (so the
@@ -97,10 +118,10 @@ namespace cvs
 		CVSAPI_EXPORT wildcard_filename& operator=(const char *_Ptr) { assign(_Ptr); return *this; }
 		CVSAPI_EXPORT bool matches_regexp(const char *regexp, bool extended = true);
 	};
-	typedef std::basic_string<char, username_char_traits> username;
+	typedef STD_STR_CLASS<char, username_char_traits> username;
 
-	typedef std::basic_string<char> string;
-	typedef std::basic_string<wchar_t> wstring;
+	typedef STD_STR_CLASS<char> string;
+	typedef STD_STR_CLASS<wchar_t> wstring;
 
 	CVSAPI_EXPORT bool str_prescan(const char *fmt, va_list va);
 
@@ -193,7 +214,7 @@ namespace cvs
 	{
 		wide(const char *str) { utf82ucs2(str); }
 		operator const wchar_t *() { return w_str.c_str(); }
-		std::wstring w_str;
+		cvs::wstring w_str;
 		void utf82ucs2(const char *src)
 		{
 			unsigned char *p=(unsigned char *)src;
@@ -219,7 +240,7 @@ namespace cvs
 	{
 		narrow(const wchar_t *w_str) { ucs22utf8(w_str); }
 		operator const char *() { return str.c_str(); }
-		std::string str;
+		cvs::string str;
 		void ucs22utf8(const wchar_t *src)
 		{
 			const wchar_t *p=src;
@@ -386,7 +407,7 @@ namespace cvs
 	{
 		idn(const char *str) { idntoascii(str); }
 		operator const char *() { return str.c_str(); }
-		std::string str;
+		cvs::string str;
 		void idntoascii(const char *src)
 		{
 			if(!bIdnToAsciiInit)
@@ -421,7 +442,7 @@ namespace cvs
 	{
 		decode_idn(const char *str) { asciitoidn(str); }
 		operator const char *() { return str.c_str(); }
-		std::string str;
+		cvs::string str;
 		void asciitoidn(const char *src)
 		{
 			if(!bIdnToUnicodeInit)
@@ -526,11 +547,12 @@ namespace cvs
 	protected:
 		const char *m_ptr;
 
-		static CVSAPI_EXPORT std::queue<std::string> global_string_cache;
+		static CVSAPI_EXPORT std::queue<cvs::string> global_string_cache;
 		static int const global_string_cache_max = 30;
 	};
 };
 
+#undef STD_STR_CLASS
 
 #endif
 

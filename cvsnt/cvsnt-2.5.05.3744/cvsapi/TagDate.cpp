@@ -65,7 +65,7 @@ bool CTagDate::AddGenericTag(const char *tag,bool isDate)
 
 		const char *p = strchr(tag,':');
 		int type=0;
-		std::string tag1,tag2;
+		cvs::string tag1,tag2;
 		
 		tag1.assign(tag,tag-p);
 		while(*p==':')

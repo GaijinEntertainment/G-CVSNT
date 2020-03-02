@@ -59,7 +59,7 @@ enum ClientState { lcLogin, lcActive, lcMonitor, lcClosed };
 enum LockFlags { lfRead = 0x01, lfWrite = 0x02, lfClosed = 0x10 };
 enum MonitorFlags { lcMonitorClient=0x01, lcMonitorLock=0x02, lcMonitorVersion=0x04 };
 
-typedef std::map<std::string,std::string> VersionMapType;
+typedef std::map<cvs::string,cvs::string> VersionMapType;
 
 #ifdef _WIN32
 CRITICAL_SECTION g_crit;
@@ -134,7 +134,7 @@ struct locktime_t
 struct Lock
 {
 	size_t owner;
-	std::string path;
+	cvs::string path;
 	unsigned flags;
 	size_t length; /* length of path */
 	VersionMapType versions;
@@ -145,10 +145,10 @@ struct TransactionStruct
 	TransactionStruct();
 	~TransactionStruct();
 	size_t owner;
-	std::string path;
-	std::string branch;
-	std::string version;
-	std::string oldversion;
+	cvs::string path;
+	cvs::string branch;
+	cvs::string version;
+	cvs::string oldversion;
 	char type;
 
 	bool operator==(const char *oth) { return !strcmp(path.c_str(),oth)?true:false; }
@@ -159,10 +159,10 @@ typedef std::vector<TransactionStruct> TransactionListType;
 struct LockClient
 {
 	LockClient() { state=lcClosed; flags=0; }
-	std::string server_host;
-	std::string client_host;
-	std::string user;
-	std::string root;
+	cvs::string server_host;
+	cvs::string client_host;
+	cvs::string user;
+	cvs::string root;
 	ClientState state;
 	unsigned flags;
 	locktime_t starttime;
@@ -213,7 +213,7 @@ locktime_t lock_time()
 	return locktime_t(last_clock);
 }
 
-bool RootOverlaps(size_t client, std::string& root1, std::string& root2)
+bool RootOverlaps(size_t client, cvs::string& root1, cvs::string& root2)
 {
 	if(root1.length()>root2.length())
 		return strncmp(root1.c_str(),root2.c_str(),root2.length())?false:true;
