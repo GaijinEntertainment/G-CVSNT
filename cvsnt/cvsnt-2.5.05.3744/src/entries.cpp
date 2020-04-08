@@ -651,7 +651,7 @@ static int fgetententex(List *entries, FILE *fpin, char *cmd)
 	   continue;
 	*cp++ = '\0';
 
-	if(sscanf(rcs_timestamp_string,"%"TIME_T_SPRINTF"d",&ent->rcs_timestamp)!=1)
+	if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&ent->rcs_timestamp)!=1)
 		ent->rcs_timestamp=(time_t)-1;
 	
 	if(!*cp)
@@ -770,7 +770,7 @@ int fputententex(FILE *fp, Entnode *p)
 		return 1;
 	if(p->rcs_timestamp!=(time_t)-1)
 	{
-		fprintf (fp, "%"TIME_T_SPRINTF"d", p->rcs_timestamp);
+		fprintf (fp, "%" TIME_T_SPRINTF "d", p->rcs_timestamp);
 	}
 	fprintf(fp,"/%s/%s/%s/%s/\n",p->edit_revision?p->edit_revision:"",p->edit_tag?p->edit_tag:"",p->edit_bugid?p->edit_bugid:"",p->md5?p->md5:"");
 

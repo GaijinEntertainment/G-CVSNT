@@ -220,7 +220,7 @@ static int compareTree(CXmlNodePtr tree1, CXmlNodePtr tree2,std::vector<std::pai
 
 static const char *getPath(const CXmlNodePtr node, const char *prefix)
 {
-	std::stack<const CXmlNodePtr > nodes;
+	std::stack<CXmlNodePtr > nodes;
 	static cvs::string path;
 	int lev;
 	char tmp[64];

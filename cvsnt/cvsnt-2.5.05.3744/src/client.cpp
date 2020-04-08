@@ -2012,7 +2012,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 			break;
 		*cp++ = '\0';
 
-		if(sscanf(rcs_timestamp_string,"%"TIME_T_SPRINTF"d",&rcs_timestamp)!=1)
+		if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
 			rcs_timestamp=(time_t)-1;
 
 		edit_revision = cp;
@@ -4063,13 +4063,13 @@ int start_server (int verify_only)
 		char *server_version = NULL;
 
 		send_to_server ("client-version ", 0);
-		send_to_server ("CVSNT "CVSNT_PRODUCTVERSION_STRING, 0);
+		send_to_server ("CVSNT " CVSNT_PRODUCTVERSION_STRING, 0);
 		if(CCvsgui::Active())
 			send_to_server(" (cvsgui active)", 0);
 		send_to_server ("\n", 0);
 		read_line(&server_version);
 		TRACE(1,"Server version is %s",server_version);
-		TRACE(1,"Client version is %s%s","CVSNT "CVSNT_PRODUCTVERSION_STRING,CCvsgui::Active()?" (cvsgui active)":"");
+		TRACE(1,"Client version is %s%s","CVSNT " CVSNT_PRODUCTVERSION_STRING,CCvsgui::Active()?" (cvsgui active)":"");
 		xfree(server_version);
 	}
 

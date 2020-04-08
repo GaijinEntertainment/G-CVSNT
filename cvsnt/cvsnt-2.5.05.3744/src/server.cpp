@@ -1186,7 +1186,7 @@ static void serve_max_dotdot (char *arg)
     }
     strcpy (p, server_temp_dir);
     for (i = 0; i < lim; ++i)
-		strcat (p, "/"CVSDUMMY);
+		strcat (p, "/" CVSDUMMY);
     if (server_temp_dir != orig_server_temp_dir)
 		xfree (server_temp_dir);
     server_temp_dir = p;
@@ -3219,7 +3219,7 @@ void server_register(const char *name, const char *version, const char *timestam
 	/* Entries.Extra stuff */
 	sprintf (entries_ex_line, "/%s/%s/%s/", name, merge_from_tag_1 ? merge_from_tag_1 : "",merge_from_tag_2 ? merge_from_tag_2 : "");
 	if(rcs_timestamp!=(time_t)-1)
-		sprintf (entries_ex_line+strlen(entries_ex_line), "%"TIME_T_SPRINTF"d", rcs_timestamp);
+		sprintf (entries_ex_line+strlen(entries_ex_line), "%" TIME_T_SPRINTF "d", rcs_timestamp);
 	sprintf(entries_ex_line+strlen(entries_ex_line),"/%s/%s/%s/%s/", edit_revision?edit_revision:"",edit_tag?edit_tag:"",edit_bugid?edit_bugid:"",md5?md5:"");
 }
 
@@ -3843,11 +3843,11 @@ static void serve_server_codepage(char *arg)
 
 static void serve_client_version(char *arg)
 {
-	buf_output0(buf_to_net,"CVSNT "CVSNT_PRODUCTVERSION_STRING"\n");
+	buf_output0(buf_to_net,"CVSNT " CVSNT_PRODUCTVERSION_STRING "\n");
 	buf_flush(buf_to_net,0);
 	serv_client_version = xstrdup(arg);
 
- 	TRACE(99,"Server: CVSNT "CVSNT_PRODUCTVERSION_STRING);
+ 	TRACE(99,"Server: CVSNT " CVSNT_PRODUCTVERSION_STRING);
  	TRACE(99,"Client: %s",PATCH_NULL(serv_client_version));
 
 	// At the time of writing SmartCVS is hardcoded to (I think) ISO8859-1.  This means that it can't

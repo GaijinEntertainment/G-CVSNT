@@ -387,7 +387,7 @@ extern char *sock_strerror (int errnum);
 
 #define strcasecmp stricmp
 #define strncasecmp strnicmp
-#define snprintf _snprintf
+//#define snprintf _snprintf
 
 #define HAVE_GSSAPI_GSSAPI_H
 #define HAVE_GSSAPI_GSSAPI_GENERIC_H

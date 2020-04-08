@@ -190,7 +190,7 @@ const protocol_interface *CProtocolLibrary::LoadProtocol(const char *protocol)
 		fn = buf;
 	else
 #endif
-		cvs::sprintf(fn,128,"%s"SHARED_LIBRARY_EXTENSION,protocol);
+		cvs::sprintf(fn,128,"%s" SHARED_LIBRARY_EXTENSION,protocol);
 
 	CServerIo::trace(3,"Loading protocol %s as %s",protocol,fn.c_str());
 	if(!lib.Load(fn.c_str(),CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDProtocols)))
@@ -353,7 +353,7 @@ const char *CProtocolLibrary::EnumerateProtocols(int *context)
 	{
 		CServerIo::trace(3,"EnumerateProtocols: %s",CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDProtocols));
 		m_acc.close();
-		if(!m_acc.open(CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDProtocols),"*"SHARED_LIBRARY_EXTENSION))
+		if(!m_acc.open(CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDProtocols),"*" SHARED_LIBRARY_EXTENSION))
 		{
 			CServerIo::trace(3,"EnumeratePrototocols failed");
 			return NULL;

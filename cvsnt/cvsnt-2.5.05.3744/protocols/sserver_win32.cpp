@@ -93,7 +93,7 @@ struct protocol_interface sserver_protocol_interface =
 	#endif
 	},
 	"sserver",
-	"sserver "CVSNT_PRODUCTVERSION_STRING,
+	"sserver " CVSNT_PRODUCTVERSION_STRING,
 	":sserver[;keyword=value...]:[username[:password]@]host[:port][:]/path",
 
 	elemHostname, /* Required elements */

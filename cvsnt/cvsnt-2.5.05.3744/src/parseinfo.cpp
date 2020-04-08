@@ -70,7 +70,7 @@ int run_trigger(void *param, CALLPROC callproc)
 		if(server_active)
 			cv = serv_client_version;
 		else
-			cv = "CVSNT "CVSNT_PRODUCTVERSION_STRING;
+			cv = "CVSNT " CVSNT_PRODUCTVERSION_STRING;
 
 		cvs::sprintf(infopath,512,"%s/%s/%s",current_parsed_root->directory,CVSROOTADM,CVSROOTADM_TRIGGERS);
 		if((f=fopen(infopath.c_str(),"r"))==NULL)
@@ -84,14 +84,14 @@ int run_trigger(void *param, CALLPROC callproc)
 		if (strcmp((current_parsed_root->method)?current_parsed_root->method:"","sync")==0)
 		{
 		TRACE(3,"LoadTrigger info trigger, phys repos is proxy=%s.",(current_parsed_root)?PATCH_NULL(current_parsed_root->proxy_repository_root):"no current_parsed_root");
-		if(!lib.LoadTrigger("info"SHARED_LIBRARY_EXTENSION,server_active?server_command_name:command_name,global_session_time,remote_host_name?remote_host_name:hostname,CVS_Username,current_parsed_root->unparsed_directory,current_parsed_root->proxy_repository_root,global_session_id,Editor,count_uservar,count_uservar?&uservar[0]:NULL,count_uservar?&userval[0]:NULL,cv,codep))
+		if(!lib.LoadTrigger("info" SHARED_LIBRARY_EXTENSION,server_active?server_command_name:command_name,global_session_time,remote_host_name?remote_host_name:hostname,CVS_Username,current_parsed_root->unparsed_directory,current_parsed_root->proxy_repository_root,global_session_id,Editor,count_uservar,count_uservar?&uservar[0]:NULL,count_uservar?&userval[0]:NULL,cv,codep))
 		{
 			error(1,errno,"Couldn't open default trigger library");
 		}
 		}
 		else
 		{
-		if(!lib.LoadTrigger("info"SHARED_LIBRARY_EXTENSION,server_active?server_command_name:command_name,global_session_time,remote_host_name?remote_host_name:hostname,CVS_Username,current_parsed_root->unparsed_directory,current_parsed_root->directory,global_session_id,Editor,count_uservar,count_uservar?&uservar[0]:NULL,count_uservar?&userval[0]:NULL,cv,codep))
+		if(!lib.LoadTrigger("info" SHARED_LIBRARY_EXTENSION,server_active?server_command_name:command_name,global_session_time,remote_host_name?remote_host_name:hostname,CVS_Username,current_parsed_root->unparsed_directory,current_parsed_root->directory,global_session_id,Editor,count_uservar,count_uservar?&uservar[0]:NULL,count_uservar?&userval[0]:NULL,cv,codep))
 		{
 			error(1,errno,"Couldn't open default trigger library");
 		}
@@ -100,7 +100,7 @@ int run_trigger(void *param, CALLPROC callproc)
 		CDirectoryAccess da;
 		DirectoryAccessInfo inf;
 
-		da.open(CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDTriggers),"*"SHARED_LIBRARY_EXTENSION);
+		da.open(CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDTriggers),"*" SHARED_LIBRARY_EXTENSION);
 		while(da.next(inf))
 		{
 			cvs::filename fn = inf.filename;

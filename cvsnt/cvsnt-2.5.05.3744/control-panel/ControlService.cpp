@@ -306,13 +306,13 @@ void CALLBACK ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
 	if(dwArgc!=999)
 	{
-		if (!(g_hService = RegisterServiceCtrlHandler(SERVICE_NAME,ServiceHandler))) { ReportError(TRUE,"Unable to start "SERVICE_NAME" - RegisterServiceCtrlHandler failed"); return; }
+		if (!(g_hService = RegisterServiceCtrlHandler(SERVICE_NAME,ServiceHandler))) { ReportError(TRUE,"Unable to start " SERVICE_NAME " - RegisterServiceCtrlHandler failed"); return; }
 		NotifySCM(SERVICE_START_PENDING, 0, seq++);
 	}
 	else
 	{
 		g_bTestMode=TRUE;
-		printf(SERVICE_NAME" " CVSNT_PRODUCTVERSION_STRING " ("__DATE__") starting in test mode.\n");
+		printf(SERVICE_NAME" " CVSNT_PRODUCTVERSION_STRING " (" __DATE__ ") starting in test mode.\n");
 	}
 
 // Initialisation

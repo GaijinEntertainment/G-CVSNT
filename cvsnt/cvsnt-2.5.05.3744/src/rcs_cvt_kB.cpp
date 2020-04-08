@@ -1,6 +1,6 @@
 #include <zlib.h>
 #ifdef _WIN32
-typedef unsigned __int64 int64_t;
+//typedef __int64 int64_t;
 #endif
 
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)

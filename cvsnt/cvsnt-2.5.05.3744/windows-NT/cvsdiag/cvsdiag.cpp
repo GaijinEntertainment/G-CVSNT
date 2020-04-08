@@ -419,7 +419,7 @@ void diag(FILE *output)
 	fprintf(output,"CVSNT Diagnostic output\n");
 	fprintf(output,"-----------------------\n");
 	fprintf(output,"\n");
-	fprintf(output,"Server version: "CVSNT_PRODUCTVERSION_STRING"\n");
+	fprintf(output,"Server version: " CVSNT_PRODUCTVERSION_STRING"\n");
 	fprintf(output,"OS Version: %s\n",get_os_version());
 	fprintf(output,"\n");
 	fprintf(output,"CVS Service installed: %s\n",service_installed("Cvsnt")?"Yes":"No");

@@ -816,7 +816,7 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 
 	if(acc.isopen())
 	{
-		cvs::sprintf(line,80,"%c%08"TIME_T_SPRINTF"x|%s|%s|%s|%s|%s|%s\n",
+		cvs::sprintf(line,80,"%c%08" TIME_T_SPRINTF "x|%s|%s|%s|%s|%s|%s\n",
 	     		type, global_session_time_t, username, workdir.c_str(), repos, revs, name, bugid?bugid:"");
 		if(!acc.write(line.c_str(),line.length()))
 			error (1, errno, "cannot write to history file: %s", fn_root(fname.c_str()));
@@ -928,7 +928,7 @@ static void fill_hrec (char *line, hrec_t *hr)
 		line++;
 
     hr->type = *(line++);
-	sscanf(line,"%"TIME_T_SPRINTF"x",&hr->date);
+	sscanf(line,"%" TIME_T_SPRINTF "x",&hr->date);
 	cp=line;
 	while(*cp && (isdigit((unsigned char)*cp) || (tolower((unsigned char)*cp)>='a' && tolower((unsigned char)*cp)<='f')))
 		cp++;

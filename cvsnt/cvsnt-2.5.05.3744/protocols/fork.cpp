@@ -66,7 +66,7 @@ struct protocol_interface fork_protocol_interface =
 	},
 
 	"fork",
-	"fork "CVSNT_PRODUCTVERSION_STRING,
+	"fork " CVSNT_PRODUCTVERSION_STRING,
 	":fork[;keyword=value...]:/path",
 
 	elemNone,		/* Required elements */

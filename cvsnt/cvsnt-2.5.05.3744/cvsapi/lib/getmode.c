@@ -37,7 +37,7 @@ typedef struct {
 
 #define _pioinfo(i) ( __pioinfo[(i) >> IOINFO_L2E] + ((i) & (IOINFO_ARRAY_ELTS - 1)) )
 #define _osfile(i)  ( _pioinfo(i)->osfile )
-__declspec(dllimport) ioinfo * __pioinfo[];
+//__declspec(dllimport) ioinfo * __pioinfo[];
 
 #define FOPEN           0x01    /* file handle open */
 #define FEOFLAG         0x02    /* end of file has been encountered */
@@ -48,13 +48,13 @@ __declspec(dllimport) ioinfo * __pioinfo[];
 #define FDEV            0x40    /* file handle refers to device */
 #define FTEXT           0x80    /* file handle is in text mode */
 
-int getmode(int fd)
+/*int getmode(int fd)
 {
 	unsigned char mode = _osfile(fd);
 	if(mode&FTEXT)
 		return _O_TEXT;
 	else
 		return _O_BINARY;
-}
+}*/
 
 #endif

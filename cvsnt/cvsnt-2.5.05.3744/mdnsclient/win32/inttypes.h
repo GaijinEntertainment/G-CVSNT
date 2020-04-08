@@ -25,8 +25,8 @@ typedef unsigned char u_int8_t;
 typedef signed short int16_t;
 typedef unsigned short uint16_t;
 typedef unsigned short u_int16_t;
-typedef signed long int32_t; // Note that this is the same for Win64..!
-typedef unsigned long uint32_t;
+typedef signed int int32_t; // Note that this is the same for Win64..!
+typedef unsigned int uint32_t;
 typedef unsigned long u_int32_t;
 typedef signed __int64 int64_t;
 typedef unsigned __int64 uint64_t;

@@ -254,7 +254,7 @@ void CALLBACK ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 	{
 		if (!(g_hService = RegisterServiceCtrlHandler(SERVICE_NAME,ServiceHandler))) 
 		{
-			CServerIo::log(CServerIo::logError,"Unable to start "SERVICE_NAME" - RegisterServiceCtrlHandler failed"); 
+			CServerIo::log(CServerIo::logError,"Unable to start " SERVICE_NAME " - RegisterServiceCtrlHandler failed"); 
 			return; 
 		}
 		NotifySCM(SERVICE_START_PENDING, 0, seq++);
@@ -264,7 +264,7 @@ void CALLBACK ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 		if(dwArgc==999)
 		{
 			g_bTestMode=TRUE;
-			printf(SERVICE_NAME" " CVSNT_PRODUCTVERSION_STRING " ("__DATE__") starting in test mode.\n");
+			printf(SERVICE_NAME" " CVSNT_PRODUCTVERSION_STRING " (" __DATE__ ") starting in test mode.\n");
 		}
 	}
 

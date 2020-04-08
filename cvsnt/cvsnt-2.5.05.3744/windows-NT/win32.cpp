@@ -2569,7 +2569,7 @@ static BOOL SendFileToCvsnt(LPCSTR szPath, LPCSTR szId)
 	do
 	{
 		Func="InternetOpen";
-		if((hNet = InternetOpenA("CVSNT "CVSNT_PRODUCTVERSION_SHORT,INTERNET_OPEN_TYPE_PRECONFIG,NULL,NULL,0))==NULL)
+		if((hNet = InternetOpenA("CVSNT " CVSNT_PRODUCTVERSION_SHORT,INTERNET_OPEN_TYPE_PRECONFIG,NULL,NULL,0))==NULL)
 			break;
 		Func="InternetConnect";
 		if((hConn = InternetConnectA(hNet,"crashdump2504.cvsnt.org",INTERNET_DEFAULT_HTTP_PORT,NULL,NULL,INTERNET_SERVICE_HTTP,0,0))==NULL)

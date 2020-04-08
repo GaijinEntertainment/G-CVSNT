@@ -929,7 +929,7 @@ int main (int argc, char **argv)
 		version (0, (char **) NULL); 
 		fflush(stdout);
 		printf ("\n");
- 		printf ("CVSNT %d.%d.%02d ("__DATE__") Copyright (c) 2008 March Hare Software Ltd.\n",CVSNT_PRODUCT_MAJOR,CVSNT_PRODUCT_MINOR,CVSNT_PRODUCT_PATCHLEVEL);
+ 		printf ("CVSNT %d.%d.%02d (" __DATE__ ") Copyright (c) 2008 March Hare Software Ltd.\n",CVSNT_PRODUCT_MAJOR,CVSNT_PRODUCT_MINOR,CVSNT_PRODUCT_PATCHLEVEL);
 		printf ("see http://www.march-hare.com/cvspro\n");
 		printf ("\n\n");
 		printf ("CVS Copyright (c) 1989-2001 Brian Berliner, david d `zoo' zuhn, \n\nJeff Polk, and other authors\n");

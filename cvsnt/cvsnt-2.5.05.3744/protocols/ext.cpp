@@ -71,7 +71,7 @@ struct protocol_interface ext_protocol_interface =
 	},
 
 	"ext",
-	"ext "CVSNT_PRODUCTVERSION_STRING,
+	"ext " CVSNT_PRODUCTVERSION_STRING,
 	":ext[{program}][;keyword=value...]:[user@]host[:]/path",
 
 	elemHostname,				/* Required elements */

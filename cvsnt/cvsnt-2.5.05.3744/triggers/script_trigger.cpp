@@ -21,6 +21,7 @@
 #define STRICT
 #define WIN32_LEAN_AND_MEAN
 #define WINVER 0x0500
+#define _ATL_XP_TARGETING 1
 #include <windows.h>
 #include <comutil.h>
 #include <comdef.h>

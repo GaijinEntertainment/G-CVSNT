@@ -16,6 +16,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#define _ATL_XP_TARGETING 1
 #include <config.h>
 #define STRICT
 #define WIN32_LEAN_AND_MEAN

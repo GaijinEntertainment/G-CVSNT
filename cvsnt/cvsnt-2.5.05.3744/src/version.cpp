@@ -13,7 +13,7 @@
 #include "cvs.h"
 
 #include "../version.h"
-char *version_string = "Concurrent Versions System (CVSNT) "CVSNT_PRODUCTVERSION_STRING;
+char *version_string = "Concurrent Versions System (CVSNT) " CVSNT_PRODUCTVERSION_STRING;
 
 #ifdef SERVER_SUPPORT
 char *config_string = " (client/server)\n";

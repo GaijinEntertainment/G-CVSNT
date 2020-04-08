@@ -48,7 +48,7 @@ extern "C" {
 #define TIME_T_SPRINTF "I64"
 
 #define vsnwprintf _vsnwprintf
-#define snprintf _snprintf
+//#define snprintf _snprintf
 #define snwprintf _snwprintf
 #define strcasecmp stricmp
 #define strncasecmp strnicmp

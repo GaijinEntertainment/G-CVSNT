@@ -61,7 +61,7 @@ struct protocol_interface server_protocol_interface =
 		NULL
 	},
 	"server",
-	"server "CVSNT_PRODUCTVERSION_STRING,
+	"server " CVSNT_PRODUCTVERSION_STRING,
 	":server[;keyword=value...]:[username[:password]@]host[:]/path",
 
 	elemHostname, /* Required elements */

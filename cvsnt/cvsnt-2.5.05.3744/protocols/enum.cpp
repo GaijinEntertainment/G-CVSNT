@@ -62,7 +62,7 @@ static protocol_interface enum_protocol_interface =
 	#endif
 	},
 	"enum",
-	"enum "CVSNT_PRODUCTVERSION_STRING,
+	"enum " CVSNT_PRODUCTVERSION_STRING,
 	":enum:",
 
 
@@ -141,7 +141,7 @@ int enum_auth_protocol_connect(const struct protocol_interface *protocol, const 
 	if (strcmp (auth_string, "BEGIN ENUM"))
 		return CVSPROTO_NOTME;
 
-	server_printf("Version: Concurrent Versions System (CVSNT) "CVSNT_PRODUCTVERSION_STRING"\n");
+	server_printf("Version: Concurrent Versions System (CVSNT) " CVSNT_PRODUCTVERSION_STRING "\n");
 
 	if(CGlobalSettings::GetGlobalValue("cvsnt","PServer","ServerName",buffer,sizeof(buffer)))
 		strcpy(buffer,getHostname());

@@ -376,18 +376,18 @@ void CALLBACK ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
 	if(dwArgc!=999)
 	{
-		if (!(g_hService = RegisterServiceCtrlHandler(SERVICE_NAME,ServiceHandler))) { ReportError(TRUE,"Unable to start "SERVICE_NAMEA" - RegisterServiceCtrlHandler failed"); return; }
+		if (!(g_hService = RegisterServiceCtrlHandler(SERVICE_NAME,ServiceHandler))) { ReportError(TRUE,"Unable to start " SERVICE_NAMEA " - RegisterServiceCtrlHandler failed"); return; }
 		NotifySCM(SERVICE_START_PENDING, 0, seq++);
 	}
 	else
 	{
 		g_bTestMode=TRUE;
-		printf(SERVICE_NAMEA" " CVSNT_PRODUCTVERSION_STRING " ("__DATE__") starting in test mode.\n");
+		printf(SERVICE_NAMEA" " CVSNT_PRODUCTVERSION_STRING " (" __DATE__ ") starting in test mode.\n");
 	}
 
 	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,_T("SYSTEM\\CurrentControlSet\\Control\\Session Manager\\Environment"),NULL,KEY_QUERY_VALUE,&hk_env))
 	{ 
-		ReportError(TRUE,"Unable to start "SERVICE_NAMEA" - Couldn't open environment key"); 
+		ReportError(TRUE,"Unable to start " SERVICE_NAMEA " - Couldn't open environment key"); 
 		if(!g_bTestMode)
 			NotifySCM(SERVICE_STOPPED,0,0);
 		return;
@@ -395,7 +395,7 @@ void CALLBACK ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
 	if(RegOpenKeyEx(HKEY_LOCAL_MACHINE,_T("Software\\CVS\\Pserver"),NULL,KEY_QUERY_VALUE,&hk))
 	{
-		ReportError(TRUE,"Unable to start "SERVICE_NAMEA" - Couldn't open HKLM\\Software\\CVS\\Pserver key");
+		ReportError(TRUE,"Unable to start " SERVICE_NAMEA " - Couldn't open HKLM\\Software\\CVS\\Pserver key");
 		if(!g_bTestMode)
 			NotifySCM(SERVICE_STOPPED,0,0);
 		return;
@@ -415,7 +415,7 @@ void CALLBACK ServiceMain(DWORD dwArgc, LPTSTR *lpszArgv)
 
 	if(!*szTmp2)
 	{
-		ReportError(TRUE,"Unable to start "SERVICE_NAMEA" - No path");
+		ReportError(TRUE,"Unable to start  " SERVICE_NAMEA " - No path");
 		if(!g_bTestMode)
 			NotifySCM(SERVICE_STOPPED,0,0);
 		return;

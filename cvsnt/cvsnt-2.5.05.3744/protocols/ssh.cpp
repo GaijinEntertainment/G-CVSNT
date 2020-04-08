@@ -75,7 +75,7 @@ struct protocol_interface ssh_protocol_interface =
 	},
 
 	"ssh",
-	"ssh "CVSNT_PRODUCTVERSION_STRING,
+	"ssh " CVSNT_PRODUCTVERSION_STRING,
 	":ssh[;keyword=value...]:[username[:password]@]host[:port][:]/path",
 
 	elemHostname, /* Required elements */

@@ -290,7 +290,7 @@ bool CHttpSocket::_request(const char *command, const char *location, const char
 			return false;
 	}
 	if(m_requestHeaderList.find("User-Agent")==m_requestHeaderList.end())
-		m_requestHeaderList["User-Agent"].push_back("Cvsapi "CVSNT_PRODUCTVERSION_SHORT" (Win32)");
+		m_requestHeaderList["User-Agent"].push_back("Cvsapi " CVSNT_PRODUCTVERSION_SHORT" (Win32)");
 	for(headerList_t::const_iterator i = m_requestHeaderList.begin(); i!=m_requestHeaderList.end(); i++)
 	{
 		if(!strcmp(i->first.c_str(),"Content-Length") || !strcmp(i->first.c_str(),"Host"))

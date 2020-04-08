@@ -50,7 +50,7 @@ bool CSqlConnection::GetConnectionList(connectionList_t& list, const char *libra
 	CDirectoryAccess dir;
 	DirectoryAccessInfo inf;
 
-	if(!dir.open(library_dir,"*"SHARED_LIBRARY_EXTENSION))
+	if(!dir.open(library_dir,"*" SHARED_LIBRARY_EXTENSION))
 		return false;
 
 	list.clear();

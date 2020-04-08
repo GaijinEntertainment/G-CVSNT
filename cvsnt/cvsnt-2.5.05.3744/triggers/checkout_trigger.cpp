@@ -182,7 +182,7 @@ int postcommand(const struct trigger_interface_t* cb, const char *directory, int
 	cvs::sprintf(fn,80,"%s/%s",g_repos.c_str(),CVSROOT_SHADOW);
 	if(!acc.open(fn.c_str(),"r"))
 	{
-		CServerIo::trace(3,"Could not open "CVSROOT_SHADOW);
+		CServerIo::trace(3,"Could not open " CVSROOT_SHADOW);
 		return 0;
 	}
 
@@ -199,7 +199,7 @@ int postcommand(const struct trigger_interface_t* cb, const char *directory, int
 
 		if(tok.size()!=3)
 		{
-			CServerIo::error("Malformed line %d in "CVSROOT_SHADOW" - Need Module Tag Directory",linenum);
+			CServerIo::error("Malformed line %d in " CVSROOT_SHADOW " - Need Module Tag Directory",linenum);
 			continue;
 		}
 

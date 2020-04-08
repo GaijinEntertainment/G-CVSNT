@@ -25,7 +25,7 @@
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <winsock2.h>
-#define snprintf _snprintf
+//#define snprintf _snprintf
 
 #include <stdlib.h>
 
