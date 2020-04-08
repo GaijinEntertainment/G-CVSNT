@@ -50,7 +50,7 @@ BOOL CAboutDialog::OnInitDialog()
 {
 	CDialog::OnInitDialog();
 
-	::SetDlgItemTextA(GetSafeHwnd(),IDC_VERSION,"Version "CVSNT_PRODUCTVERSION_STRING);
+	::SetDlgItemTextA(GetSafeHwnd(),IDC_VERSION,"Version " CVSNT_PRODUCTVERSION_STRING);
 	return TRUE; 
 }
 
