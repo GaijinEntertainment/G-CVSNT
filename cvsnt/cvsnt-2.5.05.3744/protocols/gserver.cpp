@@ -120,9 +120,9 @@ struct protocol_interface gserver_protocol_interface =
 
 	"gserver",
 #ifdef GSS_AD
-	"gserver "CVSNT_PRODUCTVERSION_STRING" (Active Directory)",
+	"gserver " CVSNT_PRODUCTVERSION_STRING " (Active Directory)",
 #else
-	"gserver "CVSNT_PRODUCTVERSION_STRING" (MIT)",
+	"gserver " CVSNT_PRODUCTVERSION_STRING " (MIT)",
 #endif
 	":gserver[;keyword=value...]:host[:port][:]/path",
 
