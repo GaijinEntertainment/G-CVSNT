@@ -1491,8 +1491,8 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     {
 	char *size_string;
 	char *mode_string;
-	int size;
-	char *buf;
+	int size;//since we use atoi
+	char *buf = 0;
 	char *temp_filename;
 	int patch_failed;
 	char *realfilename;
@@ -1610,8 +1610,6 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	temp_filename = (char*)xmalloc (strlen (filename) + 80);
 	sprintf(temp_filename,"_new_%s",filename);
 
-	buf = (char*)xmalloc (size);
-
         /* Some systems, like OS/2 and Windows NT, end lines with CRLF
            instead of just LF.  Format translation is done in the C
            library I/O funtions.  Here we tell them whether or not to
@@ -1639,6 +1637,9 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 		open_binary = (crlf!=CRLF_DEFAULT);
 		encoding = CCodepage::NullEncoding;
 	}
+
+	size_t bufAllocatedSize = (open_binary&&!encode&&(data->contents == UPDATE_ENTRIES_UPDATE)) ? min(size_t(10<<20), size_t(size)) : size;
+	buf = (char*)xmalloc (bufAllocatedSize);
 
 	patch_failed = 0;
 
@@ -1695,11 +1696,21 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	    if (size > 0)
 	    {
 			CMD5Calc md5;
+			size_t sizeLeft = size_t(size);
+			while (sizeLeft > 0)
+			{
+			    size_t sizeToRead = encode ? size : min(sizeLeft, bufAllocatedSize);
+  			    read_from_server(buf, sizeToRead);
+  			    sizeLeft -= sizeToRead;
 
-			read_from_server (buf, size);
-
-			if(stored_checksum_valid)
-				md5.Update(buf,size);
+  			    if(stored_checksum_valid)
+  				    md5.Update(buf,sizeToRead);
+  				if (!encode)
+  				{
+				    if (write (fd, buf, sizeToRead) != sizeToRead)
+					    error (1, errno, "writing %s", short_pathname);
+			    }
+  		    }
 
 			if(encode)
 			{
@@ -1711,11 +1722,6 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 				cdp3->EndEncoding();
 				delete cdp3;
 				cdp3=NULL;
-			}
-			else
-			{
-				if (write (fd, buf, size) != size)
-					error (1, errno, "writing %s", short_pathname);
 			}
 
 			/* Note that the checksum must be calculated on the *original* buffer,
@@ -1753,6 +1759,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 
 	if (data->contents == UPDATE_ENTRIES_UPDATE)
 	{
+	   xfree(buf); buf = 0;//free as soon as possible
 #ifdef MAC_HFS_STUFF
 		/* decode into data & resource fork if needed, adjust character encoding if needed and adjust HFS file type */
 		mac_decode_file(temp_filename, filename, open_binary);
@@ -1884,7 +1891,8 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	    stored_checksum_valid = 0;
 
 	    xfree (mode_string);
-	    xfree (buf);
+	    if (buf)
+	        xfree (buf);
 	    xfree (scratch_entries);
 	    xfree (entries_line);
 
@@ -1898,7 +1906,8 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	}
 
 	xfree (mode_string);
-	xfree (buf);
+	if (buf)
+	    xfree (buf);
     }
 
     if (stored_mode != NULL)
