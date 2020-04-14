@@ -150,7 +150,7 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences />
       <EnableCOMDATFolding />
-      <AdditionalLibraryDirectories>../external_libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../external_libs/Win32;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
@@ -203,7 +203,7 @@
       </OptimizeReferences>
       <EnableCOMDATFolding>
       </EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>../external_libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../external_libs/x64;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -256,7 +256,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <SetChecksum>true</SetChecksum>
-      <AdditionalLibraryDirectories>../external_libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../external_libs/Win32;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -309,7 +309,7 @@
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <SetChecksum>true</SetChecksum>
-      <AdditionalLibraryDirectories>../external_libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>../external_libs/x64;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

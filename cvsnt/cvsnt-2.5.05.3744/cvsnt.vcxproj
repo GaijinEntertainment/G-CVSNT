@@ -145,7 +145,7 @@
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
-      <AdditionalLibraryDirectories>..\external_libs;.\external_libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\external_libs\Win32;.\external_libs\Win32;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
@@ -192,6 +192,7 @@
       <SubSystem>NotSet</SubSystem>
       <OptimizeReferences>true</OptimizeReferences>
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
+      <AdditionalLibraryDirectories>..\external_libsx64;.\external_libs\x64;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'">
@@ -237,7 +238,7 @@
       <SubSystem>Console</SubSystem>
       <OptimizeReferences />
       <EnableCOMDATFolding />
-      <AdditionalLibraryDirectories>..\external_libs;.\external_libs;</AdditionalLibraryDirectories>
+      <AdditionalLibraryDirectories>..\external_libs\Win32;.\external_libs\Win32;</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Deploying</Message>
@@ -289,6 +290,7 @@
       </OptimizeReferences>
       <EnableCOMDATFolding>
       </EnableCOMDATFolding>
+      <AdditionalLibraryDirectories>..\external_libsx64;.\external_libs\x64;</AdditionalLibraryDirectories>
     </Link>
     <PostBuildEvent>
       <Message>Deploying</Message>
@@ -730,18 +732,6 @@
     </ProjectReference>
     <ProjectReference Include="cvsapi\cvsapi.vcxproj">
       <Project>{bcf71d75-2c0f-4b0f-967e-20d2ee52ab08}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="cvsapi\db\db2\db2_database.vcxproj">
-      <Project>{47f23da3-701e-4773-9231-781e6fff3cca}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="cvsapi\db\mssql\mssql_database.vcxproj">
-      <Project>{6f2b0e0e-c526-471d-9252-d325c5bab036}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="cvsapi\db\mysql\mysql_database.vcxproj">
-      <Project>{1d73b118-7b9c-4b1b-a9af-e386b35c4ee1}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="cvsapi\db\odbc\odbc_database.vcxproj">

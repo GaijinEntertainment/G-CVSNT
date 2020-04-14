@@ -208,7 +208,7 @@ void CAboutPage::UpdateStatus()
 	UpdateData(FALSE);
 }
 
-void CAboutPage::OnTimer(UINT nIDEvent) 
+void CAboutPage::OnTimer(UINT_PTR nIDEvent)
 {
 	UpdateStatus();
 }

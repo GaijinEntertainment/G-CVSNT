@@ -202,6 +202,7 @@
       <EnableCOMDATFolding>
       </EnableCOMDATFolding>
       <ImportLibrary>.\Debug/mdns_apple.lib</ImportLibrary>
+      <AdditionalLibraryDirectories>../../../external_libs/x64;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -307,6 +308,7 @@
       <EnableCOMDATFolding>true</EnableCOMDATFolding>
       <SetChecksum>true</SetChecksum>
       <ImportLibrary>.\Release/mdns_apple.lib</ImportLibrary>
+      <AdditionalLibraryDirectories>../../../external_libs/x64;</AdditionalLibraryDirectories>
     </Link>
   </ItemDefinitionGroup>
   <ItemGroup>

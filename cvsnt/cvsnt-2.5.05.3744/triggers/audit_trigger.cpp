@@ -561,7 +561,7 @@ static bool SelectDb(HWND hWnd, const char *db)
 	return true;
 }
 
-BOOL sql_process_file(HWND hWnd, cvs::string &fn,HCURSOR hCursor,LPCWSTR title)
+INT_PTR sql_process_file(HWND hWnd, cvs::string &fn,HCURSOR hCursor,LPCWSTR title)
 {
 					CFileAccess acc;
 					cvs::string line,comp_line;

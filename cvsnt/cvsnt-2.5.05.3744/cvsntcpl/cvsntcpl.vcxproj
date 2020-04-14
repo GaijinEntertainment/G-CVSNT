@@ -144,6 +144,9 @@
       <SetChecksum>true</SetChecksum>
       <ImportLibrary>.\Release/cvsnt.lib</ImportLibrary>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
     <Midl>
@@ -252,6 +255,9 @@
       <EnableCOMDATFolding />
       <ImportLibrary>.\Debug/cvsnt.lib</ImportLibrary>
     </Link>
+    <ProjectReference>
+      <UseLibraryDependencyInputs>true</UseLibraryDependencyInputs>
+    </ProjectReference>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
@@ -357,6 +363,14 @@
   <ItemGroup>
     <Image Include="icon1.ico" />
     <Image Include="mhlogo_plus_cvsnt.bmp" />
+  </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\cvsapi\cvsapi.vcxproj">
+      <Project>{bcf71d75-2c0f-4b0f-967e-20d2ee52ab08}</Project>
+    </ProjectReference>
+    <ProjectReference Include="..\cvstools\cvstools.vcxproj">
+      <Project>{5f0b4a94-9332-45d5-881e-f9f4c4cd03f6}</Project>
+    </ProjectReference>
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
