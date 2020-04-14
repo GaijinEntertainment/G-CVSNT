@@ -71,7 +71,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpRese
 	return TRUE;
 }
 
-BOOL CALLBACK CDb2ConnectionInformation::ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK CDb2ConnectionInformation::ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CDb2ConnectionInformation *pCI = (CDb2ConnectionInformation*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
 	switch(uMsg)

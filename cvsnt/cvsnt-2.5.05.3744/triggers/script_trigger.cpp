@@ -866,7 +866,7 @@ plugin_interface *get_plugin_interface()
 }
 
 #ifdef _WIN32
-BOOL CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char value[MAX_PATH];
 	int nSel;

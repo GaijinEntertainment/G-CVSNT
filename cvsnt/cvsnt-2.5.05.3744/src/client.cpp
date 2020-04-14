@@ -1638,7 +1638,9 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 		encoding = CCodepage::NullEncoding;
 	}
 
-	size_t bufAllocatedSize = (open_binary&&!encode&&(data->contents == UPDATE_ENTRIES_UPDATE)) ? min(size_t(10<<20), size_t(size)) : size;
+	const size_t maxBlockSize = size_t(10 << 20);
+	size_t minSize = size_t(size) < maxBlockSize ? size_t(size) : maxBlockSize;
+	size_t bufAllocatedSize = (open_binary&&!encode&&(data->contents == UPDATE_ENTRIES_UPDATE)) ? minSize : size;
 	buf = (char*)xmalloc (bufAllocatedSize);
 
 	patch_failed = 0;

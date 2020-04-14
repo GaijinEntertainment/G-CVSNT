@@ -36,7 +36,7 @@ protected:
 	cvs::string schema;
 
 #ifdef _WIN32
-	static BOOL CALLBACK ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
+	static INT_PTR CALLBACK ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam);
 #endif
 };
 

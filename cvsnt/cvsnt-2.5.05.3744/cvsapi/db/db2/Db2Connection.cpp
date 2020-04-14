@@ -330,7 +330,7 @@ unsigned CDb2Connection::GetInsertIdentity(const char *table_hint)
 	}
 
 	long id;
-	SQLINTEGER len;
+	SQLLEN len;
 
 	m_lasterror=SQLBindCol(hStmt,1,SQL_C_LONG,&id,sizeof(id),&len);
 	if(!SQL_SUCCEEDED(m_lasterror))

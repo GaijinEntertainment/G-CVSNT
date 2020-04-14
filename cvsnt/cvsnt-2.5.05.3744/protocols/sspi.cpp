@@ -899,7 +899,7 @@ LPCSTR GetErrorString(DWORD dwErr)
 	return ErrBuf;
 };
 	
-static BOOL CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	int nSel;
 	char value[64];

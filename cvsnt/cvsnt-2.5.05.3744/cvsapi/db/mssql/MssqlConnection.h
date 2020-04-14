@@ -71,7 +71,7 @@ protected:
 	cvs::string m_lasterrorString;
 	cvs::wstring m_lastrsError;
 	std::map<int,CSqlVariant> m_bindVars;
-	std::map<int,SQLINTEGER> m_sqli;
+	std::map<int,SQLLEN> m_sqli;
 	std::map<int,valStruct> m_sqlv;
 
 	CSqlRecordsetPtr _Execute(const char *string);

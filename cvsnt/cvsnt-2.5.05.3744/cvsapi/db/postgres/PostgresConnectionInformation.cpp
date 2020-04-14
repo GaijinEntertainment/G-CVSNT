@@ -77,7 +77,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpRese
 	return TRUE;
 }
 
-BOOL CALLBACK CPostgresConnectionInformation::ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK CPostgresConnectionInformation::ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CPostgresConnectionInformation *pCI = (CPostgresConnectionInformation*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
 	switch(uMsg)

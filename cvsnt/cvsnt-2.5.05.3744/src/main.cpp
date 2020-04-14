@@ -873,7 +873,7 @@ int main (int argc, char **argv)
 #endif
 #ifdef _WIN32
 			case 9:
-				_asm int 3
+				__debugbreak();
 				break;
 #endif
             case 1:

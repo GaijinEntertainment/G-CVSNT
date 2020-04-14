@@ -954,17 +954,17 @@ const char *get_default_port(const cvsroot *root)
 }
 
 #ifdef _WIN32
-static BOOL CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char value[MAX_PATH];
 	int nSel;
-	struct plugin_interface *ui = (struct plugin_interface*)GetWindowLongPtr(hWnd,GWL_USERDATA);
+	struct plugin_interface *ui = (struct plugin_interface*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
 
 	switch(uMsg)
 	{
 	case WM_INITDIALOG:
 		{
-			SetWindowLongPtr(hWnd,GWL_USERDATA,lParam);
+			SetWindowLongPtr(hWnd,GWLP_USERDATA,lParam);
 			ui = (struct plugin_interface*)lParam;
 			SetWindowText(hWnd,ui->description);
 			nSel = 1;

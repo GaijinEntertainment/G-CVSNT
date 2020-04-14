@@ -199,7 +199,7 @@ static int tcp_close()
 	return 0;
 }
 
-static BOOL WINAPI FreeDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR WINAPI FreeDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	TCHAR tmp[64];
 	static int nCountdown;
@@ -2507,7 +2507,7 @@ void wnt_get_temp_dir(char *tempdir, int tempdir_size)
 }
 
 
-static BOOL WINAPI MiniDumpDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+static INT_PTR WINAPI MiniDumpDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	TCHAR tmp[64];
 	static int nCountdown;

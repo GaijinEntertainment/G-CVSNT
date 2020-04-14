@@ -71,7 +71,7 @@ BOOL WINAPI DllMain(HINSTANCE hInstance, DWORD ul_reason_for_call, LPVOID lpRese
 	return TRUE;
 }
 
-BOOL CALLBACK CMySqlConnectionInformation::ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK CMySqlConnectionInformation::ConnectionDialogProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	CMySqlConnectionInformation *pCI = (CMySqlConnectionInformation*)GetWindowLongPtr(hWnd,GWLP_USERDATA);
 	switch(uMsg)
