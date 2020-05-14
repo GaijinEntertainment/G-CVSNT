@@ -1701,7 +1701,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 			size_t sizeLeft = size_t(size);
 			while (sizeLeft > 0)
 			{
-			    size_t sizeToRead = encode ? size : min(sizeLeft, bufAllocatedSize);
+			    size_t sizeToRead = encode ? size : (sizeLeft < bufAllocatedSize ? sizeLeft : bufAllocatedSize);
   			    read_from_server(buf, sizeToRead);
   			    sizeLeft -= sizeToRead;
 

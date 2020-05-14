@@ -255,7 +255,7 @@ void run_server(int port, int seq, int local_only)
 #if defined( __HP_aCC ) && defined ( __ia64 )
 	if(!listen_sock.create("127.0.0.1",szLockServer,local_only?true:false))
 #else
-	if(!listen_sock.create(NULL,szLockServer,local_only?true:false))
+	if(!listen_sock.create(local_only?"127.0.0.1":NULL,szLockServer,local_only?true:false))
 #endif
 	{
 		if(g_bTestMode)
