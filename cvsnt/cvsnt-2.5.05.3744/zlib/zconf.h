@@ -6,9 +6,6 @@
 #ifndef ZCONF_H
 #define ZCONF_H
 
-/* Enable dagor3 extension for ZLIB (inflateEx) */
-#define DAGOR3_ZLIB_EXTENSION 1
-
 #if !defined(_WIN32) && defined(__WIN32__)
 #  define _WIN32
 #endif

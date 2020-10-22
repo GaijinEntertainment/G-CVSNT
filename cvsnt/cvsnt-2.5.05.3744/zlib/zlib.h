@@ -514,9 +514,6 @@ Z_EXTERN int Z_EXPORT inflate(z_stream *strm, int flush);
   recovery of the data is to be attempted.
 */
 
-typedef unsigned (*in_fetch_func)(void *handle, z_stream *strm);
-
-Z_EXTERN int Z_EXPORT inflateEx(z_stream *strm, int flush, in_fetch_func in, void *handle);
 
 Z_EXTERN int Z_EXPORT inflateEnd(z_stream *strm);
 /*

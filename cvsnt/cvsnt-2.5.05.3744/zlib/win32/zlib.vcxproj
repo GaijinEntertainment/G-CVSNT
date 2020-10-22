@@ -98,7 +98,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <OmitFramePointers>false</OmitFramePointers>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ZLIB_COMPAT=1;UNALIGNED_OK;UNALIGNED64_OK;X86_FEATURES;X86_SSE2;X86_SSE2_CHUNKSET;X86_SSE2_SLIDEHASH;X86_SSSE3;X86_SSE42_CRC_HASH;X86_SSE42_CRC_INTRIN;X86_SSE42_CMP_STR;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <MinimalRebuild>true</MinimalRebuild>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <SmallerTypeCheck>false</SmallerTypeCheck>
@@ -117,6 +117,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>EditAndContinue</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <AdditionalIncludeDirectories>..\..\zlib;.\zlib;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0809</Culture>
@@ -129,7 +130,7 @@
     <ClCompile>
       <Optimization>Disabled</Optimization>
       <OmitFramePointers>false</OmitFramePointers>
-      <PreprocessorDefinitions>WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ZLIB_COMPAT=1;UNALIGNED_OK;UNALIGNED64_OK;X86_FEATURES;X86_SSE2;X86_SSE2_CHUNKSET;X86_SSE2_SLIDEHASH;X86_SSSE3;X86_SSE42_CRC_HASH;X86_SSE42_CRC_INTRIN;X86_SSE42_CMP_STR;WIN32;_DEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -147,6 +148,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <AdditionalIncludeDirectories>..\..\zlib;.\zlib;$(g3d)\G3D10\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0809</Culture>
@@ -162,7 +164,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ZLIB_COMPAT=1;UNALIGNED_OK;UNALIGNED64_OK;X86_FEATURES;X86_SSE2;X86_SSE2_CHUNKSET;X86_SSE2_SLIDEHASH;X86_SSSE3;X86_SSE42_CRC_HASH;X86_SSE42_CRC_INTRIN;X86_SSE42_CMP_STR;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -178,6 +180,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <AdditionalIncludeDirectories>..\..\zlib;.\zlib;</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0809</Culture>
@@ -193,7 +196,7 @@
       <IntrinsicFunctions>true</IntrinsicFunctions>
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
-      <PreprocessorDefinitions>WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ZLIB_COMPAT=1;UNALIGNED_OK;UNALIGNED64_OK;X86_FEATURES;X86_SSE2;X86_SSE2_CHUNKSET;X86_SSE2_SLIDEHASH;X86_SSSE3;X86_SSE42_CRC_HASH;X86_SSE42_CRC_INTRIN;X86_SSE42_CMP_STR;WIN32;NDEBUG;_WINDOWS;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -209,6 +212,7 @@
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
+      <AdditionalIncludeDirectories>..\..\zlib;.\zlib;$(g3d)\G3D10\build\include</AdditionalIncludeDirectories>
     </ClCompile>
     <ResourceCompile>
       <Culture>0x0809</Culture>
@@ -219,26 +223,66 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="..\adler32.c" />
+    <ClCompile Include="..\arch\x86\adler32_ssse3.c" />
+    <ClCompile Include="..\arch\x86\chunkset_sse.c" />
+    <ClCompile Include="..\arch\x86\compare258_sse.c" />
+    <ClCompile Include="..\arch\x86\crc_folding.c" />
+    <ClCompile Include="..\arch\x86\insert_string_sse.c" />
+    <ClCompile Include="..\arch\x86\slide_sse.c" />
+    <ClCompile Include="..\arch\x86\x86.c" />
+    <ClCompile Include="..\chunkset.c" />
+    <ClCompile Include="..\compare258.c" />
     <ClCompile Include="..\compress.c" />
     <ClCompile Include="..\crc32.c" />
     <ClCompile Include="..\deflate.c" />
-    <ClCompile Include="..\gzio.c" />
+    <ClCompile Include="..\deflate_fast.c" />
+    <ClCompile Include="..\deflate_medium.c" />
+    <ClCompile Include="..\deflate_quick.c" />
+    <ClCompile Include="..\deflate_slow.c" />
+    <ClCompile Include="..\functable.c" />
+    <ClCompile Include="..\gzlib.c" />
+    <ClCompile Include="..\gzread.c" />
+    <ClCompile Include="..\gzwrite.c" />
+    <ClCompile Include="..\infback.c" />
     <ClCompile Include="..\inffast.c" />
     <ClCompile Include="..\inflate.c" />
     <ClCompile Include="..\inftrees.c" />
+    <ClCompile Include="..\insert_string.c" />
     <ClCompile Include="..\trees.c" />
     <ClCompile Include="..\uncompr.c" />
     <ClCompile Include="..\zutil.c" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="..\adler32_p.h" />
+    <ClInclude Include="..\arch\x86\crc_folding.h" />
+    <ClInclude Include="..\arch\x86\x86.h" />
+    <ClInclude Include="..\chunkset_tpl.h" />
+    <ClInclude Include="..\crc32_p.h" />
+    <ClInclude Include="..\crc32_tbl.h" />
     <ClInclude Include="..\deflate.h" />
+    <ClInclude Include="..\deflate_p.h" />
+    <ClInclude Include="..\fallback_builtins.h" />
+    <ClInclude Include="..\functable.h" />
+    <ClInclude Include="..\gzguts.h" />
     <ClInclude Include="..\inffast.h" />
     <ClInclude Include="..\inffixed.h" />
+    <ClInclude Include="..\inffixed_tbl.h" />
+    <ClInclude Include="..\inflate.h" />
+    <ClInclude Include="..\inflate_p.h" />
     <ClInclude Include="..\inftrees.h" />
+    <ClInclude Include="..\insert_string_tpl.h" />
+    <ClInclude Include="..\match_tpl.h" />
     <ClInclude Include="..\trees.h" />
+    <ClInclude Include="..\trees_emit.h" />
+    <ClInclude Include="..\trees_tbl.h" />
+    <ClInclude Include="..\zbuild.h" />
+    <ClInclude Include="..\zconf-ng.h" />
     <ClInclude Include="..\zconf.h" />
+    <ClInclude Include="..\zendian.h" />
+    <ClInclude Include="..\zlib-ng.h" />
     <ClInclude Include="..\zlib.h" />
     <ClInclude Include="..\zutil.h" />
+    <ClInclude Include="..\zutil_p.h" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">

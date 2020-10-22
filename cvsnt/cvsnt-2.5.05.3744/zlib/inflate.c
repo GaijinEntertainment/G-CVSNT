@@ -274,19 +274,10 @@ static int32_t updatewindow(PREFIX3(stream) *strm, const uint8_t *end, uint32_t 
    Look in inflate_p.h for macros shared with inflateBack()
 */
 
-
-#define REQ_MORE_IN_OR_LEAVE() \
-  if (have == 0) { \
-    if (!in_fetch || !in_fetch(in_handle, strm)) goto inf_leave; \
-    next = strm->next_in; \
-    have = strm->avail_in; \
-    in += have; \
-  }
-
 /* Get a byte of input into the bit accumulator, or return from inflate() if there is no input available. */
 #define PULLBYTE() \
     do { \
-        REQ_MORE_IN_OR_LEAVE(); \
+        if (have == 0) goto inf_leave; \
         have--; \
         hold += ((unsigned)(*next++) << bits); \
         bits += 8; \
@@ -374,7 +365,7 @@ static int32_t updatewindow(PREFIX3(stream) *strm, const uint8_t *end, uint32_t 
    will return Z_BUF_ERROR if it has not reached the end of the stream.
  */
 
-int32_t Z_EXPORT PREFIX(inflateEx)(PREFIX3(stream) *strm, int32_t flush, in_fetch_func in_fetch, void *in_handle) {
+int32_t Z_EXPORT PREFIX(inflate)(PREFIX3(stream) *strm, int32_t flush) {
     struct inflate_state *state;
     const unsigned char *next;  /* next input */
     unsigned char *put;         /* next output */
@@ -405,7 +396,6 @@ int32_t Z_EXPORT PREFIX(inflateEx)(PREFIX3(stream) *strm, int32_t flush, in_fetc
     in = have;
     out = left;
     ret = Z_OK;
-    REQ_MORE_IN_OR_LEAVE();
     for (;;)
         switch (state->mode) {
         case HEAD:
@@ -539,7 +529,7 @@ int32_t Z_EXPORT PREFIX(inflateEx)(PREFIX3(stream) *strm, int32_t flush, in_fetc
 
         case NAME:
             if (state->flags & 0x0800) {
-                REQ_MORE_IN_OR_LEAVE();
+                if (have == 0) goto inf_leave;
                 copy = 0;
                 do {
                     len = (unsigned)(next[copy++]);
@@ -560,7 +550,7 @@ int32_t Z_EXPORT PREFIX(inflateEx)(PREFIX3(stream) *strm, int32_t flush, in_fetc
 
         case COMMENT:
             if (state->flags & 0x1000) {
-                REQ_MORE_IN_OR_LEAVE();
+                if (have == 0) goto inf_leave;
                 copy = 0;
                 do {
                     len = (unsigned)(next[copy++]);
@@ -1089,8 +1079,6 @@ int32_t Z_EXPORT PREFIX(inflateEx)(PREFIX3(stream) *strm, int32_t flush, in_fetc
         ret = Z_BUF_ERROR;
     return ret;
 }
-
-int32_t Z_EXPORT PREFIX(inflate)(PREFIX3(stream) *strm, int32_t flush) {return inflateEx(strm, flush, NULL, NULL);}
 
 int32_t Z_EXPORT PREFIX(inflateEnd)(PREFIX3(stream) *strm) {
     struct inflate_state *state;
