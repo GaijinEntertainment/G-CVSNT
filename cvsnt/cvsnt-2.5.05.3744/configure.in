@@ -368,8 +368,8 @@ fi
 CPPFLAGS="$CPPFLAGS $LIBXML_CPPFLAGS"
 AC_SUBST(LIBXML_LIBS)
 
-# Check for pcre posix library
-PKG_CHECK_MODULES(PCRE, libpcreposix)
+# Check for pcre
+PKG_CHECK_MODULES(PCRE, libpcre)
 AC_SUBST(PCRE_CFLAGS)
 AC_SUBST(PCRE_LIBS)
 

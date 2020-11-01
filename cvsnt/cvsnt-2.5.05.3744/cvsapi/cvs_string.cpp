@@ -25,9 +25,9 @@
 #include "ServerIO.h"
 
 #ifdef _WIN32
-#include "../pcre/pcreposix.h"
+#include "../pcre/pcre.h"
 #else
-#include <pcreposix.h>
+#include <pcre.h>
 #endif
 
 #include "cvs_string.h"
@@ -49,14 +49,17 @@ std::queue<cvs::string> cvs::cache_static_string::global_string_cache;
 // Note that if we're using PCRE the string match is always extended...
 // for this reason avoid setting extended=false as it'll behave differently on
 // different platforms.
-bool cvs::wildcard_filename::matches_regexp(const char *regexp, bool extended /*= true*/)
+bool cvs::wildcard_filename::matches_regexp(const char *regexp)
 { 
-	regex_t r; 
-	if(regcomp(&r,regexp,(FsCaseSensitive?0:REG_ICASE)|REG_NOSUB|(extended?REG_EXTENDED:0)))
-		return false;
-	int res=regexec(&r,c_str(),0,NULL,0);
-	regfree(&r);
-	return res?false:true;
+  const char *errorptr;
+  int erroffset;
+  int options = (FsCaseSensitive?0:PCRE_CASELESS)|PCRE_NO_AUTO_CAPTURE;
+  pcre *r = pcre_compile(regexp, options, &errorptr, &erroffset, NULL);
+  if (!r)
+    return NULL;
+  int res = pcre_exec(r, NULL, c_str(), (int)length(), 0, 0, NULL, 0);
+  pcre_free(r);
+  return res >= 0;
 }
 
 // Based on BSD vsprintf

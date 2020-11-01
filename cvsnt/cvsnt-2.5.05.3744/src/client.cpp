@@ -1533,7 +1533,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	       that, work around it.  */
 	    size_t usize;
 
-	    char buf[8192];
+	    char buf[65536];
 
 	if (filenames_case_insensitive && !case_isfile(filename,&realfilename))
 	{
