@@ -116,7 +116,7 @@ namespace cvs
 		CVSAPI_EXPORT wildcard_filename& operator=(const filename& oth) { assign(oth); return *this; }
 		CVSAPI_EXPORT wildcard_filename& operator=(const wildcard_filename& oth) { assign(oth); return *this; }
 		CVSAPI_EXPORT wildcard_filename& operator=(const char *_Ptr) { assign(_Ptr); return *this; }
-		CVSAPI_EXPORT bool matches_regexp(const char *regexp, bool extended = true);
+		CVSAPI_EXPORT bool matches_regexp(const char *regexp);
 	};
 	typedef STD_STR_CLASS<char, username_char_traits> username;
 
