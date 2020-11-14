@@ -641,7 +641,7 @@ INT_PTR sql_process_file(HWND hWnd, cvs::string &fn,HCURSOR hCursor,LPCWSTR titl
   return FALSE;
 }
 
-BOOL CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
+INT_PTR CALLBACK ConfigDlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM lParam)
 {
 	char value[1024];
 	int nSel;

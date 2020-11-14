@@ -322,24 +322,8 @@
       <Project>{bcf71d75-2c0f-4b0f-967e-20d2ee52ab08}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="..\cvsapi\db\db2\db2_database.vcxproj">
-      <Project>{47f23da3-701e-4773-9231-781e6fff3cca}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\cvsapi\db\mssql\mssql_database.vcxproj">
-      <Project>{6f2b0e0e-c526-471d-9252-d325c5bab036}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\cvsapi\db\mysql\mysql_database.vcxproj">
-      <Project>{1d73b118-7b9c-4b1b-a9af-e386b35c4ee1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="..\cvsapi\db\odbc\odbc_database.vcxproj">
       <Project>{f624df2b-5c4c-4fb6-b793-c06c96992589}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="..\cvsapi\db\postgres\postgres_database.vcxproj">
-      <Project>{25226834-3d40-47ac-8e05-17a8a7af1773}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="..\cvsapi\db\sqlite\sqlite_database.vcxproj">
