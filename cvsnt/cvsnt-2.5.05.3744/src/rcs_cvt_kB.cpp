@@ -135,13 +135,13 @@ static void create_blob_file_name(unsigned char sha256[], const char *fn, char *
 static void create_dirs(unsigned char sha256[])
 {
   char buf[1024];
-  if (snprintf(buf, sizeof(buf),"%s/%02x", current_parsed_root->directory, sha256[0]) >= sizeof(buf)-1)
+  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x", current_parsed_root->directory, sha256[0]) >= sizeof(buf)-1)
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
   if (CVS_MKDIR (buf, 0777) != 0 && errno != EEXIST)
     error (1, errno, "cannot make directory %s", buf);
-  if (snprintf(buf, sizeof(buf),"%s/%02x/%02x", current_parsed_root->directory, sha256[0], sha256[1]) >= sizeof(buf)-1)
+  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x/%02x", current_parsed_root->directory, sha256[0], sha256[1]) >= sizeof(buf)-1)
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
