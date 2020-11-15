@@ -27,13 +27,13 @@ static void calc_sha256(const void *data, size_t len, bool src_packed, size_t &u
 
 static void create_file_name(unsigned char sha256[], const char *fn, char *sha_file_name, size_t sha_max_len)//sha256 char[32]
 {
-  if (snprintf(sha_file_name, sizeof(sha_file_name),
+  if (snprintf(sha_file_name, sha_max_len,
      "%s/"
      "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
      , current_parsed_root->directory,
       SHA256_LIST(sha256)
      )
-     >= sizeof(sha_file_name)-1)
+     >= sha_max_len-1)
   {
     error(1, 0, "too long filename <%s> for <%s>", sha_file_name, fn);
   }
@@ -46,14 +46,14 @@ static void create_dirs(unsigned char sha256[])
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
-  if (CVS_MKDIR (buf, 0777) < 0)
-	error (1, errno, "cannot make directory %s", buf);
+  if (CVS_MKDIR (buf, 0777) != 0 && errno != EEXIST)
+    error (1, errno, "cannot make directory %s", buf);
   if (snprintf(buf, sizeof(buf),"%s/%02x/%02x", current_parsed_root->directory, sha256[0], sha256[1]) >= sizeof(buf)-1)
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
-  if (CVS_MKDIR (buf, 0777) < 0)
-	error (1, errno, "cannot make directory %s", buf);
+  if (CVS_MKDIR (buf, 0777) != 0 && errno != EEXIST)
+    error (1, errno, "cannot make directory %s", buf);
 }
 
 enum {ARC_MAGIC_SIZE = 8};
@@ -81,7 +81,7 @@ static void* compress_zlib_data(const void *data, size_t len, int compression_le
   memcpy(((ArcHeader*)zbuf)->magic, zlib_magic, ARC_MAGIC_SIZE);
   ((ArcHeader*)zbuf)->uncompressedLen = len;
   ((ArcHeader*)zbuf)->compressedLen = 0;
-  if(deflate(&stream, Z_FINISH)==Z_STREAM_END)
+  if (deflate(&stream, Z_FINISH)==Z_STREAM_END && (sizeof(ArcHeader) + (zlen - stream.avail_out)) < len)
   {
     zlen = sizeof(ArcHeader) + (zlen - stream.avail_out);
     ((ArcHeader*)zbuf)->compressedLen = zlen;
@@ -115,8 +115,8 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
 
   if (compressed_data != nullptr)
     xfree(compressed_data);
-  fclose(dest);
   rename_file (temp_filename, sha_file_name);
+  fclose(dest);
 
   xfree (temp_filename);
 }
@@ -136,12 +136,12 @@ static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
   calc_sha256(data, len, src_packed, unpacked_len, sha256);
   if (clientUnpackedLen != unpacked_len)
     error(1, 0, "fn <%s> says it has compressed %d data but we decompress only %d!", fn, (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
-  create_dirs(sha256);
   const size_t sha_file_name_len = 1024;
   char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 32+3+1 + strlen(current_parsed_root->directory)
   create_file_name(sha256, fn, sha_file_name, sha_file_name_len);
   if (!isreadable(sha_file_name))
   {
+    create_dirs(sha256);
     atomic_write_sha_file(fn, sha_file_name, data, len, packed, src_packed);
   }//else we already have this. deduplication!
   return unpacked_len;
@@ -165,22 +165,22 @@ static void RCS_write_binary_rev_data_new(const char *fn, const void *data, size
 	  error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn), err = true;
   if (fprintf(dest, "size:%llu", (uint64_t)srcSize) < 0)
 	  error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn), err = true;
-  fclose(dest);
   if (!err)
     rename_file (temp_filename, fn);
+  fclose(dest);
   xfree (temp_filename);
 }
 
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
 {
   char sbuf[512];
-  #if 1
+  #if 0
   {
     char *nfn = (char*)xmalloc(strlen(fn)+4);
     strcpy(nfn, fn);
     strcat(nfn, "nn");
+    RCS_write_binary_rev_data_new(nfn, data, len, packed, false);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
     xfree(nfn);
-    RCS_write_binary_rev_data_new(nfn, data, len, packed, false);
   }
   #endif
 
@@ -667,7 +667,7 @@ static void RCS_extract_rev_data(RCSNode *rcs, RCSVers *rev, RevStringList &lst,
           if (sp) sp ++; else { sp = rcs->path+strlen(rcs->path)-2; }
 
           char *path = (char*)xmalloc(strlen(rcs->path)+strlen(vers->version)+4+4);
-          sprintf(path, "%.*sCVS/%.*s", sp-rcs->path, rcs->path, strlen(sp)-2, sp );
+          sprintf(path, "%.*sCVS/%.*s", int(sp-rcs->path), rcs->path, int(strlen(sp)-2), sp );
           make_directories(path);
           sprintf(path+strlen(path), "/#%s", vers->version);
 
@@ -912,7 +912,7 @@ do_convert:
     char *delta = (char*)xmalloc(16+strlen(sp)+strlen(lst.data[i]->version));
     sprintf(delta, "%s%.*s/#%s",
       STREQ(lst.data[i]->version, rcs->head) ? "" : "d1 1\na1 1\n",
-      strlen(sp)-2, sp, lst.data[i]->version);
+      int(strlen(sp)-2), sp, lst.data[i]->version);
 
     Deltatext d;
     memset(&d, 0, sizeof(d));
