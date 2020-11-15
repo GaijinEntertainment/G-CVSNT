@@ -2,6 +2,147 @@
 #ifdef _WIN32
 //typedef __int64 int64_t;
 #endif
+#include "sha256/sha256.h"
+
+#define SHA256_LIST(a)\
+(a)[0],(a)[1],(a)[2],(a)[3],(a)[4],(a)[5],(a)[6],(a)[7],(a)[8],(a)[9],\
+(a)[10],(a)[11],(a)[12],(a)[13],(a)[14],(a)[15],(a)[16],(a)[17],(a)[18],(a)[19],\
+(a)[20],(a)[21],(a)[22],(a)[23],(a)[24],(a)[25],(a)[26],(a)[27],(a)[28],(a)[29],\
+(a)[30],(a)[31]
+
+static void calc_sha256(const void *data, size_t len, bool src_packed, unsigned char sha256[])//sha256 char[32]
+{
+  if (src_packed)
+  {
+    //calc sha256 on the unpacked data!
+    error(1, 0, "packing on clients is not supported yet");
+  }
+  blk_SHA256_CTX ctx;
+  blk_SHA256_Init(&ctx);
+  uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
+  blk_SHA256_Update(&ctx, data, len);
+  blk_SHA256_Final(sha256, &ctx);
+}
+
+static void create_file_name(unsigned char sha256[], const char *fn, char *sha_file_name, size_t sha_max_len)//sha256 char[32]
+{
+  if (snprintf(sha_file_name, sizeof(sha_file_name),
+     "%s/"
+     "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
+     , current_parsed_root->directory,
+      SHA256_LIST(sha256)
+     )
+     >= sizeof(sha_file_name)-1)
+  {
+    error(1, 0, "too long filename <%s> for <%s>", sha_file_name, fn);
+  }
+}
+
+static void create_dirs(unsigned char sha256[])
+{
+  char buf[1024];
+  if (snprintf(buf, sizeof(buf),"%s/%02x", current_parsed_root->directory, sha256[0]) >= sizeof(buf)-1)
+  {
+    error(1, 0, "too long dirname <%s>", buf);
+  }
+  if (CVS_MKDIR (buf, 0777) < 0)
+	error (1, errno, "cannot make directory %s", buf);
+  if (snprintf(buf, sizeof(buf),"%s/%02x/%02x", current_parsed_root->directory, sha256[0], sha256[1]) >= sizeof(buf)-1)
+  {
+    error(1, 0, "too long dirname <%s>", buf);
+  }
+  if (CVS_MKDIR (buf, 0777) < 0)
+	error (1, errno, "cannot make directory %s", buf);
+}
+
+enum {ARC_MAGIC_SIZE = 8};
+struct ArcHeader
+{
+  char magic[ARC_MAGIC_SIZE];
+  uint64_t uncompressedLen;
+  uint64_t compressedLen;
+};
+static const char zlib_magic[ARC_MAGIC_SIZE+1] = "ZLIBCOMP";
+
+static void* compress_zlib_data(const void *data, size_t len, int compression_level, size_t &zlen)
+{
+  zlen = 0;
+  void *zbuf = nullptr;
+
+  z_stream stream = {0};
+  deflateInit(&stream,compression_level);
+  zlen = ((deflateBound(&stream, len) - len/10) + 0xFFF) & ~0xFFF;
+  stream.avail_in = len;
+  stream.next_in = (Bytef*)data;
+  stream.avail_out = zlen;
+  zbuf = xmalloc(zlen + sizeof(ArcHeader));
+  stream.next_out = (Bytef*)((char*)zbuf)+sizeof(ArcHeader);
+  memcpy(((ArcHeader*)zbuf)->magic, zlib_magic, ARC_MAGIC_SIZE);
+  ((ArcHeader*)zbuf)->uncompressedLen = len;
+  ((ArcHeader*)zbuf)->compressedLen = 0;
+  if(deflate(&stream, Z_FINISH)==Z_STREAM_END)
+  {
+    zlen = sizeof(ArcHeader) + (zlen - stream.avail_out);
+    ((ArcHeader*)zbuf)->compressedLen = zlen;
+  } else
+  {
+    xfree(zbuf);
+    zbuf = nullptr;
+  }
+  deflateEnd(&stream);
+  return zbuf;
+}
+
+static void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, bool store_packed, bool src_packed)
+{
+  char *temp_filename = NULL;
+  FILE *dest = cvs_temp_file(&temp_filename, "wb");
+  if (!dest)
+  {
+    error(1, errno, "can't open write temp_filename <%s> for <%s>(<%s>)", temp_filename, sha_file_name, fn);
+  }
+  void *compressed_data = nullptr;
+  size_t compressed_len = 0;
+  if (store_packed && !src_packed)
+    compressed_data = compress_zlib_data(data, len, Z_BEST_COMPRESSION-4, compressed_len);
+
+  const void* writeData = compressed_data ? compressed_data : data;
+  size_t writeLen = compressed_data ? compressed_len : len;
+
+  if (fwrite(writeData,1,writeLen,dest) != writeLen)
+    error(1, errno, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)writeLen);
+
+  if (compressed_data != nullptr)
+    xfree(compressed_data);
+  fclose(dest);
+  rename_file (temp_filename, sha_file_name);
+
+  xfree (temp_filename);
+}
+
+//ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
+static void RCS_write_binary_rev_data_new(const char *fn, const void *data, size_t len, bool packed, bool src_packed = false)
+{
+  if (src_packed &&
+    (len < sizeof(ArcHeader) || ((const ArcHeader*)data)->compressedLen != len || memcmp(((const ArcHeader*)data)->magic, zlib_magic, sizeof(ArcHeader::magic))!=0))
+  {
+    error(1, errno, "fn <%s> says it's client compressed but it's not!", fn, len);
+  }
+  unsigned char sha256[32];
+  calc_sha256(data, len, src_packed, sha256);
+  create_dirs(sha256);
+  char sha_file_name[1024];//cne be dynamically allocated, as 32+3+1 + strlen(current_parsed_root->directory)
+  create_file_name(sha256, fn, sha_file_name, sizeof(sha_file_name));
+  if (!isreadable(sha_file_name))// we already have this. deduplication!
+  {
+    atomic_write_sha_file(fn, sha_file_name, data, len, packed, src_packed);
+  } else
+  {
+    char sbuf[512];
+    snprintf(sbuf, sizeof(sbuf), "CVS: fn<%s> revision of size = %gKB, already exist at <%s>\n", fn, double(len)/1024, sha_file_name); sbuf[sizeof(sbuf)-1] = 0;
+    cvs_output (sbuf, 0);
+  }
+}
 
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
 {
