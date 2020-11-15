@@ -10,13 +10,14 @@
 (a)[20],(a)[21],(a)[22],(a)[23],(a)[24],(a)[25],(a)[26],(a)[27],(a)[28],(a)[29],\
 (a)[30],(a)[31]
 
-static void calc_sha256(const void *data, size_t len, bool src_packed, unsigned char sha256[])//sha256 char[32]
+static void calc_sha256(const void *data, size_t len, bool src_packed, size_t &unpacked_len, unsigned char sha256[])//sha256 char[32]
 {
   if (src_packed)
   {
     //calc sha256 on the unpacked data!
     error(1, 0, "packing on clients is not supported yet");
   }
+  unpacked_len = len;
   blk_SHA256_CTX ctx;
   blk_SHA256_Init(&ctx);
   uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
@@ -110,7 +111,7 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
   size_t writeLen = compressed_data ? compressed_len : len;
 
   if (fwrite(writeData,1,writeLen,dest) != writeLen)
-    error(1, errno, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)writeLen);
+    error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)writeLen);
 
   if (compressed_data != nullptr)
     xfree(compressed_data);
@@ -121,32 +122,68 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
 }
 
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
-static void RCS_write_binary_rev_data_new(const char *fn, const void *data, size_t len, bool packed, bool src_packed = false)
+//after call to this function binary blob is stored
+static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
+  const char *fn, const void *data, size_t len, bool packed, bool src_packed)//fn is just context!
 {
   if (src_packed &&
     (len < sizeof(ArcHeader) || ((const ArcHeader*)data)->compressedLen != len || memcmp(((const ArcHeader*)data)->magic, zlib_magic, sizeof(ArcHeader::magic))!=0))
   {
-    error(1, errno, "fn <%s> says it's client compressed but it's not!", fn, len);
+    error(1, 0, "fn <%s> says it's client compressed but it's not!", fn, len);
   }
-  unsigned char sha256[32];
-  calc_sha256(data, len, src_packed, sha256);
+  const size_t clientUnpackedLen = src_packed ? ((const ArcHeader*)data)->uncompressedLen : len;
+  size_t unpacked_len = 0;
+  calc_sha256(data, len, src_packed, unpacked_len, sha256);
+  if (clientUnpackedLen != unpacked_len)
+    error(1, 0, "fn <%s> says it has compressed %d data but we decompress only %d!", fn, (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
   create_dirs(sha256);
-  char sha_file_name[1024];//cne be dynamically allocated, as 32+3+1 + strlen(current_parsed_root->directory)
-  create_file_name(sha256, fn, sha_file_name, sizeof(sha_file_name));
-  if (!isreadable(sha_file_name))// we already have this. deduplication!
+  const size_t sha_file_name_len = 1024;
+  char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 32+3+1 + strlen(current_parsed_root->directory)
+  create_file_name(sha256, fn, sha_file_name, sha_file_name_len);
+  if (!isreadable(sha_file_name))
   {
     atomic_write_sha_file(fn, sha_file_name, data, len, packed, src_packed);
-  } else
-  {
-    char sbuf[512];
-    snprintf(sbuf, sizeof(sbuf), "CVS: fn<%s> revision of size = %gKB, already exist at <%s>\n", fn, double(len)/1024, sha_file_name); sbuf[sizeof(sbuf)-1] = 0;
-    cvs_output (sbuf, 0);
-  }
+  }//else we already have this. deduplication!
+  return unpacked_len;
+}
+
+static void RCS_write_binary_rev_data_new(const char *fn, const void *data, size_t len, bool store_packed, bool src_packed)
+{
+  unsigned char sha256[32];
+  size_t srcSize = write_binary_blob(sha256, fn, data, len, store_packed, src_packed);
+
+  char *temp_filename = NULL;
+  FILE *dest = cvs_temp_file(&temp_filename, "w");
+  if (!dest)
+    error(1, 0, "can't open write temp_filename <%s> for <%s>", temp_filename, fn);
+  bool err = false;
+  if (fprintf(dest,
+	  "sha256:"
+	  "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
+	  "\n",
+	  SHA256_LIST(sha256)) < 0)
+	  error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn), err = true;
+  if (fprintf(dest, "size:%llu", (uint64_t)srcSize) < 0)
+	  error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn), err = true;
+  fclose(dest);
+  if (!err)
+    rename_file (temp_filename, fn);
+  xfree (temp_filename);
 }
 
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
 {
   char sbuf[512];
+  #if 1
+  {
+    char *nfn = (char*)xmalloc(strlen(fn)+4);
+    strcpy(nfn, fn);
+    strcat(nfn, "nn");
+    xfree(nfn);
+    RCS_write_binary_rev_data_new(nfn, data, len, packed, false);
+  }
+  #endif
+
   char *fnpk = (char*)xmalloc(strlen(fn)+4);
   strcpy(fnpk, fn);
   strcat(fnpk, "#z");
