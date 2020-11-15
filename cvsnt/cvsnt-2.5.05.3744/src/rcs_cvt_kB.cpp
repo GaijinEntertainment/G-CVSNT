@@ -12,9 +12,9 @@
 
 #define SHA256_REV_STRING "sha256:"
 #define BLOBS_SUBDIR "/blobs/"
-static const char sha256_rev_string[] = SHA256_REV_STRING;
-static const size_t sha256_encoded_size = 64;
-static const size_t blob_reference_size = sizeof(sha256_rev_string)-1+sha256_encoded_size;
+static const size_t sha256_magic_len = strlen(SHA256_REV_STRING);
+static const size_t sha256_encoded_size = 64;//32*2
+static const size_t blob_reference_size = sha256_magic_len+sha256_encoded_size;
 
 enum {BLOB_MAGIC_SIZE = 8};
 struct BlobHeader
@@ -102,11 +102,11 @@ static void get_blob_filename_from_encoded_sha256(const char* encoded_sha256, ch
   if (snprintf(sha_file_name, sha_max_len,
      "%s"
      BLOBS_SUBDIR
-     "%c/%c/*.%s"
+     "%c%c/%c%c/%.*s"
      , current_parsed_root->directory,
-     encoded_sha256[0],
-     encoded_sha256[1],
-     int(sha256_encoded_size)-2, encoded_sha256+2
+     encoded_sha256[0], encoded_sha256[1],
+     encoded_sha256[2], encoded_sha256[3],
+     int(sha256_encoded_size)-4, encoded_sha256+4
      )
      >= sha_max_len-1)
       error(1, 0, "too long filename <%s> for <%s>", sha_file_name, encoded_sha256);
@@ -258,7 +258,8 @@ static size_t decode_binary_blob(const char *blob_file_name, void **data)
     error(1,errno,"Couldn't read %s of %d len", blob_file_name, (int)fileLen);
     return 0;
   }
-  FILE* fp = CVS_FOPEN(blob_file_name,"rb");
+  FILE* fp;
+  fp = CVS_FOPEN(blob_file_name,"rb");
   if (!fp)
   {
     error(1,errno,"Couldn't read %s len", blob_file_name);
@@ -277,6 +278,7 @@ static size_t decode_binary_blob(const char *blob_file_name, void **data)
   }
 
   *data = xmalloc(hdr.uncompressedLen);
+  //((char*)*data)[hdr.uncompressedLen] = 0;
   if (is_packed_blob(hdr))//
   {
     void *tmpbuf = xmalloc(hdr.compressedLen);
@@ -322,7 +324,8 @@ static size_t read_binary_blob_directly(const char *blob_file_name, void **data)
     error(1,errno,"Couldn't read %s of %d len", blob_file_name, (int)fileLen);
     return 0;
   }
-  FILE* fp = CVS_FOPEN(blob_file_name, "rb");
+  FILE* fp;
+  fp = CVS_FOPEN(blob_file_name, "rb");
   if (!fp)
   {
     error(1,errno,"Couldn't read %s len", blob_file_name);
@@ -366,34 +369,33 @@ static void RCS_write_binary_rev_data_blob(const char *fn, const void *data, siz
   xfree (temp_filename);
 }
 
-static bool can_be_blob_reference(const char *blob_file_name)
+static bool can_be_blob_reference(const char *blob_ref_file_name)
 {
-  return get_file_size(blob_file_name) == blob_reference_size;//blob references is always sha256:encoded_sha_64_bytes
+  return get_file_size(blob_ref_file_name) == blob_reference_size;//blob references is always sha256:encoded_sha_64_bytes
 }
 
-static bool is_blob_reference(const char *blob_file_name, char *sha_file_name, size_t sha_max_len)//sha256_encode==char[65], encoded 32 bytes + \0
+static bool is_blob_reference(const char *blob_ref_file_name, char *sha_file_name, size_t sha_max_len)//sha256_encode==char[65], encoded 32 bytes + \0
 {
-  if (!can_be_blob_reference(blob_file_name))
+  if (!can_be_blob_reference(blob_ref_file_name))
     return false;
-  FILE* fp = CVS_FOPEN(blob_file_name,"rb");
-  if (!fp)
-    return false;
-  char sha256_magic[sizeof(sha256_rev_string)-1];
-  if (fread(sha256_magic,1,sizeof(sha256_magic),fp) != sizeof(sha256_magic))
+  FILE* fp;
+  fp = CVS_FOPEN(blob_ref_file_name, "rb");
+  char sha256_magic[sha256_magic_len];
+  if (fread(&sha256_magic[0],1, sha256_magic_len, fp) != sha256_magic_len)
   {
-    error(1,errno,"Couldn't read %s", blob_file_name);
+    error(1,errno,"Couldn't read %s", blob_ref_file_name);
     return false;
   }
-  if (memcmp(sha256_magic, sha256_rev_string, sizeof(sha256_magic) != 0))
+  if (memcmp(&sha256_magic[0], SHA256_REV_STRING, sha256_magic_len) != 0)
   {
     //not a blob reference!
     fclose(fp);
     return false;
   }
   char sha256_encoded[sha256_encoded_size+1];
-  if (fread(sha256_encoded, 1, sha256_encoded_size, fp) != sha256_encoded_size)
+  if (fread(&sha256_encoded[0], 1, sha256_encoded_size, fp) != sha256_encoded_size)
   {
-    error(1,errno,"Couldn't read %s", blob_file_name);
+    error(1,errno,"Couldn't read %s", blob_ref_file_name);
     return false;
   }
   sha256_encoded[sha256_encoded_size] = 0;
@@ -425,7 +427,7 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
     *out_len = read_binary_blob(sha_file_name, (void**)out_data, false);//
     if (*out_data)
       *inout_data_allocated = 1;
-	return true;
+    return true;
   }
   else
   {
@@ -627,14 +629,14 @@ static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bo
   #else
   RCS_write_binary_rev_data_direct(fn, data, len, packed);
   #endif
-  //todo: establish protocol
+  //todo: establish protocol, so we can move out compression to client and do not re-compress all the time
 }
 
 static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz)
 {
   #if CVS_DEDUPLICATION
   return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, false, packed, cmp_other_sz);
-#else
+  #else
   return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);
   #endif
 }
