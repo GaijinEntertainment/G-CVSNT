@@ -10,6 +10,30 @@
 (a)[20],(a)[21],(a)[22],(a)[23],(a)[24],(a)[25],(a)[26],(a)[27],(a)[28],(a)[29],\
 (a)[30],(a)[31]
 
+enum {BLOB_MAGIC_SIZE = 8};
+struct BlobHeader
+{
+  unsigned char magic[BLOB_MAGIC_SIZE];
+  uint64_t uncompressedLen;
+  uint64_t compressedLen;
+};
+static const char zlib_magic[BLOB_MAGIC_SIZE+1] = "ZLIBCOMP";
+static const char noarc_magic[BLOB_MAGIC_SIZE+1] = "NONCOMPR";
+static bool is_accepted_magic(const unsigned char *m)
+{
+  return memcmp(m, zlib_magic, BLOB_MAGIC_SIZE) == 0 || memcmp(m, noarc_magic, BLOB_MAGIC_SIZE) == 0;
+}
+
+BlobHeader get_noarc_header(size_t len)
+{
+  BlobHeader hdr;
+  memcpy(hdr.magic, noarc_magic, BLOB_MAGIC_SIZE);
+  hdr.uncompressedLen = len;
+  hdr.compressedLen = len;
+  return hdr;
+}
+
+
 static void calc_sha256(const void *data, size_t len, bool src_packed, size_t &unpacked_len, unsigned char sha256[])//sha256 char[32]
 {
   if (src_packed)
@@ -56,18 +80,9 @@ static void create_dirs(unsigned char sha256[])
     error (1, errno, "cannot make directory %s", buf);
 }
 
-enum {ARC_MAGIC_SIZE = 8};
-struct ArcHeader
+static void* compress_zlib_data(const void *data, size_t len, int compression_level, BlobHeader &hdr)
 {
-  char magic[ARC_MAGIC_SIZE];
-  uint64_t uncompressedLen;
-  uint64_t compressedLen;
-};
-static const char zlib_magic[ARC_MAGIC_SIZE+1] = "ZLIBCOMP";
-
-static void* compress_zlib_data(const void *data, size_t len, int compression_level, size_t &zlen)
-{
-  zlen = 0;
+  size_t zlen = 0;
   void *zbuf = nullptr;
 
   z_stream stream = {0};
@@ -76,19 +91,19 @@ static void* compress_zlib_data(const void *data, size_t len, int compression_le
   stream.avail_in = len;
   stream.next_in = (Bytef*)data;
   stream.avail_out = zlen;
-  zbuf = xmalloc(zlen + sizeof(ArcHeader));
-  stream.next_out = (Bytef*)((char*)zbuf)+sizeof(ArcHeader);
-  memcpy(((ArcHeader*)zbuf)->magic, zlib_magic, ARC_MAGIC_SIZE);
-  ((ArcHeader*)zbuf)->uncompressedLen = len;
-  ((ArcHeader*)zbuf)->compressedLen = 0;
-  if (deflate(&stream, Z_FINISH)==Z_STREAM_END && (sizeof(ArcHeader) + (zlen - stream.avail_out)) < len)
+  zbuf = xmalloc(zlen);
+  stream.next_out = (Bytef*)((char*)zbuf);
+  if (deflate(&stream, Z_FINISH)==Z_STREAM_END && (zlen - stream.avail_out) < len)
   {
-    zlen = sizeof(ArcHeader) + (zlen - stream.avail_out);
-    ((ArcHeader*)zbuf)->compressedLen = zlen;
+    zlen = (zlen - stream.avail_out);
+    memcpy(hdr.magic, zlib_magic, BLOB_MAGIC_SIZE);
+    hdr.uncompressedLen = len;
+    hdr.compressedLen = zlen;
   } else
   {
     xfree(zbuf);
     zbuf = nullptr;
+    hdr = get_noarc_header(len);
   }
   deflateEnd(&stream);
   return zbuf;
@@ -102,16 +117,17 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
   {
     error(1, errno, "can't open write temp_filename <%s> for <%s>(<%s>)", temp_filename, sha_file_name, fn);
   }
+  BlobHeader hdr = get_noarc_header(len);
   void *compressed_data = nullptr;
-  size_t compressed_len = 0;
   if (store_packed && !src_packed)
-    compressed_data = compress_zlib_data(data, len, Z_BEST_COMPRESSION-4, compressed_len);
+    compressed_data = compress_zlib_data(data, len, Z_BEST_COMPRESSION-4, hdr);
 
   const void* writeData = compressed_data ? compressed_data : data;
-  size_t writeLen = compressed_data ? compressed_len : len;
 
-  if (fwrite(writeData,1,writeLen,dest) != writeLen)
-    error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)writeLen);
+  if (fwrite(&hdr,1,sizeof(hdr),dest) != sizeof(hdr))
+    error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)sizeof(hdr));
+  if (fwrite(writeData,1,hdr.compressedLen,dest) != hdr.compressedLen)
+    error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)hdr.compressedLen);
 
   if (compressed_data != nullptr)
     xfree(compressed_data);
@@ -127,11 +143,14 @@ static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
   const char *fn, const void *data, size_t len, bool packed, bool src_packed)//fn is just context!
 {
   if (src_packed &&
-    (len < sizeof(ArcHeader) || ((const ArcHeader*)data)->compressedLen != len || memcmp(((const ArcHeader*)data)->magic, zlib_magic, sizeof(ArcHeader::magic))!=0))
+      (len < sizeof(BlobHeader)
+       || ((const BlobHeader*)data)->compressedLen != len + sizeof(BlobHeader)
+       || !is_accepted_magic(((const BlobHeader*)data)->magic))
+     )
   {
-    error(1, 0, "fn <%s> says it's client compressed but it's not!", fn, len);
+    error(1, 0, "fn <%s> says it's client prepared but it's not!", fn, len);
   }
-  const size_t clientUnpackedLen = src_packed ? ((const ArcHeader*)data)->uncompressedLen : len;
+  const size_t clientUnpackedLen = src_packed ? ((const BlobHeader*)data)->uncompressedLen : len;
   size_t unpacked_len = 0;
   calc_sha256(data, len, src_packed, unpacked_len, sha256);
   if (clientUnpackedLen != unpacked_len)
