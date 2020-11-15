@@ -425,6 +425,7 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
     *out_len = read_binary_blob(sha_file_name, (void**)out_data, false);//
     if (*out_data)
       *inout_data_allocated = 1;
+	return true;
   }
   else
   {
@@ -632,8 +633,8 @@ static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bo
 static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz)
 {
   #if CVS_DEDUPLICATION
-  return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);
-  #else
+  return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, false, packed, cmp_other_sz);
+#else
   return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);
   #endif
 }
