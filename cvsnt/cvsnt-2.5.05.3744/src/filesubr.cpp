@@ -1066,7 +1066,7 @@ char *cvs_temp_name ()
  * NFS locking thing, but until I hear of more problems, I'm not going to
  * bother.
  */
-FILE *cvs_temp_file (char **filename, char *mode)
+FILE *cvs_temp_file (char **filename, const char *mode)
 {
     char *fn;
     FILE *fp;

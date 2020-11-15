@@ -54,7 +54,7 @@ struct protocol_interface sspi_protocol_interface =
         },
 
 	"sspi",
-	"sspi "CVSNT_PRODUCTVERSION_STRING,
+	"sspi " CVSNT_PRODUCTVERSION_STRING,
 	":sspi[;keyword=value...]:[username[:password]@]host[:port][:]/path",
 
 	elemHostname, /* Required elements */
