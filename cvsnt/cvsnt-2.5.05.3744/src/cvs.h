@@ -558,7 +558,7 @@ char *xreadlink(const char *file);
 const char *last_component (const char *path);
 char *get_homedir();
 char *cvs_temp_name();
-FILE *cvs_temp_file(char **filename);
+FILE *cvs_temp_file(char **filename, char *mode = nullptr);
 
 int numdots (const char *s);
 char *increment_revnum (const char *rev);

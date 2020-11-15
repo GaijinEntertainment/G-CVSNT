@@ -1066,7 +1066,7 @@ char *cvs_temp_name ()
  * NFS locking thing, but until I hear of more problems, I'm not going to
  * bother.
  */
-FILE *cvs_temp_file (char **filename)
+FILE *cvs_temp_file (char **filename, char *mode)
 {
     char *fn;
     FILE *fp;
@@ -1076,6 +1076,7 @@ FILE *cvs_temp_file (char **filename)
      * noexec mode too.
      */
 
+    mode = mode ? mode : "w+";
     assert (filename != NULL);
 
 #ifdef HAVE_MKSTEMP
@@ -1091,7 +1092,7 @@ FILE *cvs_temp_file (char **filename)
      * errno should still be set
      */
     if (fd == -1) fp = NULL;
-    else if ((fp = CVS_FDOPEN (fd, "w+")) == NULL)
+    else if ((fp = CVS_FDOPEN (fd, mode)) == NULL)
     {
 	/* attempt to close and unlink the file since mkstemp returned sucessfully and
 	 * we believe it's been created and opened
@@ -1119,7 +1120,7 @@ FILE *cvs_temp_file (char **filename)
 
     fn = tempnam (Tmpdir, "cvs");
     if (fn == NULL) fp = NULL;
-    else if ((fp = CVS_FOPEN (fn, "w+")) == NULL) xfree (fn);
+    else if ((fp = CVS_FOPEN (fn, mode)) == NULL) xfree (fn);
     else chmod (fn, 0600);
 
     /* tempnam returns a pointer to a newly malloc'd string, so there's
@@ -1158,7 +1159,7 @@ FILE *cvs_temp_file (char **filename)
     fn = tmpnam (ifn);
 
     if (fn == NULL) fp = NULL;
-    else if ((fp = CVS_FOPEN (ifn, "w+")) != NULL)
+    else if ((fp = CVS_FOPEN (ifn, mode)) != NULL)
     {
 	fn = xstrdup (ifn);
 	chmod (fn, 0600);

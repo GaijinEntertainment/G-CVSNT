@@ -1321,15 +1321,15 @@ char *cvs_temp_name ()
  * NFS locking thing, but until I hear of more problems, I'm not going to
  * bother.
  */
-FILE *cvs_temp_file (char **filename)
+FILE *cvs_temp_file (char **filename, char *mode)
 {
 	char tempdir[MAX_PATH];
 	FILE *f;
-
+    mode = mode ? mode : "wb+";
 	wnt_get_temp_dir(tempdir,sizeof(tempdir));
 	*filename=(char*)xmalloc(MAX_PATH);
 	GetTempFileNameA(tempdir,"cvs",0,*filename);
-	f=CVS_FOPEN(*filename,"wb+");
+	f=CVS_FOPEN(*filename, mode);
 	return f;
 }
 

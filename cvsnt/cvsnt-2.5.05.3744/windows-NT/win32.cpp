@@ -1314,7 +1314,7 @@ int wnt_access(const char *path, int mode)
 int wnt_fclose(FILE *file)
 {
 	assert(file);
-	assert(file->_flag);
+	//assert(file->_flag);
 
 //	FlushFileBuffers((HANDLE)_get_osfhandle(fileno(file)));
 
