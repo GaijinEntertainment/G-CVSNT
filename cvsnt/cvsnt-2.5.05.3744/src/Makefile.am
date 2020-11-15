@@ -47,6 +47,7 @@ bin_PROGRAMS = cvsnt
 
 # The cvs executable
 cvsnt_SOURCES = \
+    sha256/sha256.c \
 	add.cpp \
 	admin.cpp \
 	annotate.cpp \
