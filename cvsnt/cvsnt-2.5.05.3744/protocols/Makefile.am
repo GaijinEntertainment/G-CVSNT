@@ -39,21 +39,21 @@ pserver_target =
 
 endif 
 
-if SSERVER_PROTOCOL_SUPPORT
-
-sserver_target = sserver.la
-
-sserver_la_SOURCES = \
-	sserver.cpp \
-	common.cpp 
-
-sserver_la_LDFLAGS = -module -avoid-version  -L$(DESTDIR)/$(libdir) @SSL_LIBS@
-
-else
-
+#if SSERVER_PROTOCOL_SUPPORT
+#
+#sserver_target = sserver.la
+##
+#sserver_la_SOURCES = \
+#	sserver.cpp \
+#	common.cpp 
+#
+#sserver_la_LDFLAGS = -module -avoid-version  -L$(DESTDIR)/$(libdir) @SSL_LIBS@
+#
+#else
+#
 sserver_target = 
-
-endif 
+#
+#endif 
 
 #if SYNC_PROTOCOL_SUPPORT
 #
