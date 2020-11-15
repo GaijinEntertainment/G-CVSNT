@@ -10,6 +10,12 @@
 (a)[20],(a)[21],(a)[22],(a)[23],(a)[24],(a)[25],(a)[26],(a)[27],(a)[28],(a)[29],\
 (a)[30],(a)[31]
 
+#define SHA256_REV_STRING "sha256:"
+#define BLOBS_SUBDIR "/blobs/"
+static const char sha256_rev_string[] = SHA256_REV_STRING;
+static const size_t sha256_encoded_size = 64;
+static const size_t blob_reference_size = sizeof(sha256_rev_string)-1+sha256_encoded_size;
+
 enum {BLOB_MAGIC_SIZE = 8};
 struct BlobHeader
 {
@@ -24,6 +30,16 @@ static bool is_accepted_magic(const unsigned char *m)
   return memcmp(m, zlib_magic, BLOB_MAGIC_SIZE) == 0 || memcmp(m, noarc_magic, BLOB_MAGIC_SIZE) == 0;
 }
 
+static bool is_packed_blob(const BlobHeader& hdr)
+{
+  return memcmp(hdr.magic, zlib_magic, BLOB_MAGIC_SIZE) == 0;
+}
+
+static bool is_zlib_blob(const BlobHeader& hdr)
+{
+  return memcmp(hdr.magic, zlib_magic, BLOB_MAGIC_SIZE) == 0;
+}
+
 BlobHeader get_noarc_header(size_t len)
 {
   BlobHeader hdr;
@@ -34,25 +50,78 @@ BlobHeader get_noarc_header(size_t len)
 }
 
 
-static void calc_sha256(const void *data, size_t len, bool src_packed, size_t &unpacked_len, unsigned char sha256[])//sha256 char[32]
+static void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char sha256[])//sha256 char[32]
 {
-  if (src_packed)
-  {
-    //calc sha256 on the unpacked data!
-    error(1, 0, "packing on clients is not supported yet");
-  }
   unpacked_len = len;
   blk_SHA256_CTX ctx;
   blk_SHA256_Init(&ctx);
-  uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
-  blk_SHA256_Update(&ctx, data, len);
+
+  if (src_blob)
+  {
+    //new protocol - client sends data as blob, already packed and everything.
+    //we still need to verify it!
+    //calc sha256 on the unpacked data!
+    const BlobHeader &hdr = *(const BlobHeader*)data;
+    if (is_zlib_blob(hdr))
+    {
+      unpacked_len = hdr.uncompressedLen;
+      uint64_t len64 = hdr.uncompressedLen;
+      blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
+      z_stream stream = {0};
+      inflateInit(&stream);
+      stream.avail_in = hdr.compressedLen;
+      stream.next_in = (Bytef*)((const char*)data + sizeof(BlobHeader));
+      char bufOut[32768];
+      size_t totalSrcLenLeft = hdr.compressedLen;
+      while (stream.avail_in>0)
+      {
+        stream.avail_out = sizeof(bufOut);
+        stream.next_out = (Bytef*)bufOut;
+        int result = inflate(&stream, Z_SYNC_FLUSH);
+        if (result < 0)
+          error(1,0,"internal error: inflate failed");
+
+        blk_SHA256_Update(&ctx, bufOut, sizeof(bufOut) - stream.avail_out);
+
+        if (result == Z_STREAM_END)
+          break;
+      }
+      inflateEnd(&stream);
+    } else
+      error(1,errno,"Unknown compressor %s", fn);
+  } else
+  {
+    uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
+    blk_SHA256_Update(&ctx, data, len);
+  }
   blk_SHA256_Final(sha256, &ctx);
 }
 
-static void create_file_name(unsigned char sha256[], const char *fn, char *sha_file_name, size_t sha_max_len)//sha256 char[32]
+static void get_blob_filename_from_encoded_sha256(const char* encoded_sha256, char *sha_file_name, size_t sha_max_len)
 {
   if (snprintf(sha_file_name, sha_max_len,
-     "%s/"
+     "%s"
+     BLOBS_SUBDIR
+     "%c/%c/*.%s"
+     , current_parsed_root->directory,
+     encoded_sha256[0],
+     encoded_sha256[1],
+     int(sha256_encoded_size)-2, encoded_sha256+2
+     )
+     >= sha_max_len-1)
+      error(1, 0, "too long filename <%s> for <%s>", sha_file_name, encoded_sha256);
+}
+
+static bool does_blob_exist(const char *sha_file_name)
+{
+  return get_file_size(sha_file_name) >= sizeof(BlobHeader);
+}
+
+static void create_blob_file_name(unsigned char sha256[], const char *fn, char *sha_file_name, size_t sha_max_len)//sha256 char[32]
+{
+  if (snprintf(sha_file_name, sha_max_len,
+     "%s"
+     BLOBS_SUBDIR
      "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
      , current_parsed_root->directory,
       SHA256_LIST(sha256)
@@ -117,20 +186,28 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
   {
     error(1, errno, "can't open write temp_filename <%s> for <%s>(<%s>)", temp_filename, sha_file_name, fn);
   }
-  BlobHeader hdr = get_noarc_header(len);
-  void *compressed_data = nullptr;
-  if (store_packed && !src_packed)
-    compressed_data = compress_zlib_data(data, len, Z_BEST_COMPRESSION-4, hdr);
+  if (src_packed)
+  {
+    //new protocol - client sends already prepared blobs, just write them down
+    if (fwrite(data,1,len,dest) != len)
+      error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)len);
+  } else
+  {
+    BlobHeader hdr = get_noarc_header(len);
+    void *compressed_data = nullptr;
+    if (store_packed)
+      compressed_data = compress_zlib_data(data, len, Z_BEST_COMPRESSION-4, hdr);
 
-  const void* writeData = compressed_data ? compressed_data : data;
+    const void* writeData = compressed_data ? compressed_data : data;
 
-  if (fwrite(&hdr,1,sizeof(hdr),dest) != sizeof(hdr))
-    error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)sizeof(hdr));
-  if (fwrite(writeData,1,hdr.compressedLen,dest) != hdr.compressedLen)
-    error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)hdr.compressedLen);
+    if (fwrite(&hdr,1,sizeof(hdr),dest) != sizeof(hdr))
+      error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)sizeof(hdr));
+    if (fwrite(writeData,1,hdr.compressedLen,dest) != hdr.compressedLen)
+      error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)hdr.compressedLen);
 
-  if (compressed_data != nullptr)
-    xfree(compressed_data);
+    if (compressed_data != nullptr)
+      xfree(compressed_data);
+  }
   rename_file (temp_filename, sha_file_name);
   fclose(dest);
 
@@ -148,60 +225,217 @@ static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
        || !is_accepted_magic(((const BlobHeader*)data)->magic))
      )
   {
-    error(1, 0, "fn <%s> says it's client prepared but it's not!", fn, len);
+    error(1, 0, "fn <%s> says it's client prepared blob but it's not!", fn, len);
   }
   const size_t clientUnpackedLen = src_packed ? ((const BlobHeader*)data)->uncompressedLen : len;
   size_t unpacked_len = 0;
-  calc_sha256(data, len, src_packed, unpacked_len, sha256);
+  calc_sha256(fn, data, len, src_packed, unpacked_len, sha256);
   if (clientUnpackedLen != unpacked_len)
-    error(1, 0, "fn <%s> says it has compressed %d data but we decompress only %d!", fn, (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
+    error(1, 0, "fn <%s> says it has compressed %d of data but we decompressed only %d!", fn, (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
   const size_t sha_file_name_len = 1024;
   char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 32+3+1 + strlen(current_parsed_root->directory)
-  create_file_name(sha256, fn, sha_file_name, sha_file_name_len);
+  create_blob_file_name(sha256, fn, sha_file_name, sha_file_name_len);
   if (!isreadable(sha_file_name))
   {
     create_dirs(sha256);
     atomic_write_sha_file(fn, sha_file_name, data, len, packed, src_packed);
-  }//else we already have this. deduplication!
+  }//else we already have this blob written. deduplication worked!
+  else
+  {
+    //if we are paranoid, that's the place where we can check for collision
+    //probability of sha256 collision is way lower then asteroid destroying Earth in next 1000 years
+    // in addition, it won't crash our repo, merely will result in incorrect commit (you will update something else, not what you have commited, some other file)
+    //so we won't check for it.
+  }
   return unpacked_len;
 }
 
-static void RCS_write_binary_rev_data_new(const char *fn, const void *data, size_t len, bool store_packed, bool src_packed)
+static size_t decode_binary_blob(const char *blob_file_name, void **data)
+{
+  size_t fileLen = get_file_size(blob_file_name);
+  if (fileLen < sizeof(BlobHeader))
+  {
+    error(1,errno,"Couldn't read %s of %d len", blob_file_name, (int)fileLen);
+    return 0;
+  }
+  FILE* fp = CVS_FOPEN(blob_file_name,"rb");
+  if (!fp)
+  {
+    error(1,errno,"Couldn't read %s len", blob_file_name);
+    return 0;
+  }
+  BlobHeader hdr;
+  if (fread(&hdr,1,sizeof(hdr),fp) != sizeof(hdr))
+  {
+    error(1,errno,"Couldn't read %s", blob_file_name);
+    return 0;
+  }
+  if (!is_accepted_magic(hdr.magic) || hdr.compressedLen != fileLen - sizeof(hdr))
+  {
+    error(1,errno,"<%s> is not a blob (%d bytes stored in file, vs file len = %d)", blob_file_name, (int)hdr.compressedLen, int(fileLen - sizeof(hdr)));
+    return 0;
+  }
+
+  *data = xmalloc(hdr.uncompressedLen);
+  if (is_packed_blob(hdr))//
+  {
+    void *tmpbuf = xmalloc(hdr.compressedLen);
+    if (fread(tmpbuf,1,hdr.compressedLen,fp) != hdr.compressedLen)
+    {
+      error(1,errno,"Couldn't read %s", blob_file_name);
+      return 0;
+    }
+    if (is_zlib_blob(hdr))
+    {
+      z_stream stream = {0};
+      inflateInit(&stream);
+      stream.avail_in = hdr.compressedLen;
+      stream.next_in = (Bytef*)tmpbuf;
+      stream.avail_out = hdr.uncompressedLen;
+      stream.next_out = (Bytef*)*data;
+      if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
+          error(1,0,"internal error: inflate failed");
+      inflateEnd(&stream);
+    } else
+    {
+      error(1,errno,"Unknown compressor %s", blob_file_name);
+      return 0;
+    }
+    xfree(tmpbuf);
+  } else
+  {
+    if (fread(*data,1,hdr.uncompressedLen,fp) != hdr.uncompressedLen)
+    {
+      error(1,errno,"Couldn't read %s", blob_file_name);
+      return 0;
+    }
+  }
+  fclose(fp);
+  return hdr.uncompressedLen;
+}
+
+static size_t read_binary_blob_directly(const char *blob_file_name, void **data)//allocates memory and read whole file
+{
+  size_t fileLen = get_file_size(blob_file_name);
+  if (fileLen < sizeof(BlobHeader))
+  {
+    error(1,errno,"Couldn't read %s of %d len", blob_file_name, (int)fileLen);
+    return 0;
+  }
+  FILE* fp = CVS_FOPEN(blob_file_name, "rb");
+  if (!fp)
+  {
+    error(1,errno,"Couldn't read %s len", blob_file_name);
+    return 0;
+  }
+  *data = xmalloc(fileLen);
+  if (fread(*data,1,fileLen,fp) != fileLen)
+  {
+    error(1,errno,"Couldn't read %s", blob_file_name);
+    return 0;
+  }
+  fclose(fp);
+  return fileLen;
+}
+
+static size_t read_binary_blob(const char *blob_file_name, void **data, bool return_blob_directly)
+{
+  if (return_blob_directly)//new protocol - just send data to client as is. It is already packed and everything
+    return read_binary_blob_directly(blob_file_name, data);
+  return decode_binary_blob(blob_file_name, data);
+}
+
+static void RCS_write_binary_rev_data_blob(const char *fn, const void *data, size_t len, bool store_packed, bool src_packed)
 {
   unsigned char sha256[32];
   size_t srcSize = write_binary_blob(sha256, fn, data, len, store_packed, src_packed);
 
   char *temp_filename = NULL;
-  FILE *dest = cvs_temp_file(&temp_filename, "w");
+  FILE *dest = cvs_temp_file(&temp_filename, "wb");
   if (!dest)
     error(1, 0, "can't open write temp_filename <%s> for <%s>", temp_filename, fn);
-  bool err = false;
   if (fprintf(dest,
-	  "sha256:"
-	  "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
-	  "\n",
-	  SHA256_LIST(sha256)) < 0)
-	  error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn), err = true;
-  if (fprintf(dest, "size:%llu", (uint64_t)srcSize) < 0)
-	  error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn), err = true;
-  if (!err)
+      SHA256_REV_STRING
+	  "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+	  SHA256_LIST(sha256)) != blob_reference_size)
+  {
+    error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn);
+  } else
     rename_file (temp_filename, fn);
   fclose(dest);
   xfree (temp_filename);
 }
 
-static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
+static bool can_be_blob_reference(const char *blob_file_name)
+{
+  return get_file_size(blob_file_name) == blob_reference_size;//blob references is always sha256:encoded_sha_64_bytes
+}
+
+static bool is_blob_reference(const char *blob_file_name, char *sha_file_name, size_t sha_max_len)//sha256_encode==char[65], encoded 32 bytes + \0
+{
+  if (!can_be_blob_reference(blob_file_name))
+    return false;
+  FILE* fp = CVS_FOPEN(blob_file_name,"rb");
+  if (!fp)
+    return false;
+  char sha256_magic[sizeof(sha256_rev_string)-1];
+  if (fread(sha256_magic,1,sizeof(sha256_magic),fp) != sizeof(sha256_magic))
+  {
+    error(1,errno,"Couldn't read %s", blob_file_name);
+    return false;
+  }
+  if (memcmp(sha256_magic, sha256_rev_string, sizeof(sha256_magic) != 0))
+  {
+    //not a blob reference!
+    fclose(fp);
+    return false;
+  }
+  char sha256_encoded[sha256_encoded_size+1];
+  if (fread(sha256_encoded, 1, sha256_encoded_size, fp) != sha256_encoded_size)
+  {
+    error(1,errno,"Couldn't read %s", blob_file_name);
+    return false;
+  }
+  sha256_encoded[sha256_encoded_size] = 0;
+  get_blob_filename_from_encoded_sha256(sha256_encoded, sha_file_name, sha_max_len);
+  return does_blob_exist(sha_file_name);
+}
+
+static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz);
+
+static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool return_packed, bool supposed_packed, int64_t *cmp_other_sz)
+{
+  if (cmp_other_sz)
+  {
+    if (*inout_data_allocated && *out_data)
+      xfree (*out_data);
+    *out_data = NULL;
+    *out_len = 0;
+    *inout_data_allocated = 0;
+    return false;
+  }
+  char sha_file_name[1024];
+  if (is_blob_reference(fn, sha_file_name, sizeof(sha_file_name)))
+  {
+    if (*inout_data_allocated && *out_data)
+      xfree (*out_data);
+    *out_data = NULL;
+    *out_len = 0;
+    *inout_data_allocated = 0;
+    *out_len = read_binary_blob(sha_file_name, (void**)out_data, false);//
+    if (*out_data)
+      *inout_data_allocated = 1;
+  }
+  else
+  {
+    return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, supposed_packed, cmp_other_sz);
+    //read like it used to be
+  }
+}
+
+static void RCS_write_binary_rev_data_direct(const char *fn, void *data, size_t len, bool packed)
 {
   char sbuf[512];
-  #if 0
-  {
-    char *nfn = (char*)xmalloc(strlen(fn)+4);
-    strcpy(nfn, fn);
-    strcat(nfn, "nn");
-    RCS_write_binary_rev_data_new(nfn, data, len, packed, false);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
-    xfree(nfn);
-  }
-  #endif
 
   char *fnpk = (char*)xmalloc(strlen(fn)+4);
   strcpy(fnpk, fn);
@@ -268,7 +502,7 @@ static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bo
   xfree(fnpk);
 }
 
-static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int *cmp_other_sz)
+static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz)
 {
   char *fnpk = NULL;
   struct stat s;
@@ -381,6 +615,27 @@ static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *ou
   if (fp)
     fclose(fp);
   return true;
+}
+
+#define CVS_DEDUPLICATION 0
+
+static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
+{
+  #if CVS_DEDUPLICATION
+  RCS_write_binary_rev_data_blob(fn, data, len, packed, false);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
+  #else
+  RCS_write_binary_rev_data_direct(fn, data, len, packed);
+  #endif
+  //todo: establish protocol
+}
+
+static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz)
+{
+  #if CVS_DEDUPLICATION
+  return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);
+  #else
+  return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);
+  #endif
 }
 
 struct RevStringList

@@ -72,7 +72,7 @@ const kflag_t kflag_flags[] =
 
 static void RCS_convert_to_new_binary(RCSNode *rcs);
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed);
-static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int *cmp_other_sz);
+static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz);
 
 static void rcsbuf_setpos_to_delta_base(RCSNode *rcsbuf);
 static void rcsbuf_reuse_delta_buffer(RCSNode *rcs);
@@ -4340,7 +4340,7 @@ expand_keywords (RCSNode *rcs, RCSVers *ver, const char *name, const char *log,
    comments in RCS_checkin for some issues about this. -twp */
 
 int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const char *nametag, const char *options,
-     const char *sout, RCSCHECKOUTPROC pfn, void *callerdat, mode_t *pmode, int *cmp_other_sz)
+     const char *sout, RCSCHECKOUTPROC pfn, void *callerdat, mode_t *pmode, int64_t *cmp_other_sz)
 {
     int free_rev = 0;
 	kflag expand;
@@ -6224,7 +6224,7 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
 		}
 		data.ver = n?(RCSVers*)n->data:NULL;
 
-        int src_data_sz = 0;
+        int64_t src_data_sz = 0;
         if (expand.flags&KFLAG_BINARY_DELTA)
         {
           fseek(fp,0,SEEK_END);
