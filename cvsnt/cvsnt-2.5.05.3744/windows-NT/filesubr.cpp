@@ -21,6 +21,9 @@
 #include <io.h>
 #include <zlib.h>
 #include <shellapi.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <wchar.h>
 
 /* Copies "from" to "to".  Note that the functionality here is similar
    to the win32 function CopyFile, but (1) we copy LastAccessTime and
@@ -400,6 +403,15 @@ int isreadable (const char *file)
 int iswritable (const char *file)
 {
     return isaccessible(file, W_OK);
+}
+
+size_t get_file_size(const char *file)
+{
+  struct __stat64 buf;
+  if (_stat64(file, &buf) != 0)
+      return 0; // error, could use errno to find out more
+
+  return buf.st_size;
 }
 
 /*

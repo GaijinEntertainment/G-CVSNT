@@ -554,6 +554,8 @@ int iswritable (const char *file);
 int isaccessible (const char *file, const int mode);
 int isabsolute(const char *directory);
 int isabsolute_remote(const char *directory);
+size_t get_file_size(const char *file);
+
 char *xreadlink(const char *file);
 const char *last_component (const char *path);
 char *get_homedir();

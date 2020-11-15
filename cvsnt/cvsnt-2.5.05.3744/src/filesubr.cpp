@@ -560,6 +560,15 @@ int iswritable (const char *file)
  * mode.  If compiled with SETXID_SUPPORT also works if cvs has setxid
  * bits set.
  */
+
+size_t get_file_size(const char *file)
+{
+  struct stat sb;
+  if (stat(file, &sb) == -1)
+	return 0;
+  return sb.st_size;
+}
+
 int isaccessible (const char *file, const int mode)
 {
 #ifdef SETXID_SUPPORT
