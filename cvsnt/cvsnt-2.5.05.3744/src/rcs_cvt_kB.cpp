@@ -12,7 +12,7 @@
 
 #define SHA256_REV_STRING "sha256:"
 #define BLOBS_SUBDIR "/blobs/"
-static const size_t sha256_magic_len = strlen(SHA256_REV_STRING);
+static constexpr size_t sha256_magic_len = 7;//strlen(SHA256_REV_STRING);
 static const size_t sha256_encoded_size = 64;//32*2
 static const size_t blob_reference_size = sha256_magic_len+sha256_encoded_size;
 
@@ -250,6 +250,36 @@ static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
   return unpacked_len;
 }
 
+static BlobHeader get_binary_blob_hdr(const char *blob_file_name)
+{
+  size_t fileLen = get_file_size(blob_file_name);
+  if (fileLen < sizeof(BlobHeader))
+  {
+    error(1,errno,"Couldn't read %s of %d len", blob_file_name, (int)fileLen);
+    return BlobHeader{0};
+  }
+  FILE* fp;
+  fp = CVS_FOPEN(blob_file_name,"rb");
+  if (!fp)
+  {
+    error(1,errno,"Couldn't read %s len", blob_file_name);
+    return BlobHeader{0};
+  }
+  BlobHeader hdr;
+  if (fread(&hdr,1,sizeof(hdr),fp) != sizeof(hdr))
+  {
+    error(1,errno,"Couldn't read %s", blob_file_name);
+    return hdr;
+  }
+  if (!is_accepted_magic(hdr.magic) || hdr.compressedLen != fileLen - sizeof(hdr))
+  {
+    error(1,errno,"<%s> is not a blob (%d bytes stored in file, vs file len = %d)", blob_file_name, (int)hdr.compressedLen, int(fileLen - sizeof(hdr)));
+    return BlobHeader{0};
+  }
+  fclose(fp);
+  return hdr;
+}
+
 static size_t decode_binary_blob(const char *blob_file_name, void **data)
 {
   size_t fileLen = get_file_size(blob_file_name);
@@ -407,15 +437,6 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
 
 static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool return_packed, bool supposed_packed, int64_t *cmp_other_sz)
 {
-  if (cmp_other_sz)
-  {
-    if (*inout_data_allocated && *out_data)
-      xfree (*out_data);
-    *out_data = NULL;
-    *out_len = 0;
-    *inout_data_allocated = 0;
-    return false;
-  }
   char sha_file_name[1024];
   if (is_blob_reference(fn, sha_file_name, sizeof(sha_file_name)))
   {
@@ -424,6 +445,18 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
     *out_data = NULL;
     *out_len = 0;
     *inout_data_allocated = 0;
+    if (cmp_other_sz)
+    {
+      if (get_binary_blob_hdr(sha_file_name).uncompressedLen != *cmp_other_sz)
+      {
+        *cmp_other_sz = -1;
+        return false;
+      } else
+      {
+        //todo: otherwise we actually better just return sha in out_data, so it can be compare it without reading the whole revision
+        //sha can be easily computed
+      }
+    }
     *out_len = read_binary_blob(sha_file_name, (void**)out_data, false);//
     if (*out_data)
       *inout_data_allocated = 1;
