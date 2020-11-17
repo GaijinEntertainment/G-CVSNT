@@ -97,7 +97,7 @@ static int lock_server_command(int lock_server_socket, char *line, int line_len,
 /* Connect to the lock server and attain a lock */
 static size_t do_lock_server(int lock_server_socket, const char *object, const char *flags, int wait)
 {
-	char line[MAX_PATH*4],*p,*q, *ob = NULL;
+	char line[65536],*p,*q, *ob = NULL;
 	int bWaited;
 	size_t id;
 	unsigned helper;
@@ -108,8 +108,8 @@ static size_t do_lock_server(int lock_server_socket, const char *object, const c
 		time_t now;
 		char tm[32], time_cnv[32];
 	    time (&now);
-        ctime_s(time_cnv, sizeof(time_cnv), &now);
-		strncpy_s(tm,time_cnv+11,sizeof(tm));
+        CTIME_S(time_cnv, sizeof(time_cnv), &now);
+		strncpy(tm,time_cnv+11,sizeof(tm));
 		tm[8]='\0';
 		switch(lock_server_command(lock_server_socket, line,sizeof(line),"Lock %s|%s\n",flags,object))
 		{

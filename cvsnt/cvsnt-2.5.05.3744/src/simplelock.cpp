@@ -25,7 +25,6 @@ int main(int ac, const char* argv[])
   printf("obtained lock %lld, sleep for 1sec\n", (uint64_t) lockId);
   sleep(1000);
   do_unlock_file(lock_server_socket, lockId);
-  free(fullPath);
 
   cvs_tcp_close(lock_server_socket);
   return 0;

@@ -1,13 +1,19 @@
 #include <stdio.h>
 #include <stdint.h>
+#include <stdlib.h>
+#include <string.h>
+#include <ctype.h>
 
 #ifdef _WIN32
 #include <io.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
 #else
+#include <sched.h>
+#include <cerrno>
 #include <sys/types.h>
 #include <sys/socket.h>
+#include <unistd.h>
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
@@ -29,13 +35,16 @@
 #include <stdarg.h>
 #include <time.h>
 
-#define strdup _strdup
-#define sscanf sscanf_s
 #if _WIN32
   #include <windows.h>
+  #define strdup _strdup
+  #define sscanf sscanf_s
+  #define strncpy strncpy_s
+  #define CTIME_S CTIME_S
 #else
   #include <fcntl.h>
   #include <sys/stat.h>
+  #define CTIME_S(a,s,n) ctime_r(n, a);
 #endif
 
 void sleep(int ms)
