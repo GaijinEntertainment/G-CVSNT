@@ -4541,7 +4541,7 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
       strcpy(data_path, rcs->path);
       char *p = strrchr(data_path, '/');
       if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
-      sprintf(p, "CVS/%.*s", len, value);
+      sprintf(p, "CVS/%.*s", int(len), value);
 
       if (!RCS_read_binary_rev_data(data_path, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, cmp_other_sz))
       {
