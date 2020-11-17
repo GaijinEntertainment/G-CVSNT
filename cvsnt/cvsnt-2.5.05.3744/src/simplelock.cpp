@@ -1,8 +1,8 @@
 #include "simpleLock.cpp.inc"
 static void usage()
 {
-  printf("Usage: <server> <user> <full_root> (<full_directory/file,v> | <lock_id))\n");
-  printf("example:simplelock simplelock.exe 127.0.0.1 some_user /home/some_user/test testDir/a.png,v\n");
+  printf("Usage: <server> <user> <full_root/> (<full_directory/file,v> | <lock_id))\n");
+  printf("example:simplelock simplelock.exe 127.0.0.1 some_user /home/some_user/test/ testDir/a.png,v\n");
 }
 
 int main(int ac, const char* argv[])

@@ -40,7 +40,7 @@
   #define strdup _strdup
   #define sscanf sscanf_s
   #define strncpy strncpy_s
-  #define CTIME_S CTIME_S
+  #define CTIME_S ctime_s
 #else
   #include <fcntl.h>
   #include <sys/stat.h>
