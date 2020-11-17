@@ -1,7 +1,7 @@
 #include "sha_blob_reference.h"
 static void RCS_write_binary_rev_data_blob(const char *fn, const void *data, size_t len, bool store_packed, bool src_packed)
 {
-  write_blob_and_blob_reference(fn, data, len, store_packed, src_packed);
+  write_blob_and_blob_reference(current_parsed_root->directory, fn, data, len, store_packed, src_packed);
 }
 
 
@@ -10,7 +10,7 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
 static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool return_packed, bool supposed_packed, int64_t *cmp_other_sz)
 {
   char sha_file_name[1024];
-  if (is_blob_reference(fn, sha_file_name, sizeof(sha_file_name)))
+  if (is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name)))
   {
     if (*inout_data_allocated && *out_data)
       xfree (*out_data);

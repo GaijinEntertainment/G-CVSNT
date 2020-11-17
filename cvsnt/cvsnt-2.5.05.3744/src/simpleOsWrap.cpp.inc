@@ -1,3 +1,7 @@
+#ifdef _WIN32
+#define _CRT_SECURE_NO_WARNINGS
+//#define _CRT_NONSTDC_DEPRECATE
+#endif
 #include <stdio.h>
 #include <stdint.h>
 #include <stdlib.h>
@@ -8,6 +12,8 @@
 #include <io.h>
 #include <winsock2.h>
 #include <ws2tcpip.h>
+#include <sys/types.h>
+#include <sys/stat.h>
 #else
 #include <sched.h>
 #include <cerrno>
@@ -34,7 +40,6 @@
 
 #include <stdarg.h>
 #include <time.h>
-
 #if _WIN32
   #include <windows.h>
   #define strdup _strdup
@@ -46,6 +51,8 @@
   #include <sys/stat.h>
   #define CTIME_S(a,s,n) ctime_r(n, a);
 #endif
+#define xmalloc malloc
+#define xfree free
 
 void sleep(int ms)
 {
@@ -89,10 +96,146 @@ static void error(int a, int b, const char *cmd, ...)
     exit(1);
 }
 
-const char *idn(const char*a) {return a;}
-const char *decode_idn(const char*a) {return a;}
+#if _WIN32
+inline size_t get_file_size(const char *file)
+{
+  struct __stat64 buf;
+  if (_stat64(file, &buf) != 0)
+      return 0; // error, could use errno to find out more
 
-void tcp_init()
+  return buf.st_size;
+}
+inline int isreadable (const char *file)
+{
+  DWORD fa = GetFileAttributes(file);
+  if (fa == INVALID_FILE_ATTRIBUTES)
+	return 0;
+  return 1;  
+}
+inline int iswriteable (const char *file)
+{
+  DWORD fa = GetFileAttributes(file);
+  if (fa == INVALID_FILE_ATTRIBUTES)
+	return 0;
+  if(fa&FILE_ATTRIBUTE_DIRECTORY)
+  	return 1;
+  if (FILE_ATTRIBUTE_READONLY)
+    return 0;
+  return 1;
+}
+inline int mkdir (const char *path, int mode)
+{
+  return CreateDirectory(path,NULL);
+}
+inline void wnt_get_temp_dir(char *tempdir, int tempdir_size)
+{
+  DWORD fa;
+
+  if(!(GetEnvironmentVariableA("TEMP",tempdir,tempdir_size) ||
+       GetEnvironmentVariableA("TMP",tempdir,tempdir_size)))
+  {
+  	// No TEMP or TMP, use default <windir>\TEMP
+  	GetWindowsDirectoryA(tempdir,tempdir_size);
+  	strcat(tempdir,"\\TEMP");
+  }
+  if((fa=GetFileAttributesA(tempdir))==0xFFFFFFFF || !(fa&FILE_ATTRIBUTE_DIRECTORY))
+  {
+  	// Last resort, can't find a valid temp.... use C:\...
+  	strcpy(tempdir,"C:\\");
+  }
+}
+
+inline FILE *cvs_temp_file (char **filename, const char *mode)
+{
+  char tempdir[MAX_PATH];
+  FILE *f;
+  mode = mode ? mode : "wb+";
+  wnt_get_temp_dir(tempdir,sizeof(tempdir));
+  *filename=(char*)xmalloc(MAX_PATH);
+  GetTempFileNameA(tempdir,"cvs",0,*filename);
+  f=fopen(*filename, mode);
+  return f;
+}
+inline int unlink_file (const char *f) { return _unlink(f); }
+
+#else
+inline size_t get_file_size(const char *file)
+{
+  struct stat sb;
+  if (stat(file, &sb) == -1)
+    return 0;
+  return sb.st_size;
+}
+inline int isreadable (const char *file)
+{
+  return access(file, R_OK) == 0;
+}
+inline int iswritable (const char *file)
+{
+  return access(file, W_OK) == 0;
+}
+
+#define Tmpdir "/tmp"
+
+inline FILE *cvs_temp_file (char **filename, const char *mode)
+{
+  char *fn;
+  FILE *fp;
+
+  mode = mode ? mode : "w+";
+  {
+  int fd;
+
+  fn = (char*)xmalloc (strlen (Tmpdir) + 11);
+  sprintf (fn, "%s/%s", Tmpdir, "cvsXXXXXX" );
+  fd = mkstemp (fn);
+
+  /* a NULL return will be interpreted by callers as an error and
+   * errno should still be set
+   */
+  if (fd == -1) fp = NULL;
+  else if ((fp = fdopen (fd, mode)) == NULL)
+  {
+  /* attempt to close and unlink the file since mkstemp returned sucessfully and
+   * we believe it's been created and opened
+   */
+   int save_errno = errno;
+  if (close (fd))
+      error (0, errno, "Failed to close temporary file %s", fn);
+  if (unlink (fn))
+      error (0, errno, "Failed to unlink temporary file %s", fn);
+  errno = save_errno;
+  }
+
+  if (fp == NULL) xfree (fn);
+  /* mkstemp is defined to open mode 0600 using glibc 2.0.7+ */
+  /* FIXME - configure can probably tell us which version of glibc we are
+   * linking to and not chmod for 2.0.7+
+   */
+  else chmod (fn, 0600);
+
+  }
+
+  *filename = fn;
+  return fp;
+}
+inline int unlink_file (const char *f) { return unlink(f); }
+#endif
+
+#ifndef CVS_MKDIR
+#define CVS_MKDIR mkdir
+#endif
+
+inline void rename_file (const char *from, const char *to)
+{
+  if (rename (from, to) < 0)
+    error (1, errno, "cannot rename file %s to %s", from, to);
+}
+
+inline const char *idn(const char*a) {return a;}
+inline const char *decode_idn(const char*a) {return a;}
+
+inline void tcp_init()
 {
 #ifdef _WIN32
   WSADATA data;
@@ -103,7 +246,7 @@ void tcp_init()
   }
 #endif
 }
-int cvs_tcp_connect(const char *servername, const char *port, int supress_errors)
+inline int cvs_tcp_connect(const char *servername, const char *port, int supress_errors)
 {
 	struct addrinfo hint = {0};
 	struct addrinfo *tcp_addrinfo;
@@ -194,7 +337,7 @@ int cvs_tcp_connect(const char *servername, const char *port, int supress_errors
 	return sock;
 }
 
-int cvs_tcp_close(int sock)
+inline int cvs_tcp_close(int sock)
 {
 	return closesocket(sock);
 }

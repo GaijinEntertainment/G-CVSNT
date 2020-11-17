@@ -1,7 +1,4 @@
-#include <zlib.h>
-#ifdef _WIN32
-//typedef __int64 int64_t;
-#endif
+#include "../zlib/zlib.h"
 #include "sha256/sha256.h"
 #include "sha_blob_format.h"
 
@@ -63,13 +60,13 @@ static void calc_sha256(const char *fn, const void *data, size_t len, bool src_b
   blk_SHA256_Final(sha256, &ctx);
 }
 
-static void get_blob_filename_from_encoded_sha256(const char* encoded_sha256, char *sha_file_name, size_t sha_max_len)
+static void get_blob_filename_from_encoded_sha256(const char *root_dir, const char* encoded_sha256, char *sha_file_name, size_t sha_max_len)
 {
   if (snprintf(sha_file_name, sha_max_len,
      "%s"
      BLOBS_SUBDIR
      "%c%c/%c%c/%.*s"
-     , current_parsed_root->directory,
+     , root_dir ,
      encoded_sha256[0], encoded_sha256[1],
      encoded_sha256[2], encoded_sha256[3],
      int(sha256_encoded_size)-4, encoded_sha256+4
@@ -83,13 +80,13 @@ static bool does_blob_exist(const char *sha_file_name)
   return get_file_size(sha_file_name) >= sizeof(BlobHeader);
 }
 
-static void create_blob_file_name(unsigned char sha256[], const char *fn, char *sha_file_name, size_t sha_max_len)//sha256 char[32]
+static void create_blob_file_name(const char *root, unsigned char sha256[], const char *fn, char *sha_file_name, size_t sha_max_len)//sha256 char[32]
 {
   if (snprintf(sha_file_name, sha_max_len,
      "%s"
      BLOBS_SUBDIR
      "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
-     , current_parsed_root->directory,
+     , root,
       SHA256_LIST(sha256)
      )
      >= sha_max_len-1)
@@ -98,20 +95,20 @@ static void create_blob_file_name(unsigned char sha256[], const char *fn, char *
   }
 }
 
-static void create_dirs(unsigned char sha256[])
+static void create_dirs(const char *root, unsigned char sha256[])
 {
   char buf[1024];
-  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x", current_parsed_root->directory, sha256[0]) >= sizeof(buf)-1)
+  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x", root, sha256[0]) >= sizeof(buf)-1)
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
-  if (CVS_MKDIR (buf, 0777) != 0 && errno != EEXIST)
+  if (CVS_MKDIR(buf, 0777) != 0 && errno != EEXIST)
     error (1, errno, "cannot make directory %s", buf);
-  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x/%02x", current_parsed_root->directory, sha256[0], sha256[1]) >= sizeof(buf)-1)
+  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x/%02x", root, sha256[0], sha256[1]) >= sizeof(buf)-1)
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
-  if (CVS_MKDIR (buf, 0777) != 0 && errno != EEXIST)
+  if (CVS_MKDIR(buf, 0777) != 0 && errno != EEXIST)
     error (1, errno, "cannot make directory %s", buf);
 }
 
@@ -180,7 +177,7 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
 
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
 //after call to this function binary blob is stored
-static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
+static size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   const char *fn,//fn is for context only
   const void *data, size_t len, bool packed, bool src_packed)//fn is just context!
 {
@@ -199,11 +196,11 @@ static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
   if (clientUnpackedLen != unpacked_len)
     error(1, 0, "fn <%s> says it has compressed %d of data but we decompressed only %d!", fn, (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
   const size_t sha_file_name_len = 1024;
-  char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 32+3+1 + strlen(current_parsed_root->directory)
-  create_blob_file_name(sha256, fn, sha_file_name, sha_file_name_len);
+  char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 32+3+1 + strlen(root)
+  create_blob_file_name(root, sha256, fn, sha_file_name, sha_file_name_len);
   if (!isreadable(sha_file_name))
   {
-    create_dirs(sha256);
+    create_dirs(root, sha256);
     atomic_write_sha_file(fn, sha_file_name, data, len, packed, src_packed);
   }//else we already have this blob written. deduplication worked!
   else
