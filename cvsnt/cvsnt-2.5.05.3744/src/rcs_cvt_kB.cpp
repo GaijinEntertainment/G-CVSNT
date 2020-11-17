@@ -16,15 +16,16 @@ static constexpr size_t sha256_magic_len = 7;//strlen(SHA256_REV_STRING);
 static const size_t sha256_encoded_size = 64;//32*2
 static const size_t blob_reference_size = sha256_magic_len+sha256_encoded_size;
 
-enum {BLOB_MAGIC_SIZE = 8};
+enum {BLOB_MAGIC_SIZE = 4};
 struct BlobHeader
 {
   unsigned char magic[BLOB_MAGIC_SIZE];
+  unsigned int  headerSize;
   uint64_t uncompressedLen;
   uint64_t compressedLen;
 };
-static const char zlib_magic[BLOB_MAGIC_SIZE+1] = "ZLIBCOMP";
-static const char noarc_magic[BLOB_MAGIC_SIZE+1] = "NONCOMPR";
+static const unsigned char zlib_magic[BLOB_MAGIC_SIZE] = {'Z','L','I','B'};
+static const unsigned char noarc_magic[BLOB_MAGIC_SIZE] = {'N','O','N','E'};
 static bool is_accepted_magic(const unsigned char *m)
 {
   return memcmp(m, zlib_magic, BLOB_MAGIC_SIZE) == 0 || memcmp(m, noarc_magic, BLOB_MAGIC_SIZE) == 0;
@@ -44,8 +45,18 @@ BlobHeader get_noarc_header(size_t len)
 {
   BlobHeader hdr;
   memcpy(hdr.magic, noarc_magic, BLOB_MAGIC_SIZE);
+  hdr.headerSize = sizeof(BlobHeader);
   hdr.uncompressedLen = len;
   hdr.compressedLen = len;
+  return hdr;
+}
+BlobHeader get_zlib_header(size_t len, size_t zlen)
+{
+  BlobHeader hdr;
+  memcpy(hdr.magic, zlib_magic, BLOB_MAGIC_SIZE);
+  hdr.headerSize = sizeof(BlobHeader);
+  hdr.uncompressedLen = len;
+  hdr.compressedLen = zlen;
   return hdr;
 }
 
@@ -62,15 +73,18 @@ static void calc_sha256(const char *fn, const void *data, size_t len, bool src_b
     //we still need to verify it!
     //calc sha256 on the unpacked data!
     const BlobHeader &hdr = *(const BlobHeader*)data;
-    if (is_zlib_blob(hdr))
+    unpacked_len = hdr.uncompressedLen;
+    const uint64_t len64 = hdr.uncompressedLen;
+    blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
+    if (!is_packed_blob(hdr))
     {
-      unpacked_len = hdr.uncompressedLen;
-      uint64_t len64 = hdr.uncompressedLen;
-      blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
+      blk_SHA256_Update(&ctx, ((const char*)data + hdr.headerSize), unpacked_len);
+    } else if (is_zlib_blob(hdr))
+    {
       z_stream stream = {0};
       inflateInit(&stream);
       stream.avail_in = hdr.compressedLen;
-      stream.next_in = (Bytef*)((const char*)data + sizeof(BlobHeader));
+      stream.next_in = (Bytef*)((const char*)data + hdr.headerSize);
       char bufOut[32768];
       size_t totalSrcLenLeft = hdr.compressedLen;
       while (stream.avail_in>0)
@@ -88,7 +102,9 @@ static void calc_sha256(const char *fn, const void *data, size_t len, bool src_b
       }
       inflateEnd(&stream);
     } else
+    {
       error(1,errno,"Unknown compressor %s", fn);
+    }
   } else
   {
     uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
@@ -165,9 +181,7 @@ static void* compress_zlib_data(const void *data, size_t len, int compression_le
   if (deflate(&stream, Z_FINISH)==Z_STREAM_END && (zlen - stream.avail_out) < len)
   {
     zlen = (zlen - stream.avail_out);
-    memcpy(hdr.magic, zlib_magic, BLOB_MAGIC_SIZE);
-    hdr.uncompressedLen = len;
-    hdr.compressedLen = zlen;
+    hdr = get_zlib_header(len, zlen);
   } else
   {
     xfree(zbuf);
@@ -221,7 +235,8 @@ static size_t write_binary_blob(unsigned char sha256[],// 32 bytes
 {
   if (src_packed &&
       (len < sizeof(BlobHeader)
-       || ((const BlobHeader*)data)->compressedLen != len + sizeof(BlobHeader)
+       || ((const BlobHeader*)data)->headerSize < sizeof(BlobHeader)
+       || ((const BlobHeader*)data)->compressedLen != len + ((const BlobHeader*)data)->headerSize
        || !is_accepted_magic(((const BlobHeader*)data)->magic))
      )
   {
@@ -271,7 +286,7 @@ static BlobHeader get_binary_blob_hdr(const char *blob_file_name)
     error(1,errno,"Couldn't read %s", blob_file_name);
     return hdr;
   }
-  if (!is_accepted_magic(hdr.magic) || hdr.compressedLen != fileLen - sizeof(hdr))
+  if (!is_accepted_magic(hdr.magic) || hdr.compressedLen != fileLen - hdr.headerSize)
   {
     error(1,errno,"<%s> is not a blob (%d bytes stored in file, vs file len = %d)", blob_file_name, (int)hdr.compressedLen, int(fileLen - sizeof(hdr)));
     return BlobHeader{0};
@@ -306,6 +321,7 @@ static size_t decode_binary_blob(const char *blob_file_name, void **data)
     error(1,errno,"<%s> is not a blob (%d bytes stored in file, vs file len = %d)", blob_file_name, (int)hdr.compressedLen, int(fileLen - sizeof(hdr)));
     return 0;
   }
+  fseek(fp, hdr.headerSize, SEEK_SET);
 
   *data = xmalloc(hdr.uncompressedLen);
   //((char*)*data)[hdr.uncompressedLen] = 0;
