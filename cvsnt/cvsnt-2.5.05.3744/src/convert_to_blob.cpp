@@ -76,9 +76,11 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
   std::time_t startTime = std::time(nullptr);
   for (const auto & entry : fs::directory_iterator(pathToVersions))
   {
-    if (is_blob_reference(rootDir, entry.path().c_str(), sha_file_name.data(), sha_file_name.size()))
+    if (entry.is_directory())
+      continue;
+    if (is_blob_reference(rootDir, entry.path().string().c_str(), sha_file_name.data(), sha_file_name.size()))
     {
-      printf("%s is already blob reference\n", entry.path().c_str());
+      printf("%s is already blob reference\n", entry.path().string().c_str());
       //rename_z_to_normal(entry.path().c_str());
       continue;
     }

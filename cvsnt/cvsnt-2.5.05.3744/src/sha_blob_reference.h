@@ -8,7 +8,7 @@ static bool can_be_blob_reference(const char *blob_ref_file_name)
   return get_file_size(blob_ref_file_name) == blob_reference_size;//blob references is always sha256:encoded_sha_64_bytes
 }
 
-static bool is_blob_reference(const char *root_dir, const char *blob_ref_file_name, char *sha_file_name, size_t sha_max_len)//sha256_encode==char[65], encoded 32 bytes + \0
+static bool get_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
 {
   if (!can_be_blob_reference(blob_ref_file_name))
     return false;
@@ -26,13 +26,20 @@ static bool is_blob_reference(const char *root_dir, const char *blob_ref_file_na
     fclose(fp);
     return false;
   }
-  char sha256_encoded[sha256_encoded_size+1];
   if (fread(&sha256_encoded[0], 1, sha256_encoded_size, fp) != sha256_encoded_size)
   {
     error(1,errno,"Couldn't read %s", blob_ref_file_name);
     return false;
   }
   sha256_encoded[sha256_encoded_size] = 0;
+  return true;
+}
+
+static bool is_blob_reference(const char *root_dir, const char *blob_ref_file_name, char *sha_file_name, size_t sha_max_len)//sha256_encode==char[65], encoded 32 bytes + \0
+{
+  char sha256_encoded[sha256_encoded_size+1];
+  if (!get_blob_reference_sha256(blob_ref_file_name, sha256_encoded))//sha256_encoded==char[65], encoded 32 bytes + \0
+    return false;
   get_blob_filename_from_encoded_sha256(root_dir, sha256_encoded, sha_file_name, sha_max_len);
   return does_blob_exist(sha_file_name);
 }

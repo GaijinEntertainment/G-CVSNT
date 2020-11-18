@@ -53,6 +53,8 @@
 #endif
 #define xmalloc malloc
 #define xfree free
+#undef max
+#undef min
 
 void sleep(int ms)
 {
