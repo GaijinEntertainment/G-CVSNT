@@ -1,4 +1,4 @@
-#include "../zlib/zlib.h"
+#include "zlib.h"
 #include "sha256/sha256.h"
 #include "sha_blob_format.h"
 
@@ -177,6 +177,7 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
 
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
 //after call to this function binary blob is stored
+//returns zero if nothing written
 static size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   const char *fn,//fn is for context only
   const void *data, size_t len, bool packed, bool src_packed)//fn is just context!
@@ -202,6 +203,7 @@ static size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 b
   {
     create_dirs(root, sha256);
     atomic_write_sha_file(fn, sha_file_name, data, len, packed, src_packed);
+    return unpacked_len;
   }//else we already have this blob written. deduplication worked!
   else
   {
@@ -209,8 +211,8 @@ static size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 b
     //probability of sha256 collision is way lower then asteroid destroying Earth in next 1000 years
     // in addition, it won't crash our repo, merely will result in incorrect commit (you will update something else, not what you have commited, some other file)
     //so we won't check for it.
+    return 0;
   }
-  return unpacked_len;
 }
 
 static BlobHeader get_binary_blob_hdr(const char *blob_file_name)

@@ -170,7 +170,7 @@ inline int isreadable (const char *file)
 {
   return access(file, R_OK) == 0;
 }
-inline int iswritable (const char *file)
+inline int iswriteable (const char *file)
 {
   return access(file, W_OK) == 0;
 }

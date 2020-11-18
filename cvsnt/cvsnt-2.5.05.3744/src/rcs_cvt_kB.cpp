@@ -12,6 +12,7 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
   char sha_file_name[1024];
   if (is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name)))
   {
+    //as soon as we convert all binary repo, we should only keep that branch
     if (*inout_data_allocated && *out_data)
       xfree (*out_data);
     *out_data = NULL;
@@ -36,6 +37,7 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
   }
   else
   {
+    //as soon as we convert all binary repo, it can't be happening
     return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, supposed_packed, cmp_other_sz);
     //read like it used to be
   }
@@ -225,11 +227,12 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
   return true;
 }
 
-#define CVS_DEDUPLICATION 0
+#define CVS_WRITE_DEDUPLICATION 1
+#define CVS_READ_DEDUPLICATION 1
 
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
 {
-  #if CVS_DEDUPLICATION
+  #if CVS_WRITE_DEDUPLICATION
   RCS_write_binary_rev_data_blob(fn, data, len, packed, false);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
   #else
   RCS_write_binary_rev_data_direct(fn, data, len, packed);
@@ -239,7 +242,7 @@ static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bo
 
 static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz)
 {
-  #if CVS_DEDUPLICATION
+  #if CVS_READ_DEDUPLICATION || CVS_WRITE_DEDUPLICATION//we cant write what we won't read!
   return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, false, packed, cmp_other_sz);
   #else
   return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);

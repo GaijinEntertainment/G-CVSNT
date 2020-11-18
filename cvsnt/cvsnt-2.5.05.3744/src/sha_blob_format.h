@@ -1,6 +1,7 @@
 #pragma once
 
 #define SHA256_REV_STRING "sha256:"
+#define BLOBS_SUBDIR_BASE "blobs"
 #define BLOBS_SUBDIR "/blobs/"
 static constexpr size_t sha256_magic_len = 7;//strlen(SHA256_REV_STRING);
 static const size_t sha256_encoded_size = 64;//32*2
