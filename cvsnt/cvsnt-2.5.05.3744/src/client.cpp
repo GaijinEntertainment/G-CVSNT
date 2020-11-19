@@ -3856,7 +3856,7 @@ int start_server (int verify_only)
 		rootless_encryption = 0;
 
 	if(gzip_level<0 && (supported_request("Compression-Requested") || supported_request("Compression-Required")))
-		gzip_level = 3; /* gzip_level doesn't actually make much difference */
+		gzip_level = 1; /* gzip_level doesn't actually make much difference */
 	if(supported_request("Encryption-Requested") || supported_request("Encryption-Required"))
 		cvsencrypt = -1;
 	else if(supported_request("Authentication-Requested") || supported_request("Authentication-Required"))
