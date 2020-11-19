@@ -19,11 +19,11 @@ bool gather_used = false;
 
 static void usage()
 {
-  printf("Usage: gc-blobs <full_root> used|unused|broken\n");
+  printf("Usage: gc-blobs <full_root> used|unused|broken|delete_unused\n");
   printf("example:gc-blobs /home/some_user/test unused\n");
   printf("example:gc-blobs /home/some_user/test used\n");
   printf("safe to run in working production environment. uses one thread only\n");
-  printf("Warning! It doesnt delete anything, it will just output to stdout the list of referenced(used)/unreferenced/broken sha paths\n");
+  printf("Warning! It doesnt delete anything, unless called with delete_unused, it will just output to stdout the list of referenced(used)/unreferenced/broken sha paths\n");
   printf("Warning! run only on server!\n");
 }
 
@@ -205,12 +205,15 @@ int main(int ac, const char* argv[])
     usage();
     exit(1);
   }
-  bool gather_broken = false;
+  bool gather_broken = false, delete_unused = false;
   if (strcmp(argv[2], "used") == 0)
     gather_used = true;
   else if (strcmp(argv[2], "unused") == 0)
     gather_used = false;
-  else if (strcmp(argv[2], "broken") == 0)
+  else if (strcmp(argv[2], "delete_unused") == 0)
+  {
+    gather_used = false;delete_unused = true;
+  } else if (strcmp(argv[2], "broken") == 0)
     gather_used = true, gather_broken = true;
   else
   {
@@ -243,9 +246,17 @@ int main(int ac, const char* argv[])
     printf("========================================================================\n");
     for (auto &i : collected_shas)
     {
-      printf(
-       "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n",
-        SHA256_LIST(i.v.sha256));
+      if (delete_unused)
+      {
+        char buf[1024];
+        snprintf(buf, sizeof(buf),
+         "%s%s%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+         argv[1], BLOBS_SUBDIR, SHA256_LIST(i.v.sha256));
+        printf("deleting <%s>...%s\n", buf, unlink(buf) ? "ERR" : "OK");
+      } else
+        printf(
+         "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n",
+          SHA256_LIST(i.v.sha256));
     }
   }
 
