@@ -229,10 +229,26 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
 
 #define CVS_WRITE_DEDUPLICATION 1
 #define CVS_READ_DEDUPLICATION 1
+#define CVS_GUESS_REFERENCE 1
 
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
 {
   #if CVS_WRITE_DEDUPLICATION
+    #if CVS_GUESS_REFERENCE
+    //this is actually security issue. By replacing your file with sha256:<> and then updating it, you can obtain data of any blob in repo!
+    //to be removed!
+    //todo:!!
+    if (len == blob_reference_size && memcmp(data, SHA256_REV_STRING, sha256_magic_len) == 0)
+    {
+      char sha_file_name[1024];
+      get_blob_filename_from_encoded_sha256(current_parsed_root->directory, ((const char*)data) + sha256_magic_len, sha_file_name, sizeof(sha_file_name));
+      if (does_blob_exist(sha_file_name))//we guessed correct
+      {
+        write_direct_blob_reference(fn, data, len);
+        return;
+      }
+    }
+    #endif
   RCS_write_binary_rev_data_blob(fn, data, len, packed, false);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
   #else
   RCS_write_binary_rev_data_direct(fn, data, len, packed);

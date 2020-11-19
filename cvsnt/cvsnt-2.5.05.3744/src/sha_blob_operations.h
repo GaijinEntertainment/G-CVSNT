@@ -8,6 +8,16 @@
 (a)[20],(a)[21],(a)[22],(a)[23],(a)[24],(a)[25],(a)[26],(a)[27],(a)[28],(a)[29],\
 (a)[30],(a)[31]
 
+static void encode_sha256(unsigned char sha256[], char sha256_encoded[], size_t enc_len)//sha256 char[32], sha256_encoded[65]
+{
+  if (enc_len < sha256_encoded_size+1)
+    error (1, 0, "too short %d", (int)enc_len);
+
+  snprintf(sha256_encoded, enc_len,
+     "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+      SHA256_LIST(sha256));
+}
+
 static void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char sha256[])//sha256 char[32]
 {
   unpacked_len = len;
@@ -72,7 +82,7 @@ static void get_blob_filename_from_encoded_sha256(const char *root_dir, const ch
      int(sha256_encoded_size)-4, encoded_sha256+4
      )
      >= sha_max_len-1)
-      error(1, 0, "too long filename <%s> for <%s>", sha_file_name, encoded_sha256);
+      error(1, 0, "get_blob_name:too long filename <%s> for <%s>", sha_file_name, encoded_sha256);
 }
 
 static bool does_blob_exist(const char *sha_file_name)
@@ -91,7 +101,7 @@ static void create_blob_file_name(const char *root, unsigned char sha256[], cons
      )
      >= sha_max_len-1)
   {
-    error(1, 0, "too long filename <%s> for <%s>", sha_file_name, fn);
+    error(1, 0, "create_blob_name: too long filename <%s> for <%s>", sha_file_name, fn);
   }
 }
 
@@ -178,6 +188,64 @@ static void atomic_write_sha_file(const char *fn, const char *sha_file_name, con
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
 //after call to this function binary blob is stored
 //returns zero if nothing written
+static bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
+  const void *data, size_t len)
+{
+  if (
+      (len < sizeof(BlobHeader)
+       || ((const BlobHeader*)data)->headerSize < sizeof(BlobHeader)
+       || ((const BlobHeader*)data)->compressedLen + ((const BlobHeader*)data)->headerSize != len
+       || !is_accepted_magic(((const BlobHeader*)data)->magic))
+     )
+  {
+    error(0, 0, "Client <%s> says it's client prepared blob of len <%d> but it's not!", client_sha256, (int)len);
+    if (len >= sizeof(BlobHeader))
+    {
+      if (((const BlobHeader*)data)->headerSize < sizeof(BlobHeader))
+        error(0, 0, "Blob header size = %d and should be at least <%d>!", ((const BlobHeader*)data)->headerSize, (int)sizeof(BlobHeader));
+      if (((const BlobHeader*)data)->compressedLen + ((const BlobHeader*)data)->headerSize != len)
+        error(0, 0, "Blob total size is %d and promised is %d!", (int)(((const BlobHeader*)data)->compressedLen + ((const BlobHeader*)data)->headerSize), (int)len);
+      if (!is_accepted_magic(((const BlobHeader*)data)->magic))
+        error(0, 0, "unaccepted magic <%.*s>!", (int)BLOB_MAGIC_SIZE, ((const BlobHeader*)data)->magic);
+    }
+    return false;
+  }
+  const size_t sha_file_name_len = 1024;
+  char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
+  get_blob_filename_from_encoded_sha256(root, client_sha256, sha_file_name, sha_file_name_len);
+  if (isreadable(sha_file_name))
+  {
+    //no need to check if client is lying about this sha content
+    printf("sha <%s> already exist, deduplication\n", client_sha256);
+    return true;
+  }
+
+  const size_t clientUnpackedLen = ((const BlobHeader*)data)->uncompressedLen;
+  size_t unpacked_len = 0;
+  unsigned char sha256[32];
+  calc_sha256(client_sha256, data, len, true, unpacked_len, sha256);
+  if (clientUnpackedLen != unpacked_len)
+  {
+    error(0, 0, "Client <%s> says it has compressed %d of data but we decompressed only %d!",client_sha256 , (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
+    return false;
+  }
+  char real_sha256_encoded[sha256_encoded_size+1];
+  encode_sha256(sha256, real_sha256_encoded, sizeof(real_sha256_encoded));
+  if (memcmp(client_sha256, real_sha256_encoded, sha256_encoded_size) != 0)
+  {
+    error(0, 0, "client-promised sha <%s> and real sha<%s> different!", client_sha256, real_sha256_encoded);
+    return false;
+  }
+  create_blob_file_name(root, sha256, client_sha256, sha_file_name, sha_file_name_len);
+  if (!isreadable(sha_file_name))
+  {
+    create_dirs(root, sha256);
+    atomic_write_sha_file(client_sha256, sha_file_name, data, len, false, true);
+    return unpacked_len;
+  }//else we already have this blob written. deduplication worked!
+  return true;
+}
+
 static size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   const char *fn,//fn is for context only
   const void *data, size_t len, bool packed, bool src_packed)//fn is just context!
@@ -185,11 +253,11 @@ static size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 b
   if (src_packed &&
       (len < sizeof(BlobHeader)
        || ((const BlobHeader*)data)->headerSize < sizeof(BlobHeader)
-       || ((const BlobHeader*)data)->compressedLen != len + ((const BlobHeader*)data)->headerSize
+       || ((const BlobHeader*)data)->compressedLen + ((const BlobHeader*)data)->headerSize != len
        || !is_accepted_magic(((const BlobHeader*)data)->magic))
      )
   {
-    error(1, 0, "fn <%s> says it's client prepared blob but it's not!", fn, len);
+    error(1, 0, "fn <%s> says it's client prepared blob of len <%d> but it's not!", fn, (int)len);
   }
   const size_t clientUnpackedLen = src_packed ? ((const BlobHeader*)data)->uncompressedLen : len;
   size_t unpacked_len = 0;

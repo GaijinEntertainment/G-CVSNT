@@ -24,6 +24,7 @@
 #include "getline.h"
 #include "edit.h"
 #include "buffer.h"
+#include "sha_blob_operations.h"
 
 #ifdef MAC_HFS_STUFF
 #	include "mac_hfs_stuff.h"
@@ -648,7 +649,7 @@ int read_line (char **resultp)
     if (status != 0)
     {
 	if (status == -1)
-	    error (1, 0, "end of file from server (consult above messages if any)");
+	    error (1, 0, "end of file from server (consult above messages if any11)");
 	else if (status == -2)
 	    error (1, 0, "out of memory in client.c");
 	else
@@ -3339,7 +3340,7 @@ size_t try_read_from_server (char *buf, size_t len)
     {
 	if (status == -1)
 	    error (1, 0,
-		   "end of file from server (consult above messages if any)");
+		   "end of file from server (consult above messages if any2)");
 	else if (status == -2)
 	    error (1, 0, "out of memory in client.c");
 	else
@@ -3612,27 +3613,6 @@ static void send_variable_proc (variable_list_t::const_reference item)
 #ifdef _WIN32
 bool SendStatistics(char *url)
 {
-	CHttpSocket sock;
-
-	if(!sock.create("http://march-hare.com"))
-	{
-		TRACE(3,"Failed to send statistics.  Server not responding");
-		return false;
-	}
-
-	if(!sock.request("GET",url))
-	{
-		// Not sure this can actually fail.. it would normally succeed with an error code
-		TRACE(3,"Failed to send statistics.  Server not responding to GET requests");
-		return false;
-	}
-
-	if(sock.responseCode()!=200)
-	{
-		TRACE(3,"Failed to send statistics.  Server returned error %d\n",sock.responseCode());
-		return false;
-	}
-
 	return true;
 }
 #endif
@@ -4236,6 +4216,7 @@ static void send_modified (const char *file, const char *short_pathname, const V
  	size_t newsize;
 	kflag options_flags;
 	LineType crlf;
+    bool blob_binary = false, blob_binary_compressed = false;
 
 	TRACE(1,"Sending file '%s' to server", PATCH_NULL(file));
 
@@ -4262,6 +4243,12 @@ static void send_modified (const char *file, const char *short_pathname, const V
 		encode = !(options_flags.flags&KFLAG_BINARY) && ((options_flags.flags&KFLAG_ENCODED) || (crlf!=CRLF_DEFAULT));
 		encoding = options_flags.encoding;
 		targetencoding = (options_flags.flags&KFLAG_ENCODED)?CCodepage::Utf8Encoding:CCodepage::NullEncoding;
+        if (options_flags.flags&KFLAG_BINARY_DELTA)
+          blob_binary = true;
+        if (options_flags.flags&KFLAG_COMPRESS_DELTA)
+          blob_binary_compressed = true;
+        if (blob_binary)
+          encode = false, open_binary = true;
 	}
     else
 	{
@@ -4424,18 +4411,49 @@ static void send_modified (const char *file, const char *short_pathname, const V
 	else
 #endif
 	{
-		char tmp[80];
+		char tmp[128];
 
-		send_to_server ("Modified ", 0);
-		send_to_server (file, 0);
-		send_to_server ("\n", 1);
-		send_to_server (mode_string, 0);
-		send_to_server ("\n", 1);
-		sprintf (tmp, "%lu\n", (unsigned long) newsize);
-		send_to_server (tmp, 0);
+        if (blob_binary && supported_request ("Blob-ref-transfer") && supported_request ("Blob-transfer"))
+        {
+            size_t unpacked_len;
+            unsigned char sha256[32];
+            char sha256_encoded[65];
+            calc_sha256(file, buf, newsize, false, unpacked_len, sha256);
+            encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));//sha256 char[32], sha256_encoded[65]
+    		send_to_server ("Blob-transfer ", 0);
+    		sprintf (tmp, "%s\n", sha256_encoded);
+    		send_to_server (tmp, 0);
+            BlobHeader hdr = get_noarc_header(newsize);
+            void *compressed_data = nullptr;
+            if (blob_binary_compressed)
+              compressed_data = compress_zlib_data(buf, newsize, Z_BEST_COMPRESSION, hdr);
+    		sprintf (tmp, "%llu\n", (unsigned long long) (hdr.compressedLen + sizeof(hdr)));
+    		send_to_server (tmp, 0);
+    		send_to_server_untranslated((const char*)&hdr, sizeof(hdr));
+    		send_to_server_untranslated(compressed_data ? (const char*)compressed_data : buf, hdr.compressedLen);
+            if (compressed_data != nullptr)
+              xfree(compressed_data);
 
-		if (newsize > 0)
-			send_to_server_untranslated(buf, newsize);
+    		send_to_server ("Blob-ref-transfer ", 0);
+    		send_to_server (file, 0);
+    		send_to_server ("\n", 1);
+    		send_to_server (mode_string, 0);
+    		send_to_server ("\n", 1);
+    		sprintf (tmp, SHA256_REV_STRING "%s\n", sha256_encoded);
+    		send_to_server (tmp, 0);
+        } else
+        {
+    		send_to_server ("Modified ", 0);
+    		send_to_server (file, 0);
+    		send_to_server ("\n", 1);
+    		send_to_server (mode_string, 0);
+    		send_to_server ("\n", 1);
+    		sprintf (tmp, "%lu\n", (unsigned long) newsize);
+    		send_to_server (tmp, 0);
+
+    		if (newsize > 0)
+    			send_to_server_untranslated(buf, newsize);
+        }
 	}
 
 #ifdef MAC_HFS_STUFF
@@ -4578,7 +4596,7 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 	     || args->force || strcmp (vers->ts_user, vers->ts_rcs) != 0)
     {
 		bool modified = true;
-		if(!args->force && vers->entdata && vers->entdata->md5)
+		if(!args->force && vers->entdata && vers->entdata->md5 && vers->entdata->md5[0])
 		{
 			char *buf = NULL;
 			size_t bufsize=0,len=0;

@@ -6,6 +6,7 @@
 #define BLOBS_SUBDIR "/blobs/"
 static constexpr size_t sha256_magic_len = 7;//strlen(SHA256_REV_STRING);
 static const size_t sha256_encoded_size = 64;//32*2
+static constexpr size_t blob_file_path_len = sha256_encoded_size + 2 /* / / */ + 7 /*strlen(BLOBS_SUBDIR)*/ + 1/*'\0'*/;
 
 enum {BLOB_MAGIC_SIZE = 4};
 struct BlobHeader
@@ -32,7 +33,7 @@ static bool is_zlib_blob(const BlobHeader& hdr)
   return memcmp(hdr.magic, zlib_magic, BLOB_MAGIC_SIZE) == 0;
 }
 
-BlobHeader get_noarc_header(size_t len)
+static inline BlobHeader get_noarc_header(size_t len)
 {
   BlobHeader hdr;
   memcpy(hdr.magic, noarc_magic, BLOB_MAGIC_SIZE);
@@ -41,7 +42,8 @@ BlobHeader get_noarc_header(size_t len)
   hdr.compressedLen = len;
   return hdr;
 }
-BlobHeader get_zlib_header(size_t len, size_t zlen)
+
+static inline BlobHeader get_zlib_header(size_t len, size_t zlen)
 {
   BlobHeader hdr;
   memcpy(hdr.magic, zlib_magic, BLOB_MAGIC_SIZE);

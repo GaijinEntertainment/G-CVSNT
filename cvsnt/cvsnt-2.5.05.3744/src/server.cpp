@@ -15,6 +15,7 @@
 #include "getline.h"
 #include "buffer.h"
 #include "savecwd.h"
+#include "sha_blob_operations.h"
 
 #include "../version.h"
 
@@ -1699,6 +1700,173 @@ static time_t checkin_time;
 
 static void serve_is_modified(char *arg);
 static kflag serve_file_kopt (char *arg);
+
+static void serve_blob (char *arg)
+{
+  int status;
+  uint64_t size;
+  char *size_text;
+
+  status = buf_read_line (buf_from_net, &size_text, (int *) NULL);
+  if (status != 0)
+  {
+  	if (status == -2)
+  		error(1,ENOMEM,"Alloc failed");
+  	else
+  	{
+  		if (status == -1)
+  			error(1,0,"end of file reading size for blob %s", arg);
+  		else
+  			error(1,0,"error reading size for blob %s", arg);
+  	}
+  	return;
+  }
+  size = atoll (size_text);
+  if (size == 0)
+    error(1,0,"incorrect blob size<%s> == %d for %s", size_text, (int)size, arg);
+  xfree (size_text);
+
+  char sha_file_name[1024];
+  get_blob_filename_from_encoded_sha256(current_parsed_root->directory, arg, sha_file_name, sizeof(sha_file_name));
+  char *fileData = does_blob_exist(sha_file_name) ? nullptr : (char*)xmalloc(size);
+  char *curData = fileData;
+  size_t sizeLeft = size;
+  while (sizeLeft > 0)
+  {
+    int status, nread;
+    char *data;
+
+    if (sizeLeft == size)
+      status = buf_read_data (buf_from_net, sizeof(BlobHeader), &data, &nread);
+    else
+      status = buf_read_data (buf_from_net, sizeLeft, &data, &nread);
+    if (status != 0)
+    {
+      error(0,0,"can't recieve data for <%s>", arg);
+      return;
+    }
+    if (fileData)
+    {
+      memcpy(curData, data, nread);
+      curData += nread;
+    }
+    sizeLeft -= nread;
+  }
+  if (fileData && !write_prepacked_binary_blob(current_parsed_root->directory, arg, fileData, size))
+    error(1,0, "can't process sha blob <%s>", arg);
+
+  if (fileData)
+    xfree(fileData);
+}
+
+static void serve_blob_ref (char *arg)
+{
+    int size, status;
+    char *mode_text;
+    char *sha256;
+
+    /*
+     * This used to return immediately if error_pending () was true.
+     * However, that fails, because it causes each line of the file to
+     * be echoed back to the client as an unrecognized command.  The
+     * client isn't reading from the socket, so eventually both
+     * processes block trying to write to the other.  Now, we try to
+     * read the file if we can.
+     */
+
+    status = buf_read_line (buf_from_net, &mode_text, (int *) NULL);
+    if (status != 0)
+    {
+        if (status == -2)
+			error(1,ENOMEM,"Alloc failed");
+		else
+		{
+			if (status == -1)
+				error(1,0,"end of file reading mode for %s", arg);
+			else
+				error(1,0,"error reading mode for %s", arg);
+		}
+		return;
+    }
+
+    status = buf_read_line (buf_from_net, &sha256, (int *) NULL);
+    if (status != 0)
+    {
+        if (status == -2)
+			error(1,ENOMEM,"Alloc failed");
+		else
+		{
+			if (status == -1)
+				error(1,0,"end of file reading mode for %s", arg);
+			else
+				error(1,0,"error reading mode for %s", arg);
+		}
+		return;
+    }
+
+    if (outside_dir (arg))
+    {
+      xfree (mode_text);
+      xfree (sha256);
+      return;
+    }
+
+    //if (size >= 0)
+	//	receive_file (size, arg, false);
+    /* Write the file.  */
+    auto fd = CVS_OPEN (arg, O_WRONLY | O_CREAT | O_TRUNC, 0600);
+    if (fd < 0)
+    {
+  	  error(1,errno,"cannot open %s",arg);
+  	  return;
+    }
+
+	if (write (fd, sha256, strlen(sha256)) < 0)
+	{
+      error(1,errno,"unable to write");
+    }
+
+    xfree(sha256);
+
+    if (close (fd) < 0)
+    {
+      xfree (mode_text);
+      error(1,errno,"cannot close %s", arg);
+      return;
+    }
+
+    if (checkin_time_valid)
+    {
+      struct utimbuf t;
+
+      memset (&t, 0, sizeof (t));
+      t.modtime = t.actime = checkin_time;
+      if (utime (arg, &t) < 0)
+      {
+        xfree (mode_text);
+      	error(1,errno,"cannot utime %s", arg);
+        return;
+      }
+      checkin_time_valid = 0;
+    }
+
+    {
+      int status = change_mode (arg, mode_text, 0);
+      xfree (mode_text);
+      if (status)
+      {
+        error(1,0,"cannot change mode for %s", fn_root(arg));
+        return;
+      }
+    }
+
+    /* Make sure that the Entries indicate the right kopt.  We probably
+       could do this even in the non-kopt case and, I think, save a stat()
+       call in time_stamp_server.  But for conservatism I'm leaving the
+       non-kopt case alone.  */
+    if (kopt != NULL)
+		serve_is_modified (arg);
+}
 
 static void serve_modified (char *arg)
 {
@@ -4523,6 +4691,8 @@ struct request requests[] =
   REQ_LINE("Checkin-time", serve_checkin_time, 0),
   REQ_LINE("Checksum", serve_checksum, 0),
   REQ_LINE("Modified", serve_modified, RQ_ESSENTIAL),
+  REQ_LINE("Blob-transfer", serve_blob, 0),
+  REQ_LINE("Blob-ref-transfer", serve_blob_ref, 0),
   REQ_LINE("Binary-transfer", serve_binary_transfer, 0),
   REQ_LINE("Is-modified", serve_is_modified, 0),
   REQ_LINE("UseUnchanged", serve_enable_unchanged, RQ_ENABLEME | RQ_ROOTLESS),
