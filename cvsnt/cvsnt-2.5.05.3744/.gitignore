@@ -30,6 +30,8 @@ missing
 mkinstalldirs
 INSTALL
 config.sub
+config.h
+config.h.in
 protocols/ntlm/test-driver
 stamp-h1.in
 protocols/ntlm/libntlm.pc
