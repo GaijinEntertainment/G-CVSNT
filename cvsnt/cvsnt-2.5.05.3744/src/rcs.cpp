@@ -72,7 +72,7 @@ const kflag_t kflag_flags[] =
 
 static void RCS_convert_to_new_binary(RCSNode *rcs);
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed);
-static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz);
+static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz, bool *is_ref);
 
 static void rcsbuf_setpos_to_delta_base(RCSNode *rcsbuf);
 static void rcsbuf_reuse_delta_buffer(RCSNode *rcs);
@@ -4340,7 +4340,7 @@ expand_keywords (RCSNode *rcs, RCSVers *ver, const char *name, const char *log,
    comments in RCS_checkin for some issues about this. -twp */
 
 int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const char *nametag, const char *options,
-     const char *sout, RCSCHECKOUTPROC pfn, void *callerdat, mode_t *pmode, int64_t *cmp_other_sz)
+     const char *sout, RCSCHECKOUTPROC pfn, void *callerdat, mode_t *pmode, int64_t *cmp_other_sz, bool *is_ref)
 {
     int free_rev = 0;
 	kflag expand;
@@ -4543,7 +4543,7 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
       if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
       sprintf(p, "CVS/%.*s", int(len), value);
 
-      if (!RCS_read_binary_rev_data(data_path, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, cmp_other_sz))
+      if (!RCS_read_binary_rev_data(data_path, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, cmp_other_sz, is_ref))
       {
         rcsbuf_valfree(&rcs->rcsbuf,&log);
         if (free_rev)
@@ -5294,7 +5294,7 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
     checkin_quiet = flags & RCS_FLAGS_QUIET;
     if (!checkin_quiet)
     {
-	cvs_output (fn_root(rcs->path), 0);
+    cvs_output (fn_root(rcs->path), 0);
 	cvs_output ("  <--  ", 7);
 	cvs_output (workfilename?workfilename:workfile, 0);
 	cvs_output ("\n", 1);

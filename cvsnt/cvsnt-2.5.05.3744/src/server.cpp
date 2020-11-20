@@ -15,7 +15,7 @@
 #include "getline.h"
 #include "buffer.h"
 #include "savecwd.h"
-#include "sha_blob_operations.h"
+#include "sha_blob_reference.h"
 
 #include "../version.h"
 
@@ -4168,7 +4168,6 @@ void server_updated (
     struct buffer *filebuf)
 {
     char *mode_string;
-
 	TRACE(3,"server_updated(%s,%04o)",PATCH_NULL(finfo->file),mode);
     if (noexec)
     {
@@ -4239,7 +4238,7 @@ void server_updated (
 			checksum_supported = supported_response ("Checksum");
 	    }
 
-	    if (checksum_supported && updated != SERVER_UPDATED)
+	    if (checksum_supported && updated != SERVER_UPDATED && updated != SERVER_BLOB_REF)
 	    {
 			buf_output0(buf_to_net,"Checksum ");
 			buf_output0(buf_to_net,md5->Final());
@@ -4278,7 +4277,28 @@ void server_updated (
 	    xfree (entnode->timestamp);
 	    entnode->timestamp = xstrdup (UNCHANGED_CHAR_S);
 	}
-	else if (updated == SERVER_MERGED)
+    else if (updated == SERVER_BLOB_REF)
+    {
+        if (!supported_response ("Blob-ref"))
+        {
+            char sha256_encoded[65];
+            if (!get_blob_reference_content_sha256((const unsigned char*)filebuf->data->bufp, filebuf->data->size, sha256_encoded))
+              error(1,0, "not a sha256 ref <%s>!", filebuf->data->text);
+            char sha_file_name[1024];
+            get_blob_filename_from_encoded_sha256(current_parsed_root->directory, sha256_encoded, sha_file_name, sizeof(sha_file_name));
+            if (!does_blob_exist(sha_file_name))
+              error(1,0, "blob <%s> doesnt exist!", sha_file_name);
+            buf_free(filebuf);
+            filebuf = buf_nonio_initialize((BUFMEMERRPROC) NULL);
+            char *data;
+            size = decode_binary_blob(sha_file_name, (void**)&data);
+            buf_output(filebuf, data, size);
+            xfree(data);
+    	    buf_output0(buf_to_net,"Updated ");
+        } else
+ 		   buf_output0(buf_to_net,"Blob-ref ");
+	}
+    else if (updated == SERVER_MERGED)
 		buf_output0(buf_to_net,"Merged ");
 	else if (updated == SERVER_PATCHED)
 		buf_output0(buf_to_net,"Patched ");

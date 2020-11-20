@@ -649,7 +649,7 @@ int read_line (char **resultp)
     if (status != 0)
     {
 	if (status == -1)
-	    error (1, 0, "end of file from server (consult above messages if any11)");
+	    error (1, 0, "end of file from server (consult above messages if any)");
 	else if (status == -2)
 	    error (1, 0, "out of memory in client.c");
 	else
@@ -2091,6 +2091,15 @@ static void handle_updated (char *args, int len)
     call_in_directory (args, update_entries, (char *)&dat);
 }
 
+static void handle_updated_blobs (char *args, int len)
+{
+    struct update_entries_data dat;
+    dat.contents = UPDATE_ENTRIES_UPDATE;
+    dat.existp = UPDATE_ENTRIES_EXISTING_OR_NEW;
+    dat.timestamp = NULL;
+    call_in_directory (args, update_entries, (char *)&dat);
+}
+
 static void handle_created (char *args, int len)
 {
     struct update_entries_data dat;
@@ -3223,6 +3232,7 @@ struct response responses[] =
     RSP_LINE("New-entry", handle_new_entry, proxy_line2, response_type_normal, rs_optional),
     RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
     RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
+    //RSP_LINE("Blob-ref", handle_updated_blobs, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
     RSP_LINE("Created", handle_created, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Update-existing", handle_update_existing, proxy_updated, response_type_normal,
@@ -3340,7 +3350,7 @@ size_t try_read_from_server (char *buf, size_t len)
     {
 	if (status == -1)
 	    error (1, 0,
-		   "end of file from server (consult above messages if any2)");
+		   "end of file from server (consult above messages if any)");
 	else if (status == -2)
 	    error (1, 0, "out of memory in client.c");
 	else

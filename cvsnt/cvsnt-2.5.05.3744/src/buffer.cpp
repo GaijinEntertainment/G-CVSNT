@@ -159,7 +159,7 @@ buf_count_mem (struct buffer *buf)
 /* Add data DATA of length LEN to BUF.  */
 
 void
-buf_output (struct buffer *buf, const char *data, int len)
+buf_output (struct buffer *buf, const char *data, size_t len)
 {
     if (buf->data != NULL
 	&& (((buf->last->text + BUFFER_DATA_SIZE)

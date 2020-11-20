@@ -7,10 +7,10 @@ static void RCS_write_binary_rev_data_blob(const char *fn, const void *data, siz
 
 static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz);
 
-static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool return_packed, bool supposed_packed, int64_t *cmp_other_sz)
+static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool *is_ref, bool supposed_packed, int64_t *cmp_other_sz)
 {
   char sha_file_name[1024];
-  if (is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name)))
+  if (!is_ref && is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name)))
   {
     //as soon as we convert all binary repo, we should only keep that branch
     if (*inout_data_allocated && *out_data)
@@ -38,7 +38,10 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
   else
   {
     //as soon as we convert all binary repo, it can't be happening
-    return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, supposed_packed, cmp_other_sz);
+    bool ret = RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, supposed_packed, cmp_other_sz);
+    if (is_ref)
+      *is_ref = is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name));
+    return ret;
     //read like it used to be
   }
 }
@@ -256,11 +259,13 @@ static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bo
   //todo: establish protocol, so we can move out compression to client and do not re-compress all the time
 }
 
-static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz)
+static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz, bool *is_ref)
 {
   #if CVS_READ_DEDUPLICATION || CVS_WRITE_DEDUPLICATION//we cant write what we won't read!
-  return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, false, packed, cmp_other_sz);
+  return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, is_ref, packed, cmp_other_sz);
   #else
+  if (is_ref)
+    *is_ref = false;
   return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);
   #endif
 }

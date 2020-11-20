@@ -8,31 +8,31 @@ static bool can_be_blob_reference(const char *blob_ref_file_name)
   return get_file_size(blob_ref_file_name) == blob_reference_size;//blob references is always sha256:encoded_sha_64_bytes
 }
 
+static bool get_blob_reference_content_sha256(const unsigned char *ref_file_content, size_t len, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
+{
+  if (len != blob_reference_size || memcmp(&ref_file_content[0], SHA256_REV_STRING, sha256_magic_len) != 0)
+    //not a blob reference!
+    return false;
+  //todo: may be check if it is sha256 encoded
+  memcpy(sha256_encoded, ref_file_content + sha256_magic_len, sha256_encoded_size);
+  sha256_encoded[sha256_encoded_size] = 0;
+  return true;
+}
+
 static bool get_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
 {
   if (!can_be_blob_reference(blob_ref_file_name))
     return false;
+  unsigned char ref_file_content[blob_reference_size];
   FILE* fp;
   fp = fopen(blob_ref_file_name, "rb");
-  char sha256_magic[sha256_magic_len];
-  if (fread(&sha256_magic[0],1, sha256_magic_len, fp) != sha256_magic_len)
+  if (fread(&ref_file_content[0],1, blob_reference_size, fp) != blob_reference_size)
   {
     error(1,errno,"Couldn't read %s", blob_ref_file_name);
     return false;
   }
-  if (memcmp(&sha256_magic[0], SHA256_REV_STRING, sha256_magic_len) != 0)
-  {
-    //not a blob reference!
-    fclose(fp);
-    return false;
-  }
-  if (fread(&sha256_encoded[0], 1, sha256_encoded_size, fp) != sha256_encoded_size)
-  {
-    error(1,errno,"Couldn't read %s", blob_ref_file_name);
-    return false;
-  }
-  sha256_encoded[sha256_encoded_size] = 0;
-  return true;
+  fclose(fp);
+  return get_blob_reference_content_sha256(ref_file_content, blob_reference_size, sha256_encoded);
 }
 
 static bool is_blob_reference(const char *root_dir, const char *blob_ref_file_name, char *sha_file_name, size_t sha_max_len)//sha256_encode==char[65], encoded 32 bytes + \0

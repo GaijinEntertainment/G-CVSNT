@@ -82,7 +82,7 @@ struct buffer_data
     char *bufp;
 
     /* The number of data bytes found at BUFP.  */
-    int size;
+    size_t size;
 
     /*
      * Actual buffer.  This never changes after the structure is
@@ -119,7 +119,7 @@ struct buffer *nonpacketizing_buffer_initialize(struct buffer *, int (*) (void *
 void packetizing_buffer_set_wrap(struct buffer *buf, struct buffer *wrap);
 
 int buf_empty_p(struct buffer *);
-void buf_output(struct buffer *, const char *, int);
+void buf_output(struct buffer *, const char *, size_t);
 void buf_output0(struct buffer *, const char *);
 void buf_append_char(struct buffer *, int);
 int buf_send_output(struct buffer *);

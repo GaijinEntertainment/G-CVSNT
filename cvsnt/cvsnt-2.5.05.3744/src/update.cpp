@@ -1509,6 +1509,7 @@ int checkout_file (struct file_info *finfo, Vers_TS *vers_ts, int adding,
     struct buffer *newrevbuf;
 	mode_t mode=0666;
 	const char *xfile = finfo->file;
+    bool is_ref = false;
 
     backup = NULL;
     newrevbuf = NULL;
@@ -1589,10 +1590,13 @@ VERS: ", 0);
 	    newrevbuf = buf_nonio_initialize ((BUFMEMERRPROC) NULL);
 		TRACE(3,"checkout_file: revbuf%sNULL",(newrevbuf==NULL)?"==":"!=");
 		if (newrevbuf!=NULL) TRACE(3,"checkout_file: revbuf->data%sNULL",(newrevbuf->data==NULL)?"==":"!=");
+        bool send_blob_ref = true;//fixme
 	    status = RCS_checkout (vers_ts->srcfile, (char *) NULL,
 				   vn_rcs, vers_ts->vn_tag,
 				   vers_ts->options, RUN_TTY,
-				   checkout_to_buffer, newrevbuf, &mode);
+				   checkout_to_buffer, newrevbuf, &mode, nullptr,
+                   //if_client_supports_references
+                   send_blob_ref ? &is_ref : nullptr);
 		TRACE(3,"checkout_file: after RCS_checkout revbuf%sNULL",(newrevbuf==NULL)?"==":"!=");
 		if (newrevbuf!=NULL) TRACE(3,"checkout_file: after RCS_checkout revbuf->data%sNULL",(newrevbuf->data==NULL)?"==":"!=");
 	}
@@ -1777,7 +1781,7 @@ VERS: ", 0);
 
 		TRACE(3,"checkout_file: server_updated (with md5)");
 		server_updated (finfo, vers_ts,
-			merging ? SERVER_MERGED : SERVER_UPDATED,
+			is_ref ? SERVER_BLOB_REF : (merging ? SERVER_MERGED : SERVER_UPDATED),
 			mode, md5, newrevbuf);
 
 		delete md5;
