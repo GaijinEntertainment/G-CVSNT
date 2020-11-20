@@ -24,7 +24,7 @@
 #include "getline.h"
 #include "edit.h"
 #include "buffer.h"
-#include "sha_blob_operations.h"
+#include "sha_blob_reference.h"
 
 #ifdef MAC_HFS_STUFF
 #	include "mac_hfs_stuff.h"
@@ -2064,6 +2064,350 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     xfree (entries_line);
 }
 
+static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short_pathname, char *filename)
+{
+  char *entries_line;
+  struct update_entries_data *data = (struct update_entries_data *)data_arg;
+
+  char *cp;
+  char *user;
+  char *vn;
+  /* Timestamp field.  Always empty according to the protocol.  */
+  char *ts;
+  char *options = NULL;
+  kflag options_flags;
+  char *tag = NULL;
+  char *date = NULL;
+  char *tag_or_date;
+  char *scratch_entries = NULL;
+  char *merge_tag1, *merge_tag2;
+  time_t rcs_timestamp;
+  char *edit_revision = "*";
+  char *edit_tag = NULL;
+  char *edit_bugid = NULL;
+  char *md5 = NULL;
+
+#ifdef UTIME_EXPECTS_WRITABLE
+  int change_it_back = 0;
+#endif
+
+  read_line (&entries_line);
+
+  /*
+   * Parse the entries line.
+   */
+  scratch_entries = xstrdup (entries_line);
+
+  if (scratch_entries[0] != '/')
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  user = scratch_entries + 1;
+  if ((cp = strchr (user, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  vn = cp;
+  if ((cp = strchr (vn, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  
+  ts = cp;
+  if ((cp = strchr (ts, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  options = cp;
+  if(options[0]=='-' && options[1]=='k')
+  	options+=2;
+  if ((cp = strchr (options, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  tag_or_date = cp;
+  
+  /* If a slash ends the tag_or_date, ignore everything after it.  */
+  cp = strchr (tag_or_date, '/');
+  if (cp != NULL)
+      *cp = '\0';
+  if (*tag_or_date == 'T')
+      tag = tag_or_date + 1;
+  else if (*tag_or_date == 'D')
+      date = tag_or_date + 1;
+
+  /* Done parsing the entries line. */
+
+  if (data->contents == UPDATE_ENTRIES_UPDATE)
+  {
+    char *size_string;
+    char *mode_string;
+    int size;//since we use atoi
+    char *temp_filename;
+    char *realfilename;
+
+    read_line (&mode_string);
+    read_line (&size_string);
+    size = atoi (size_string);
+    xfree (size_string);
+    if (size != blob_reference_size)
+      error(1,0,"not a reference! for %s", short_pathname);
+
+    char blob_ref[blob_reference_size+1];
+    read_from_server(blob_ref, size);
+    blob_ref[blob_reference_size] = 0;
+
+    /* Note that checking this separately from writing the file is
+       a race condition: if the existence or lack thereof of the
+       file changes between now and the actual calls which
+       operate on it, we lose.  However (a) there are so many
+       cases, I'm reluctant to try to fix them all, (b) in some
+       cases the system might not even have a system call which
+       does the right thing, and (c) it isn't clear this needs to
+       work.  */
+    if (data->existp == UPDATE_ENTRIES_EXISTING
+        && !isfile (filename))
+        /* Emit a warning and update the file anyway.  */
+        error (0, 0, "warning: %s unexpectedly disappeared",
+    	   short_pathname);
+
+    if (filenames_case_insensitive && client_overwrite_existing && isfile(filename) && !case_isfile(filename,&realfilename))
+    {
+    	xfree(realfilename);
+    }
+    else if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename))
+    {
+      if (filenames_case_insensitive && !case_isfile(filename,&realfilename))
+      {
+        if(!quiet)
+          error(0,0,"Case ambiguity between %s and %s.  Using %s.",filename,realfilename,realfilename);
+        xfree(realfilename);
+        goto discard_file_and_return;
+      }
+      /* This error might be confusing; it isn't really clear to
+      the user what to do about it.  Keep in mind that it has
+      several causes: (1) something/someone creates the file
+      during the time that CVS is running, (2) the repository
+      has two files whose names clash for the client because
+      of case-insensitivity or similar causes, (3) a special
+      case of this is that a file gets renamed for example
+      from a.c to A.C.  A "cvs update" on a case-insensitive
+      client will get this error.  Repeating the update takes
+      care of the problem, but is it clear to the user what
+      is going on and what to do about it?, (4) the client
+      has a file which the server doesn't know about (e.g. "?
+      foo" file), and that name clashes with a file the
+      server does know about, (5) classify.c will print the same
+      message for other reasons.
+
+      I hope the above paragraph makes it clear that making this
+      clearer is not a one-line fix.  */
+      error (0, 0, "move away %s; it is in the way", short_pathname);
+      if (updated_fname != NULL)
+      {
+        cvs_output ("C ", 0);
+        cvs_output (updated_fname, 0);
+        cvs_output ("\n", 1);
+      }
+      failure_exit = 1;
+
+    discard_file_and_return:
+
+      xfree (mode_string);
+      xfree (scratch_entries);
+      xfree (entries_line);
+
+      /* The Mode, Mod-time, and Checksum responses should not carry
+         over to a subsequent Created (or whatever) response, even
+         in the error case.  */
+      if (stored_mode != NULL)
+      {
+    	xfree (stored_mode);
+    	stored_mode = NULL;
+      }
+      stored_modtime_valid = 0;
+      stored_checksum_valid = 0;
+
+      if (updated_fname != NULL)
+      {
+      	xfree (updated_fname);
+      	updated_fname = NULL;
+      }
+      return;
+    }
+    extern bool download_blob_ref_file(const char *url, int port, const char *repo, const char *name, const char *encoded_sha256);
+    if (!download_blob_ref_file("localhost",80, current_parsed_root->directory, filename, blob_ref+sha256_magic_len))
+      error (1, errno, "writing %s", short_pathname);
+
+    /* This is after we have read the file from the net (a change
+       from previous versions, where the server would send us
+       "M U foo.c" before Update-existing or whatever), but before
+       we finish writing the file (arguably a bug).  The timing
+       affects a user who wants status info about how far we have
+       gotten, and also affects whether "U foo.c" appears in addition
+       to various error messages.  */
+    if (updated_fname != NULL)
+    {
+      cvs_output ("Ub ", 0);
+      cvs_output (updated_fname, 0);
+      cvs_output ("\n", 1);
+      xfree (updated_fname);
+      updated_fname = 0;
+    }
+
+    {
+      int status = change_mode (filename, mode_string, 1);
+      if (status != 0)
+      	error (0, status, "cannot change mode of %s", short_pathname);
+    }
+
+    xfree (mode_string);
+  }
+
+  if (stored_mode != NULL)
+  {
+    change_mode (filename, stored_mode, 1);
+    xfree (stored_mode);
+    stored_mode = NULL;
+  }
+
+  if (stored_modtime_valid)
+  {
+    struct utimbuf t;
+
+    memset (&t, 0, sizeof (t));
+    /* There is probably little point in trying to preserved the
+       actime (or is there? What about Checked-in?).  */
+    t.modtime = t.actime = stored_modtime;
+
+    #ifdef UTIME_EXPECTS_WRITABLE
+    if (!iswritable (filename))
+    {
+        xchmod (filename, 1);
+        change_it_back = 1;
+    }
+    #endif  /* UTIME_EXPECTS_WRITABLE  */
+
+    if (utime (filename, &t) < 0)
+        error (0, errno, "cannot set time on %s", filename);
+
+    #ifdef UTIME_EXPECTS_WRITABLE
+    if (change_it_back == 1)
+    {
+      xchmod (filename, 0);
+      change_it_back = 0;
+    }
+    #endif  /*  UTIME_EXPECTS_WRITABLE  */
+
+    stored_modtime_valid = 0;
+  }
+
+  /*
+   * Process the entries line.  Do this after we've written the file,
+   * since we need the timestamp.
+   */
+  if (strcmp (command_name, "export") != 0)
+  {
+    char *local_timestamp;
+    char *localtime_timestamp;
+    char *file_timestamp;
+
+    (void) time (&last_register_time);
+
+    local_timestamp = data->timestamp;
+    if (local_timestamp == NULL || ts[0] == '+')
+    {
+        file_timestamp = time_stamp (filename,0);
+        localtime_timestamp = time_stamp (filename,1);
+    }
+    else
+        file_timestamp = NULL;
+
+    /*
+     * These special version numbers signify that it is not up to
+     * date.  Create a dummy timestamp which will never compare
+     * equal to the timestamp of the file.
+     */
+    // TMA 2001/12/18: Accept version numbers starting with "0."
+    if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
+        local_timestamp = "dummy timestamp";
+    else if (local_timestamp == NULL)
+    {
+      local_timestamp = file_timestamp;
+
+      /* Checking for command_name of "commit" doesn't seem like
+         the cleanest way to handle this, but it seem to roughly
+         parallel what the :local: code which calls
+         mark_up_to_date ends up amounting to.  Some day, should
+         think more about what the Checked-in response means
+         vis-a-vis both Entries and Base and clarify
+         cvsclient.texi accordingly.  */
+
+      if (!strcmp (command_name, "commit"))
+  		mark_up_to_date (filename);
+    }
+
+    /* Get the data for Entries.Extra */
+    merge_tag1 = merge_tag2 = NULL;
+    rcs_timestamp = (time_t)-1;
+    while(extra_entry && extra_entry[0]=='/')
+    {
+      char *fn, *tag1, *tag2, *rcs_timestamp_string;
+      fn = extra_entry  + 1;
+      if ((cp = strchr (fn, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+      if(fncmp(fn, filename))
+      	break;
+      tag1 = cp;
+      if ((cp = strchr (tag1, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+      tag2=cp;
+      if ((cp = strchr (tag2, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+      merge_tag1 = tag1;
+      merge_tag2 = tag2;
+      rcs_timestamp_string=cp;
+      if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
+      	rcs_timestamp=(time_t)-1;
+
+      edit_revision = cp;
+      if ((cp = strchr (edit_revision, '/')) == NULL)
+      {
+      	edit_revision="*"; /* Revision was unseen by client */
+      	break;
+      }
+      *cp++ = '\0';
+
+      edit_tag = cp;
+      if ((cp = strchr (edit_tag, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      edit_bugid = cp;
+      if ((cp = strchr (edit_bugid, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      md5 = cp;
+      if ((cp = strchr (md5, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      break;
+    }
+
+    Register (ent_list, filename, vn, local_timestamp,
+    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+
+    if (file_timestamp)
+        xfree (file_timestamp);
+
+  }
+  xfree (scratch_entries);
+  xfree (entries_line);
+}
+
 static void handle_checked_in (char *args, int len)
 {
     struct update_entries_data dat;
@@ -2091,13 +2435,13 @@ static void handle_updated (char *args, int len)
     call_in_directory (args, update_entries, (char *)&dat);
 }
 
-static void handle_updated_blobs (char *args, int len)
+static void handle_updated_blobs_refs (char *args, int len)
 {
     struct update_entries_data dat;
     dat.contents = UPDATE_ENTRIES_UPDATE;
     dat.existp = UPDATE_ENTRIES_EXISTING_OR_NEW;
     dat.timestamp = NULL;
-    call_in_directory (args, update_entries, (char *)&dat);
+    call_in_directory (args, update_blob_ref_entries, (char *)&dat);
 }
 
 static void handle_created (char *args, int len)
@@ -3232,7 +3576,7 @@ struct response responses[] =
     RSP_LINE("New-entry", handle_new_entry, proxy_line2, response_type_normal, rs_optional),
     RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
     RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
-    //RSP_LINE("Blob-ref", handle_updated_blobs, proxy_updated, response_type_normal, rs_optional),
+    RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
     RSP_LINE("Created", handle_created, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Update-existing", handle_update_existing, proxy_updated, response_type_normal,
