@@ -87,7 +87,8 @@ enum server_updated_arg4
     SERVER_UPDATED,
     SERVER_MERGED,
     SERVER_PATCHED,
-    SERVER_RCS_DIFF
+    SERVER_RCS_DIFF,
+    SERVER_BLOB_REF
 };
 struct buffer;
 
