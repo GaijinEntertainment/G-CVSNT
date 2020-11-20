@@ -1,4 +1,4 @@
-//to build on linux: clang++ -std=c++17 -O2 convert_to_blob.cpp ./sha256/sha256.c -lz -ocvtblob
+//to build on linux: clang++ -std=c++17 -O2 convert_to_blob.cpp blob_operations.cpp ./sha256/sha256.c -lz -ocvtblob
 
 #include "simpleLock.cpp.inc"
 #include "sha_blob_reference.h"

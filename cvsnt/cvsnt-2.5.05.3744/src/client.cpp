@@ -4769,24 +4769,21 @@ static void send_modified (const char *file, const char *short_pathname, const V
 
         if (blob_binary && supported_request ("Blob-ref-transfer") && supported_request ("Blob-transfer"))
         {
-            size_t unpacked_len;
-            unsigned char sha256[32];
-            char sha256_encoded[65];
-            calc_sha256(file, buf, newsize, false, unpacked_len, sha256);
-            encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));//sha256 char[32], sha256_encoded[65]
-    		send_to_server ("Blob-transfer ", 0);
-    		sprintf (tmp, "%s\n", sha256_encoded);
+			char sha256_encoded[65];
+			BlobHeader *hdr = nullptr; void *blob_data_no_hdr = nullptr; bool allocated_blob_data = false;
+			//create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded);
+			create_binary_blob_to_send(file, buf, newsize, blob_binary_compressed, &hdr, &blob_data_no_hdr, allocated_blob_data, sha256_encoded);
+			send_to_server("Blob-transfer ", 0);
+			send_to_server(sha256_encoded, 0);
+			send_to_server("\n", 1);
+
+			sprintf (tmp, "%llu\n", (unsigned long long) (hdr->compressedLen + hdr->headerSize));
     		send_to_server (tmp, 0);
-            BlobHeader hdr = get_noarc_header(newsize);
-            void *compressed_data = nullptr;
-            if (blob_binary_compressed)
-              compressed_data = compress_zlib_data(buf, newsize, Z_BEST_COMPRESSION, hdr);
-    		sprintf (tmp, "%llu\n", (unsigned long long) (hdr.compressedLen + sizeof(hdr)));
-    		send_to_server (tmp, 0);
-    		send_to_server_untranslated((const char*)&hdr, sizeof(hdr));
-    		send_to_server_untranslated(compressed_data ? (const char*)compressed_data : buf, hdr.compressedLen);
-            if (compressed_data != nullptr)
-              xfree(compressed_data);
+    		send_to_server_untranslated((const char*)hdr, hdr->headerSize);
+    		send_to_server_untranslated((const char*)blob_data_no_hdr, hdr->compressedLen);
+            if (allocated_blob_data)
+              blob_free(blob_data_no_hdr);
+			blob_free(hdr);
 
     		send_to_server ("Blob-ref-transfer ", 0);
     		send_to_server (file, 0);
@@ -5670,3 +5667,6 @@ void from_server_buffer_read (char **line, int *lenp)
 {
     buf_read_line (from_server, line, lenp);
 }
+void blob_free(void *p) {xfree(p);}
+void *blob_alloc(size_t sz) {return xmalloc(sz);}
+int blob_mkdir (const char *path, int mode){return CVS_MKDIR(path, mode);}

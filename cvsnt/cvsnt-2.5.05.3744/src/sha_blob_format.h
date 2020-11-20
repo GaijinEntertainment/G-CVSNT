@@ -1,5 +1,6 @@
 #pragma once
 #include <stdint.h>
+#include <string.h>
 
 #define SHA256_REV_STRING "sha256:"
 #define BLOBS_SUBDIR_BASE "blobs"
