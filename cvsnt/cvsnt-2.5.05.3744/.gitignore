@@ -18,6 +18,7 @@ configure
 Makefile.in
 Makefile
 aclocal.m4
+*./aclocal.m4
 config.h.in
 compile
 depcomp
@@ -33,9 +34,14 @@ INSTALL
 config.sub
 config.h
 config.h.in
+config.guess
+*./config.h.in
+*./config.guess
+*./config.sub
 protocols/ntlm/test-driver
 stamp-h1.in
 protocols/ntlm/libntlm.pc
 protocols/ntlm/libntlm.spec
 protocols/ntlm/ntlm.h
+protocols/ntlm/INSTALL
 redhat/cvsnt.spec
