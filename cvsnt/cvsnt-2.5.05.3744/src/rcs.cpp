@@ -12,6 +12,7 @@
 #include "edit.h"
 #include "hardlink.h"
 #include "../cvsdelta/cvsdelta.h"
+#include "sha_blob_reference.h"
 #include <zlib.h>
 
 /* This is defined in zlib.h but we have to redefine it here... seems to be
@@ -4339,221 +4340,240 @@ expand_keywords (RCSNode *rcs, RCSVers *ver, const char *name, const char *log,
    permissions, and special files across checkin and checkout -- see
    comments in RCS_checkin for some issues about this. -twp */
 
+char *get_binary_blob_ver_file_path(char *&data_path, RCSNode *rcs, const char *value, int len)
+{
+  data_path = (char*)xmalloc(strlen(rcs->path)+len+4+1);
+  strcpy(data_path, rcs->path);
+  char *p = strrchr(data_path, '/');
+  if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
+  sprintf(p, "CVS/%.*s", int(len), value);
+  return data_path;
+}
+
+//unresolved binary
+int RCS_checkout_raw_value (RCSNode *rcs, const char *&rev, int &free_rev,
+  const char *nametag, const char *options,
+  kflag &expand,
+  char *&value,
+  int &free_value,
+  size_t &len,
+  char *&log,
+  size_t &loglen
+)
+{
+  free_value = 0;
+  log = NULL;
+  loglen = 0;
+
+  free_rev = 0;
+  char *key;
+  Node *vp = NULL;
+
+  assert (rev == NULL || isdigit ((unsigned char) *rev));
+
+  /* Some callers, such as Checkin or remove_file, will pass us a
+     branch.  */
+  if (rev != NULL && (numdots (rev) & 1) == 0)
+  {
+    rev = RCS_getbranch (rcs, rev, 1);
+    if (rev == NULL)
+        error (1, 0, "internal error: bad branch tag in checkout");
+    free_rev = 1;
+  }
+
+  rcsbuf_setpos_to_delta_base(rcs);
+
+  if (rev == NULL || STREQ (rev, rcs->head))
+  {
+    int gothead;
+
+    /* We want the head revision.  Try to read it directly.  */
+
+    gothead = 0;
+    if (! rcsbuf_getrevnum (&rcs->rcsbuf, &key))
+        error (1, 0, "unexpected EOF reading %s", fn_root(rcs->path));
+    while (rcsbuf_getkey (&rcs->rcsbuf, &key, &value))
+    {
+      if (STREQ (key, "log"))
+      	rcsbuf_valcopy (&log, &rcs->rcsbuf, value, 0, &loglen, false);
+      else if (STREQ (key, "text"))
+      {
+        gothead = 1;
+        break;
+      }
+    }
+
+    if (! gothead)
+    {
+        error (0, 0, "internal error: cannot find head text");
+        if (free_rev)
+    	xfree (rev);
+    	rcsbuf_valfree(&rcs->rcsbuf,&log);
+        return 1;
+    }
+
+    rcsbuf_valpolish (&rcs->rcsbuf, value, 0, &len);
+
+    /* Handle zip expansion of head */
+    {
+      RCSVers *vers;
+
+      vp = findnode (rcs->versions, rcs->head);
+      if (vp == NULL)
+      	error (1, 0, "internal error: no revision information for %s",
+      	rev == NULL ? rcs->head : rev);
+      vers = (RCSVers *) vp->data;
+      if(vers->type && (STREQ(vers->type,"compressed_text") || STREQ(vers->type,"compressed_binary")))
+      {
+      	uLong zlen;
+
+      	z_stream stream = {0};
+      	inflateInit(&stream);
+      	zlen = ntohl(*(unsigned long *)value);
+      	if(zlen)
+      	{
+          stream.avail_in = len-4;
+          stream.next_in = (Bytef*)(value+4);
+          stream.avail_out = zlen;
+          void *zbuf = xmalloc(zlen);
+          stream.next_out = (Bytef*)zbuf;
+          if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
+          {
+          	error(1,0,"internal error: inflate failed");
+          }
+      	  value = (char*)zbuf;
+          free_value = 1;
+      	}
+      	len = zlen;
+      }
+    }
+  }
+  else
+  {
+    struct rcsbuffer *rcsbufp;
+
+    /* It isn't the head revision of the trunk.  We'll need to
+     walk through the deltas.  */
+
+    RCS_deltas (rcs, NULL, NULL, rev, RCS_FETCH, &value, &len,
+          &log, &loglen);
+    free_value = 1;
+  }
+
+  /* If OPTIONS is NULL or the empty string, then the old code would
+     invoke the RCS co program with no -k option, which means that
+     co would use the string we have stored in vers->expand.  */
+
+  /* Handle version specific expansion */
+  if(options == NULL || options[0] == '\0')
+  {
+  	RCSVers *vers;
+
+  	vp = findnode (rcs->versions, rev == NULL ? rcs->head : rev);
+  	if (vp == NULL)
+  		error (1, 0, "internal error: no revision information for %s",
+  		rev == NULL ? rcs->head : rev);
+  	vers = (RCSVers *) vp->data;
+
+  	options = vers->kopt;
+  }
+
+  if ((options == NULL || options[0] == '\0') && rcs->expand == NULL)
+  	expand.flags = KFLAG_TEXT|KFLAG_KEYWORD|KFLAG_VALUE;
+  else
+  {
+  	const char *ouroptions;
+
+  	if (options != NULL && options[0] != '\0')
+  		ouroptions = options;
+  	else
+  		ouroptions = rcs->expand;
+
+  	TRACE(3,"RCS_checkout options = \"%s\"",ouroptions);
+  	RCS_get_kflags(ouroptions, false, expand); // Don't signal an error here.. corrupt kopt in the RCS file would make checkout blow up
+  }
+  return 1;
+}
+
 int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const char *nametag, const char *options,
      const char *sout, RCSCHECKOUTPROC pfn, void *callerdat, mode_t *pmode, int64_t *cmp_other_sz, bool *is_ref)
 {
-    int free_rev = 0;
-	kflag expand;
-    FILE *fp, *ofp;
-    char *key;
-    char *value;
-    size_t len;
-    int free_value = 0;
-    char *log = NULL;
-    size_t loglen;
-    Node *vp = NULL;
-    mode_t rcs_mode;
-	void *zbuf = NULL;
+  TRACE(1,"RCS_checkout (%s, %s, %s, %s)",
+  		PATCH_NULL(fn_root(rcs->path)),
+  		rev != NULL ? rev : "",
+  		options != NULL ? options : "",
+  		(pfn != NULL ? "(function)"
+  		 : (workfile != NULL
+  		    ? workfile
+  		    : (sout != RUN_TTY ? sout : "(stdout)"))));
 
-	TRACE(1,"RCS_checkout (%s, %s, %s, %s)",
-			PATCH_NULL(fn_root(rcs->path)),
-			rev != NULL ? rev : "",
-			options != NULL ? options : "",
-			(pfn != NULL ? "(function)"
-			 : (workfile != NULL
-			    ? workfile
-			    : (sout != RUN_TTY ? sout : "(stdout)"))));
+  if (noexec && workfile != NULL)
+  	return 0;
 
-    assert (rev == NULL || isdigit ((unsigned char) *rev));
+  assert (sout == RUN_TTY || workfile == NULL);
+  assert (pfn == NULL || (sout == RUN_TTY && workfile == NULL));
+  kflag expand;
+  char *value = nullptr; size_t len = 0;
+  int free_value = 0;
+  char *log = nullptr;
+  size_t loglen = 0;
+  int free_rev =0;
+  if (!RCS_checkout_raw_value (rcs, rev, free_rev, nametag, options, expand, value, free_value, len, log, loglen))
+    return 0;
 
-    if (noexec && workfile != NULL)
-		return 0;
+  FILE *fp = nullptr, *ofp = nullptr;
+  if(expand.flags&KFLAG_BINARY_DELTA)
+  {
+    char *data_path;
+    char *rev_file_name = get_binary_blob_ver_file_path(data_path, rcs, value, len);
 
-    assert (sout == RUN_TTY || workfile == NULL);
-    assert (pfn == NULL || (sout == RUN_TTY && workfile == NULL));
-
-    /* Some callers, such as Checkin or remove_file, will pass us a
-       branch.  */
-    if (rev != NULL && (numdots (rev) & 1) == 0)
+    if (!RCS_read_binary_rev_data(rev_file_name, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, cmp_other_sz, is_ref))
     {
-	rev = RCS_getbranch (rcs, rev, 1);
-	if (rev == NULL)
-	    error (1, 0, "internal error: bad branch tag in checkout");
-	free_rev = 1;
-    }
-
-	rcsbuf_setpos_to_delta_base(rcs);
-
-    if (rev == NULL || STREQ (rev, rcs->head))
-    {
-	int gothead;
-
-	/* We want the head revision.  Try to read it directly.  */
-
-	gothead = 0;
-	if (! rcsbuf_getrevnum (&rcs->rcsbuf, &key))
-	    error (1, 0, "unexpected EOF reading %s", fn_root(rcs->path));
-	while (rcsbuf_getkey (&rcs->rcsbuf, &key, &value))
-	{
-	    if (STREQ (key, "log"))
-			rcsbuf_valcopy (&log, &rcs->rcsbuf, value, 0, &loglen, false);
-	    else if (STREQ (key, "text"))
-	    {
-		gothead = 1;
-		break;
-	    }
-	}
-
-	if (! gothead)
-	{
-	    error (0, 0, "internal error: cannot find head text");
-	    if (free_rev)
-		xfree (rev);
-		rcsbuf_valfree(&rcs->rcsbuf,&log);
-	    return 1;
-	}
-
-	rcsbuf_valpolish (&rcs->rcsbuf, value, 0, &len);
-
-	/* Handle zip expansion of head */
-	{
-		RCSVers *vers;
-
-		vp = findnode (rcs->versions, rcs->head);
-		if (vp == NULL)
-			error (1, 0, "internal error: no revision information for %s",
-			rev == NULL ? rcs->head : rev);
-		vers = (RCSVers *) vp->data;
-		if(vers->type && (STREQ(vers->type,"compressed_text") || STREQ(vers->type,"compressed_binary")))
-		{
-			uLong zlen;
-
-			z_stream stream = {0};
-			inflateInit(&stream);
-			zlen = ntohl(*(unsigned long *)value);
-			if(zlen)
-			{
-				stream.avail_in = len-4;
-				stream.next_in = (Bytef*)(value+4);
-				stream.avail_out = zlen;
-				zbuf = xmalloc(zlen);
-				stream.next_out = (Bytef*)zbuf;
-				if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
-				{
-					error(1,0,"internal error: inflate failed");
-				}
-			}
-			len = zlen;
-			value = (char*)zbuf;
-		}
-	}
-	}
-	else
-	{
- 	struct rcsbuffer *rcsbufp;
-
-	/* It isn't the head revision of the trunk.  We'll need to
-	   walk through the deltas.  */
-
-	fp = NULL;
-
-	if (fp == NULL)
-	    rcsbufp = NULL;
-	else
-	    rcsbufp = &rcs->rcsbuf;
-
-	RCS_deltas (rcs, fp, rcsbufp, rev, RCS_FETCH, &value, &len,
-		    &log, &loglen);
-	free_value = 1;
-    }
-
-	/* If OPTIONS is NULL or the empty string, then the old code would
-       invoke the RCS co program with no -k option, which means that
-       co would use the string we have stored in vers->expand.  */
-
-	/* Handle version specific expansion */
-	if(options == NULL || options[0] == '\0')
-    {
-		RCSVers *vers;
-
-		vp = findnode (rcs->versions, rev == NULL ? rcs->head : rev);
-		if (vp == NULL)
-			error (1, 0, "internal error: no revision information for %s",
-			rev == NULL ? rcs->head : rev);
-		vers = (RCSVers *) vp->data;
-
-		options = vers->kopt;
-    }
-
-    if ((options == NULL || options[0] == '\0') && rcs->expand == NULL)
-		expand.flags = KFLAG_TEXT|KFLAG_KEYWORD|KFLAG_VALUE;
-    else
-    {
-		const char *ouroptions;
-
-		if (options != NULL && options[0] != '\0')
-			ouroptions = options;
-		else
-			ouroptions = rcs->expand;
-
-		TRACE(3,"RCS_checkout options = \"%s\"",ouroptions);
-		RCS_get_kflags(ouroptions, false, expand); // Don't signal an error here.. corrupt kopt in the RCS file would make checkout blow up
-    }
-
-    /* Handle permissions */
-    {
-		RCSVers *vers;
-		Node *info;
-
-		vp = findnode (rcs->versions, rev == NULL ? rcs->head : rev);
-		if (vp == NULL)
-			error (1, 0, "internal error: no revision information for %s",
-			rev == NULL ? rcs->head : rev);
-		vers = (RCSVers *) vp->data;
-
-		info = findnode (vers->other_delta, "permissions");
-		if (info != NULL)
-		{
-			rcs_mode = (mode_t) strtoul (info->data, NULL, 8) & 0777;
-			TRACE(3,"got rcs_mode = %04o from rcs-permissions-tag",rcs_mode);
-		}
-		else 
-		{
-#ifndef _WIN32
-			struct stat sb;
-			if( rcs->path && (CVS_LSTAT (rcs->path, &sb) >= 0))
-			{
-				rcs_mode =  (mode_t)(sb.st_mode & 0777);
-				TRACE(3,"got rcs_mode = %04o from file permissions <%s>",rcs_mode, rcs->path);
-			} 
-			else
-#endif
-			{
-				rcs_mode = 0644;
-				TRACE(3,"using default rcs_mode = %04o <%s>",rcs_mode, rcs->path);
-			}
-		}
-    }
-
-    if(expand.flags&KFLAG_BINARY_DELTA)
-    {
-      char *data_path = (char*)xmalloc(strlen(rcs->path)+len+4+1);
-      strcpy(data_path, rcs->path);
-      char *p = strrchr(data_path, '/');
-      if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
-      sprintf(p, "CVS/%.*s", int(len), value);
-
-      if (!RCS_read_binary_rev_data(data_path, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, cmp_other_sz, is_ref))
-      {
-        rcsbuf_valfree(&rcs->rcsbuf,&log);
-        if (free_rev)
-          xfree (rev);
-        xfree(zbuf);
-        xfree(data_path);
-        return 0;
-      }
+      rcsbuf_valfree(&rcs->rcsbuf, &log);
+      if (free_rev)
+        xfree (rev);
       xfree(data_path);
+      return 0;
     }
+    xfree(data_path);
+  }
+
+  /* Handle permissions */
+  mode_t rcs_mode;
+  Node *vp = NULL;
+  {
+  	RCSVers *vers;
+  	Node *info;
+
+  	vp = findnode (rcs->versions, rev == NULL ? rcs->head : rev);
+  	if (vp == NULL)
+  		error (1, 0, "internal error: no revision information for %s",
+  		rev == NULL ? rcs->head : rev);
+  	vers = (RCSVers *) vp->data;
+
+  	info = findnode (vers->other_delta, "permissions");
+  	if (info != NULL)
+  	{
+  		rcs_mode = (mode_t) strtoul (info->data, NULL, 8) & 0777;
+  		TRACE(3,"got rcs_mode = %04o from rcs-permissions-tag",rcs_mode);
+  	}
+  	else
+  	{
+    #ifndef _WIN32
+      struct stat sb;
+      if( rcs->path && (CVS_LSTAT (rcs->path, &sb) >= 0))
+      {
+      	rcs_mode =  (mode_t)(sb.st_mode & 0777);
+      	TRACE(3,"got rcs_mode = %04o from file permissions <%s>",rcs_mode, rcs->path);
+      } 
+      else
+    #endif
+      {
+      	rcs_mode = 0644;
+      	TRACE(3,"using default rcs_mode = %04o <%s>",rcs_mode, rcs->path);
+      }
+  	}
+  }
 
     if (!(expand.flags&KFLAG_PRESERVE))
     {
@@ -4650,7 +4670,6 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
 		error (0, errno, "cannot open %s", workfile);
 		if (free_value)
 		    xfree (value);
-		xfree(zbuf);
 		return 1;
 	    }
 	}
@@ -4722,7 +4741,6 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
 			    : (sout != RUN_TTY ? sout : "stdout")));
 		    if (free_value)
 				xfree (value);
-			xfree(zbuf);
 			cdp.EndEncoding();
 		    return 1;
 		}
@@ -4753,7 +4771,6 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
 			    : (sout != RUN_TTY ? sout : "stdout")));
 		    if (free_value)
 				xfree (value);
-			xfree(zbuf);
 		    return 1;
 		}
 		p += nstep;
@@ -4766,7 +4783,6 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
 
     if (free_value)
 		xfree (value);
-	xfree(zbuf);
 
 	// Must remove write here as rest of code relies on it
 	rcs_mode = modify_mode(rcs_mode,0,S_IWUSR|S_IWGRP|S_IWOTH);
@@ -6190,6 +6206,63 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
         options = RCS_rebuild_options(&expand,_opt);
     }
 
+    if ((expand.flags&KFLAG_BINARY_DELTA))
+    {
+      kflag expand2;
+      char *value = nullptr; size_t len = 0;
+      int free_value = 0;
+      char *log = nullptr;
+      size_t loglen = 0;
+      int free_rev =0;
+      int checkOutSuccess = RCS_checkout_raw_value (rcs, rev, free_rev, NULL, options, expand2, value, free_value, len, log, loglen);
+      if (!checkOutSuccess || !(expand2.flags&KFLAG_BINARY_DELTA))
+      {
+        if (free_rev)
+          xfree(rev);
+        if (free_value)
+          xfree(value);
+        return 1;
+      }
+      char *data_path;
+      char *rev_file_name = get_binary_blob_ver_file_path(data_path, rcs, value, len);
+      char sha256_encoded[sha256_encoded_size+1];
+      if (!get_blob_reference_sha256(rev_file_name, sha256_encoded))//sha256_encoded==char[65], encoded 32 bytes + \0
+      {
+        unsigned char sha256[32];
+        if (!calc_sha256_file(rev_file_name, sha256))
+          error(1,0, "can't read file revision <%s> to compare sha", rev_file_name);
+        encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));//sha256 char[32], sha256_encoded[65]
+      }
+      xfree(data_path);
+
+      char sha256_encoded_sent[sha256_encoded_size+1];
+      //this is same security hole. we assume reference can be sent!
+      //todo: fixme, we should explicitly say that we have sent reference to be compared with!
+      if (!get_blob_reference_sha256(filename, sha256_encoded_sent))//sha256_encoded==char[65], encoded 32 bytes + \0
+      {
+        unsigned char sha256[32];
+        if (!calc_sha256_file(filename, sha256))
+          error(1,0, "can't read file <%s> to compare sha", filename);
+        encode_sha256(sha256, sha256_encoded_sent, sizeof(sha256_encoded_sent));//sha256 char[32], sha256_encoded[65]
+      }
+      if (free_rev)
+        xfree(rev);
+      if (free_value)
+        xfree(value);
+      return memcmp(sha256_encoded, sha256_encoded_sent, sha256_encoded_size) != 0;
+    }
+
+    Node *n = NULL;
+    if(rev)
+      n = findnode(rcs->versions,rev);
+    else
+    {
+      rev = RCS_head(rcs);
+      if(rev)
+      	n = findnode(rcs->versions,rev);
+      xfree(rev);
+    }
+
     {
 		char *dir=xgetwd();
         fp = CVS_FOPEN (filename, binary ? FOPEN_BINARY_READ : "r");
@@ -6212,18 +6285,7 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
 		data.expand = expand;
 		data.ignore_keywords = ignore_keywords;
 		data.rcs = rcs;
-		Node *n = NULL;
-		if(rev)
-			n = findnode(rcs->versions,rev);
-		else
-		{
-			rev = RCS_head(rcs);
-			if(rev)
-				n = findnode(rcs->versions,rev);
-			xfree(rev);
-		}
 		data.ver = n?(RCSVers*)n->data:NULL;
-
         int64_t src_data_sz = 0;
         if (expand.flags&KFLAG_BINARY_DELTA)
         {

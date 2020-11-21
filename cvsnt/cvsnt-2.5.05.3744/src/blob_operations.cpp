@@ -35,7 +35,7 @@ void blob_free(void *);
 void encode_sha256(unsigned char sha256[], char sha256_encoded[], size_t enc_len)//sha256 char[32], sha256_encoded[65]
 {
   if (enc_len < sha256_encoded_size+1)
-    error (1, 0, "too short sha256 %d", (int)enc_len);
+    error (1, 0, "too short %d", (int)enc_len);
 
   snprintf(sha256_encoded, enc_len,
      "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
@@ -122,6 +122,34 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
     blk_SHA256_Update(&ctx, data, len);
   }
   blk_SHA256_Final(sha256, &ctx);
+}
+
+bool calc_sha256_file(const char *fn, unsigned char sha256[])//sha256 char[32]
+{
+  blk_SHA256_CTX ctx;
+  blk_SHA256_Init(&ctx);
+
+  FILE* fp = fopen(fn,"rb");
+  if (!fp)
+    return false;
+  size_t len = get_file_size(fn);
+  uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
+  char buf[32768];
+  while (len > 0)
+  {
+    size_t sz = len < sizeof(buf) ? len : sizeof(buf);
+    if (fread(buf,1,sz,fp) != sz)
+    {
+      fclose(fp);
+      return false;
+    }
+    blk_SHA256_Update(&ctx, buf, sz);
+    len -= sz;
+  }
+  fclose(fp);
+
+  blk_SHA256_Final(sha256, &ctx);
+  return true;
 }
 
 bool does_blob_exist(const char *sha_file_name)
@@ -562,12 +590,12 @@ void write_blob_and_blob_reference(const char *root, const char *fn, const void 
 }
 
 
-void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded, size_t sha_256enc_len)
+void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded)
 {
   unsigned char sha256[32];
   size_t unpacked_len;
   calc_sha256(ctx, file_content, len, false, unpacked_len, sha256);
-  encode_sha256(sha256, sha256_encoded, sha_256enc_len);//sha256 char[32], sha256_encoded[65]
+  encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));//sha256 char[32], sha256_encoded[65]
   *hdr_ = (BlobHeader*)blob_alloc(sizeof(BlobHeader));
   BlobHeader &hdr = **hdr_;
   hdr = get_noarc_header(len);
