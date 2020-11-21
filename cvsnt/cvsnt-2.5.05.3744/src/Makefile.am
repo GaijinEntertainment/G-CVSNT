@@ -49,6 +49,7 @@ bin_PROGRAMS = cvsnt
 cvsnt_SOURCES = \
     sha256/sha256.c \
     blob_operations.cpp \
+    download_blob_to.cpp \
 	add.cpp \
 	admin.cpp \
 	annotate.cpp \

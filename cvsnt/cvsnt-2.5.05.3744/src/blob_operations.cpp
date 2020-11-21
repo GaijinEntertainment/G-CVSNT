@@ -7,6 +7,7 @@
 
 #include <stdio.h>
 #include <string.h>
+#include <errno.h>
 
 #ifndef __attribute__
 /* This feature is available in gcc versions 2.5 and later.  */
