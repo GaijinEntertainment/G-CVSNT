@@ -36,7 +36,7 @@ size_t read_binary_blob_directly(const char *blob_file_name, void **data);
 size_t read_binary_blob(const char *blob_file_name, void **data, bool return_blob_directly);
 
 //this creates two memory chunks; hdr_  and blob_data (the last should be freed if, and only if allocated_blob_data = true)
-void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded);
+void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded, size_t sha256_encoded_len);
 size_t decode_binary_blob(const char *context, const void *data, size_t fileLen, void **out_data, bool &need_free);
 
 //link time resolved dependency!

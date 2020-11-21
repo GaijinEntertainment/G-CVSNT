@@ -278,7 +278,7 @@ mode_to_string (mode_t mode)
  * Returns 0 for success or errno code.
  * If RESPECT_UMASK is set, then honor the umask.
  */
-int change_mode (char *filename, char *mode_string, int respect_umask)
+int change_mode (const char *filename, const char *mode_string, int respect_umask)
 {
 #ifdef CHMOD_BROKEN
     char *p;
@@ -320,7 +320,7 @@ int change_mode (char *filename, char *mode_string, int respect_umask)
 
 #else /* ! CHMOD_BROKEN */
 
-    char *p;
+    const char *p;
     mode_t mode = 0;
     mode_t oumask;
 
@@ -332,7 +332,7 @@ int change_mode (char *filename, char *mode_string, int respect_umask)
 	if ((p[0] == 'u' || p[0] == 'g' || p[0] == 'o') && p[1] == '=')
 	{
 	    int can_read = 0, can_write = 0, can_execute = 0;
-	    char *q = p + 2;
+	    const char *q = p + 2;
 	    while (*q != ',' && *q != '\0')
 	    {
 		if (*q == 'r')
@@ -2064,6 +2064,73 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     xfree (entries_line);
 }
 
+void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp)
+{
+  extern bool download_blob_ref_file(const char *url, int port, const char *repo, const char *name, const char *encoded_sha256);
+  if (!download_blob_ref_file("localhost",80, current_parsed_root->directory, filename, encoded_sha256))
+    error (1, errno, "writing %s", filename);
+  struct utimbuf t;
+
+  memset (&t, 0, sizeof (t));
+  /* There is probably little point in trying to preserved the
+     actime (or is there? What about Checked-in?).  */
+  t.modtime = t.actime = timestamp;
+
+  #ifdef UTIME_EXPECTS_WRITABLE
+  bool change_it_back = false;
+  if (!iswritable (filename))
+  {
+      xchmod (filename, 1);
+      change_it_back = true;
+  }
+  #endif
+
+  if (utime (filename, &t) < 0)
+      error (0, errno, "cannot set time on %s", filename);
+
+  #ifdef UTIME_EXPECTS_WRITABLE
+  if (change_it_back)
+    xchmod (filename, 0);
+  #endif
+
+  {
+    int status = change_mode (filename, file_mode, 1);
+    if (status != 0)
+      error (0, status, "cannot change mode of %s", filename);
+  }
+}
+
+static char *time_stamp (time_t mtime, int local)
+{
+  struct stat sb;
+  char *cp;
+  char *ts;
+
+  struct tm *tm_p;
+  struct tm local_tm;
+  ts = (char*)xmalloc (25);
+  /* We want to use the same timestamp format as is stored in the
+     st_mtime.  For unix (and NT I think) this *must* be universal
+     time (UT), so that files don't appear to be modified merely
+     because the timezone has changed.  For VMS, or hopefully other
+     systems where gmtime returns NULL, the modification time is
+     stored in local time, and therefore it is not possible to cause
+     st_mtime to be out of sync by changing the timezone.  */
+  tm_p = local?NULL:gmtime (&mtime);
+  if (tm_p)
+  {
+    memcpy (&local_tm, tm_p, sizeof (local_tm));
+    cp = asctime (&local_tm);	/* copy in the modify time */
+  }
+  else
+    cp = ctime(&mtime);
+
+  cp[24] = 0;
+  (void) strcpy (ts, cp);
+
+  return (ts);
+}
+
 static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short_pathname, char *filename)
 {
   char *entries_line;
@@ -2132,7 +2199,8 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
 
   /* Done parsing the entries line. */
 
-  if (data->contents == UPDATE_ENTRIES_UPDATE)
+  const time_t file_mtime = stored_modtime_valid ? stored_modtime : time(NULL);
+  stored_modtime_valid = 0;
   {
     char *size_string;
     char *mode_string;
@@ -2229,9 +2297,11 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
       }
       return;
     }
-    extern bool download_blob_ref_file(const char *url, int port, const char *repo, const char *name, const char *encoded_sha256);
-    if (!download_blob_ref_file("localhost",80, current_parsed_root->directory, filename, blob_ref+sha256_magic_len))
-      error (1, errno, "writing %s", short_pathname);
+
+    extern void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
+    add_download_queue(filename, blob_ref+sha256_magic_len,
+      stored_mode ? stored_mode : mode_string,
+      file_mtime);
 
     /* This is after we have read the file from the net (a change
        from previous versions, where the server would send us
@@ -2249,51 +2319,12 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
       updated_fname = 0;
     }
 
-    {
-      int status = change_mode (filename, mode_string, 1);
-      if (status != 0)
-      	error (0, status, "cannot change mode of %s", short_pathname);
-    }
-
     xfree (mode_string);
-  }
-
-  if (stored_mode != NULL)
-  {
-    change_mode (filename, stored_mode, 1);
-    xfree (stored_mode);
-    stored_mode = NULL;
-  }
-
-  if (stored_modtime_valid)
-  {
-    struct utimbuf t;
-
-    memset (&t, 0, sizeof (t));
-    /* There is probably little point in trying to preserved the
-       actime (or is there? What about Checked-in?).  */
-    t.modtime = t.actime = stored_modtime;
-
-    #ifdef UTIME_EXPECTS_WRITABLE
-    if (!iswritable (filename))
+    if (stored_mode != NULL)
     {
-        xchmod (filename, 1);
-        change_it_back = 1;
+      xfree (stored_mode);
+      stored_mode = NULL;
     }
-    #endif  /* UTIME_EXPECTS_WRITABLE  */
-
-    if (utime (filename, &t) < 0)
-        error (0, errno, "cannot set time on %s", filename);
-
-    #ifdef UTIME_EXPECTS_WRITABLE
-    if (change_it_back == 1)
-    {
-      xchmod (filename, 0);
-      change_it_back = 0;
-    }
-    #endif  /*  UTIME_EXPECTS_WRITABLE  */
-
-    stored_modtime_valid = 0;
   }
 
   /*
@@ -2311,8 +2342,8 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
     local_timestamp = data->timestamp;
     if (local_timestamp == NULL || ts[0] == '+')
     {
-        file_timestamp = time_stamp (filename,0);
-        localtime_timestamp = time_stamp (filename,1);
+        file_timestamp = time_stamp (file_mtime,0);
+        localtime_timestamp = time_stamp (file_mtime,1);
     }
     else
         file_timestamp = NULL;
@@ -4557,7 +4588,7 @@ void send_arg (const char *string)
    using any other fields of the struct vers, we would need to fix
    client_process_import_file to set them up.  */
 
-static void send_modified (const char *file, const char *short_pathname, const Vers_TS *vers)
+static void send_modified (const char *file, const char *short_pathname, const Vers_TS *vers, bool send_blob_content)
 {
     /* File was modified, send it.  */
     struct stat sb;
@@ -4731,39 +4762,6 @@ static void send_modified (const char *file, const char *short_pathname, const V
 	    send_to_server ("\n", 1);
 	}
 
-#if 0 // Not implemented yet
-	if(newsize>1024*1024 && supported_request("Binary-transfer")) // We don't do this on files <1MB..
-	{
-		char tmp[80];
-		const char *p = buf;
-		size_t s = newsize,l;
-		CMD5Calc md5;
-
-		send_to_server("Binary-transfer",0);
-		send_to_server (file, 0);
-		send_to_server ("\n", 1);
-		send_to_server (mode_string, 0);
-		send_to_server ("\n", 1);
-		snprintf (tmp, 80, "%lu\n", (unsigned long) newsize);
-		send_to_server (tmp, 0);
-
-		md5.Update(buf,newsize);
-		send_to_server(md5.Final(),0);
-		send_to_server("\n",1);
-
-		while(s)
-		{
-			md5.Init();
-			l=s>65536?65536:s;
-			md5.Update(p,l);
-			p+=l;
-			s-=l;
-			send_to_server_untranslated(md5.Final(),0);
-			send_to_server_untranslated("\n",1);
-		}
-	}
-	else
-#endif
 	{
 		char tmp[128];
 
@@ -4772,15 +4770,18 @@ static void send_modified (const char *file, const char *short_pathname, const V
 			char sha256_encoded[65];
 			BlobHeader *hdr = nullptr; void *blob_data_no_hdr = nullptr; bool allocated_blob_data = false;
 			//create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded);
-			create_binary_blob_to_send(file, buf, newsize, blob_binary_compressed, &hdr, &blob_data_no_hdr, allocated_blob_data, sha256_encoded);
-			send_to_server("Blob-transfer ", 0);
-			send_to_server(sha256_encoded, 0);
-			send_to_server("\n", 1);
+			create_binary_blob_to_send(file, buf, newsize, blob_binary_compressed, &hdr, &blob_data_no_hdr, allocated_blob_data, sha256_encoded, sizeof(sha256_encoded));
+            if (send_blob_content)
+            {
+              send_to_server("Blob-transfer ", 0);
+              send_to_server(sha256_encoded, 0);
+              send_to_server("\n", 1);
 
-			sprintf (tmp, "%llu\n", (unsigned long long) (hdr->compressedLen + hdr->headerSize));
-    		send_to_server (tmp, 0);
-    		send_to_server_untranslated((const char*)hdr, hdr->headerSize);
-    		send_to_server_untranslated((const char*)blob_data_no_hdr, hdr->compressedLen);
+              sprintf (tmp, "%llu\n", (unsigned long long) (hdr->compressedLen + hdr->headerSize));
+              send_to_server (tmp, 0);
+              send_to_server_untranslated((const char*)hdr, hdr->headerSize);
+              send_to_server_untranslated((const char*)blob_data_no_hdr, hdr->compressedLen);
+            }
             if (allocated_blob_data)
               blob_free(blob_data_no_hdr);
 			blob_free(hdr);
@@ -4837,6 +4838,7 @@ struct send_data
     int build_dirs;
     int force;
     int no_contents;
+    int blob_contents;
     int backup_modified;
 	int modified;
 	int case_sensitive;
@@ -4979,7 +4981,7 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 				send_to_server ("\n", 1);
 			}
 			else
-				send_modified (filename, finfo->fullname, vers);
+				send_modified (filename, finfo->fullname, vers, args->blob_contents);
 
 			if (args->backup_modified)
 			{
@@ -5368,6 +5370,7 @@ void send_files (int argc, char **argv, int local, int aflag, unsigned int flags
     args.force = flags & SEND_FORCE;
 	args.case_sensitive = flags & SEND_CASE_SENSITIVE;
     args.no_contents = flags & SEND_NO_CONTENTS;
+    args.blob_contents = !(flags & SEND_NO_BLOBS_CONTENT);
     args.backup_modified = flags & BACKUP_MODIFIED_FILES;
     err = start_recursion
 	(send_fileproc, send_filesdoneproc, (PREDIRENTPROC) NULL,
@@ -5465,7 +5468,7 @@ int client_process_import_file(const char *message, const char *vfile, const cha
 			error (0, 0,
 			"warning: ignoring -d option due to server limitations");
 	}
-	send_modified (vfile, fullname, &vers);
+	send_modified (vfile, fullname, &vers, true);
 	xfree (vers.options);
 	xfree (fullname);
 	return 0;

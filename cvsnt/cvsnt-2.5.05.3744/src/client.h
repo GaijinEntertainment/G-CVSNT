@@ -4,7 +4,7 @@
 
 /* Stuff shared with the server.  */
 extern char *mode_to_string(mode_t mode);
-extern int change_mode(char *filename, char *mode_string, int respect_umask);
+extern int change_mode(const char *filename, const char *mode_string, int respect_umask);
 
 extern int gzip_level;
 extern int file_gzip_level;
@@ -75,6 +75,7 @@ send_files(int argc, char **argv, int local, int aflag, unsigned int flags);
 #define BACKUP_MODIFIED_FILES	0x008
 #define SEND_DIRECTORIES_ONLY	0x010
 #define SEND_CASE_SENSITIVE		0x020
+#define SEND_NO_BLOBS_CONTENT   0x080
 
 /* Send an argument to the remote server.  */
 void send_arg(const char *string);

@@ -383,7 +383,7 @@ int update (int argc, char **argv)
 		/* If noexec, probably could be setting SEND_NO_CONTENTS.
 		   Same caveats as for "cvs status" apply.  */
 
-		send_files (argc, argv, local, aflag, flags);
+		send_files (argc, argv, local, aflag, flags|SEND_NO_BLOBS_CONTENT);
 		send_file_names (argc, argv, SEND_EXPAND_WILD|(case_sensitive?SEND_CASE_SENSITIVE:0));
 	    }
 	    else
@@ -412,7 +412,7 @@ int update (int argc, char **argv)
 			flags |= SEND_CASE_SENSITIVE;
 
 		send_files (failed_patches_count, failed_patches, local,
-			    aflag, flags);
+			    aflag, flags|SEND_NO_BLOBS_CONTENT);
 		send_file_names (failed_patches_count, failed_patches, 0);
 		free_names (&failed_patches_count, failed_patches);
 	    }
