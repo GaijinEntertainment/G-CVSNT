@@ -84,7 +84,7 @@ void sleep(int ms)
 
 
 #define TRACE(...)
-static void error(int a, int b, const char *cmd, ...)
+void error(int a, int b, const char *cmd, ...)
 {
   char line[1024];int line_len = sizeof(line);
   int l;
@@ -99,7 +99,7 @@ static void error(int a, int b, const char *cmd, ...)
 }
 
 #if _WIN32
-inline size_t get_file_size(const char *file)
+size_t get_file_size(const char *file)
 {
   struct __stat64 buf;
   if (_stat64(file, &buf) != 0)
@@ -107,14 +107,14 @@ inline size_t get_file_size(const char *file)
 
   return buf.st_size;
 }
-inline int isreadable (const char *file)
+int isreadable (const char *file)
 {
   DWORD fa = GetFileAttributes(file);
   if (fa == INVALID_FILE_ATTRIBUTES)
 	return 0;
   return 1;  
 }
-inline int iswriteable (const char *file)
+int iswriteable (const char *file)
 {
   DWORD fa = GetFileAttributes(file);
   if (fa == INVALID_FILE_ATTRIBUTES)
@@ -147,7 +147,7 @@ inline void wnt_get_temp_dir(char *tempdir, int tempdir_size)
   }
 }
 
-inline FILE *cvs_temp_file (char **filename, const char *mode)
+FILE *cvs_temp_file (char **filename, const char *mode)
 {
   char tempdir[MAX_PATH];
   FILE *f;
@@ -161,25 +161,25 @@ inline FILE *cvs_temp_file (char **filename, const char *mode)
 inline int unlink_file (const char *f) { return _unlink(f); }
 
 #else
-inline size_t get_file_size(const char *file)
+size_t get_file_size(const char *file)
 {
   struct stat sb;
   if (stat(file, &sb) == -1)
     return 0;
   return sb.st_size;
 }
-inline int isreadable (const char *file)
+int isreadable (const char *file)
 {
   return access(file, R_OK) == 0;
 }
-inline int iswriteable (const char *file)
+int iswriteable (const char *file)
 {
   return access(file, W_OK) == 0;
 }
 
 #define Tmpdir "/tmp"
 
-inline FILE *cvs_temp_file (char **filename, const char *mode)
+FILE *cvs_temp_file (char **filename, const char *mode)
 {
   char *fn;
   FILE *fp;
@@ -228,7 +228,11 @@ inline int unlink_file (const char *f) { return unlink(f); }
 #define CVS_MKDIR mkdir
 #endif
 
-inline void rename_file (const char *from, const char *to)
+void blob_free(void *p) {xfree(p);}
+void *blob_alloc(size_t sz) {return xmalloc(sz);}
+int blob_mkdir (const char *path, int mode){return CVS_MKDIR(path, mode);}
+
+void rename_file (const char *from, const char *to)
 {
   if (rename (from, to) < 0)
     error (1, errno, "cannot rename file %s to %s", from, to);

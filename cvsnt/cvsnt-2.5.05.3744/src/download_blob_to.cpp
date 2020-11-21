@@ -1,11 +1,12 @@
 #include <stdio.h>
 #include "httplib.h"
 #include "sha_blob_format.h"
+#include "sha_blob_reference.h"
 #include <vector>
 #include <string>
-void rename_file (const char *from, const char *to);
-
-size_t decode_binary_blob(const char *context, const void *data, size_t fileLen, void **out_data, bool &need_free);
+#if !_MSC_VER
+#define _snprintf snprintf
+#endif
 
 bool download_blob_ref_file(const char *url, int port, const char *repo, const char *to, const char *encoded_sha256)
 {
