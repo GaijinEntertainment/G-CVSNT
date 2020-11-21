@@ -590,12 +590,12 @@ void write_blob_and_blob_reference(const char *root, const char *fn, const void 
 }
 
 
-void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded)
+void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded, size_t sha_256enc_len)
 {
   unsigned char sha256[32];
   size_t unpacked_len;
   calc_sha256(ctx, file_content, len, false, unpacked_len, sha256);
-  encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));//sha256 char[32], sha256_encoded[65]
+  encode_sha256(sha256, sha256_encoded, sha_256enc_len);//sha256 char[32], sha256_encoded[65]
   *hdr_ = (BlobHeader*)blob_alloc(sizeof(BlobHeader));
   BlobHeader &hdr = **hdr_;
   hdr = get_noarc_header(len);
