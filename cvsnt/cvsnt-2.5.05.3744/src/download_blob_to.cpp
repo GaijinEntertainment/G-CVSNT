@@ -20,6 +20,16 @@ bool download_blob_ref_file(const char *url, int port, const char *repo, const c
 
   std::vector<char> temp_buf;
   httplib::Client cli(url, port);
+  cli.set_keep_alive(true);
+  cli.set_tcp_nodelay(true);
+  auto initialRes = cli.Get("/");
+  if (!cli.is_socket_open() || initialRes->status != 200)
+  {
+    printf("can't connect <%s:%d>, err = %d, %s\n", url, port, initialRes->status, httplib::detail::status_message(initialRes->status));
+    return false;
+  }
+  //cli.enable_server_certificate_verification(true);//if we will switch to https
+  //cli.set_basic_auth("user", "passwd");//read me from User registry once
   auto res = cli.Get(buf,
     [&](const char *data, size_t data_length) {
       //printf("receive %lld\n", data_length);
@@ -31,7 +41,12 @@ bool download_blob_ref_file(const char *url, int port, const char *repo, const c
       temp_buf.reserve(total);
       return true;
     }
-    );
+  );
+  if (res->status != 200)
+  {
+    printf("can't download <%s>, err = %d, %s\n", buf, res->status, httplib::detail::status_message(res->status));
+    return false;
+  }
   void *data = nullptr; bool need_free = false;
   size_t decodedData = decode_binary_blob(to, temp_buf.data(), temp_buf.size(), &data, need_free);
   std::string temp_filename = "_new_";
@@ -39,6 +54,7 @@ bool download_blob_ref_file(const char *url, int port, const char *repo, const c
   FILE *tmp = fopen(temp_filename.c_str(), "wb");
   if (fwrite(data, 1, decodedData, tmp) != decodedData)
   {
+    printf("can't write <%s>\n", temp_filename.c_str());
     fclose(tmp);
     return false;
   }

@@ -2068,7 +2068,7 @@ void add_download_queue(const char *filename, const char *encoded_sha256, const 
 {
   extern bool download_blob_ref_file(const char *url, int port, const char *repo, const char *name, const char *encoded_sha256);
   if (!download_blob_ref_file("localhost",80, current_parsed_root->directory, filename, encoded_sha256))
-    error (1, errno, "writing %s", filename);
+    error (1, errno, "downloading %s", filename);
   struct utimbuf t;
 
   memset (&t, 0, sizeof (t));
