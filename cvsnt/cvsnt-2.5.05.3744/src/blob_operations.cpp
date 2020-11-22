@@ -33,6 +33,8 @@ int blob_mkdir (const char *path, int mode);
 void *blob_alloc(size_t sz);
 void blob_free(void *);
 
+#define TRY_ZLIB_AS_WELL_ON_BEST 0//if 1, on Pack::BEST we will try both algoritms to find out whats working best
+
 void encode_sha256(unsigned char sha256[], char sha256_encoded[], size_t enc_len)//sha256 char[32], sha256_encoded[65]
 {
   if (enc_len < sha256_encoded_size+1)
@@ -274,7 +276,27 @@ void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
     BlobHeader hdr = get_noarc_header(len);
     void *compressed_data = nullptr;
     if (pack != BlobPackType::NO)
+    {
       compressed_data = compress_zstd_data(data, len, pack, hdr);//on server we use non-ultra method!
+      #if TRY_ZLIB_AS_WELL_ON_BEST
+      if (pack == BlobPackType::BEST)
+      {
+        BlobHeader hdr_zlib;
+        void *compressed_data_zlib = compress_zlib_data(data, len, Z_BEST_COMPRESSION, hdr_zlib);
+        if (hdr_zlib.compressedLen < hdr.compressedLen)
+        {
+          if (compressed_data)
+            blob_free(compressed_data);
+          compressed_data = compressed_data_zlib;
+          hdr = hdr_zlib;
+        } else
+        {
+          if (compressed_data_zlib)
+            blob_free(compressed_data_zlib);
+        }
+      }
+      #endif
+    }
 
     const void* writeData = compressed_data ? compressed_data : data;
 
