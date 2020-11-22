@@ -20,8 +20,8 @@ bool gather_used = false;
 static void usage()
 {
   printf("Usage: gc-blobs <full_root> used|unused|broken|delete_unused\n");
-  printf("example:gc-blobs /home/some_user/test unused\n");
-  printf("example:gc-blobs /home/some_user/test used\n");
+  printf("example:gc-blobs /cvs/some_repo unused\n");
+  printf("example:gc-blobs /cvs/some_repo used\n");
   printf("safe to run in working production environment. uses one thread only\n");
   printf("Warning! It doesnt delete anything, unless called with delete_unused, it will just output to stdout the list of referenced(used)/unreferenced/broken sha paths\n");
   printf("Warning! run only on server!\n");

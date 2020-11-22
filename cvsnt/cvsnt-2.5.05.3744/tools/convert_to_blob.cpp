@@ -19,8 +19,8 @@ static void usage()
 {
   printf("Usage: <lock_server> <user_name> <full_root> full_directory file [max_lock_time_in_seconds]\n");
   printf("or: <lock_server> <user_name> <full_root> max_lock_time_in_seconds\n");
-  printf("example:convert_to_blob 127.0.0.1 some_user /home/some_user/test testDir a.png\n");
-  printf("or:convert_to_blob 127.0.0.1 some_user /home/some_user/test \n");
+  printf("example:convert_to_blob 127.0.0.1 some_user /cvs/some_repo testDir a.png\n");
+  printf("or:convert_to_blob 127.0.0.1 some_user /cvs/some_repo \n");
   printf("Warning! no ,v in the end is needed. Warning, do not enter CVS directories\n");
   printf("Warning! run only on server!\n");
   printf("Warning! it can lock one file for a while. The total required time depends on amount of version. In order to be safe, use max_lock_time == 600 (10 minutes) during production times\n");
@@ -130,8 +130,9 @@ static void process_directory(int lock_server_socket, const char *rootDir, const
 
 int main(int ac, const char* argv[])
 {
-  if (ac < 5)
+  if (ac < 4)
   {
+    printf("not enough params <%d>\n", ac);
     usage();
     exit(1);
   }

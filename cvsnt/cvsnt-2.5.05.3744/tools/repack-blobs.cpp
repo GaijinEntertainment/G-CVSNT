@@ -36,10 +36,11 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
       continue;
     }
+    filename = entry.path().string();
     const size_t currentFileLength = get_file_size(filename.c_str());
     if (currentFileLength < sizeof(BlobHeader))
     {
-      printf("[E] <%s> is not a sha blob!\n", filename.c_str());
+      printf("[E] <%s> is not a sha blob due to size %lld!\n", filename.c_str(), (long long)currentFileLength);
       continue;
     }
     time_t cftime = get_file_mtime(filename.c_str());
@@ -79,10 +80,11 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
       }
       fclose(tmpf);
       atomic_write_sha_file(filename.c_str(), tempFilename, decodedData, uncompressedSize, BlobPackType::BEST, false);
+      blob_free(decodedData);
       const size_t newFileLength = get_file_size(tempFilename);
       if (newFileLength > currentFileLength)
       {
-        printf("[W] <%s> was somehow better compressed!\n", filename.c_str());
+        printf("[W] <%s> was somehow better compressed (%lld < %lld)!\n", filename.c_str(), (long long)currentFileLength, (long long)newFileLength);
         unlink(tempFilename);
         blob_free(tempFilename);
       } else
