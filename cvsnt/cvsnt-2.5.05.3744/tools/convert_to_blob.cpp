@@ -38,6 +38,8 @@ static void rename_z_to_normal(const char *f)
   }
 }
 
+static uint64_t deduplicatedData = 0, readData = 0, writtenData = 0;
+
 static void process_file(int lock_server_socket, const char *rootDir, const char *dir, const char *file)
 {
   printf("process <%s>/<%s>\n", dir, file);
@@ -78,7 +80,6 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
   };
   std::vector<char> fileData;
   std::vector<char> sha_file_name(filePath.length() + sha256_encoded_size + 7);
-  size_t readData = 0, writtenData = 0;
   for (const auto & entry : fs::directory_iterator(pathToVersions))
   {
     if (entry.is_directory())
@@ -105,6 +106,11 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
     {
       unsigned char sha256[32];
       size_t wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileData.data(), sz, BlobPackType::BEST, false);
+      if (!wr)
+      {
+        printf("deduplication %d for %s", int(sz), filePath.c_str());
+        deduplicatedData += sz;
+      }
       get_lock();
       if (write_blob_reference(entry.path().c_str(), sha256, false))
         rename_z_to_normal(entry.path().c_str());
@@ -114,8 +120,6 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       writtenData += wr;
     }
   }
-  if (writtenData != readData)
-    printf("de-duplicated %lld\n", (long long int)(readData-writtenData));
   do_unlock_file(lock_server_socket, lockId);
 }
 
@@ -126,6 +130,7 @@ static void process_directory(int lock_server_socket, const char *rootDir, const
   if (dirPath[dirPath.length()-1] != '/' && dir[0]!='/')
     dirPath+="/";
   dirPath += dir;
+  size_t readData_old = readData, writtenData_old = writtenData;
   for (const auto & entry : fs::directory_iterator(dirPath.c_str()))
   {
     if (entry.is_directory())
@@ -145,6 +150,8 @@ static void process_directory(int lock_server_socket, const char *rootDir, const
       }
     }
   }
+  if (writtenData_old != writtenData)
+    printf("processed dir <%s>, saved %gkb\n", dir, double(int64_t(readData_old - readData) - int64_t(writtenData_old-writtenData))/1024.0);
 }
 
 int main(int ac, const char* argv[])
@@ -165,12 +172,14 @@ int main(int ac, const char* argv[])
   }
   if (ac > 5)
   {
-    const size_t max_lock_time = ac < 7 ? size_t(~size_t(0)) : unsigned(atoi(argv[6]));
     process_file(lock_server_socket, rootDir, argv[4], argv[5]);
   } else
   {
     process_directory(lock_server_socket, rootDir, "");
   }
+  printf("written %gmb, saved %g mb, de-duplicated %g mb\n", double(writtenData)/(1<<20),
+    (double(readData)-double(writtenData))/(1<<20),
+    double(deduplicatedData)/(1<<20));
 
   cvs_tcp_close(lock_server_socket);
   return 0;
