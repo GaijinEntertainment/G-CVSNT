@@ -1,3 +1,4 @@
+#pragma once
 #include "sha_blob_format.h"
 
 #define SHA256_LIST(a)\
@@ -16,7 +17,8 @@ bool calc_sha256_file(const char *fn, unsigned char sha256[]);//sha256 char[32]
 
 bool does_blob_exist(const char *sha_file_name);
 void create_dirs(const char *root, unsigned char sha256[]);
-void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, bool store_packed, bool src_packed);
+enum class BlobPackType {NO, FAST, BEST};//try to pack
+void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed);
 
 
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
@@ -25,10 +27,9 @@ void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
 bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
   const void *data, size_t len);
 
-
 size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   const char *fn,//fn is for context only
-  const void *data, size_t len, bool packed, bool src_packed);//fn is just context!
+  const void *data, size_t len, BlobPackType pack, bool src_packed);//fn is just context!
 
 
 BlobHeader get_binary_blob_hdr(const char *blob_file_name);

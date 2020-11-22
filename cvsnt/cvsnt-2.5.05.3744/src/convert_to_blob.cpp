@@ -30,7 +30,7 @@ static void usage()
 static size_t write_blob_and_blob_reference_saved(const char *root, const char *fn, const void *data, size_t len, bool store_packed, bool src_packed)
 {
   unsigned char sha256[32];
-  size_t wr = write_binary_blob(root, sha256, fn, data, len, store_packed, src_packed);
+  size_t wr = write_binary_blob(root, sha256, fn, data, len, BlobPackType::BEST, src_packed);
   write_blob_reference(fn, sha256);
   return wr;
 }

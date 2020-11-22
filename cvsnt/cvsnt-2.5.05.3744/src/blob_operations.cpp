@@ -1,4 +1,5 @@
 #include "zlib.h"
+#include "zstd.h"
 #include "sha256/sha256.h"
 //#include "cvs.h"
 #include "sha_blob_format.h"
@@ -112,6 +113,27 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
           break;
       }
       inflateEnd(&stream);
+    } else if (is_zstd_blob(hdr))
+    {
+      ZSTD_DStream* zds = ZSTD_createDStream();
+      ZSTD_initDStream(zds);
+      ZSTD_inBuffer_s streamIn;
+      streamIn.src = (const char*)((const char*)data + hdr.headerSize);
+      streamIn.size = hdr.compressedLen;
+      streamIn.pos = 0;
+      char bufOut[ZSTD_BLOCKSIZE_MAX];
+      ZSTD_outBuffer_s streamOut;
+      streamOut.dst = bufOut;
+      streamOut.size = sizeof(bufOut);
+      streamOut.pos = 0;
+      while (streamIn.pos < streamIn.size && streamOut.pos < streamOut.size)
+      {
+        if (ZSTD_isError(ZSTD_decompressStream(zds, &streamOut, &streamIn)))
+          error(1,0,"internal error: inflate failed");
+
+        blk_SHA256_Update(&ctx, bufOut, streamOut.pos);
+      };
+      ZSTD_freeDStream(zds);
     } else
     {
       error(1,errno,"Unknown compressor %s", fn);
@@ -174,6 +196,21 @@ void create_dirs(const char *root, unsigned char sha256[])
     error (1, errno, "cannot make directory %s", buf);
 }
 
+
+static inline BlobHeader get_header(const uint8_t *m, size_t len, size_t zlen, uint16_t flags)
+{
+  BlobHeader hdr;
+  memcpy(hdr.magic, m, BLOB_MAGIC_SIZE);
+  hdr.headerSize = sizeof(BlobHeader);
+  hdr.flags = flags;
+  hdr.uncompressedLen = len;
+  hdr.compressedLen = zlen;
+  return hdr;
+}
+static inline BlobHeader get_noarc_header(size_t len, uint16_t flags = 0) {return get_header(noarc_magic, len, len, flags);}
+static inline BlobHeader get_zlib_header(size_t len, size_t zlen, uint16_t flags = 0) {return get_header(zlib_magic, len, zlen, flags);}
+static inline BlobHeader get_zstd_header(size_t len, size_t zlen, uint16_t flags = 0) {return get_header(zstd_magic, len, zlen, flags);}
+
 static void* compress_zlib_data(const void *data, size_t len, int compression_level, BlobHeader &hdr)
 {
   size_t zlen = 0;
@@ -201,7 +238,25 @@ static void* compress_zlib_data(const void *data, size_t len, int compression_le
   return zbuf;
 }
 
-void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, bool store_packed, bool src_packed)
+static const int zstd_fast_comp = 19;//we dont use ultra so everything is fast enough. some server lazy utility can constantly re-pack blobs with smaller compression levels
+static void* compress_zstd_data(const void *data, size_t len, BlobPackType pack, BlobHeader &hdr)
+{
+  const int compression_level = pack == BlobPackType::FAST ? zstd_fast_comp : ZSTD_maxCLevel();
+  size_t zlen = ZSTD_compressBound(len);
+  void *zbuf = blob_alloc(zlen);
+  const uint16_t flags = compression_level == ZSTD_maxCLevel() ? BlobHeader::BEST_POSSIBLE_COMPRESSION : 0;
+  size_t compressedSz = ZSTD_compress( zbuf, zlen, data, len, compression_level);
+  if (ZSTD_isError(compressedSz) || compressedSz > len - len/20)//should be at least 95% compression, otherwise why bother compressing at all
+  {
+    blob_free(zbuf);
+    zbuf = nullptr;
+    hdr = get_noarc_header(len, flags);
+  } else
+    hdr = get_zstd_header(len, compressedSz, flags);
+  return zbuf;
+}
+
+void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed)
 {
   char *temp_filename = NULL;
   FILE *dest = cvs_temp_file(&temp_filename, "wb");
@@ -218,8 +273,8 @@ void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
   {
     BlobHeader hdr = get_noarc_header(len);
     void *compressed_data = nullptr;
-    if (store_packed)
-      compressed_data = compress_zlib_data(data, len, Z_BEST_COMPRESSION-4, hdr);
+    if (pack != BlobPackType::NO)
+      compressed_data = compress_zstd_data(data, len, pack, hdr);//on server we use non-ultra method!
 
     const void* writeData = compressed_data ? compressed_data : data;
 
@@ -292,7 +347,7 @@ bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
   if (!isreadable(sha_file_name))
   {
     create_dirs(root, sha256);
-    atomic_write_sha_file(client_sha256, sha_file_name, data, len, false, true);
+    atomic_write_sha_file(client_sha256, sha_file_name, data, len, BlobPackType::NO, true);
     return unpacked_len;
   }//else we already have this blob written. deduplication worked!
   return true;
@@ -300,7 +355,7 @@ bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
 
 size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   const char *fn,//fn is for context only
-  const void *data, size_t len, bool packed, bool src_packed)//fn is just context!
+  const void *data, size_t len, BlobPackType pack, bool src_packed)//fn is just context!
 {
   if (src_packed &&
       (len < sizeof(BlobHeader)
@@ -322,7 +377,7 @@ size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   if (!isreadable(sha_file_name))
   {
     create_dirs(root, sha256);
-    atomic_write_sha_file(fn, sha_file_name, data, len, packed, src_packed);
+    atomic_write_sha_file(fn, sha_file_name, data, len, pack, src_packed);
     return unpacked_len;
   }//else we already have this blob written. deduplication worked!
   else
@@ -414,6 +469,11 @@ size_t decode_binary_blob(const char *blob_file_name, void **data)
       if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
           error(1,0,"internal error: inflate failed");
       inflateEnd(&stream);
+    } else if (is_zstd_blob(hdr))
+    {
+      if (ZSTD_isError(ZSTD_decompress( *data, hdr.uncompressedLen,
+                              tmpbuf, hdr.compressedLen)))
+          error(1,0,"internal error: zstd decompress failed");
     } else
     {
       error(1,errno,"Unknown compressor %s", blob_file_name);
@@ -495,6 +555,11 @@ size_t decode_binary_blob(const char *context, const void *data, size_t fileLen,
       if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
           error(1,0,"internal error: inflate failed");
       inflateEnd(&stream);
+    } else if (is_zstd_blob(hdr))
+    {
+      if (ZSTD_isError(ZSTD_decompress( *out_data, hdr.uncompressedLen,
+                              readData, hdr.compressedLen)))
+          error(1,0,"internal error: zstd decompress failed");
     } else
     {
       error(1,errno,"Unknown compressor %s", context);
@@ -582,7 +647,7 @@ void write_blob_reference(const char *fn, unsigned char sha256[])//sha256[32] ==
   write_direct_blob_reference(fn,  sha256_encoded, blob_reference_size);
 }
 
-void write_blob_and_blob_reference(const char *root, const char *fn, const void *data, size_t len, bool store_packed, bool src_packed)
+void write_blob_and_blob_reference(const char *root, const char *fn, const void *data, size_t len, BlobPackType store_packed, bool src_packed)
 {
   unsigned char sha256[32];
   write_binary_blob(root, sha256, fn, data, len, store_packed, src_packed);
@@ -601,7 +666,7 @@ void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len,
   hdr = get_noarc_header(len);
   void *compressed_data = nullptr;
   if (guess_packed)
-    compressed_data = compress_zlib_data(file_content, len, Z_BEST_COMPRESSION, hdr);
+    compressed_data = compress_zstd_data(file_content, len, BlobPackType::FAST, hdr);//on client
   if (compressed_data)
   {
     *blob_data = compressed_data;

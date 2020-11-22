@@ -14,5 +14,5 @@ void write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len
 void write_blob_reference(const char *fn, unsigned char sha256[]);//sha256[32] == digest
 
 //writes blob reference to fn, and also writes blob itself;
-void write_blob_and_blob_reference(const char *root, const char *fn, const void *data, size_t len, bool store_packed, bool src_packed);
+void write_blob_and_blob_reference(const char *root, const char *fn, const void *data, size_t len, BlobPackType pack, bool src_packed);
 
