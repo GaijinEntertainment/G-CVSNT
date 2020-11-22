@@ -509,7 +509,7 @@ AC_SEARCH_LIBS(zlibVersion, z, [AC_MSG_CHECKING([for zlib > 1.2.0])
  AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <zlib.h>]], [[z_stream z; deflateBound(&z,99);]])],[ac_cv_have_zlib="yes"],[ac_cv_have_zlib="no"
                LIBS="$saved_libs"])
 AC_MSG_RESULT($ac_cv_have_zlib)], ac_cv_have_zlib="no")
-ZLIB_LIBS="$LIBS"
+ZLIB_LIBS="$LIBS -lzstd"
 LIBS="$saved_libs"
 AC_SUBST(ZLIB_LIBS)
 
