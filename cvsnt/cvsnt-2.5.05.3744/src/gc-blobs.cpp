@@ -1,4 +1,4 @@
-//to build on linux: clang++ -std=c++17 -O2 gc-blobs.cpp blob_operations.cpp ./sha256/sha256.c -lz -ogc-blobs
+//to build on linux: clang++ -std=c++17 -O2 gc-blobs.cpp blob_operations.cpp ./sha256/sha256.c -lz -lzstd -ogc-blobs
 
 #include "simpleOsWrap.cpp.inc"
 #include "sha_blob_reference.h"

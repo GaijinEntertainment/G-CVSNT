@@ -22371,7 +22371,7 @@ else
   ac_cv_have_zlib="no"
 fi
 
-ZLIB_LIBS="$LIBS"
+ZLIB_LIBS="$LIBS -lzstd"
 LIBS="$saved_libs"
 
 
