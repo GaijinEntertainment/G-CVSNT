@@ -93,7 +93,7 @@ void error(int a, int b, const char *cmd, ...)
   va_start(va,cmd);
   vsnprintf(line,line_len,cmd,va);
   va_end(va);
-  printf("error <%s>\n", line);
+  printf("error %d, <%s>\n", b, line);
   if (a)
     exit(1);
 }
@@ -176,11 +176,19 @@ int iswriteable (const char *file)
 {
   return access(file, W_OK) == 0;
 }
-
-#define Tmpdir "/tmp"
+static const char *def_tmp_dir = nullptr;
+#define Tmpdir def_tmp_dir
+static void init_temp_dir()
+{
+  if (def_tmp_dir)
+    return;
+  const char *tmp = getenv("CVS_TMP");
+  def_tmp_dir = tmp ? strdup(tmp) : "/tmp";
+}
 
 FILE *cvs_temp_file (char **filename, const char *mode)
 {
+  init_temp_dir();
   char *fn;
   FILE *fp;
 

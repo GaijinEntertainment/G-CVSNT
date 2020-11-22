@@ -17,6 +17,7 @@ namespace fs = std::filesystem;
 static size_t data_saved = 0, repacked_files = 0, affected_files = 0;
 static void usage()
 {
+  printf("CVS_TMP env var (or /tmp) should point to same filesystem as root\n");
   printf("Usage: repack-blobs <full_root> [days_newer]\n");
   printf("example:repack-blobs /cvs/some_repo 32\n");
   printf("safe to run in working production environment. Uses one thread only, but better decrease nicenesess\n");

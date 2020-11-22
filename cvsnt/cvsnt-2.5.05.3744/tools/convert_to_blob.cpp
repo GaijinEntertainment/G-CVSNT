@@ -17,6 +17,7 @@ namespace fs = std::filesystem;
 
 static void usage()
 {
+  printf("CVS_TMP env var (or /tmp) should point to same filesystem as root\n");
   printf("Usage: <lock_server> <user_name> <full_root> full_directory file [max_lock_time_in_seconds]\n");
   printf("or: <lock_server> <user_name> <full_root> max_lock_time_in_seconds\n");
   printf("example:convert_to_blob 127.0.0.1 some_user /cvs/some_repo testDir a.png\n");
