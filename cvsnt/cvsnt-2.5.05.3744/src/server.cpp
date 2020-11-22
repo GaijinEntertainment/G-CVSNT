@@ -1810,7 +1810,20 @@ static void serve_blob_ref (char *arg)
       xfree (sha256);
       return;
     }
+    if (!is_blob_reference_data(sha256, strlen(sha256)))
+    {
+  	  error(1,errno," %s received is not a blob reference of <%s>",arg, sha256);
+  	  return;
+    }
+    unsigned char session_ref[session_blob_reference_size];
+    memcpy(session_ref, sha256, blob_reference_size);
+    xfree(sha256);
 
+    if (!gen_session_crypt(session_ref, sizeof(session_ref)))
+    {
+  	  error(1,errno," %s can't create session reference for <%s>",arg, sha256);
+  	  return;
+    }
     //if (size >= 0)
 	//	receive_file (size, arg, false);
     /* Write the file.  */
@@ -1821,12 +1834,10 @@ static void serve_blob_ref (char *arg)
   	  return;
     }
 
-	if (write (fd, sha256, strlen(sha256)) < 0)
+	if (write (fd, session_ref, sizeof(session_ref)) != sizeof(session_ref))
 	{
-      error(1,errno,"unable to write");
+      error(1,errno,"unable to write session ref to %s", arg);
     }
-
-    xfree(sha256);
 
     if (close (fd) < 0)
     {
@@ -6980,3 +6991,23 @@ void server_buf_output(buffer *buf, const char *data, int len)
 	if(ostr) xfree(ostr);
 }
 #endif
+
+static uint64_t user_session_bits = 0;
+
+# ifdef _MSC_VER
+  #include <intrin.h>
+# else
+  #include <x86intrin.h>
+# endif
+
+uint64_t get_user_session_salt()
+{
+  if (user_session_bits)
+    return user_session_bits;
+  uint64_t result = 14695981039346656037LU;
+  srand(__rdtsc());//instead of time we use ticks. it is harder to guess ticks from client
+  for (size_t i = 0, len = 16; i < len; ++i)
+    result = (result^uint64_t(rand()&0xFF)) * uint64_t(1099511628211);
+  user_session_bits = result;
+  return get_user_session_salt();
+}

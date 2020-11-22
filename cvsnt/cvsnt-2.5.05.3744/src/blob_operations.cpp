@@ -35,6 +35,16 @@ void blob_free(void *);
 
 #define TRY_ZLIB_AS_WELL_ON_BEST 0//if 1, on Pack::BEST we will try both algoritms to find out whats working best
 
+inline bool is_encoded_sha256(const char *d, size_t len)
+{
+  if (len != 64)
+    return false;
+  for (const char *e = d + len; d != e; ++d)
+    if ((*d < '0' || *d > '9') && (*d < 'a' || *d > 'f'))
+      return false;
+  return true;
+}
+
 void encode_sha256(unsigned char sha256[], char sha256_encoded[], size_t enc_len)//sha256 char[32], sha256_encoded[65]
 {
   if (enc_len < sha256_encoded_size+1)
@@ -612,7 +622,9 @@ bool get_blob_reference_content_sha256(const unsigned char *ref_file_content, si
   if (len != blob_reference_size || memcmp(&ref_file_content[0], SHA256_REV_STRING, sha256_magic_len) != 0)
     //not a blob reference!
     return false;
-  //todo: may be check if it is sha256 encoded
+  //may be check if it is sha256 encoded
+  if (!is_encoded_sha256((const char*)ref_file_content + sha256_magic_len, sha256_encoded_size))
+    return false;
   memcpy(sha256_encoded, ref_file_content + sha256_magic_len, sha256_encoded_size);
   sha256_encoded[sha256_encoded_size] = 0;
   return true;
@@ -699,4 +711,65 @@ void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len,
     *blob_data = file_content;
     allocated_blob_data = false;
   }
+}
+
+bool is_blob_reference_data(const void *data, size_t len)
+{
+  if (len != blob_reference_size || memcmp(data, SHA256_REV_STRING, sha256_magic_len) != 0)
+    return false;
+  if (!is_encoded_sha256((const char*)data + sha256_magic_len, sha256_encoded_size))
+    return false;
+  return true;
+}
+
+uint64_t get_user_session_salt();//link time resolved dependency
+
+inline const uint64_t hash_with_salt(const void *data_, size_t len, uint64_t salt)
+{
+  const uint8_t* data = (const uint8_t* )data_;
+  uint64_t result = salt;
+  for (size_t i = 0; i < len; ++i)
+    result = (result^uint64_t(data[i])) * uint64_t(1099511628211);
+  return result;
+}
+const uint64_t get_session_crypt(const void *data, size_t len)
+{
+  //make salted hash of content where salt is randomly generated on each session.
+  return *(const uint64_t*)((const char*)data + sha256_magic_len+1);
+}
+
+bool gen_session_crypt(void *data, size_t len)
+{
+  if (len != session_blob_reference_size || memcmp(data, SHA256_REV_STRING, sha256_magic_len) != 0)
+    return false;
+  //write salted hash of sha256
+  *(uint64_t*)((char*)data + blob_reference_size) = hash_with_salt(data, blob_reference_size, get_user_session_salt());
+  return true;
+}
+
+bool is_session_blob_reference_data(const void *data, size_t len)
+{
+  if (len != session_blob_reference_size || memcmp(data, SHA256_REV_STRING, sha256_magic_len) != 0)
+    return false;
+  if (*(const uint64_t*)((const char*)data + blob_reference_size) != hash_with_salt(data, blob_reference_size, get_user_session_salt()))
+    return false;
+  return true;
+}
+
+bool get_session_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
+{
+  if (get_file_size(blob_ref_file_name) != session_blob_reference_size)
+    return false;
+  unsigned char session_ref_file_content[session_blob_reference_size];
+  FILE* fp;
+  fp = fopen(blob_ref_file_name, "rb");
+  if (fread(&session_ref_file_content[0],1, session_blob_reference_size, fp) != session_blob_reference_size)
+  {
+    error(1,errno,"Couldn't read %s", blob_ref_file_name);
+    return false;
+  }
+  fclose(fp);
+  if (!is_session_blob_reference_data(session_ref_file_content, session_blob_reference_size))
+    return false;
+  return get_blob_reference_content_sha256(session_ref_file_content, blob_reference_size, sha256_encoded);
 }

@@ -20,7 +20,7 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
     *out_data = NULL;
     *out_len = 0;
     *inout_data_allocated = 0;
-    if (cmp_other_sz)
+    if (cmp_other_sz)//this case is no longer existent, to be removed
     {
       if (get_binary_blob_hdr(sha_file_name).uncompressedLen != *cmp_other_sz)
       {
@@ -239,33 +239,20 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
 static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed)
 {
   #if CVS_WRITE_DEDUPLICATION
-    #if CVS_GUESS_REFERENCE
-    //this is actually security issue. By replacing your file with sha256:<> and then updating it, you can obtain data of any blob in repo!
-    //to be removed!
-    //todo:!!
-    if (len == blob_reference_size && memcmp(data, SHA256_REV_STRING, sha256_magic_len) == 0)
-    {
-      write_direct_blob_reference(fn, data, len);
-      return;
-      /*char sha_file_name[1024];
-      get_blob_filename_from_encoded_sha256(current_parsed_root->directory, ((const char*)data) + sha256_magic_len, sha_file_name, sizeof(sha_file_name));
-      if (true || does_blob_exist(sha_file_name))//we guessed correct
-      {
-        write_direct_blob_reference(fn, data, len);
-        return;
-      }*/
-    }
-    #endif
-  RCS_write_binary_rev_data_blob(fn, data, len, packed, false);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
+  if (is_session_blob_reference_data(data, len))
+    write_direct_blob_reference(fn, data, blob_reference_size);
+  else
+    RCS_write_binary_rev_data_blob(fn, data, len, packed, false);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
   #else
+  //
   RCS_write_binary_rev_data_direct(fn, data, len, packed);
   #endif
-  //todo: establish protocol, so we can move out compression to client and do not re-compress all the time
 }
 
 static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz, bool *is_ref)
 {
   #if CVS_READ_DEDUPLICATION || CVS_WRITE_DEDUPLICATION//we cant write what we won't read!
+  //there should be only this case, as soon as all repos are converted.
   return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, is_ref, packed, cmp_other_sz);
   #else
   if (is_ref)

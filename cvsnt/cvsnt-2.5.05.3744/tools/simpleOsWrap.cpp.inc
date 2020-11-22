@@ -371,3 +371,4 @@ inline int cvs_tcp_close(int sock)
 {
 	return closesocket(sock);
 }
+uint64_t get_user_session_salt(){return 14695981039346656037LU;}//link time resolved dependency

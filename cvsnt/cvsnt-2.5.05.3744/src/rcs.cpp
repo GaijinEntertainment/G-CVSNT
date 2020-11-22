@@ -6236,9 +6236,7 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
       xfree(data_path);
 
       char sha256_encoded_sent[sha256_encoded_size+1];
-      //this is same security hole. we assume reference can be sent!
-      //todo: fixme, we should explicitly say that we have sent reference to be compared with!
-      if (!get_blob_reference_sha256(filename, sha256_encoded_sent))//sha256_encoded==char[65], encoded 32 bytes + \0
+      if (!get_session_blob_reference_sha256(filename, sha256_encoded_sent))//sha256_encoded==char[65], encoded 32 bytes + \0
       {
         unsigned char sha256[32];
         if (!calc_sha256_file(filename, sha256))
