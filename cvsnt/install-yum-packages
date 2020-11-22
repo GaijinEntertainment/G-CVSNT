@@ -1,8 +1,10 @@
-yum install devtoolset-8-gcc devtoolset-8-gcc-c++
-scl enable devtoolset-8 -- bash
+yum install devtoolset-9-gcc devtoolset-9-gcc-c++
+scl enable devtoolset-9 -- bash
 yum install dh-autoreconf
 yum install libxml2-devel
 yum install pcre-devel
 yum install libtool-ltdl-devel
 yum install glibc-static
 yum install libstdc++-static 
+yum install libzstd-devel
+yum install zstd
