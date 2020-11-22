@@ -2064,19 +2064,31 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     xfree (entries_line);
 }
 
-void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp)
+void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
+
+void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo)
 {
-  extern bool download_blob_ref_file(const char *url, int port, const char *repo, const char *name, const char *encoded_sha256);
-  if (!download_blob_ref_file("localhost",80, current_parsed_root->directory, filename, encoded_sha256))
-    error (1, errno, "downloading %s", filename);
+  char *cp;
+  repo = current_parsed_root->directory;
+  auth_user = current_parsed_root->username;
+  auth_passwd = current_parsed_root->password;
+  port = 80;
+  if ((cp = getenv ("CVS_BLOBS_PORT")) != NULL)
+    port = atoi(cp);
+  url = current_parsed_root->hostname;
+  if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)//we don't do copy, as we dont call other getenv
+    url = cp;
+}
+
+void change_utime(const char* filename, time_t timestamp)
+{
   struct utimbuf t;
 
   memset (&t, 0, sizeof (t));
   /* There is probably little point in trying to preserved the
      actime (or is there? What about Checked-in?).  */
   t.modtime = t.actime = timestamp;
-
-  #ifdef UTIME_EXPECTS_WRITABLE
+  #ifdef UTIME_EXPECTS_WRITABLE//win32
   bool change_it_back = false;
   if (!iswritable (filename))
   {
@@ -2092,12 +2104,6 @@ void add_download_queue(const char *filename, const char *encoded_sha256, const 
   if (change_it_back)
     xchmod (filename, 0);
   #endif
-
-  {
-    int status = change_mode (filename, file_mode, 1);
-    if (status != 0)
-      error (0, status, "cannot change mode of %s", filename);
-  }
 }
 
 static char *time_stamp (time_t mtime, int local)
