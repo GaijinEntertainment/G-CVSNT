@@ -372,3 +372,13 @@ inline int cvs_tcp_close(int sock)
 	return closesocket(sock);
 }
 uint64_t get_user_session_salt(){return 14695981039346656037LU;}//link time resolved dependency
+bool rename_attempts(const char *from, const char *to, unsigned attempts)
+{
+  for (unsigned i = 0; i < attempts; ++i)
+  {
+    if (rename (from, to) >= 0)
+      break;
+    printf("can't rename file <%s> to <%s> %d/%d attempt\n", from, to, i, attempts);
+    sleep(1000);
+  }
+}

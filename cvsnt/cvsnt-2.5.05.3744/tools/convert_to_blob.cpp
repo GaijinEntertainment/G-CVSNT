@@ -41,7 +41,8 @@ static void rename_z_to_normal(const char *f)
   if (pathStr[pathStr.length()-1] == 'z' && pathStr[pathStr.length()-2] == '#')
   {
     pathStr[pathStr.length()-2] = 0;
-    rename_file(f, pathStr.c_str());//not packed anymore
+    if (!rename_attempts(f, pathStr.c_str(), 100))
+      printf("[E] can't rename file <%s> to <%s>\n", f, pathStr.c_str());
   }
 }
 
