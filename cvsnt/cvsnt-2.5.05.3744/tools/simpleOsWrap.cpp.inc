@@ -240,10 +240,19 @@ void blob_free(void *p) {xfree(p);}
 void *blob_alloc(size_t sz) {return xmalloc(sz);}
 int blob_mkdir (const char *path, int mode){return CVS_MKDIR(path, mode);}
 
-void rename_file (const char *from, const char *to)
+bool rename_file (const char *from, const char *to, bool fail_on_error)
 {
   if (rename (from, to) < 0)
-    error (1, errno, "cannot rename file %s to %s", from, to);
+  {
+    error (fail_on_error ? 1 : 0, errno, "cannot rename file %s to %s", from, to);
+    return false;
+  }
+  return true;
+}
+
+void rename_file (const char *from, const char *to)
+{
+  rename_file(from, to, true);
 }
 
 time_t get_file_mtime(const char *file)

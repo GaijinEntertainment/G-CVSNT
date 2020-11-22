@@ -18,22 +18,13 @@ namespace fs = std::filesystem;
 static void usage()
 {
   printf("CVS_TMP env var (or /tmp) should point to same filesystem as root\n");
-  printf("Usage: <lock_server> <user_name> <full_root> full_directory file [max_lock_time_in_seconds]\n");
-  printf("or: <lock_server> <user_name> <full_root> max_lock_time_in_seconds\n");
+  printf("Usage: <lock_server> <user_name> <full_root> full_directory file\n");
+  printf("or: <lock_server> <user_name> <full_root>\n");
   printf("example:convert_to_blob 127.0.0.1 some_user /cvs/some_repo testDir a.png\n");
   printf("or:convert_to_blob 127.0.0.1 some_user /cvs/some_repo \n");
   printf("Warning! no ,v in the end is needed. Warning, do not enter CVS directories\n");
   printf("Warning! run only on server!\n");
-  printf("Warning! it can lock one file for a while. The total required time depends on amount of version. In order to be safe, use max_lock_time == 600 (10 minutes) during production times\n");
-  printf("max_lock_time_in_seconds == -1 means infinite\n");
-}
-
-static size_t write_blob_and_blob_reference_saved(const char *root, const char *fn, const void *data, size_t len, bool store_packed, bool src_packed)
-{
-  unsigned char sha256[32];
-  size_t wr = write_binary_blob(root, sha256, fn, data, len, BlobPackType::BEST, src_packed);
-  write_blob_reference(fn, sha256);
-  return wr;
+  printf("Warning! it can lock one file for a short while, but will do that numerous time. \n");
 }
 
 static void rename_z_to_normal(const char *f)
@@ -47,7 +38,7 @@ static void rename_z_to_normal(const char *f)
   }
 }
 
-static void process_file(int lock_server_socket, const char *rootDir, const char *dir, const char *file, size_t max_lock_time)
+static void process_file(int lock_server_socket, const char *rootDir, const char *dir, const char *file)
 {
   printf("process <%s>/<%s>\n", dir, file);
   std::string dirPath = rootDir;
@@ -65,17 +56,29 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
   }
 
   std::string filePath = dirPath + file;
-  printf("obtaining lock for <%s>\n", filePath.c_str());
   size_t lockId = 0;
-  do {
-    lockId = do_lock_file(lock_server_socket, filePath.c_str(), 1, 0);
-  } while(lockId == 0);
-
-  printf("for <%s> obtained lock %lld, start processing\n", filePath.c_str(), (long long int) lockId);
+  auto get_lock = [&]()
+  {
+    if (lockId)
+      return;
+    printf("obtaining lock for <%s>\n", filePath.c_str());
+    lockId = 0;
+    do {
+      lockId = do_lock_file(lock_server_socket, filePath.c_str(), 1, 0);
+      sleep(500);
+    } while(lockId == 0);
+    printf("for <%s> obtained lock %lld, start processing\n", filePath.c_str(), (long long int) lockId);
+  };
+  auto unlock = [&](){
+    if (lockId)
+    {
+      printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
+      do_unlock_file(lock_server_socket, lockId);
+    }
+  };
   std::vector<char> fileData;
   std::vector<char> sha_file_name(filePath.length() + sha256_encoded_size + 7);
   size_t readData = 0, writtenData = 0;
-  std::time_t startTime = std::time(nullptr);
   for (const auto & entry : fs::directory_iterator(pathToVersions))
   {
     if (entry.is_directory())
@@ -86,23 +89,37 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       //rename_z_to_normal(entry.path().c_str());
       continue;
     }
+    get_lock();
+    if (is_blob_reference(rootDir, entry.path().string().c_str(), sha_file_name.data(), sha_file_name.size()))
+    {
+      //became reference
+      unlock();
+      continue;
+    }
     const auto sz = fs::file_size(entry.path());
     fileData.resize(sz);
     std::ifstream f(entry.path(), std::ios::in | std::ios::binary);
     f.read(fileData.data(), sz);
+    unlock();
     readData += sz;
-    writtenData += write_blob_and_blob_reference_saved(rootDir, entry.path().c_str(), fileData.data(), sz, true, false);
-    rename_z_to_normal(entry.path().c_str());
-    if (std::time(nullptr) - startTime > max_lock_time)
-      printf("stopping, as time limit is exhausted.\n");
+    {
+      unsigned char sha256[32];
+      size_t wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileData.data(), sz, BlobPackType::BEST, false);
+      get_lock();
+      if (write_blob_reference(entry.path().c_str(), sha256, false))
+        rename_z_to_normal(entry.path().c_str());
+      else
+        printf("[E] blob reference %s couldn't be saved", entry.path().c_str());
+      unlock();
+      writtenData += wr;
+    }
   }
   if (writtenData != readData)
     printf("de-duplicated %lld\n", (long long int)(readData-writtenData));
-  printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
   do_unlock_file(lock_server_socket, lockId);
 }
 
-static void process_directory(int lock_server_socket, const char *rootDir, const char *dir, size_t max_lock_time)
+static void process_directory(int lock_server_socket, const char *rootDir, const char *dir)
 {
   printf("process dir <%s>\n", dir);
   std::string dirPath = rootDir;
@@ -116,7 +133,7 @@ static void process_directory(int lock_server_socket, const char *rootDir, const
       if (strcmp(entry.path().filename().c_str(), "CVS") != 0 &&
           strcmp(entry.path().filename().c_str(), "CVSROOT") != 0 &&
           strcmp(entry.path().filename().c_str(), BLOBS_SUBDIR_BASE) != 0)
-        process_directory(lock_server_socket, rootDir, entry.path().lexically_relative(rootDir).c_str(), max_lock_time);
+        process_directory(lock_server_socket, rootDir, entry.path().lexically_relative(rootDir).c_str());
     } else
     {
       std::string filename = entry.path().filename();
@@ -124,7 +141,7 @@ static void process_directory(int lock_server_socket, const char *rootDir, const
       if (filename.length()>2 && filename[filename.length()-1] == 'v' && filename[filename.length()-2] == ',')
       {
         filename[filename.length()-2] = 0;
-        process_file(lock_server_socket, rootDir, dir, filename.c_str(), max_lock_time);
+        process_file(lock_server_socket, rootDir, dir, filename.c_str());
       }
     }
   }
@@ -149,11 +166,10 @@ int main(int ac, const char* argv[])
   if (ac > 5)
   {
     const size_t max_lock_time = ac < 7 ? size_t(~size_t(0)) : unsigned(atoi(argv[6]));
-    process_file(lock_server_socket, rootDir, argv[4], argv[5],max_lock_time);
+    process_file(lock_server_socket, rootDir, argv[4], argv[5]);
   } else
   {
-    const size_t max_lock_time = ac == 4 ? size_t(~size_t(0)) : unsigned(atoi(argv[4]));
-    process_directory(lock_server_socket, rootDir, "", max_lock_time);
+    process_directory(lock_server_socket, rootDir, "");
   }
 
   cvs_tcp_close(lock_server_socket);

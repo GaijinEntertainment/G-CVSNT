@@ -20,8 +20,8 @@ bool get_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_enco
 bool is_blob_reference(const char *root_dir, const char *blob_ref_file_name, char *sha_file_name, size_t sha_max_len);//returns sha_file_name, which is root/blobs/xx/yy/zzzzzzz*
 
 //writes reference tp file fn. ref_len should be blob_reference_size!
-void write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len);//ref_len == blob_reference_size
-void write_blob_reference(const char *fn, unsigned char sha256[]);//sha256[32] == digest
+bool write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len, bool fail_on_error=true);//ref_len == blob_reference_size
+bool write_blob_reference(const char *fn, unsigned char sha256[], bool fail_on_error=true);//sha256[32] == digest
 
 //writes blob reference to fn, and also writes blob itself;
 void write_blob_and_blob_reference(const char *root, const char *fn, const void *data, size_t len, BlobPackType pack, bool src_packed);

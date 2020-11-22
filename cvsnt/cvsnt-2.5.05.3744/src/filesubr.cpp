@@ -756,14 +756,23 @@ void xchmod (const char *fname, int writable)
 /*
  * Rename a file and die if it fails
  */
+bool rename_file (const char *from, const char *to, bool fail_on_error)
+{
+  TRACE(1,"rename(%s,%s)",PATCH_NULL(from),PATCH_NULL(to));
+  if (noexec)
+  	return true;
+
+  if (rename (from, to) < 0)
+  {
+	error (fail_on_error ? 1 : 0, errno, "cannot rename file %s to %s", fn_root(from), fn_root(to));
+    return false;
+  }
+  return true;
+}
+
 void rename_file (const char *from, const char *to)
 {
-	TRACE(1,"rename(%s,%s)",PATCH_NULL(from),PATCH_NULL(to));
-    if (noexec)
-		return;
-
-    if (rename (from, to) < 0)
-	error (1, errno, "cannot rename file %s to %s", fn_root(from), fn_root(to));
+  rename_file(from, to, true);
 }
 
 /*

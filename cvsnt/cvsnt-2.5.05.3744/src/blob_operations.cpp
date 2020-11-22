@@ -25,7 +25,7 @@
 void error (int, int, const char *, ...)  __attribute__ ((__format__ (__printf__, 3, 4)));
 //files
 FILE *cvs_temp_file(char **filename, const char *mode = nullptr);
-void rename_file (const char *from, const char *to);
+bool rename_file (const char *from, const char *to, bool fail);
 size_t get_file_size(const char *file);
 int isreadable (const char *file);
 int blob_mkdir (const char *path, int mode);
@@ -318,7 +318,7 @@ void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
     if (compressed_data != nullptr)
       blob_free(compressed_data);
   }
-  rename_file (temp_filename, sha_file_name);
+  rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
   fclose(dest);
 
   blob_free (temp_filename);
@@ -655,30 +655,42 @@ bool is_blob_reference(const char *root_dir, const char *blob_ref_file_name, cha
   return does_blob_exist(sha_file_name);
 }
 
-void write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len)//ref_len == blob_reference_size
+bool write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len, bool fail_on_error)//ref_len == blob_reference_size
 {
   if (ref_len != blob_reference_size)
     error(1, 0, "not a reference <%s>", fn);
   char *temp_filename = NULL;
   FILE *dest = cvs_temp_file(&temp_filename, "wb");
   if (!dest)
-    error(1, 0, "can't open write temp_filename <%s> for <%s>", temp_filename, fn);
+  {
+    error(fail_on_error ? 1 : 0, 0, "can't open write temp_filename <%s> for <%s>", temp_filename, fn);
+    return false;
+  }
+  bool ret = true;
   if (fwrite(ref, 1, ref_len, dest) != ref_len)
   {
-    error(1, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn);
-  } else
-    rename_file (temp_filename, fn);
-  fclose(dest);
-  blob_free (temp_filename);
+    error(fail_on_error ? 1 : 0, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn);
+    ret = false;
+    fclose(dest);
+    blob_free (temp_filename);
+    return false;
+  }
+  if (ret)
+  {
+    ret = rename_file (temp_filename, fn, fail_on_error);
+    fclose(dest);
+    blob_free (temp_filename);
+  }
+  return ret;
 }
 
-void write_blob_reference(const char *fn, unsigned char sha256[])//sha256[32] == digest
+bool write_blob_reference(const char *fn, unsigned char sha256[], bool fail_on_error)//sha256[32] == digest
 {
- char sha256_encoded[blob_reference_size+1];
- snprintf(sha256_encoded, sizeof(sha256_encoded), SHA256_REV_STRING
+  char sha256_encoded[blob_reference_size+1];
+  snprintf(sha256_encoded, sizeof(sha256_encoded), SHA256_REV_STRING
 	  "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
 	  SHA256_LIST(sha256));
-  write_direct_blob_reference(fn,  sha256_encoded, blob_reference_size);
+  return write_direct_blob_reference(fn,  sha256_encoded, blob_reference_size, fail_on_error);
 }
 
 void write_blob_and_blob_reference(const char *root, const char *fn, const void *data, size_t len, BlobPackType store_packed, bool src_packed)
