@@ -1,2 +1,3 @@
 clang++ -std=c++17 -O2 -I../src gc-blobs.cpp ../src/blob_operations.cpp ../src/sha256/sha256.c -lz -lzstd -ogc-blobs
 clang++ -std=c++17 -O2 -I../src convert_to_blob.cpp ../src/blob_operations.cpp ../src/sha256/sha256.c -lz -lzstd -ocvtblob
+clang++ -std=c++17 -O2 -I../src repack-blobs.cpp ../src/blob_operations.cpp ../src/sha256/sha256.c -lz -lzstd -orepack-blobs

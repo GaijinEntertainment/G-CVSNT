@@ -238,6 +238,30 @@ void rename_file (const char *from, const char *to)
     error (1, errno, "cannot rename file %s to %s", from, to);
 }
 
+time_t get_file_mtime(const char *file)
+{
+  struct stat sb;
+
+  if (stat (file, &sb) < 0)
+    return 0;
+  return sb.st_mtime;
+}
+
+#if _MSC_VER
+ #include <sys/utime.h>
+#else
+ #include <sys/types.h>
+ #include <utime.h>
+#endif
+
+void set_file_mtime(const char *filename, time_t mtime)
+{
+  struct utimbuf t;
+  memset (&t, 0, sizeof (t));
+  t.modtime = t.actime = mtime;
+  utime (filename, &t);
+}
+
 inline const char *idn(const char*a) {return a;}
 inline const char *decode_idn(const char*a) {return a;}
 

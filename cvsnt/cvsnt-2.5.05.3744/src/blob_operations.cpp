@@ -354,7 +354,7 @@ bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
 }
 
 size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
-  const char *fn,//fn is for context only
+  const char *fn,//write to
   const void *data, size_t len, BlobPackType pack, bool src_packed)//fn is just context!
 {
   if (src_packed &&

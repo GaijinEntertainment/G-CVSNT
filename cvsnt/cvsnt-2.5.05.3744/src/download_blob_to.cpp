@@ -87,7 +87,12 @@ static bool download_blob_ref_file(const char *to, const char *encoded_sha256)
 }
 
 
-#include <sys/utime.h>
+#if _MSC_VER
+ #include <sys/utime.h>
+#else
+ #include <sys/types.h>
+ #include <utime.h>
+#endif
 #include "error.h"
 extern int change_mode(const char *filename, const char *mode_string, int respect_umask);
 extern void change_utime(const char* filename, time_t timestamp);
