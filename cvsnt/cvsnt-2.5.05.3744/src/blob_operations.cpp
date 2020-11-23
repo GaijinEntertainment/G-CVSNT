@@ -250,13 +250,14 @@ static void* compress_zlib_data(const void *data, size_t len, int compression_le
   return zbuf;
 }
 
-static const int zstd_fast_comp = 19;//we dont use ultra so everything is fast enough. some server lazy utility can constantly re-pack blobs with smaller compression levels
+static const int zstd_fast_comp = 10;//we dont use ultra so everything is fast enough. some server lazy utility can constantly re-pack blobs with smaller compression levels
+static const int zstd_best_comp = 19;//we dont use ultra as it consumes too much memory
 static void* compress_zstd_data(const void *data, size_t len, BlobPackType pack, BlobHeader &hdr)
 {
-  const int compression_level = pack == BlobPackType::FAST ? zstd_fast_comp : ZSTD_maxCLevel();
+  const int compression_level = pack == BlobPackType::FAST ? zstd_fast_comp : zstd_best_comp;
   size_t zlen = ZSTD_compressBound(len);
   void *zbuf = blob_alloc(zlen);
-  const uint16_t flags = compression_level == ZSTD_maxCLevel() ? BlobHeader::BEST_POSSIBLE_COMPRESSION : 0;
+  const uint16_t flags = pack == BlobPackType::FAST ? 0 : BlobHeader::BEST_POSSIBLE_COMPRESSION;
   size_t compressedSz = ZSTD_compress( zbuf, zlen, data, len, compression_level);
   if (ZSTD_isError(compressedSz) || compressedSz > len - len/20)//should be at least 95% compression, otherwise why bother compressing at all
   {
