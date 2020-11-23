@@ -67,16 +67,17 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
     lockId = 0;
     do {
       lockId = do_lock_file(lock_server_socket, filePath.c_str(), 1, 0);
-      sleep(500);
+      if (lockId == 0)
+        sleep(500);
     } while(lockId == 0);
     printf("for <%s> obtained lock %lld, start processing\n", filePath.c_str(), (long long int) lockId);
   };
   auto unlock = [&](){
-    if (lockId)
-    {
-      printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
-      do_unlock_file(lock_server_socket, lockId);
-    }
+    if (!lockId)
+      return;
+    printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
+    do_unlock_file(lock_server_socket, lockId);
+    lockId = 0;
   };
   std::vector<char> fileData;
   std::vector<char> sha_file_name(filePath.length() + sha256_encoded_size + 7);
