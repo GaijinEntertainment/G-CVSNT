@@ -116,18 +116,19 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
     //process packed data
     if (wasPacked)
     {
+      //printf("was packed %d ->%d\n", (int)unpackedDataSize,(int)sz);
       //we need to unpack data first, so we can repack.
       //ofc, for fastest possible conversion we can just write blobs as is (i.e. keep them zlib)
-      filePackedData.resize(unpackedDataSize);//we then swap it with fileUnpackedData
+      std::swap(fileUnpackedData, filePackedData);
+      fileUnpackedData.resize(unpackedDataSize);//we then swap it with fileUnpackedData
       z_stream stream = {0};
       inflateInit(&stream);
-      stream.avail_in = fileUnpackedData.size() - sizeof(int);
-      stream.next_in = (Bytef*)(fileUnpackedData.data() + sizeof(int));
+      stream.avail_in = filePackedData.size() - sizeof(int);
+      stream.next_in = (Bytef*)(filePackedData.data() + sizeof(int));
       stream.avail_out = unpackedDataSize;
-      stream.next_out = (Bytef*)filePackedData.data();
+      stream.next_out = (Bytef*)fileUnpackedData.data();
       if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
           error(1,0,"internal error: inflate failed");
-      std::swap(fileUnpackedData, filePackedData);
     }
     //if wasPacked, originally packed data is in filePackedData
     unsigned char sha256[32];
@@ -151,12 +152,10 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
           error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)sizeof(hdr));
         if (fwrite(wasPacked ? filePackedData.data() + sizeof(int) : fileUnpackedData.data(), 1, hdr.compressedLen, dest) != hdr.compressedLen)
           error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)hdr.compressedLen);
-        rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
         fclose(dest);
-        wr = hdr.compressedLen + sizeof(hdr);
         rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
         blob_free (temp_filename);
-        fclose(dest);
+        wr = hdr.compressedLen + sizeof(hdr);
       }
     } else
       wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
