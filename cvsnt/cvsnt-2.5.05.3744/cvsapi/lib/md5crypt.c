@@ -163,5 +163,5 @@ int compare_crypt(const char *text, const char *crypt_pw)
 	else
 		test_pw = crypt(text,crypt_pw);
 
-	return strcmp(test_pw,crypt_pw);
+	return test_pw ? strcmp(test_pw,crypt_pw) : 1;
 }
