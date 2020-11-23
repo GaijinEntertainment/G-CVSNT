@@ -244,7 +244,7 @@ static int zstd_buffer_flush (void *closure)
         return EIO;
     }
 
-    if (cb->streamOut.pos != BUFFER_DATA_SIZE)
+    if (cb->streamOut.pos != 0)
         buf_output (cb->buf, buffer, cb->streamOut.pos);
 
     /* If the deflate function did not fill the output buffer,
@@ -309,7 +309,7 @@ static int zstd_buffer_shutdown_output (void *closure)
         return EIO;
     }
 
-    if (cb->streamOut.pos != BUFFER_DATA_SIZE)
+    if (cb->streamOut.pos != 0)
         buf_output (cb->buf, buffer, cb->streamOut.pos);
 
     /* If the deflate function did not fill the output buffer,
