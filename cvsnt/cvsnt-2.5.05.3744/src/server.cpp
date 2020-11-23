@@ -4290,24 +4290,24 @@ void server_updated (
 	}
     else if (updated == SERVER_BLOB_REF)
     {
-        if (!supported_response ("Blob-ref"))
-        {
-            char sha256_encoded[65];
-            if (!get_blob_reference_content_sha256((const unsigned char*)filebuf->data->bufp, filebuf->data->size, sha256_encoded))
-              error(1,0, "not a sha256 ref <%s>!", filebuf->data->text);
-            char sha_file_name[1024];
-            get_blob_filename_from_encoded_sha256(current_parsed_root->directory, sha256_encoded, sha_file_name, sizeof(sha_file_name));
-            if (!does_blob_exist(sha_file_name))
-              error(1,0, "blob <%s> doesnt exist!", sha_file_name);
-            buf_free(filebuf);
-            filebuf = buf_nonio_initialize((BUFMEMERRPROC) NULL);
-            char *data;
-            size = decode_binary_blob(sha_file_name, (void**)&data);
-            buf_output(filebuf, data, size);
-            xfree(data);
-    	    buf_output0(buf_to_net,"Updated ");
-        } else
- 		   buf_output0(buf_to_net,"Blob-ref ");
+      if (!supported_response ("Blob-ref"))
+      {
+        char sha256_encoded[65];
+        if (!get_blob_reference_content_sha256((const unsigned char*)filebuf->data->bufp, filebuf->data->size, sha256_encoded))
+          error(1,0, "not a sha256 ref <%s>!", filebuf->data->text);
+        char sha_file_name[1024];
+        get_blob_filename_from_encoded_sha256(current_parsed_root->directory, sha256_encoded, sha_file_name, sizeof(sha_file_name));
+        if (!does_blob_exist(sha_file_name))
+          error(1,0, "blob <%s> doesnt exist!", sha_file_name);
+        buf_free(filebuf);
+        filebuf = buf_nonio_initialize((BUFMEMERRPROC) NULL);
+        char *data;
+        size = decode_binary_blob(sha_file_name, (void**)&data);
+        buf_output(filebuf, data, size);
+        xfree(data);
+  	    buf_output0(buf_to_net,"Updated ");
+      } else
+   	   buf_output0(buf_to_net,"Blob-ref ");
 	}
     else if (updated == SERVER_MERGED)
 		buf_output0(buf_to_net,"Merged ");
@@ -4317,7 +4317,14 @@ void server_updated (
 		buf_output0(buf_to_net,"Rcs-diff ");
 	else
 		error(1,0,"Internal error - invalid update type");
-	
+
+    static bool old_client_warning_fired = false;
+    if (!old_client_warning_fired)
+    {
+      if (!supported_response ("Blob-ref"))
+        error(0,0, "Client version is old!");
+      old_client_warning_fired = true;
+    }
 	output_dir (finfo->update_dir, finfo->repository);
 	server_buf_output0(buf_to_net,finfo->file);
 	buf_output0(buf_to_net,"\n");

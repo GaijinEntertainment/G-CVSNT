@@ -4770,6 +4770,13 @@ static void send_modified (const char *file, const char *short_pathname, const V
 
 	{
 		char tmp[128];
+        static bool old_server_warning_fired = false;
+        if (!old_server_warning_fired)
+        {
+          if (!supported_request ("Blob-ref-transfer"))
+            error(0,0, "Connnecting to old server!");
+          old_server_warning_fired = true;
+        }
 
         if (blob_binary && supported_request ("Blob-ref-transfer") && supported_request ("Blob-transfer"))
         {
