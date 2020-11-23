@@ -112,7 +112,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
     readData += sz;
     std::string srcPathString = entry.path().c_str();
     const bool wasPacked = (srcPathString[srcPathString.length()-1] == 'z' && srcPathString[srcPathString.length()-2] == '#');
-    size_t unpackedDataSize = wasPacked ? size_t(*(int*)fileUnpackedData.data()) : sz;
+    size_t unpackedDataSize = wasPacked ? size_t(ntohl(*(int*)fileUnpackedData.data())) : sz;
     //process packed data
     if (wasPacked)
     {
