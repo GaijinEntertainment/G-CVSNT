@@ -5764,6 +5764,8 @@ static char *check_system_password(const char *username, const char *password, v
 /* Return a hosting username if password matches, else NULL. */
 static char *check_password (const char *username, const char *password, const char *repository, void **user_token)
 {
+    if (!password)
+        return NULL;
     int rc;
     char *host_user = NULL;
 
