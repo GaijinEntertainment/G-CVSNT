@@ -4318,13 +4318,6 @@ void server_updated (
 	else
 		error(1,0,"Internal error - invalid update type");
 
-    static bool old_client_warning_fired = false;
-    if (!old_client_warning_fired)
-    {
-      if (!supported_response ("Blob-ref"))
-        error(0,0, "Client version is old!");
-      old_client_warning_fired = true;
-    }
 	output_dir (finfo->update_dir, finfo->repository);
 	server_buf_output0(buf_to_net,finfo->file);
 	buf_output0(buf_to_net,"\n");
