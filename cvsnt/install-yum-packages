@@ -8,3 +8,4 @@ yum install glibc-static
 yum install libstdc++-static 
 yum install libzstd-devel
 yum install zstd
+yum install pam-devel
