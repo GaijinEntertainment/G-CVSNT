@@ -1,0 +1,21 @@
+cd cvsnt-2.5.05.3744
+autoreconf -i
+bash configure  \
+    --enable-pam \
+    --enable-server \
+    --enable-pserver \
+    --enable-sspi \
+    --enable-ext \
+    --disable-mysql \
+    --disable-postgres \
+    --disable-sqlite \
+    --enable-64bit
+
+cd zstd
+make
+sudo make install
+cd ..
+make
+sudo make install
+cd tools
+./build_tools 
