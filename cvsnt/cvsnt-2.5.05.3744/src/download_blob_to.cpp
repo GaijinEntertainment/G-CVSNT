@@ -10,7 +10,6 @@
 //may be better to switch to libcurl https://curl.se/libcurl/c/http2-download.html
 static std::unique_ptr<httplib::Client> client;
 static std::string base_repo;
-
 //link time resolved dependency
 extern void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo);
 
@@ -26,12 +25,6 @@ void init_download_source()
   //cli.enable_server_certificate_verification(true);//if we will switch to https
   if (user && passwd)
     cli->set_basic_auth(user, passwd);//read me from User registry once
-  auto initialRes = cli->Get("/");
-  if (!cli->is_socket_open() || initialRes->status != 200)
-  {
-    printf("can't connect <%s:%d>, err = %d, %s\n", url, port, initialRes->status, httplib::detail::status_message(initialRes->status));
-    return;
-  }
   base_repo = repo;
   if (base_repo[0] != '/')
     base_repo = "/" + base_repo;
@@ -99,7 +92,8 @@ extern void change_utime(const char* filename, time_t timestamp);
 
 void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp)
 {
-  init_download_source();
+  if (!client)
+    init_download_source();
   if (!download_blob_ref_file(filename, encoded_sha256))
     error (1, errno, "downloading %s", filename);
 

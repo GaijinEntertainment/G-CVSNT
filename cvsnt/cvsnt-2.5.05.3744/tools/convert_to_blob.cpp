@@ -28,7 +28,7 @@ static void usage()
   printf("Warning! run only on server!\n");
   printf("Warning! it can lock one file for a short while, but will do that numerous time. \n");
 }
-static bool fastest_conversion = true;
+static bool fastest_conversion = false;//if true, we won't repack, just calc sha256 and put zlib block as is.
 
 static void rename_z_to_normal(const char *f)
 {
@@ -127,8 +127,11 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       stream.next_in = (Bytef*)(filePackedData.data() + sizeof(int));
       stream.avail_out = unpackedDataSize;
       stream.next_out = (Bytef*)fileUnpackedData.data();
-      if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
-          error(1,0,"internal error: inflate failed");
+      if (unpackedDataSize && inflate(&stream, Z_FINISH)!=Z_STREAM_END)
+      {
+        printf("[E] can't unpack %s of sz=%d unpacked=%d \n", srcPathString.c_str(), (int)sz, (int)unpackedDataSize);
+        continue;
+      }
     }
     //if wasPacked, originally packed data is in filePackedData
     unsigned char sha256[32];
@@ -174,7 +177,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       if (wasPacked)
         rename_z_to_normal(entry.path().c_str());
     } else
-      printf("[E] blob reference %s couldn't be saved", entry.path().c_str());
+      printf("[E] blob reference %s couldn't be saved\n", entry.path().c_str());
     unlock();
     writtenData += wr;
   }
