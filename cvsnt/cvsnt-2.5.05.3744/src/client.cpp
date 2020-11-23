@@ -4319,7 +4319,25 @@ int start_server (int verify_only)
 	if (gzip_level>0 && rootless_encryption)
 	{
 	TRACE(2,"client start - gzip_level>0 && rootless_encryption.");
-	if (supported_request ("Gzip-stream"))
+    if (supported_request ("Zstd-stream"))
+	{
+		char gzip_level_buf[5];
+		send_to_server ("Zstd-stream ", 0);
+		sprintf (gzip_level_buf, "%d", gzip_level);
+		send_to_server (gzip_level_buf, 0);
+		send_to_server ("\n", 1);
+
+		/* All further communication with the server will be
+			compressed.  */
+
+		to_server = zstd_buffer_initialize (to_server, 0, gzip_level,
+							(BUFMEMERRPROC) NULL);
+		from_server = zstd_buffer_initialize (from_server, 1,
+							gzip_level,
+							(BUFMEMERRPROC) NULL);
+		TRACE(1,"Compression enabled");
+	}
+	else if (supported_request ("Gzip-stream"))
 	{
 		char gzip_level_buf[5];
 		send_to_server ("Gzip-stream ", 0);

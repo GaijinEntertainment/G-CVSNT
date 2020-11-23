@@ -4634,6 +4634,28 @@ static void serve_gzip_stream (char *arg)
 
 	protocol_compression_enabled = 1;
 }
+static void serve_zstd_stream (char *arg)
+{
+    int level;
+    level = atoi (arg);
+
+	if(protocol_compression_enabled)
+		return;
+
+	/* All further communication with the client will be compressed.  */
+	buf_flush(stderr_buf, 1);
+	buf_flush(stdout_buf, 1);
+
+    buf_to_net = zstd_buffer_initialize (buf_to_net, 0, level,
+					     buf_to_net->memory_error);
+    buf_from_net = zstd_buffer_initialize (buf_from_net, 1, level,
+					       buf_from_net->memory_error);
+
+	cvs_protocol_wrap_set_buffer(stdout_buf, buf_to_net);
+	cvs_protocol_wrap_set_buffer(stderr_buf, buf_to_net);
+
+	protocol_compression_enabled = 1;
+}
 
 /* Tell the client about RCS options set in CVSROOT/cvswrappers. */
 static void serve_wrapper_sendme_rcs_options(char *arg)
@@ -4737,6 +4759,7 @@ struct request requests[] =
   REQ_LINE("Argumentx", serve_argumentx, RQ_ESSENTIAL),
   REQ_LINE("Global_option", serve_global_option, RQ_ROOTLESS),
   REQ_LINE("Gzip-stream", serve_gzip_stream, RQ_ROOTLESS),
+  REQ_LINE("Zstd-stream", serve_zstd_stream, RQ_ROOTLESS),
   REQ_LINE("wrapper-sendme-rcsOptions", serve_wrapper_sendme_rcs_options, RQ_ROOTLESS),
   REQ_LINE("Set", serve_set, RQ_ROOTLESS),
   REQ_LINE("Rename", serve_rename, 0),

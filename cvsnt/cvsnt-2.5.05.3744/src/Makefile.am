@@ -118,6 +118,7 @@ cvsnt_SOURCES = \
 	xgetwd.cpp \
 	xdiff.cpp \
 	zlib.cpp \
+    zstd_buffer.cpp \
 	buffer.h \
 	client.h \
 	cvs.h \

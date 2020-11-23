@@ -92,7 +92,7 @@ struct buffer_data
 };
 
 /* The size we allocate for each buffer_data structure.  */
-#define BUFFER_DATA_SIZE BUFSIZ*10
+#define BUFFER_DATA_SIZE (BUFSIZ*10)
 
 /* The type of a function passed as a memory error handler.  */
 typedef void (*BUFMEMERRPROC)(struct buffer *);
@@ -109,6 +109,8 @@ struct buffer *buf_initialize (int (*) (void *, char *, int,
 void buf_free(struct buffer *);
 struct buffer *buf_nonio_initialize(void (*) (struct buffer *));
 struct buffer *stdio_buffer_initialize(FILE *, int, void (*) (struct buffer *));
+
+struct buffer *zstd_buffer_initialize(struct buffer *, int, int, void (*) (struct buffer *));
 struct buffer *compress_buffer_initialize(struct buffer *, int, int, void (*) (struct buffer *));
 struct buffer *packetizing_buffer_initialize(struct buffer *, int (*) (void *, const char *, char *, int),
 	 int (*) (void *, const char *, char *, int, int *), void *,
