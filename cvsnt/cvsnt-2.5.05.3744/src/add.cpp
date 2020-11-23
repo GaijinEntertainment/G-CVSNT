@@ -87,6 +87,8 @@ int add (int argc, char **argv)
 		if(server_active && compat[compat_level].ignore_client_wrappers)
 			break;
 		options = RCS_check_kflag (optarg,true,true);
+        if (char *oldBinary = strstr(options, "b"))
+          *oldBinary = 'B';
 		break;
 
 	    case 'm':
