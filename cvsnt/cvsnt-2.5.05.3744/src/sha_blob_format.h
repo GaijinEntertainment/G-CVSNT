@@ -38,3 +38,14 @@ static bool is_packed_blob(const BlobHeader& hdr)
 {
   return is_zstd_blob(hdr) || is_zlib_blob(hdr);
 }
+
+static inline BlobHeader get_header(const uint8_t *m, size_t len, size_t zlen, uint16_t flags)
+{
+  BlobHeader hdr;
+  memcpy(hdr.magic, m, BLOB_MAGIC_SIZE);
+  hdr.headerSize = sizeof(BlobHeader);
+  hdr.flags = flags;
+  hdr.uncompressedLen = len;
+  hdr.compressedLen = zlen;
+  return hdr;
+}

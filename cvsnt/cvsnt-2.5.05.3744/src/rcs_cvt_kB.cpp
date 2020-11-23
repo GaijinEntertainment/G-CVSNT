@@ -216,15 +216,15 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
       if (fread(tmpbuf, 1, zlen, fp) != zlen)
         error(1,errno,"Couldn't read from %s#z", fn);
 
-            z_stream stream = {0};
-            inflateInit(&stream);
-            stream.avail_in = zlen;
-            stream.next_in = (Bytef*)tmpbuf;
-            stream.avail_out = data_sz;
-            stream.next_out = (Bytef*)*out_data;
-            if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
-                error(1,0,"internal error: inflate failed");
-            xfree(tmpbuf);
+      z_stream stream = {0};
+      inflateInit(&stream);
+      stream.avail_in = zlen;
+      stream.next_in = (Bytef*)tmpbuf;
+      stream.avail_out = data_sz;
+      stream.next_out = (Bytef*)*out_data;
+      if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
+          error(1,0,"internal error: inflate failed");
+      xfree(tmpbuf);
     }
   }
   if (fp)

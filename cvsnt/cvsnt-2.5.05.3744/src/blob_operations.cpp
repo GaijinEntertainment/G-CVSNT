@@ -209,16 +209,6 @@ void create_dirs(const char *root, unsigned char sha256[])
 }
 
 
-static inline BlobHeader get_header(const uint8_t *m, size_t len, size_t zlen, uint16_t flags)
-{
-  BlobHeader hdr;
-  memcpy(hdr.magic, m, BLOB_MAGIC_SIZE);
-  hdr.headerSize = sizeof(BlobHeader);
-  hdr.flags = flags;
-  hdr.uncompressedLen = len;
-  hdr.compressedLen = zlen;
-  return hdr;
-}
 static inline BlobHeader get_noarc_header(size_t len, uint16_t flags = 0) {return get_header(noarc_magic, len, len, flags);}
 static inline BlobHeader get_zlib_header(size_t len, size_t zlen, uint16_t flags = 0) {return get_header(zlib_magic, len, zlen, flags);}
 static inline BlobHeader get_zstd_header(size_t len, size_t zlen, uint16_t flags = 0) {return get_header(zstd_magic, len, zlen, flags);}

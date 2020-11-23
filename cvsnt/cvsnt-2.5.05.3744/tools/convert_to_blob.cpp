@@ -8,6 +8,7 @@
 #include <fstream>
 #include <vector>
 #include <ctime>
+#include "zlib.h"
 #ifdef _WIN32
 namespace fs = std::experimental::filesystem;
 #else
@@ -27,6 +28,7 @@ static void usage()
   printf("Warning! run only on server!\n");
   printf("Warning! it can lock one file for a short while, but will do that numerous time. \n");
 }
+static bool fastest_conversion = true;
 
 static void rename_z_to_normal(const char *f)
 {
@@ -59,7 +61,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
   }
 
   std::string filePath = dirPath + file;
-  std::vector<char> fileData;
+  std::vector<char> fileUnpackedData, filePackedData;
   std::vector<char> sha_file_name(filePath.length() + sha256_encoded_size + 7);
   for (const auto & entry : fs::directory_iterator(pathToVersions))
   {
@@ -101,28 +103,79 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       unlock();
       continue;
     }
+    //read data
     const auto sz = fs::file_size(entry.path());
-    fileData.resize(sz);
+    fileUnpackedData.resize(sz);
     std::ifstream f(entry.path(), std::ios::in | std::ios::binary);
-    f.read(fileData.data(), sz);
+    f.read(fileUnpackedData.data(), sz);
     unlock();
     readData += sz;
+    std::string srcPathString = entry.path().c_str();
+    const bool wasPacked = (srcPathString[srcPathString.length()-1] == 'z' && srcPathString[srcPathString.length()-2] == '#');
+    size_t unpackedDataSize = wasPacked ? size_t(*(int*)fileUnpackedData.data()) : sz;
+    //process packed data
+    if (wasPacked)
     {
-      unsigned char sha256[32];
-      size_t wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileData.data(), sz, BlobPackType::FAST, false);
-      if (!wr)
-      {
-        printf("deduplication %d for %s", int(sz), filePath.c_str());
-        deduplicatedData += sz;
-      }
-      get_lock(entry.path().string().c_str());
-      if (write_blob_reference(entry.path().c_str(), sha256, false))
-        rename_z_to_normal(entry.path().c_str());
-      else
-        printf("[E] blob reference %s couldn't be saved", entry.path().c_str());
-      unlock();
-      writtenData += wr;
+      //we need to unpack data first, so we can repack.
+      //ofc, for fastest possible conversion we can just write blobs as is (i.e. keep them zlib)
+      filePackedData.resize(unpackedDataSize);//we then swap it with fileUnpackedData
+      z_stream stream = {0};
+      inflateInit(&stream);
+      stream.avail_in = fileUnpackedData.size() - sizeof(int);
+      stream.next_in = (Bytef*)(fileUnpackedData.data() + sizeof(int));
+      stream.avail_out = unpackedDataSize;
+      stream.next_out = (Bytef*)filePackedData.data();
+      if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
+          error(1,0,"internal error: inflate failed");
+      std::swap(fileUnpackedData, filePackedData);
     }
+    //if wasPacked, originally packed data is in filePackedData
+    unsigned char sha256[32];
+    size_t wr = 0;
+    if (fastest_conversion)
+    {
+      calc_sha256(srcPathString.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), false, unpackedDataSize, sha256);
+      const size_t sha_file_name_len = 1024;
+      char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
+      char sha256_encoded[sha256_encoded_size+1];
+      encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));
+      get_blob_filename_from_encoded_sha256(rootDir, sha256_encoded, sha_file_name, sha_file_name_len);
+      if (!isreadable(sha_file_name))// otherwise blob exist
+      {
+        char *temp_filename = NULL;
+        FILE *dest = cvs_temp_file(&temp_filename, "wb");
+        if (!dest)
+          error(1, errno, "can't open write temp_filename <%s> for <%s>(<%s>)", temp_filename, sha_file_name, srcPathString.c_str());
+        BlobHeader hdr = wasPacked ? get_header(zlib_magic, fileUnpackedData.size(), filePackedData.size()-sizeof(int), 0) : get_header(noarc_magic, fileUnpackedData.size(), fileUnpackedData.size(), 0);
+        if (fwrite(&hdr,1,sizeof(hdr),dest) != sizeof(hdr))
+          error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)sizeof(hdr));
+        if (fwrite(wasPacked ? filePackedData.data() + sizeof(int) : fileUnpackedData.data(), 1, hdr.compressedLen, dest) != hdr.compressedLen)
+          error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)hdr.compressedLen);
+        rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
+        fclose(dest);
+        wr = hdr.compressedLen + sizeof(hdr);
+        rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
+        blob_free (temp_filename);
+        fclose(dest);
+      }
+    } else
+      wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
+
+    //now we can write reference
+    if (!wr)
+    {
+      printf("deduplication %d for %s", int(sz), filePath.c_str());
+      deduplicatedData += sz;
+    }
+    get_lock(entry.path().string().c_str());
+    if (write_blob_reference(entry.path().c_str(), sha256, false))
+    {
+      if (wasPacked)
+        rename_z_to_normal(entry.path().c_str());
+    } else
+      printf("[E] blob reference %s couldn't be saved", entry.path().c_str());
+    unlock();
+    writtenData += wr;
   }
 }
 
@@ -180,7 +233,7 @@ int main(int ac, const char* argv[])
   {
     process_directory(lock_server_socket, rootDir, ac > 4 ? argv[4] : "");
   }
-  printf("written %gmb, saved %g mb, de-duplicated %g mb\n", double(writtenData)/(1<<20),
+  printf("written %g mb, saved %g mb, de-duplicated %g mb\n", double(writtenData)/(1<<20),
     (double(readData)-double(writtenData))/(1<<20),
     double(deduplicatedData)/(1<<20));
 
