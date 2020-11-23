@@ -19,9 +19,10 @@ static void usage()
 {
   printf("CVS_TMP env var (or /tmp) should point to same filesystem as root\n");
   printf("Usage: <lock_server> <user_name> <full_root> full_directory file\n");
-  printf("or: <lock_server> <user_name> <full_root>\n");
+  printf("or: <lock_server> <user_name> <full_root> [full_directory]\n");
   printf("example:convert_to_blob 127.0.0.1 some_user /cvs/some_repo testDir a.png\n");
   printf("or:convert_to_blob 127.0.0.1 some_user /cvs/some_repo \n");
+  printf("or:convert_to_blob 127.0.0.1 some_user /cvs/some_repo SomeFolderThere\n");
   printf("Warning! no ,v in the end is needed. Warning, do not enter CVS directories\n");
   printf("Warning! run only on server!\n");
   printf("Warning! it can lock one file for a short while, but will do that numerous time. \n");
@@ -58,27 +59,6 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
   }
 
   std::string filePath = dirPath + file;
-  size_t lockId = 0;
-  auto get_lock = [&]()
-  {
-    if (lockId)
-      return;
-    printf("obtaining lock for <%s>\n", filePath.c_str());
-    lockId = 0;
-    do {
-      lockId = do_lock_file(lock_server_socket, filePath.c_str(), 1, 0);
-      if (lockId == 0)
-        sleep(500);
-    } while(lockId == 0);
-    printf("for <%s> obtained lock %lld, start processing\n", filePath.c_str(), (long long int) lockId);
-  };
-  auto unlock = [&](){
-    if (!lockId)
-      return;
-    printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
-    do_unlock_file(lock_server_socket, lockId);
-    lockId = 0;
-  };
   std::vector<char> fileData;
   std::vector<char> sha_file_name(filePath.length() + sha256_encoded_size + 7);
   for (const auto & entry : fs::directory_iterator(pathToVersions))
@@ -91,7 +71,30 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       //rename_z_to_normal(entry.path().c_str());
       continue;
     }
-    get_lock();
+
+    size_t lockId = 0;
+    auto get_lock = [&](const char *fp)
+    {
+      if (lockId)
+        return;
+      printf("obtaining lock for <%s>...", fp);
+      lockId = 0;
+      do {
+        lockId = do_lock_file(lock_server_socket, filePath.c_str(), 1, 0);
+        if (lockId == 0)
+          sleep(500);
+      } while(lockId == 0);
+      printf(" lock=%lld, start processing\n", (long long int) lockId);
+    };
+    auto unlock = [&](){
+      if (!lockId)
+        return;
+      printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
+      do_unlock_file(lock_server_socket, lockId);
+      lockId = 0;
+    };
+
+    get_lock(entry.path().string().c_str());
     if (is_blob_reference(rootDir, entry.path().string().c_str(), sha_file_name.data(), sha_file_name.size()))
     {
       //became reference
@@ -112,7 +115,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
         printf("deduplication %d for %s", int(sz), filePath.c_str());
         deduplicatedData += sz;
       }
-      get_lock();
+      get_lock(entry.path().string().c_str());
       if (write_blob_reference(entry.path().c_str(), sha256, false))
         rename_z_to_normal(entry.path().c_str());
       else
@@ -121,7 +124,6 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       writtenData += wr;
     }
   }
-  do_unlock_file(lock_server_socket, lockId);
 }
 
 static void process_directory(int lock_server_socket, const char *rootDir, const char *dir)
@@ -176,7 +178,7 @@ int main(int ac, const char* argv[])
     process_file(lock_server_socket, rootDir, argv[4], argv[5]);
   } else
   {
-    process_directory(lock_server_socket, rootDir, "");
+    process_directory(lock_server_socket, rootDir, ac > 4 ? argv[4] : "");
   }
   printf("written %gmb, saved %g mb, de-duplicated %g mb\n", double(writtenData)/(1<<20),
     (double(readData)-double(writtenData))/(1<<20),
