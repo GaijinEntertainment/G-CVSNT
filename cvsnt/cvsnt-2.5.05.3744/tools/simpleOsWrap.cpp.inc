@@ -217,13 +217,6 @@ FILE *cvs_temp_file (char **filename, const char *mode)
   errno = save_errno;
   }
 
-  if (fp == NULL) xfree (fn);
-  /* mkstemp is defined to open mode 0600 using glibc 2.0.7+ */
-  /* FIXME - configure can probably tell us which version of glibc we are
-   * linking to and not chmod for 2.0.7+
-   */
-  else chmod (fn, 0600);
-
   }
 
   *filename = fn;
@@ -231,6 +224,11 @@ FILE *cvs_temp_file (char **filename, const char *mode)
 }
 inline int unlink_file (const char *f) { return unlink(f); }
 #endif
+
+bool change_file_mode(const char *f, int mode)
+{
+  return chmod(f, mode&0777) >= 0;
+}
 
 #ifndef CVS_MKDIR
 #define CVS_MKDIR mkdir

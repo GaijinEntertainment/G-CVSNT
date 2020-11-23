@@ -278,6 +278,11 @@ mode_to_string (mode_t mode)
  * Returns 0 for success or errno code.
  * If RESPECT_UMASK is set, then honor the umask.
  */
+bool change_file_mode(const char *file, int mode)
+{
+  return chmod (file, mode & 0777) >= 0;
+}
+
 int change_mode (const char *filename, const char *mode_string, int respect_umask)
 {
 #ifdef CHMOD_BROKEN

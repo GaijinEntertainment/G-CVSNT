@@ -153,6 +153,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
         if (fwrite(wasPacked ? filePackedData.data() + sizeof(int) : fileUnpackedData.data(), 1, hdr.compressedLen, dest) != hdr.compressedLen)
           error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)hdr.compressedLen);
         create_dirs(rootDir, sha256);
+        change_file_mode(temp_filename, 0666);
         rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
         fclose(dest);
         blob_free (temp_filename);

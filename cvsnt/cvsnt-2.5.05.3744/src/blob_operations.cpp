@@ -29,6 +29,7 @@ bool rename_file (const char *from, const char *to, bool fail);
 size_t get_file_size(const char *file);
 int isreadable (const char *file);
 int blob_mkdir (const char *path, int mode);
+bool change_file_mode(const char *file, int mode);
 //mem
 void *blob_alloc(size_t sz);
 void blob_free(void *);
@@ -312,6 +313,7 @@ void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
     if (compressed_data != nullptr)
       blob_free(compressed_data);
   }
+  change_file_mode(temp_filename, 0666);
   rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
   fclose(dest);
 
@@ -666,11 +668,13 @@ bool write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len
     error(fail_on_error ? 1 : 0, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn);
     ret = false;
     fclose(dest);
+    unlink(temp_filename);
     blob_free (temp_filename);
     return false;
   }
   if (ret)
   {
+    change_file_mode(temp_filename, 0666);
     ret = rename_file (temp_filename, fn, fail_on_error);
     fclose(dest);
     blob_free (temp_filename);

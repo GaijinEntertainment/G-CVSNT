@@ -90,6 +90,7 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
         blob_free(tempFilename);
       } else
       {
+        change_file_mode(tempFilename, 0666);
         set_file_mtime(tempFilename, cftime);
         if (!rename_attempts(tempFilename, filename.c_str(), 100))
           printf("[W] can't rename temp file <%s> to <%s> skipping\n", tempFilename, filename.c_str());
