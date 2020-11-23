@@ -109,7 +109,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
     readData += sz;
     {
       unsigned char sha256[32];
-      size_t wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileData.data(), sz, BlobPackType::BEST, false);
+      size_t wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileData.data(), sz, BlobPackType::FAST, false);
       if (!wr)
       {
         printf("deduplication %d for %s", int(sz), filePath.c_str());

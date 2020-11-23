@@ -250,7 +250,10 @@ static void* compress_zlib_data(const void *data, size_t len, int compression_le
   return zbuf;
 }
 
-static const int zstd_fast_comp = 10;//we dont use ultra so everything is fast enough. some server lazy utility can constantly re-pack blobs with smaller compression levels
+//we dont use higher compression levels, as we want everything to perform as fast as possible
+//in the same time, we want to save traffic for others, until repack-blobs utility had made it's business
+static const int zstd_fast_comp = 3;
+//server lazy repack-blobs utility can constantly re-pack blobs with better compression levels
 static const int zstd_best_comp = 19;//we dont use ultra as it consumes too much memory
 static void* compress_zstd_data(const void *data, size_t len, BlobPackType pack, BlobHeader &hdr)
 {
