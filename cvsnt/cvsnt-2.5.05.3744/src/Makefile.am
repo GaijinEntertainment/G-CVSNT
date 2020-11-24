@@ -41,7 +41,7 @@ else
   ssl_lib =
 endif
 
-AM_CPPFLAGS = -I$(top_srcdir)/lib -I$(top_srcdir)/cvsapi -I$(top_srcdir)/cvstools -I$(top_srcdir)/diff -I$(top_srcdir)/cvsapi $(zlib_inc) $(includeopt) $(mac_hfs_inc) -std=c++11 -pthread
+AM_CPPFLAGS = -I$(top_srcdir)/lib -I$(top_srcdir)/cvsapi -I$(top_srcdir)/cvstools -I$(top_srcdir)/diff -I$(top_srcdir)/cvsapi $(zlib_inc) $(includeopt) $(mac_hfs_inc) -pthread
 AM_LDFLAGS = -pthread
 
 bin_PROGRAMS = cvsnt
