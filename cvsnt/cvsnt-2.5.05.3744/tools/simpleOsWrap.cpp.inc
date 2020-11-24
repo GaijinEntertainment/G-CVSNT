@@ -183,7 +183,13 @@ static void init_temp_dir()
   if (def_tmp_dir)
     return;
   const char *tmp = getenv("CVS_TMP");
-  def_tmp_dir = tmp ? strdup(tmp) : "/tmp";
+  if (tmp)
+    def_tmp_dir = tmp;
+  else
+  {
+    const char *tmp = getenv("TMPDIR");
+    def_tmp_dir = tmp ? strdup(tmp) : "/tmp";
+  }
 }
 
 FILE *cvs_temp_file (char **filename, const char *mode)
