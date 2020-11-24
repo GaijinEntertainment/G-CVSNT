@@ -178,6 +178,7 @@
       <DebugInformationFormat>ProgramDatabase</DebugInformationFormat>
       <CompileAs>Default</CompileAs>
       <BufferSecurityCheck>false</BufferSecurityCheck>
+      <WholeProgramOptimization>true</WholeProgramOptimization>
     </ClCompile>
     <ResourceCompile>
       <PreprocessorDefinitions>NDEBUG;%(PreprocessorDefinitions)</PreprocessorDefinitions>
@@ -815,10 +816,6 @@
       <Project>{2f90c820-cd6e-4ba2-a6a1-339147e508aa}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="protocols\ext_protocol.vcxproj">
-      <Project>{00725064-bf63-4724-9fb4-740eabe62cec}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="protocols\fork_protocol.vcxproj">
       <Project>{5d695560-5dd9-4ef5-9b2e-d609d1a05324}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -829,10 +826,6 @@
     </ProjectReference>
     <ProjectReference Include="protocols\server_protocol.vcxproj">
       <Project>{6fed639c-5fe8-4fdf-abe8-f720947ac9a1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="protocols\sserver_protocol.vcxproj">
-      <Project>{7b67f987-4bbb-4fd4-b537-77bf79abd04f}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="protocols\ssh_protocol.vcxproj">
@@ -901,10 +894,6 @@
     </ProjectReference>
     <ProjectReference Include="windows-NT\setuid\setuid\setuid.vcxproj">
       <Project>{e066ef1f-0dd5-4338-abc9-c413a556ab0f}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="xdiff\ext_xdiff.vcxproj">
-      <Project>{4ad8ab20-d822-44e2-aec1-e870140d254a}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="xdiff\xml_xdiff.vcxproj">

@@ -2071,7 +2071,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 
 void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
 
-void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo)
+void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count)
 {
   char *cp;
   repo = current_parsed_root->directory;
@@ -2080,6 +2080,8 @@ void get_download_source(const char *&url, int &port, const char *&auth_user, co
   port = 80;
   if ((cp = getenv ("CVS_BLOBS_PORT")) != NULL)
     port = atoi(cp);
+  if ((cp = getenv ("CVS_BLOB_DOWNLOAD_THREADS")) != NULL)
+    threads_count = atoi(cp);
   url = current_parsed_root->hostname;
   if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)//we don't do copy, as we dont call other getenv
     url = cp;
@@ -2309,8 +2311,8 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
       return;
     }
 
-    extern void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
-    add_download_queue(filename, blob_ref+sha256_magic_len,
+    extern void add_download_queue(const char *message, const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
+    add_download_queue(short_pathname, filename, blob_ref+sha256_magic_len,
       stored_mode ? stored_mode : mode_string,
       file_mtime);
 
@@ -2321,11 +2323,11 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
        affects a user who wants status info about how far we have
        gotten, and also affects whether "U foo.c" appears in addition
        to various error messages.  */
-    if (updated_fname != NULL)
+    if (!quiet && updated_fname != NULL)
     {
       cvs_output ("Ub ", 0);
       cvs_output (updated_fname, 0);
-      cvs_output ("\n", 1);
+      cvs_output ("...\n", 1);
       xfree (updated_fname);
       updated_fname = 0;
     }
@@ -4773,7 +4775,7 @@ static void send_modified (const char *file, const char *short_pathname, const V
 	}
 	if (close (fd) < 0)
 	    error (0, errno, "warning: can't close %s", short_pathname);
-   
+
 	if (supported_request ("Checkin-time") && strcmp(command_name,"import"))
 	{
 	    struct stat sb;

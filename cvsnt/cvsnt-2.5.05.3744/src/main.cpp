@@ -1703,7 +1703,8 @@ int main (int argc, char **argv)
 
     dellist (&root_directories);
 //	free_names(&argc,argv);
-
+    extern void wait_threads();
+    wait_threads();
     } /* end of stuff that gets done if the user DOESN'T ask for help */
 
 	xfree(lock_server);

@@ -3406,7 +3406,7 @@ public:
   ~WSInit() { WSACleanup(); }
 };
 
-static WSInit wsinit_;
+//static WSInit wsinit_;
 #endif
 
 #ifdef CPPHTTPLIB_OPENSSL_SUPPORT
