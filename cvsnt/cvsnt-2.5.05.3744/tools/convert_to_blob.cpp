@@ -58,7 +58,9 @@ static void process_file_ver(const char *rootDir,
   sha_file_name.resize(filePath.length() + sha256_encoded_size + 7);
   if (is_blob_reference(rootDir, path.string().c_str(), sha_file_name.data(), sha_file_name.size()))
   {
+    #if VERBOSE
     printf("%s is already blob reference\n", path.string().c_str());
+    #endif
     //rename_z_to_normal(entry.path().c_str());
     return;
   }
@@ -67,7 +69,9 @@ static void process_file_ver(const char *rootDir,
   {
     if (lockId)
       return;
+    #if VERBOSE
     printf("obtaining lock for <%s>...", fp);
+    #endif
     lockId = 0;
     do {
       {
@@ -77,12 +81,16 @@ static void process_file_ver(const char *rootDir,
       if (lockId == 0)
         sleep(500);
     } while(lockId == 0);
+    #if VERBOSE
     printf(" lock=%lld, start processing\n", (long long int) lockId);
+    #endif
   };
   auto unlock = [&](){
     if (!lockId)
       return;
+    #if VERBOSE
     printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
+    #endif
     std::unique_lock<std::mutex> lockGuard(lock_id_mutex);
     do_unlock_file(lock_server_socket, lockId);
     lockId = 0;
@@ -164,7 +172,9 @@ static void process_file_ver(const char *rootDir,
   //now we can write reference
   if (!wr)
   {
+    #if VERBOSE
     printf("deduplication %d for %s", int(sz), filePath.c_str());
+    #endif
     deduplicatedData += sz;
   }
 
@@ -226,7 +236,6 @@ static FileVerProcessor processor;
 
 static void process_file(const char *rootDir, const char *dir, const char *file)
 {
-  printf("process <%s>/<%s>\n", dir, file);
   std::string dirPath = rootDir;
   if (dirPath[dirPath.length()-1] != '/' && dir[0]!='/')
     dirPath+="/";
@@ -237,9 +246,12 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
 
   if (!iswriteable(pathToVersions.c_str()))
   {
-    printf("<%s> is not a writeable directory (not a kB file?)!\n", pathToVersions.c_str());
+    //printf("<%s> is not a writeable directory (not a kB file?)!\n", pathToVersions.c_str());
     return;
   }
+  #if VERBOSE
+  printf("process <%s>/<%s>\n", dir, file);
+  #endif
 
   std::string filePath = dirPath + file;
   ThreadData data;
@@ -257,7 +269,9 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
 
 static void process_directory(const char *rootDir, const char *dir)
 {
+  #if VERBOSE
   printf("process dir <%s>\n", dir);
+  #endif
   std::string dirPath = rootDir;
   if (dirPath[dirPath.length()-1] != '/' && dir[0]!='/')
     dirPath+="/";
