@@ -83,7 +83,7 @@ void BackgroundDownloader::init()
   if (is_inited())
     return;
   const char *url, *repo, *user = nullptr, *passwd = nullptr; int port;
-  int threads_count = std::min(4, std::max(1, (int)std::thread::hardware_concurrency()-2));//limit concurrency to fixed
+  int threads_count = std::min(8, std::max(1, (int)std::thread::hardware_concurrency()-1));//limit concurrency to fixed
   get_download_source(url, port, user, passwd, repo, threads_count);
   clients.resize(std::max(1, threads_count));
   for (auto &cli : clients)
