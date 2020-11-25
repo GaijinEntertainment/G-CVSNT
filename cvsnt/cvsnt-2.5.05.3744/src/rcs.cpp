@@ -72,7 +72,7 @@ const kflag_t kflag_flags[] =
 };
 
 static void RCS_convert_to_new_binary(RCSNode *rcs);
-static void RCS_write_binary_rev_data(const char *fn, void *data, size_t len, bool packed);
+static void RCS_write_binary_rev_data(const char *rcs_version, const char *rcs_path, const char *workfile, char * &data, size_t &len, bool guessed_compression, bool write_it);
 static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz, bool *is_ref);
 
 static void rcsbuf_setpos_to_delta_base(RCSNode *rcsbuf);
@@ -293,13 +293,14 @@ RCSNode *RCS_parse (const char *file, const char *repos)
 
  out:
     xfree(rcsfile);
+#if OLD_STYLE_CONVERSION
     if (retval)
     {
       const char *user = getcaller();
       if (user && STREQ(user, "cvs-convert"))
         RCS_convert_to_new_binary(retval);
     }
-
+#endif
     return retval;
 }
 
@@ -5184,6 +5185,16 @@ static void calc_add_remove(RCSNode *rcs, const char *buf, size_t len, unsigned 
 	}
 }
 
+static void write_file_line(const char *workfile, const char *rev1)
+{
+  char *file1 = NULL;
+  FILE *fp = cvs_temp_file(&file1);
+  fprintf(fp, "%s", rev1);
+  fclose(fp);
+  xfree(file1);
+}
+
+/*
 static int diff_exec_bin_delta(const char *workfile, const char *rev1, const char *rev2, const char *label1, const char *label2, const char *options, const char *out)
 {
   char *file1 = NULL, *file2 = NULL;
@@ -5194,6 +5205,7 @@ static int diff_exec_bin_delta(const char *workfile, const char *rev1, const cha
   fclose(fp);
 
   fp = cvs_temp_file(&file2);
+  fprintf(fp, "%s", workfile, rev2);
   fprintf(fp, "%s/#%s", workfile, rev2);
   fclose(fp);
 
@@ -5205,7 +5217,7 @@ static int diff_exec_bin_delta(const char *workfile, const char *rev1, const cha
   xfree(file1);
   xfree(file2);
   return diff_res;
-}
+}*/
 
 /* Check in to RCSFILE with revision REV (which must be greater than
    the largest revision) and message MESSAGE (which is checked for
@@ -5228,6 +5240,7 @@ static int diff_exec_bin_delta(const char *workfile, const char *rev1, const cha
    error), positive for error (and an error message has been printed),
    or zero for success.  */
 
+static const size_t blobrefdifflen = blob_reference_size+1 + strlen("d1 1\na1 1\n");
 int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const char *rev, const char *options, int flags,
 			 const char *merge_from_tag1, const char *merge_from_tag2, RCSCHECKINPROC callback, char **pnewversion, const char *bugid, variable_list_t *props)
 {
@@ -5684,20 +5697,8 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 
         if(kf.flags&KFLAG_BINARY_DELTA)
         {
-          int name_len = strlen(workfile)+2+strlen(rcs->head);
-          char *data_path = (char*)xmalloc(strlen(rcs->path)+name_len+4+1);
-          strcpy(data_path, rcs->path);
-          char *p = strrchr(data_path, '/');
-          if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
-          sprintf(p, "CVS/%s", workfile); make_directories(data_path);
-          sprintf(p+strlen(p), "/#%s", rcs->head); p += 4;
-
-          RCS_write_binary_rev_data(data_path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA);
-
-          dtext->len = name_len = strlen(p);
-          dtext->text = (char*)xrealloc (dtext->text, bufsize=name_len+1);
-          memcpy(dtext->text, p, name_len+1);
-          xfree(data_path);
+          RCS_write_binary_rev_data(rcs->head, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, true);
+          bufsize = dtext->len+1;
         }
 
 		fout = rcs_internal_lockfile (rcs->path, &lockId_temp);
@@ -5745,7 +5746,18 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 
     tmpfile = cvs_temp_name();
     if(kf.flags&KFLAG_BINARY_DELTA)
-      status = 0;
+    {
+      bool is_ref = false;
+      status = RCS_checkout (rcs, NULL, commitpt->version, NULL, "B",
+			   tmpfile,
+			   (RCSCHECKOUTPROC)0, NULL, NULL, NULL, &is_ref);
+       if (!is_ref)//old revision. todo: remove me, when db is converted
+       {
+         FILE *fp = fopen(tmpfile,"wb");
+         fprintf(fp, "%s/#%s", workfile, commitpt->version);
+         fclose(fp);
+       }
+    }
     else
       status = RCS_checkout (rcs, NULL, commitpt->version, NULL,
 			   (kf.flags&KFLAG_BINARY)
@@ -5798,54 +5810,41 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 
 		if(kf.flags&KFLAG_BINARY_DELTA)
 		{
-          int name_len = strlen(workfile)+2+strlen(delta->version);
-          char *data_path = (char*)xmalloc(strlen(rcs->path)+name_len+4+1);
-          strcpy(data_path, rcs->path);
-          char *p = strrchr(data_path, '/');
-          if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
-          sprintf(p, "CVS/%s", workfile); make_directories(data_path);
-          sprintf(p+strlen(p), "/#%s", delta->version); p += 4;
-
-          if (!delta->dead)
-            RCS_write_binary_rev_data(data_path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA);
-
-          dtext->len = name_len = strlen(p);
-          dtext->text = (char*)xrealloc (dtext->text, bufsize=name_len+1);
-          memcpy(dtext->text, p, name_len+1);
-          xfree(data_path);
-
-          diff_res = diff_exec_bin_delta (workfile, delta->version, commitpt->version, NULL, NULL, diffopts, changefile);
-		}
-		else
-		{
+          RCS_write_binary_rev_data(delta->version, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
+          bufsize = dtext->len+1;
+          write_file_line(workfile, dtext->text);
           diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
-		}
+          //todo: not working with not updated version
+          //commitpt->text->text = (char*)xmalloc((commitpt->text->len = blobrefdifflen-1) + 1);
+          //sprintf(commitpt->text->text, "d1 1\na1 1\n%*.s", dtext->len, dtext->text);
+		} else
+          diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
+      	bufsize = 0;
+
+      	switch (diff_res)
+      	{
+      		case 0:
+      		case 1:
+      		break;
+      		case -1:
+      		/* FIXME-update-dir: message does not include update_dir.  */
+      		error (1, errno, "error diffing %s", workfile);
+      		break;
+      		default:
+      		/* FIXME-update-dir: message does not include update_dir.  */
+      		error (1, 0, "error diffing %s", workfile);
+      		break;
+      	}
+
+      	/* Diff will have produced output in RCS format (lf),
+      	   so we read it as binary */
+
+      	get_file (changefile, changefile,
+      			"rb", 
+      			&commitpt->text->text, &bufsize, &commitpt->text->len, kf_binary);
 
 
 		{
-			bufsize = 0;
-
-			switch (diff_res)
-			{
-				case 0:
-				case 1:
-				break;
-				case -1:
-				/* FIXME-update-dir: message does not include update_dir.  */
-				error (1, errno, "error diffing %s", workfile);
-				break;
-				default:
-				/* FIXME-update-dir: message does not include update_dir.  */
-				error (1, 0, "error diffing %s", workfile);
-				break;
-			}
-
-			/* Diff will have produced output in RCS format (lf),
-			   so we read it as binary */
-
-			get_file (changefile, changefile,
-					"rb", 
-					&commitpt->text->text, &bufsize, &commitpt->text->len, kf_binary);
 
 			calc_add_remove(rcs,commitpt->text->text, commitpt->text->len, rcsdiff_args.removed, rcsdiff_args.added);
 
@@ -5924,29 +5923,14 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 		{
           if (!delta->dead)
         		get_file (workfile, workfile, "rb", &dtext->text, &bufsize, &dtext->len, kf);
-          
-          int name_len = strlen(workfile)+2+strlen(delta->version);
-          char *data_path = (char*)xmalloc(strlen(rcs->path)+name_len+4+1);
-          strcpy(data_path, rcs->path);
-          char *p = strrchr(data_path, '/');
-          if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
-          sprintf(p, "CVS/%s", workfile); make_directories(data_path);
-          sprintf(p+strlen(p), "/#%s", delta->version); p += 4;
+          RCS_write_binary_rev_data(delta->version, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
+          bufsize = dtext->len+1;
 
-          if (!delta->dead)
-            RCS_write_binary_rev_data(data_path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA);
-
-          dtext->len = name_len = strlen(p);
-          dtext->text = (char*)xrealloc (dtext->text, bufsize=name_len+1);
-          memcpy(dtext->text, p, name_len+1);
-          xfree(data_path);
-
-          diff_res = diff_exec_bin_delta (workfile, commitpt->version, delta->version, NULL, NULL, diffopts, changefile);
-		}
-		else
-		{
-          diff_res = diff_exec (tmpfile, workfile, NULL, NULL, diffopts, changefile);
-		}
+          write_file_line(workfile, dtext->text);
+          diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
+          //diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
+		} else
+          diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
 
 		{
 			switch (diff_res)
@@ -6226,12 +6210,18 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
       char *data_path;
       char *rev_file_name = get_binary_blob_ver_file_path(data_path, rcs, value, len);
       char sha256_encoded[sha256_encoded_size+1];
-      if (!get_blob_reference_sha256(rev_file_name, sha256_encoded))//sha256_encoded==char[65], encoded 32 bytes + \0
+      if (!is_blob_reference_data(value, len))
+      //if (!get_blob_reference_sha256(rev_file_name, sha256_encoded))//sha256_encoded==char[65], encoded 32 bytes + \0
       {
+        //todo: should not be needed as soon as all converted. Everything is a reference
         unsigned char sha256[32];
         if (!calc_sha256_file(rev_file_name, sha256))
           error(1,0, "can't read file revision <%s> to compare sha", rev_file_name);
         encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));//sha256 char[32], sha256_encoded[65]
+      } else
+      {
+        memcpy(sha256_encoded, value + sha256_magic_len, sha256_encoded_size);
+        sha256_encoded[sha256_encoded_size] = 0;
       }
       xfree(data_path);
 

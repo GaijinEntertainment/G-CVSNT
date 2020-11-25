@@ -189,6 +189,8 @@ bool calc_sha256_file(const char *fn, unsigned char sha256[])//sha256 char[32]
 
 bool does_blob_exist(const char *sha_file_name)
 {
+  printf("try %s\n", sha_file_name);
+  printf("tried %d\n", get_file_size(sha_file_name));
   return get_file_size(sha_file_name) >= sizeof(BlobHeader);
 }
 
@@ -626,7 +628,7 @@ bool get_blob_reference_content_sha256(const unsigned char *ref_file_content, si
   return true;
 }
 
-bool get_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
+/*bool get_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
 {
   if (!can_be_blob_reference(blob_ref_file_name))
     return false;
@@ -682,12 +684,10 @@ bool write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len
   return ret;
 }
 
-bool write_blob_reference(const char *fn, unsigned char sha256[], bool fail_on_error)//sha256[32] == digest
+bool write_blob_reference(const char *fn, const unsigned char sha256[], bool fail_on_error)//sha256[32] == digest
 {
   char sha256_encoded[blob_reference_size+1];
-  snprintf(sha256_encoded, sizeof(sha256_encoded), SHA256_REV_STRING
-	  "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-	  SHA256_LIST(sha256));
+  encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));
   return write_direct_blob_reference(fn,  sha256_encoded, blob_reference_size, fail_on_error);
 }
 
@@ -696,7 +696,7 @@ void write_blob_and_blob_reference(const char *root, const char *fn, const void 
   unsigned char sha256[32];
   write_binary_blob(root, sha256, fn, data, len, store_packed, src_packed);
   write_blob_reference(fn, sha256);
-}
+}*/
 
 
 void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded, size_t sha_256enc_len)
