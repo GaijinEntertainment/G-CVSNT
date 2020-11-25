@@ -263,7 +263,7 @@ static void* compress_zstd_data(const void *data, size_t len, BlobPackType pack,
   return zbuf;
 }
 
-void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed)
+bool atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed)
 {
   char *temp_filename = NULL;
   FILE *dest = cvs_temp_file(&temp_filename, "wb");
@@ -314,10 +314,11 @@ void atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
       blob_free(compressed_data);
   }
   change_file_mode(temp_filename, 0666);
-  rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
+  bool ret = rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
   fclose(dest);
 
   blob_free (temp_filename);
+  return ret;
 }
 
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
@@ -376,7 +377,7 @@ bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
   {
     create_dirs(root, sha256);
     atomic_write_sha_file(client_sha256, sha_file_name, data, len, BlobPackType::NO, true);
-    return unpacked_len;
+    return true;
   }//else we already have this blob written. deduplication worked!
   return true;
 }
@@ -405,8 +406,7 @@ size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   if (!isreadable(sha_file_name))
   {
     create_dirs(root, sha256);
-    atomic_write_sha_file(fn, sha_file_name, data, len, pack, src_packed);
-    return unpacked_len;
+    return atomic_write_sha_file(fn, sha_file_name, data, len, pack, src_packed) ? unpacked_len : 0;
   }//else we already have this blob written. deduplication worked!
   else
   {

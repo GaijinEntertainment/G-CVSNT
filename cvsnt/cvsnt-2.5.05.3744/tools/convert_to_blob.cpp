@@ -158,10 +158,11 @@ static void process_file_ver(const char *rootDir,
         error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)hdr.compressedLen);
       create_dirs(rootDir, sha256);
       change_file_mode(temp_filename, 0666);
-      rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
+      const bool renamed = rename_file (temp_filename, sha_file_name, false);//we dont care if blob is written independently
       fclose(dest);
       blob_free (temp_filename);
-      wr = hdr.compressedLen + sizeof(hdr);
+      if (renamed)
+        wr = hdr.compressedLen + sizeof(hdr);
     } else
     {
       ensure_blob_mtime(srcPathString.c_str(), sha_file_name);//so later incremental repack still works correctly
