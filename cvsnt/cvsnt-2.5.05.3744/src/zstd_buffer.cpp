@@ -114,7 +114,7 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
 
   while (1)
   {
-    int zstatus, sofar, status, nread;
+    int sofar, status, nread;
 
     /* First try to inflate any data we already have buffered up.
        This is useful even if we don't have any buffered data,
@@ -124,18 +124,22 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
     cb->streamIn.src = bd->bufp;
     cb->streamIn.size = bd->size;
     cb->streamIn.pos = 0;
+    size_t sz = 0;
 
-    while (cb->streamIn.pos < cb->streamIn.size && cb->streamOut.pos < cb->streamOut.size)
-    {
-      size_t sz = ZSTD_decompressStream(cb->zds, &cb->streamOut, &cb->streamIn);
+    do {
+      sz = ZSTD_decompressStream(cb->zds, &cb->streamOut, &cb->streamIn);
+      if (sz == 0)
+        break;
       if (cb->streamOut.pos == cb->streamOut.size && !ZSTD_isError(sz))
         sz = ZSTD_decompressStream(cb->zds, &cb->streamOut, &cb->streamIn);
+      if (sz == 0)
+        break;
       if (ZSTD_isError(sz))
       {
       	zstd_error (0, sz, "inflate");
       	return EIO;
       }
-    };
+    } while(cb->streamIn.pos < cb->streamIn.size && cb->streamOut.pos < cb->streamOut.size);
 
     bd->size = cb->streamIn.size - cb->streamIn.pos;
     bd->bufp = (char *)cb->streamIn.src + cb->streamIn.pos;
@@ -149,8 +153,8 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
     if (sofar > 0 && sofar >= need)
       break;
 
-    //if (zstatus == Z_STREAM_END)
-     //   return -1;
+    if (sz == 0)
+      return -1;
 
     /* All our buffered data should have been processed at this
            point.  */
