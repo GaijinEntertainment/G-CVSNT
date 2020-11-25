@@ -19,7 +19,7 @@ namespace fs = std::filesystem;
 #endif
 
 
-static bool fastest_conversion = false;//if true, we won't repack, just calc sha256 and put zlib block as is.
+static bool fastest_conversion = true;//if true, we won't repack, just calc sha256 and put zlib block as is.
 static void ensure_blob_mtime(const char* verfile, const char *blob_file)
 {
   time_t blob_mtime = get_file_mtime(blob_file);
@@ -188,9 +188,10 @@ struct ProcessTask
 struct FileVerProcessor
 {
   FileVerProcessor():queue(&threads){}
-  void finishDownloads()
+  void finish()
   {
-    queue.finishWork();
+    if (is_inited())
+      queue.finishWork();
   }
 
   bool is_inited() const {return !threads.empty();}
@@ -299,6 +300,7 @@ int main(int ac, const char* argv[])
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
   auto file = options.arg_or("-file", "", "File to process (inside dir)");
   auto threads = options.arg_as_or<int>("-j", 0,"concurrency level(threads to run)");
+  fastest_conversion = !options.passed("-repack", "repack zlib to zstd, slow");
 
   bool help = options.passed("-h", "print help usage");
   if (help || !options.sane()) {
@@ -313,7 +315,11 @@ int main(int ac, const char* argv[])
     exit(1);
   }
   if (threads>1)
+  {
+    printf("using %d threads\n", threads);
     processor.init(rootDir.c_str(), threads);
+  }
+  mkdir((rootDir+"/blobs").c_str(), 0777);
 
   if (file.length()>0)
   {
@@ -322,6 +328,7 @@ int main(int ac, const char* argv[])
   {
     process_directory(rootDir.c_str(), dir.c_str());
   }
+  processor.finish();
   printf("written %g mb, saved %g mb, de-duplicated %g mb\n", double(writtenData)/(1<<20),
     (double(readData)-double(writtenData))/(1<<20),
     double(deduplicatedData)/(1<<20));
