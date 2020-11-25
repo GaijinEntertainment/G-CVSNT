@@ -29,6 +29,13 @@ static void usage()
   printf("Warning! it can lock one file for a short while, but will do that numerous time. \n");
 }
 static bool fastest_conversion = false;//if true, we won't repack, just calc sha256 and put zlib block as is.
+static void ensure_blob_mtime(const char* verfile, const char *blob_file)
+{
+  time_t blob_mtime = get_file_mtime(blob_file);
+  time_t ver_atime = get_file_atime(verfile);
+  if (ver_atime > blob_mtime)
+    set_file_mtime(blob_file, ver_atime);
+}
 
 static void rename_z_to_normal(const char *f)
 {
@@ -37,7 +44,7 @@ static void rename_z_to_normal(const char *f)
   {
     pathStr[pathStr.length()-2] = 0;
     if (!rename_attempts(f, pathStr.c_str(), 100))
-      printf("[E] can't rename file <%s> to <%s>\n", f, pathStr.c_str());
+      fprintf(stderr, "[E] can't rename file <%s> to <%s>\n", f, pathStr.c_str());
   }
 }
 
@@ -129,7 +136,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       stream.next_out = (Bytef*)fileUnpackedData.data();
       if (unpackedDataSize && inflate(&stream, Z_FINISH)!=Z_STREAM_END)
       {
-        printf("[E] can't unpack %s of sz=%d unpacked=%d \n", srcPathString.c_str(), (int)sz, (int)unpackedDataSize);
+        fprintf(stderr, "[E] can't unpack %s of sz=%d unpacked=%d \n", srcPathString.c_str(), (int)sz, (int)unpackedDataSize);
         continue;
       }
     }
@@ -161,6 +168,9 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
         fclose(dest);
         blob_free (temp_filename);
         wr = hdr.compressedLen + sizeof(hdr);
+      } else
+      {
+        ensure_blob_mtime(srcPathString.c_str(), sha_file_name);//so later incremental repack still works correctly
       }
     } else
       wr = write_binary_blob(rootDir, sha256, entry.path().c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
@@ -177,7 +187,7 @@ static void process_file(int lock_server_socket, const char *rootDir, const char
       if (wasPacked)
         rename_z_to_normal(entry.path().c_str());
     } else
-      printf("[E] blob reference %s couldn't be saved\n", entry.path().c_str());
+      fprintf(stderr, "[E] blob reference %s couldn't be saved\n", entry.path().c_str());
     unlock();
     writtenData += wr;
   }
@@ -227,7 +237,7 @@ int main(int ac, const char* argv[])
   int lock_server_socket = lock_register_client(argv[2], rootDir, argv[1]);
   if (lock_server_socket == -1)
   {
-    printf("[E] Can't connect\n");
+    fprintf(stderr, "[E] Can't connect to lock server\n");
     exit(1);
   }
   if (ac > 5)

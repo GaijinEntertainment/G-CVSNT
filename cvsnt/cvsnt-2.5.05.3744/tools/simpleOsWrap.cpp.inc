@@ -268,6 +268,15 @@ time_t get_file_mtime(const char *file)
   return sb.st_mtime;
 }
 
+time_t get_file_atime(const char *file)
+{
+  struct stat sb;
+
+  if (stat (file, &sb) < 0)
+    return 0;
+  return sb.st_atime;
+}
+
 #if _MSC_VER
  #include <sys/utime.h>
 #else
