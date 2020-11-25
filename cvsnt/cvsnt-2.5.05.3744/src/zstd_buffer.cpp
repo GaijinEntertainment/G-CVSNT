@@ -128,6 +128,8 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
     while (cb->streamIn.pos < cb->streamIn.size && cb->streamOut.pos < cb->streamOut.size)
     {
       size_t sz = ZSTD_decompressStream(cb->zds, &cb->streamOut, &cb->streamIn);
+      if (cb->streamOut.pos == cb->streamOut.size && !ZSTD_isError(sz))
+        sz = ZSTD_decompressStream(cb->zds, &cb->streamOut, &cb->streamIn);
       if (ZSTD_isError(sz))
       {
       	zstd_error (0, sz, "inflate");
@@ -246,11 +248,12 @@ static int zstd_buffer_flush (void *closure)
 
     if (cb->streamOut.pos != 0)
         buf_output (cb->buf, buffer, cb->streamOut.pos);
-
+    if (sz == 0)
+      break;
     /* If the deflate function did not fill the output buffer,
            then all data has been flushed.  */
-    if (cb->streamOut.pos < cb->streamOut.size)
-        break;
+    //if (cb->streamOut.pos < cb->streamOut.size)
+    //    break;
   }
 
   /* Now flush the underlying buffer.  Note that if the original
@@ -277,7 +280,7 @@ static int zstd_buffer_block (void *closure, int block)
 static int zstd_buffer_shutdown_input (void *closure)
 {
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
-  size_t sz = ZSTD_freeDStream(cb->zds);
+  size_t sz = ZSTD_freeDStream(cb->zds);cb->zds= nullptr;
   if (ZSTD_isError(sz))
   {
     zstd_error (0, sz, "inflateEnd");
@@ -292,7 +295,6 @@ static int zstd_buffer_shutdown_input (void *closure)
 static int zstd_buffer_shutdown_output (void *closure)
 {
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
-
   while (1)
   {
     char buffer[BUFFER_DATA_SIZE];
@@ -300,8 +302,6 @@ static int zstd_buffer_shutdown_output (void *closure)
     cb->streamOut.size = sizeof(buffer);
     cb->streamOut.pos = 0;
     size_t sz = ZSTD_endStream(cb->zcs, &cb->streamOut);
-
-      break;
 
     if (ZSTD_isError(sz))
     {
@@ -314,9 +314,17 @@ static int zstd_buffer_shutdown_output (void *closure)
 
     /* If the deflate function did not fill the output buffer,
            then all data has been flushed.  */
-    if (cb->streamOut.pos < cb->streamOut.size)
+    if (sz == 0)//(cb->streamOut.pos < cb->streamOut.size)
         break;
   }
+
+  size_t sz = ZSTD_freeCStream(cb->zcs);
+  if (ZSTD_isError(sz))
+  {
+    zstd_error (0, sz, "inflateEnd");
+    return EIO;
+  }
+  cb->zcs = nullptr;
 
 /* Now flush the underlying buffer.  Note that if the original
    call to buf_flush passed 1 for the BLOCK argument, then the
