@@ -72,11 +72,6 @@ int server_io_socket = 0;
 int force_network_share = 0;
 int locale_active = 1;
 const char *force_locale = NULL;
-#ifdef _WIN32
-int force_no_statistics = 0;
-#endif
-int server_stats_enabled = 0;
-char *server_statistics = NULL;
 int read_only_server = 0;
 int atomic_checkouts = 0;
 LineType crlf_mode = CRLF_DEFAULT;
@@ -256,14 +251,7 @@ static const char *const usg[] =
 	   contribute to the open source effort rely on the pro support income
 	   to do so */
     "For Open Source CVS updates and additional information, see\n",
-	"    the CVSNT home page at http://www.cvsnt.org/wiki/\n",
-	"    The vendor offers no Professional or Commercial Support for this version.\n",
-    NULL,
-
-	"For Professional Support by the authors of CVSNT, see\n",
-	"    the CVS Suite home page at http://march-hare.com/cvsnt/\n",
-	"    and the CVS Pro home page at http://march-hare.com/cvspro/\n",
-	"     (See Pro edition for CVSNT Multi-Site replication support)\n",
+	"    the G-CVSNT home page at https://github.com/GaijinEntertainment/G-CVSNT\n",
     NULL,
 };
 
@@ -337,6 +325,8 @@ static const char *const opt_usage[] =
     "    -f              Do not use the ~/.cvsrc file.\n",
 	"    -F file         Read command arguments from file.\n",
     "    -z #            Use compression level '#' for net traffic.\n",
+    "    -j #            Concurrency download level. Use 0 to download in main thread.\n",
+    "    -blob_url url   Blob download url, can be in form of http://127.0.0.1/something@80 (@80 - means port)\n",
 	"    -c              Checksum files as they are sent to the server.\n",
     "    -x              Encrypt all net traffic (fail if not encrypted).  Implies -a.\n",
     "    -y              Encrypt all net traffic (if supported by protocol).  Implies -a.\n",
@@ -418,7 +408,7 @@ static const char * const*cmd_synonyms ()
 	numcmds++;
 	c++;
     }
-    
+
     synonyms = (char **) xmalloc(numcmds * sizeof(char *));
     line = synonyms;
     *line++ = "CVS command synonyms are:\n";
@@ -706,16 +696,13 @@ int main (int argc, char **argv)
     int help = 0;		/* Has the user asked for help?  This
 				   lets us support the `cvs -H cmd'
 				   convention to give help for cmd. */
-	static const char short_options[] = "+Qqrwtnlvb:T:e:d:HfF:z:s:axyNRo::OL:C:c";
+	static const char short_options[] = "+QqrwtnlvT:e:d:HfF:z:s:axyNRo::OL:C:cj:";
     static struct option long_options[] =
     {
 		{"help", 0, NULL, 'H'},
 		{"version", 0, NULL, 'v'},
 		{"encrypt", 0, NULL, 'x'},
 		{"authenticate", 0, NULL, 'a'},
-#ifdef _WIN32
-		{"nostats", 0, NULL, 11},
-#endif
 		{"readonly",0,NULL,257},
 		{"utf8",0,NULL,258},
 		{"help-commands", 0, NULL, 1},
@@ -734,6 +721,7 @@ int main (int argc, char **argv)
 #if defined(WIN32)
 		{"debug", 0, NULL, 9},
 #endif
+    	{"blob_url", required_argument, NULL, 11},
         {0, 0, 0, 0}
     };
     /* `getopt_long' stores the option index here, but right now we
@@ -849,11 +837,6 @@ int main (int argc, char **argv)
 		}
 		break;
 #endif
-#ifdef _WIN32
-	    case 11:
-	        force_no_statistics = 1;
-		break;
-#endif
 	    case 5:
 		/* --crlf */
 		crlf_mode=ltCrLf;
@@ -934,34 +917,14 @@ int main (int argc, char **argv)
 		printf ("\n\n");
 		printf ("CVS Copyright (c) 1989-2001 Brian Berliner, david d `zoo' zuhn, \n\nJeff Polk, and other authors\n");
  		printf ("CVSNT Copyright (c) 1999-2008 Tony Hoyle and others\n");
-		printf ("see http://www.cvsnt.org\n");
-		printf ("\n");
-		printf ("Commercial support and training provided by March Hare Software Ltd.\n");
-		printf ("see http://www.march-hare.com/cvspro\n");
-		printf ("\n");
+ 		printf ("Gaijin Copyright (c) 2008-2020 Nikolay Savichev, Anton Yudintsev and others\n");
+		printf ("see https://github.com/GaijinEntertainment/G-CVSNT\n");
 		printf ("CVSNT may be copied only under the terms of the GNU General Public License v2,\n");
 		printf ("a copy of which can be found with the CVS distribution.\n");
 		printf ("\n");
 		printf ("The CVSNT Application API is licensed under the terms of the\n");
 		printf ("GNU Library (or Lesser) General Public License.\n");
 		printf ("\n");
-
-#ifdef _WIN32
-		printf ("SSH connectivity provided by PuTTY:\n");
-		printf ("  PuTTY is copyright 1997-2001 Simon Tatham.\n");
-		printf ("  Portions copyright Robert de Bath, Joris van Rantwijk, Delian\n");
-		printf ("  Delchev, Andreas Schultz, Jeroen Massar, Wez Furlong, Nicolas Barry,\n");
-		printf ("  Justin Bradford, and CORE SDI S.A.\n");
-		printf ("  See http://www.chiark.greenend.org.uk/~sgtatham/putty/\n");
-		printf ("\n");
-#endif
-#ifdef HAVE_PCRE
-		printf ("Perl Compatible Regular Expression Library (PCRE)\n");
-		printf ("  Copyright (c) 1997-2004 University of Cambridge.\n");
-		printf ("  Licensed under the BSD license.\n");
-		printf ("  See http://www.pcre.org/license.txt\n");
-		printf ("\n");
-#endif
 
 		printf ("Specify the --help option for further information about CVS\n");
 
@@ -1010,6 +973,17 @@ int main (int argc, char **argv)
 		if (gzip_level < 0 || gzip_level > 9)
 		  error (1, 0,
 			 "gzip compression level must be between 0 and 9");
+		break;
+        case 'j':
+		blob_concurrency_download_level = atoi (optarg);
+		break;
+        case 11:
+        strcpy(blob_download_url, optarg);
+        if (char * port = strchr(blob_download_url, '@'))
+        {
+          blob_download_port = atoi(port+1);
+          *port = 0;
+        }
 		break;
 	    case 's':
 		variable_set (optarg);

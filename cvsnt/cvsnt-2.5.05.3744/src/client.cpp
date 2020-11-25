@@ -2071,20 +2071,36 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 
 void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
 
+int blob_concurrency_download_level = -1;
+char blob_download_url[256] = {0};
+int blob_download_port = -1;
+
 void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count)
 {
   char *cp;
   repo = current_parsed_root->directory;
   auth_user = current_parsed_root->username;
   auth_passwd = current_parsed_root->password;
-  port = 80;
-  if ((cp = getenv ("CVS_BLOBS_PORT")) != NULL)
-    port = atoi(cp);
-  if ((cp = getenv ("CVS_BLOB_DOWNLOAD_THREADS")) != NULL)
+  if (blob_download_port >= 0)
+    port = blob_download_port;
+  else
+  {
+    port = 80;
+    if ((cp = getenv ("CVS_BLOBS_PORT")) != NULL)
+      port = atoi(cp);
+  }
+  if (blob_concurrency_download_level >= 0)
+    threads_count = blob_concurrency_download_level;
+  else if ((cp = getenv ("CVS_BLOB_DOWNLOAD_THREADS")) != NULL)
     threads_count = atoi(cp);
-  url = current_parsed_root->hostname;
-  if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)//we don't do copy, as we dont call other getenv
-    url = cp;
+  if (blob_download_url[0])
+    url = blob_download_url;
+  else
+  {
+    url = current_parsed_root->hostname;
+    if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)//we don't do copy, as we dont call other getenv
+      url = cp;
+  }
 }
 
 void change_utime(const char* filename, time_t timestamp)
@@ -2323,11 +2339,11 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
        affects a user who wants status info about how far we have
        gotten, and also affects whether "U foo.c" appears in addition
        to various error messages.  */
-    if (!quiet && updated_fname != NULL)
+    if (updated_fname != NULL)//!quiet && 
     {
       cvs_output ("Ub ", 0);
       cvs_output (updated_fname, 0);
-      cvs_output ("...\n", 1);
+      cvs_output ("...\n", 4);
       xfree (updated_fname);
       updated_fname = 0;
     }

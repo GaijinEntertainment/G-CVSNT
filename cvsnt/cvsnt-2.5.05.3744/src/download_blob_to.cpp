@@ -10,6 +10,7 @@
 #include "error.h"
 extern int change_mode(const char *filename, const char *mode_string, int respect_umask);
 extern void change_utime(const char* filename, time_t timestamp);
+extern int unlink_file(const char* filename);
 
 //may be better to switch to libcurl https://curl.se/libcurl/c/http2-download.html
 struct BlobDownloadTask
@@ -49,6 +50,15 @@ struct BackgroundDownloader
       download_blob_ref_file(clients[0].get(), base_repo.c_str(), task);
     else
     {
+      //we can't guarantee, that user will finish download (not cancel it, kill the process or whatever)
+      //if he won't, then entries would still be updated with new version, but the file will be old (while be shown as Modified)
+      //the correct way would be to keep old entries, and update them only when download is finished
+      //that's doable, but will require to:
+      //  a) implement locking (so same entries are not updated from different threads, including main)
+      //  b) format of entries has to be known here
+      //  While not a big deal, is still not that easy task
+      // so we use simplest solution - we simply kill old binary file. It can also be renamed, but better to not bother
+      unlink_file(task.filename.c_str());
       queue.emplace(std::move(task));
     }
   }
@@ -73,7 +83,7 @@ void BackgroundDownloader::init()
   if (is_inited())
     return;
   const char *url, *repo, *user = nullptr, *passwd = nullptr; int port;
-  int threads_count = std::max(1, (int)std::thread::hardware_concurrency()-2);
+  int threads_count = std::min(4, std::max(1, (int)std::thread::hardware_concurrency()-2));//limit concurrency to fixed
   get_download_source(url, port, user, passwd, repo, threads_count);
   clients.resize(std::max(1, threads_count));
   for (auto &cli : clients)

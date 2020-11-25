@@ -1161,11 +1161,6 @@ extern int allow_trace;
 /* Is client/server locale translation active? */
 extern int locale_active;
 extern const char *force_locale;
-extern int server_stats_enabled;
-extern char *server_statistics;
-#ifdef _WIN32
-extern int force_no_statistics;
-#endif
 
 /* Client force mode flag */
 extern LineType crlf_mode;
