@@ -141,9 +141,12 @@ class flags {
             auto output = std::stringstream("");
             output << flag;
             if (type == detail::flag_type::optional)
-                output << "[=" << alt << "]" ;
+               if (alt.length()>0)
+                   output << "[=" << alt << "]" ;
+               else
+                   output << "(opt)" ;
              else if (type == detail::flag_type::flag)
-                output << "flag";
+                output << "(flag)";
             else
                 output << "    ";
             return output.str();

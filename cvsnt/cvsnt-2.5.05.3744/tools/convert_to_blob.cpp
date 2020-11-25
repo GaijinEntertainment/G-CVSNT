@@ -306,7 +306,7 @@ int main(int ac, const char* argv[])
     return help ? 0 : -1;
   }
   tcp_init();
-  lock_server_socket = lock_register_client(lock_url.c_str(), rootDir.c_str(), lock_user.c_str());
+  lock_server_socket = lock_register_client(lock_user.c_str(), rootDir.c_str(), lock_url.c_str());
   if (lock_server_socket == -1)
   {
     fprintf(stderr, "[E] Can't connect to lock server\n");
