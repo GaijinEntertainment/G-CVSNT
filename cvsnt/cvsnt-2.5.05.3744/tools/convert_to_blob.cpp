@@ -67,6 +67,7 @@ static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_r
   while ((text_found_start = find_rcs_data(data, text_to_replace.c_str(), text_to_replace.length())) >= 0)
   {
     rcs_data.replace(text_found_start, text_to_replace.length(), replace_text);
+    text_found_start += data - rcs_data.c_str();
     data = rcs_data.c_str() + text_found_start + replace_text_length;
     found = true;
   }
@@ -199,7 +200,7 @@ static void process_file_ver(const char *rootDir,
   if (!wr)
   {
     #if VERBOSE
-    printf("deduplication %d for %s", int(sz), filePath.c_str());
+    printf("deduplication %d for %s\n", int(sz), filePath.c_str());
     #endif
     deduplicatedData += sz;
   }
@@ -261,6 +262,7 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
   {
     while (files_to_process != processed_files.load())
       sleep(100);
+    processed_files.store(0);
   }
 
   {
@@ -274,18 +276,23 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
       rcsData = buffer.str();
     }
     std::string oldVerRCS;
-    char sha_ref[blob_reference_size+1];
+    char sha_ref[blob_reference_size+2];
     memcpy(sha_ref, SHA256_REV_STRING, sha256_magic_len);
-    sha_ref[blob_reference_size] = 0;
-    std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
-    std::string filenameDir = std::string(filename) + "/";
-    for (auto &fv: file_version_remap)
+    sha_ref[blob_reference_size] = '@';
+    sha_ref[blob_reference_size+1] = 0;
+    tsl::sparse_map<std::string, char[sha256_encoded_size+1]> file_version_remap_process;
     {
-      oldVerRCS = filenameDir + fv.first;
+      std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
+      file_version_remap_process.swap(file_version_remap);
+    }
+    std::string filenameDir = std::string(filename) + "/";
+    for (auto &fv: file_version_remap_process)
+    {
+      oldVerRCS = filenameDir + fv.first + "@";
       if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
-        oldVerRCS.erase(oldVerRCS.end()-2);
+        oldVerRCS.erase(oldVerRCS.length()-2);
       memcpy(sha_ref+sha256_magic_len, fv.second, sha256_encoded_size);
-      bool replaced = replace_rcs_data(rcsData, oldVerRCS, sha_ref, blob_reference_size);
+      bool replaced = replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1);
       if (!replaced)
       {
         printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
@@ -315,7 +322,6 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
       } else
         printf("[E] can't write temp file for <%s>\n", rcs_file_name_full_path.c_str());
     }
-    file_version_remap.clear();
     unlock(lockId, lock_rcs_file_name);//unlock2
   }
 }
