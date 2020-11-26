@@ -136,17 +136,26 @@ class flags {
         return true;
     }
 
+    std::string print_missing() {
+        auto output = std::stringstream("");
+        for (auto [flag, type, alt, detail] : flags_) {
+            (void)alt;
+            (void)detail;
+            if (type == detail::flag_type::required && !passed_(flag)) {
+                output << " " << flag;
+            }
+        }
+        return output.str();
+    }
+
     std::string usage() {
         auto flag_name = [](const std::string &flag, const detail::flag_type type, const std::string &alt) {
             auto output = std::stringstream("");
             output << flag;
             if (type == detail::flag_type::optional)
-               if (alt.length()>0)
-                   output << "[=" << alt << "]" ;
-               else
-                   output << "(opt)" ;
+                output << "[=" << alt << "]" ;
              else if (type == detail::flag_type::flag)
-                output << "(flag)";
+                output << "flag";
             else
                 output << "    ";
             return output.str();

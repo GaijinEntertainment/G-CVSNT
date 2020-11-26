@@ -12,12 +12,14 @@
 #include "zlib.h"
 #include "flags.h"
 #include "concurrent_queue.h"
+#include "tsl/sparse_map.h"
 #ifdef _WIN32
 namespace fs = std::experimental::filesystem;
 #else
 namespace fs = std::filesystem;
 #endif
 
+static int max_files_to_process = 64;// to limit amount of double sized data
 
 static bool fastest_conversion = true;//if true, we won't repack, just calc sha256 and put zlib block as is.
 static void ensure_blob_mtime(const char* verfile, const char *blob_file)
@@ -28,19 +30,55 @@ static void ensure_blob_mtime(const char* verfile, const char *blob_file)
     set_file_mtime(blob_file, ver_atime);
 }
 
-static void rename_z_to_normal(const char *f)
+static int find_rcs_data(const char* rcs_data, const char *text_to_find, size_t text_to_find_length)
 {
-  std::string pathStr = f;
-  if (pathStr[pathStr.length()-1] == 'z' && pathStr[pathStr.length()-2] == '#')
+  const char *data = rcs_data;
+  #define TEXT_COMMAND "@\ntext\n@"
+  while (const char *text_command = strstr(data, TEXT_COMMAND))
   {
-    pathStr[pathStr.length()-2] = 0;
-    if (!rename_attempts(f, pathStr.c_str(), 100))
-      fprintf(stderr, "[E] can't rename file <%s> to <%s>\n", f, pathStr.c_str());
+    //text command found
+    bool text_found = false;
+    for (data = text_command + strlen(TEXT_COMMAND); *data; ++data)
+    {
+      if (*data == '@')
+      {
+        if (data[1] != '@')//end of text command
+          break;
+        data++;//escaped '@'
+        continue;
+      }
+      if (strncmp(data, text_to_find, text_to_find_length) == 0)
+      {
+        text_found = true;
+        break;
+      }
+    }
+    if (text_found)
+      return data - rcs_data;
   }
+  return -1;
+}
+
+static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length)
+{
+  const char* data = rcs_data.c_str();
+  bool found = false;
+  int text_found_start;
+  while ((text_found_start = find_rcs_data(data, text_to_replace.c_str(), text_to_replace.length())) >= 0)
+  {
+    rcs_data.replace(text_found_start, text_to_replace.length(), replace_text);
+    data = rcs_data.c_str() + text_found_start + replace_text_length;
+    found = true;
+  }
+  return found;
 }
 
 static std::atomic<uint64_t> deduplicatedData = 0, readData = 0, writtenData = 0;
+std::atomic<uint32_t> processed_files = 0;
+
 static std::mutex lock_id_mutex;
+static std::mutex  file_version_remap_mutex;
+static tsl::sparse_map<std::string, char[sha256_encoded_size+1]> file_version_remap;
 
 struct ThreadData
 {
@@ -49,66 +87,50 @@ struct ThreadData
 
 static int lock_server_socket = -1;
 
+size_t get_lock(const char *lock_file_name)
+{
+  size_t lockId = 0;
+  #if VERBOSE
+  printf("obtaining lock for <%s>...", lock_file_name);
+  #endif
+  lockId = 0;
+  do {
+    {
+      std::unique_lock<std::mutex> lockGuard(lock_id_mutex);
+      lockId = do_lock_file(lock_server_socket, lock_file_name, 1, 0);
+    }
+    if (lockId == 0)
+      sleep(500);
+  } while(lockId == 0);
+  #if VERBOSE
+  printf(" lock=%lld, start processing\n", (long long int) lockId);
+  #endif
+  return lockId;
+}
+
+static void unlock(size_t lockId, const char *debug_text = nullptr)
+{
+  if (!lockId)
+    return;
+  #if VERBOSE
+  printf("releasing lock %lld for %s\n", (long long int) lockId, debug_text ? debug_text : "");
+  #endif
+  std::unique_lock<std::mutex> lockGuard(lock_id_mutex);
+  do_unlock_file(lock_server_socket, lockId);
+};
+
 static void process_file_ver(const char *rootDir,
   std::string &filePath,//v file
   const std::filesystem::path &path,//blob reference file
-  ThreadData& data, bool mutex_needed)
+  ThreadData& data)
 {
   std::vector<char> &fileUnpackedData = data.fileUnpackedData, &filePackedData  = data.filePackedData, &sha_file_name = data.sha_file_name;
-  sha_file_name.resize(filePath.length() + sha256_encoded_size + 7);
-  if (is_blob_reference(rootDir, path.string().c_str(), sha_file_name.data(), sha_file_name.size()))
-  {
-    #if VERBOSE
-    printf("%s is already blob reference\n", path.string().c_str());
-    #endif
-    //rename_z_to_normal(entry.path().c_str());
-    return;
-  }
-  size_t lockId = 0;
-  auto get_lock = [&](const char *fp)
-  {
-    if (lockId)
-      return;
-    #if VERBOSE
-    printf("obtaining lock for <%s>...", fp);
-    #endif
-    lockId = 0;
-    do {
-      {
-        std::unique_lock<std::mutex> lockGuard(lock_id_mutex);
-        lockId = do_lock_file(lock_server_socket, filePath.c_str(), 1, 0);
-      }
-      if (lockId == 0)
-        sleep(500);
-    } while(lockId == 0);
-    #if VERBOSE
-    printf(" lock=%lld, start processing\n", (long long int) lockId);
-    #endif
-  };
-  auto unlock = [&](){
-    if (!lockId)
-      return;
-    #if VERBOSE
-    printf("releasing lock %lld for %s\n", (long long int) lockId, filePath.c_str());
-    #endif
-    std::unique_lock<std::mutex> lockGuard(lock_id_mutex);
-    do_unlock_file(lock_server_socket, lockId);
-    lockId = 0;
-  };
-
-  get_lock(path.string().c_str());//Lock1
-  if (is_blob_reference(rootDir, path.string().c_str(), sha_file_name.data(), sha_file_name.size()))
-  {
-    //became reference!
-    unlock();//unLock1
-    return;
-  }
-
+  size_t lockId = get_lock(filePath.c_str());//Lock1
   const auto sz = fs::file_size(path);
   fileUnpackedData.resize(sz);
   std::ifstream f(path, std::ios::in | std::ios::binary);
   f.read(fileUnpackedData.data(), sz);
-  unlock();//unLock1, because some other utility can lock
+  unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
 
   readData += sz;
   std::string srcPathString = path.c_str();
@@ -181,21 +203,15 @@ static void process_file_ver(const char *rootDir,
     #endif
     deduplicatedData += sz;
   }
-
-  get_lock(path.string().c_str());//lock2
-  if (write_blob_reference(path.c_str(), sha256, false))
-  {
-    if (wasPacked)
-      rename_z_to_normal(path.c_str());
-  } else
-    fprintf(stderr, "[E] blob reference %s couldn't be saved\n", path.c_str());
-  unlock();//unlock2
+  std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
+  auto &i = file_version_remap[path.filename().string()];
+  encode_sha256(sha256, i, sha256_encoded_size+1);
   writtenData += wr;
 }
 
 struct ProcessTask
 {
-  std::string filePath;
+  std::string rcsFilePath;
   std::filesystem::path path;
 };
 
@@ -222,13 +238,14 @@ struct FileVerProcessor
     ProcessTask task;
     ThreadData data;
     while (processor->queue.wait_and_pop(task))
-      process_file_ver(processor->base_repo.c_str(), task.filePath, task.path, data, true);
+    {
+      process_file_ver(processor->base_repo.c_str(), task.rcsFilePath, task.path, data);
+      ++processed_files;
+    }
   }
-  void emplace(const std::string &filePath, const std::filesystem::path &p)
+  void emplace(const std::string &rcsFilePath, const std::filesystem::path &p)
   {
-    if (!is_inited())
-      return;
-    queue.emplace(ProcessTask{filePath, p});
+    queue.emplace(ProcessTask{rcsFilePath, p});
   }
   std::vector<std::thread> threads;//soa
 
@@ -237,6 +254,70 @@ struct FileVerProcessor
 };
 
 static FileVerProcessor processor;
+
+void process_queued_files(const char *filename, const char *lock_rcs_file_name, const std::string &rcs_file_name_full_path, const std::string &path_to_versions, int files_to_process)
+{
+  if (processor.is_inited())//finish conversion
+  {
+    while (files_to_process != processed_files.load())
+      sleep(100);
+  }
+
+  {
+    //replace references
+    size_t lockId = get_lock(lock_rcs_file_name);//lock2
+    std::string rcsData;
+    {
+      std::ifstream f(rcs_file_name_full_path);
+      std::stringstream buffer;
+      buffer << f.rdbuf();
+      rcsData = buffer.str();
+    }
+    std::string oldVerRCS;
+    char sha_ref[blob_reference_size+1];
+    memcpy(sha_ref, SHA256_REV_STRING, sha256_magic_len);
+    sha_ref[blob_reference_size] = 0;
+    std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
+    std::string filenameDir = std::string(filename) + "/";
+    for (auto &fv: file_version_remap)
+    {
+      oldVerRCS = filenameDir + fv.first;
+      memcpy(sha_ref+sha256_magic_len, fv.second, sha256_encoded_size);
+      bool replaced = replace_rcs_data(rcsData, oldVerRCS, sha_ref, blob_reference_size);
+      if (!replaced)
+      {
+        printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
+        //it is dangerous to remove file then
+        continue;
+      }
+      char *tempFilename;
+      FILE *tmpf = cvs_temp_file (&tempFilename, "wb");
+      if (tmpf)
+      {
+        if (fwrite(rcsData.c_str(), 1, rcsData.length(), tmpf) == rcsData.length())
+        {
+          if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
+          {
+            std::string fullPath = (path_to_versions + "/") + fv.first;
+            printf("erase %s\n", fullPath.c_str());
+            unlink(fullPath.c_str());
+            rmdir(path_to_versions.c_str());//will delete only empty folder
+          } else
+          {
+            printf("[E] can'rename  temp file <%s> to <%s>\n", tempFilename, rcs_file_name_full_path.c_str());
+            unlink(tempFilename);
+          }
+        } else
+          printf("[E] can't write temp file for <%s>\n", tempFilename);
+        fclose(tmpf);
+        blob_free(tempFilename);
+      } else
+        printf("[E] can't write temp file for <%s>\n", rcs_file_name_full_path.c_str());
+    }
+    file_version_remap.clear();
+    unlock(lockId, lock_rcs_file_name);//unlock2
+  }
+}
 
 static void process_file(const char *rootDir, const char *dir, const char *file)
 {
@@ -257,7 +338,12 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
   printf("process <%s>/<%s>\n", dir, file);
   #endif
 
+  int files_to_process = 0;
+  if (processed_files.load() != 0)
+    fprintf(stderr, "[E] not all files were processed");
+  processed_files.store(0);
   std::string filePath = dirPath + file;
+  std::string rcsFilePath = filePath+",v";
   ThreadData data;
   for (const auto & entry : fs::directory_iterator(pathToVersions))
   {
@@ -265,10 +351,19 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
       continue;
     //read data
     if (processor.is_inited())
-      processor.emplace(filePath, entry.path());
-    else
-      process_file_ver(rootDir, filePath, entry.path(), data, false);
+    {
+      ++files_to_process;
+      processor.emplace(rcsFilePath, entry.path());
+    } else
+      process_file_ver(rootDir, rcsFilePath, entry.path(), data);
+    if (files_to_process > max_files_to_process)
+    {
+      process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
+      files_to_process = 0;
+    }
   }
+  process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
+  files_to_process = 0;
 }
 
 static void process_directory(const char *rootDir, const char *dir)
@@ -322,6 +417,8 @@ int main(int ac, const char* argv[])
 
   bool help = options.passed("-h", "print help usage");
   if (help || !options.sane()) {
+    if (!options.sane())
+      printf("Missing required arguments:%s\n", options.print_missing().c_str());
     std::cout << options.usage();
     return help ? 0 : -1;
   }
