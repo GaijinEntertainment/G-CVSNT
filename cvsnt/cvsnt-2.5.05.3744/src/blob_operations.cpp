@@ -263,7 +263,7 @@ static void* compress_zstd_data(const void *data, size_t len, BlobPackType pack,
   return zbuf;
 }
 
-bool atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed)
+size_t atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed)
 {
   char *temp_filename = NULL;
   FILE *dest = cvs_temp_file(&temp_filename, "wb");
@@ -271,11 +271,13 @@ bool atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
   {
     error(1, errno, "can't open write temp_filename <%s> for <%s>(<%s>)", temp_filename, sha_file_name, fn);
   }
+  size_t written = 0;
   if (src_packed)
   {
     //new protocol - client sends already prepared blobs, just write them down
     if (fwrite(data,1,len,dest) != len)
       error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)len);
+    written = len;
   } else
   {
     BlobHeader hdr = get_noarc_header(len);
@@ -309,7 +311,7 @@ bool atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
       error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)sizeof(hdr));
     if (fwrite(writeData,1,hdr.compressedLen,dest) != hdr.compressedLen)
       error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, fn, (uint32_t)hdr.compressedLen);
-
+    written = hdr.compressedLen + hdr.headerSize;
     if (compressed_data != nullptr)
       blob_free(compressed_data);
   }
@@ -318,7 +320,7 @@ bool atomic_write_sha_file(const char *fn, const char *sha_file_name, const void
   fclose(dest);
 
   blob_free (temp_filename);
-  return ret;
+  return ret ? written : 0;
 }
 
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
@@ -406,7 +408,7 @@ size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   if (!isreadable(sha_file_name))
   {
     create_dirs(root, sha256);
-    return atomic_write_sha_file(fn, sha_file_name, data, len, pack, src_packed) ? unpacked_len : 0;
+    return atomic_write_sha_file(fn, sha_file_name, data, len, pack, src_packed);
   }//else we already have this blob written. deduplication worked!
   else
   {

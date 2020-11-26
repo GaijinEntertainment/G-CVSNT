@@ -289,26 +289,21 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
     {
       unlock(lockId, lock_rcs_file_name);//unlock2
       fprintf(stderr, "[E] no rcs file <%s>\n", rcs_file_name_full_path.c_str());
-      file_version_remap_process.clear();
+      file_version_remap.clear();
       return;
     }
     std::string rcsData;rcsData.resize(rcs_sz+1);
     {
-      std::ifstream f(path, std::ios::in | std::ios::binary);
-      f.read(rcsData.data(), sz);rcsData[rcs_sz] = 0;
+      std::ifstream f(rcs_file_name_full_path.c_str(), std::ios::in | std::ios::binary);
+      f.read(rcsData.data(), rcs_sz);rcsData[rcs_sz] = 0;
     }
     std::string oldVerRCS;
     char sha_ref[blob_reference_size+2];
     memcpy(sha_ref, SHA256_REV_STRING, sha256_magic_len);
     sha_ref[blob_reference_size] = '@';
     sha_ref[blob_reference_size+1] = 0;
-    tsl::sparse_map<std::string, char[sha256_encoded_size+1]> file_version_remap_process;
-    {
-      std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
-      file_version_remap_process.swap(file_version_remap);
-    }
     std::string filenameDir = std::string(filename) + "/";
-    for (auto &fv: file_version_remap_process)
+    for (auto &fv: file_version_remap)
     {
       oldVerRCS = filenameDir + fv.first;
       if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
@@ -427,7 +422,7 @@ static void process_directory(const char *rootDir, const char *dir)
     }
   }
   if (writtenData_old != writtenData)
-    printf("processed dir <%s>, saved %gkb\n", dir, double(int64_t(readData_old - readData) - int64_t(writtenData_old-writtenData))/1024.0);
+    printf("processed dir <%s>, saved %gkb\n", dir, double(int64_t(readData-readData_old) - int64_t(writtenData-writtenData_old))/1024.0);
 }
 
 int main(int ac, const char* argv[])

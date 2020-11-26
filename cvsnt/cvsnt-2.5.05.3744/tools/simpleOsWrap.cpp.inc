@@ -241,7 +241,7 @@ bool get_file_mode_and_size(const char *file, mode_t &mode, size_t &sz)
   struct stat sb;
   if (stat(file, &sb) == -1)
     return false;
-  mode = sb.mode;
+  mode = sb.st_mode;
   sz = sb.st_size;
   return true;
 }

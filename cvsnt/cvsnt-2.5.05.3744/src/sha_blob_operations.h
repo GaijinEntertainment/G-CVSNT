@@ -18,7 +18,7 @@ bool calc_sha256_file(const char *fn, unsigned char sha256[]);//sha256 char[32]
 bool does_blob_exist(const char *sha_file_name);
 void create_dirs(const char *root, unsigned char sha256[]);
 enum class BlobPackType {NO, FAST, BEST};//try to pack
-bool atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed);
+size_t atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed);//returns size or 0 on error
 
 
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client

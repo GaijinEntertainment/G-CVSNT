@@ -2339,7 +2339,7 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
        affects a user who wants status info about how far we have
        gotten, and also affects whether "U foo.c" appears in addition
        to various error messages.  */
-    if (updated_fname != NULL)//!quiet && 
+    if (!quiet && updated_fname != NULL)
     {
       cvs_output ("Ub ", 0);
       cvs_output (updated_fname, 0);
