@@ -303,7 +303,8 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
     memcpy(sha_ref, SHA256_REV_STRING, sha256_magic_len);
     sha_ref[blob_reference_size] = '@';
     sha_ref[blob_reference_size+1] = 0;
-    tsl::sparse_map<std::string> keep_files_list;
+    tsl::sparse_set<std::string> keep_files_list;
+    std::string filenameDir = std::string(filename) + "/";
     bool anyReplaced = false;
     for (auto &fv: file_version_remap)
     {
@@ -315,7 +316,7 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
       if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1))
       {
         //it is dangerous to remove file then
-        printf("[E] can't find references to <%s> in <%s> of %d. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str(), rcs_sz);
+        printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
         keep_files_list.emplace(fv.first);
       } else
         anyReplaced = true;
@@ -348,11 +349,10 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
 
     if (rcsChanged)//unlink all replaced files
     {
-      std::string filenameDir = std::string(filename) + "/";
-      std::string fullPath = (path_to_versions + "/") + fv.first;
+      std::string pathtoVersionDir = path_to_versions + "/";
       for (auto &fv: file_version_remap)
         if (keep_files_list.find(fv.first) == keep_files_list.end())
-          unlink(fullPath.c_str());
+          unlink((pathtoVersionDir + fv.first).c_str());
       rmdir(path_to_versions.c_str());//will delete only empty folder
     }
     file_version_remap.clear();
