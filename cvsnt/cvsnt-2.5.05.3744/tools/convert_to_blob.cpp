@@ -13,6 +13,7 @@
 #include "flags.h"
 #include "concurrent_queue.h"
 #include "tsl/sparse_map.h"
+#include "tsl/sparse_set.h"
 #ifdef _WIN32
 namespace fs = std::experimental::filesystem;
 #else
@@ -302,7 +303,8 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
     memcpy(sha_ref, SHA256_REV_STRING, sha256_magic_len);
     sha_ref[blob_reference_size] = '@';
     sha_ref[blob_reference_size+1] = 0;
-    std::string filenameDir = std::string(filename) + "/";
+    tsl::sparse_map<std::string> keep_files_list;
+    bool anyReplaced = false;
     for (auto &fv: file_version_remap)
     {
       oldVerRCS = filenameDir + fv.first;
@@ -310,13 +312,17 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
         oldVerRCS.erase(oldVerRCS.length()-2);
       oldVerRCS += "@";
       memcpy(sha_ref+sha256_magic_len, fv.second, sha256_encoded_size);
-      bool replaced = replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1);
-      if (!replaced)
+      if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1))
       {
-        printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
         //it is dangerous to remove file then
-        continue;
-      }
+        printf("[E] can't find references to <%s> in <%s> of %d. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str(), rcs_sz);
+        keep_files_list.emplace(fv.first);
+      } else
+        anyReplaced = true;
+    }
+    bool rcsChanged = false;
+    if (anyReplaced)
+    {
       char *tempFilename;
       FILE *tmpf = cvs_temp_file (&tempFilename, "wb");
       if (tmpf)
@@ -325,11 +331,8 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
         {
           change_file_mode(tempFilename, rcs_mode);
           if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
-          {
-            std::string fullPath = (path_to_versions + "/") + fv.first;
-            unlink(fullPath.c_str());
-            rmdir(path_to_versions.c_str());//will delete only empty folder
-          } else
+            rcsChanged = true;
+          else
           {
             printf("[E] can'rename  temp file <%s> to <%s>\n", tempFilename, rcs_file_name_full_path.c_str());
             unlink(tempFilename);
@@ -342,6 +345,17 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
         printf("[E] can't write temp file for <%s>\n", rcs_file_name_full_path.c_str());
     }
     unlock(lockId, lock_rcs_file_name);//unlock2
+
+    if (rcsChanged)//unlink all replaced files
+    {
+      std::string filenameDir = std::string(filename) + "/";
+      std::string fullPath = (path_to_versions + "/") + fv.first;
+      for (auto &fv: file_version_remap)
+        if (keep_files_list.find(fv.first) == keep_files_list.end())
+          unlink(fullPath.c_str());
+      rmdir(path_to_versions.c_str());//will delete only empty folder
+    }
+    file_version_remap.clear();
   }
 }
 
