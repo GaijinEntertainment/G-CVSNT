@@ -288,9 +288,10 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
     std::string filenameDir = std::string(filename) + "/";
     for (auto &fv: file_version_remap_process)
     {
-      oldVerRCS = filenameDir + fv.first + "@";
+      oldVerRCS = filenameDir + fv.first;
       if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
         oldVerRCS.erase(oldVerRCS.length()-2);
+      oldVerRCS += "@";
       memcpy(sha_ref+sha256_magic_len, fv.second, sha256_encoded_size);
       bool replaced = replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1);
       if (!replaced)
