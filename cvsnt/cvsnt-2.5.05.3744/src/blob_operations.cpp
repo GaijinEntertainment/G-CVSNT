@@ -189,8 +189,6 @@ bool calc_sha256_file(const char *fn, unsigned char sha256[])//sha256 char[32]
 
 bool does_blob_exist(const char *sha_file_name)
 {
-  printf("try %s\n", sha_file_name);
-  printf("tried %d\n", get_file_size(sha_file_name));
   return get_file_size(sha_file_name) >= sizeof(BlobHeader);
 }
 
