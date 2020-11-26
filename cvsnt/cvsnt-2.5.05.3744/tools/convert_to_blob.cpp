@@ -282,8 +282,8 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
     for (auto &fv: file_version_remap)
     {
       oldVerRCS = filenameDir + fv.first;
-      if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 1] == '#')
-        oldVerRCS.erase(oldVerRCS.end()-2)
+      if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
+        oldVerRCS.erase(oldVerRCS.end()-2);
       memcpy(sha_ref+sha256_magic_len, fv.second, sha256_encoded_size);
       bool replaced = replace_rcs_data(rcsData, oldVerRCS, sha_ref, blob_reference_size);
       if (!replaced)
