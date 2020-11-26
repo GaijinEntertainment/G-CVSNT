@@ -19,7 +19,7 @@ namespace fs = std::experimental::filesystem;
 namespace fs = std::filesystem;
 #endif
 
-static int max_files_to_process = 64;// to limit amount of double sized data
+static size_t max_files_to_process = 64;// to limit amount of double sized data
 
 static bool fastest_conversion = true;//if true, we won't repack, just calc sha256 and put zlib block as is.
 static void ensure_blob_mtime(const char* verfile, const char *blob_file)
@@ -282,6 +282,8 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
     for (auto &fv: file_version_remap)
     {
       oldVerRCS = filenameDir + fv.first;
+      if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 1] == '#')
+        oldVerRCS.erase(oldVerRCS.end()-2)
       memcpy(sha_ref+sha256_magic_len, fv.second, sha256_encoded_size);
       bool replaced = replace_rcs_data(rcsData, oldVerRCS, sha_ref, blob_reference_size);
       if (!replaced)
@@ -299,7 +301,6 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
           if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
           {
             std::string fullPath = (path_to_versions + "/") + fv.first;
-            printf("erase %s\n", fullPath.c_str());
             unlink(fullPath.c_str());
             rmdir(path_to_versions.c_str());//will delete only empty folder
           } else
@@ -410,9 +411,12 @@ int main(int ac, const char* argv[])
   auto lock_user = options.arg("-user", "User name for lock server");
   auto rootDir = options.arg("-root", "Root dir for CVS");
   auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
+  if (tmpDir.length() > 1)
+    def_tmp_dir = tmpDir.c_str();
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
   auto file = options.arg_or("-file", "", "File to process (inside dir)");
   auto threads = options.arg_as_or<int>("-j", 0,"concurrency level(threads to run)");
+  max_files_to_process = options.arg_as_or<int>("-j", 64, "max versions to process before changing rcs. Limits amount of space needed");
   fastest_conversion = !options.passed("-repack", "repack zlib to zstd, slow");
 
   bool help = options.passed("-h", "print help usage");
