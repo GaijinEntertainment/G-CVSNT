@@ -56,7 +56,7 @@
 #undef max
 #undef min
 
-void sleep(int ms)
+void sleep_ms(int ms)
 {
 #if _WIN32
   if (ms == 0)
@@ -236,6 +236,16 @@ bool change_file_mode(const char *f, int mode)
   return chmod(f, mode&0777) >= 0;
 }
 
+bool get_file_mode_and_size(const char *file, mode_t &mode, size_t &sz)
+{
+  struct stat sb;
+  if (stat(file, &sb) == -1)
+    return false;
+  mode = sb.mode;
+  sz = sb.st_size;
+  return true;
+}
+
 #ifndef CVS_MKDIR
 #define CVS_MKDIR mkdir
 #endif
@@ -410,7 +420,7 @@ bool rename_attempts(const char *from, const char *to, unsigned attempts)
     if (rename (from, to) >= 0)
       break;
     printf("can't rename file <%s> to <%s> %d/%d attempt\n", from, to, i, attempts);
-    sleep(1000);
+    sleep_ms(1000);
   }
   return i < attempts;
 }

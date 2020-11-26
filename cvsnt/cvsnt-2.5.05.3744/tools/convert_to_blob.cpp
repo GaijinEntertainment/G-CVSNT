@@ -19,6 +19,11 @@ namespace fs = std::experimental::filesystem;
 namespace fs = std::filesystem;
 #endif
 
+// enable if we want to allow concurrent conversion of SAME dir (it's ok to convert different dirs)
+// that's insane to do, really
+#define CONCURRENT_CONVERSION_TOOL 0
+
+
 static size_t max_files_to_process = 64;// to limit amount of double sized data
 
 static bool fastest_conversion = true;//if true, we won't repack, just calc sha256 and put zlib block as is.
@@ -101,7 +106,7 @@ size_t get_lock(const char *lock_file_name)
       lockId = do_lock_file(lock_server_socket, lock_file_name, 1, 0);
     }
     if (lockId == 0)
-      sleep(500);
+      sleep_ms(100);
   } while(lockId == 0);
   #if VERBOSE
   printf(" lock=%lld, start processing\n", (long long int) lockId);
@@ -126,12 +131,16 @@ static void process_file_ver(const char *rootDir,
   ThreadData& data)
 {
   std::vector<char> &fileUnpackedData = data.fileUnpackedData, &filePackedData  = data.filePackedData, &sha_file_name = data.sha_file_name;
-  size_t lockId = get_lock(filePath.c_str());//Lock1
+  #if CONCURRENT_CONVERSION_TOOL
+    size_t lockId = get_lock(filePath.c_str());//Lock1
+  #endif
   const auto sz = fs::file_size(path);
   fileUnpackedData.resize(sz);
   std::ifstream f(path, std::ios::in | std::ios::binary);
   f.read(fileUnpackedData.data(), sz);
-  unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
+  #if CONCURRENT_CONVERSION_TOOL
+    unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
+  #endif
 
   readData += sz;
   std::string srcPathString = path.c_str();
@@ -260,20 +269,33 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
 {
   if (processor.is_inited())//finish conversion
   {
-    while (files_to_process != processed_files.load())
-      sleep(100);
+    ThreadData data;
+    ProcessTask task;
+    while (files_to_process != processed_files.load() && processor.queue.try_pop(task))
+    {
+      process_file_ver(processor.base_repo.c_str(), task.rcsFilePath, task.path, data);
+      ++processed_files;
+    }
+    while (files_to_process != processed_files.load())//wait for other jobs to finish
+      sleep_ms(1);
     processed_files.store(0);
   }
 
   {
     //replace references
     size_t lockId = get_lock(lock_rcs_file_name);//lock2
-    std::string rcsData;
+    mode_t rcs_mode; size_t rcs_sz;
+    if (!get_file_mode_and_size(rcs_file_name_full_path.c_str(), rcs_mode, rcs_sz))
     {
-      std::ifstream f(rcs_file_name_full_path);
-      std::stringstream buffer;
-      buffer << f.rdbuf();
-      rcsData = buffer.str();
+      unlock(lockId, lock_rcs_file_name);//unlock2
+      fprintf(stderr, "[E] no rcs file <%s>\n", rcs_file_name_full_path.c_str());
+      file_version_remap_process.clear();
+      return;
+    }
+    std::string rcsData;rcsData.resize(rcs_sz+1);
+    {
+      std::ifstream f(path, std::ios::in | std::ios::binary);
+      f.read(rcsData.data(), sz);rcsData[rcs_sz] = 0;
     }
     std::string oldVerRCS;
     char sha_ref[blob_reference_size+2];
@@ -306,6 +328,7 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
       {
         if (fwrite(rcsData.c_str(), 1, rcsData.length(), tmpf) == rcsData.length())
         {
+          change_file_mode(tempFilename, rcs_mode);
           if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
           {
             std::string fullPath = (path_to_versions + "/") + fv.first;

@@ -23,7 +23,7 @@ int main(int ac, const char* argv[])
   snprintf(fullPath, sizeof(fullPath), "%s%s", argv[3], argv[4]);
   size_t lockId = do_lock_file(lock_server_socket, fullPath, 1, 1);
   printf("obtained lock %lld, sleep for 1sec\n", (uint64_t) lockId);
-  sleep(1000);
+  sleep_ms(1000);
   do_unlock_file(lock_server_socket, lockId);
 
   cvs_tcp_close(lock_server_socket);

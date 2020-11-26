@@ -175,7 +175,7 @@ static size_t do_lock_server(int lock_server_socket, const char *object, const c
 			error(1,0,"Unknown response from lock server: %s", line+4);
 		}
 		// Only get here in case 2 == WAIT
-		sleep(1);
+		sleep_ms(1);
 	} while(1);
 	free(ob);
 	return 0;
