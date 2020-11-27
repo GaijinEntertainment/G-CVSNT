@@ -321,6 +321,13 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\blake3\blake3.c" />
+    <ClCompile Include="src\blake3\blake3_avx2.c" />
+    <ClCompile Include="src\blake3\blake3_avx512.c" />
+    <ClCompile Include="src\blake3\blake3_dispatch.c" />
+    <ClCompile Include="src\blake3\blake3_portable.c" />
+    <ClCompile Include="src\blake3\blake3_sse2.c" />
+    <ClCompile Include="src\blake3\blake3_sse41.c" />
     <ClCompile Include="src\blob_operations.cpp" />
     <ClCompile Include="src\buffer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
