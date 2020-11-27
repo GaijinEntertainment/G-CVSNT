@@ -23,6 +23,8 @@ namespace fs = std::filesystem;
 // enable if we want to allow concurrent conversion of SAME dir (it's ok to convert different dirs)
 // that's insane to do, really
 #define CONCURRENT_CONVERSION_TOOL 0
+#define PRINT_PROGRESS 1
+#define VERBOSE 0
 
 
 static size_t max_files_to_process = 64;// to limit amount of double sized data
@@ -394,19 +396,24 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
     if (entry.is_directory())
       continue;
     //read data
+    ++files_to_process;
     if (processor.is_inited())
-    {
-      ++files_to_process;
       processor.emplace(rcsFilePath, entry.path());
-    } else
+    else
       process_file_ver(rootDir, rcsFilePath, entry.path(), data);
     if (files_to_process > max_files_to_process)
     {
       process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
+      #if PRINT_PROGRESS
+      printf(".");
+      #endif
       files_to_process = 0;
     }
   }
   process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
+  #if PRINT_PROGRESS
+  printf(".");
+  #endif
   files_to_process = 0;
 }
 
