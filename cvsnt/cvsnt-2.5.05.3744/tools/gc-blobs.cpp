@@ -1,6 +1,7 @@
 //to build on linux: clang++ -std=c++17 -O2 gc-blobs.cpp blob_operations.cpp ./sha256/sha256.c -lz -lzstd -ogc-blobs
 
-#include "simpleOsWrap.cpp.inc"
+//#include "simpleOsWrap.cpp.inc"
+#include "simpleLock.cpp.inc"
 #include "sha_blob_reference.h"
 #include <string>
 #include <filesystem>
@@ -9,23 +10,16 @@
 #include <vector>
 #include <ctime>
 #include "tsl/sparse_set.h"
+#include "flags.h"
 #ifdef _WIN32
 namespace fs = std::experimental::filesystem;
 #else
 namespace fs = std::filesystem;
 #endif
 
-bool gather_used = false;
+static int lock_server_socket = -1;
 
-static void usage()
-{
-  printf("Usage: gc-blobs <full_root> used|unused|broken|delete_unused\n");
-  printf("example:gc-blobs /cvs/some_repo unused\n");
-  printf("example:gc-blobs /cvs/some_repo used\n");
-  printf("safe to run in working production environment. uses one thread only\n");
-  printf("Warning! It doesnt delete anything, unless called with delete_unused, it will just output to stdout the list of referenced(used)/unreferenced/broken sha paths\n");
-  printf("Warning! run only on server!\n");
-}
+bool gather_used = false;
 
 struct ShaKey
 {
@@ -57,7 +51,34 @@ inline const bool sh_from_encoded(const char *sha, ShaKey &k)
   return !err;
 }
 
-static void process_file(const char *rootDir, const char *dir, const char *file)
+size_t get_lock(const char *lock_file_name)
+{
+  size_t lockId = 0;
+  #if VERBOSE
+  printf("obtaining lock for <%s>...", lock_file_name);
+  #endif
+  do {
+    lockId = do_lock_file(lock_server_socket, lock_file_name, 0, 0);
+    if (lockId == 0)
+      sleep_ms(100);
+  } while(lockId == 0);
+  #if VERBOSE
+  printf(" lock=%lld, start processing\n", (long long int) lockId);
+  #endif
+  return lockId;
+}
+
+static void unlock(size_t lockId, const char *debug_text = nullptr)
+{
+  if (!lockId)
+    return;
+  #if VERBOSE
+  printf("releasing lock %lld for %s\n", (long long int) lockId, debug_text ? debug_text : "");
+  #endif
+  do_unlock_file(lock_server_socket, lockId);
+};
+
+static void process_file(const char *rootDir, const char *dir, const char *rcs_file)
 {
   std::string dirPath = rootDir;
   if (dirPath[dirPath.length()-1] != '/' && dir[0]!='/')
@@ -65,38 +86,58 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
   dirPath += dir;
   if (dirPath[dirPath.length()-1] != '/')
     dirPath+="/";
-  std::string pathToVersions = (dirPath + "CVS/")+file;
+  std::string fullPathToRCS = dirPath+rcs_file;
 
-  if (!iswriteable(pathToVersions.c_str()))
+  if (!iswriteable(fullPathToRCS.c_str()))
   {
-    printf("<%s> is not a writeable directory (not a kB file?)!\n", pathToVersions.c_str());
+    printf("<%s> is not a writeable file. We can't process it!\n", fullPathToRCS.c_str());
     return;
   }
 
-  std::string filePath = dirPath + file;
-  std::vector<char> sha_file_name(filePath.length() + sha256_encoded_size + 7);
-  size_t readData = 0, writtenData = 0;
-  for (const auto & entry : fs::directory_iterator(pathToVersions))
+  size_t lockId = get_lock(fullPathToRCS.c_str());//lock for read
+  std::ifstream t(fullPathToRCS.c_str());
+  std::stringstream buffer;
+  buffer << t.rdbuf();
+  std::string rcsData = buffer.str();
+  unlock(lockId);
+
+  const char *data = rcsData.c_str(), *end = data + rcsData.length();
+  #define TEXT_COMMAND "@\ntext\n@"
+  while (const char *text_command = strstr(data, TEXT_COMMAND))//we found something looking like text command in rcs
   {
-    if (entry.is_directory())
+    //text command found
+    data = text_command + strlen(TEXT_COMMAND);
+    if (*data == '@')//that last @ was escaped !
       continue;
-    char sha256_encoded[sha256_encoded_size+1];
-    if (!get_blob_reference_sha256(entry.path().string().c_str(), sha256_encoded))//sha256_encoded==char[65], encoded 32 bytes + \0
+    for (; *data; ++data)
     {
-      printf("[E] %s not a blob reference\n", entry.path().string().c_str());
-      //rename_z_to_normal(entry.path().c_str());
-      continue;
-    }
-    ShaKey k;
-    if (!sh_from_encoded(sha256_encoded, k))
-      printf("[E] <%s> looks like a blob reference, but it's <%s> is not a sha!\n", entry.path().string().c_str(), sha256_encoded);
-    else
-    {
-      //printf("%s sha blob!\n", sha256_encoded);
-      if (gather_used)
-        collected_shas.insert(k);
-      else
-        collected_shas.erase(k);
+      if (*data == '@')
+      {
+        if (data[1] != '@')//end of text command
+          break;
+        data++;//escaped '@', how that it is in text?
+        continue;
+      }
+
+      if (data + blob_reference_size >= end)
+        break;
+      if (is_blob_reference_data(data, blob_reference_size)//is a blob reference
+          && data[blob_reference_size] == '@')//that's the end of text
+      {
+          ShaKey k;
+          const char *sha256_encoded = data + sha256_magic_len;
+          if (!sh_from_encoded(sha256_encoded, k))
+            fprintf(stderr, "[E] in <%s> some string <%*.s> like a blob reference, but it's part is not a sha!\n",
+              fullPathToRCS.c_str(), (int)blob_reference_size, data);
+          else
+          {
+            //printf("%s sha blob!\n", sha256_encoded);
+            if (gather_used)
+              collected_shas.insert(k);
+            else
+              collected_shas.erase(k);
+          }
+      }
     }
   }
 }
@@ -122,7 +163,6 @@ static void process_directory(const char *rootDir, const char *dir)
 
       if (filename.length()>2 && filename[filename.length()-1] == 'v' && filename[filename.length()-2] == ',')
       {
-        filename[filename.length()-2] = 0;
         process_file(rootDir, dir, filename.c_str());
       }
     }
@@ -200,35 +240,59 @@ static void process_sha_directory(const char *rootDir)
 
 int main(int ac, const char* argv[])
 {
-  if (ac < 3)
+  auto options = flags::flags{ac, argv};
+  options.info("gc-blobs",
+    "conversion utility from old CVS to blob de-duplicated one"
+    "Usage: gc-blobs -root <rootDir> -lock_url <lock_url> -user <lock_user> used|unused|broken|delete_unused\n"
+    "safe to run in working production environment. Uses one thread only\n"
+    "Warning! It doesnt delete anything, unless called with delete_unused, it will just output to stdout the list of referenced(used)/unreferenced/broken sha paths\n"
+    "Warning! run only on server!\n"
+  );
+
+  auto lock_url = options.arg("-lock_url", "Url for lock server");
+  auto lock_user = options.arg("-user", "User name for lock server");
+  auto rootDir = options.arg("-root", "Root dir for CVS");
+
+  bool help = options.passed("-h", "print help usage");
+  if (help || !options.sane()) {
+    if (!options.sane())
+      printf("Missing required arguments:%s\n", options.print_missing().c_str());
+    std::cout << options.usage();
+    return help ? 0 : -1;
+  }
+  tcp_init();
+  lock_server_socket = lock_register_client(lock_user.c_str(), rootDir.c_str(), lock_url.c_str());
+  if (lock_server_socket == -1)
   {
-    usage();
+    fprintf(stderr, "[E] Can't connect to lock server\n");
     exit(1);
   }
+
   bool gather_broken = false, delete_unused = false;
-  if (strcmp(argv[2], "used") == 0)
+  if (strcmp(argv[ac-1], "used") == 0)
     gather_used = true;
-  else if (strcmp(argv[2], "unused") == 0)
+  else if (strcmp(argv[ac-1], "unused") == 0)
     gather_used = false;
-  else if (strcmp(argv[2], "delete_unused") == 0)
+  else if (strcmp(argv[ac-1], "delete_unused") == 0)
   {
     gather_used = false;delete_unused = true;
-  } else if (strcmp(argv[2], "broken") == 0)
+  } else if (strcmp(argv[ac-1], "broken") == 0)
     gather_used = true, gather_broken = true;
   else
   {
-    printf("[E] Unkown command <%s>\n", argv[2]);
-    usage();
+    printf("[E] Unknown command <%s>\n", argv[ac-1]);
+    std::cout << options.usage();
     exit(1);
   }
   size_t storedBlobs = 0;
   if (!gather_used)
   {
-    process_sha_directory(argv[1]);
+    process_sha_directory(rootDir.c_str());
     storedBlobs = collected_shas.size();
     printf("gathered %lld blobs\n", (unsigned long long)storedBlobs);
   }
-  process_directory(argv[1], "");
+  process_directory(rootDir.c_str(), "");
+
   if (!gather_used)
   {
     printf("referenced %lld blobs %lld unused\n", (unsigned long long)(storedBlobs - collected_shas.size()), (unsigned long long)collected_shas.size());
@@ -237,7 +301,7 @@ int main(int ac, const char* argv[])
     printf("referenced %lld blobs\n", (unsigned long long)collected_shas.size());
     if (gather_broken)
     {
-      process_sha_directory(argv[1]);
+      process_sha_directory(rootDir.c_str());
       printf("broken %lld references\n", (unsigned long long)collected_shas.size());
     }
   }
@@ -251,7 +315,7 @@ int main(int ac, const char* argv[])
         char buf[1024];
         snprintf(buf, sizeof(buf),
          "%s%s%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-         argv[1], BLOBS_SUBDIR, SHA256_LIST(i.v.sha256));
+         rootDir.c_str(), BLOBS_SUBDIR, SHA256_LIST(i.v.sha256));
         printf("deleting <%s>...%s\n", buf, unlink(buf) ? "ERR" : "OK");
       } else
         printf(
@@ -260,5 +324,6 @@ int main(int ac, const char* argv[])
     }
   }
 
+  cvs_tcp_close(lock_server_socket);
   return 0;
 }

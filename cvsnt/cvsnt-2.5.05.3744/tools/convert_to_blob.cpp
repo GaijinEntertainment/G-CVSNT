@@ -40,11 +40,15 @@ static int find_rcs_data(const char* rcs_data, const char *text_to_find, size_t 
 {
   const char *data = rcs_data;
   #define TEXT_COMMAND "@\ntext\n@"
-  while (const char *text_command = strstr(data, TEXT_COMMAND))
+  while (const char *text_command = strstr(data, TEXT_COMMAND))//we found something looking like text command in rcs
   {
     //text command found
+    data = text_command + strlen(TEXT_COMMAND);
+    if (*data == '@')//that last @ was escaped !
+      continue;
+    //text command found
     bool text_found = false;
-    for (data = text_command + strlen(TEXT_COMMAND); *data; ++data)
+    for (; *data; ++data)
     {
       if (*data == '@')
       {
