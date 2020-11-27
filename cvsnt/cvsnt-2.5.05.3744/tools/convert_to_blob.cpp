@@ -27,7 +27,8 @@ namespace fs = std::filesystem;
 #define VERBOSE 0
 
 
-static size_t max_files_to_process = 64;// to limit amount of double sized data
+//this, and only this is amount of work to be done in parallel.
+static size_t max_files_to_process = 256;// to limit amount of double sized data
 
 static bool fastest_conversion = true;//if true, we won't repack, just calc sha256 and put zlib block as is.
 static void ensure_blob_mtime(const char* verfile, const char *blob_file)
@@ -466,7 +467,7 @@ int main(int ac, const char* argv[])
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
   auto file = options.arg_or("-file", "", "File to process (inside dir)");
   auto threads = options.arg_as_or<int>("-j", 0,"concurrency level(threads to run)");
-  max_files_to_process = options.arg_as_or<int>("-j", 64, "max versions to process before changing rcs. Limits amount of space needed");
+  max_files_to_process = options.arg_as_or<int>("-max_files", 256, "max versions to process before changing rcs. Limits amount of space needed");
   fastest_conversion = !options.passed("-repack", "repack zlib to zstd, slow");
 
   bool help = options.passed("-h", "print help usage");
