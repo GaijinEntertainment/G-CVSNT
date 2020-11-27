@@ -49,6 +49,11 @@ bin_PROGRAMS = cvsnt
 # The cvs executable
 cvsnt_SOURCES = \
     sha256/sha256.c \
+    blake3/blake3.c \
+    blake3/blake3_sse41.c \
+    blake3/blake3_sse2.c \
+    blake3/blake3_avx2.c \
+    blake3/blake3_avx512.c \
     blob_operations.cpp \
     download_blob_to.cpp \
 	add.cpp \
