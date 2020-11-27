@@ -1,5 +1,6 @@
 #include "blake3_impl.h"
 
+#if !defined(BLAKE3_NO_AVX2)
 #include <immintrin.h>
 
 #define DEGREE 8
@@ -323,3 +324,4 @@ void blake3_hash_many_avx2(const uint8_t *const *inputs, size_t num_inputs,
                             out);
 #endif
 }
+#endif

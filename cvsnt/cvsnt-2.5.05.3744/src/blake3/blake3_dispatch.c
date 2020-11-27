@@ -1,3 +1,5 @@
+#if defined(BLAKE3_DISPATCH)
+
 #include <stdbool.h>
 #include <stddef.h>
 #include <stdint.h>
@@ -274,3 +276,4 @@ size_t blake3_simd_degree(void) {
 #endif
   return 1;
 }
+#endif

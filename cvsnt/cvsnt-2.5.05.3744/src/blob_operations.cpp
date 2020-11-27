@@ -1,6 +1,7 @@
 #include "zlib.h"
 #include "zstd.h"
-#include "sha256/sha256.h"
+//#include "sha256/sha256.h"
+#include "blake3/blake3.h"
 //#include "cvs.h"
 #include "sha_blob_format.h"
 #include "sha_blob_reference.h"
@@ -33,6 +34,11 @@ bool change_file_mode(const char *file, int mode);
 //mem
 void *blob_alloc(size_t sz);
 void blob_free(void *);
+
+#define BLOB_HASH_CTX blake3_hasher
+#define BLOB_HASH_Final(out, ctx) blake3_hasher_finalize(ctx, out, 32)
+#define BLOB_HASH_Init blake3_hasher_init
+#define BLOB_HASH_Update blake3_hasher_update
 
 #define TRY_ZLIB_AS_WELL_ON_BEST 0//if 1, on Pack::BEST we will try both algoritms to find out whats working best
 
@@ -89,8 +95,8 @@ void get_blob_filename_from_sha256(const char *root, unsigned char sha256[], con
 void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char sha256[])//sha256 char[32]
 {
   unpacked_len = len;
-  blk_SHA256_CTX ctx;
-  blk_SHA256_Init(&ctx);
+  BLOB_HASH_CTX ctx;
+  BLOB_HASH_Init(&ctx);
 
   if (src_blob)
   {
@@ -99,11 +105,9 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
     //calc sha256 on the unpacked data!
     const BlobHeader &hdr = *(const BlobHeader*)data;
     unpacked_len = hdr.uncompressedLen;
-    const uint64_t len64 = hdr.uncompressedLen;
-    blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
     if (!is_packed_blob(hdr))
     {
-      blk_SHA256_Update(&ctx, ((const char*)data + hdr.headerSize), unpacked_len);
+      BLOB_HASH_Update(&ctx, ((const char*)data + hdr.headerSize), unpacked_len);
     } else if (is_zlib_blob(hdr))
     {
       z_stream stream = {0};
@@ -120,7 +124,7 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
         if (result < 0)
           error(1,0,"internal error: inflate failed");
 
-        blk_SHA256_Update(&ctx, bufOut, sizeof(bufOut) - stream.avail_out);
+        BLOB_HASH_Update(&ctx, bufOut, sizeof(bufOut) - stream.avail_out);
 
         if (result == Z_STREAM_END)
           break;
@@ -144,7 +148,7 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
         if (ZSTD_isError(ZSTD_decompressStream(zds, &streamOut, &streamIn)))
           error(1,0,"internal error: inflate failed");
 
-        blk_SHA256_Update(&ctx, bufOut, streamOut.pos);
+        BLOB_HASH_Update(&ctx, bufOut, streamOut.pos);
       };
       ZSTD_freeDStream(zds);
     } else
@@ -153,22 +157,20 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
     }
   } else
   {
-    uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
-    blk_SHA256_Update(&ctx, data, len);
+    BLOB_HASH_Update(&ctx, data, len);
   }
-  blk_SHA256_Final(sha256, &ctx);
+  BLOB_HASH_Final(sha256, &ctx);
 }
 
 bool calc_sha256_file(const char *fn, unsigned char sha256[])//sha256 char[32]
 {
-  blk_SHA256_CTX ctx;
-  blk_SHA256_Init(&ctx);
+  BLOB_HASH_CTX ctx;
+  BLOB_HASH_Init(&ctx);
 
   FILE* fp = fopen(fn,"rb");
   if (!fp)
     return false;
   size_t len = get_file_size(fn);
-  uint64_t len64 = len;blk_SHA256_Update(&ctx, &len64, sizeof(len64));//that would make attack significantly harder. But we dont expect attacks on our repo.
   char buf[32768];
   while (len > 0)
   {
@@ -178,12 +180,12 @@ bool calc_sha256_file(const char *fn, unsigned char sha256[])//sha256 char[32]
       fclose(fp);
       return false;
     }
-    blk_SHA256_Update(&ctx, buf, sz);
+    BLOB_HASH_Update(&ctx, buf, sz);
     len -= sz;
   }
   fclose(fp);
 
-  blk_SHA256_Final(sha256, &ctx);
+  BLOB_HASH_Final(sha256, &ctx);
   return true;
 }
 

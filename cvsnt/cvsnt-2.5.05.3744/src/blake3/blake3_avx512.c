@@ -1,5 +1,6 @@
 #include "blake3_impl.h"
 
+#if !defined(BLAKE3_NO_AVX512)
 #include <immintrin.h>
 
 #define _mm_shuffle_ps2(a, b, c)                                               \
@@ -1202,3 +1203,4 @@ void blake3_hash_many_avx512(const uint8_t *const *inputs, size_t num_inputs,
     out = &out[BLAKE3_OUT_LEN];
   }
 }
+#endif

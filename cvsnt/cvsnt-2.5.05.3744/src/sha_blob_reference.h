@@ -3,7 +3,7 @@
 #include "sha_blob_operations.h"
 //sha256 blob reference has the following format: sha256:<encoded_sha256>:<encoded_fnv1_of_encoded_sha256>
 //ofc, all files in repo are sha256 blob reference, but right now kinda trust that client wont commit sha256 reference itself, this make it unlikely
-#define SHA256_REV_STRING "sha256:"
+#define SHA256_REV_STRING "blake3:"//we actually use blake3, as it is not-vulnerable to length extension. Also, it is 4 times faster in C, 8 times faster with just sse2 (and also can be implemented with AVX)
 static constexpr size_t sha256_magic_len = 7;//strlen(SHA256_REV_STRING);
 
 static const size_t sha256_encoded_size = 64;//32*2

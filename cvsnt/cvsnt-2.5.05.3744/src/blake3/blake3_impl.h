@@ -45,6 +45,52 @@ enum blake3_flags {
 #include <immintrin.h>
 #endif
 
+#define BLAKE3_NO_AVX512
+#define BLAKE3_NO_AVX2
+//#define BLAKE3_NO_SSE41
+//#define BLAKE3_NO_SSE2
+//#define BLAKE3_REQUIRE_AVX512
+//#define BLAKE3_REQUIRE_AVX2
+#ifndef BLAKE3_NO_SSE41
+#define BLAKE3_REQUIRE_SSE41
+#else
+#define BLAKE3_REQUIRE_SSE2
+#endif
+
+#if defined(BLAKE3_REQUIRE_AVX512)
+inline size_t blake3_simd_degree(void) {return 16;}
+#define blake3_compress_in_place blake3_compress_in_place_avx512
+#define blake3_compress_xof blake3_compress_xof_avx512
+#define blake3_hash_many blake3_hash_many_avx512
+#elif defined(BLAKE3_REQUIRE_AVX2)
+inline size_t blake3_simd_degree(void) {return 8;}
+#define blake3_compress_in_place blake3_compress_in_place_avx2
+#define blake3_compress_xof blake3_compress_xof_avx2
+#define blake3_hash_many blake3_hash_many_avx2
+#elif defined(BLAKE3_REQUIRE_SSE41)
+inline size_t blake3_simd_degree(void) {return 4;}
+#define blake3_compress_in_place blake3_compress_in_place_sse2
+#define blake3_compress_xof blake3_compress_xof_sse2
+#define blake3_hash_many blake3_hash_many_sse41
+#elif defined(BLAKE3_REQUIRE_SSE2)
+inline size_t blake3_simd_degree(void) {return 4;}
+#define blake3_compress_in_place blake3_compress_in_place_sse2
+#define blake3_compress_xof blake3_compress_xof_sse2
+#define blake3_hash_many blake3_hash_many_sse2
+#elif defined(BLAKE3_REQUIRE_NEON)
+inline size_t blake3_simd_degree(void) {return 4;}
+#define blake3_compress_in_place blake3_compress_in_place_portable
+#define blake3_compress_xof blake3_compress_xof_portable
+#define blake3_hash_many blake3_hash_many_neon
+#elif !defined(BLAKE3_DISPATCH)
+//use blake3_dispatch.c
+size_t blake3_simd_degree(void);
+#else
+#define blake3_compress_in_place blake3_compress_in_place_portable
+#define blake3_compress_xof blake3_compress_xof_portable
+inline size_t blake3_simd_degree(void) {return 1;}
+#endif
+
 #if defined(IS_X86)
 #define MAX_SIMD_DEGREE 16
 #elif defined(BLAKE3_USE_NEON)
@@ -179,8 +225,6 @@ void blake3_hash_many(const uint8_t *const *inputs, size_t num_inputs,
                       size_t blocks, const uint32_t key[8], uint64_t counter,
                       bool increment_counter, uint8_t flags,
                       uint8_t flags_start, uint8_t flags_end, uint8_t *out);
-
-size_t blake3_simd_degree(void);
 
 
 // Declarations for implementation-specific functions.
