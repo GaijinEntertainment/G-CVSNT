@@ -6210,13 +6210,17 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
       char *data_path;
       char *rev_file_name = get_binary_blob_ver_file_path(data_path, rcs, value, len);
       char sha256_encoded[sha256_encoded_size+1];
+      bool had_errors = false;
       if (!is_blob_reference_data(value, len))
       //if (!get_blob_reference_sha256(rev_file_name, sha256_encoded))//sha256_encoded==char[65], encoded 32 bytes + \0
       {
         //todo: should not be needed as soon as all converted. Everything is a reference
         unsigned char sha256[32];
         if (!calc_sha256_file(rev_file_name, sha256))
-          error(1,0, "can't read file revision <%s> to compare sha", rev_file_name);
+        {
+          error(0,0, "can't read file revision <%s> to compare sha", rev_file_name);
+          had_errors = true;
+        }
         encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));//sha256 char[32], sha256_encoded[65]
       } else
       {
@@ -6230,14 +6234,17 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
       {
         unsigned char sha256[32];
         if (!calc_sha256_file(filename, sha256))
-          error(1,0, "can't read file <%s> to compare sha", filename);
+        {
+          error(0,0, "can't read file <%s> to compare sha", filename);
+          had_errors = true;
+        }
         encode_sha256(sha256, sha256_encoded_sent, sizeof(sha256_encoded_sent));//sha256 char[32], sha256_encoded[65]
       }
       if (free_rev)
         xfree(rev);
       if (free_value)
         xfree(value);
-      return memcmp(sha256_encoded, sha256_encoded_sent, sha256_encoded_size) != 0;
+      return had_errors || memcmp(sha256_encoded, sha256_encoded_sent, sha256_encoded_size) != 0;
     }
 
     Node *n = NULL;
