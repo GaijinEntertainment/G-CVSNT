@@ -31,10 +31,9 @@ namespace fs = std::filesystem;
 static size_t max_files_to_process = 256;// to limit amount of double sized data
 
 static bool fastest_conversion = true;//if true, we won't repack, just calc sha256 and put zlib block as is.
-static void ensure_blob_mtime(const char* verfile, const char *blob_file)
+static void ensure_blob_mtime(time_t ver_atime, const char *blob_file)
 {
   time_t blob_mtime = get_file_mtime(blob_file);
-  time_t ver_atime = get_file_atime(verfile);
   if (ver_atime > blob_mtime)
     set_file_mtime(blob_file, ver_atime);
 }
@@ -142,6 +141,7 @@ static void process_file_ver(const char *rootDir,
   #if CONCURRENT_CONVERSION_TOOL
     size_t lockId = get_lock(filePath.c_str());//Lock1
   #endif
+  time_t ver_atime = get_file_atime(path.c_str());
   const auto sz = fs::file_size(path);
   fileUnpackedData.resize(sz);
   std::ifstream f(path, std::ios::in | std::ios::binary);
@@ -208,7 +208,7 @@ static void process_file_ver(const char *rootDir,
       blob_free (temp_filename);
     } else
     {
-      ensure_blob_mtime(srcPathString.c_str(), sha_file_name);//so later incremental repack still works correctly
+      ensure_blob_mtime(ver_atime, sha_file_name);//so later incremental repack still works correctly
     }
   } else
     wr = write_binary_blob(rootDir, sha256, path.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
