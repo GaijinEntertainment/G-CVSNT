@@ -49,7 +49,7 @@ int main(int ac, const char* argv[])
     if (result < best)
       best = result;
   }
-  printf("a=%d total ticks %ulld\nBLAKE3="
+  printf("a=%d total ticks %lld\nBLAKE3="
      "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
     (int)a, (unsigned long long)best, SHA256_LIST(sha256));
   free(data);
