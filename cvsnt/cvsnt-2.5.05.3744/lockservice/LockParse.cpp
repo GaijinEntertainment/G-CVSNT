@@ -14,6 +14,7 @@
     License along with this library; if not, write to the Free Software
     Foundation, Inc., 59 Temple Place, Suite 330, Boston, MA  02111-1307  USA
 */
+#define NOMINMAX
 #include "config.h"
 
 #include <stdio.h>
@@ -30,6 +31,7 @@
 #include <map>
 #include <algorithm>
 #include "../cvsapi/cvsapi.h"
+#include "../tools/tsl/robin_map.h"
 
 #include "LockService.h"
 
@@ -59,7 +61,7 @@ enum ClientState { lcLogin, lcActive, lcMonitor, lcClosed };
 enum LockFlags { lfRead = 0x01, lfWrite = 0x02, lfClosed = 0x10 };
 enum MonitorFlags { lcMonitorClient=0x01, lcMonitorLock=0x02, lcMonitorVersion=0x04 };
 
-typedef std::map<cvs::string,cvs::string> VersionMapType;
+typedef tsl::robin_map<cvs::string,cvs::string> VersionMapType;
 
 #ifdef _WIN32
 CRITICAL_SECTION g_crit;
@@ -168,9 +170,8 @@ struct LockClient
 	locktime_t starttime;
 	locktime_t endtime;
 };
-
-typedef std::map<size_t,LockClient> LockClientMapType;
-typedef std::map<size_t,Lock> LockMapType;
+typedef tsl::robin_map<size_t,LockClient> LockClientMapType;
+typedef tsl::robin_map<size_t,Lock> LockMapType;
 LockClientMapType LockClientMap;
 LockMapType LockMap;
 TransactionListType TransactionList;
@@ -183,7 +184,7 @@ TransactionStruct::~TransactionStruct()
 {
 }
 
-std::map<int,size_t> SockToClient;
+tsl::robin_map<int,size_t> SockToClient;
 
 size_t next_client_id;
 
@@ -816,9 +817,9 @@ bool DoClose(CSocketIOPtr s,size_t client, char *param)
 
 bool request_lock(size_t client, const char *path, unsigned flags, size_t& lock_to_wait_for)
 {
-	LockMapType::const_iterator i;
+	LockMapType::const_iterator i, e;
 	size_t pathlen = strlen(path);
-	for(i=LockMap.begin(); i!=LockMap.end(); ++i)
+	for(i=LockMap.begin(), e = LockMap.end(); i!=e; ++i)
 	{
 		size_t locklen = i->second.length;
 
@@ -838,7 +839,7 @@ bool request_lock(size_t client, const char *path, unsigned flags, size_t& lock_
 			}
 		}
 	}
-	if(i!=LockMap.end())
+	if(i!=e)
 	{
 		lock_to_wait_for = i->first;
 		return false;
