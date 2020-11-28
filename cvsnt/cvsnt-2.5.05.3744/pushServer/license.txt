@@ -1,0 +1,2 @@
+It is not part of CVS, and license will be BSD.
+I am too lazy to copy it now, so if you want - contact me, I will publish.
