@@ -52,7 +52,8 @@ static bool DoClose(CSocketIOPtr s,size_t client, char *param);
 static bool request_lock(size_t client, const char *path, unsigned flags, size_t& lock_to_wait_for);
 
 extern bool g_bTestMode;
-#define DEBUG if(g_bTestMode) printf
+//#define DEBUG if(g_bTestMode) printf
+#define DEBUG(...)
 
 static size_t global_lockId;
 
@@ -137,9 +138,9 @@ struct Lock
 {
 	size_t owner;
 	cvs::string path;
+    size_t length; /* length of path */
+    VersionMapType versions;
 	unsigned flags;
-	size_t length; /* length of path */
-	VersionMapType versions;
 };
 
 struct TransactionStruct
@@ -291,15 +292,15 @@ bool OpenLockClient(CSocketIOPtr s)
 bool CloseLockClient(CSocketIOPtr s)
 {
 	ClientLock lock;
-
-	if(SockToClient.find(s->getsocket())==SockToClient.end())
+    auto stcI = SockToClient.find(s->getsocket());
+	if(stcI==SockToClient.end())
 	   return true; // Already closed
 
-	size_t client = SockToClient[s->getsocket()];
+	size_t client = stcI->second;
 	int count=0;
 	for(LockMapType::iterator i = LockMap.begin(); i!=LockMap.end();)
 	{
-		if(i->second.owner == client) 
+		if(i->second.owner == client)
 		{
 			count++;
 			LockMap.erase(i++);
@@ -308,9 +309,10 @@ bool CloseLockClient(CSocketIOPtr s)
 			++i;
 	}
 	DEBUG("Destroyed %d locks\n",count);
-	SockToClient.erase(SockToClient.find(s->getsocket()));
-	LockClientMap[client].state=lcClosed;
-	LockClientMap[client].endtime=lock_time();
+	SockToClient.erase(stcI);
+    auto &clMap = LockClientMap[client];
+	clMap.state=lcClosed;
+	clMap.endtime=lock_time();
 	if(LockClientMap.size()<=1)
 	{
 		// No clients, just empty the transaction store
@@ -391,16 +393,12 @@ bool ParseLockCommand(CSocketIOPtr s, const char *command)
 	char *cmd,*p;
 	char *param;
 	bool bRet = true;
-	size_t client;
+	size_t client = ~0;
 
 	if(!*command)
 		return bRet; // Empty line
 
 	cmd = strdup(command);
-	{
-		ClientLock lock;
-		client = SockToClient[s->getsocket()];
-	}
 	p=lock_strchr(cmd,' ');
 	if(!p)
 	{
@@ -408,34 +406,60 @@ bool ParseLockCommand(CSocketIOPtr s, const char *command)
 	}
 	else
 	{
-		if(!*p)
+        enum {DO_LOCK, DO_UNLOCK, DO_MODIFIED, DO_CLIENT, DO_CLOSE, DO_VERSION, DO_MONITOR, DO_CLIENTS, DO_LOCKS, NCMD} commandI = NCMD;
+    	if(!*p)
 			param = p;
 		else
 			param = p+1;
 		*p='\0';
-		if(!strcmp(cmd,"Client"))
-			DoClient(s,client,param);
+    	if(!strcmp(cmd,"Client"))
+			commandI = DO_CLIENT;
 		else if(!strcmp(cmd,"Lock"))
-			DoLock(s,client,param);
+    		commandI = DO_LOCK;
 		else if(!strcmp(cmd,"Unlock"))
-			DoUnlock(s,client,param);
+    		commandI = DO_UNLOCK;
 		else if(!strcmp(cmd,"Version"))
-			DoVersion(s,client,param);
+    		commandI = DO_VERSION;
 		else if(!strcmp(cmd,"Modified"))
-			DoModified(s,client,param);
+    		commandI = DO_MODIFIED;
 		else if(!strcmp(cmd,"Monitor"))
-			DoMonitor(s,client,param);
+    		commandI = DO_MONITOR;
 		else if(!strcmp(cmd,"Clients"))
-			DoClients(s,client,param);
+    		commandI = DO_CLIENTS;
 		else if(!strcmp(cmd,"Locks"))
-			DoLocks(s,client,param);
+    		commandI = DO_LOCKS;
 		else if(!strcmp(cmd,"Close"))
-		{
-			DoClose(s,client,param);
-			bRet=false;
-		}
-		else
+    		commandI = DO_CLOSE;
+    	else
 			s->printf("001 FAIL Unknown command '%s'\n",cmd);
+
+        if (commandI != NCMD)
+        {
+            ClientLock lock;
+            client = SockToClient[s->getsocket()];
+
+            if (commandI == DO_LOCK)
+              DoLock(s,client,param);
+            else if (commandI == DO_UNLOCK)
+              DoUnlock(s,client,param);
+            else if (commandI == DO_MODIFIED)
+              DoModified(s,client,param);
+            else if (commandI == DO_CLIENT)
+              DoClient(s,client,param);
+            else if (commandI == DO_CLOSE)
+            {
+              DoClose(s,client,param);
+              bRet=false;
+            }
+            else if (commandI == DO_VERSION)
+              DoVersion(s,client,param);
+            else if (commandI == DO_MONITOR)
+              DoMonitor(s,client,param);
+            else if (commandI == DO_CLIENTS)
+              DoClients(s,client,param);
+            else if (commandI == DO_LOCKS)
+              DoLocks(s,client,param);
+        }
 	}
 	free(cmd);
 	return bRet;
@@ -443,7 +467,6 @@ bool ParseLockCommand(CSocketIOPtr s, const char *command)
 
 bool DoClient(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	char *user, *root, *host, *flags;
 	if(LockClientMap[client].state!=lcLogin)
 	{
@@ -489,7 +512,6 @@ bool DoClient(CSocketIOPtr s,size_t client, char *param)
 
 bool DoLock(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	char *flags, *path,*p;
 	unsigned uFlags=0;
 	size_t lock_to_wait_for;
@@ -511,9 +533,9 @@ bool DoLock(CSocketIOPtr s,size_t client, char *param)
 	{
 		char c=*p;
 		*p='\0';
-		if(!strcmp(flags,"Read"))
+		if(flags[0] == 'R')//!strcmp(flags,"Read"))
 			uFlags|=lfRead;
-		else if(!strcmp(flags,"Write"))
+		else if(flags[0] == 'W')//if(!strcmp(flags,"Write"))
 			uFlags|=lfWrite;
 		else
 		{
@@ -566,17 +588,17 @@ bool DoLock(CSocketIOPtr s,size_t client, char *param)
 			}
 		}
 		DEBUG("(#%d) Lock request on %s (%s) (granted %u)\n",(int)client,path,FlagToString(uFlags),(unsigned)newId);
-		s->printf("000 OK Lock granted (%u)\n",(unsigned)newId);
-		LockMap[newId].flags=uFlags;
-		LockMap[newId].path=path;
-		LockMap[newId].length=strlen(path);
-		LockMap[newId].owner=client;
-		LockMap[newId].versions = ver;
+		s->printf("000 grant (%u)\n",(unsigned)newId);
+        auto &lm = LockMap[newId];
+		lm.flags=uFlags;
+		lm.path=path;
+		lm.owner=client;
+		lm.versions = ver;
 	}
 	else
 	{
 		DEBUG("(#%d) Lock request on %s (%s) (wait for %u)\n",(int)client,path,FlagToString(uFlags),(unsigned)lock_to_wait_for);
-		s->printf("002 WAIT Lock busy|%s|%s|%s\n",LockClientMap[LockMap[lock_to_wait_for].owner].user.c_str(),LockClientMap[LockMap[lock_to_wait_for].owner].client_host.c_str(),LockMap[lock_to_wait_for].path.c_str());
+		s->printf("002 busy|%s|%s|%s\n",LockClientMap[LockMap[lock_to_wait_for].owner].user.c_str(),LockClientMap[LockMap[lock_to_wait_for].owner].client_host.c_str(),LockMap[lock_to_wait_for].path.c_str());
 	}
 
 	return true;
@@ -584,7 +606,6 @@ bool DoLock(CSocketIOPtr s,size_t client, char *param)
 
 bool DoUnlock(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	size_t lockId;
 	unsigned helper;
 
@@ -595,29 +616,28 @@ bool DoUnlock(CSocketIOPtr s,size_t client, char *param)
 	}
 	sscanf(param,"%u",&helper); /* 64 bit aware */
 	lockId = helper;
-
-	if(LockMap.find(lockId)==LockMap.end())
+    auto lmI = LockMap.find(lockId);
+	if(lmI==LockMap.end())
 	{
 		s->printf("001 FAIL Unknown lock id %u\n",(unsigned)lockId);
 		return false;
 	}
-	if(LockMap[lockId].owner != client)
+	if(lmI->second.owner != client)
 	{
 		s->printf("001 FAIL Do not own lock id %u\n",(unsigned)lockId);
 		return false;
 	}
 
-	LockMap.erase(LockMap.find(lockId));
+	LockMap.erase(lmI);
 
 	DEBUG("(#%d) Unlock request on lock %u\n",(int)client,(unsigned)lockId);
 
-	s->printf("000 OK Unlocked\n");
+	s->printf("000 Unlocked\n");
 	return true;
 }
 
 bool DoMonitor(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	if(LockClientMap[client].state!=lcLogin)
 	{
 		s->printf("001 FAIL Unexpected 'Monitor' command\n");
@@ -630,7 +650,6 @@ bool DoMonitor(CSocketIOPtr s,size_t client, char *param)
 
 bool DoClients(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	if(LockClientMap[client].state!=lcMonitor)
 	{
 		s->printf("001 FAIL Unexpected 'Clients' command\n");
@@ -653,13 +672,12 @@ bool DoClients(CSocketIOPtr s,size_t client, char *param)
 
 bool DoLocks(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	if(LockClientMap[client].state!=lcMonitor)
 	{
 		s->printf("001 FAIL Unexpected 'Locks' command\n");
 		return false;
 	}
-	for(LockMapType::const_iterator i = LockMap.begin(); i!=LockMap.end(); ++i)
+	for(LockMapType::const_iterator i = LockMap.begin(), e = LockMap.end(); i!=e; ++i)
 		s->printf("(#%d) %s|%s (%u)\n",(int)i->second.owner,i->second.path.c_str(),FlagToString(i->second.flags), (unsigned)i->first);
 
 	s->printf("000 OK\n");
@@ -668,7 +686,6 @@ bool DoLocks(CSocketIOPtr s,size_t client, char *param)
 
 bool DoModified(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	char *id,*branch,*version,*oldversion;
 	char type;
 	size_t lockId;
@@ -721,19 +738,19 @@ bool DoModified(CSocketIOPtr s,size_t client, char *param)
 		s->printf("001 FAIL Modified command expects <flags>|<lockId>|<branch>|<version>\n");
 		return false;
 	}
-
-	if(LockMap.find(lockId)==LockMap.end())
+    auto it = LockMap.find(lockId);
+	if(it==LockMap.end())
 	{
 		s->printf("001 FAIL Unknown lock id %u\n",(unsigned)lockId);
 		return false;
 	}
-	if(LockMap[lockId].owner != client)
+	if(it->second.owner != client)
 	{
 		s->printf("001 FAIL Do not own lock id %u\n",(unsigned)lockId);
 		return false;
 	}
 
-	if(!(LockMap[lockId].flags&lfWrite))
+	if(!(it->second.flags&lfWrite))
 	{
 		s->printf("001 FAIL No write lock on file\n");
 		return false;
@@ -746,7 +763,7 @@ bool DoModified(CSocketIOPtr s,size_t client, char *param)
 	TransactionStruct t;
 	t.owner=client;
 	t.branch=branch;
-	t.path=LockMap[lockId].path.c_str();
+	t.path=it->second.path;
 	t.version=version;
 	t.oldversion=oldversion;
 	t.type=type;
@@ -758,7 +775,6 @@ bool DoModified(CSocketIOPtr s,size_t client, char *param)
 
 bool DoVersion(CSocketIOPtr s,size_t client, char *param)
 {
-	ClientLock lock;
 	char *branch;
 	size_t lockId;
 	unsigned helper;
@@ -779,28 +795,29 @@ bool DoVersion(CSocketIOPtr s,size_t client, char *param)
 	sscanf(param,"%u",&helper); /* 64 bit aware */
 	lockId = helper;
 
-	if(LockMap.find(lockId)==LockMap.end())
+    auto it = LockMap.find(lockId);
+	if(it==LockMap.end())
 	{
 		s->printf("001 FAIL Unknown lock id %u\n",(unsigned)lockId);
 		return false;
 	}
-	if(LockMap[lockId].owner != client)
+	if(it->second.owner != client)
 	{
 		s->printf("001 FAIL Do not own lock id %u\n",(unsigned)lockId);
 		return false;
 	}
 
 	VersionMapType& ver = LockMap[lockId].versions;
-
-	if(ver.find(branch)==ver.end())
+    auto verI = ver.find(branch);
+	if(verI==ver.end())
 	{ 
 		s->printf("000 OK\n");
 		DEBUG("(#%d) Version request on lock %u (%s)\n",(int)client,(unsigned)lockId,branch);
 	}
 	else
 	{
-		s->printf("000 OK (%s)\n",ver[branch].c_str());
-		DEBUG("(#%d) Version request on lock %u (%s) returned %s\n",(int)client,(unsigned)lockId,branch,ver[branch].c_str());
+		s->printf("000 OK (%s)\n",verI->second.c_str());
+		DEBUG("(#%d) Version request on lock %u (%s) returned %s\n",(int)client,(unsigned)lockId,branch,verI->second.c_str());
 	}
 
 	return true;
@@ -808,7 +825,6 @@ bool DoVersion(CSocketIOPtr s,size_t client, char *param)
 
 bool DoClose(CSocketIOPtr s,size_t client, char *param)
 {
-	CloseLockClient(s);
 	s->printf("000 OK\n");
 	DEBUG("(#%d) Close request\n",(int)client);
 
@@ -821,11 +837,11 @@ bool request_lock(size_t client, const char *path, unsigned flags, size_t& lock_
 	size_t pathlen = strlen(path);
 	for(i=LockMap.begin(), e = LockMap.end(); i!=e; ++i)
 	{
-		size_t locklen = i->second.length;
+		size_t locklen = i->second.path.length();
 
 		if((locklen==pathlen && !strcmp(path,i->second.path.c_str())))
 		{
-			if(flags&lfWrite) 
+			if(flags&lfWrite)
 			{
 				/* Mixed Write lock only possible with the same client */
 				if(i->second.owner!=client)

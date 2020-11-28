@@ -325,7 +325,7 @@ void run_server(int port, int seq, int local_only)
 
 	while(!g_bStop && listen_sock.accept(15000))
 	{
-		for(size_t n=0; n<listen_sock.accepted_sockets().size(); n++)
+		for(size_t n=0, e = listen_sock.accepted_sockets().size(); n<e; n++)
 			start_thread(listen_sock.accepted_sockets()[n].Detach());
 	}
 	g_bStop = true;
