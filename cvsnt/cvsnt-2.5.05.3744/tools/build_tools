@@ -1,4 +1,7 @@
-clang++ -std=c++17 -O2 -I../src gc-blobs.cpp ../src/blob_operations.cpp ../src/blake3/blake3.c ../src/blake3/blake3_sse41.c  ../src/blake3/blake3_sse2.c -msse4.1 -lz -lzstd -ogc-blobs
-clang++ -std=c++17 -O2 -I../src convert_to_blob.cpp ../src/blob_operations.cpp ../src/blake3/blake3.c ../src/blake3/blake3_sse41.c ../src/blake3/blake3_sse2.c  -msse4.1 -lz -lzstd -pthread -ocvtblob
-clang++ -std=c++17 -O2 -I../src repack-blobs.cpp ../src/blob_operations.cpp ../src/blake3/blake3.c ../src/blake3/blake3_sse41.c ../src/blake3/blake3_sse2.c  -msse4.1 -lz -lzstd -orepack-blobs
-clang++ -O2 -I../src blake3-calc.cpp ../src/blake3/blake3.c ../src/blake3/blake3_sse41.c ../src/blake3/blake3_sse2.c -msse4.1
+cd ../src/blake3
+./build_blake
+cd ../../tools
+clang++ -std=c++17 -O3 -I../src gc-blobs.cpp ../src/blob_operations.cpp -L../src/blake3 -lblake3 -msse4.1 -lz -lzstd -ogc-blobs
+clang++ -std=c++17 -O3 -I../src convert_to_blob.cpp ../src/blob_operations.cpp  -L../src/blake3 -lblake3  -msse4.1 -lz -lzstd -pthread -ocvtblob
+clang++ -std=c++17 -O3 -I../src repack-blobs.cpp ../src/blob_operations.cpp  -L../src/blake3 -lblake3  -msse4.1 -lz -lzstd -orepack-blobs
+clang++ -O3 -I../src blake3-calc.cpp  -L../src/blake3 -lblake3 -msse4.1

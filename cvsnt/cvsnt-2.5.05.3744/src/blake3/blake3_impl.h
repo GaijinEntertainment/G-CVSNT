@@ -86,7 +86,7 @@ inline size_t blake3_simd_degree(void) {return 4;}
 #define blake3_compress_in_place blake3_compress_in_place_portable
 #define blake3_compress_xof blake3_compress_xof_portable
 #define blake3_hash_many blake3_hash_many_neon
-#elif !defined(BLAKE3_DISPATCH)
+#elif defined(BLAKE3_DISPATCH)
 //use blake3_dispatch.c
 size_t blake3_simd_degree(void);
 #else
