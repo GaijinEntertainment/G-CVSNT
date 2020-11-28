@@ -45,27 +45,29 @@ enum blake3_flags {
 #include <immintrin.h>
 #endif
 
-#define BLAKE3_NO_AVX512
-#define BLAKE3_NO_AVX2
+//#define BLAKE3_NO_AVX512
+//#define BLAKE3_NO_AVX2
 //#define BLAKE3_NO_SSE41
 //#define BLAKE3_NO_SSE2
-//#define BLAKE3_REQUIRE_AVX512
-//#define BLAKE3_REQUIRE_AVX2
-#ifndef BLAKE3_NO_SSE41
-#define BLAKE3_REQUIRE_SSE41
+#if __AVX512__ && !defined(BLAKE3_NO_AVX512)
+  #define BLAKE3_REQUIRE_AVX512
+#elif __AVX2__ && !defined(BLAKE3_NO_AVX2)
+  #define BLAKE3_REQUIRE_AVX2
+#elif  !defined(BLAKE3_NO_SSE41);
+  #define BLAKE3_REQUIRE_SSE41
 #else
-#define BLAKE3_REQUIRE_SSE2
+  #define BLAKE3_REQUIRE_SSE2
 #endif
 
 #if defined(BLAKE3_REQUIRE_AVX512)
 inline size_t blake3_simd_degree(void) {return 16;}
-#define blake3_compress_in_place blake3_compress_in_place_avx512
-#define blake3_compress_xof blake3_compress_xof_avx512
+#define blake3_compress_in_place blake3_compress_in_place_sse2
+#define blake3_compress_xof blake3_compress_xof_sse2
 #define blake3_hash_many blake3_hash_many_avx512
 #elif defined(BLAKE3_REQUIRE_AVX2)
 inline size_t blake3_simd_degree(void) {return 8;}
-#define blake3_compress_in_place blake3_compress_in_place_avx2
-#define blake3_compress_xof blake3_compress_xof_avx2
+#define blake3_compress_in_place blake3_compress_in_place_sse2
+#define blake3_compress_xof blake3_compress_xof_sse2
 #define blake3_hash_many blake3_hash_many_avx2
 #elif defined(BLAKE3_REQUIRE_SSE41)
 inline size_t blake3_simd_degree(void) {return 4;}
