@@ -23,7 +23,6 @@ namespace fs = std::filesystem;
 // enable if we want to allow concurrent conversion of SAME dir (it's ok to convert different dirs)
 // that's insane to do, really
 #define CONCURRENT_CONVERSION_TOOL 0
-#define PRINT_PROGRESS 1
 #define VERBOSE 0
 
 
@@ -95,7 +94,7 @@ static tsl::sparse_map<std::string, char[sha256_encoded_size+1]> file_version_re
 
 struct ThreadData
 {
-  std::vector<char> fileUnpackedData, filePackedData, sha_file_name;
+  std::vector<char> fileUnpackedData, filePackedData;
 };
 
 static int lock_server_socket = -1;
@@ -137,11 +136,18 @@ static void process_file_ver(const char *rootDir,
   const std::filesystem::path &path,//blob reference file
   ThreadData& data)
 {
-  std::vector<char> &fileUnpackedData = data.fileUnpackedData, &filePackedData  = data.filePackedData, &sha_file_name = data.sha_file_name;
+  std::vector<char> &fileUnpackedData = data.fileUnpackedData, &filePackedData  = data.filePackedData;
   #if CONCURRENT_CONVERSION_TOOL
     size_t lockId = get_lock(filePath.c_str());//Lock1
   #endif
-  time_t ver_atime = get_file_atime(path.c_str());
+  std::string srcPathString = path.c_str();
+  const bool wasPacked = (srcPathString[srcPathString.length()-1] == 'z' && srcPathString[srcPathString.length()-2] == '#');
+  unsigned char sha256[32];
+  char sha256_encoded[sha256_encoded_size+1];
+  const size_t sha_file_name_len = 1024;
+  char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
+
+  time_t ver_atime = get_file_mtime(path.c_str());
   const auto sz = fs::file_size(path);
   fileUnpackedData.resize(sz);
   std::ifstream f(path, std::ios::in | std::ios::binary);
@@ -151,8 +157,6 @@ static void process_file_ver(const char *rootDir,
   #endif
 
   readData += sz;
-  std::string srcPathString = path.c_str();
-  const bool wasPacked = (srcPathString[srcPathString.length()-1] == 'z' && srcPathString[srcPathString.length()-2] == '#');
   size_t unpackedDataSize = wasPacked ? size_t(ntohl(*(int*)fileUnpackedData.data())) : sz;
   //process packed data
   if (wasPacked)
@@ -160,6 +164,8 @@ static void process_file_ver(const char *rootDir,
     //printf("was packed %d ->%d\n", (int)unpackedDataSize,(int)sz);
     //we need to unpack data first, so we can repack.
     //ofc, for fastest possible conversion we can just write blobs as is (i.e. keep them zlib)
+    //with fastest conversion we should be using only streaming to calc hash.
+    //thats 10x less memory
     std::swap(fileUnpackedData, filePackedData);
     fileUnpackedData.resize(unpackedDataSize);//we then swap it with fileUnpackedData
     z_stream stream = {0};
@@ -175,16 +181,16 @@ static void process_file_ver(const char *rootDir,
     }
   }
   //if wasPacked, originally packed data is in filePackedData
-  unsigned char sha256[32];
+  auto encode_file_name = [&]()
+  {
+    encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));
+    get_blob_filename_from_encoded_sha256(rootDir, sha256_encoded, sha_file_name, sha_file_name_len);
+  };
   size_t wr = 0;
   if (fastest_conversion)
   {
     calc_sha256(srcPathString.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), false, unpackedDataSize, sha256);
-    const size_t sha_file_name_len = 1024;
-    char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
-    char sha256_encoded[sha256_encoded_size+1];
-    encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));
-    get_blob_filename_from_encoded_sha256(rootDir, sha256_encoded, sha_file_name, sha_file_name_len);
+    encode_file_name();
     if (!isreadable(sha_file_name))// otherwise blob exist
     {
       char *temp_filename = NULL;
@@ -206,12 +212,17 @@ static void process_file_ver(const char *rootDir,
       } else
         unlink_file(temp_filename);
       blob_free (temp_filename);
-    } else
-    {
-      ensure_blob_mtime(ver_atime, sha_file_name);//so later incremental repack still works correctly
     }
   } else
+  {
     wr = write_binary_blob(rootDir, sha256, path.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
+    encode_file_name();
+  }
+
+   if (wr)
+      set_file_mtime(sha_file_name, ver_atime);
+    else
+      ensure_blob_mtime(ver_atime, sha_file_name);//so later incremental repack still works correctly
 
   //now we can write reference
   if (!wr)
@@ -221,10 +232,9 @@ static void process_file_ver(const char *rootDir,
     #endif
     deduplicatedData += sz;
   }
-  std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
-  auto &i = file_version_remap[path.filename().string()];
-  encode_sha256(sha256, i, sha256_encoded_size+1);
   writtenData += wr;
+  std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
+  memcpy(&file_version_remap[path.filename().string()][0], sha256_encoded, sha256_encoded_size+1);
 }
 
 struct ProcessTask
@@ -405,16 +415,10 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
     if (files_to_process > max_files_to_process)
     {
       process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
-      #if PRINT_PROGRESS
-      printf(".");
-      #endif
       files_to_process = 0;
     }
   }
   process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
-  #if PRINT_PROGRESS
-  printf(".");
-  #endif
   files_to_process = 0;
 }
 
