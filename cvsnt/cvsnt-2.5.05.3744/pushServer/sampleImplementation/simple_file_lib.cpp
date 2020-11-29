@@ -1,7 +1,10 @@
 #include <stdio.h>
+#include <string.h>
+#include <stdlib.h>
 #include <string>
 #include <memory>
-#include "file_functions.h"
+#include "fileio.h"
+#include "simple_file_lib.h"
 
 //we can implement remapping of hashes, or even different hash structure (hash_type->root_folder) with symlinks to same content
 
@@ -12,14 +15,26 @@ void set_hash_type(const char *p){accepted_hash_type = p;}
 
 static inline bool is_valid_hash_type(const char* hash_type) {return accepted_hash_type == 0 || (strncmp(accepted_hash_type, hash_type, 6) == 0);}
 
-static inline std::string get_file_path(const char* /*hash_type*/, const char* hash_hex_string)
+static inline bool make_blob_dirs(std::string &fp)
 {
-  if (strlen(hash_hex_string) < 64)
+  if (fp.length()<67)
+    return false;
+  if (fp[fp.length()-61] != '/' || fp[fp.length()-64] != '/')
+    return false;
+  fp[fp.length()-64] = 0;
+  blob_ensure_dir(fp.c_str());
+  fp[fp.length()-64] = '/'; fp[fp.length()-61] = 0;
+  blob_ensure_dir(fp.c_str());
+  fp[fp.length()-61] = '/';
+  return true;
+}
+
+static inline std::string get_file_path(const char* hash_type, const char* hash_hex_string)
+{
+  if (strlen(hash_hex_string) < 64 || !is_valid_hash_type(hash_type))
     return std::string();
   char buf[68];
-  //sprintf(buf,"/%2s/%2s/%.60s", hash_hex_string, hash_hex_string+2, hash_hex_string+4);
-  //todo: folders!
-  sprintf(buf,"/%.64s", hash_hex_string);
+  sprintf(buf,"/%.2s/%.2s/%.60s", hash_hex_string, hash_hex_string+2, hash_hex_string+4);
   return std::string(root_path) + buf;
 }
 
@@ -53,7 +68,6 @@ extern uintptr_t file_start_push_data(const char* hash_type, const char* hash_he
     return 1;//magic number. we dont need to do anything, but that's not an error
   std::string temp_file_name;
   FILE * tmpf = blob_get_temp_file(temp_file_name);
-  printf("try open <%s> tmp = %p\n",temp_file_name.c_str(), tmpf);
   if (!tmpf)
     return 0;
   return uintptr_t(new TempFilePush{std::move(filepath), std::move(temp_file_name), tmpf});
@@ -61,7 +75,6 @@ extern uintptr_t file_start_push_data(const char* hash_type, const char* hash_he
 
 extern bool file_push_data(const void *data, size_t data_size, uintptr_t up)
 {
-  printf("file_push_data %p %d\n", up, int(data_size));
   if (up == 1)
     return true;
   if (up == 0)
@@ -71,12 +84,10 @@ extern bool file_push_data(const void *data, size_t data_size, uintptr_t up)
     return false;
   if (fwrite(data, 1, data_size, fp->fp) == data_size)
   {
-    printf("written %p data_size = %d\n", fp, data_size);
     //todo:
     //we can (and should) decode & update hash on the fly
     return true;
   }
-  printf("cant write %p\n", fp);
   fclose(fp->fp);
   blob_unlink_file(fp->temp_file_name.c_str());
   fp->fp = nullptr;
@@ -89,7 +100,6 @@ extern bool file_end_push_data(uintptr_t up, bool ok)
     return true;
   if (!up)
     return false;
-  printf("end push %p %d\n", up, ok);
   std::unique_ptr<TempFilePush> fp((TempFilePush*)up);
   if (!fp->fp)
     return false;
@@ -105,10 +115,18 @@ extern bool file_end_push_data(uintptr_t up, bool ok)
     return true;
   }
   //todo: validate hash! We can't trust it!
+  make_blob_dirs(fp->filepath);
   return blob_rename_file(fp->temp_file_name.c_str(), fp->filepath.c_str());
 }
 
 #if !_WIN32
+//memory mapped files
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
+
 struct FilePullData
 {
   const char* begin;
@@ -119,11 +137,11 @@ uintptr_t file_start_pull_data(const char* hash_type, const char* hash_hex_strin
 {
   if (!is_valid_hash_type(hash_type))
     return 0;
+  std::string filepath = get_file_path(hash_type, hash_hex_string);
   blob_sz = blob_get_file_size(filepath.c_str());
   if (!blob_sz)
     return 0;
-  std::string filepath = get_file_path(hash_type, hash_hex_string);
-  int fd = open(argv[1], O_RDONLY);
+  int fd = open(filepath.c_str(), O_RDONLY);
   if (fd == -1)
     return 0;
 
@@ -153,7 +171,8 @@ extern bool file_end_pull_data(uintptr_t up)
 }
 
 #else
-
+//file io
+//todo: on windows we can also make mmap files
 struct FilePullData
 {
   FILE *fp;

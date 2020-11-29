@@ -1,15 +1,7 @@
 #pragma once
-#include <stdio.h>
-#include <string>
+#include <stdint.h>
 
-//this is link time dependencies
-extern size_t blob_get_file_size(const char*);
-extern bool blob_is_file_readable(const char*);
-extern bool blob_rename_file(const char*from, const char*to);
-extern void blob_unlink_file(const char*f);
-extern FILE* blob_get_temp_file(std::string &fn);
-
-//these are implemented
+//these are functions implemented in library, see simple_file_lib.cpp
 extern size_t file_get_hash_blob_size(const char* hash_type, const char* hash_hex_string);//hash_type = "blake3" hash_hex_string = "fe12bc56...."
 extern bool file_does_hash_blob_exist(const char* hash_type, const char* hash_hex_string);//hash_type = "blake3" hash_hex_string = "fe12bc56...."
 extern uintptr_t file_start_push_data(const char* hash_type, const char* hash_hex_string, uint64_t size);//hash_type = "blake3" hash_hex_string = "fe12bc56...."

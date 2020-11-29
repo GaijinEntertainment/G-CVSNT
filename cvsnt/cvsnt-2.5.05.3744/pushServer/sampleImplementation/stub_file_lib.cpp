@@ -1,5 +1,4 @@
 #include "../blob_server_func_deps.h"
-#include "file_functions.h"
 
 size_t blob_get_hash_blob_size(const char* htype, const char* hhex) {return 1;}
 bool blob_does_hash_blob_exist(const char* htype, const char* hhex) {return true;}

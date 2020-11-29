@@ -14,7 +14,7 @@ bool decode_blob_hash_to_hex_hash_s(const unsigned char *blob_hash, size_t blob_
 bool encode_hash_str_to_blob_hash(const char *hash_type, const char *hash_hex_string, unsigned char *blob_hash);
 bool decode_blob_hash_to_hex_hash(const unsigned char *blob_hash, char *hash_type, char *hash_hex_string);
 
-static inline bool bin_hash_to_hex_string_s(const unsigned char *blob_hash, char *to_hash_hex_string, size_t hash_hex_string_capacity)
+inline bool bin_hash_to_hex_string_s(const unsigned char *blob_hash, char *to_hash_hex_string, size_t hash_hex_string_capacity)
 {
   if (hash_hex_string_capacity < 65)
     return false;
@@ -28,10 +28,10 @@ static inline bool bin_hash_to_hex_string_s(const unsigned char *blob_hash, char
   return true;
 }
 
-static inline bool bin_hash_to_hex_string(const unsigned char *blob_hash, char *to_hash_hex_string)
+inline bool bin_hash_to_hex_string(const unsigned char *blob_hash, char *to_hash_hex_string)
 { return bin_hash_to_hex_string_s(blob_hash, to_hash_hex_string, 65); }
 
-static inline int decode_hash_symbol(char c)
+inline int decode_hash_symbol(char c)
 {
   if (c >= '0' && c <= '9')
     return c - '0';
@@ -41,7 +41,8 @@ static inline int decode_hash_symbol(char c)
     return c - 'A' + 10;
   return -1;
 }
-static inline bool hex_string_to_bin_hash_s(const char *from_hash_hex_string, unsigned char *blob_hash, size_t blob_hash_capacity)
+
+inline bool hex_string_to_bin_hash_s(const char *from_hash_hex_string, unsigned char *blob_hash, size_t blob_hash_capacity)
 {
   if (blob_hash_capacity < 32)
     return false;
@@ -58,11 +59,11 @@ static inline bool hex_string_to_bin_hash_s(const char *from_hash_hex_string, un
   return true;
 }
 
-static inline bool hex_string_to_bin_hash(const char *from_hash_hex_string, unsigned char *to_blob_hash)
+inline bool hex_string_to_bin_hash(const char *from_hash_hex_string, unsigned char *to_blob_hash)
 { return hex_string_to_bin_hash_s(from_hash_hex_string, to_blob_hash, 32); }
 
 ///======Blob specific Hash manipulation=======
-static inline bool encode_hash_str_to_blob_hash_s(const char *hash_type, const char *hash_hex_string, unsigned char *blob_hash, size_t blob_hash_capacity)
+inline bool encode_hash_str_to_blob_hash_s(const char *hash_type, const char *hash_hex_string, unsigned char *blob_hash, size_t blob_hash_capacity)
 {
   if (blob_hash_capacity < 32+6)
     return false;
@@ -70,12 +71,12 @@ static inline bool encode_hash_str_to_blob_hash_s(const char *hash_type, const c
   return hex_string_to_bin_hash(hash_hex_string, blob_hash+6);
 }
 
-static inline bool encode_hash_str_to_blob_hash(const char *hash_type, const char *hash_hex_string, unsigned char *blob_hash)
+inline bool encode_hash_str_to_blob_hash(const char *hash_type, const char *hash_hex_string, unsigned char *blob_hash)
 { return encode_hash_str_to_blob_hash(hash_type, hash_hex_string, blob_hash); }
 
 //requires: hash_type_capacity >= 8, blob_hash_capacity==32+7, hash_hex_string_capacity>=65
 //prints hash_type, and hash_hex_string, including trailing zero
-static inline bool decode_blob_hash_to_hex_hash_s(const unsigned char *blob_hash, size_t blob_hash_len,
+inline bool decode_blob_hash_to_hex_hash_s(const unsigned char *blob_hash, size_t blob_hash_len,
   char *hash_type, size_t hash_type_capacity, char *hash_hex_string, size_t hash_hex_string_capacity)
 {
   if (blob_hash_len != 32+6 || hash_type_capacity<7 || hash_hex_string_capacity<65)
@@ -84,8 +85,8 @@ static inline bool decode_blob_hash_to_hex_hash_s(const unsigned char *blob_hash
   return bin_hash_to_hex_string(blob_hash+6, hash_hex_string);
 }
 
-static inline bool decode_blob_hash_to_hex_hash(const unsigned char *blob_hash, char *hash_type, char *hash_hex_string)
+inline bool decode_blob_hash_to_hex_hash(const unsigned char *blob_hash, char *hash_type, char *hash_hex_string)
 { return decode_blob_hash_to_hex_hash_s(blob_hash, 32+6, hash_type, 7, hash_hex_string, 65); }
 
-__forceinline void memcpy_to(void* &to, const void* from, size_t sz) {memcpy(to, from, sz); to=(char*)to + sz;}
-__forceinline void memcpy_from(void* to, const void* &from, size_t sz) {memcpy(to, from, sz); from=(const char*)from + sz;}
+inline void memcpy_to(void* &to, const void* from, size_t sz) {memcpy(to, from, sz); to=(char*)to + sz;}
+inline void memcpy_from(void* to, const void* &from, size_t sz) {memcpy(to, from, sz); from=(const char*)from + sz;}

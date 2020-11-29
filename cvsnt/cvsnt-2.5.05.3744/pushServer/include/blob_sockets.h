@@ -16,14 +16,16 @@
   typedef int socklen_t;
 #else
   #include <sys/socket.h>
+  #include <netinet/tcp.h>
   #include <arpa/inet.h>
   #include <stdlib.h>
   #include <string.h>
   #include <unistd.h>
   #include <errno.h>
+  #include <netdb.h>
 
   inline void blob_close_socket(int socket) { close(socket); }
-  inline bool blob_init_sockets(){}
+  inline bool blob_init_sockets(){return true;}
   inline void blob_close_sockets(){}
   inline int blob_get_last_sock_error() { return errno; }
 #endif

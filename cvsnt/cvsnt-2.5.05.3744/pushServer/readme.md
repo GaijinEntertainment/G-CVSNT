@@ -48,12 +48,16 @@ there are two sample applications: server and client
 Server
 To build server:
 cd server
-clang -O3 blob_file_server.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp ../sampleImplementation/blob_file_lib.cpp ../sampleImplementation/simple_file_lib.cpp ../sampleImplementation/fileio.cpp
+g++ -std=c++11 -O3 blob_file_server.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp ../sampleImplementation/blob_file_lib.cpp ../sampleImplementation/simple_file_lib.cpp ../sampleImplementation/fileio.cpp -pthread -oserver
 
 Client
 to build client:
 cd client
-clang -O3 blob_file_server_sample_client.cpp ../clientLib/blob_push_pull_client.cpp ../clientLib/blob_push_client_cmd.cpp ../clientLib/blob_pull_client_cmd.cpp ../clientLib/blob_chck_client_cmd.cpp 
+g++ -O3 -std=c++11 blob_file_server_sample_client.cpp ../clientLib/blob_push_pull_client.cpp ../clientLib/blob_push_client_cmd.cpp ../clientLib/blob_pull_client_cmd.cpp ../clientLib/blob_chck_client_cmd.cpp -oclient
+
+Building on Windows
+instead of g++ you can use clang-cl or cl, -O3 should be replaced with -Ox, and "-pthread", "-std=c++11" flags are not needed
+
 
 ===================================================
 
