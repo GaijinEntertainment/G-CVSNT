@@ -7,7 +7,7 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
 {
   virtual bool canDownload() {return true;}
   virtual bool canUpload() {return false;}
-  virtual bool download(const char *repo, const char *hex_hash, std::function<bool(const char *data, size_t dest_at, size_t data_length)> cb, std::string &err)
+  virtual bool download(const char *repo, const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
   {
     char buf[128];
     std::snprintf(buf, sizeof(buf),
@@ -17,11 +17,9 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
     size_t current = 0;
     auto res = client->Get(buf,
       [&](const char *data, size_t data_length) {
-        bool ret = cb(data, current, data_length);
-        current+=data_length;
-        return ret;
+        return cb(data, data_length);
       },
-      [&](uint64_t len, uint64_t total) {return cb(nullptr, 0, total);}
+      [&](uint64_t len, uint64_t total) {return cb(nullptr, total);}
     );
     if (!res || res->status != 200)
     {

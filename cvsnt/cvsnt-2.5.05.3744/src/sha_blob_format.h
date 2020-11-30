@@ -33,6 +33,10 @@ static inline bool is_zstd_blob(const BlobHeader& hdr)
 {
   return memcmp(hdr.magic, zstd_magic, BLOB_MAGIC_SIZE) == 0;
 }
+static inline bool is_noarc_blob(const BlobHeader& hdr)
+{
+  return memcmp(hdr.magic, noarc_magic, BLOB_MAGIC_SIZE) == 0;
+}
 
 static bool is_packed_blob(const BlobHeader& hdr)
 {

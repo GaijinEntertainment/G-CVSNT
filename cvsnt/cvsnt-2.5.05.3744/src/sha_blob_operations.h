@@ -54,3 +54,22 @@ int blob_mkdir (const char *path, int mode);
 //mem
 void *blob_alloc(size_t sz);
 void blob_free(void *);
+
+#include "streaming_compressors.h"
+inline bool init_decompress_blob_stream(char *ctx, size_t ctx_size, const BlobHeader &hdr)
+{
+  if (!is_accepted_magic(hdr.magic))
+    return false;
+  BlobStreamType type = BlobStreamType::Undefined;
+  if (is_zlib_blob(hdr))
+    type = BlobStreamType::ZLIB;
+  else if (is_zstd_blob(hdr))
+    type = BlobStreamType::ZSTD;
+  else if (is_noarc_blob(hdr))
+    type = BlobStreamType::Unpacked;
+  else
+    type = BlobStreamType::Undefined;
+  if (type == BlobStreamType::Undefined)
+    return false;
+  return init_decompress_blob_stream(ctx, ctx_size, type);
+}

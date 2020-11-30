@@ -136,35 +136,76 @@ void wait_threads()
 
 static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *base_repo, const BlobTask &task)
 {
-  std::vector<char> temp_buf;
+  std::string temp_filename = task.dirpath +"/_new_";
+  temp_filename += task.filename;
+  FILE *tmp = nullptr;
   std::string err;
+  char cctx[BLOB_STREAM_CTX_SIZE];
+  BlobHeader hdr; memset(&hdr, 0, sizeof(hdr));size_t dataRead = 0, uncompressedSize = 0;
   if (!processor->download(base_repo, task.encoded_hash.data(),
-      [&](const char *data, size_t at, size_t data_length) {
-        if (!data)
-          temp_buf.reserve(at + data_length);
-        else
-          temp_buf.insert(temp_buf.begin() + std::min(at, temp_buf.size()), data, data+data_length);
+      [&](const char *data, size_t data_length) {
+        if (!data)//that was hint size. we can allocate full file, for example
+          return true;
+        if (dataRead < sizeof(hdr))
+        {
+          size_t hdrPart = std::min(data_length - dataRead, sizeof(hdr));
+          memcpy((char*)&hdr + dataRead, data, hdrPart);
+          if (dataRead + data_length <= sizeof(hdr))
+            return true;
+          data += hdrPart;
+		  dataRead += hdrPart;
+          data_length -= hdrPart;
+        }
+		dataRead += data_length;
+		if (!tmp)
+        {
+          if (!init_decompress_blob_stream(cctx, sizeof(cctx), hdr))
+            return false;
+          tmp = fopen(temp_filename.c_str(), "wb");
+          if (!tmp)
+            return false;
+        }
+		if (is_noarc_blob(hdr))
+		{
+		  if (fwrite(data, 1, data_length, tmp) != data_length)
+			return false;
+		  return true;
+		}
+		else
+		{
+			size_t src_pos = 0;
+			char buf[262144];
+			while (src_pos < data_length)
+			{
+				size_t dest_pos = 0;
+				auto status = decompress_blob_stream(cctx, data, src_pos, data_length, buf, dest_pos, sizeof(buf));
+				if (status == BlobStreamStatus::Error)
+					return false;
+				if (fwrite(buf, 1, dest_pos, tmp) != dest_pos)
+					return false;
+				uncompressedSize += dest_pos;
+				if (status == BlobStreamStatus::Finished || uncompressedSize == hdr.uncompressedLen)
+					return true;
+			}
+		}
         return true;
       },
       err))
   {
+    if (tmp)
+    {
+      finish_decompress_blob_stream(cctx);
+      fclose(tmp);
+    }
+    unlink_file(temp_filename.c_str());
     printf("can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
     return false;
   }
-  void *data = nullptr; bool need_free = false;
-  size_t decodedData = decode_binary_blob(task.filename.c_str(), temp_buf.data(), temp_buf.size(), &data, need_free);
-  std::string temp_filename = task.dirpath +"/_new_";
-  temp_filename += task.filename;
-  FILE *tmp = fopen(temp_filename.c_str(), "wb");
-  if (fwrite(data, 1, decodedData, tmp) != decodedData)
+  if (tmp)
   {
-    printf("can't write <%s>\n", temp_filename.c_str());
+    finish_decompress_blob_stream(cctx);
     fclose(tmp);
-    return false;
   }
-  fclose(tmp);
-  if (need_free)
-    free(data);
 
   change_utime(temp_filename.c_str(), task.timestamp);
   {

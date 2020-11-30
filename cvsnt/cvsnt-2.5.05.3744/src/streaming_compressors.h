@@ -1,3 +1,4 @@
+#pragma once
 #include <stddef.h>
 enum class BlobStreamType {Unpacked, ZLIB, ZSTD, Undefined};
 enum class BlobStreamStatus {Continue, Finished, Error};
