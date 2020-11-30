@@ -2,6 +2,8 @@
 
 #include "simpleLock.cpp.inc"
 #include "sha_blob_reference.h"
+#include "streaming_compressors.h"
+#include "calc_hash.h"
 #include <string>
 #include <filesystem>
 #include <iostream>
@@ -17,6 +19,11 @@
 #ifdef _WIN32
 namespace fs = std::experimental::filesystem;
 #else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+#include <unistd.h>
 namespace fs = std::filesystem;
 #endif
 
@@ -146,83 +153,97 @@ static void process_file_ver(const char *rootDir,
   char hash_encoded[hash_encoded_size+1];
   const size_t sha_file_name_len = 1024;
   char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
+  char hctx[HASH_CONTEXT_SIZE];
+  if (!init_blob_hash_context(hctx, sizeof(hctx)))
+    error(1, 0, "can't init hash context");
 
   time_t ver_atime = get_file_mtime(path.c_str());
-  const auto sz = fs::file_size(path);
-  fileUnpackedData.resize(sz);
-  std::ifstream f(path, std::ios::in | std::ios::binary);
-  f.read(fileUnpackedData.data(), sz);
-  #if CONCURRENT_CONVERSION_TOOL
-    unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
-  #endif
+  const size_t fsz = get_file_size(path.c_str());
+  readData += fsz;
 
-  readData += sz;
-  size_t unpackedDataSize = wasPacked ? size_t(ntohl(*(int*)fileUnpackedData.data())) : sz;
-  //process packed data
-  if (wasPacked)
-  {
-    //printf("was packed %d ->%d\n", (int)unpackedDataSize,(int)sz);
-    //we need to unpack data first, so we can repack.
-    //ofc, for fastest possible conversion we can just write blobs as is (i.e. keep them zlib)
-    //with fastest conversion we should be using only streaming to calc hash.
-    //thats 10x less memory
-    std::swap(fileUnpackedData, filePackedData);
-    fileUnpackedData.resize(unpackedDataSize);//we then swap it with fileUnpackedData
-    z_stream stream = {0};
-    inflateInit(&stream);
-    stream.avail_in = filePackedData.size() - sizeof(int);
-    stream.next_in = (Bytef*)(filePackedData.data() + sizeof(int));
-    stream.avail_out = unpackedDataSize;
-    stream.next_out = (Bytef*)fileUnpackedData.data();
-    if (unpackedDataSize && inflate(&stream, Z_FINISH)!=Z_STREAM_END)
-    {
-      fprintf(stderr, "[E] can't unpack %s of sz=%d unpacked=%d \n", srcPathString.c_str(), (int)sz, (int)unpackedDataSize);
-      return;
-    }
-  }
-  //if wasPacked, originally packed data is in filePackedData
+  int fd = open(srcPathString.c_str(), O_RDONLY);
+  if (fd == -1)
+    error(1, errno, "can't open for read <%s>", srcPathString.c_str());
+
   auto encode_file_name = [&]()
   {
     encode_hash(hash, hash_encoded, sizeof(hash_encoded));
     get_blob_filename_from_encoded_hash(rootDir, hash_encoded, sha_file_name, sha_file_name_len);
   };
+
+  const char* begin = (const char*)(mmap(NULL, fsz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
+  const size_t packedSz = wasPacked  ? ntohl(*(int*)begin) : fsz;
+  const size_t unpackedSz = wasPacked ? fsz - sizeof(int) : fsz;
+  const char* readData = wasPacked ? begin + sizeof(int) : begin;
   size_t wr = 0;
+
   if (fastest_conversion)
   {
-    calc_hash(srcPathString.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), false, unpackedDataSize, hash);
-    encode_file_name();
-    if (!isreadable(sha_file_name))// otherwise blob exist
+    char *temp_filename = NULL;
+    FILE *tempF = cvs_temp_file(&temp_filename, "wb");
+    if (!tempF)
+      error(1, errno, "can't open write temp_filename <%s> for <%s>", temp_filename, srcPathString.c_str());
+    BlobHeader hdr = wasPacked ? get_header(zlib_magic, unpackedSz, packedSz, 0) :
+                                 get_header(noarc_magic, unpackedSz, unpackedSz, 0);
+
+    if (fwrite(&hdr,1,sizeof(hdr), tempF) != sizeof(hdr))
     {
-      char *temp_filename = NULL;
-      FILE *dest = cvs_temp_file(&temp_filename, "wb");
-      if (!dest)
-        error(1, errno, "can't open write temp_filename <%s> for <%s>(<%s>)", temp_filename, sha_file_name, srcPathString.c_str());
-      BlobHeader hdr = wasPacked ? get_header(zlib_magic, fileUnpackedData.size(), filePackedData.size()-sizeof(int), 0) : get_header(noarc_magic, fileUnpackedData.size(), fileUnpackedData.size(), 0);
-      if (fwrite(&hdr,1,sizeof(hdr),dest) != sizeof(hdr))
-        error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)sizeof(hdr));
-      if (fwrite(wasPacked ? filePackedData.data() + sizeof(int) : fileUnpackedData.data(), 1, hdr.compressedLen, dest) != hdr.compressedLen)
-        error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)hdr.compressedLen);
+      unlink_file(temp_filename);
+      error(1, 0, "can't write temp_filename <%s> for <%s> of %d len", temp_filename, srcPathString.c_str(), (uint32_t)sizeof(hdr));
+    }
+
+    size_t cursor = 0;
+    char bufOut[65536];
+    if (decompress_lambda(
+      [&](const char *&src, size_t &src_pos, size_t &src_size){
+        src = readData+cursor; src_size = std::min(int64_t(unpackedSz - cursor), (int64_t)65536); src_pos = 0;
+        //if we will choose all area, we will force to read all file to memory to make write
+        if (src_size && fwrite(src+cursor, 1, src_size, tempF) != src_size)//this write
+          return BlobStreamStatus::Error;
+        cursor += src_size;
+        return BlobStreamStatus::Continue;
+     },
+     [&](char *&dst, size_t &dst_pos, size_t &dst_size)
+     {
+       if (dst_pos != 0)
+         update_blob_hash(hctx, dst, dst_pos);
+       dst_pos = 0; dst_size = sizeof(bufOut); dst = bufOut;
+       return BlobStreamStatus::Continue;
+     }, wasPacked ? BlobStreamType::ZLIB : BlobStreamType::Unpacked) == BlobStreamStatus::Error)
+    {
+      error(0, errno, "can't write temp_filename <%s> or decode <%s>", temp_filename, srcPathString.c_str());
+      unlink_file(temp_filename);
+      close(fd);
+    } else
+    {
+      close(fd);
+      finalize_blob_hash(hctx, hash);
+      encode_file_name();
       create_dirs(rootDir, hash);
       change_file_mode(temp_filename, 0666);
-      fclose(dest);
+      fclose(tempF);
       if (!isreadable(sha_file_name))
       {
         if (rename_file (temp_filename, sha_file_name, false))//we dont care if blob is written independently
           wr = hdr.compressedLen + sizeof(hdr);
       } else
         unlink_file(temp_filename);
-      blob_free (temp_filename);
     }
   } else
   {
-    wr = write_binary_blob(rootDir, hash, path.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
+    wr = write_binary_blob(rootDir, hash, path.c_str(), readData, fileUnpackedData.size(), BlobPackType::FAST, false);
     encode_file_name();
+    close(fd);
   }
 
-   if (wr)
-      set_file_mtime(sha_file_name, ver_atime);
-    else
-      ensure_blob_mtime(ver_atime, sha_file_name);//so later incremental repack still works correctly
+  #if CONCURRENT_CONVERSION_TOOL
+    unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
+  #endif
+
+  if (wr)
+    set_file_mtime(sha_file_name, ver_atime);
+  else
+    ensure_blob_mtime(ver_atime, sha_file_name);//so later incremental repack still works correctly
 
   //now we can write reference
   if (!wr)
@@ -230,7 +251,7 @@ static void process_file_ver(const char *rootDir,
     #if VERBOSE
     printf("deduplication %d for %s\n", int(sz), filePath.c_str());
     #endif
-    deduplicatedData += sz;
+    deduplicatedData += fsz;
   }
   writtenData += wr;
   std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);

@@ -336,6 +336,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\calc_hash.cpp" />
     <ClCompile Include="src\chacl.cpp" />
     <ClCompile Include="src\checkin.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -609,6 +610,7 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
+    <ClCompile Include="src\streaming_compressors.cpp" />
     <ClCompile Include="src\subr.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
@@ -709,6 +711,7 @@
     <ClInclude Include="cvsservice\ServiceMsg.h" />
     <ClInclude Include="src\blob_network_processor.h" />
     <ClInclude Include="src\buffer.h" />
+    <ClInclude Include="src\calc_hash.h" />
     <ClInclude Include="src\client.h" />
     <ClInclude Include="src\cvs.h" />
     <ClInclude Include="src\edit.h" />
@@ -719,6 +722,7 @@
     <ClInclude Include="src\rcs.h" />
     <ClInclude Include="src\savecwd.h" />
     <ClInclude Include="src\server.h" />
+    <ClInclude Include="src\streaming_compressors.h" />
     <ClInclude Include="src\update.h" />
     <ClInclude Include="src\watch.h" />
     <ClInclude Include="version_fu.h" />

@@ -1,10 +1,8 @@
-#include "zlib.h"
-#include "zstd.h"
-#include "blake3/blake3.h"
 //#include "cvs.h"
 #include "sha_blob_format.h"
 #include "sha_blob_reference.h"
 #include "sha_blob_operations.h"
+#include "streaming_compressors.h"
 
 #include <stdio.h>
 #include <string.h>
@@ -86,126 +84,11 @@ void get_blob_filename_from_hash(const char *root, unsigned char hash[], const c
   }
 }
 
-bool init_blob_hash_context(char *ctx, size_t ctx_size)
-{
-  static_assert(sizeof(blake3_hasher) <= HASH_CONTEXT_SIZE, "sizeof hasher context expected to be bigger than defined");
-  if (ctx_size < sizeof(blake3_hasher))
-    return false;
-  blake3_hasher_init((blake3_hasher*)ctx);
-  return true;
-}
-
-void update_blob_hash(char *ctx, const char *data, size_t data_size)
-{
-  blake3_hasher_update((blake3_hasher*)ctx, data, data_size);
-}
-
-bool finalize_blob_hash(char *ctx, unsigned char *digest, size_t digest_size)
-{
-  blake3_hasher_finalize((blake3_hasher*)ctx, digest, digest_size);
-  return true;
-}
-
-bool init_decode_blob_stream(char *ctx_, size_t ctx_size, BlobStreamType type)
-{
-  static_assert(sizeof(z_stream) <= BLOB_STREAM_CTX_SIZE, "streaming ctx defined wrong");
-  static_assert(sizeof(ZSTD_DStream*) + sizeof(BlobStreamType) <= BLOB_STREAM_CTX_SIZE, "streaming ctx defined wrong");
-  if (ctx_size < BLOB_STREAM_CTX_SIZE)
-    return false;
-  memcpy(ctx_, &type, sizeof(type));
-  char *ctx = ctx + sizeof(type);
-  if (type == BlobStreamType::ZLIB)
-    inflateInit((z_stream*)ctx);
-  else if (type == BlobStreamType::ZSTD)
-  {
-    memcpy(ctx, ZSTD_createDStream(), sizeof(sizeof(ZSTD_DStream*)));
-    ZSTD_initDStream((ZSTD_DStream*)ctx);
-  } else
-    return false;
-  return true;
-}
-
-static BlobStreamStatus decode_blob_stream_zlib(z_stream* stream, const char *src, size_t &src_pos, size_t src_size, char *dest, size_t &dest_pos, size_t dest_capacity)
-{
-  while (src_pos < src_size && dest_pos < dest_capacity)
-  {
-    stream->avail_in = src_size - src_pos;
-    stream->next_in = (Bytef*)(src + src_pos);
-    stream->avail_out = dest_capacity - dest_pos;
-    stream->next_out = (Bytef*)(dest + dest_pos);
-    int result = inflate(stream, Z_NO_FLUSH);
-    dest_pos += stream->avail_out - (dest_capacity - dest_pos);
-    src_pos += stream->avail_in - (src_size - src_pos);
-    if (result == Z_STREAM_END)
-      return BlobStreamStatus::Finished;
-    if (result != Z_OK)
-      return BlobStreamStatus::Error;
-  }
-  return BlobStreamStatus::Continue;
-}
-
-static BlobStreamStatus decode_blob_stream_zstd(ZSTD_DStream* zds, const char *src, size_t &src_pos, size_t src_size, char *dest, size_t &dest_pos, size_t dest_capacity)
-{
-  ZSTD_inBuffer_s streamIn;
-  streamIn.src = src;
-  streamIn.size = src_size;
-  streamIn.pos = src_pos;
-
-  ZSTD_outBuffer_s streamOut;
-  streamOut.dst = dest;
-  streamOut.size = dest_capacity;
-  streamOut.pos = dest_pos;
-  size_t sz;
-  do {
-    sz = ZSTD_decompressStream(zds, &streamOut, &streamIn);
-
-    if (sz == 0)
-      break;
-    if (streamOut.pos == streamOut.size && !ZSTD_isError(sz))
-      sz = ZSTD_decompressStream(zds, &streamOut, &streamIn);
-    if (sz == 0)
-      break;
-    if (ZSTD_isError(sz))
-      return BlobStreamStatus::Error;
-  } while(streamIn.pos < streamIn.size && streamOut.pos < streamOut.size);
-  dest_pos = streamOut.pos;
-  src_pos = streamIn.pos;
-  return sz == 0 ? BlobStreamStatus::Finished : BlobStreamStatus::Continue;
-}
-
-BlobStreamStatus decode_blob_stream(char *ctx, const char *src, size_t &src_pos, size_t src_size, char *dest, size_t &dest_pos, size_t dest_capacity)
-{
-  if (src_pos >= src_size || dest_pos >= dest_capacity)
-    return BlobStreamStatus::Continue;
-  if (*(BlobStreamType*)ctx == BlobStreamType::ZLIB)
-    return decode_blob_stream_zlib((z_stream*)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
-  else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
-    return decode_blob_stream_zstd((ZSTD_DStream*)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
-  else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
-  {
-    size_t copy = src_size-src_pos < dest_capacity-dest_pos ? src_size-src_pos : dest_capacity-dest_pos;
-    memcpy(dest + dest_pos, src + src_pos, copy);
-    src_pos += copy;
-    dest_pos += copy;
-    return BlobStreamStatus::Continue;//we never know if data is finished in unpacked file. That is left to application
-  } else
-    return BlobStreamStatus::Error;
-}
-
-void finish_decode_blob_stream(char *ctx)
-{
-  if (*(BlobStreamType*)ctx == BlobStreamType::ZLIB)
-    inflateEnd((z_stream*)(ctx+sizeof(BlobStreamType)));
-  else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
-    ZSTD_freeDStream((ZSTD_DStream*)(ctx+sizeof(BlobStreamType)));
-  else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
-  {}
-}
 void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char hash[])//hash char[32]
 {
   unpacked_len = len;
-  char ctx[HASH_CONTEXT_SIZE];
-  init_blob_hash_context(ctx, sizeof(ctx));
+  char hctx[HASH_CONTEXT_SIZE];
+  init_blob_hash_context(hctx, sizeof(hctx));
 
   if (src_blob)
   {
@@ -216,11 +99,11 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
     unpacked_len = hdr.uncompressedLen;
     if (!is_packed_blob(hdr))
     {
-      update_blob_hash(ctx, ((const char*)data + hdr.headerSize), unpacked_len);
+      update_blob_hash(hctx, ((const char*)data + hdr.headerSize), unpacked_len);
     } else if (is_zlib_blob(hdr) || is_zstd_blob(hdr))
     {
-      char ctx[BLOB_STREAM_CTX_SIZE];
-      if (!init_decode_blob_stream(ctx, sizeof(ctx), is_zlib_blob(hdr) ? BlobStreamType::ZLIB : BlobStreamType::ZSTD))
+      char cctx[BLOB_STREAM_CTX_SIZE];
+      if (!init_decompress_blob_stream(cctx, sizeof(cctx), is_zlib_blob(hdr) ? BlobStreamType::ZLIB : BlobStreamType::ZSTD))
         error(1,0,"Can't init ctx");
       const char *src = (const char *)((const char*)data + hdr.headerSize);
 	  size_t src_pos = 0;
@@ -230,13 +113,13 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
       while (src_pos < len)
       {
         size_t dest_pos = 0;
-        BlobStreamStatus status = decode_blob_stream(ctx, src, src_pos, hdr.uncompressedLen, bufOut, dest_pos, sizeof(bufOut));
-        update_blob_hash(ctx, bufOut, dest_pos);
+        BlobStreamStatus status = decompress_blob_stream(cctx, src, src_pos, hdr.uncompressedLen, bufOut, dest_pos, sizeof(bufOut));
+        update_blob_hash(hctx, bufOut, dest_pos);
         unpacked_len += dest_pos;
-        if (status == BlobStreamStatus::Finished)
+        if (status != BlobStreamStatus::Continue)
           break;
-      };
-      finish_decode_blob_stream(ctx);
+      }
+      finish_decompress_blob_stream(cctx);
     } else if (is_zstd_blob(hdr))
     {
     } else
@@ -245,15 +128,15 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
     }
   } else
   {
-    update_blob_hash(ctx, (const char*)data, len);
+    update_blob_hash(hctx, (const char*)data, len);
   }
-  finalize_blob_hash(ctx, hash);
+  finalize_blob_hash(hctx, hash);
 }
 
 bool calc_hash_file(const char *fn, unsigned char hash[])//hash char[32]
 {
-  char ctx[HASH_CONTEXT_SIZE];
-  init_blob_hash_context(ctx, sizeof(ctx));
+  char hctx[HASH_CONTEXT_SIZE];
+  init_blob_hash_context(hctx, sizeof(hctx));
 
   FILE* fp = fopen(fn,"rb");
   if (!fp)
@@ -268,12 +151,12 @@ bool calc_hash_file(const char *fn, unsigned char hash[])//hash char[32]
       fclose(fp);
       return false;
     }
-    update_blob_hash(ctx, buf, sz);
+    update_blob_hash(hctx, buf, sz);
     len -= sz;
   }
   fclose(fp);
 
-  finalize_blob_hash(ctx, hash);
+  finalize_blob_hash(hctx, hash);
   return true;
 }
 
@@ -304,54 +187,31 @@ static inline BlobHeader get_noarc_header(size_t len, uint16_t flags = 0) {retur
 static inline BlobHeader get_zlib_header(size_t len, size_t zlen, uint16_t flags = 0) {return get_header(zlib_magic, len, zlen, flags);}
 static inline BlobHeader get_zstd_header(size_t len, size_t zlen, uint16_t flags = 0) {return get_header(zstd_magic, len, zlen, flags);}
 
-static void* compress_zlib_data(const void *data, size_t len, int compression_level, BlobHeader &hdr)
-{
-  size_t zlen = 0;
-  void *zbuf = nullptr;
-
-  z_stream stream = {0};
-  deflateInit(&stream,compression_level);
-  zlen = ((deflateBound(&stream, len) - len/10) + 0xFFF) & ~0xFFF;
-  stream.avail_in = len;
-  stream.next_in = (Bytef*)data;
-  stream.avail_out = zlen;
-  zbuf = blob_alloc(zlen);
-  stream.next_out = (Bytef*)((char*)zbuf);
-  if (deflate(&stream, Z_FINISH)==Z_STREAM_END && (zlen - stream.avail_out) < len)
-  {
-    zlen = (zlen - stream.avail_out);
-    hdr = get_zlib_header(len, zlen);
-  } else
-  {
-    blob_free(zbuf);
-    zbuf = nullptr;
-    hdr = get_noarc_header(len);
-  }
-  deflateEnd(&stream);
-  return zbuf;
-}
-
-//we dont use higher compression levels, as we want everything to perform as fast as possible
-//in the same time, we want to save traffic for others, until repack-blobs utility had made it's business
 static const int zstd_fast_comp = 3;
-//server lazy repack-blobs utility can constantly re-pack blobs with better compression levels
 static const int zstd_best_comp = 19;//we dont use ultra as it consumes too much memory
-static void* compress_zstd_data(const void *data, size_t len, BlobPackType pack, BlobHeader &hdr)
+static const int zlib_fast_comp = 3;
+static const int zlib_best_comp = 9;//we dont use ultra as it consumes too much memory
+
+static void* compress_blob_data(const void *data, size_t len, BlobPackType pack, BlobHeader &hdr, BlobStreamType type = BlobStreamType::ZSTD)
 {
-  const int compression_level = pack == BlobPackType::FAST ? zstd_fast_comp : zstd_best_comp;
-  size_t zlen = ZSTD_compressBound(len);
-  void *zbuf = blob_alloc(zlen);
-  const uint16_t flags = pack == BlobPackType::FAST ? 0 : BlobHeader::BEST_POSSIBLE_COMPRESSION;
-  size_t compressedSz = ZSTD_compress( zbuf, zlen, data, len, compression_level);
-  if (ZSTD_isError(compressedSz) || compressedSz > len - len/20)//should be at least 95% compression, otherwise why bother compressing at all
+  const int compression_level = type == BlobStreamType::ZSTD ? (pack == BlobPackType::FAST ? zstd_fast_comp : zstd_best_comp) :
+                                                               (pack == BlobPackType::FAST ? zlib_fast_comp : zlib_best_comp);
+  char cctx[BLOB_STREAM_CTX_SIZE];
+  size_t zlen = 0;
+  if (init_compress_blob_stream(cctx, sizeof(cctx), compression_level, type) && (zlen = compress_blob_bound(cctx, len)) != 0)
   {
-    blob_free(zbuf);
-    zbuf = nullptr;
-    hdr = get_noarc_header(len, flags);
-  } else
-    hdr = get_zstd_header(len, compressedSz, flags);
-  return zbuf;
+    void *zbuf = blob_alloc(zlen);
+    if (compress_blob_stream_and_finish(cctx, (const char *)data, len, (char*)zbuf, zlen, zlen) == BlobStreamStatus::Finished || zlen < len - len/20)
+    {
+      hdr = get_header(type == BlobStreamType::ZSTD ? zstd_magic : zlib_magic, len, zlen, pack == BlobPackType::FAST ? 0 : BlobHeader::BEST_POSSIBLE_COMPRESSION);
+      return zbuf;
+    } else
+      blob_free(zbuf);
+  }
+  hdr = get_header(noarc_magic, len, len, 0);
+  return nullptr;
 }
+
 
 size_t atomic_write_sha_file(const char *fn, const char *sha_file_name, const void *data, size_t len, BlobPackType pack, bool src_packed)
 {
@@ -373,27 +233,7 @@ size_t atomic_write_sha_file(const char *fn, const char *sha_file_name, const vo
     BlobHeader hdr = get_noarc_header(len);
     void *compressed_data = nullptr;
     if (pack != BlobPackType::NO)
-    {
-      compressed_data = compress_zstd_data(data, len, pack, hdr);//on server we use non-ultra method!
-      #if TRY_ZLIB_AS_WELL_ON_BEST
-      if (pack == BlobPackType::BEST)
-      {
-        BlobHeader hdr_zlib;
-        void *compressed_data_zlib = compress_zlib_data(data, len, Z_BEST_COMPRESSION, hdr_zlib);
-        if (hdr_zlib.compressedLen < hdr.compressedLen)
-        {
-          if (compressed_data)
-            blob_free(compressed_data);
-          compressed_data = compressed_data_zlib;
-          hdr = hdr_zlib;
-        } else
-        {
-          if (compressed_data_zlib)
-            blob_free(compressed_data_zlib);
-        }
-      }
-      #endif
-    }
+      compressed_data = compress_blob_data(data, len, pack, hdr);//we use non-ultra method, unless we repack!
 
     const void* writeData = compressed_data ? compressed_data : data;
 
@@ -592,27 +432,8 @@ size_t decode_binary_blob(const char *context, const void *data, size_t fileLen,
   {
     *out_data = blob_alloc(hdr.uncompressedLen);
     need_free = true;
-    if (is_zlib_blob(hdr))
-    {
-      z_stream stream = {0};
-      inflateInit(&stream);
-      stream.avail_in = hdr.compressedLen;
-      stream.next_in = (Bytef*)readData;
-      stream.avail_out = hdr.uncompressedLen;
-      stream.next_out = (Bytef*)*out_data;
-      if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
-          error(1,0,"internal error: inflate failed");
-      inflateEnd(&stream);
-    } else if (is_zstd_blob(hdr))
-    {
-      if (ZSTD_isError(ZSTD_decompress( *out_data, hdr.uncompressedLen,
-                              readData, hdr.compressedLen)))
-          error(1,0,"internal error: zstd decompress failed");
-    } else
-    {
-      error(1,errno,"Unknown compressor %s", context);
-      return 0;
-    }
+    if (decompress_blob(readData, hdr.compressedLen, (char*)*out_data, hdr.uncompressedLen, is_zlib_blob(hdr) ? BlobStreamType::ZLIB : BlobStreamType::ZSTD) != BlobStreamStatus::Finished)
+        error(1,0,"internal error: decompress failed");
   } else
   {
     *out_data = (void*)readData;
@@ -653,8 +474,8 @@ size_t decode_binary_blob(const char *blob_file_name, void **data)
   //((char*)*data)[hdr.uncompressedLen] = 0;
   if (is_packed_blob(hdr))//
   {
-    char ctx[BLOB_STREAM_CTX_SIZE];
-    if (!init_decode_blob_stream(ctx, sizeof(ctx), is_zlib_blob(hdr) ? BlobStreamType::ZLIB : BlobStreamType::ZSTD))
+    char cctx[BLOB_STREAM_CTX_SIZE];
+    if (!init_decompress_blob_stream(cctx, sizeof(cctx), is_zlib_blob(hdr) ? BlobStreamType::ZLIB : BlobStreamType::ZSTD))
       error(1,0,"Can't init ctx");
     char bufIn[32768];
     size_t dest_pos = 0;
@@ -669,7 +490,7 @@ size_t decode_binary_blob(const char *blob_file_name, void **data)
         return 0;
       }
 	  totalRead += dataRead;
-      BlobStreamStatus status = decode_blob_stream(ctx, bufIn, src_pos, dataRead, (char*)*data, dest_pos, hdr.uncompressedLen);
+      BlobStreamStatus status = decompress_blob_stream(cctx, bufIn, src_pos, dataRead, (char*)*data, dest_pos, hdr.uncompressedLen);
       if (status == BlobStreamStatus::Finished)
         break;
       if (dest_pos >= hdr.uncompressedLen)
@@ -678,7 +499,7 @@ size_t decode_binary_blob(const char *blob_file_name, void **data)
         return 0;
       }
     };
-    finish_decode_blob_stream(ctx);
+    finish_decompress_blob_stream(cctx);
   } else
   {
     if (fread(*data,1,hdr.uncompressedLen,fp) != hdr.uncompressedLen)
@@ -729,7 +550,7 @@ void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len,
   hdr = get_noarc_header(len);
   void *compressed_data = nullptr;
   if (guess_packed)
-    compressed_data = compress_zstd_data(file_content, len, BlobPackType::FAST, hdr);//on client
+    compressed_data = compress_blob_data(file_content, len, BlobPackType::FAST, hdr);//on client
   if (compressed_data)
   {
     *blob_data = compressed_data;

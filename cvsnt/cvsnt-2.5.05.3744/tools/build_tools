@@ -1,9 +1,9 @@
 cd ../src/blake3
 ./build_blake
-cp libblake3.so /usr/
+cp libblake3.so ../../tools
 cd ../../tools
 LD_LIBRARY_PATH=$LD_LIBRARY_PATH:.
-clang++ -std=c++17 -O3 -I../src gc-blobs.cpp ../src/blob_operations.cpp -L../src/blake3 -lblake3 -msse4.1 -lz -lzstd -ogc-blobs
-clang++ -std=c++17 -O3 -I../src convert_to_blob.cpp ../src/blob_operations.cpp  -L../src/blake3 -lblake3  -msse4.1 -lz -lzstd -pthread -ocvtblob
-clang++ -std=c++17 -O3 -I../src repack-blobs.cpp ../src/blob_operations.cpp  -L../src/blake3 -lblake3  -msse4.1 -lz -lzstd -orepack-blobs
+clang++ -std=c++17 -O3 -I../src gc-blobs.cpp ../src/blob_operations.cpp -L../src/blake3 ../src/calc_hash.cpp ../src/streaming_compressors.cpp -lblake3 -msse4.1 -lz -lzstd -ogc-blobs
+clang++ -std=c++17 -O3 -I../src convert_to_blob.cpp ../src/blob_operations.cpp  -L../src/blake3 ../src/calc_hash.cpp ../src/streaming_compressors.cpp -lblake3  -msse4.1 -lz -lzstd -pthread -ocvtblob
+clang++ -std=c++17 -O3 -I../src repack-blobs.cpp ../src/blob_operations.cpp  -L../src/blake3 ../src/calc_hash.cpp ../src/streaming_compressors.cpp -lblake3 -msse4.1 -lz -lzstd -orepack-blobs
 clang++ -O3 -I../src blake3-calc.cpp  -L../src/blake3 -lblake3 -msse4.1

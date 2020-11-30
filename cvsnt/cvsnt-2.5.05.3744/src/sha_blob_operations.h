@@ -1,4 +1,5 @@
 #pragma once
+#include "calc_hash.h"
 #include "sha_blob_format.h"
 //we use BLAKE3
 #define HASH_LIST(a)\
@@ -10,20 +11,6 @@
 void encode_hash(unsigned char hash[], char hash_encoded[], size_t enc_len);//hash char[32], hash_encoded[65]
 void get_blob_filename_from_encoded_hash(const char *root_dir, const char* encoded_hash, char *sha_file_name, size_t sha_max_len);// sha_file_name =root/blobs/xx/yy/zzzzzzz
 void get_blob_filename_from_hash(const char *root, unsigned char hash[], const char *fn, char *sha_file_name, size_t sha_max_len);//hash char[32]
-
-enum {HASH_CONTEXT_SIZE = 2048};
-
-bool init_blob_hash_context(char *ctx, size_t ctx_size);
-void update_blob_hash(char *ctx, const char *data, size_t data_size);
-bool finalize_blob_hash(char *ctx, unsigned char *digest, size_t digest_size=32);//digest_size <= 32
-
-enum class BlobStreamType {Unpacked, ZLIB, ZSTD};
-enum class BlobStreamStatus {Continue, Finished, Error};
-enum {BLOB_STREAM_CTX_SIZE = 96};
-
-bool init_decode_blob_stream(char *ctx_, size_t ctx_size, BlobStreamType type);
-BlobStreamStatus decode_blob_stream(char *ctx, const char *src, size_t &src_pos, size_t src_size, char *dest, size_t &dest_pos, size_t dest_capacity);
-void finish_decode_blob_stream(char *ctx);
 
 //
 void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char hash[]);//hash char[32]

@@ -56,6 +56,8 @@ cvsnt_SOURCES = \
     blake3/blake3_avx512.c \
     blob_operations.cpp \
     download_blob_to.cpp \
+    streaming_compressors.cpp \
+    calc_hash.cpp \
     blob_http_processor.cpp \
 	add.cpp \
 	admin.cpp \
