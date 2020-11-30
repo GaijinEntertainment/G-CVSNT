@@ -148,7 +148,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *
       },
       err))
   {
-    printf("can't download <%.64s>, err = %d, %s\n", task.encoded_hash.data(), err.c_str());
+    printf("can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
     return false;
   }
   void *data = nullptr; bool need_free = false;

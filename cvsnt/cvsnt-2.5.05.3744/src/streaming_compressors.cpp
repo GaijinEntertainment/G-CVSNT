@@ -42,9 +42,9 @@ bool init_decompress_blob_stream(char *ctx_, size_t ctx_size, BlobStreamType typ
     inflateInit((z_stream*)ctx);
   else if (type == BlobStreamType::ZSTD)
   {
-    memcpy(ctx, ZSTD_createDStream(), sizeof(sizeof(ZSTD_DStream*)));
-    ZSTD_initDStream((ZSTD_DStream*)ctx);
-  } else
+	*(ZSTD_DStream**)ctx = ZSTD_createDStream();
+    ZSTD_initDStream(*(ZSTD_DStream**)ctx);
+  } else if (type != BlobStreamType::Unpacked)
     return false;
   return true;
 }
@@ -104,7 +104,7 @@ BlobStreamStatus decompress_blob_stream(char *ctx, const char *src, size_t &src_
   if (*(BlobStreamType*)ctx == BlobStreamType::ZLIB)
     return decode_blob_stream_zlib((z_stream*)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
   else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
-    return decode_blob_stream_zstd((ZSTD_DStream*)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
+    return decode_blob_stream_zstd(*(ZSTD_DStream**)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
   else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
   {
     size_t copy = src_size-src_pos < dest_capacity-dest_pos ? src_size-src_pos : dest_capacity-dest_pos;
@@ -121,7 +121,7 @@ void finish_decompress_blob_stream(char *ctx)
   if (*(BlobStreamType*)ctx == BlobStreamType::ZLIB)
     inflateEnd((z_stream*)(ctx+sizeof(BlobStreamType)));
   else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
-    ZSTD_freeDStream((ZSTD_DStream*)(ctx+sizeof(BlobStreamType)));
+    ZSTD_freeDStream(*(ZSTD_DStream**)(ctx+sizeof(BlobStreamType)));
   else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
   {}
 }
@@ -135,15 +135,15 @@ bool init_compress_blob_stream(char *ctx_, size_t ctx_size, int compression, Blo
   if (ctx_size < BLOB_STREAM_CTX_SIZE)
     return false;
   memcpy(ctx_, &type, sizeof(type));
-  char *ctx = ctx + sizeof(type);
+  char *ctx = ctx_ + sizeof(type);
   if (type == BlobStreamType::ZLIB)
     deflateInit((z_stream*)ctx, compression);
   else if (type == BlobStreamType::ZSTD)
   {
-    memcpy(ctx, ZSTD_createCStream(), sizeof(sizeof(ZSTD_CStream*)));
-    ZSTD_initCStream((ZSTD_CStream*)ctx, compression);
+	*(ZSTD_CStream**)ctx = ZSTD_createCStream();
+    ZSTD_initCStream(*(ZSTD_CStream**)ctx, compression);
     memcpy(ctx + sizeof(ZSTD_CStream*), &compression, sizeof(int));
-  } else
+  } else if (type != BlobStreamType::Unpacked)
     return false;
   return true;
 }
@@ -178,7 +178,7 @@ BlobStreamStatus compress_blob(char *ctx_, const char *src, size_t src_size, cha
   }
   else if (*(BlobStreamType*)ctx_ == BlobStreamType::ZSTD)
   {
-    ZSTD_CStream* zcs = (ZSTD_CStream*)ctx;
+    ZSTD_CStream* zcs = *(ZSTD_CStream**)ctx;
     ZSTD_inBuffer_s streamIn;
     streamIn.src = src;
     streamIn.size = src_size;
@@ -256,7 +256,7 @@ BlobStreamStatus compress_blob_stream_and_finish(char *ctx, const char *src, siz
   if (*(BlobStreamType*)ctx == BlobStreamType::ZLIB)
     return compress_blob_stream_zlib((z_stream*)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
   else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
-    return compress_blob_stream_zstd((ZSTD_CStream*)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
+    return compress_blob_stream_zstd(*(ZSTD_CStream**)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
   else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
   {
     size_t copy = src_size-src_pos < dest_capacity-dest_pos ? src_size-src_pos : dest_capacity-dest_pos;
@@ -288,7 +288,7 @@ BlobStreamStatus finalize_compress_blob_stream(char *ctx, char *dest, size_t &de
     return result == Z_OK ? BlobStreamStatus::Continue : BlobStreamStatus::Error;
   } else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
   {
-    ZSTD_CStream* zcs = (ZSTD_CStream*)(ctx+sizeof(BlobStreamType));
+    ZSTD_CStream* zcs = *(ZSTD_CStream**)(ctx+sizeof(BlobStreamType));
     ZSTD_outBuffer_s streamOut;
     streamOut.dst = dest;
     streamOut.size = dest_capacity;

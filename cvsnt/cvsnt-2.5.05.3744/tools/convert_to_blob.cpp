@@ -161,17 +161,17 @@ static void process_file_ver(const char *rootDir,
   const size_t fsz = get_file_size(path.c_str());
   readData += fsz;
 
-  int fd = open(srcPathString.c_str(), O_RDONLY);
-  if (fd == -1)
-    error(1, errno, "can't open for read <%s>", srcPathString.c_str());
-
   auto encode_file_name = [&]()
   {
     encode_hash(hash, hash_encoded, sizeof(hash_encoded));
     get_blob_filename_from_encoded_hash(rootDir, hash_encoded, sha_file_name, sha_file_name_len);
   };
 
+  int fd = open(srcPathString.c_str(), O_RDONLY);
+  if (fd == -1)
+    error(1, errno, "can't open for read <%s>", srcPathString.c_str());
   const char* begin = (const char*)(mmap(NULL, fsz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
+  close(fd);
   const size_t packedSz = wasPacked  ? ntohl(*(int*)begin) : fsz;
   const size_t unpackedSz = wasPacked ? fsz - sizeof(int) : fsz;
   const char* readData = wasPacked ? begin + sizeof(int) : begin;
@@ -196,10 +196,17 @@ static void process_file_ver(const char *rootDir,
     char bufOut[65536];
     if (decompress_lambda(
       [&](const char *&src, size_t &src_pos, size_t &src_size){
-        src = readData+cursor; src_size = std::min(int64_t(unpackedSz - cursor), (int64_t)65536); src_pos = 0;
+        src_size = std::min(int64_t(unpackedSz - cursor), (int64_t)65536); src_pos = 0;
+        if (src_size == 0)
+          return BlobStreamStatus::Finished;
         //if we will choose all area, we will force to read all file to memory to make write
-        if (src_size && fwrite(src+cursor, 1, src_size, tempF) != src_size)//this write
+        if (fwrite(readData+cursor, 1, src_size, tempF) != src_size)//this write
+        {
+          error(0, errno, "can't write %d to temp_filename <%s> from %d out of %d (fsz = %d)",
+            (int)src_size, temp_filename, (int)cursor, int(unpackedSz), (int)fsz);
           return BlobStreamStatus::Error;
+        }
+        src = readData+cursor;
         cursor += src_size;
         return BlobStreamStatus::Continue;
      },
@@ -211,12 +218,13 @@ static void process_file_ver(const char *rootDir,
        return BlobStreamStatus::Continue;
      }, wasPacked ? BlobStreamType::ZLIB : BlobStreamType::Unpacked) == BlobStreamStatus::Error)
     {
-      error(0, errno, "can't write temp_filename <%s> or decode <%s>", temp_filename, srcPathString.c_str());
+      munmap((void*)begin, fsz);
       unlink_file(temp_filename);
-      close(fd);
+      error(0, errno, "can't write temp_filename <%s> or decode <%s>", temp_filename, srcPathString.c_str());
+      return;
     } else
     {
-      close(fd);
+      munmap((void*)begin, fsz);
       finalize_blob_hash(hctx, hash);
       encode_file_name();
       create_dirs(rootDir, hash);

@@ -78,10 +78,11 @@ inline BlobStreamStatus decompress_lambda(Produce rcb, Consume wcb, BlobStreamTy
       break;
   }
   finish_decompress_blob_stream(cctx);
-  if (decompressStatus == BlobStreamStatus::Finished)
+  if (decompressStatus == BlobStreamStatus::Finished || readStatus == BlobStreamStatus::Finished)
   {
     wcb(dst, dst_pos, dst_size);//consume
-    return BlobStreamStatus::Finished;
+    if (type == BlobStreamType::Unpacked || decompressStatus == BlobStreamStatus::Finished)
+      return BlobStreamStatus::Finished;
   }
   return BlobStreamStatus::Error;
 }

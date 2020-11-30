@@ -131,7 +131,6 @@ struct FilePullData
 {
   const char* begin;
   uint64_t size;
-  int fd;
 };
 uintptr_t file_start_pull_data(const char* hash_type, const char* hash_hex_string, uint64_t &blob_sz)
 {
@@ -146,7 +145,8 @@ uintptr_t file_start_pull_data(const char* hash_type, const char* hash_hex_strin
     return 0;
 
   const char* begin = (const char*)(mmap(NULL, blob_sz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
-  return uintptr_t(new FilePullData{begin, blob_sz, fd});
+  close(fd);
+  return uintptr_t(new FilePullData{begin, blob_sz});
 }
 
 const char *file_pull_data(uintptr_t up, uint64_t from, size_t &data_pulled)
@@ -166,7 +166,7 @@ extern bool file_end_pull_data(uintptr_t up)
   if (!up)
     return false;
   std::unique_ptr<FilePullData> fp((FilePullData*)up);
-  close(fp->fd);
+  munmap((void*)fp->begin, fp->size);
   return true;
 }
 
