@@ -138,17 +138,22 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
       streamIn.size = hdr.compressedLen;
       streamIn.pos = 0;
       char bufOut[ZSTD_BLOCKSIZE_MAX];
-      ZSTD_outBuffer_s streamOut;
-      streamOut.dst = bufOut;
-      streamOut.size = sizeof(bufOut);
-      streamOut.pos = 0;
-      while (streamIn.pos < streamIn.size && streamOut.pos < streamOut.size)
-      {
-        if (ZSTD_isError(ZSTD_decompressStream(zds, &streamOut, &streamIn)))
-          error(1,0,"internal error: inflate failed");
-
+      do {
+        ZSTD_outBuffer_s streamOut;
+        streamOut.dst = bufOut;
+        streamOut.size = sizeof(bufOut);
+        streamOut.pos = 0;
+        size_t sz = ZSTD_decompressStream(zds, &streamOut, &streamIn);
+        if (sz == 0)
+          break;
         BLOB_HASH_Update(&ctx, bufOut, streamOut.pos);
-      };
+        if (streamOut.pos == streamOut.size && !ZSTD_isError(sz))
+          sz = ZSTD_decompressStream(zds, &streamOut, &streamIn);
+        if (sz == 0)
+          break;
+        if (ZSTD_isError(sz))
+          error(1,0,"internal error: zstd decompression failed");
+      } while(streamIn.pos < streamIn.size);
       ZSTD_freeDStream(zds);
     } else
     {
