@@ -37,7 +37,7 @@ bool init_decompress_blob_stream(char *ctx_, size_t ctx_size, BlobStreamType typ
   if (ctx_size < BLOB_STREAM_CTX_SIZE)
     return false;
   memcpy(ctx_, &type, sizeof(type));
-  char *ctx = ctx + sizeof(type);
+  char *ctx = ctx_ + sizeof(type);
   if (type == BlobStreamType::ZLIB)
     inflateInit((z_stream*)ctx);
   else if (type == BlobStreamType::ZSTD)
@@ -124,6 +124,7 @@ void finish_decompress_blob_stream(char *ctx)
     ZSTD_freeDStream(*(ZSTD_DStream**)(ctx+sizeof(BlobStreamType)));
   else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
   {}
+  *(BlobStreamType*)ctx = BlobStreamType::Undefined;
 }
 
 
@@ -254,18 +255,33 @@ BlobStreamStatus compress_blob_stream_and_finish(char *ctx, const char *src, siz
   if (dest_pos >= dest_capacity)
     return BlobStreamStatus::Continue;
   if (*(BlobStreamType*)ctx == BlobStreamType::ZLIB)
-    return compress_blob_stream_zlib((z_stream*)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
-  else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
-    return compress_blob_stream_zstd(*(ZSTD_CStream**)(ctx+sizeof(BlobStreamType)), src, src_pos, src_size, dest, dest_pos, dest_capacity);
-  else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
+  {
+    z_stream* stream = (z_stream*)(ctx+sizeof(BlobStreamType));
+    if (compress_blob_stream_zlib(stream, src, src_pos, src_size, dest, dest_pos, dest_capacity) == BlobStreamStatus::Error)
+    {
+      deflateEnd(stream);
+      *(BlobStreamType*)ctx = BlobStreamType::Undefined;
+      return BlobStreamStatus::Error;
+    }
+  } else if (*(BlobStreamType*)ctx == BlobStreamType::ZSTD)
+  {
+    ZSTD_CStream* zcs = *(ZSTD_CStream**)(ctx+sizeof(BlobStreamType));
+    if (compress_blob_stream_zstd(zcs, src, src_pos, src_size, dest, dest_pos, dest_capacity) == BlobStreamStatus::Error)
+    {
+      *(BlobStreamType*)ctx = BlobStreamType::Undefined;
+      ZSTD_freeCStream(zcs);
+      return BlobStreamStatus::Error;
+    }
+  } else if (*(BlobStreamType*)ctx == BlobStreamType::Unpacked)
   {
     size_t copy = src_size-src_pos < dest_capacity-dest_pos ? src_size-src_pos : dest_capacity-dest_pos;
     memcpy(dest + dest_pos, src + src_pos, copy);
     src_pos += copy;
     dest_pos += copy;
-    return BlobStreamStatus::Continue;//we never know if data is finished in unpacked file. That is left to application
+    return BlobStreamStatus::Finished;
   } else
     return BlobStreamStatus::Error;
+  return finalize_compress_blob_stream(ctx, dest, dest_pos, dest_capacity);
 }
 
 BlobStreamStatus finalize_compress_blob_stream(char *ctx, char *dest, size_t &dest_pos, size_t dest_capacity)

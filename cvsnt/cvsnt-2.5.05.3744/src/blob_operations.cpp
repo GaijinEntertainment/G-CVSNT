@@ -197,11 +197,11 @@ static void* compress_blob_data(const void *data, size_t len, BlobPackType pack,
   const int compression_level = type == BlobStreamType::ZSTD ? (pack == BlobPackType::FAST ? zstd_fast_comp : zstd_best_comp) :
                                                                (pack == BlobPackType::FAST ? zlib_fast_comp : zlib_best_comp);
   char cctx[BLOB_STREAM_CTX_SIZE];
-  size_t zlen = 0;
-  if (init_compress_blob_stream(cctx, sizeof(cctx), compression_level, type) && (zlen = compress_blob_bound(cctx, len)) != 0)
+  size_t zlen = 0, zbound = 0;
+  if (init_compress_blob_stream(cctx, sizeof(cctx), compression_level, type) && ((zbound = compress_blob_bound(cctx, len)) != 0))
   {
-    void *zbuf = blob_alloc(zlen);
-    if (compress_blob_stream_and_finish(cctx, (const char *)data, len, (char*)zbuf, zlen, zlen) == BlobStreamStatus::Finished || zlen < len - len/20)
+    void *zbuf = blob_alloc(zbound);
+    if (compress_blob_stream_and_finish(cctx, (const char *)data, len, (char*)zbuf, zlen, zbound) == BlobStreamStatus::Finished && zlen < len - len/20)
     {
       hdr = get_header(type == BlobStreamType::ZSTD ? zstd_magic : zlib_magic, len, zlen, pack == BlobPackType::FAST ? 0 : BlobHeader::BEST_POSSIBLE_COMPRESSION);
       return zbuf;
@@ -493,7 +493,7 @@ size_t decode_binary_blob(const char *blob_file_name, void **data)
       BlobStreamStatus status = decompress_blob_stream(cctx, bufIn, src_pos, dataRead, (char*)*data, dest_pos, hdr.uncompressedLen);
       if (status == BlobStreamStatus::Finished)
         break;
-      if (dest_pos >= hdr.uncompressedLen)
+      if (dest_pos > hdr.uncompressedLen)
       {
         error(1,errno,"Couldn't decode %s, corrupted", blob_file_name);
         return 0;
