@@ -79,14 +79,14 @@ static int find_rcs_data(const char* rcs_data, const char *text_to_find, size_t 
 
 static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length)
 {
-  const char* data = rcs_data.c_str();
+  const char* data = rcs_data.data();
   bool found = false;
   int text_found_start;
   while ((text_found_start = find_rcs_data(data, text_to_replace.c_str(), text_to_replace.length())) >= 0)
   {
+    size_t wasAt = data - rcs_data.data();
     rcs_data.replace(text_found_start, text_to_replace.length(), replace_text);
-    text_found_start += data - rcs_data.c_str();
-    data = rcs_data.c_str() + text_found_start + replace_text_length;
+    data = rcs_data.data() + wasAt + text_found_start + replace_text_length;
     found = true;
   }
   return found;
@@ -169,7 +169,7 @@ static void process_file_ver(const char *rootDir,
 
   int fd = open(srcPathString.c_str(), O_RDONLY);
   if (fd == -1)
-    error(1, errno, "can't open for read <%s>", srcPathString.c_str());
+    error(1, errno, "can't open for read <%s> of %d sz", srcPathString.c_str(), (int)fsz);
   const char* begin = (const char*)(mmap(NULL, fsz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
   close(fd);
   const size_t packedSz = wasPacked  ? ntohl(*(int*)begin) : fsz;
@@ -193,10 +193,12 @@ static void process_file_ver(const char *rootDir,
     }
 
     size_t cursor = 0;
-    char bufOut[65536];
+    char bufOut[1<<17];
     if (decompress_lambda(
       [&](const char *&src, size_t &src_pos, size_t &src_size){
-        src_size = std::min(int64_t(unpackedSz - cursor), (int64_t)65536); src_pos = 0;
+        if (src_pos < src_size)
+          return BlobStreamStatus::Continue;
+        src_size = std::min(int64_t(unpackedSz - cursor), (int64_t)32768); src_pos = 0;
         if (src_size == 0)
           return BlobStreamStatus::Finished;
         //if we will choose all area, we will force to read all file to memory to make write
@@ -220,7 +222,7 @@ static void process_file_ver(const char *rootDir,
     {
       munmap((void*)begin, fsz);
       unlink_file(temp_filename);
-      error(0, errno, "can't write temp_filename <%s> or decode <%s>", temp_filename, srcPathString.c_str());
+      error(0, errno, "can't decode <%s>", srcPathString.c_str());
       return;
     } else
     {

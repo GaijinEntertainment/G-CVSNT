@@ -2,6 +2,7 @@
 #include "zstd.h"
 #include "streaming_compressors.h"
 #include <string.h>
+#include <new.h>
 
 BlobStreamStatus decompress_blob(const char *src, size_t src_size, char *dest, size_t dest_capacity, BlobStreamType type)
 {
@@ -39,7 +40,7 @@ bool init_decompress_blob_stream(char *ctx_, size_t ctx_size, BlobStreamType typ
   memcpy(ctx_, &type, sizeof(type));
   char *ctx = ctx_ + sizeof(type);
   if (type == BlobStreamType::ZLIB)
-    inflateInit((z_stream*)ctx);
+    inflateInit(new (ctx) z_stream {0});
   else if (type == BlobStreamType::ZSTD)
   {
 	*(ZSTD_DStream**)ctx = ZSTD_createDStream();
@@ -138,7 +139,7 @@ bool init_compress_blob_stream(char *ctx_, size_t ctx_size, int compression, Blo
   memcpy(ctx_, &type, sizeof(type));
   char *ctx = ctx_ + sizeof(type);
   if (type == BlobStreamType::ZLIB)
-    deflateInit((z_stream*)ctx, compression);
+    deflateInit(new(ctx) z_stream {0}, compression);
   else if (type == BlobStreamType::ZSTD)
   {
 	*(ZSTD_CStream**)ctx = ZSTD_createCStream();
