@@ -99,7 +99,10 @@ FILE* blob_get_temp_file (std::string &fn, const char *tmp_path, const char *mod
     close (fd);
     unlink(buf);
   } else
+  {
+    chmod(buf, 666);//linux create temp files with very limited access writes
     fn = buf;
+  }
   return fp;
 }
 #endif
