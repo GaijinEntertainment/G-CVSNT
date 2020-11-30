@@ -14,7 +14,7 @@ extern int unlink_file(const char* filename);
 
 struct BlobTask
 {
-  std::string message, dirpath, filename, encoded_sha256, file_mode;
+  std::string message, dirpath, filename, encoded_hash, file_mode;
   time_t timestamp;
   enum class Type {Download, Upload} type;
 };
@@ -108,7 +108,7 @@ void BackgroundDownloader::wait()
 
 extern char *xgetwd();
 
-void add_download_queue(const char *message, const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp)
+void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp)
 {
   if (!downloader)
   {
@@ -116,7 +116,7 @@ void add_download_queue(const char *message, const char *filename, const char *e
     downloader->init();
   }
   char *cdir = xgetwd();
-  downloader->emplace(BlobTask{message, cdir, filename, encoded_sha256, file_mode, timestamp, BlobTask::Type::Download});
+  downloader->emplace(BlobTask{message, cdir, filename, encoded_hash, file_mode, timestamp, BlobTask::Type::Download});
   blob_free(cdir);
 }
 
@@ -138,7 +138,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *
 {
   std::vector<char> temp_buf;
   std::string err;
-  if (!processor->download(base_repo, task.encoded_sha256.data(),
+  if (!processor->download(base_repo, task.encoded_hash.data(),
       [&](const char *data, size_t at, size_t data_length) {
         if (!data)
           temp_buf.reserve(at + data_length);
@@ -148,7 +148,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *
       },
       err))
   {
-    printf("can't download <%.64s>, err = %d, %s\n", task.encoded_sha256.data(), err.c_str());
+    printf("can't download <%.64s>, err = %d, %s\n", task.encoded_hash.data(), err.c_str());
     return false;
   }
   void *data = nullptr; bool need_free = false;

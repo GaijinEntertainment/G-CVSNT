@@ -2069,7 +2069,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     xfree (entries_line);
 }
 
-void add_download_queue(const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
+void add_download_queue(const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp);
 
 int blob_concurrency_download_level = -1;
 char blob_download_url[256] = {0};
@@ -2327,8 +2327,8 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
       return;
     }
 
-    extern void add_download_queue(const char *message, const char *filename, const char *encoded_sha256, const char *file_mode, time_t timestamp);
-    add_download_queue(short_pathname, filename, blob_ref+sha256_magic_len,
+    extern void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp);
+    add_download_queue(short_pathname, filename, blob_ref+hash_type_magic_len,
       stored_mode ? stored_mode : mode_string,
       file_mtime);
 
@@ -4821,14 +4821,14 @@ static void send_modified (const char *file, const char *short_pathname, const V
 
         if (blob_binary && supported_request ("Blob-ref-transfer") && supported_request ("Blob-transfer"))
         {
-			char sha256_encoded[65];
+			char hash_encoded[65];
 			BlobHeader *hdr = nullptr; void *blob_data_no_hdr = nullptr; bool allocated_blob_data = false;
-			//create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded);
-			create_binary_blob_to_send(file, buf, newsize, blob_binary_compressed, &hdr, &blob_data_no_hdr, allocated_blob_data, sha256_encoded, sizeof(sha256_encoded));
+			//create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*hash_encoded);
+			create_binary_blob_to_send(file, buf, newsize, blob_binary_compressed, &hdr, &blob_data_no_hdr, allocated_blob_data, hash_encoded, sizeof(hash_encoded));
             if (send_blob_content)
             {
               send_to_server("Blob-transfer ", 0);
-              send_to_server(sha256_encoded, 0);
+              send_to_server(hash_encoded, 0);
               send_to_server("\n", 1);
 
               sprintf (tmp, "%llu\n", (unsigned long long) (hdr->compressedLen + hdr->headerSize));
@@ -4845,7 +4845,7 @@ static void send_modified (const char *file, const char *short_pathname, const V
     		send_to_server ("\n", 1);
     		send_to_server (mode_string, 0);
     		send_to_server ("\n", 1);
-    		sprintf (tmp, SHA256_REV_STRING "%s\n", sha256_encoded);
+    		sprintf (tmp, HASH_TYPE_REV_STRING "%s\n", hash_encoded);
     		send_to_server (tmp, 0);
         } else
         {

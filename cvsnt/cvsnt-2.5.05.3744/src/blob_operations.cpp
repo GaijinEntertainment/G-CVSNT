@@ -1,6 +1,5 @@
 #include "zlib.h"
 #include "zstd.h"
-//#include "sha256/sha256.h"
 #include "blake3/blake3.h"
 //#include "cvs.h"
 #include "sha_blob_format.h"
@@ -42,7 +41,7 @@ void blob_free(void *);
 
 #define TRY_ZLIB_AS_WELL_ON_BEST 0//if 1, on Pack::BEST we will try both algoritms to find out whats working best
 
-inline bool is_encoded_sha256(const char *d, size_t len)
+inline bool is_encoded_hash(const char *d, size_t len)
 {
   if (len != 64)
     return false;
@@ -52,39 +51,39 @@ inline bool is_encoded_sha256(const char *d, size_t len)
   return true;
 }
 
-void encode_sha256(unsigned char sha256[], char sha256_encoded[], size_t enc_len)//sha256 char[32], sha256_encoded[65]
+void encode_hash(unsigned char hash[], char hash_encoded[], size_t enc_len)//hash char[32], hash_encoded[65]
 {
-  if (enc_len < sha256_encoded_size+1)
+  if (enc_len < hash_encoded_size+1)
     error (1, 0, "too short %d", (int)enc_len);
 
-  snprintf(sha256_encoded, enc_len,
+  snprintf(hash_encoded, enc_len,
      "%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-      SHA256_LIST(sha256));
+      HASH_LIST(hash));
 }
 
-void get_blob_filename_from_encoded_sha256(const char *root_dir, const char* encoded_sha256, char *sha_file_name, size_t sha_max_len)
+void get_blob_filename_from_encoded_hash(const char *root_dir, const char* encoded_hash, char *sha_file_name, size_t sha_max_len)
 {
   if (snprintf(sha_file_name, sha_max_len,
      "%s"
      BLOBS_SUBDIR
-     "%c%c/%c%c/%.*s"
+     "%.2s/%.2s/%.60s"
      , root_dir ,
-     encoded_sha256[0], encoded_sha256[1],
-     encoded_sha256[2], encoded_sha256[3],
-     int(sha256_encoded_size)-4, encoded_sha256+4
+     encoded_hash,
+     encoded_hash+2,
+     encoded_hash+4
      )
      >= sha_max_len-1)
-      error(1, 0, "get_blob_name:too long filename <%s> for <%s>", sha_file_name, encoded_sha256);
+      error(1, 0, "get_blob_name:too long filename <%s> for <%s>", sha_file_name, encoded_hash);
 }
 
-void get_blob_filename_from_sha256(const char *root, unsigned char sha256[], const char *fn, char *sha_file_name, size_t sha_max_len)//sha256 char[32]
+void get_blob_filename_from_hash(const char *root, unsigned char hash[], const char *fn, char *sha_file_name, size_t sha_max_len)//hash char[32]
 {
   if (snprintf(sha_file_name, sha_max_len,
      "%s"
      BLOBS_SUBDIR
      "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x"
      , root,
-      SHA256_LIST(sha256)
+      HASH_LIST(hash)
      )
      >= sha_max_len-1)
   {
@@ -92,7 +91,7 @@ void get_blob_filename_from_sha256(const char *root, unsigned char sha256[], con
   }
 }
 
-void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char sha256[])//sha256 char[32]
+void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char hash[])//hash char[32]
 {
   unpacked_len = len;
   BLOB_HASH_CTX ctx;
@@ -102,7 +101,7 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
   {
     //new protocol - client sends data as blob, already packed and everything.
     //we still need to verify it!
-    //calc sha256 on the unpacked data!
+    //calc hash on the unpacked data!
     const BlobHeader &hdr = *(const BlobHeader*)data;
     unpacked_len = hdr.uncompressedLen;
     if (!is_packed_blob(hdr))
@@ -159,10 +158,10 @@ void calc_sha256(const char *fn, const void *data, size_t len, bool src_blob, si
   {
     BLOB_HASH_Update(&ctx, data, len);
   }
-  BLOB_HASH_Final(sha256, &ctx);
+  BLOB_HASH_Final(hash, &ctx);
 }
 
-bool calc_sha256_file(const char *fn, unsigned char sha256[])//sha256 char[32]
+bool calc_hash_file(const char *fn, unsigned char hash[])//hash char[32]
 {
   BLOB_HASH_CTX ctx;
   BLOB_HASH_Init(&ctx);
@@ -185,7 +184,7 @@ bool calc_sha256_file(const char *fn, unsigned char sha256[])//sha256 char[32]
   }
   fclose(fp);
 
-  BLOB_HASH_Final(sha256, &ctx);
+  BLOB_HASH_Final(hash, &ctx);
   return true;
 }
 
@@ -194,16 +193,16 @@ bool does_blob_exist(const char *sha_file_name)
   return get_file_size(sha_file_name) >= sizeof(BlobHeader);
 }
 
-void create_dirs(const char *root, unsigned char sha256[])
+void create_dirs(const char *root, unsigned char hash[])
 {
   char buf[1024];
-  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x", root, sha256[0]) >= sizeof(buf)-1)
+  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x", root, hash[0]) >= sizeof(buf)-1)
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
   if (blob_mkdir(buf, 0777) != 0 && errno != EEXIST)
     error (1, errno, "cannot make directory %s", buf);
-  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x/%02x", root, sha256[0], sha256[1]) >= sizeof(buf)-1)
+  if (snprintf(buf, sizeof(buf),"%s" BLOBS_SUBDIR "%02x/%02x", root, hash[0], hash[1]) >= sizeof(buf)-1)
   {
     error(1, 0, "too long dirname <%s>", buf);
   }
@@ -328,7 +327,7 @@ size_t atomic_write_sha_file(const char *fn, const char *sha_file_name, const vo
 //ideally we should receive already packed data, UNPACK it (for sha computations), and then store packed. That way compression moved to client
 //after call to this function binary blob is stored
 //returns zero if nothing written
-bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
+bool write_prepacked_binary_blob(const char *root, const char *client_hash,
   const void *data, size_t len)
 {
   if (
@@ -338,7 +337,7 @@ bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
        || !is_accepted_magic(((const BlobHeader*)data)->magic))
      )
   {
-    error(0, 0, "Client <%s> says it's client prepared blob of len <%d> but it's not!", client_sha256, (int)len);
+    error(0, 0, "Client <%s> says it's client prepared blob of len <%d> but it's not!", client_hash, (int)len);
     if (len >= sizeof(BlobHeader))
     {
       if (((const BlobHeader*)data)->headerSize < sizeof(BlobHeader))
@@ -352,41 +351,41 @@ bool write_prepacked_binary_blob(const char *root, const char *client_sha256,
   }
   const size_t sha_file_name_len = 1024;
   char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
-  get_blob_filename_from_encoded_sha256(root, client_sha256, sha_file_name, sha_file_name_len);
+  get_blob_filename_from_encoded_hash(root, client_hash, sha_file_name, sha_file_name_len);
   if (isreadable(sha_file_name))
   {
     //no need to check if client is lying about this sha content
-    printf("sha <%s> already exist, deduplication\n", client_sha256);
+    printf("sha <%s> already exist, deduplication\n", client_hash);
     return true;
   }
 
   const size_t clientUnpackedLen = ((const BlobHeader*)data)->uncompressedLen;
   size_t unpacked_len = 0;
-  unsigned char sha256[32];
-  calc_sha256(client_sha256, data, len, true, unpacked_len, sha256);
+  unsigned char hash[32];
+  calc_hash(client_hash, data, len, true, unpacked_len, hash);
   if (clientUnpackedLen != unpacked_len)
   {
-    error(0, 0, "Client <%s> says it has compressed %d of data but we decompressed only %d!",client_sha256 , (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
+    error(0, 0, "Client <%s> says it has compressed %d of data but we decompressed only %d!",client_hash , (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
     return false;
   }
-  char real_sha256_encoded[sha256_encoded_size+1];
-  encode_sha256(sha256, real_sha256_encoded, sizeof(real_sha256_encoded));
-  if (memcmp(client_sha256, real_sha256_encoded, sha256_encoded_size) != 0)
+  char real_hash_encoded[hash_encoded_size+1];
+  encode_hash(hash, real_hash_encoded, sizeof(real_hash_encoded));
+  if (memcmp(client_hash, real_hash_encoded, hash_encoded_size) != 0)
   {
-    error(0, 0, "client-promised sha <%s> and real sha<%s> different!", client_sha256, real_sha256_encoded);
+    error(0, 0, "client-promised sha <%s> and real sha<%s> different!", client_hash, real_hash_encoded);
     return false;
   }
-  get_blob_filename_from_sha256(root, sha256, client_sha256, sha_file_name, sha_file_name_len);
+  get_blob_filename_from_hash(root, hash, client_hash, sha_file_name, sha_file_name_len);
   if (!isreadable(sha_file_name))
   {
-    create_dirs(root, sha256);
-    atomic_write_sha_file(client_sha256, sha_file_name, data, len, BlobPackType::NO, true);
+    create_dirs(root, hash);
+    atomic_write_sha_file(client_hash, sha_file_name, data, len, BlobPackType::NO, true);
     return true;
   }//else we already have this blob written. deduplication worked!
   return true;
 }
 
-size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
+size_t write_binary_blob(const char *root, unsigned char hash[],// 32 bytes
   const char *fn,//write to
   const void *data, size_t len, BlobPackType pack, bool src_packed)//fn is just context!
 {
@@ -401,21 +400,21 @@ size_t write_binary_blob(const char *root, unsigned char sha256[],// 32 bytes
   }
   const size_t clientUnpackedLen = src_packed ? ((const BlobHeader*)data)->uncompressedLen : len;
   size_t unpacked_len = 0;
-  calc_sha256(fn, data, len, src_packed, unpacked_len, sha256);
+  calc_hash(fn, data, len, src_packed, unpacked_len, hash);
   if (clientUnpackedLen != unpacked_len)
     error(1, 0, "fn <%s> says it has compressed %d of data but we decompressed only %d!", fn, (uint32_t)clientUnpackedLen, (uint32_t)unpacked_len);
   const size_t sha_file_name_len = 1024;
   char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 32+3+1 + strlen(root)
-  get_blob_filename_from_sha256(root, sha256, fn, sha_file_name, sha_file_name_len);
+  get_blob_filename_from_hash(root, hash, fn, sha_file_name, sha_file_name_len);
   if (!isreadable(sha_file_name))
   {
-    create_dirs(root, sha256);
+    create_dirs(root, hash);
     return atomic_write_sha_file(fn, sha_file_name, data, len, pack, src_packed);
   }//else we already have this blob written. deduplication worked!
   else
   {
     //if we are paranoid, that's the place where we can check for collision
-    //probability of sha256 collision is way lower then asteroid destroying Earth in next 1000 years
+    //probability of hash collision is way lower then asteroid destroying Earth in next 1000 years
     // in addition, it won't crash our repo, merely will result in incorrect commit (you will update something else, not what you have commited, some other file)
     //so we won't check for it.
     return 0;
@@ -614,99 +613,29 @@ size_t read_binary_blob(const char *blob_file_name, void **data, bool return_blo
 
 bool can_be_blob_reference(const char *blob_ref_file_name)
 {
-  return get_file_size(blob_ref_file_name) == blob_reference_size;//blob references is always sha256:encoded_sha_64_bytes
+  return get_file_size(blob_ref_file_name) == blob_reference_size;//blob references is always hash:encoded_sha_64_bytes
 }
 
-bool get_blob_reference_content_sha256(const unsigned char *ref_file_content, size_t len, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
+bool get_blob_reference_content_hash(const unsigned char *ref_file_content, size_t len, char *hash_encoded)//hash_encoded==char[65], encoded 32 bytes + \0
 {
-  if (len != blob_reference_size || memcmp(&ref_file_content[0], SHA256_REV_STRING, sha256_magic_len) != 0)
+  if (len != blob_reference_size || memcmp(&ref_file_content[0], HASH_TYPE_REV_STRING, hash_type_magic_len) != 0)
     //not a blob reference!
     return false;
-  //may be check if it is sha256 encoded
-  if (!is_encoded_sha256((const char*)ref_file_content + sha256_magic_len, sha256_encoded_size))
+  //may be check if it is hash encoded
+  if (!is_encoded_hash((const char*)ref_file_content + hash_type_magic_len, hash_encoded_size))
     return false;
-  memcpy(sha256_encoded, ref_file_content + sha256_magic_len, sha256_encoded_size);
-  sha256_encoded[sha256_encoded_size] = 0;
+  memcpy(hash_encoded, ref_file_content + hash_type_magic_len, hash_encoded_size);
+  hash_encoded[hash_encoded_size] = 0;
   return true;
 }
 
-/*bool get_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
-{
-  if (!can_be_blob_reference(blob_ref_file_name))
-    return false;
-  unsigned char ref_file_content[blob_reference_size];
-  FILE* fp;
-  fp = fopen(blob_ref_file_name, "rb");
-  if (fread(&ref_file_content[0],1, blob_reference_size, fp) != blob_reference_size)
-  {
-    error(1,errno,"Couldn't read %s", blob_ref_file_name);
-    return false;
-  }
-  fclose(fp);
-  return get_blob_reference_content_sha256(ref_file_content, blob_reference_size, sha256_encoded);
-}
 
-bool is_blob_reference(const char *root_dir, const char *blob_ref_file_name, char *sha_file_name, size_t sha_max_len)//sha256_encode==char[65], encoded 32 bytes + \0
+void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*hash_encoded, size_t sha_256enc_len)
 {
-  char sha256_encoded[sha256_encoded_size+1];
-  if (!get_blob_reference_sha256(blob_ref_file_name, sha256_encoded))//sha256_encoded==char[65], encoded 32 bytes + \0
-    return false;
-  get_blob_filename_from_encoded_sha256(root_dir, sha256_encoded, sha_file_name, sha_max_len);
-  return does_blob_exist(sha_file_name);
-}
-
-bool write_direct_blob_reference(const char *fn, const void *ref, size_t ref_len, bool fail_on_error)//ref_len == blob_reference_size
-{
-  if (ref_len != blob_reference_size)
-    error(1, 0, "not a reference <%s>", fn);
-  char *temp_filename = NULL;
-  FILE *dest = cvs_temp_file(&temp_filename, "wb");
-  if (!dest)
-  {
-    error(fail_on_error ? 1 : 0, 0, "can't open write temp_filename <%s> for <%s>", temp_filename, fn);
-    return false;
-  }
-  bool ret = true;
-  if (fwrite(ref, 1, ref_len, dest) != ref_len)
-  {
-    error(fail_on_error ? 1 : 0, 0, "can't write to temp <%s> for <%s>!", temp_filename, fn);
-    ret = false;
-    fclose(dest);
-    unlink(temp_filename);
-    blob_free (temp_filename);
-    return false;
-  }
-  if (ret)
-  {
-    change_file_mode(temp_filename, 0666);
-    ret = rename_file (temp_filename, fn, fail_on_error);
-    fclose(dest);
-    blob_free (temp_filename);
-  }
-  return ret;
-}
-
-bool write_blob_reference(const char *fn, const unsigned char sha256[], bool fail_on_error)//sha256[32] == digest
-{
-  char sha256_encoded[blob_reference_size+1];
-  encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));
-  return write_direct_blob_reference(fn,  sha256_encoded, blob_reference_size, fail_on_error);
-}
-
-void write_blob_and_blob_reference(const char *root, const char *fn, const void *data, size_t len, BlobPackType store_packed, bool src_packed)
-{
-  unsigned char sha256[32];
-  write_binary_blob(root, sha256, fn, data, len, store_packed, src_packed);
-  write_blob_reference(fn, sha256);
-}*/
-
-
-void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*sha256_encoded, size_t sha_256enc_len)
-{
-  unsigned char sha256[32];
+  unsigned char hash[32];
   size_t unpacked_len;
-  calc_sha256(ctx, file_content, len, false, unpacked_len, sha256);
-  encode_sha256(sha256, sha256_encoded, sha_256enc_len);//sha256 char[32], sha256_encoded[65]
+  calc_hash(ctx, file_content, len, false, unpacked_len, hash);
+  encode_hash(hash, hash_encoded, sha_256enc_len);//hash char[32], hash_encoded[65]
   *hdr_ = (BlobHeader*)blob_alloc(sizeof(BlobHeader));
   BlobHeader &hdr = **hdr_;
   hdr = get_noarc_header(len);
@@ -727,9 +656,9 @@ void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len,
 
 bool is_blob_reference_data(const void *data, size_t len)
 {
-  if (len != blob_reference_size || memcmp(data, SHA256_REV_STRING, sha256_magic_len) != 0)
+  if (len != blob_reference_size || memcmp(data, HASH_TYPE_REV_STRING, hash_type_magic_len) != 0)
     return false;
-  if (!is_encoded_sha256((const char*)data + sha256_magic_len, sha256_encoded_size))
+  if (!is_encoded_hash((const char*)data + hash_type_magic_len, hash_encoded_size))
     return false;
   return true;
 }
@@ -747,28 +676,28 @@ inline const uint64_t hash_with_salt(const void *data_, size_t len, uint64_t sal
 const uint64_t get_session_crypt(const void *data, size_t len)
 {
   //make salted hash of content where salt is randomly generated on each session.
-  return *(const uint64_t*)((const char*)data + sha256_magic_len+1);
+  return *(const uint64_t*)((const char*)data + hash_type_magic_len+1);
 }
 
 bool gen_session_crypt(void *data, size_t len)
 {
-  if (len != session_blob_reference_size || memcmp(data, SHA256_REV_STRING, sha256_magic_len) != 0)
+  if (len != session_blob_reference_size || memcmp(data, HASH_TYPE_REV_STRING, hash_type_magic_len) != 0)
     return false;
-  //write salted hash of sha256
+  //write salted hash of hash
   *(uint64_t*)((char*)data + blob_reference_size) = hash_with_salt(data, blob_reference_size, get_user_session_salt());
   return true;
 }
 
 bool is_session_blob_reference_data(const void *data, size_t len)
 {
-  if (len != session_blob_reference_size || memcmp(data, SHA256_REV_STRING, sha256_magic_len) != 0)
+  if (len != session_blob_reference_size || memcmp(data, HASH_TYPE_REV_STRING, hash_type_magic_len) != 0)
     return false;
   if (*(const uint64_t*)((const char*)data + blob_reference_size) != hash_with_salt(data, blob_reference_size, get_user_session_salt()))
     return false;
   return true;
 }
 
-bool get_session_blob_reference_sha256(const char *blob_ref_file_name, char *sha256_encoded)//sha256_encoded==char[65], encoded 32 bytes + \0
+bool get_session_blob_reference_hash(const char *blob_ref_file_name, char *hash_encoded)//hash_encoded==char[65], encoded 32 bytes + \0
 {
   if (get_file_size(blob_ref_file_name) != session_blob_reference_size)
     return false;
@@ -783,5 +712,5 @@ bool get_session_blob_reference_sha256(const char *blob_ref_file_name, char *sha
   fclose(fp);
   if (!is_session_blob_reference_data(session_ref_file_content, session_blob_reference_size))
     return false;
-  return get_blob_reference_content_sha256(session_ref_file_content, blob_reference_size, sha256_encoded);
+  return get_blob_reference_content_hash(session_ref_file_content, blob_reference_size, hash_encoded);
 }

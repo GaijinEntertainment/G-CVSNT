@@ -4,12 +4,12 @@
 
 static void RCS_write_binary_rev_data_blob(const char *fn, char *&data, size_t &len, bool store_packed, bool write_it)
 {
-  unsigned char sha256[32];
-  //todo: skip actual write, if !write_it. we just need sha256
-  write_binary_blob(current_parsed_root->directory, sha256, fn, data, len, store_packed ? BlobPackType::FAST : BlobPackType::NO, false);
+  unsigned char hash[32];
+  //todo: skip actual write, if !write_it. we just need hash
+  write_binary_blob(current_parsed_root->directory, hash, fn, data, len, store_packed ? BlobPackType::FAST : BlobPackType::NO, false);
   data = (char*)xrealloc (data, blob_reference_size+1);
-  memcpy(data, SHA256_REV_STRING, sha256_magic_len);
-  encode_sha256(sha256, data+sha256_magic_len, blob_reference_size+1);
+  memcpy(data, HASH_TYPE_REV_STRING, hash_type_magic_len);
+  encode_hash(hash, data+hash_type_magic_len, blob_reference_size+1);
   data[blob_reference_size] = 0;
   TRACE(0, 0, "write sha %s %d\n",data, write_it);
 }
@@ -21,7 +21,7 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
   const bool blobRef = is_blob_reference_data(*out_data, *out_len);
   char sha_file_name[1024];
   if (blobRef)
-    get_blob_filename_from_encoded_sha256(current_parsed_root->directory, *out_data + sha256_magic_len, sha_file_name, sizeof(sha_file_name));
+    get_blob_filename_from_encoded_hash(current_parsed_root->directory, *out_data + hash_type_magic_len, sha_file_name, sizeof(sha_file_name));
 
   if (!is_ref && blobRef)// is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name)))
   {

@@ -1727,7 +1727,7 @@ static void serve_blob (char *arg)
   xfree (size_text);
 
   char sha_file_name[1024];
-  get_blob_filename_from_encoded_sha256(current_parsed_root->directory, arg, sha_file_name, sizeof(sha_file_name));
+  get_blob_filename_from_encoded_hash(current_parsed_root->directory, arg, sha_file_name, sizeof(sha_file_name));
   char *fileData = does_blob_exist(sha_file_name) ? nullptr : (char*)xmalloc(size);
   char *curData = fileData;
   size_t sizeLeft = size;
@@ -1763,7 +1763,7 @@ static void serve_blob_ref (char *arg)
 {
     int size, status;
     char *mode_text;
-    char *sha256;
+    char *hash;
 
     /*
      * This used to return immediately if error_pending () was true.
@@ -1789,7 +1789,7 @@ static void serve_blob_ref (char *arg)
 		return;
     }
 
-    status = buf_read_line (buf_from_net, &sha256, (int *) NULL);
+    status = buf_read_line (buf_from_net, &hash, (int *) NULL);
     if (status != 0)
     {
         if (status == -2)
@@ -1807,21 +1807,21 @@ static void serve_blob_ref (char *arg)
     if (outside_dir (arg))
     {
       xfree (mode_text);
-      xfree (sha256);
+      xfree (hash);
       return;
     }
-    if (!is_blob_reference_data(sha256, strlen(sha256)))
+    if (!is_blob_reference_data(hash, strlen(hash)))
     {
-  	  error(1,errno," %s received is not a blob reference of <%s>",arg, sha256);
+  	  error(1,errno," %s received is not a blob reference of <%s>",arg, hash);
   	  return;
     }
     unsigned char session_ref[session_blob_reference_size];
-    memcpy(session_ref, sha256, blob_reference_size);
-    xfree(sha256);
+    memcpy(session_ref, hash, blob_reference_size);
+    xfree(hash);
 
     if (!gen_session_crypt(session_ref, sizeof(session_ref)))
     {
-  	  error(1,errno," %s can't create session reference for <%s>",arg, sha256);
+  	  error(1,errno," %s can't create session reference for <%s>",arg, hash);
   	  return;
     }
     //if (size >= 0)
@@ -4292,11 +4292,11 @@ void server_updated (
     {
       if (!supported_response ("Blob-ref"))
       {
-        char sha256_encoded[65];
-        if (!get_blob_reference_content_sha256((const unsigned char*)filebuf->data->bufp, filebuf->data->size, sha256_encoded))
-          error(1,0, "not a sha256 ref <%s>!", filebuf->data->text);
+        char hash_encoded[65];
+        if (!get_blob_reference_content_hash((const unsigned char*)filebuf->data->bufp, filebuf->data->size, hash_encoded))
+          error(1,0, "not a hash ref <%s>!", filebuf->data->text);
         char sha_file_name[1024];
-        get_blob_filename_from_encoded_sha256(current_parsed_root->directory, sha256_encoded, sha_file_name, sizeof(sha_file_name));
+        get_blob_filename_from_encoded_hash(current_parsed_root->directory, hash_encoded, sha_file_name, sizeof(sha_file_name));
         if (!does_blob_exist(sha_file_name))
           error(1,0, "blob <%s> doesnt exist!", sha_file_name);
         buf_free(filebuf);
