@@ -328,6 +328,7 @@
     <ClCompile Include="src\blake3\blake3_portable.c" />
     <ClCompile Include="src\blake3\blake3_sse2.c" />
     <ClCompile Include="src\blake3\blake3_sse41.c" />
+    <ClCompile Include="src\blob_http_processor.cpp" />
     <ClCompile Include="src\blob_operations.cpp" />
     <ClCompile Include="src\buffer.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
@@ -706,6 +707,7 @@
   </ItemGroup>
   <ItemGroup>
     <ClInclude Include="cvsservice\ServiceMsg.h" />
+    <ClInclude Include="src\blob_network_processor.h" />
     <ClInclude Include="src\buffer.h" />
     <ClInclude Include="src\client.h" />
     <ClInclude Include="src\cvs.h" />
