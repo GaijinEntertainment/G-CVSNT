@@ -34,11 +34,6 @@ bool change_file_mode(const char *file, int mode);
 void *blob_alloc(size_t sz);
 void blob_free(void *);
 
-#define BLOB_HASH_CTX blake3_hasher
-#define BLOB_HASH_Final(out, ctx) blake3_hasher_finalize(ctx, out, 32)
-#define BLOB_HASH_Init blake3_hasher_init
-#define BLOB_HASH_Update blake3_hasher_update
-
 #define TRY_ZLIB_AS_WELL_ON_BEST 0//if 1, on Pack::BEST we will try both algoritms to find out whats working best
 
 inline bool is_encoded_hash(const char *d, size_t len)
@@ -91,11 +86,31 @@ void get_blob_filename_from_hash(const char *root, unsigned char hash[], const c
   }
 }
 
+bool init_blob_hash_context(char *ctx, size_t ctx_size)
+{
+  static_assert(sizeof(blake3_hasher) <= HASH_CONTEXT_SIZE, "sizeof hasher context expected to be bigger than defined");
+  if (ctx_size < sizeof(blake3_hasher))
+    return false;
+  blake3_hasher_init((blake3_hasher*)ctx);
+  return true;
+}
+
+void update_blob_hash(char *ctx, const char *data, size_t data_size)
+{
+  blake3_hasher_update((blake3_hasher*)ctx, data, data_size);
+}
+
+bool finalize_blob_hash(char *ctx, unsigned char *digest, size_t digest_size)
+{
+  blake3_hasher_finalize((blake3_hasher*)ctx, digest, digest_size);
+  return true;
+}
+
 void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char hash[])//hash char[32]
 {
   unpacked_len = len;
-  BLOB_HASH_CTX ctx;
-  BLOB_HASH_Init(&ctx);
+  char ctx[HASH_CONTEXT_SIZE];
+  init_blob_hash_context(ctx, sizeof(ctx));
 
   if (src_blob)
   {
@@ -106,7 +121,7 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
     unpacked_len = hdr.uncompressedLen;
     if (!is_packed_blob(hdr))
     {
-      BLOB_HASH_Update(&ctx, ((const char*)data + hdr.headerSize), unpacked_len);
+      update_blob_hash(ctx, ((const char*)data + hdr.headerSize), unpacked_len);
     } else if (is_zlib_blob(hdr))
     {
       z_stream stream = {0};
@@ -123,7 +138,7 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
         if (result < 0)
           error(1,0,"internal error: inflate failed");
 
-        BLOB_HASH_Update(&ctx, bufOut, sizeof(bufOut) - stream.avail_out);
+        update_blob_hash(ctx, bufOut, sizeof(bufOut) - stream.avail_out);
 
         if (result == Z_STREAM_END)
           break;
@@ -146,7 +161,7 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
         size_t sz = ZSTD_decompressStream(zds, &streamOut, &streamIn);
         if (sz == 0)
           break;
-        BLOB_HASH_Update(&ctx, bufOut, streamOut.pos);
+        update_blob_hash(ctx, bufOut, streamOut.pos);
         if (streamOut.pos == streamOut.size && !ZSTD_isError(sz))
           sz = ZSTD_decompressStream(zds, &streamOut, &streamIn);
         if (sz == 0)
@@ -161,15 +176,15 @@ void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size
     }
   } else
   {
-    BLOB_HASH_Update(&ctx, data, len);
+    update_blob_hash(ctx, (const char*)data, len);
   }
-  BLOB_HASH_Final(hash, &ctx);
+  finalize_blob_hash(ctx, hash);
 }
 
 bool calc_hash_file(const char *fn, unsigned char hash[])//hash char[32]
 {
-  BLOB_HASH_CTX ctx;
-  BLOB_HASH_Init(&ctx);
+  char ctx[HASH_CONTEXT_SIZE];
+  init_blob_hash_context(ctx, sizeof(ctx));
 
   FILE* fp = fopen(fn,"rb");
   if (!fp)
@@ -184,12 +199,12 @@ bool calc_hash_file(const char *fn, unsigned char hash[])//hash char[32]
       fclose(fp);
       return false;
     }
-    BLOB_HASH_Update(&ctx, buf, sz);
+    update_blob_hash(ctx, buf, sz);
     len -= sz;
   }
   fclose(fp);
 
-  BLOB_HASH_Final(hash, &ctx);
+  finalize_blob_hash(ctx, hash);
   return true;
 }
 

@@ -11,6 +11,11 @@ void encode_hash(unsigned char hash[], char hash_encoded[], size_t enc_len);//ha
 void get_blob_filename_from_encoded_hash(const char *root_dir, const char* encoded_hash, char *sha_file_name, size_t sha_max_len);// sha_file_name =root/blobs/xx/yy/zzzzzzz
 void get_blob_filename_from_hash(const char *root, unsigned char hash[], const char *fn, char *sha_file_name, size_t sha_max_len);//hash char[32]
 
+enum {HASH_CONTEXT_SIZE = 2048};
+
+bool init_blob_hash_context(char *ctx, size_t ctx_size);
+void update_blob_hash(char *ctx, const char *data, size_t data_size);
+bool finalize_blob_hash(char *ctx, unsigned char *digest, size_t digest_size=32);//digest_size <= 32
 //
 void calc_hash(const char *fn, const void *data, size_t len, bool src_blob, size_t &unpacked_len, unsigned char hash[]);//hash char[32]
 bool calc_hash_file(const char *fn, unsigned char hash[]);//hash char[32]
