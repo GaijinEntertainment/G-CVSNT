@@ -2,7 +2,7 @@
 #include "zstd.h"
 #include "streaming_compressors.h"
 #include <string.h>
-#include <new.h>
+#include <new>
 
 BlobStreamStatus decompress_blob(const char *src, size_t src_size, char *dest, size_t dest_capacity, BlobStreamType type)
 {
