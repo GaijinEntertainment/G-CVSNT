@@ -29,7 +29,7 @@ namespace fs = std::filesystem;
 //this, and only this is amount of work to be done in parallel.
 static size_t max_files_to_process = 256;// to limit amount of double sized data
 
-static bool fastest_conversion = true;//if true, we won't repack, just calc sha256 and put zlib block as is.
+static bool fastest_conversion = true;//if true, we won't repack, just calc hash and put zlib block as is.
 static void ensure_blob_mtime(time_t ver_atime, const char *blob_file)
 {
   time_t blob_mtime = get_file_mtime(blob_file);
@@ -90,7 +90,7 @@ std::atomic<uint32_t> processed_files = 0;
 
 static std::mutex lock_id_mutex;
 static std::mutex  file_version_remap_mutex;
-static tsl::sparse_map<std::string, char[sha256_encoded_size+1]> file_version_remap;
+static tsl::sparse_map<std::string, char[hash_encoded_size+1]> file_version_remap;
 
 struct ThreadData
 {
@@ -142,8 +142,8 @@ static void process_file_ver(const char *rootDir,
   #endif
   std::string srcPathString = path.c_str();
   const bool wasPacked = (srcPathString[srcPathString.length()-1] == 'z' && srcPathString[srcPathString.length()-2] == '#');
-  unsigned char sha256[32];
-  char sha256_encoded[sha256_encoded_size+1];
+  unsigned char hash[32];
+  char hash_encoded[hash_encoded_size+1];
   const size_t sha_file_name_len = 1024;
   char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
 
@@ -183,13 +183,13 @@ static void process_file_ver(const char *rootDir,
   //if wasPacked, originally packed data is in filePackedData
   auto encode_file_name = [&]()
   {
-    encode_sha256(sha256, sha256_encoded, sizeof(sha256_encoded));
-    get_blob_filename_from_encoded_sha256(rootDir, sha256_encoded, sha_file_name, sha_file_name_len);
+    encode_hash(hash, hash_encoded, sizeof(hash_encoded));
+    get_blob_filename_from_encoded_hash(rootDir, hash_encoded, sha_file_name, sha_file_name_len);
   };
   size_t wr = 0;
   if (fastest_conversion)
   {
-    calc_sha256(srcPathString.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), false, unpackedDataSize, sha256);
+    calc_hash(srcPathString.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), false, unpackedDataSize, hash);
     encode_file_name();
     if (!isreadable(sha_file_name))// otherwise blob exist
     {
@@ -202,7 +202,7 @@ static void process_file_ver(const char *rootDir,
         error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)sizeof(hdr));
       if (fwrite(wasPacked ? filePackedData.data() + sizeof(int) : fileUnpackedData.data(), 1, hdr.compressedLen, dest) != hdr.compressedLen)
         error(1, 0, "can't write temp_filename <%s> for <%s>(<%s>) of %d len", temp_filename, sha_file_name, srcPathString.c_str(), (uint32_t)hdr.compressedLen);
-      create_dirs(rootDir, sha256);
+      create_dirs(rootDir, hash);
       change_file_mode(temp_filename, 0666);
       fclose(dest);
       if (!isreadable(sha_file_name))
@@ -215,7 +215,7 @@ static void process_file_ver(const char *rootDir,
     }
   } else
   {
-    wr = write_binary_blob(rootDir, sha256, path.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
+    wr = write_binary_blob(rootDir, hash, path.c_str(), fileUnpackedData.data(), fileUnpackedData.size(), BlobPackType::FAST, false);
     encode_file_name();
   }
 
@@ -234,7 +234,7 @@ static void process_file_ver(const char *rootDir,
   }
   writtenData += wr;
   std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
-  memcpy(&file_version_remap[path.filename().string()][0], sha256_encoded, sha256_encoded_size+1);
+  memcpy(&file_version_remap[path.filename().string()][0], hash_encoded, hash_encoded_size+1);
 }
 
 struct ProcessTask
@@ -317,7 +317,7 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
     }
     std::string oldVerRCS;
     char sha_ref[blob_reference_size+2];
-    memcpy(sha_ref, SHA256_REV_STRING, sha256_magic_len);
+    memcpy(sha_ref, HASH_TYPE_REV_STRING, hash_type_magic_len);
     sha_ref[blob_reference_size] = '@';
     sha_ref[blob_reference_size+1] = 0;
     tsl::sparse_set<std::string> keep_files_list;
@@ -329,7 +329,7 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
       if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
         oldVerRCS.erase(oldVerRCS.length()-2);
       oldVerRCS += "@";
-      memcpy(sha_ref+sha256_magic_len, fv.second, sha256_encoded_size);
+      memcpy(sha_ref+hash_type_magic_len, fv.second, hash_encoded_size);
       if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1))
       {
         //it is dangerous to remove file then

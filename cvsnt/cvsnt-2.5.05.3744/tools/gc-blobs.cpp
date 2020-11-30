@@ -25,7 +25,7 @@ struct ShaKey
 {
   union {
     uint64_t keys[4];//32 bytes
-    unsigned char sha256[32];
+    unsigned char hash[32];
   } v;
   bool operator == (const ShaKey& k) const {return k.v.keys[0] == v.keys[0] && k.v.keys[1] == v.keys[1] && k.v.keys[2] == v.keys[2] && k.v.keys[3] == v.keys[3];}
 };
@@ -47,7 +47,7 @@ inline const bool sh_from_encoded(const char *sha, ShaKey &k)
 {
   bool err = false;
   for (int i = 0; i < 32; ++i)
-    k.v.sha256[i] = (decode_symbol(sha[i*2], err)<<4)|(decode_symbol(sha[i*2+1], err));//strtol(sha+i*2, sha+i*2+2, 16);//can be
+    k.v.hash[i] = (decode_symbol(sha[i*2], err)<<4)|(decode_symbol(sha[i*2+1], err));//strtol(sha+i*2, sha+i*2+2, 16);//can be
   return !err;
 }
 
@@ -125,13 +125,13 @@ static void process_file(const char *rootDir, const char *dir, const char *rcs_f
           && data[blob_reference_size] == '@')//that's the end of text
       {
           ShaKey k;
-          const char *sha256_encoded = data + sha256_magic_len;
-          if (!sh_from_encoded(sha256_encoded, k))
+          const char *hash_encoded = data + hash_type_magic_len;
+          if (!sh_from_encoded(hash_encoded, k))
             fprintf(stderr, "[E] in <%s> some string <%*.s> like a blob reference, but it's part is not a sha!\n",
               fullPathToRCS.c_str(), (int)blob_reference_size, data);
           else
           {
-            //printf("%s sha blob!\n", sha256_encoded);
+            //printf("%s sha blob!\n", hash_encoded);
             if (gather_used)
               collected_shas.insert(k);
             else
@@ -183,9 +183,9 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
       continue;
     }
     bool err = false;
-    ShaKey k;k.v.sha256[0] = sha0;k.v.sha256[1] = sha1;
+    ShaKey k;k.v.hash[0] = sha0;k.v.hash[1] = sha1;
     for (int i = 0; i < 30; ++i)
-      k.v.sha256[i+2] = (decode_symbol(filename[i*2], err)<<4)|(decode_symbol(filename[i*2+1], err));//strtol(sha+i*2, sha+i*2+2, 16);//can be
+      k.v.hash[i+2] = (decode_symbol(filename[i*2], err)<<4)|(decode_symbol(filename[i*2+1], err));//strtol(sha+i*2, sha+i*2+2, 16);//can be
     if (err)
     {
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
@@ -315,12 +315,12 @@ int main(int ac, const char* argv[])
         char buf[1024];
         snprintf(buf, sizeof(buf),
          "%s%s%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-         rootDir.c_str(), BLOBS_SUBDIR, SHA256_LIST(i.v.sha256));
+         rootDir.c_str(), BLOBS_SUBDIR, HASH_LIST(i.v.hash));
         printf("deleting <%s>...%s\n", buf, unlink(buf) ? "ERR" : "OK");
       } else
         printf(
          "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n",
-          SHA256_LIST(i.v.sha256));
+          HASH_LIST(i.v.hash));
     }
   }
 
