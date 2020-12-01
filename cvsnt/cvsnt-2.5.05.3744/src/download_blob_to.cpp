@@ -215,6 +215,6 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *
   }
   std::string fullPath = (task.dirpath+"/")+task.filename;
   rename_file (temp_filename.c_str(), fullPath.c_str());
-  printf("U %s\n", task.message.c_str());
+  printf("Ud %s\n", task.message.c_str());
   return true;
 }
