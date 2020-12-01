@@ -1,4 +1,4 @@
-#include "blake3/blake3.h"
+#include "../blake3/blake3.h"
 #include "calc_hash.h"
 
 bool init_blob_hash_context(char *hctx, size_t ctx_size)

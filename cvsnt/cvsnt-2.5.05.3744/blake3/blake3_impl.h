@@ -49,15 +49,19 @@ enum blake3_flags {
 //#define BLAKE3_NO_AVX2
 //#define BLAKE3_NO_SSE41
 //#define BLAKE3_NO_SSE2
-#if !defined(BLAKE3_DISPATCH)
+#if !defined(BLAKE3_NO_DISPATCH)
 #if __AVX512__ && !defined(BLAKE3_NO_AVX512)
   #define BLAKE3_REQUIRE_AVX512
 #elif __AVX2__ && !defined(BLAKE3_NO_AVX2)
   #define BLAKE3_NO_AVX512
   #define BLAKE3_REQUIRE_AVX2
 #elif __SSE4_1__ && !defined(BLAKE3_NO_SSE41)
+#ifndef BLAKE3_NO_AVX512
   #define BLAKE3_NO_AVX512
+#endif
+#ifndef BLAKE3_NO_AVX2
   #define BLAKE3_NO_AVX2
+#endif
   #define BLAKE3_REQUIRE_SSE41
 #else
   #define BLAKE3_NO_AVX512

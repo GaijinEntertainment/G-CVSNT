@@ -36,7 +36,7 @@ endif
 cvs_config_dir=@cvs_config_dir@
 
 # All other subdirs:
-SUBDIRS = lib $(MDNSCLIENT_SUBDIR) cvsapi diff cvsgui cvstools xdiff \
+SUBDIRS = lib $(MDNSCLIENT_SUBDIR) cvsapi diff cvsgui cvstools xdiff blake3 \
 	  protocols triggers cvsdelta $(MACOSX_SUBDIR) src lockservice $(RCSTOOLS_SUBDIR) man run_script
 
 .PHONY: remotecheck

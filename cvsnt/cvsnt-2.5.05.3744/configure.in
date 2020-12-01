@@ -946,6 +946,8 @@ test -f src/options.h && (
   cp ./src/options.h ./src/options.h-SAVED
 )
 
+AM_PROG_AS
+
 AC_CONFIG_FILES([Makefile \
 	  diff/Makefile \
 	  lib/Makefile \
@@ -957,6 +959,7 @@ AC_CONFIG_FILES([Makefile \
 	  triggers/Makefile \
 	  lockservice/Makefile \
 	  rcs/Makefile \
+      blake3/Makefile \
 	  cvsapi/Makefile \
 	  cvsapi/db/Makefile \
 	  cvsapi/mdns/Makefile \
