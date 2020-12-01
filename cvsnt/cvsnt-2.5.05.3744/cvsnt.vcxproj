@@ -21,34 +21,36 @@
   <PropertyGroup Label="Globals">
     <ProjectGuid>{43B8C2B3-0526-4121-91F8-F218ABC1D0C2}</ProjectGuid>
     <RootNamespace>cvsnt</RootNamespace>
+    <WindowsTargetPlatformVersion>10.0</WindowsTargetPlatformVersion>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.Default.props" />
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|Win32'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <PropertyGroup Condition="'$(Configuration)|$(Platform)'=='Release|x64'" Label="Configuration">
     <ConfigurationType>Application</ConfigurationType>
-    <PlatformToolset>v140</PlatformToolset>
+    <PlatformToolset>v142</PlatformToolset>
     <UseOfMfc>false</UseOfMfc>
     <CharacterSet>Unicode</CharacterSet>
   </PropertyGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.props" />
   <ImportGroup Label="ExtensionSettings">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.props" />
   </ImportGroup>
   <ImportGroup Condition="'$(Configuration)|$(Platform)'=='Debug|Win32'" Label="PropertySheets">
     <Import Project="$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props" Condition="exists('$(UserRootDir)\Microsoft.Cpp.$(Platform).user.props')" Label="LocalAppDataPlatform" />
@@ -160,7 +162,7 @@
       <FavorSizeOrSpeed>Speed</FavorSizeOrSpeed>
       <OmitFramePointers>true</OmitFramePointers>
       <AdditionalIncludeDirectories>.\zstd;..\external_libs;.\external_libs;.\windows-NT;.\src;.\lib;.\diff;.\zlib;.\cvsgui;.\expat\lib;.\xmlapi;.\cvsapi\lib;.\cvsapi;.\cvstools;.\libxml\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>BLAKE3_NO_AVX2;BLAKE3_NO_AVX512;ISOLATION_AWARE_ENABLED;NDEBUG;_CONSOLE;WIN32;HAVE_CONFIG_H;POSIX;CVSGUI_PIPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>ISOLATION_AWARE_ENABLED;NDEBUG;_CONSOLE;WIN32;HAVE_CONFIG_H;POSIX;CVSGUI_PIPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <StringPooling>true</StringPooling>
       <RuntimeLibrary>MultiThreadedDLL</RuntimeLibrary>
       <FunctionLevelLinking>false</FunctionLevelLinking>
@@ -257,7 +259,7 @@
       <Optimization>Disabled</Optimization>
       <OmitFramePointers>false</OmitFramePointers>
       <AdditionalIncludeDirectories>.\zstd;..\external_libs;.\external_libs;.\windows-NT;.\src;.\lib;.\diff;.\zlib;.\cvsgui;.\expat\lib;.\xmlapi;.\cvsapi\lib;.\cvsapi;.\cvstools;.\libxml\include;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
-      <PreprocessorDefinitions>BLAKE3_NO_AVX2;BLAKE3_NO_AVX512;_DEBUG;_CONSOLE;WIN32;HAVE_CONFIG_H;CVSGUI_PIPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
+      <PreprocessorDefinitions>_DEBUG;_CONSOLE;WIN32;HAVE_CONFIG_H;CVSGUI_PIPE;%(PreprocessorDefinitions)</PreprocessorDefinitions>
       <BasicRuntimeChecks>EnableFastChecks</BasicRuntimeChecks>
       <SmallerTypeCheck>false</SmallerTypeCheck>
       <RuntimeLibrary>MultiThreadedDebugDLL</RuntimeLibrary>
@@ -303,6 +305,8 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="blake3\blake3.c" />
+    <ClCompile Include="blake3\blake3_portable.c" />
     <ClCompile Include="src\add.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
@@ -321,13 +325,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\blake3\blake3.c" />
-    <ClCompile Include="src\blake3\blake3_avx2.c" />
-    <ClCompile Include="src\blake3\blake3_avx512.c" />
-    <ClCompile Include="src\blake3\blake3_dispatch.c" />
-    <ClCompile Include="src\blake3\blake3_portable.c" />
-    <ClCompile Include="src\blake3\blake3_sse2.c" />
-    <ClCompile Include="src\blake3\blake3_sse41.c" />
     <ClCompile Include="src\blob_http_processor.cpp" />
     <ClCompile Include="src\blob_operations.cpp" />
     <ClCompile Include="src\buffer.cpp">
@@ -708,6 +705,8 @@
     <ClCompile Include="windows-NT\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
+    <ClInclude Include="blake3\blake3.h" />
+    <ClInclude Include="blake3\blake3_impl.h" />
     <ClInclude Include="cvsservice\ServiceMsg.h" />
     <ClInclude Include="src\blob_network_processor.h" />
     <ClInclude Include="src\buffer.h" />
@@ -924,7 +923,14 @@
       <Project>{749f2eab-b9e4-4a19-9f65-fdded97fa75d}</Project>
     </ProjectReference>
   </ItemGroup>
+  <ItemGroup>
+    <MASM Include="blake3\blake3_avx2_x86-64_windows_msvc.asm" />
+    <MASM Include="blake3\blake3_avx512_x86-64_windows_msvc.asm" />
+    <MASM Include="blake3\blake3_sse2_x86-64_windows_msvc.asm" />
+    <MASM Include="blake3\blake3_sse41_x86-64_windows_msvc.asm" />
+  </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
+    <Import Project="$(VCTargetsPath)\BuildCustomizations\masm.targets" />
   </ImportGroup>
 </Project>

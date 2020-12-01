@@ -93,7 +93,9 @@ enum
 };
 
 #define MDNS_SERV "_services._dns-sd._udp.local"
-
+#if _WIN32
+#undef IP_RECVTTL
+#endif
 static mdns_service_item_t *service_root = NULL;
 
 static void mdns_mcast_group(struct sockaddr_in *ret_sa) {

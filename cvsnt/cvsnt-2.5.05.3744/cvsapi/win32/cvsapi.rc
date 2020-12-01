@@ -7,7 +7,7 @@
 //
 // Generated from the TEXTINCLUDE 2 resource.
 //
-#include "afxres.h"
+#include <windows.h>
 
 /////////////////////////////////////////////////////////////////////////////
 #undef APSTUDIO_READONLY_SYMBOLS
@@ -85,7 +85,7 @@ LANGUAGE 9, 1
 #include "../version_no.h"  // master version number defs
 #include "../version_fu.h"  // version number macros
 #include "cvsapi.rc2"  // non-Microsoft Visual C++ edited resources
-#include "afxres.rc"         // Standard components
+//#include "afxres.rc"         // Standard components
 #endif
 
 /////////////////////////////////////////////////////////////////////////////

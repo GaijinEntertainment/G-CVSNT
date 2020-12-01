@@ -47,7 +47,7 @@ int main(int argc, char **argv)
 	const char *lpCmdLine = argv[1];
 #endif
 
-#ifndef _DEBUG
+#if !defined(_DEBUG)
 	time_t t = time(NULL);
 	size_t days = (size_t)(t/(60*60*24));
 	days -= (365*30);
@@ -59,6 +59,8 @@ int main(int argc, char **argv)
 		fscanf(f,"%d",&days);
 		printf("Forcing build to %d\n",days);
 		fclose(f);
+        if (days == 0)
+          return 0;
 	}
 	else
 	{
