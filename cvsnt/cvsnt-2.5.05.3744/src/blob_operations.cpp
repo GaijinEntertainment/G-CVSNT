@@ -520,11 +520,6 @@ size_t read_binary_blob(const char *blob_file_name, void **data, bool return_blo
   return decode_binary_blob(blob_file_name, data);
 }
 
-bool can_be_blob_reference(const char *blob_ref_file_name)
-{
-  return get_file_size(blob_ref_file_name) == blob_reference_size;//blob references is always hash:encoded_sha_64_bytes
-}
-
 bool get_blob_reference_content_hash(const unsigned char *ref_file_content, size_t len, char *hash_encoded)//hash_encoded==char[65], encoded 32 bytes + \0
 {
   if (len != blob_reference_size || memcmp(&ref_file_content[0], HASH_TYPE_REV_STRING, hash_type_magic_len) != 0)
