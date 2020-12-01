@@ -4240,8 +4240,10 @@ void server_updated (
 		mode = sb.st_mode;
 	    }
 	}
+    if (updated == SERVER_UPDATED_META && !supported_response ("Updated-meta"))
+      updated = SERVER_UPDATED;
 
-    if (size == session_blob_reference_size && updated == SERVER_UPDATED)// updated != SERVER_BLOB_REF)
+    if (size == session_blob_reference_size && (updated == SERVER_UPDATED || updated == SERVER_BLOB_REF))
     {
         TRACE(3,"%s can be a blob ref", finfo->file);
         if (filebuf == NULL)
@@ -4343,6 +4345,8 @@ void server_updated (
 		buf_output0(buf_to_net,"Patched ");
 	else if (updated == SERVER_RCS_DIFF)
 		buf_output0(buf_to_net,"Rcs-diff ");
+    else if (updated == SERVER_UPDATED_META)
+		buf_output0(buf_to_net,"Updated-meta ");
 	else
 		error(1,0,"Internal error - invalid update type");
 
@@ -4364,76 +4368,51 @@ void server_updated (
 	file_allocated = 0;
 	file_used = 0;
 
-	if (size > 0)
-	{
-	    /* Throughout this section we use binary mode to read the
-	       file we are sending.  The client handles any line ending
-	       translation if necessary.  */
+    if (updated != SERVER_UPDATED_META)
+    {
+    	if (size > 0)
+    	{
+    	    /* Throughout this section we use binary mode to read the
+    	       file we are sending.  The client handles any line ending
+    	       translation if necessary.  */
 
-	    if (filebuf == NULL)
-	    {
-			long status;
+    	    if (filebuf == NULL)
+    	    {
+    			long status;
 
-            TRACE(3,"read and output file %s (%s)", finfo->file, finfo->fullname);
-			f = CVS_FOPEN (finfo->file, "rb");
-			if (f == NULL)
-				error (1, errno, "reading %s", fn_root(finfo->fullname));
-			status = buf_read_file (f, size, &list, &last);
-			if (status != 0)
-				error (1, ferror (f) ? errno : 0, "reading %s",
-				   fn_root(finfo->fullname));
-			if (fclose (f) == EOF)
-				error (1, errno, "reading %s", fn_root(finfo->fullname));
-	    }
-	}
+                TRACE(3,"read and output file %s (%s)", finfo->file, finfo->fullname);
+    			f = CVS_FOPEN (finfo->file, "rb");
+    			if (f == NULL)
+    				error (1, errno, "reading %s", fn_root(finfo->fullname));
+    			status = buf_read_file (f, size, &list, &last);
+    			if (status != 0)
+    				error (1, ferror (f) ? errno : 0, "reading %s",
+    				   fn_root(finfo->fullname));
+    			if (fclose (f) == EOF)
+    				error (1, errno, "reading %s", fn_root(finfo->fullname));
+    	    }
+    	}
 
-	{
-		char text[16];
-		sprintf(text,"%lu\n",size);
-		buf_output0(buf_to_net,text);
-	}
+    	{
+    		char text[16];
+    		sprintf(text,"%lu\n",size);
+    		buf_output0(buf_to_net,text);
+    	}
 
-#ifdef _WIN32
-	// Statistics tracking
-	kflag kf;
-	if(vers && vers->options)
-		RCS_get_kflags(vers->options,false,kf);
-
-	if(kf.flags&KFLAG_BINARY)
-	{
-		int binarycount=0,binaryavg=0;
-		CGlobalSettings::GetGlobalValue("cvsnt","PServer","BinaryCount",binarycount);
-		CGlobalSettings::GetGlobalValue("cvsnt","PServer","BinaryAverage",binaryavg);
-		binarycount++;
-		binaryavg=(binaryavg+size)/2;
-		CGlobalSettings::SetGlobalValue("cvsnt","PServer","BinaryCount",binarycount);
-		CGlobalSettings::SetGlobalValue("cvsnt","PServer","BinaryAverage",binaryavg);
-	}
-	else
-	{
-		int textcount=0,textavg=0;
-		CGlobalSettings::GetGlobalValue("cvsnt","PServer","TextCount",textcount);
-		CGlobalSettings::GetGlobalValue("cvsnt","PServer","TextAverage",textavg);
-		textcount++;
-		textavg=(textavg+size)/2;
-		CGlobalSettings::SetGlobalValue("cvsnt","PServer","TextCount",textcount);
-		CGlobalSettings::SetGlobalValue("cvsnt","PServer","TextAverage",textavg);
-	}
-#endif
-
-	if (file != NULL)
-	{
-	    buf_output (buf_to_net, (char *) file, file_used);
-	    xfree (file);
-	    file = NULL;
-	}
-	else if (filebuf == NULL)
-	    buf_append_data (buf_to_net, list, last);
-	else
-	{
-	    buf_append_buffer (buf_to_net, filebuf);
-	    buf_free (filebuf);
-	}
+    	if (file != NULL)
+    	{
+    	    buf_output (buf_to_net, (char *) file, file_used);
+    	    xfree (file);
+    	    file = NULL;
+    	}
+    	else if (filebuf == NULL)
+    	    buf_append_data (buf_to_net, list, last);
+    	else
+    	{
+    	    buf_append_buffer (buf_to_net, filebuf);
+    	    buf_free (filebuf);
+    	}
+    }
 	/* Note we only send a newline here if the file ended with one.  */
 
 	/*
@@ -4446,6 +4425,7 @@ void server_updated (
     if (updated == SERVER_BLOB_REF && internal_filebuf != NULL)
       filebuf = NULL;
 	if ((updated == SERVER_UPDATED
+         || updated == SERVER_UPDATED_META
 	     || updated == SERVER_PATCHED
          || (updated == SERVER_BLOB_REF && internal_filebuf != NULL)
 	     || updated == SERVER_RCS_DIFF)

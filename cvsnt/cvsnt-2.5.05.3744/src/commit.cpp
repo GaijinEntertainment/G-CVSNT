@@ -917,7 +917,8 @@ static int check_fileproc (void *callerdat, struct file_info *finfo)
 		if(server_active)
 		{
 			/* Need to update the checked out file on the client side.  */
-			server_updated (finfo, vers, SERVER_UPDATED,
+    	    TRACE(3,"server_updated_Meta called");
+			server_updated (finfo, vers, SERVER_UPDATED_META,
 			    (mode_t) -1, NULL,
 			    (struct buffer *) NULL);
 		}

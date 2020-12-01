@@ -2468,6 +2468,225 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
   xfree (entries_line);
 }
 
+static void update_meta_entries (char *data_arg, List *ent_list, char *short_pathname, char *filename)
+{
+  char *entries_line;
+  struct update_entries_data *data = (struct update_entries_data *)data_arg;
+
+  char *cp;
+  char *user;
+  char *vn;
+  /* Timestamp field.  Always empty according to the protocol.  */
+  char *ts;
+  char *options = NULL;
+  kflag options_flags;
+  char *tag = NULL;
+  char *date = NULL;
+  char *tag_or_date;
+  char *scratch_entries = NULL;
+  char *merge_tag1, *merge_tag2;
+  time_t rcs_timestamp;
+  char *edit_revision = "*";
+  char *edit_tag = NULL;
+  char *edit_bugid = NULL;
+  char *md5 = NULL;
+
+#ifdef UTIME_EXPECTS_WRITABLE
+  int change_it_back = 0;
+#endif
+
+  read_line (&entries_line);
+
+  /*
+   * Parse the entries line.
+   */
+  scratch_entries = xstrdup (entries_line);
+
+  if (scratch_entries[0] != '/')
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  user = scratch_entries + 1;
+  if ((cp = strchr (user, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  vn = cp;
+  if ((cp = strchr (vn, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  
+  ts = cp;
+  if ((cp = strchr (ts, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  options = cp;
+  if(options[0]=='-' && options[1]=='k')
+  	options+=2;
+  if ((cp = strchr (options, '/')) == NULL)
+      error (1, 0, "bad entries line `%s' from server", entries_line);
+  *cp++ = '\0';
+  tag_or_date = cp;
+  
+  /* If a slash ends the tag_or_date, ignore everything after it.  */
+  cp = strchr (tag_or_date, '/');
+  if (cp != NULL)
+      *cp = '\0';
+  if (*tag_or_date == 'T')
+      tag = tag_or_date + 1;
+  else if (*tag_or_date == 'D')
+      date = tag_or_date + 1;
+
+  /* Done parsing the entries line. */
+  
+  const time_t file_mtime = stored_modtime_valid ? stored_modtime : 0;
+  stored_modtime_valid = 0;
+  {
+    char *size_string;
+    char *mode_string;
+    char *temp_filename;
+    char *realfilename;
+
+    read_line (&mode_string);
+
+    if (!isfile (filename))
+        /* Emit a warning and update the file anyway.  */
+        error (0, 0, "warning: %s unexpectedly disappeared",
+    	   short_pathname);
+
+    /* This is after we have read the file from the net (a change
+       from previous versions, where the server would send us
+       "M U foo.c" before Update-existing or whatever), but before
+       we finish writing the file (arguably a bug).  The timing
+       affects a user who wants status info about how far we have
+       gotten, and also affects whether "U foo.c" appears in addition
+       to various error messages.  */
+    if (!quiet && updated_fname != NULL)
+    {
+      cvs_output ("Tm ", 0);
+      cvs_output (updated_fname, 0);
+      cvs_output ("...\n", 4);
+      xfree (updated_fname);
+      updated_fname = 0;
+    }
+
+    xfree (mode_string);
+    if (stored_mode != NULL)
+    {
+      xfree (stored_mode);
+      stored_mode = NULL;
+    }
+  }
+
+  /*
+   * Process the entries line.  Do this after we've written the file,
+   * since we need the timestamp.
+   */
+  if (strcmp (command_name, "export") != 0)
+  {
+    char *local_timestamp;
+    char *localtime_timestamp;
+    char *file_timestamp;
+
+    (void) time (&last_register_time);
+
+    local_timestamp = data->timestamp;
+    if (local_timestamp == NULL || ts[0] == '+')
+    {
+        file_timestamp = time_stamp (filename,0);
+	    localtime_timestamp = time_stamp (filename,1);
+    }
+    else
+        file_timestamp = NULL;
+
+    /*
+     * These special version numbers signify that it is not up to
+     * date.  Create a dummy timestamp which will never compare
+     * equal to the timestamp of the file.
+     */
+    // TMA 2001/12/18: Accept version numbers starting with "0."
+    if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
+        local_timestamp = "dummy timestamp";
+    else if (local_timestamp == NULL)
+    {
+      local_timestamp = file_timestamp;
+
+      /* Checking for command_name of "commit" doesn't seem like
+         the cleanest way to handle this, but it seem to roughly
+         parallel what the :local: code which calls
+         mark_up_to_date ends up amounting to.  Some day, should
+         think more about what the Checked-in response means
+         vis-a-vis both Entries and Base and clarify
+         cvsclient.texi accordingly.  */
+
+      if (!strcmp (command_name, "commit"))
+  		mark_up_to_date (filename);
+    }
+
+    /* Get the data for Entries.Extra */
+    merge_tag1 = merge_tag2 = NULL;
+    rcs_timestamp = (time_t)-1;
+    while(extra_entry && extra_entry[0]=='/')
+    {
+      char *fn, *tag1, *tag2, *rcs_timestamp_string;
+      fn = extra_entry  + 1;
+      if ((cp = strchr (fn, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+      if(fncmp(fn, filename))
+      	break;
+      tag1 = cp;
+      if ((cp = strchr (tag1, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+      tag2=cp;
+      if ((cp = strchr (tag2, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+      merge_tag1 = tag1;
+      merge_tag2 = tag2;
+      rcs_timestamp_string=cp;
+      if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
+      	rcs_timestamp=(time_t)-1;
+
+      edit_revision = cp;
+      if ((cp = strchr (edit_revision, '/')) == NULL)
+      {
+      	edit_revision="*"; /* Revision was unseen by client */
+      	break;
+      }
+      *cp++ = '\0';
+
+      edit_tag = cp;
+      if ((cp = strchr (edit_tag, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      edit_bugid = cp;
+      if ((cp = strchr (edit_bugid, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      md5 = cp;
+      if ((cp = strchr (md5, '/')) == NULL)
+      	break;
+      *cp++ = '\0';
+
+      break;
+    }
+
+    Register (ent_list, filename, vn, local_timestamp,
+    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+
+    if (file_timestamp)
+        xfree (file_timestamp);
+
+  }
+  xfree (scratch_entries);
+  xfree (entries_line);
+}
+
 static void handle_checked_in (char *args, int len)
 {
     struct update_entries_data dat;
@@ -2502,6 +2721,15 @@ static void handle_updated_blobs_refs (char *args, int len)
     dat.existp = UPDATE_ENTRIES_EXISTING_OR_NEW;
     dat.timestamp = NULL;
     call_in_directory (args, update_blob_ref_entries, (char *)&dat);
+}
+
+static void handle_updated_meta (char *args, int len)
+{
+    struct update_entries_data dat;
+    dat.contents = UPDATE_ENTRIES_UPDATE;
+    dat.existp = UPDATE_ENTRIES_EXISTING;
+    dat.timestamp = NULL;
+    call_in_directory (args, update_meta_entries, (char *)&dat);
 }
 
 static void handle_created (char *args, int len)
@@ -3638,6 +3866,7 @@ struct response responses[] =
     RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
     RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
+    RSP_LINE("Updated-meta", handle_updated_meta, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Created", handle_created, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Update-existing", handle_update_existing, proxy_updated, response_type_normal,
        rs_optional),
