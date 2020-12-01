@@ -912,13 +912,12 @@ int main (int argc, char **argv)
 		version (0, (char **) NULL); 
 		fflush(stdout);
 		printf ("\n");
- 		printf ("CVSNT %d.%d.%02d (" __DATE__ ") Copyright (c) 2008 March Hare Software Ltd.\n",CVSNT_PRODUCT_MAJOR,CVSNT_PRODUCT_MINOR,CVSNT_PRODUCT_PATCHLEVEL);
-		printf ("see http://www.march-hare.com/cvspro\n");
+ 		printf ("CVSNT %d.%d.%02d (" __DATE__ ") Copyright (c) 2020 Gaijin Games KFT.\n",CVSNT_PRODUCT_MAJOR,CVSNT_PRODUCT_MINOR,CVSNT_PRODUCT_PATCHLEVEL);
+ 	printf ("see https://github.com/GaijinEntertainment/G-CVSNT\n");
 		printf ("\n\n");
 		printf ("CVS Copyright (c) 1989-2001 Brian Berliner, david d `zoo' zuhn, \n\nJeff Polk, and other authors\n");
  		printf ("CVSNT Copyright (c) 1999-2008 Tony Hoyle and others\n");
  		printf ("Gaijin Copyright (c) 2008-2020 Nikolay Savichev, Anton Yudintsev and others\n");
-		printf ("see https://github.com/GaijinEntertainment/G-CVSNT\n");
 		printf ("CVSNT may be copied only under the terms of the GNU General Public License v2,\n");
 		printf ("a copy of which can be found with the CVS distribution.\n");
 		printf ("\n");
