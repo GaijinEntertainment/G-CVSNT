@@ -36,10 +36,6 @@ size_t write_binary_blob(const char *root, unsigned char hash[],// 32 bytes
 BlobHeader get_binary_blob_hdr(const char *blob_file_name);
 size_t decode_binary_blob(const char *blob_file_name, void **data);//only needed for compatibility with old cvs clients
 
-//allocates memory and read whole file to memory, but checks if it's size is consistent;
-size_t read_binary_blob_directly(const char *blob_file_name, void **data);
-size_t read_binary_blob(const char *blob_file_name, void **data, bool return_blob_directly);
-
 //this creates two memory chunks; hdr_  and blob_data (the last should be freed if, and only if allocated_blob_data = true)
 void create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*hash_encoded, size_t hash_encoded_len);
 size_t decode_binary_blob(const char *context, const void *data, size_t fileLen, void **out_data, bool &need_free);

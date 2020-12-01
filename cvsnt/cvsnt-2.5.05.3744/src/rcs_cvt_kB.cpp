@@ -29,7 +29,7 @@ static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *ou
     *out_data = NULL;
     *out_len = 0;
     *inout_data_allocated = 0;
-    *out_len = read_binary_blob(sha_file_name, (void**)out_data, false);//
+    *out_len = decode_binary_blob(sha_file_name, (void**)out_data);//for compatibility with old clients only
     if (*out_data)
       *inout_data_allocated = 1;
     return true;

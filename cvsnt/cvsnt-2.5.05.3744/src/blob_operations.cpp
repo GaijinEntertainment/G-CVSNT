@@ -380,37 +380,6 @@ BlobHeader get_binary_blob_hdr(const char *blob_file_name)
   return hdr;
 }
 
-size_t read_binary_blob_directly(const char *blob_file_name, void **data)//allocates memory and read whole file
-{
-  size_t fileLen = get_file_size(blob_file_name);
-  if (fileLen < sizeof(BlobHeader))
-  {
-    error(1,errno,"Couldn't read %s of %d len", blob_file_name, (int)fileLen);
-    return 0;
-  }
-  FILE* fp;
-  fp = fopen(blob_file_name, "rb");
-  if (!fp)
-  {
-    error(1,errno,"Couldn't read %s len", blob_file_name);
-    return 0;
-  }
-  *data = blob_alloc(fileLen);
-  if (fread(*data,1,fileLen,fp) != fileLen)
-  {
-    error(1,errno,"Couldn't read %s", blob_file_name);
-    return 0;
-  }
-  const BlobHeader &hdr = *((const BlobHeader*)*data);
-  if (hdr.compressedLen + hdr.headerSize != fileLen || !is_accepted_magic(hdr.magic))
-  {
-    error(1,errno,"<%s> is not a blob", blob_file_name);
-    fclose(fp);
-  }
-  fclose(fp);
-  return fileLen;
-}
-
 size_t decode_binary_blob(const char *context, const void *data, size_t fileLen, void **out_data, bool &need_free)
 {
   if (fileLen < sizeof(BlobHeader))
@@ -512,13 +481,6 @@ size_t decode_binary_blob(const char *blob_file_name, void **data)
   return hdr.uncompressedLen;
 }
 
-
-size_t read_binary_blob(const char *blob_file_name, void **data, bool return_blob_directly)
-{
-  if (return_blob_directly)//new protocol - just send data to client as is. It is already packed and everything
-    return read_binary_blob_directly(blob_file_name, data);
-  return decode_binary_blob(blob_file_name, data);
-}
 
 bool get_blob_reference_content_hash(const unsigned char *ref_file_content, size_t len, char *hash_encoded)//hash_encoded==char[65], encoded 32 bytes + \0
 {
