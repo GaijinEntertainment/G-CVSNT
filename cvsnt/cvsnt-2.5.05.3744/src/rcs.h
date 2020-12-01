@@ -356,7 +356,7 @@ int RCS_isdead (RCSNode *, const char *);
 char *RCS_getexpand(RCSNode *rcs, const char *vn_rcs);
 void RCS_setexpand (RCSNode *, char *);
 int RCS_checkout (RCSNode *, const char *, const char *, const char *, const char *, const char *,
-			 RCSCHECKOUTPROC, void *, mode_t*, int64_t *cmp_other_sz=NULL, bool *is_ref = nullptr);
+			 RCSCHECKOUTPROC, void *, mode_t*, bool *is_ref = nullptr);
 int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const char *rev, const char *options, int flags,
 			 const char *merge_from_tag1, const char *merge_from_tag2, RCSCHECKINPROC callback, char **pnewversion, const char *bugid, variable_list_t* props);
 int RCS_cmp_file (RCSNode *, const char *, const char *, const char *, int);

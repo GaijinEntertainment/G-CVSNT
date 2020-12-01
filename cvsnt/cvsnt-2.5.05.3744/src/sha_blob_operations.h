@@ -34,7 +34,7 @@ size_t write_binary_blob(const char *root, unsigned char hash[],// 32 bytes
 
 
 BlobHeader get_binary_blob_hdr(const char *blob_file_name);
-size_t decode_binary_blob(const char *blob_file_name, void **data);
+size_t decode_binary_blob(const char *blob_file_name, void **data);//only needed for compatibility with old cvs clients
 
 //allocates memory and read whole file to memory, but checks if it's size is consistent;
 size_t read_binary_blob_directly(const char *blob_file_name, void **data);

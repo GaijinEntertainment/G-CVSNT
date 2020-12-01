@@ -1,7 +1,5 @@
 #include "sha_blob_reference.h"
 
-#define CVS_BLOB_DEDUPLICATION 1
-
 static void RCS_write_binary_rev_data_blob(const char *fn, char *&data, size_t &len, bool store_packed, bool write_it)
 {
   unsigned char hash[32];
@@ -14,9 +12,9 @@ static void RCS_write_binary_rev_data_blob(const char *fn, char *&data, size_t &
   TRACE(0, 0, "write sha %s %d\n",data, write_it);
 }
 
-static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz);
+static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed);
 
-static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool *is_ref, bool supposed_packed, int64_t *cmp_other_sz)
+static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool supposed_packed, bool *is_ref)
 {
   const bool blobRef = is_blob_reference_data(*out_data, *out_len);
   char sha_file_name[1024];
@@ -31,18 +29,6 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
     *out_data = NULL;
     *out_len = 0;
     *inout_data_allocated = 0;
-    if (cmp_other_sz)//this case is no longer existent, to be removed
-    {
-      if (get_binary_blob_hdr(sha_file_name).uncompressedLen != *cmp_other_sz)
-      {
-        *cmp_other_sz = -1;
-        return false;
-      } else
-      {
-        //todo: otherwise we actually better just return sha in out_data, so it can be compare it without reading the whole revision
-        //sha can be easily computed
-      }
-    }
     *out_len = read_binary_blob(sha_file_name, (void**)out_data, false);//
     if (*out_data)
       *inout_data_allocated = 1;
@@ -52,7 +38,7 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
   {
     //as soon as we convert all binary repo, it can't be happening
 
-    bool ret = blobRef ? true : RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, supposed_packed, cmp_other_sz);
+    bool ret = blobRef ? true : RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, supposed_packed);
     if (is_ref)
       *is_ref = blobRef;
       //*is_ref = is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name));
@@ -61,98 +47,9 @@ static bool RCS_read_binary_rev_data_blob(const char *fn, char **out_data, size_
   }
 
 }
-#if !CVS_BLOB_DEDUPLICATION
-static void RCS_write_binary_rev_data_direct_int(const char *fn, void *data, size_t len, bool packed)
-{
-  char sbuf[512];
-
-  char *fnpk = (char*)xmalloc(strlen(fn)+4);
-  strcpy(fnpk, fn);
-  strcat(fnpk, "#z");
-
-  const char *path = packed ? fnpk : fn;
-  FILE *fp = CVS_FOPEN(path,"wb");
-
-  if (packed && fp)
-  {
-    uLong zlen;
-    void *zbuf;
-
-    z_stream stream = {0};
-    deflateInit(&stream,Z_BEST_COMPRESSION-4);
-    zlen = ((deflateBound(&stream, len) - len/10) + 0xFFF) & ~0xFFF;
-    stream.avail_in = len;
-    stream.next_in = (Bytef*)data;
-    stream.avail_out = zlen;
-    zbuf = xmalloc(zlen+4);
-    stream.next_out = (Bytef*)((char*)zbuf)+4;
-    *(unsigned*)zbuf=htonl(len);
-    if(deflate(&stream, Z_FINISH)==Z_STREAM_END)
-    {
-      zlen = 4 + (zlen - stream.avail_out);
-      snprintf(sbuf, sizeof(sbuf), "CVS: commit compressed %s (%+d Kb)\n", path, ((int)zlen-(int)len)/1024); sbuf[sizeof(sbuf)-1] = 0;
-      cvs_output (sbuf, 0);
-
-      if(fwrite(zbuf,1,zlen,fp)!=zlen)
-      {
-        fclose(fp); fp = NULL;
-        unlink(path);
-        error(1,errno,"Couldn't write to %s", path);
-      }
-    }
-    else
-    {
-      snprintf(sbuf, sizeof(sbuf), "CVS: commit failed to compress %s, store uncompressed\n", path); sbuf[sizeof(sbuf)-1] = 0;
-      cvs_output (sbuf, 0);
-
-      fclose(fp);
-      unlink(path);
-      packed = false;
-      path = fn;
-      fp = CVS_FOPEN(path,"wb");
-    }
-    deflateEnd(&stream);
-    xfree(zbuf);
-  }
-
-  if (!packed && fp)
-    if(fwrite(data,1,len,fp)!=len)
-    {
-      fclose(fp); fp = NULL;
-      unlink(path);
-      error(1,errno,"Couldn't write to %s", path);
-    }
-
-  if (fp)
-    fclose(fp);
-  else
-    error(1,errno,"Couldn't create %s", path);
-
-  xfree(fnpk);
-}
-
-void RCS_write_binary_rev_data_direct(const char *rcs_version, const char *rcs_path, const char *workfile, char * &text, size_t &len, bool guessed_compression, bool write_it)
-{
-  int name_len = strlen(workfile)+2+strlen(rcs_version);
-  char *data_path = (char*)xmalloc(strlen(rcs_path)+name_len+4+1);
-  strcpy(data_path, rcs_path);
-  char *p = strrchr(data_path, '/');
-  if (p) { p[1] = 0; p ++; } else { p = data_path+strlen(data_path); }
-  sprintf(p, "CVS/%s", workfile); make_directories(data_path);
-  sprintf(p+strlen(p), "/#%s", rcs_version); p += 4;
-
-  if (write_it)
-    RCS_write_binary_rev_data_direct_int(data_path, text, len, guessed_compression);
-
-  len = name_len = strlen(p);
-  text = (char*)xrealloc (text, name_len+1);
-  memcpy(text, p, name_len+1);
-  xfree(data_path);
-}
-#endif
 
 //we need reading, untill all converts
-static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz)
+static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed)
 {
   char *fnpk = NULL;
   struct stat s;
@@ -204,22 +101,6 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
     data_sz = (fread(&data_sz,1,4,fp) == 4) ? ntohl(data_sz) : -1;
   }
 
-  if (cmp_other_sz && data_sz != *cmp_other_sz)
-  {
-    *cmp_other_sz = -1;
-    if (fp)
-      fclose(fp);
-    if (fnpk)
-      xfree(fnpk);
-
-    if (*inout_data_allocated && *out_data)
-      xfree (*out_data);
-    *out_data = NULL;
-    *out_len = 0;
-    *inout_data_allocated = 0;
-    return false;
-  }
-
   if (*inout_data_allocated && *out_data)
     xfree (*out_data);
   *out_data = NULL;
@@ -269,7 +150,6 @@ static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, siz
 
 void RCS_write_binary_rev_data(const char *rcs_version, const char *rcs_path, const char *workfile, char * &data, size_t &len, bool guessed_compression, bool write_it)
 {
-  #if CVS_BLOB_DEDUPLICATION
   if (is_session_blob_reference_data(data, len))
   {
     len = blob_reference_size; //shrink data;
@@ -277,23 +157,8 @@ void RCS_write_binary_rev_data(const char *rcs_version, const char *rcs_path, co
     //write_direct_blob_reference(fn, data, blob_reference_size);
   } else
     RCS_write_binary_rev_data_blob(rcs_version, data, len, guessed_compression, write_it);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
-  #else
-  //
-  RCS_write_binary_rev_data_direct(rcs_version, rcs_path, workfile, data, len, guessed_compression, write_it);
-  #endif
 }
 
-static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz, bool *is_ref)
-{
-  #if CVS_BLOB_DEDUPLICATION //we cant write what we won't read!
-  //there should be only this case, as soon as all repos are converted.
-  return RCS_read_binary_rev_data_blob(fn, out_data, out_len, inout_data_allocated, is_ref, packed, cmp_other_sz);
-  #else
-  if (is_ref)
-    *is_ref = false;
-  return RCS_read_binary_rev_data_direct(fn, out_data, out_len, inout_data_allocated, packed, cmp_other_sz);
-  #endif
-}
 
 #if OLD_STYLE_CONVERSION
 //todo: replce with explicit conversion utility

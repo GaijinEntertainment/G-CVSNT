@@ -10,7 +10,6 @@ static constexpr size_t blob_file_path_len = hash_encoded_size + 2 /* / / */ + 7
 
 static const size_t blob_reference_size = hash_type_magic_len+hash_encoded_size;
 
-//bool can_be_blob_reference(const char *blob_ref_file_name);
 bool is_blob_reference_data(const void *data, size_t len);
 
 bool get_blob_reference_content_hash(const unsigned char *ref_file_content, size_t len, char *hash_encoded);//hash_encoded==char[65], encoded 32 bytes + \0

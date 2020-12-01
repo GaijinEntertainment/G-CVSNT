@@ -73,7 +73,7 @@ const kflag_t kflag_flags[] =
 
 static void RCS_convert_to_new_binary(RCSNode *rcs);
 static void RCS_write_binary_rev_data(const char *rcs_version, const char *rcs_path, const char *workfile, char * &data, size_t &len, bool guessed_compression, bool write_it);
-static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, int64_t *cmp_other_sz, bool *is_ref);
+static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, bool *is_ref);
 
 static void rcsbuf_setpos_to_delta_base(RCSNode *rcsbuf);
 static void rcsbuf_reuse_delta_buffer(RCSNode *rcs);
@@ -4497,7 +4497,7 @@ int RCS_checkout_raw_value (RCSNode *rcs, const char *&rev, int &free_rev,
 }
 
 int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const char *nametag, const char *options,
-     const char *sout, RCSCHECKOUTPROC pfn, void *callerdat, mode_t *pmode, int64_t *cmp_other_sz, bool *is_ref)
+     const char *sout, RCSCHECKOUTPROC pfn, void *callerdat, mode_t *pmode, bool *is_ref)
 {
   TRACE(1,"RCS_checkout (%s, %s, %s, %s)",
   		PATCH_NULL(fn_root(rcs->path)),
@@ -4528,7 +4528,7 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
     char *data_path;
     char *rev_file_name = get_binary_blob_ver_file_path(data_path, rcs, value, len);
 
-    if (!RCS_read_binary_rev_data(rev_file_name, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, cmp_other_sz, is_ref))
+    if (!RCS_read_binary_rev_data(rev_file_name, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, is_ref))
     {
       rcsbuf_valfree(&rcs->rcsbuf, &log);
       if (free_rev)
@@ -5750,7 +5750,7 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
       bool is_ref = false;
       status = RCS_checkout (rcs, NULL, commitpt->version, NULL, "B",
 			   tmpfile,
-			   (RCSCHECKOUTPROC)0, NULL, NULL, NULL, &is_ref);
+			   (RCSCHECKOUTPROC)0, NULL, NULL, &is_ref);
        if (!is_ref)//old revision. todo: remove me, when db is converted
        {
          FILE *fp = fopen(tmpfile,"wb");
@@ -6244,6 +6244,7 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
         xfree(rev);
       if (free_value)
         xfree(value);
+      TRACE(3,"RCS_cmp_file() for KB returns %d || %d", had_errors, memcmp(hash_encoded, hash_encoded_sent, hash_encoded_size) != 0);
       return had_errors || memcmp(hash_encoded, hash_encoded_sent, hash_encoded_size) != 0;
     }
 
@@ -6291,7 +6292,7 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
 
         retcode = RCS_checkout (rcs, (char *) NULL, rev, (char *) NULL,
 				options, RUN_TTY, cmp_file_buffer,
-				(void *) &data, NULL, (expand.flags&KFLAG_BINARY_DELTA) ? &src_data_sz : NULL);
+				(void *) &data, NULL);
 
         if (src_data_sz < 0)
         {

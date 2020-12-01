@@ -1594,7 +1594,7 @@ VERS: ", 0);
 	    status = RCS_checkout (vers_ts->srcfile, (char *) NULL,
 				   vn_rcs, vers_ts->vn_tag,
 				   vers_ts->options, RUN_TTY,
-				   checkout_to_buffer, newrevbuf, &mode, nullptr,
+				   checkout_to_buffer, newrevbuf, &mode,
                    //if_client_supports_references
                    send_blob_ref ? &is_ref : nullptr);
 		TRACE(3,"checkout_file: after RCS_checkout revbuf%sNULL",(newrevbuf==NULL)?"==":"!=");
