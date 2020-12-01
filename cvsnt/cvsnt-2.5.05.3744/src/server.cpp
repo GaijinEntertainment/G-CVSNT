@@ -4178,6 +4178,7 @@ void server_updated (
     CMD5Calc* md5,
     struct buffer *filebuf)
 {
+    struct buffer *internal_filebuf = nullptr;
     char *mode_string;
 	TRACE(3,"server_updated(%s,%04o)",PATCH_NULL(finfo->file),mode);
     if (noexec)
@@ -4239,6 +4240,33 @@ void server_updated (
 		mode = sb.st_mode;
 	    }
 	}
+
+    if (size == session_blob_reference_size && updated == SERVER_UPDATED)// updated != SERVER_BLOB_REF)
+    {
+        TRACE(3,"%s can be a blob ref", finfo->file);
+        if (filebuf == NULL)
+        {
+          TRACE(3,"read a file");
+          FILE *f = CVS_FOPEN (finfo->file, "rb");
+          if (f)
+          {
+            char ref[session_blob_reference_size];
+            if (fread(ref, 1, sizeof(ref), f) == sizeof(ref) && is_session_blob_reference_data(ref, sizeof(ref)))
+            {
+              internal_filebuf = buf_nonio_initialize ((BUFMEMERRPROC) NULL);
+              buf_output (internal_filebuf, ref, size);
+              filebuf = internal_filebuf;
+            }
+            fclose(f);
+          }
+        }
+        if (filebuf != NULL && is_session_blob_reference_data((const unsigned char*)filebuf->data->bufp, filebuf->data->size))
+        {
+          TRACE(3,"%s is a blob ref", finfo->file);
+          updated = SERVER_BLOB_REF;
+          size = filebuf->data->size = blob_reference_size;//trunkate
+        }
+    }
 
 	if (md5)
 	{
@@ -4319,6 +4347,7 @@ void server_updated (
 		error(1,0,"Internal error - invalid update type");
 
 	output_dir (finfo->update_dir, finfo->repository);
+    TRACE(3,"output file %s with updated = %d (%s)", finfo->file, updated, updated==SERVER_BLOB_REF ? "blob ref" : updated == SERVER_UPDATED ? "updated" : "other");
 	server_buf_output0(buf_to_net,finfo->file);
 	buf_output0(buf_to_net,"\n");
 
@@ -4345,6 +4374,7 @@ void server_updated (
 	    {
 			long status;
 
+            TRACE(3,"read and output file %s (%s)", finfo->file, finfo->fullname);
 			f = CVS_FOPEN (finfo->file, "rb");
 			if (f == NULL)
 				error (1, errno, "reading %s", fn_root(finfo->fullname));
@@ -4413,8 +4443,11 @@ void server_updated (
 	 * not up-to-date, and we indicate that by leaving the file there.
 	 * I'm thinking of cases like "cvs update foo/foo.c foo".
 	 */
+    if (updated == SERVER_BLOB_REF && internal_filebuf != NULL)
+      filebuf = NULL;
 	if ((updated == SERVER_UPDATED
 	     || updated == SERVER_PATCHED
+         || (updated == SERVER_BLOB_REF && internal_filebuf != NULL)
 	     || updated == SERVER_RCS_DIFF)
 	    && filebuf == NULL
 	    /* But if we are joining, we'll need the file when we call
