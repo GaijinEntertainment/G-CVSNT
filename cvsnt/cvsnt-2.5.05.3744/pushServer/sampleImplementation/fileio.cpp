@@ -4,7 +4,7 @@
 #include <unistd.h>
 #endif
 
-bool blob_rename_file(const char*from, const char*to)//the only common implementation on posix and windows
+bool blob_fileio_rename_file(const char*from, const char*to)//the only common implementation on posix and windows
 {
   return rename(from, to) >= 0;
 }
@@ -15,7 +15,7 @@ bool blob_rename_file(const char*from, const char*to)//the only common implement
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 
-size_t blob_get_file_size(const char* fn)
+size_t blob_fileio_get_file_size(const char* fn)
 {
   struct __stat64 buf;
   if (_stat64(fn, &buf) != 0)
@@ -24,7 +24,7 @@ size_t blob_get_file_size(const char* fn)
   return buf.st_size;
 }
 
-bool blob_is_file_readable(const char* fn)
+bool blob_fileio_is_file_readable(const char* fn)
 {
   DWORD fa = GetFileAttributes(fn);
   if (fa == INVALID_FILE_ATTRIBUTES)
@@ -33,15 +33,15 @@ bool blob_is_file_readable(const char* fn)
 }
 
 
-void blob_unlink_file(const char* f) { _unlink(f); }
+void blob_fileio_unlink_file(const char* f) { _unlink(f); }
 
-bool blob_ensure_dir(const char* name)
+bool blob_fileio_ensure_dir(const char* name)
 {
   return CreateDirectoryA(name, NULL) != FALSE;
 }
 
 
-FILE* blob_get_temp_file (std::string &fn, const char *tmp_path, const char *mode)
+FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const char *mode)
 {
   char tempdir[_MAX_PATH];
   if (tmp_path == nullptr && !GetTempPathA(sizeof(tempdir), tempdir))
@@ -58,7 +58,7 @@ FILE* blob_get_temp_file (std::string &fn, const char *tmp_path, const char *mod
 
 #else
 
-size_t blob_get_file_size(const char* fn)
+size_t blob_fileio_get_file_size(const char* fn)
 {
   struct stat sb;
   if (stat(fn, &sb) == -1)
@@ -66,15 +66,15 @@ size_t blob_get_file_size(const char* fn)
   return sb.st_size;
 }
 
-bool blob_is_file_readable(const char* fn)
+bool blob_fileio_is_file_readable(const char* fn)
 {
   return access(fn, R_OK) == 0;
 }
 
 
-void blob_unlink_file(const char* f) { unlink(f); }
+void blob_fileio_unlink_file(const char* f) { unlink(f); }
 
-bool blob_ensure_dir(const char* name)
+bool blob_fileio_ensure_dir(const char* name)
 {
   int ret = mkdir(name, 0777);
   if (ret == 0)
@@ -85,7 +85,7 @@ bool blob_ensure_dir(const char* name)
 }
 
 
-FILE* blob_get_temp_file (std::string &fn, const char *tmp_path, const char *mode)
+FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const char *mode)
 {
   FILE *fp = nullptr;
 
