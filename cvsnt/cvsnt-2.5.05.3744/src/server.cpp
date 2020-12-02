@@ -16,6 +16,7 @@
 #include "buffer.h"
 #include "savecwd.h"
 #include "sha_blob_reference.h"
+#include "../ca_blobs_fs/streaming_blobs.h"
 
 #include "../version.h"
 
@@ -4332,14 +4333,19 @@ void server_updated (
         caddressed_fs::PullData *pd = caddressed_fs::start_pull(hash_encoded, blob_sz);
         if (!pd)
           error(1,0, "blob <%s> can not be pulled!", hash_encoded);
+        caddressed_fs::DownloadBlobInfo info;
         while (at < blob_sz)
         {
           size_t sz = 0;
           const char *data = caddressed_fs::pull(pd, at, sz);//returned data_pulled != 0, unless error
-          buf_output(filebuf, data, sz);
+          if (!sz || !data)
+            error(1,0, "blob <%s> can not be pulled!", hash_encoded);
+          if (!caddressed_fs::decode_stream_blob_data(info, data, sz, [&](const char *unpacked, size_t usz) {buf_output(filebuf, unpacked, usz);return true;}))
+            error(1,0, "blob <%s> can not be unpacked!", hash_encoded);
           at+=sz;
         }
         caddressed_fs::destroy(pd);//will destroy it
+        size = info.realUncompressedSize;//has to be same as hdr.uncompressedLen
   	    buf_output0(buf_to_net,"Updated ");
       } else
    	   buf_output0(buf_to_net,"Blob-ref ");

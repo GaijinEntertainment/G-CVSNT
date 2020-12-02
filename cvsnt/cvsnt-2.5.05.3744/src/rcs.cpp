@@ -5185,39 +5185,15 @@ static void calc_add_remove(RCSNode *rcs, const char *buf, size_t len, unsigned 
 	}
 }
 
-static void write_file_line(const char *workfile, const char *rev1)
+static bool write_file_line(const char *workfile, const char *rev1, size_t sz)
 {
-  char *file1 = NULL;
-  FILE *fp = cvs_temp_file(&file1);
-  fprintf(fp, "%s", rev1);
+  FILE *fp = fopen(workfile, "wb");
+  if (!fp)
+    return false;
+  bool ret = fwrite(rev1, 1, sz, fp) == sz;
   fclose(fp);
-  xfree(file1);
+  return ret;
 }
-
-/*
-static int diff_exec_bin_delta(const char *workfile, const char *rev1, const char *rev2, const char *label1, const char *label2, const char *options, const char *out)
-{
-  char *file1 = NULL, *file2 = NULL;
-  FILE *fp;
-
-  fp = cvs_temp_file(&file1);
-  fprintf(fp, "%s/#%s", workfile, rev1);
-  fclose(fp);
-
-  fp = cvs_temp_file(&file2);
-  fprintf(fp, "%s", workfile, rev2);
-  fprintf(fp, "%s/#%s", workfile, rev2);
-  fclose(fp);
-
-  int diff_res = diff_exec(file1, file2, label1, label2, options, out);
-  if (CVS_UNLINK (file1))
-    error (0, errno, "Failed to unlink temporary file %s", file1);
-  if (CVS_UNLINK (file2))
-    error (0, errno, "Failed to unlink temporary file %s", file1);
-  xfree(file1);
-  xfree(file2);
-  return diff_res;
-}*/
 
 /* Check in to RCSFILE with revision REV (which must be greater than
    the largest revision) and message MESSAGE (which is checked for
@@ -5812,11 +5788,9 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 		{
           RCS_write_binary_rev_data(delta->version, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
           bufsize = dtext->len+1;
-          write_file_line(workfile, dtext->text);
+          if (!write_file_line(workfile, dtext->text, dtext->len))
+            error(1,0,"cant write workfile %s", workfile);
           diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
-          //todo: not working with not updated version
-          //commitpt->text->text = (char*)xmalloc((commitpt->text->len = blobrefdifflen-1) + 1);
-          //sprintf(commitpt->text->text, "d1 1\na1 1\n%*.s", dtext->len, dtext->text);
 		} else
           diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
       	bufsize = 0;
@@ -5925,8 +5899,9 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
         		get_file (workfile, workfile, "rb", &dtext->text, &bufsize, &dtext->len, kf);
           RCS_write_binary_rev_data(delta->version, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
           bufsize = dtext->len+1;
+          if (!write_file_line(workfile, dtext->text, dtext->len))
+            error(1,0,"cant write workfile %s", workfile);
 
-          write_file_line(workfile, dtext->text);
           diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
           //diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
 		} else
