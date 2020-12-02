@@ -1,11 +1,11 @@
 #include <stdio.h>
-#include "sha_blob_format.h"
 #include "sha_blob_reference.h"
 #include <vector>
 #include <string>
 #include "concurrent_queue.h"
 #include <thread>
 #include "blob_network_processor.h"
+#include "../ca_blobs_fs/streaming_blobs.h"
 
 #include "error.h"
 extern int change_mode(const char *filename, const char *mode_string, int respect_umask);
@@ -107,7 +107,7 @@ void BackgroundDownloader::wait()
 
 
 extern char *xgetwd();
-
+extern void blob_free(void*);
 void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp)
 {
   if (!downloader)
@@ -133,79 +133,29 @@ void wait_threads()
     downloader->finishDownloads();
   downloader.reset();
 }
-
+void rename_file (const char *from, const char *to);
 static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *base_repo, const BlobTask &task)
 {
   std::string temp_filename = task.dirpath +"/_new_";
   temp_filename += task.filename;
-  FILE *tmp = nullptr;
+  FILE *tmp = fopen(temp_filename.c_str(), "wb");
+  if (!tmp)
+    return false;
   std::string err;
-  char cctx[BLOB_STREAM_CTX_SIZE];
-  BlobHeader hdr; memset(&hdr, 0, sizeof(hdr));size_t dataRead = 0, uncompressedSize = 0;
+  caddressed_fs::DownloadBlobInfo info;
   if (!processor->download(base_repo, task.encoded_hash.data(),
       [&](const char *data, size_t data_length) {
-        if (!data)//that was hint size. we can allocate full file, for example
-          return true;
-        if (dataRead < sizeof(hdr))
-        {
-          size_t hdrPart = std::min(data_length - dataRead, sizeof(hdr));
-          memcpy((char*)&hdr + dataRead, data, hdrPart);
-          if (dataRead + data_length <= sizeof(hdr))
-            return true;
-          data += hdrPart;
-		  dataRead += hdrPart;
-          data_length -= hdrPart;
-        }
-		dataRead += data_length;
-		if (!tmp)
-        {
-          if (!init_decompress_blob_stream(cctx, sizeof(cctx), hdr))
-            return false;
-          tmp = fopen(temp_filename.c_str(), "wb");
-          if (!tmp)
-            return false;
-        }
-		if (is_noarc_blob(hdr))
-		{
-		  if (fwrite(data, 1, data_length, tmp) != data_length)
-			return false;
-		  return true;
-		}
-		else
-		{
-			size_t src_pos = 0;
-			char buf[262144];
-			while (src_pos < data_length)
-			{
-				size_t dest_pos = 0;
-				auto status = decompress_blob_stream(cctx, data, src_pos, data_length, buf, dest_pos, sizeof(buf));
-				if (status == BlobStreamStatus::Error)
-					return false;
-				if (fwrite(buf, 1, dest_pos, tmp) != dest_pos)
-					return false;
-				uncompressedSize += dest_pos;
-				if (status == BlobStreamStatus::Finished || uncompressedSize == hdr.uncompressedLen)
-					return true;
-			}
-		}
-        return true;
+        return caddressed_fs::decode_stream_blob_data(info, data, data_length,
+          [&](const void *data, size_t sz) { return fwrite(data, 1, sz, tmp) == sz; });//we can easily add hash validation here. but seems unnessasry
       },
       err))
   {
-    if (tmp)
-    {
-      finish_decompress_blob_stream(cctx);
-      fclose(tmp);
-    }
     unlink_file(temp_filename.c_str());
     printf("can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
     return false;
   }
   if (tmp)
-  {
-    finish_decompress_blob_stream(cctx);
     fclose(tmp);
-  }
 
   change_utime(temp_filename.c_str(), task.timestamp);
   {

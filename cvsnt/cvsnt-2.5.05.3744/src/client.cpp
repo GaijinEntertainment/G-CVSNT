@@ -26,10 +26,7 @@
 #include "buffer.h"
 #include "sha_blob_reference.h"
 
-#ifdef MAC_HFS_STUFF
-#	include "mac_hfs_stuff.h"
-#endif
-
+#include <vector>
 int client_overwrite_existing;
 int client_max_dotdot;
 int is_cvsnt = 1;
@@ -4869,9 +4866,9 @@ static void send_modified (const char *file, const char *short_pathname, const V
     /* File was modified, send it.  */
     struct stat sb;
     int fd;
-    char *buf;
+    char *buf = 0;
     char *mode_string;
-    size_t bufsize;
+    size_t bufsize = 0;
 	bool open_binary, encode;
 	CCodepage::Encoding encoding,targetencoding;
  	size_t newsize;
@@ -4923,36 +4920,18 @@ static void send_modified (const char *file, const char *short_pathname, const V
        number of characters read is not the same as sb.st_size.  Text
        files should always be transmitted using the LF convention, so
        we don't want to disable this conversion.  */
-    bufsize = sb.st_size;
-    buf = (char*)xmalloc (bufsize);
-
-#ifdef MAC_HFS_STUFF
+    const bool send_blob_ref = blob_binary && supported_request ("Blob-ref-transfer") && supported_request ("Blob-transfer");
+    if (!send_blob_ref)
 	{
-#	ifndef _POSIX_NO_TRUNC
-		char tfile[1024]; strcpy(tfile, file); strcat(tfile, ".CVSBFCTMP");
-#	else
-		char tfile[1024]; sprintf (tfile, "%.9s%s", file, ".CVSBFCTMP");
-#	endif
-		/* encode data & resource fork into flat file if needed and adjust character encoding if needed */
-		mac_encode_file(file, tfile, open_binary);
-		xfree (buf);
-		if ( CVS_STAT (tfile, &sb) < 0)
-			error (1, errno, "reading %s", tfile);
-		bufsize = sb.st_size;
-		buf = (char*)xmalloc (bufsize);
-		fd = CVS_OPEN (tfile, O_RDONLY | OPEN_BINARY,0);
-		if (fd < 0)
-			error (1, errno, "reading %s", short_pathname);
-	}
-#else
-	fd = CVS_OPEN (file, O_RDONLY | (open_binary ? OPEN_BINARY : 0),0);
-#endif
-	
-    if (fd < 0)
-	error (1, errno, "reading %s", short_pathname);
+
+        bufsize = sb.st_size;
+        buf = (char*)xmalloc (bufsize);
+    	fd = CVS_OPEN (file, O_RDONLY | (open_binary ? OPEN_BINARY : 0),0);
+
+        if (fd < 0)
+        	error (1, errno, "reading %s", short_pathname);
 
 
-	{
 	    char *bufp = buf;
 		CCodepage *cdp1;
 	    int len;
@@ -5017,18 +4996,15 @@ static void send_modified (const char *file, const char *short_pathname, const V
 			delete cdp1;
 			cdp1=NULL;
 		}
+        if (close (fd) < 0)
+    	    error (0, errno, "warning: can't close %s", short_pathname);
 	}
-	if (close (fd) < 0)
-	    error (0, errno, "warning: can't close %s", short_pathname);
 
 	if (supported_request ("Checkin-time") && strcmp(command_name,"import"))
 	{
-	    struct stat sb;
 	    char *rcsdate;
 	    char netdate[MAXDATELEN];
 
-	    if (CVS_STAT (file, &sb) < 0)
-			error (1, errno, "cannot stat %s", file);
 	    rcsdate = date_from_time_t (sb.st_mtime);
 	    date_to_internet (netdate, rcsdate);
 	    xfree (rcsdate);
@@ -5048,34 +5024,57 @@ static void send_modified (const char *file, const char *short_pathname, const V
           old_server_warning_fired = true;
         }
 
-        if (blob_binary && supported_request ("Blob-ref-transfer") && supported_request ("Blob-transfer"))
+        if (send_blob_ref)
         {
-			char hash_encoded[65];
-			BlobHeader *hdr = nullptr; void *blob_data_no_hdr = nullptr; bool allocated_blob_data = false;
-			//create_binary_blob_to_send(const char *ctx, void *file_content, size_t len, bool guess_packed, BlobHeader **hdr_, void** blob_data, bool &allocated_blob_data, char*hash_encoded);
-			create_binary_blob_to_send(file, buf, newsize, blob_binary_compressed, &hdr, &blob_data_no_hdr, allocated_blob_data, hash_encoded, sizeof(hash_encoded));
-            if (send_blob_content)
-            {
-              send_to_server("Blob-transfer ", 0);
-              send_to_server(hash_encoded, 0);
-              send_to_server("\n", 1);
+	      using namespace caddressed_fs;
+		  using namespace streaming_compression;
+		  char hash_encoded[65];hash_encoded[64] = 0;
+          if (send_blob_content)
+          {
+            BlobHeader hdr = get_header(blob_binary_compressed ? zstd_magic : noarc_magic, sb.st_size, 0);
+            send_to_server_untranslated((const char*)&hdr, newsize);
+            char bufIn[128<<10];
+            FILE* rf = fopen(file, "rb");
+            std::vector<char> blob;blob.resize(sb.st_size); size_t dataWritten = 0;
+            StreamStatus st = compress_lambda(
+              [&](const char *&src, size_t &src_pos, size_t &src_size)
+                {if (src_pos < src_size) return StreamStatus::Continue;//previously extracted wasn't consumed
+                 src = bufIn; src_pos = 0;
+                 src_size = fread(bufIn, 1, sizeof(bufIn), rf);
+                 return ferror(rf) ? StreamStatus::Error : src_size == 0 ? StreamStatus::Finished : StreamStatus::Continue;
+                },
+              [&](char *&dst, size_t &dst_pos, size_t &dst_capacity)
+                {
+                  dataWritten = dst_pos;
+                  if (dst_pos < blob.size())
+                    blob.resize(blob.size()*3/2 + 8192);
+                  dst = blob.data(); dst_capacity = blob.size();
+                  return StreamStatus::Continue;
+                }
+             , 6, blob_binary_compressed ? StreamType::ZSTD : StreamType::Unpacked);
+            if (st != StreamStatus::Finished)
+              error(1,0, "Can't send binary blob for %s", file);
+            fclose(rf);
+            send_to_server("Blob-transfer ", 0);
+            send_to_server("\n", 1);
+            send_to_server(hash_encoded, 0);
+            send_to_server("\n", 1);
 
-              sprintf (tmp, "%llu\n", (unsigned long long) (hdr->compressedLen + hdr->headerSize));
-              send_to_server (tmp, 0);
-              send_to_server_untranslated((const char*)hdr, hdr->headerSize);
-              send_to_server_untranslated((const char*)blob_data_no_hdr, hdr->compressedLen);
-            }
-            if (allocated_blob_data)
-              blob_free(blob_data_no_hdr);
-			blob_free(hdr);
-
-    		send_to_server ("Blob-ref-transfer ", 0);
-    		send_to_server (file, 0);
-    		send_to_server ("\n", 1);
-    		send_to_server (mode_string, 0);
-    		send_to_server ("\n", 1);
-    		sprintf (tmp, HASH_TYPE_REV_STRING "%s\n", hash_encoded);
-    		send_to_server (tmp, 0);
+            sprintf (tmp, "%llu\n", (unsigned long long) dataWritten);
+            send_to_server (tmp, 0);
+            send_to_server_untranslated((const char*)blob.data(), dataWritten);
+          } else
+          {
+            if (!caddressed_fs::get_file_content_hash(file, hash_encoded, sizeof(hash_encoded)))
+			  error(1, 0, "Can't calculate hash for %s", file);
+      		send_to_server ("Blob-ref-transfer ", 0);
+      		send_to_server (file, 0);
+      		send_to_server ("\n", 1);
+      		send_to_server (mode_string, 0);
+      		send_to_server ("\n", 1);
+      		sprintf (tmp, HASH_TYPE_REV_STRING "%s\n", hash_encoded);
+      		send_to_server (tmp, 0);
+          }
         } else
         {
     		send_to_server ("Modified ", 0);

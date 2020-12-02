@@ -1726,37 +1726,36 @@ static void serve_blob (char *arg)
     error(1,0,"incorrect blob size<%s> == %d for %s", size_text, (int)size, arg);
   xfree (size_text);
 
-  char sha_file_name[1024];
-  get_blob_filename_from_encoded_hash(current_parsed_root->directory, arg, sha_file_name, sizeof(sha_file_name));
-  char *fileData = does_blob_exist(sha_file_name) ? nullptr : (char*)xmalloc(size);
-  char *curData = fileData;
   size_t sizeLeft = size;
-  while (sizeLeft > 0)
+  const bool exists = caddressed_fs::exists(arg);
+  caddressed_fs::PushData *pd = caddressed_fs::start_push();
+  while (sizeLeft>0)
   {
-    int status, nread;
+    int nread;
     char *data;
-
-    if (sizeLeft == size)
-      status = buf_read_data (buf_from_net, sizeof(BlobHeader), &data, &nread);
-    else
-      status = buf_read_data (buf_from_net, sizeLeft, &data, &nread);
-    if (status != 0)
+    if (buf_read_data (buf_from_net, sizeLeft, &data, &nread) != 0)
     {
       error(0,0,"can't recieve data for <%s>", arg);
+      caddressed_fs::destroy(pd);
       return;
     }
-    if (fileData)
-    {
-      memcpy(curData, data, nread);
-      curData += nread;
-    }
+    if (pd)
+      caddressed_fs::stream_push(pd, data, nread);
     sizeLeft -= nread;
   }
-  if (fileData && !write_prepacked_binary_blob(current_parsed_root->directory, arg, fileData, size))
-    error(1,0, "can't process sha blob <%s>", arg);
 
-  if (fileData)
-    xfree(fileData);
+  if (pd)
+  {
+	char actual_hash[65];
+    auto res = caddressed_fs::finish(pd, actual_hash);
+    if (res == caddressed_fs::PushResult::OK)
+      return;
+    if (res == caddressed_fs::PushResult::IO_ERROR)
+      error(1,0,"io failed <%s>", arg);
+    if (memcmp(actual_hash, arg, 64) != 0)
+      error(1,0,"blob served with hash <%s> has different hash", arg);
+    error(1,0, "other error for %s", arg);
+  }
 }
 
 static void serve_blob_ref (char *arg)
@@ -4325,16 +4324,22 @@ void server_updated (
         char hash_encoded[65];
         if (!get_blob_reference_content_hash((const unsigned char*)filebuf->data->bufp, filebuf->data->size, hash_encoded))
           error(1,0, "not a hash ref <%s>!", filebuf->data->text);
-        char sha_file_name[1024];
-        get_blob_filename_from_encoded_hash(current_parsed_root->directory, hash_encoded, sha_file_name, sizeof(sha_file_name));
-        if (!does_blob_exist(sha_file_name))
-          error(1,0, "blob <%s> doesnt exist!", sha_file_name);
+        if (!caddressed_fs::exists(hash_encoded))
+          error(1,0, "blob <%s> doesnt exist!", hash_encoded);
         buf_free(filebuf);
         filebuf = buf_nonio_initialize((BUFMEMERRPROC) NULL);
-        char *data;
-        size = decode_binary_blob(sha_file_name, (void**)&data);
-        buf_output(filebuf, data, size);
-        xfree(data);
+        size_t blob_sz = 0, at = 0;
+        caddressed_fs::PullData *pd = caddressed_fs::start_pull(hash_encoded, blob_sz);
+        if (!pd)
+          error(1,0, "blob <%s> can not be pulled!", hash_encoded);
+        while (at < blob_sz)
+        {
+          size_t sz = 0;
+          const char *data = caddressed_fs::pull(pd, at, sz);//returned data_pulled != 0, unless error
+          buf_output(filebuf, data, sz);
+          at+=sz;
+        }
+        caddressed_fs::destroy(pd);//will destroy it
   	    buf_output0(buf_to_net,"Updated ");
       } else
    	   buf_output0(buf_to_net,"Blob-ref ");

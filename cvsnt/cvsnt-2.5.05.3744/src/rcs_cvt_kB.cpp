@@ -1,35 +1,72 @@
 #include "sha_blob_reference.h"
+#include "../ca_blobs_fs/push_whole_blob.h"
+#include "../ca_blobs_fs/streaming_blobs.h"
 
+void* blob_alloc(size_t sz);
 static void RCS_write_binary_rev_data_blob(const char *fn, char *&data, size_t &len, bool store_packed, bool write_it)
 {
-  unsigned char hash[32];
-  //todo: skip actual write, if !write_it. we just need hash
-  write_binary_blob(current_parsed_root->directory, hash, fn, data, len, store_packed ? BlobPackType::FAST : BlobPackType::NO, false);
+  //todo: skip actual write, if !write_it. we then just need hash
+  //however, new client should never send data
   data = (char*)xrealloc (data, blob_reference_size+1);
+  memset(data, 0, blob_reference_size+1);
   memcpy(data, HASH_TYPE_REV_STRING, hash_type_magic_len);
-  encode_hash(hash, data+hash_type_magic_len, blob_reference_size+1);
-  data[blob_reference_size] = 0;
-  TRACE(0, 0, "write sha %s %d\n",data, write_it);
+  bool res = push_whole_blob_from_raw_data(data, len, data+hash_type_magic_len, store_packed);
+  if (!res)
+    error(1,errno,"Couldn't write blob of %s", fn);
 }
 
 static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed);
 
+
+inline bool pull_at_once(const char* hash_hex_string, size_t &blob_sz, char **decoded)
+{
+  //this is for compatibility with old clients
+  using namespace caddressed_fs;
+  using namespace streaming_compression;
+  PullData *pd = start_pull(hash_hex_string, blob_sz);
+  if (!pd)
+    return false;
+  size_t at = 0;
+  DownloadBlobInfo info;
+  char *dest = nullptr;
+  while (at < blob_sz)
+  {
+    size_t data_pulled = 0;
+    const char *some = pull(pd, at, data_pulled);//returned data_pulled != 0, unless error
+    if (!data_pulled)
+      break;
+    at += data_pulled;
+    if (!decode_stream_blob_data(info, some, data_pulled, [&](const void *unpacked, size_t sz)
+      {
+        if (!dest)
+          dest = (char*)blob_alloc(info.hdr.uncompressedLen);
+        if (info.realUncompressedSize + sz > info.hdr.uncompressedLen)
+          return false;
+        memcpy(dest+info.realUncompressedSize, unpacked, sz);
+        return true;
+        }
+    ))
+        break;
+  }
+  *decoded = dest;
+  return destroy(pd);
+}
+
 static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool supposed_packed, bool *is_ref)
 {
   const bool blobRef = is_blob_reference_data(*out_data, *out_len);
-  char sha_file_name[1024];
-  if (blobRef)
-    get_blob_filename_from_encoded_hash(current_parsed_root->directory, *out_data + hash_type_magic_len, sha_file_name, sizeof(sha_file_name));
 
   if (!is_ref && blobRef)// is_blob_reference(current_parsed_root->directory, fn, sha_file_name, sizeof(sha_file_name)))
   {
     //as soon as we convert all binary repo, we should only keep that branch
+    char hash[64]; memcpy(hash, *out_data + hash_type_magic_len, sizeof(hash));
+
     if (*inout_data_allocated && *out_data)
       xfree (*out_data);
     *out_data = NULL;
     *out_len = 0;
     *inout_data_allocated = 0;
-    *out_len = decode_binary_blob(sha_file_name, (void**)out_data);//for compatibility with old clients only
+    pull_at_once(hash, *out_len, out_data);
     if (*out_data)
       *inout_data_allocated = 1;
     return true;
@@ -152,6 +189,7 @@ void RCS_write_binary_rev_data(const char *rcs_version, const char *rcs_path, co
 {
   if (is_session_blob_reference_data(data, len))
   {
+    // that's the only correct for new clients
     len = blob_reference_size; //shrink data;
     data[len] = 0;
     //write_direct_blob_reference(fn, data, blob_reference_size);

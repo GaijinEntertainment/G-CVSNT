@@ -16,10 +16,7 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
        hex_hash, hex_hash + 2, hex_hash + 4);
     size_t current = 0;
     auto res = client->Get(buf,
-      [&](const char *data, size_t data_length) {
-        return cb(data, data_length);
-      },
-      [&](uint64_t len, uint64_t total) {return cb(nullptr, total);}
+      [&](const char *data, size_t data_length) { return cb(data, data_length); }
     );
     if (!res || res->status != 200)
     {

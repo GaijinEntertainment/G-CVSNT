@@ -6209,36 +6209,29 @@ int RCS_cmp_file (RCSNode *rcs, const char *rev, const char *options, const char
       }
       char *data_path;
       char *rev_file_name = get_binary_blob_ver_file_path(data_path, rcs, value, len);
-      char hash_encoded[hash_encoded_size+1];
+      char hash_encoded[hash_encoded_size+1];hash_encoded[hash_encoded_size] = 0;
       bool had_errors = false;
       if (!is_blob_reference_data(value, len))
       //if (!get_blob_reference_hash(rev_file_name, hash_encoded))//hash_encoded==char[65], encoded 32 bytes + \0
       {
         //todo: should not be needed as soon as all converted. Everything is a reference
-        unsigned char hash[32];
-        if (!calc_hash_file(rev_file_name, hash))
+        if (!caddressed_fs::get_file_content_hash(rev_file_name, hash_encoded, sizeof(hash_encoded)))
         {
           error(0,0, "can't read file revision <%s> to compare sha", rev_file_name);
           had_errors = true;
         }
-        encode_hash(hash, hash_encoded, sizeof(hash_encoded));//hash char[32], hash_encoded[65]
       } else
-      {
         memcpy(hash_encoded, value + hash_type_magic_len, hash_encoded_size);
-        hash_encoded[hash_encoded_size] = 0;
-      }
       xfree(data_path);
 
-      char hash_encoded_sent[hash_encoded_size+1];
+      char hash_encoded_sent[hash_encoded_size+1];hash_encoded_sent[hash_encoded_size] = 0;
       if (!get_session_blob_reference_hash(filename, hash_encoded_sent))//hash_encoded==char[65], encoded 32 bytes + \0
       {
-        unsigned char hash[32];
-        if (!calc_hash_file(filename, hash))
+        if (!caddressed_fs::get_file_content_hash(filename, hash_encoded_sent, sizeof(hash_encoded_sent)))
         {
           error(0,0, "can't read file <%s> to compare sha", filename);
           had_errors = true;
         }
-        encode_hash(hash, hash_encoded_sent, sizeof(hash_encoded_sent));//hash char[32], hash_encoded[65]
       }
       if (free_rev)
         xfree(rev);
