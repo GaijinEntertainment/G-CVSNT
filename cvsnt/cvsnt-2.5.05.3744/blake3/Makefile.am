@@ -13,11 +13,6 @@ libblake3_la_SOURCES = \
 
 libblake3_la_LDFLAGS = -release $(VERSION) -L$(DESTDIR)/$(libdir) 
 
-libblake3_la_LIBADD = \
-        $(libxml_lib) \
-        $(zlib_lib) \
-        $(pcre_lib) \
-        $(mdns_client_lib) \
-        $(LIBLTDL)
+##libblake3_la_LIBADD = $(LIBLTDL)
 
 lib_LTLIBRARIES = libblake3.la
