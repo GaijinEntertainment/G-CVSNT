@@ -57,7 +57,7 @@ inline bool decode_stream_blob_data(DownloadBlobInfo &info, const char *data, si
     size_t hdrPart = (data_length - info.dataRead);
     hdrPart = hdrPart < sizeof(BlobHeader) ? hdrPart : sizeof(BlobHeader);
     memcpy((char*)&info.hdr + info.dataRead, data, hdrPart);
-    info.dataRead += data_length;
+    info.dataRead += hdrPart;
 
     if (info.dataRead >= sizeof(BlobHeader))
     {

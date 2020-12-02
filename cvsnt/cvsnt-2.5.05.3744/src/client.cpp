@@ -5032,7 +5032,8 @@ static void send_modified (const char *file, const char *short_pathname, const V
           if (send_blob_content)
           {
             BlobHeader hdr = get_header(blob_binary_compressed ? zstd_magic : noarc_magic, sb.st_size, 0);
-            send_to_server_untranslated((const char*)&hdr, newsize);
+            char hctx[HASH_CONTEXT_SIZE];
+            init_blob_hash_context(hctx, sizeof(hctx));
             char bufIn[128<<10];
             FILE* rf = fopen(file, "rb");
             std::vector<char> blob;blob.resize(sb.st_size); size_t dataWritten = 0;
@@ -5041,12 +5042,13 @@ static void send_modified (const char *file, const char *short_pathname, const V
                 {if (src_pos < src_size) return StreamStatus::Continue;//previously extracted wasn't consumed
                  src = bufIn; src_pos = 0;
                  src_size = fread(bufIn, 1, sizeof(bufIn), rf);
+                 update_blob_hash(hctx, bufIn, src_size);
                  return ferror(rf) ? StreamStatus::Error : src_size == 0 ? StreamStatus::Finished : StreamStatus::Continue;
                 },
               [&](char *&dst, size_t &dst_pos, size_t &dst_capacity)
                 {
                   dataWritten = dst_pos;
-                  if (dst_pos < blob.size())
+                  if (dst_pos + 16384 > blob.size())
                     blob.resize(blob.size()*3/2 + 8192);
                   dst = blob.data(); dst_capacity = blob.size();
                   return StreamStatus::Continue;
@@ -5055,26 +5057,28 @@ static void send_modified (const char *file, const char *short_pathname, const V
             if (st != StreamStatus::Finished)
               error(1,0, "Can't send binary blob for %s", file);
             fclose(rf);
+            uint8_t digest[32];
+            if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string(digest, hash_encoded))
+              error(1,0, "Can't calc hash for %s", file);
             send_to_server("Blob-transfer ", 0);
-            send_to_server("\n", 1);
             send_to_server(hash_encoded, 0);
             send_to_server("\n", 1);
 
-            sprintf (tmp, "%llu\n", (unsigned long long) dataWritten);
+            sprintf (tmp, "%llu\n", (unsigned long long) (dataWritten + sizeof(hdr)));
             send_to_server (tmp, 0);
-            send_to_server_untranslated((const char*)blob.data(), dataWritten);
+			send_to_server_untranslated((const char*)&hdr, sizeof(hdr));
+			send_to_server_untranslated((const char*)blob.data(), dataWritten);
           } else
-          {
             if (!caddressed_fs::get_file_content_hash(file, hash_encoded, sizeof(hash_encoded)))
 			  error(1, 0, "Can't calculate hash for %s", file);
-      		send_to_server ("Blob-ref-transfer ", 0);
-      		send_to_server (file, 0);
-      		send_to_server ("\n", 1);
-      		send_to_server (mode_string, 0);
-      		send_to_server ("\n", 1);
-      		sprintf (tmp, HASH_TYPE_REV_STRING "%s\n", hash_encoded);
-      		send_to_server (tmp, 0);
-          }
+
+    		send_to_server ("Blob-ref-transfer ", 0);
+    		send_to_server (file, 0);
+    		send_to_server ("\n", 1);
+    		send_to_server (mode_string, 0);
+    		send_to_server ("\n", 1);
+    		sprintf (tmp, HASH_TYPE_REV_STRING "%s\n", hash_encoded);
+    		send_to_server (tmp, 0);
         } else
         {
     		send_to_server ("Modified ", 0);

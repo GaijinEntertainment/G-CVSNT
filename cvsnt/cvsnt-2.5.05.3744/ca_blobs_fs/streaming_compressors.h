@@ -51,7 +51,7 @@ inline StreamStatus compress_lambda(Produce rcb, Consume wcb, int compression_le
     if (compressStatus == StreamStatus::Error)
       return StreamStatus::Error;
   }
-  return compressStatus == StreamStatus::Finished && writeStatus == StreamStatus::Finished ? StreamStatus::Finished : StreamStatus::Error;
+  return compressStatus == StreamStatus::Finished && writeStatus != StreamStatus::Error ? StreamStatus::Finished : StreamStatus::Error;
 }
 //sample file compression FILE* rf, *wf;
 // char bufIn[32768], bufOut[32768];

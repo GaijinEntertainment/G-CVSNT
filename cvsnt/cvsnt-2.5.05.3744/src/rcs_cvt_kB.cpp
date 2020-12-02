@@ -44,9 +44,9 @@ inline bool pull_at_once(const char* hash_hex_string, size_t &blob_sz, char **de
           return false;
         memcpy(dest+info.realUncompressedSize, unpacked, sz);
         return true;
-        }
+      }
     ))
-        break;
+      break;
   }
   *decoded = dest;
   return destroy(pd);

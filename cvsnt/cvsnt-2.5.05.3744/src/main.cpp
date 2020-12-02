@@ -1609,7 +1609,6 @@ int main (int argc, char **argv)
 
 		if (use_cvsrc)
 			read_cvsrc (&argc, &argv, command_name);
-
 		if(!server_active && !proxy_active && current_parsed_root && !current_parsed_root->isremote)
 		{
 			precommand_args_t args;

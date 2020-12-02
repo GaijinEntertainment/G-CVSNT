@@ -48,11 +48,8 @@ bin_PROGRAMS = cvsnt
 
 # The cvs executable
 cvsnt_SOURCES = \
-    sha256/sha256.c \
     blob_operations.cpp \
     download_blob_to.cpp \
-    streaming_compressors.cpp \
-    calc_hash.cpp \
     blob_http_processor.cpp \
 	add.cpp \
 	admin.cpp \

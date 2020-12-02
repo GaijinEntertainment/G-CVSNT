@@ -307,6 +307,7 @@
   <ItemGroup>
     <ClCompile Include="blake3\blake3.c" />
     <ClCompile Include="blake3\blake3_portable.c" />
+    <ClCompile Include="ca_blobs_fs\src\calc_hash.cpp" />
     <ClCompile Include="ca_blobs_fs\src\content_addressed_fs.cpp" />
     <ClCompile Include="ca_blobs_fs\src\fileio.cpp" />
     <ClCompile Include="ca_blobs_fs\src\streaming_compressors.cpp" />
@@ -336,7 +337,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\calc_hash.cpp" />
     <ClCompile Include="src\chacl.cpp" />
     <ClCompile Include="src\checkin.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">

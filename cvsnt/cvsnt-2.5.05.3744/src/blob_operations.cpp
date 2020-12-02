@@ -71,6 +71,8 @@ bool is_session_blob_reference_data(const void *data, size_t len)
   return true;
 }
 
+#include <errno.h>
+
 size_t get_file_size(const char *file);
 bool get_session_blob_reference_hash(const char *blob_ref_file_name, char *hash_encoded)//hash_encoded==char[65], encoded 32 bytes + \0
 {

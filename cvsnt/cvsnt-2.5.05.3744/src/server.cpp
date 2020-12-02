@@ -1748,6 +1748,8 @@ static void serve_blob (char *arg)
   {
 	char actual_hash[65];
     auto res = caddressed_fs::finish(pd, actual_hash);
+    if (strncmp(actual_hash, arg, 64) != 0)
+      error(1,0, "received hash %.64s, actual = %.64s.", arg, actual_hash);
     if (res == caddressed_fs::PushResult::OK)
       return;
     if (res == caddressed_fs::PushResult::IO_ERROR)
@@ -5152,6 +5154,8 @@ int server (int argc, char **argv)
        by this server" or something like that instead of usage message.  */
     argument_vector[0] = "cvs server";
 
+    TRACE(3,"temp for CAFS %s", Tmpdir);
+    caddressed_fs::set_temp_dir(Tmpdir);
     while (1)
     {
 	char *cmd, *orig_cmd;
@@ -5197,6 +5201,8 @@ error ENOMEM Virtual memory exhausted.\n");
                     error(1,0,"Protocol error: Root request missing");
 			}
 
+            if (current_parsed_root && current_parsed_root->directory)
+              caddressed_fs::set_root(current_parsed_root->directory);
 			/* By convention 'commands' start with lowercase, and 'flags' start with
 			   uppercase.  The extra check allows us to look for things like
 			   'version' and 'init */

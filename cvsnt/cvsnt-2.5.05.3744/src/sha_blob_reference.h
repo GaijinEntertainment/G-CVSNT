@@ -2,6 +2,7 @@
 #include "../ca_blobs_fs/ca_blob_format.h"
 #include "../ca_blobs_fs/content_addressed_fs.h"
 #include "../ca_blobs_fs/streaming_compressors.h"
+#include "../ca_blobs_fs/calc_hash.h"
 //session hash blob reference has the following format: blake3:<encoded_hash>:<encoded_fnv1_of_encoded_hash>
 #define HASH_TYPE_REV_STRING "blake3:"//we actually use blake3, as it is not-vulnerable to length extension. Also, it is 4 times faster in C, 8 times faster with just sse2 (and also can be implemented with AVX)
 static constexpr size_t hash_type_magic_len = 7;//strlen(HASH_TYPE_REV_STRING);

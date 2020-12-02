@@ -12,6 +12,7 @@ namespace caddressed_fs
   // the library will create subfolders of name xx/yy/ inside that root
   //but in a future we can add support of different hashes easily. Content itself isn't aware of it's hashing method.
   void set_root(const char *root);
+  void set_allow_trust(bool);
 
   class PushData;
   class PullData;
@@ -19,7 +20,8 @@ namespace caddressed_fs
   size_t get_size(const char* hash_hex_string);
   bool exists(const char* hash_hex_string);
 
-  PushData* start_push(const char* hash_hex_string = nullptr);//if we provide hash_hex_string, we will trust it. this is for tools, networking server never trusts
+  //if we provide hash_hex_string, we will trust it. this is for tools, networking server never trusts
+  PushData* start_push(const char* hash_hex_string = nullptr);
   bool stream_push(PushData *pd, const void *data, size_t data_size);
   PushResult finish(PushData *pd, char *actual_hash_str);//will destroy it.
   void destroy(PushData *pd);
