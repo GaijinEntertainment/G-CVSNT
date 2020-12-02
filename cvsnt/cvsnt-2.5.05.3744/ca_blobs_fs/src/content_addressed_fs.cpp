@@ -16,7 +16,7 @@ namespace caddressed_fs
 const char *blobs_sub_folder= "/blobs";
 static std::string root_path = blobs_sub_folder;
 static std::string default_tmp_dir = "";
-static bool allow_trust = false;
+static bool allow_trust = true;
 void set_allow_trust(bool p){allow_trust = p;}
 
 void set_temp_dir(const char *p){default_tmp_dir = p;}
@@ -62,8 +62,8 @@ bool exists(const char* hash_hex_string)
 class PushData
 {
 public:
-  std::string temp_file_name;
   FILE *fp;
+  std::string temp_file_name;
   char provided_hash[64];
   DownloadBlobInfo info;
   blake3_hasher hasher;
@@ -72,33 +72,36 @@ public:
 PushData* start_push(const char* hash_hex_string)
 {
   if (hash_hex_string && blob_fileio_is_file_readable(get_file_path(hash_hex_string).c_str()))
-    return (PushData*)uintptr_t(1);//magic number. we dont need to do anything, but that's not an error
+  {
+    auto r = new PushData{(FILE*)uintptr_t(1)};//magic number. we dont need to do anything, but that's not an error. we save cpu by not decoding/encoding data and calc hash again. even if hash is different, no real issue
+    memcpy(r->provided_hash, hash_hex_string, 64);
+    return r;
+  }
   std::string temp_file_name;
   FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : "");
   if (!tmpf)
-    return 0;
-  auto r = new PushData{std::move(temp_file_name), tmpf};
-  if (allow_trust && hash_hex_string)
+    return nullptr;
+  auto r = new PushData{tmpf, std::move(temp_file_name)};
+  if (hash_hex_string)
     memcpy(r->provided_hash, hash_hex_string, 64);
   else
-  {
     r->provided_hash[0] = 0;
+  if (!allow_trust || !r->provided_hash[0])
     blake3_hasher_init(&r->hasher);
-  }
   return r;
 }
 
 bool stream_push(PushData *fp, const void *data, size_t data_size)
 {
-  if (uintptr_t(fp) == 1)
-    return true;
   if (fp == nullptr)
     return false;
+  if (uintptr_t(fp->fp) == 1)
+    return true;
   if (!fp->fp)
     return false;
   if (fwrite(data, 1, data_size, fp->fp) != data_size)//we write packed data as is
     return false;
-  if (fp->provided_hash[0])//we trusted cache.
+  if (allow_trust && fp->provided_hash[0])//we trusted cache.
     return true;
   //but we always unpack to calculate hash, unless hash is provided so we can trust it
   if (!decode_stream_blob_data(fp->info, (const char*)data, data_size, [&](const void *unpacked_data, size_t sz)
@@ -108,15 +111,15 @@ bool stream_push(PushData *fp, const void *data, size_t data_size)
     blob_fileio_unlink_file(fp->temp_file_name.c_str());
     return false;
   }
-  return false;
+  return true;
 }
 
 void destroy(PushData *fp)
 {
-  if (uintptr_t(fp) == 1 || fp == nullptr)
+  if (fp == nullptr)
     return;
   std::unique_ptr<PushData> kill(fp);
-  if (!fp->fp)
+  if (!fp->fp || uintptr_t(fp->fp) == 1)
     return;
   fclose(fp->fp);
   blob_fileio_unlink_file(fp->temp_file_name.c_str());
@@ -124,24 +127,31 @@ void destroy(PushData *fp)
 
 PushResult finish(PushData *fp, char *actual_hash_str)
 {
-  if (uintptr_t(fp) == 1)
-    return PushResult::OK;
   if (fp == nullptr)
     return PushResult::EMPTY_DATA;
   std::unique_ptr<PushData> kill(fp);
+  if (uintptr_t(fp->fp) == 1)
+  {
+    if (actual_hash_str)
+      memcpy(actual_hash_str, fp->provided_hash, 64);
+    return PushResult::OK;
+  }
   if (!fp->fp)
     return PushResult::IO_ERROR;
   fclose(fp->fp);
 
-  if (!fp->provided_hash[0])
+  char final_hash[64];
+  char *final_hash_p = actual_hash_str ? actual_hash_str : final_hash;
+  if (!allow_trust || !fp->provided_hash[0])
   {
     unsigned char digest[32];
     blake3_hasher_finalize(&fp->hasher, digest, sizeof(digest));
-    bin_hash_to_hex_string(digest, fp->provided_hash);
-    if (actual_hash_str)
-      memcpy(actual_hash_str, fp->provided_hash, 64);
-  }
-  std::string filepath = get_file_path(fp->provided_hash);
+    bin_hash_to_hex_string(digest, final_hash_p);
+    if (fp->provided_hash[0] && memcmp(fp->provided_hash, final_hash_p, 64) != 0)
+      return PushResult::WRONG_HASH;
+  } else
+    memcpy(final_hash_p, fp->provided_hash, 64);
+  std::string filepath = get_file_path(final_hash_p);
   if (blob_fileio_is_file_readable(filepath.c_str()))//was pushed by someone else
   {
     blob_fileio_unlink_file(fp->temp_file_name.c_str());

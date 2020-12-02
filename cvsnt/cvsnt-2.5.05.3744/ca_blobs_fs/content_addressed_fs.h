@@ -12,6 +12,13 @@ namespace caddressed_fs
   // the library will create subfolders of name xx/yy/ inside that root
   //but in a future we can add support of different hashes easily. Content itself isn't aware of it's hashing method.
   void set_root(const char *root);
+
+  //trust client provided hashes (if any)
+  //actually, there is nothing that really bad with trusting client on their hash, actually
+  //in the worst case scenario that would be "bad" blob just to be removed in gc phase
+  //we can't spoil repo that way - overwriting existing blobs are not allowed (unless in a possible race, but then you have to guess the current hash)
+  //it is kinda possible to 'spam' with incorrect hashed blobs - but then again, not much harder to spam with correct one
+  //so, we enable trust by default
   void set_allow_trust(bool);
 
   class PushData;

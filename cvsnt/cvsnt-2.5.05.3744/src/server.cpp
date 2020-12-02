@@ -1728,7 +1728,7 @@ static void serve_blob (char *arg)
 
   size_t sizeLeft = size;
   const bool exists = caddressed_fs::exists(arg);
-  caddressed_fs::PushData *pd = caddressed_fs::start_push();
+  caddressed_fs::PushData *pd = caddressed_fs::start_push(arg);
   while (sizeLeft>0)
   {
     int nread;
@@ -1746,16 +1746,14 @@ static void serve_blob (char *arg)
 
   if (pd)
   {
-	char actual_hash[65];
+	char actual_hash[64];
     auto res = caddressed_fs::finish(pd, actual_hash);
-    if (strncmp(actual_hash, arg, 64) != 0)
-      error(1,0, "received hash %.64s, actual = %.64s.", arg, actual_hash);
     if (res == caddressed_fs::PushResult::OK)
       return;
+    if (res == caddressed_fs::PushResult::WRONG_HASH)
+      error(1,0, "received hash %.64s, actual = %.64s.", arg, actual_hash);
     if (res == caddressed_fs::PushResult::IO_ERROR)
       error(1,0,"io failed <%s>", arg);
-    if (memcmp(actual_hash, arg, 64) != 0)
-      error(1,0,"blob served with hash <%s> has different hash", arg);
     error(1,0, "other error for %s", arg);
   }
 }
