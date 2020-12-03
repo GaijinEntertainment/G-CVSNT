@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <string.h>
 #include <memory.h>
-#include "blake3/blake3.h"
+#include "../blake3/blake3.h"
 # ifdef _MSC_VER
   #include <intrin.h>
 # else

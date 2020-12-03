@@ -1,8 +1,8 @@
 //to build on linux: clang++ -std=c++17 -O2 gc-blobs.cpp blob_operations.cpp ./sha256/sha256.c -lz -lzstd -ogc-blobs
 
 //#include "simpleOsWrap.cpp.inc"
-#include "simpleLock.cpp.inc"
 #include "sha_blob_reference.h"
+#include "simpleLock.cpp.inc"
 #include <string>
 #include <filesystem>
 #include <iostream>
@@ -11,6 +11,10 @@
 #include <ctime>
 #include "tsl/sparse_set.h"
 #include "flags.h"
+
+#include "content_addressed_fs.h"//we only use it for blobs_dir_path..
+#include "src/details.h"
+
 #ifdef _WIN32
 namespace fs = std::experimental::filesystem;
 #else
@@ -155,7 +159,7 @@ static void process_directory(const char *rootDir, const char *dir)
     {
       if (strcmp(entry.path().filename().string().c_str(), "CVS") != 0 &&
           strcmp(entry.path().filename().string().c_str(), "CVSROOT") != 0 &&
-          strcmp(entry.path().filename().string().c_str(), BLOBS_SUBDIR_BASE) != 0)
+          strcmp(entry.path().filename().string().c_str(), caddressed_fs::blobs_subfolder()) != 0)
         process_directory(rootDir, entry.path().lexically_relative(rootDir).string().c_str());
     } else
     {
@@ -198,12 +202,9 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
   }
 }
 
-static void process_sha_directory(const char *rootDir)
+static void process_sha_directory()
 {
-  std::string dirPath = rootDir;
-  if (dirPath[dirPath.length()-1] != '/')
-    dirPath+="/";
-  dirPath += BLOBS_SUBDIR_BASE;
+  std::string dirPath = caddressed_fs::blobs_dir_path();
   for (const auto & entry : fs::directory_iterator(dirPath.c_str()))
   {
     if (!entry.is_directory())
@@ -238,11 +239,17 @@ static void process_sha_directory(const char *rootDir)
   }
 }
 
+#define HASH_LIST(a)\
+(a)[0],(a)[1],(a)[2],(a)[3],(a)[4],(a)[5],(a)[6],(a)[7],(a)[8],(a)[9],\
+(a)[10],(a)[11],(a)[12],(a)[13],(a)[14],(a)[15],(a)[16],(a)[17],(a)[18],(a)[19],\
+(a)[20],(a)[21],(a)[22],(a)[23],(a)[24],(a)[25],(a)[26],(a)[27],(a)[28],(a)[29],\
+(a)[30],(a)[31]
+
 int main(int ac, const char* argv[])
 {
   auto options = flags::flags{ac, argv};
   options.info("gc-blobs",
-    "conversion utility from old CVS to blob de-duplicated one"
+    "GC/Prune utility\n"
     "Usage: gc-blobs -root <rootDir> -lock_url <lock_url> -user <lock_user> used|unused|broken|delete_unused\n"
     "safe to run in working production environment. Uses one thread only\n"
     "Warning! It doesnt delete anything, unless called with delete_unused, it will just output to stdout the list of referenced(used)/unreferenced/broken sha paths\n"
@@ -252,6 +259,11 @@ int main(int ac, const char* argv[])
   auto lock_url = options.arg("-lock_url", "Url for lock server");
   auto lock_user = options.arg("-user", "User name for lock server");
   auto rootDir = options.arg("-root", "Root dir for CVS");
+  init_temp_dir();
+  auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
+  if (tmpDir.length() > 1)
+    def_tmp_dir = tmpDir.c_str();
+  caddressed_fs::set_temp_dir(def_tmp_dir);
 
   bool help = options.passed("-h", "print help usage");
   if (help || !options.sane()) {
@@ -267,6 +279,7 @@ int main(int ac, const char* argv[])
     fprintf(stderr, "[E] Can't connect to lock server\n");
     exit(1);
   }
+  caddressed_fs::set_root(rootDir.c_str());
 
   bool gather_broken = false, delete_unused = false;
   if (strcmp(argv[ac-1], "used") == 0)
@@ -287,7 +300,7 @@ int main(int ac, const char* argv[])
   size_t storedBlobs = 0;
   if (!gather_used)
   {
-    process_sha_directory(rootDir.c_str());
+    process_sha_directory();
     storedBlobs = collected_shas.size();
     printf("gathered %lld blobs\n", (unsigned long long)storedBlobs);
   }
@@ -301,7 +314,7 @@ int main(int ac, const char* argv[])
     printf("referenced %lld blobs\n", (unsigned long long)collected_shas.size());
     if (gather_broken)
     {
-      process_sha_directory(rootDir.c_str());
+      process_sha_directory();
       printf("broken %lld references\n", (unsigned long long)collected_shas.size());
     }
   }
@@ -314,8 +327,8 @@ int main(int ac, const char* argv[])
       {
         char buf[1024];
         snprintf(buf, sizeof(buf),
-         "%s%s%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-         rootDir.c_str(), BLOBS_SUBDIR, HASH_LIST(i.v.hash));
+         "%s/%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+         caddressed_fs::blobs_dir_path().c_str(), HASH_LIST(i.v.hash));
         printf("deleting <%s>...%s\n", buf, unlink(buf) ? "ERR" : "OK");
       } else
         printf(

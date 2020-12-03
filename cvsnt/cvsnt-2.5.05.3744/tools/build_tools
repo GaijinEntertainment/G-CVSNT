@@ -1,4 +1,4 @@
 clang++ -std=c++17 -O3 -I../ca_blobs_fs -I../src convert_to_blob.cpp -lblake3 -lca_blobs_fs -msse4.1 -lz -lzstd -pthread -ocvtblob
-clang++ -std=c++17 -O3 -I../ca_blobs_fs -I../src gc-blobs.cpp -lblake3 -lca_blobs_fs -msse4.1 -lz -lzstd -pthread -ogc-blobs
+clang++ -std=c++17 -O3 -I../ca_blobs_fs -I../src gc-blobs.cpp ../src/blob_operations.cpp -lblake3 -lca_blobs_fs -msse4.1 -lz -lzstd -pthread -ogc-blobs
 clang++ -std=c++17 -O3 -I../ca_blobs_fs -I../src repack-blobs.cpp -lblake3 -lca_blobs_fs -msse4.1 -lz -lzstd -pthread -orepack-blobs
-clang++ -O3 -I../src blake3-calc.cpp  -L../src/blake3 -lblake3 -msse4.1
+clang++ -O3 -I../src blake3-calc.cpp -lblake3 -msse4.1 -oblake3-calc
