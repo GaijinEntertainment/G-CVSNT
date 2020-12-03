@@ -5031,6 +5031,7 @@ static void send_modified (const char *file, const char *short_pathname, const V
 		  char hash_encoded[65];hash_encoded[64] = 0;
           if (send_blob_content)
           {
+            //todo: replace with push to CA server (as soon as it is ready)
             BlobHeader hdr = get_header(blob_binary_compressed ? zstd_magic : noarc_magic, sb.st_size, 0);
             char hctx[HASH_CONTEXT_SIZE];
             init_blob_hash_context(hctx, sizeof(hctx));

@@ -4,7 +4,8 @@
 namespace caddressed_fs
 {
 
-  enum class PushResult {OK, IO_ERROR, WRONG_HASH, EMPTY_DATA};
+  enum class PushResult {OK, DEDUPLICATED, IO_ERROR, WRONG_HASH, EMPTY_DATA};
+  inline bool is_ok(PushResult pr){return pr == PushResult::OK || pr == PushResult::DEDUPLICATED;}
   //these are functions implemented in library, see simple_file_lib.cpp
   //it is important to have tempdir to be set to same FS as root. Otherwise rename isn't possible!
   void set_temp_dir(const char *p);

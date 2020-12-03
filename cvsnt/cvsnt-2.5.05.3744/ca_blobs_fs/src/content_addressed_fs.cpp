@@ -28,7 +28,7 @@ void set_root(const char *p)
   root_path += blobs_sub_folder;
 }
 
-static inline bool make_blob_dirs(std::string &fp)
+inline bool make_blob_dirs(std::string &fp)
 {
   if (fp.length()<67)
     return false;
@@ -42,7 +42,7 @@ static inline bool make_blob_dirs(std::string &fp)
   return true;
 }
 
-static inline std::string get_file_path(const char* hash_hex_string)
+std::string get_file_path(const char* hash_hex_string)
 {
   char buf[68];
   std::snprintf(buf,sizeof(buf), "/%.2s/%.2s/%.60s", hash_hex_string, hash_hex_string+2, hash_hex_string+4);
@@ -73,7 +73,9 @@ PushData* start_push(const char* hash_hex_string)
 {
   if (hash_hex_string && blob_fileio_is_file_readable(get_file_path(hash_hex_string).c_str()))
   {
-    auto r = new PushData{(FILE*)uintptr_t(1)};//magic number. we dont need to do anything, but that's not an error. we save cpu by not decoding/encoding data and calc hash again. even if hash is different, no real issue
+    //magic number. we dont need to do anything if such exists, but that's not an error.
+    //we save cpu by not decoding/encoding data and calc hash again. even if real hash is different, no real issue, we won't overwrite correct one. Only liars are 'harmed'
+    auto r = new PushData{(FILE*)uintptr_t(1)};
     memcpy(r->provided_hash, hash_hex_string, 64);
     return r;
   }
@@ -134,7 +136,7 @@ PushResult finish(PushData *fp, char *actual_hash_str)
   {
     if (actual_hash_str)
       memcpy(actual_hash_str, fp->provided_hash, 64);
-    return PushResult::OK;
+    return PushResult::DEDUPLICATED;
   }
   if (!fp->fp)
     return PushResult::IO_ERROR;
@@ -155,10 +157,10 @@ PushResult finish(PushData *fp, char *actual_hash_str)
   if (blob_fileio_is_file_readable(filepath.c_str()))//was pushed by someone else
   {
     blob_fileio_unlink_file(fp->temp_file_name.c_str());
-    return PushResult::OK;
+    return PushResult::DEDUPLICATED;
   }
   make_blob_dirs(filepath);
-  return blob_fileio_rename_file(fp->temp_file_name.c_str(), filepath.c_str()) ?  PushResult::OK : PushResult::IO_ERROR;
+  return blob_fileio_rename_file(fp->temp_file_name.c_str(), filepath.c_str()) ? PushResult::OK : PushResult::IO_ERROR;
 }
 
 #if !_WIN32

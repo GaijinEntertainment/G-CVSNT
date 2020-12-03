@@ -1749,7 +1749,7 @@ static void serve_blob (char *arg)
   {
 	char actual_hash[64];
     auto res = caddressed_fs::finish(pd, actual_hash);
-    if (res == caddressed_fs::PushResult::OK)
+    if (caddressed_fs::is_ok(res))
       return;
     if (res == caddressed_fs::PushResult::WRONG_HASH)
       error(1,0, "received hash %.64s, actual = %.64s.", arg, actual_hash);

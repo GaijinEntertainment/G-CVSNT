@@ -1,8 +1,11 @@
 //to build on linux: clang++ -std=c++17 -O2 -I../src repack-blobs.cpp ../src/blob_operations.cpp ../src/sha256/sha256.c -lz -lzstd -orepack-blobs
 
 #include "simpleLock.cpp.inc"
-#include "sha_blob_reference.h"
 #include "streaming_compressors.h"
+#include "content_addressed_fs.h"
+#include "src/details.h"
+#include "sha_blob_reference.h"
+//#include "ca_blob_format.h"
 #include "calc_hash.h"
 #include <string>
 #include <filesystem>
@@ -32,11 +35,12 @@ namespace fs = std::filesystem;
 #define CONCURRENT_CONVERSION_TOOL 0
 #define VERBOSE 0
 
+using namespace caddressed_fs;
+using namespace streaming_compression;
 
 //this, and only this is amount of work to be done in parallel.
 static size_t max_files_to_process = 256;// to limit amount of double sized data
 
-static bool fastest_conversion = true;//if true, we won't repack, just calc hash and put zlib block as is.
 static void ensure_blob_mtime(time_t ver_atime, const char *blob_file)
 {
   time_t blob_mtime = get_file_mtime(blob_file);
@@ -149,114 +153,47 @@ static void process_file_ver(const char *rootDir,
   #endif
   std::string srcPathString = path.c_str();
   const bool wasPacked = (srcPathString[srcPathString.length()-1] == 'z' && srcPathString[srcPathString.length()-2] == '#');
-  unsigned char hash[32];
-  char hash_encoded[hash_encoded_size+1];
-  const size_t sha_file_name_len = 1024;
-  char sha_file_name[sha_file_name_len];//can be dynamically allocated, as 64+3+1 + strlen(root). Yet just don't put it that far!
-  char hctx[HASH_CONTEXT_SIZE];
-  if (!init_blob_hash_context(hctx, sizeof(hctx)))
-    error(1, 0, "can't init hash context");
+  char hash_encoded[hash_encoded_size+1];hash_encoded[hash_encoded_size] = 0;
 
   time_t ver_atime = get_file_mtime(path.c_str());
   const size_t fsz = get_file_size(path.c_str());
   readData += fsz;
-
-  auto encode_file_name = [&]()
-  {
-    encode_hash(hash, hash_encoded, sizeof(hash_encoded));
-    get_blob_filename_from_encoded_hash(rootDir, hash_encoded, sha_file_name, sha_file_name_len);
-  };
 
   int fd = open(srcPathString.c_str(), O_RDONLY);
   if (fd == -1)
     error(1, errno, "can't open for read <%s> of %d sz", srcPathString.c_str(), (int)fsz);
   const char* begin = (const char*)(mmap(NULL, fsz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
   close(fd);
-  const size_t packedSz = wasPacked  ? ntohl(*(int*)begin) : fsz;
-  const size_t unpackedSz = wasPacked ? fsz - sizeof(int) : fsz;
+  const size_t unpackedSz = wasPacked  ? ntohl(*(int*)begin) : fsz;
+  const size_t readDataSz = wasPacked ? fsz - sizeof(int) : fsz;
   const char* readData = wasPacked ? begin + sizeof(int) : begin;
-  size_t wr = 0;
-
-  if (fastest_conversion)
+  PushResult pr = PushResult::IO_ERROR;
+  //just push data as is
+  PushData* pd = start_push(nullptr);
+  BlobHeader hdr = get_header(wasPacked ? zlib_magic : noarc_magic, unpackedSz, 0);
+  if (!stream_push(pd, &hdr, sizeof(hdr)) || !stream_push(pd, readData, readDataSz))
   {
-    char *temp_filename = NULL;
-    FILE *tempF = cvs_temp_file(&temp_filename, "wb");
-    if (!tempF)
-      error(1, errno, "can't open write temp_filename <%s> for <%s>", temp_filename, srcPathString.c_str());
-    BlobHeader hdr = wasPacked ? get_header(zlib_magic, unpackedSz, packedSz, 0) :
-                                 get_header(noarc_magic, unpackedSz, unpackedSz, 0);
-
-    if (fwrite(&hdr,1,sizeof(hdr), tempF) != sizeof(hdr))
-    {
-      unlink_file(temp_filename);
-      error(1, 0, "can't write temp_filename <%s> for <%s> of %d len", temp_filename, srcPathString.c_str(), (uint32_t)sizeof(hdr));
-    }
-
-    size_t cursor = 0;
-    char bufOut[1<<17];
-    if (decompress_lambda(
-      [&](const char *&src, size_t &src_pos, size_t &src_size){
-        if (src_pos < src_size)
-          return BlobStreamStatus::Continue;
-        src_size = std::min(int64_t(unpackedSz - cursor), (int64_t)32768); src_pos = 0;
-        if (src_size == 0)
-          return BlobStreamStatus::Finished;
-        //if we will choose all area, we will force to read all file to memory to make write
-        if (fwrite(readData+cursor, 1, src_size, tempF) != src_size)//this write
-        {
-          error(0, errno, "can't write %d to temp_filename <%s> from %d out of %d (fsz = %d)",
-            (int)src_size, temp_filename, (int)cursor, int(unpackedSz), (int)fsz);
-          return BlobStreamStatus::Error;
-        }
-        src = readData+cursor;
-        cursor += src_size;
-        return BlobStreamStatus::Continue;
-     },
-     [&](char *&dst, size_t &dst_pos, size_t &dst_size)
-     {
-       if (dst_pos != 0)
-         update_blob_hash(hctx, dst, dst_pos);
-       dst_pos = 0; dst_size = sizeof(bufOut); dst = bufOut;
-       return BlobStreamStatus::Continue;
-     }, wasPacked ? BlobStreamType::ZLIB : BlobStreamType::Unpacked) == BlobStreamStatus::Error)
-    {
-      munmap((void*)begin, fsz);
-      unlink_file(temp_filename);
-      error(0, errno, "can't decode <%s>", srcPathString.c_str());
-      return;
-    } else
-    {
-      munmap((void*)begin, fsz);
-      finalize_blob_hash(hctx, hash);
-      encode_file_name();
-      create_dirs(rootDir, hash);
-      change_file_mode(temp_filename, 0666);
-      fclose(tempF);
-      if (!isreadable(sha_file_name))
-      {
-        if (rename_file (temp_filename, sha_file_name, false))//we dont care if blob is written independently
-          wr = hdr.compressedLen + sizeof(hdr);
-      } else
-        unlink_file(temp_filename);
-    }
+    error(0, errno, "can't push blob for <%s>", srcPathString.c_str());
+    destroy(pd);
   } else
-  {
-    wr = write_binary_blob(rootDir, hash, path.c_str(), readData, fileUnpackedData.size(), BlobPackType::FAST, false);
-    encode_file_name();
-    close(fd);
-  }
+    pr = finish(pd, hash_encoded);
+  munmap((void*)begin, fsz);
 
   #if CONCURRENT_CONVERSION_TOOL
     unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
   #endif
 
-  if (wr)
-    set_file_mtime(sha_file_name, ver_atime);
-  else
-    ensure_blob_mtime(ver_atime, sha_file_name);//so later incremental repack still works correctly
+  size_t wr = pr == PushResult::OK ? get_size(hash_encoded) : 0;
+
+  //this details are only for conversion. We want to make times relevant, so repacking can be addressed to only recent blobs
+  std::string sha_file_name = get_file_path(hash_encoded);
+  if (pr == PushResult::OK)
+    set_file_mtime(sha_file_name.c_str(), ver_atime);
+  else if (pr == PushResult::DEDUPLICATED)
+    ensure_blob_mtime(ver_atime, sha_file_name.c_str());//so later incremental repack still works correctly
 
   //now we can write reference
-  if (!wr)
+  if (pr == PushResult::DEDUPLICATED)
   {
     #if VERBOSE
     printf("deduplication %d for %s\n", int(sz), filePath.c_str());
@@ -265,7 +202,8 @@ static void process_file_ver(const char *rootDir,
   }
   writtenData += wr;
   std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
-  memcpy(&file_version_remap[path.filename().string()][0], hash_encoded, hash_encoded_size+1);
+  if (is_ok(pr))
+    memcpy(&file_version_remap[path.filename().string()][0], hash_encoded, hash_encoded_size+1);
 }
 
 struct ProcessTask
@@ -469,7 +407,7 @@ static void process_directory(const char *rootDir, const char *dir)
     {
       if (strcmp(entry.path().filename().c_str(), "CVS") != 0 &&
           strcmp(entry.path().filename().c_str(), "CVSROOT") != 0 &&
-          strcmp(entry.path().filename().c_str(), BLOBS_SUBDIR_BASE) != 0)
+          strcmp(entry.path().filename().c_str(), "blobs") != 0)
         process_directory(rootDir, entry.path().lexically_relative(rootDir).c_str());
     } else
     {
@@ -496,14 +434,15 @@ int main(int ac, const char* argv[])
   auto lock_url = options.arg("-lock_url", "Url for lock server");
   auto lock_user = options.arg("-user", "User name for lock server");
   auto rootDir = options.arg("-root", "Root dir for CVS");
+  init_temp_dir();
   auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
   if (tmpDir.length() > 1)
     def_tmp_dir = tmpDir.c_str();
+  set_temp_dir(def_tmp_dir);
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
   auto file = options.arg_or("-file", "", "File to process (inside dir)");
   auto threads = options.arg_as_or<int>("-j", 0,"concurrency level(threads to run)");
   max_files_to_process = options.arg_as_or<int>("-max_files", 256, "max versions to process before changing rcs. Limits amount of space needed");
-  fastest_conversion = !options.passed("-repack", "repack zlib to zstd, slow");
 
   bool help = options.passed("-h", "print help usage");
   if (help || !options.sane()) {
@@ -524,6 +463,7 @@ int main(int ac, const char* argv[])
     printf("using %d threads\n", threads);
     processor.init(rootDir.c_str(), threads);
   }
+  set_root(rootDir.c_str());
   mkdir((rootDir+"/blobs").c_str(), 0777);
 
   if (file.length()>0)

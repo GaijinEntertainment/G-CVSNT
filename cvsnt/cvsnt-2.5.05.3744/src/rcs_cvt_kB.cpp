@@ -8,7 +8,7 @@ static void RCS_write_binary_rev_data_blob(const char *fn, char *&data, size_t &
   //todo: skip actual write, if !write_it. we then just need hash
   //however, new client should never send data
   char hash[64];
-  bool res = push_whole_blob_from_raw_data(data, len, hash, store_packed);
+  bool res = caddressed_fs::push_whole_blob_from_raw_data(data, len, hash, store_packed);
   if (!res)
     error(1,errno,"Couldn't write blob of %s", fn);
   data = (char*)xrealloc (data, blob_reference_size+1);
