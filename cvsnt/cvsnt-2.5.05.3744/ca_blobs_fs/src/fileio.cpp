@@ -57,6 +57,9 @@ FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const ch
 }
 
 #else
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <unistd.h>
 
 size_t blob_fileio_get_file_size(const char* fn)
 {
