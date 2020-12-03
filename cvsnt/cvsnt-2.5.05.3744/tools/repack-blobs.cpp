@@ -70,8 +70,16 @@ void BlobProcessor::processor_thread_loop()
 static void process_sha_files_directory(const char *dir, unsigned char sha0, unsigned char sha1, time_t start_time)
 {
   char hash[65];hash[64]=0;
+  int lastMessaged = affected_files;
   while (processor.is_inited() && maxQueuedItems < processed_files-affected_files)
+  {
+    if (affected_files > lastMessaged+32)
+    {
+      lastMessaged = affected_files;
+      printf("...%lld processed, %lld repacked saved %gMb\n", (long long)processed_files, (long long)repacked_files, data_saved/1024./1024.);
+    }
     sleep_ms(100);
+  }
   for (const auto & entry : fs::directory_iterator(dir))
   {
     if (entry.is_directory())
