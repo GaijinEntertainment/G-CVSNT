@@ -37,7 +37,7 @@ void process_blob(const char *hash)
   if (affected_files > lastMessaged+32)
   {
     lastMessaged = size_t(affected_files);
-    printf("...%lld processed, %lld repacked saved %gMb\n", (long long)processed_files, (long long)repacked_files, data_saved/1024./1024.);
+    printf("...%lld processed, %lld repacked, saved %gMb\n", (long long)processed_files, (long long)repacked_files, data_saved/1024./1024.);
   }
 }
 
@@ -132,7 +132,7 @@ static void process_sha_directory(time_t start_time)
       printf("[E] <%s>(%s) is not a sha directory!\n", entry.path().string().c_str(), entry.path().filename().string().c_str());
       continue;
     }
-    printf("dir <%d/255> %s scheduled\n", dirI++, entry.path().string().c_str());
+    printf("dir <%d/255> %s scheduled, %d\n", dirI++, entry.path().string().c_str(), (int)processed_files);
     for (const auto & entry2 : fs::directory_iterator(entry.path()))
     {
       unsigned char sha1;
