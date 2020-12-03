@@ -25,6 +25,7 @@ static size_t processed_files = 0;
 static std::atomic<size_t> repacked_files = 0, affected_files = 0;
 static std::atomic<int64_t> data_saved = 0;
 static constexpr size_t maxQueuedItems = 1024;
+static std::atomic<size_t> lastMessaged = 0;
 
 void process_blob(const char *hash)
 {
@@ -33,6 +34,11 @@ void process_blob(const char *hash)
   if (ds != 0)
     repacked_files++;
   data_saved += ds;
+  if (affected_files > lastMessaged+32)
+  {
+    lastMessaged = size_t(affected_files);
+    printf("...%lld processed, %lld repacked saved %gMb\n", (long long)processed_files, (long long)repacked_files, data_saved/1024./1024.);
+  }
 }
 
 static struct BlobProcessor
@@ -66,19 +72,12 @@ void BlobProcessor::processor_thread_loop()
   while (processor.queue.wait_and_pop(task))
     process_blob(task.c_str());
 }
-static int lastMessaged = 0;
+
 static void process_sha_files_directory(const char *dir, unsigned char sha0, unsigned char sha1, time_t start_time)
 {
   char hash[65];hash[64]=0;
   while (processor.is_inited() && maxQueuedItems < processed_files-affected_files)
-  {
-    if (affected_files > lastMessaged+32)
-    {
-      lastMessaged = affected_files;
-      printf("...%lld processed, %lld repacked saved %gMb\n", (long long)processed_files, (long long)repacked_files, data_saved/1024./1024.);
-    }
     sleep_ms(100);
-  }
   for (const auto & entry : fs::directory_iterator(dir))
   {
     if (entry.is_directory())
@@ -133,7 +132,7 @@ static void process_sha_directory(time_t start_time)
       printf("[E] <%s>(%s) is not a sha directory!\n", entry.path().string().c_str(), entry.path().filename().string().c_str());
       continue;
     }
-    printf("dir <%d/255> %s, currently %lld processed files, saved %gMb\n", dirI, entry.path().string().c_str(), (long long)processed_files, data_saved/1024./1024.);
+    printf("dir <%d/255> %s scheduled\n", dirI++, entry.path().string().c_str());
     for (const auto & entry2 : fs::directory_iterator(entry.path()))
     {
       unsigned char sha1;
