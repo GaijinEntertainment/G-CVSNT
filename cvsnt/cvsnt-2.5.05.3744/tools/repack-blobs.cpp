@@ -82,7 +82,7 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
       continue;
     }
-    if (start_time == 0 || get_file_mtime(entry.path()..c_str()) > start_time)
+    if (start_time == 0 || get_file_mtime(entry.path().c_str()) > start_time)
     {
       std::snprintf(hash, sizeof(hash), "%02x%02x%.60s", sha0, sha1, filename.c_str());
       ++processed_files;
