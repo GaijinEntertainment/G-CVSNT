@@ -66,11 +66,10 @@ void BlobProcessor::processor_thread_loop()
   while (processor.queue.wait_and_pop(task))
     process_blob(task.c_str());
 }
-
+static int lastMessaged = 0;
 static void process_sha_files_directory(const char *dir, unsigned char sha0, unsigned char sha1, time_t start_time)
 {
   char hash[65];hash[64]=0;
-  int lastMessaged = affected_files;
   while (processor.is_inited() && maxQueuedItems < processed_files-affected_files)
   {
     if (affected_files > lastMessaged+32)
@@ -113,6 +112,7 @@ inline unsigned char decode_symbol(unsigned char s, bool &err)
 static void process_sha_directory(time_t start_time)
 {
   std::string dirPath = blobs_dir_path();
+  int dirI = 0;
   for (const auto & entry : fs::directory_iterator(dirPath.c_str()))
   {
     if (!entry.is_directory())
@@ -133,7 +133,7 @@ static void process_sha_directory(time_t start_time)
       printf("[E] <%s>(%s) is not a sha directory!\n", entry.path().string().c_str(), entry.path().filename().string().c_str());
       continue;
     }
-    printf("process sha dir <%s>, %lld processed currently saved %gMb\n", entry.path().string().c_str(), (long long)processed_files, data_saved/1024./1024.);
+    printf("dir <%d/255> %s, currently %lld processed files, saved %gMb\n", dirI, entry.path().string().c_str(), (long long)processed_files, data_saved/1024./1024.);
     for (const auto & entry2 : fs::directory_iterator(entry.path()))
     {
       unsigned char sha1;
