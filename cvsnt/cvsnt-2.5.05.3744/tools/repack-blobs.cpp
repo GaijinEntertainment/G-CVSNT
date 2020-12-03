@@ -82,7 +82,7 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
       continue;
     }
-    if (start_time == 0 || get_file_mtime(filename.c_str()) > start_time)
+    if (start_time == 0 || get_file_mtime(entry.path()..c_str()) > start_time)
     {
       std::snprintf(hash, sizeof(hash), "%02x%02x%.60s", sha0, sha1, filename.c_str());
       ++processed_files;
@@ -125,7 +125,7 @@ static void process_sha_directory(time_t start_time)
       printf("[E] <%s>(%s) is not a sha directory!\n", entry.path().string().c_str(), entry.path().filename().string().c_str());
       continue;
     }
-    printf("process sha dir <%s>\n", entry.path().string().c_str());
+    printf("process sha dir <%s>, %lld processed currently saved %gMb\n", entry.path().string().c_str(), (long long)processed_files, data_saved/1024./1024.);
     for (const auto & entry2 : fs::directory_iterator(entry.path()))
     {
       unsigned char sha1;
@@ -147,7 +147,7 @@ int main(int ac, const char* argv[])
   );
   auto rootDir = options.arg("-root", "Root dir for CVS");
   init_temp_dir();
-  auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
+  auto tmpDir = options.arg("-tmp", "Tmp dir for blobs");
   auto threads = options.arg_as_or<int>("-j", 0, "concurrency level(threads to run)");
   auto days_changed = options.arg_as_or<int>("-last_days", 0, "Convert only blobs that were written in last N days");
 
