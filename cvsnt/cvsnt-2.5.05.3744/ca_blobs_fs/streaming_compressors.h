@@ -19,12 +19,12 @@ void finish_decompress_stream(char *ctx);
 
 bool init_compress_stream(char *ctx_, size_t ctx_size, int compression_level, StreamType type);
 size_t compress_bound(char *ctx, size_t src_size);
-StreamStatus compress_stream(char *ctx, const char *src, size_t &src_pos, size_t src_size, char *dest, size_t &dest_pos, size_t dest_capacity);//will free context, no need to call finish_compress_stream
+StreamStatus compress_stream(char *ctx, const char *src, size_t &src_pos, size_t src_size, char *dest, size_t &dest_pos, size_t dest_capacity);//will free context, no need to call finish_compress_stream, if error
 StreamStatus compress_stream_and_finish(char *ctx, const char *src, size_t src_size, char *dest, size_t &dest_pos, size_t dest_capacity);
 
 //should be called in loop until Finished or Error, while freeing some space in destination
-void kill_compress_stream(char *ctx);
-StreamStatus finalize_compress_stream(char *ctx, char *dest, size_t &dest_pos, size_t dest_capacity);
+StreamStatus finalize_compress_stream(char *ctx, char *dest, size_t &dest_pos, size_t dest_capacity);//will also kill compress_stream on error or success
+void kill_compress_stream(char *ctx);//will kill stream. Only need to be called if you changed your mind, on Finished/Error it will be auto killed. It is safe to call twice though
 
 //StreamStatus (const char *&src, size_t &src_pos, size_t &src_size)
 template <typename Produce, typename Consume>

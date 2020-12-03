@@ -20,6 +20,8 @@ static bool allow_trust = true;
 void set_allow_trust(bool p){allow_trust = p;}
 
 void set_temp_dir(const char *p){default_tmp_dir = p;}
+std::string blobs_dir_path(){return root_path;}
+const char* blobs_subfolder(){return blobs_sub_folder;}
 void set_root(const char *p)
 {
   if (strncmp(root_path.c_str(), p, strlen(p)) == 0)
@@ -204,7 +206,7 @@ const char *pull(PullData* fp, uint64_t from, size_t &data_pulled)
   return fp->begin;
 }
 
-extern bool destroy(PullData* up)
+bool destroy(PullData* up)
 {
   if (!up)
     return false;
@@ -270,7 +272,7 @@ const char *pull(PullData* fp, uint64_t from, size_t &data_pulled)
   return fp->tempBuf.get();
 }
 
-extern bool destroy(PullData* fp)
+bool destroy(PullData* fp)
 {
   if (!fp)
     return false;
@@ -304,5 +306,84 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
   return true;
 }
 #endif
+
+int64_t repack(const char* hash_hex_string)
+{
+  using namespace streaming_compression;
+  size_t curSize = 0;
+  std::unique_ptr<PullData, bool(*)(PullData*)> in(start_pull(hash_hex_string, curSize), caddressed_fs::destroy);
+  if (!in)
+    return 0;
+  //check if it is already repacked.
+  BlobHeader wasHdr;
+  {
+    size_t sz = 0;
+    const BlobHeader & hdr = *(const BlobHeader *)pull(in.get(), 0, sz);
+    if (sz < sizeof(BlobHeader))
+      return 0;
+    wasHdr = hdr;
+  }
+  if ((wasHdr.flags&BlobHeader::BEST_POSSIBLE_COMPRESSION) != 0)
+    return 0;
+  BlobHeader hdr = get_header(zstd_magic, wasHdr.uncompressedLen, BlobHeader::BEST_POSSIBLE_COMPRESSION);
+  std::string temp_file_name;
+  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : "");
+  if (!tmpf)
+    return 0;
+  char cctx[CTX_SIZE];
+  if (fwrite(&hdr, 1, sizeof(hdr), tmpf) != sizeof(hdr) || !init_compress_stream(cctx, sizeof(cctx), 19, StreamType::ZSTD))
+  {
+    fclose(tmpf);
+    blob_fileio_unlink_file(temp_file_name.c_str());
+    return 0;
+  }
+
+  uint64_t at = 0;
+  char buf[65536];
+  DownloadBlobInfo info;
+  do {// with mmap that's one iteration
+    size_t sz = 0;
+    const char *got = pull(in.get(), at, sz);
+    if (!sz)
+      break;
+    if (!decode_stream_blob_data(info, got, sz, [&](const char *unpacked_data, size_t unpacked_sz)
+      {
+        size_t src_pos = 0;
+        while (src_pos < unpacked_sz)
+        {
+          size_t dst_pos = 0;
+          if (compress_stream(cctx, unpacked_data, src_pos, unpacked_sz, buf, dst_pos, sizeof(buf)) == StreamStatus::Error)
+            return false;
+          if (fwrite(buf, 1, dst_pos, tmpf) != dst_pos)
+            return false;
+        }
+        return true;
+      }))
+      break;
+    at += sz;
+  } while (at < curSize);
+  in.reset();
+
+  StreamStatus st = StreamStatus::Continue;
+  while (at == curSize && st == StreamStatus::Continue)
+  {
+    size_t dst_pos = 0;
+    st = finalize_compress_stream(cctx, buf, dst_pos, sizeof(buf));
+    if ( fwrite(buf, 1, dst_pos, tmpf) != dst_pos )
+      break;
+  }
+  fclose(tmpf);
+
+  size_t finalSize = blob_fileio_get_file_size(temp_file_name.c_str());
+  if (at < curSize || st != StreamStatus::Finished || (finalSize > curSize && !is_zlib_blob(wasHdr)))//if it was unpacked file and not zlib, then keep it unpacked. Unpacked files are faster to update
+  {
+    blob_fileio_unlink_file(temp_file_name.c_str());
+    return 0;
+    //we probably should write BEST_POSSIBLE_COMPRESSION flag in current header, if it is not compressing
+  }
+ if (blob_fileio_rename_file(temp_file_name.c_str(), get_file_path(hash_hex_string).c_str()))
+    return int64_t(curSize) - int64_t(finalSize);
+  return 0;
+}
 
 }

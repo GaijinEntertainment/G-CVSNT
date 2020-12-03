@@ -112,6 +112,8 @@ static int lock_server_socket = -1;
 
 size_t get_lock(const char *lock_file_name)
 {
+  if (lock_server_socket == -1)
+    return 0;
   size_t lockId = 0;
   #if VERBOSE
   printf("obtaining lock for <%s>...", lock_file_name);
@@ -407,7 +409,7 @@ static void process_directory(const char *rootDir, const char *dir)
     {
       if (strcmp(entry.path().filename().c_str(), "CVS") != 0 &&
           strcmp(entry.path().filename().c_str(), "CVSROOT") != 0 &&
-          strcmp(entry.path().filename().c_str(), "blobs") != 0)
+          strcmp(entry.path().filename().c_str(), blobs_subfolder()) != 0)
         process_directory(rootDir, entry.path().lexically_relative(rootDir).c_str());
     } else
     {
@@ -431,8 +433,13 @@ int main(int ac, const char* argv[])
     "conversion utility from old CVS to blob de-duplicated one"
   );
 
-  auto lock_url = options.arg("-lock_url", "Url for lock server");
-  auto lock_user = options.arg("-user", "User name for lock server");
+  auto lock_url = options.arg("-lock_url", "Url for lock server. 'offline' - means you disconnected from network, and noone can work with CVS.");
+  bool offline = (lock_url == "offline");
+  std::string lock_user;
+  if (offline)
+    lock_user = options.arg("-user", "User name for lock server");
+  else
+    lock_user = options.arg_or("-user", "not_needed in offline", "User name for lock server");
   auto rootDir = options.arg("-root", "Root dir for CVS");
   init_temp_dir();
   auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
@@ -452,19 +459,23 @@ int main(int ac, const char* argv[])
     return help ? 0 : -1;
   }
   tcp_init();
-  lock_server_socket = lock_register_client(lock_user.c_str(), rootDir.c_str(), lock_url.c_str());
-  if (lock_server_socket == -1)
+  if (!offline)
   {
-    fprintf(stderr, "[E] Can't connect to lock server\n");
-    exit(1);
-  }
+    lock_server_socket = lock_register_client(lock_user.c_str(), rootDir.c_str(), lock_url.c_str());
+    if (lock_server_socket == -1)
+    {
+      fprintf(stderr, "[E] Can't connect to lock server\n");
+      exit(1);
+    }
+  } else
+    printf("Running in lockless mode. That can damage your repo, if someone will work with it, during conversion.\n");
   if (threads>1)
   {
     printf("using %d threads\n", threads);
     processor.init(rootDir.c_str(), threads);
   }
   set_root(rootDir.c_str());
-  mkdir((rootDir+"/blobs").c_str(), 0777);
+  mkdir(blobs_dir_path().c_str(), 0777);
 
   if (file.length()>0)
   {

@@ -1,7 +1,9 @@
 //to build on linux: clang++ -std=c++17 -O2 gc-blobs.cpp blob_operations.cpp ./sha256/sha256.c -lz -lzstd -ogc-blobs
 
 #include "simpleOsWrap.cpp.inc"
-#include "sha_blob_reference.h"
+//#include "sha_blob_reference.h"
+#include "src/details.h"
+#include "content_addressed_fs.h"
 #include <string>
 #include <filesystem>
 #include <iostream>
@@ -14,7 +16,10 @@ namespace fs = std::experimental::filesystem;
 #else
 namespace fs = std::filesystem;
 #endif
-static size_t data_saved = 0, repacked_files = 0, affected_files = 0;
+using namespace caddressed_fs;
+
+static size_t repacked_files = 0, affected_files = 0;
+static int64_t data_saved = 0;
 static void usage()
 {
   printf("CVS_TMP env var (or /tmp) should point to same filesystem as root\n");
@@ -27,6 +32,7 @@ static void usage()
 
 static void process_sha_files_directory(const char *dir, unsigned char sha0, unsigned char sha1, time_t start_time)
 {
+  char hash[65];hash[64]=0;
   for (const auto & entry : fs::directory_iterator(dir))
   {
     if (entry.is_directory())
@@ -37,67 +43,15 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
       continue;
     }
-    filename = entry.path().string();
-    const size_t currentFileLength = get_file_size(filename.c_str());
-    if (currentFileLength < sizeof(BlobHeader))
-    {
-      printf("[E] <%s> is not a sha blob due to size %lld!\n", filename.c_str(), (long long)currentFileLength);
-      continue;
-    }
     time_t cftime = get_file_mtime(filename.c_str());
     if (cftime >= start_time)
     {
       affected_files++;
-      BlobHeader hdr;
-      FILE *f = fopen(filename.c_str(), "rb");
-      if (fread(&hdr, 1, sizeof(hdr), f) != sizeof(hdr))
-      {
-        printf("[E] can't read <%s>\n", filename.c_str());
-        fclose(f);
-        continue;
-      }
-      if (hdr.flags&BlobHeader::BEST_POSSIBLE_COMPRESSION)
-      {
-        //already best possible compression was used
-        fclose(f);
-        continue;
-      }
-      fclose(f);
-      void *decodedData = nullptr;
-      const size_t uncompressedSize = decode_binary_blob(filename.c_str(), &decodedData);
-      if (uncompressedSize != hdr.uncompressedLen)
-      {
-        printf("[E] can't decompress <%s>\n", filename.c_str());
-        continue;
-      }
-      repacked_files ++;
-      char *tempFilename;
-      FILE *tmpf = cvs_temp_file (&tempFilename, "wb");
-      if (!tmpf)
-      {
-        blob_free(decodedData);
-        printf("[E] can't write temp file for <%s>\n", filename.c_str());
-        continue;
-      }
-      fclose(tmpf);
-      atomic_write_sha_file(filename.c_str(), tempFilename, decodedData, uncompressedSize, BlobPackType::BEST, false);
-      blob_free(decodedData);
-      const size_t newFileLength = get_file_size(tempFilename);
-      if (newFileLength > currentFileLength)
-      {
-        printf("[W] <%s> was somehow better compressed (%lld < %lld)!\n", filename.c_str(), (long long)currentFileLength, (long long)newFileLength);
-        unlink(tempFilename);
-        blob_free(tempFilename);
-      } else
-      {
-        change_file_mode(tempFilename, 0666);
-        set_file_mtime(tempFilename, cftime);
-        if (!rename_attempts(tempFilename, filename.c_str(), 100))
-          printf("[W] can't rename temp file <%s> to <%s> skipping\n", tempFilename, filename.c_str());
-        else
-          data_saved += currentFileLength-newFileLength;
-        blob_free(tempFilename);
-      }
+      std::snprintf(hash, sizeof(hash), "%02x%02x%.60s", sha0, sha1, filename.c_str());
+      int64_t ds = caddressed_fs::repack(hash);
+      if (ds != 0)
+        repacked_files++;
+      data_saved += ds;
     }
   }
 }
@@ -109,12 +63,10 @@ inline unsigned char decode_symbol(unsigned char s, bool &err)
   err = true;
   return 0;
 }
-static void process_sha_directory(const char *rootDir, time_t start_time)
+
+static void process_sha_directory(time_t start_time)
 {
-  std::string dirPath = rootDir;
-  if (dirPath[dirPath.length()-1] != '/')
-    dirPath+="/";
-  dirPath += BLOBS_SUBDIR_BASE;
+  std::string dirPath = blobs_dir_path();
   for (const auto & entry : fs::directory_iterator(dirPath.c_str()))
   {
     if (!entry.is_directory())
@@ -159,7 +111,10 @@ int main(int ac, const char* argv[])
   time_t start = 0;
   if (ac > 2)
     start = time(NULL) - (atoi(argv[2])*60*60*24);
-  process_sha_directory(argv[1], start);
+  init_temp_dir();
+  set_temp_dir(def_tmp_dir);
+  set_root(argv[1]);
+  process_sha_directory(start);
   printf("processed %lld files, repacked %lld files, saved %lld bytes\n",
   (long long)affected_files, (long long)repacked_files, (long long)data_saved);
   return 0;
