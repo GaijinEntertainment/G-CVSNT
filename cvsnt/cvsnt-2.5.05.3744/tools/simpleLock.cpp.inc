@@ -1,4 +1,5 @@
 #include "simpleOsWrap.cpp.inc"
+#include "../lockservice/lockservice_uds_name.h"
 #define L_OK		0		/* success */
 #define L_ERROR		1		/* error condition */
 #define L_LOCKED	2		/* lock owned by someone else */
@@ -28,6 +29,10 @@ static int lock_register_client(const char *username, const char *root, const ch
   	serv = "127.0.0.1"; /* XP Home breakage */
   else
   	serv = lock_server;
+  #ifndef _WIN32
+  if (strcmp(serv, "127.0.0.1") == 0)// on linux we connect to UDS instead. that's way faster
+    serv = uds_lock_socket_name;
+  #endif
   TRACE(3,"Lock server connect to %s port %s",PATCH_NULL(serv),p?p:"2402");
 
   if((lock_server_socket=cvs_tcp_connect(serv,p?p:"2402", 0))<0)

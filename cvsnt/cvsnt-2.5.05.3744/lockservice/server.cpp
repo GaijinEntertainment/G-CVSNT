@@ -226,6 +226,8 @@ static void start_mdns_thread()
 }
 #endif
 
+static void start_uds_thread();
+
 void run_server(int port, int seq, int local_only)
 {
 	CSocketIO listen_sock;
@@ -323,6 +325,11 @@ void run_server(int port, int seq, int local_only)
 		NotifySCM(SERVICE_RUNNING, 0, 0);
 #endif
 
+#ifndef _WIN32
+    if (local_only)
+      start_uds_thread();
+#endif
+
 	while(!g_bStop && listen_sock.accept(15000))
 	{
 		for(size_t n=0, e = listen_sock.accepted_sockets().size(); n<e; n++)
@@ -331,3 +338,52 @@ void run_server(int port, int seq, int local_only)
 	g_bStop = true;
 	CloseServer();
 }
+
+
+#ifndef _WIN32
+
+#include <sys/un.h>
+#include "lockservice_uds_name.h"
+static void * uds_thread_proc(void*)
+{
+  int uds = socket(AF_UNIX, SOCK_STREAM, 0);
+  if (uds < 0)
+  {
+     CServerIo::log(CServerIo::logError,"Failed to create UD socket");
+     return NULL;
+  }
+  struct sockaddr_un serveraddr;
+  memset(&serveraddr, 0, sizeof(serveraddr));
+  serveraddr.sun_family = AF_UNIX;
+  unlink(uds_lock_socket_name);
+  strcpy(serveraddr.sun_path, uds_lock_socket_name);
+  if (::bind(uds, (struct sockaddr *)&serveraddr, SUN_LEN(&serveraddr)) < 0)
+  {
+    CServerIo::log(CServerIo::logError,"Failed to bind UD socket");
+    close(uds);
+    return NULL;
+  }
+  CServerIo::log(CServerIo::logNotice,"uds %d", uds);
+  ::listen(uds, SOMAXCONN);
+
+  sockaddr_storage sin;
+  #ifdef __hpux
+    int addrlen=(int)sizeof(sockaddr_storage);
+  #else
+    socklen_t addrlen=sizeof(sockaddr_storage);
+  #endif
+  int s = -1;
+  while (!g_bStop && (s = ::accept(uds,(sockaddr*)&sin,&addrlen)) >= 0)
+    start_thread(new CSocketIO(s,(sockaddr*)&sin,addrlen,true));
+  return NULL;
+}
+
+static void start_uds_thread()
+{
+#if HAVE_PTHREAD_H
+	pthread_t         a_thread = 0;
+	pthread_create( &a_thread, NULL, uds_thread_proc, NULL);
+	pthread_detach( a_thread );
+#endif
+}
+#endif

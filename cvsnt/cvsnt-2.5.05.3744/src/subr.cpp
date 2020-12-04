@@ -29,6 +29,7 @@
 #include <netinet/in.h>
 #include <netinet/tcp.h>
 #include <netdb.h>
+#include <sys/un.h>
 #endif
 #include <errno.h>
 
@@ -1194,6 +1195,7 @@ void cvs_putenv(const char *variable, const char *value)
 int cvs_tcp_connect(const char *servername, const char *port, int supress_errors)
 {
 	struct addrinfo hint = {0};
+    bool uds_socket = false;
 	struct addrinfo *tcp_addrinfo;
 	int res,sock;
 #ifdef _WIN32
@@ -1205,12 +1207,31 @@ int cvs_tcp_connect(const char *servername, const char *port, int supress_errors
 
 	hint.ai_flags=supress_errors?0:AI_CANONNAME;
 	hint.ai_socktype=SOCK_STREAM;
-	if((res=getaddrinfo(cvs::idn(servername),port,&hint,&tcp_addrinfo))!=0)
-	{
-		if(!supress_errors)
-			error(0,0, "Error connecting to host %s: %s\n", servername, gai_strerror(socket_errno));
-		return -1;
-	}
+#ifndef _WIN32
+    struct sockaddr_un unix_serveraddr;
+    if (strstr(servername, "/tmp/") == servername)
+    {
+      TRACE(3,"cvs_tcp_connect to unix domain socket %s", servername);
+      tcp_addrinfo = &hint;
+      tcp_addrinfo->ai_family = AF_UNIX;
+      tcp_addrinfo->ai_socktype = SOCK_STREAM;
+      tcp_addrinfo->ai_protocol = 0;
+      memset(&unix_serveraddr, 0, sizeof(unix_serveraddr));
+      unix_serveraddr.sun_family = AF_UNIX;
+      strcpy(unix_serveraddr.sun_path, servername);
+      tcp_addrinfo->ai_addr = (struct sockaddr *)&unix_serveraddr;
+      tcp_addrinfo->ai_addrlen = SUN_LEN(&unix_serveraddr);
+      uds_socket = true;
+    } else
+#endif
+    {
+      if((res=getaddrinfo(cvs::idn(servername),port,&hint,&tcp_addrinfo))!=0)
+      {
+        if(!supress_errors)
+        	error(0,0, "Error connecting to host %s: %s\n", servername, gai_strerror(socket_errno));
+        return -1;
+      }
+    }
 
     sock = socket(tcp_addrinfo->ai_family, tcp_addrinfo->ai_socktype, tcp_addrinfo->ai_protocol);
     if (sock == -1)
@@ -1270,7 +1291,7 @@ int cvs_tcp_connect(const char *servername, const char *port, int supress_errors
 		fcntl(sock,F_SETFL,b&~O_NONBLOCK);
 #endif
 	}
-
+    if (!uds_socket)
 	freeaddrinfo(tcp_addrinfo);
 
 	/* Disable socket send delay.  Since this is mostly used for cvslock over loopback this make sense */

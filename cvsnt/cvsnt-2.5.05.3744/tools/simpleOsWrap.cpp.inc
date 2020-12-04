@@ -292,6 +292,7 @@ time_t get_file_atime(const char *file)
 #else
  #include <sys/types.h>
  #include <utime.h>
+#include <sys/un.h>
 #endif
 
 void set_file_mtime(const char *filename, time_t mtime)
@@ -319,6 +320,7 @@ inline void tcp_init()
 inline int cvs_tcp_connect(const char *servername, const char *port, int supress_errors)
 {
 	struct addrinfo hint = {0};
+    bool uds_socket = false;
 	struct addrinfo *tcp_addrinfo;
 	int res,sock;
 #ifdef _WIN32
@@ -330,6 +332,23 @@ inline int cvs_tcp_connect(const char *servername, const char *port, int supress
 
 	hint.ai_flags=supress_errors?0:AI_CANONNAME;
 	hint.ai_socktype=SOCK_STREAM;
+#ifndef _WIN32
+    struct sockaddr_un unix_serveraddr;
+    if (strstr(servername, "/tmp/") == servername)
+    {
+      TRACE(3,"cvs_tcp_connect to unix domain socket %s", servername);
+      tcp_addrinfo = &hint;
+      tcp_addrinfo->ai_family = AF_UNIX;
+      tcp_addrinfo->ai_socktype = SOCK_STREAM;
+      tcp_addrinfo->ai_protocol = 0;
+      memset(&unix_serveraddr, 0, sizeof(unix_serveraddr));
+      unix_serveraddr.sun_family = AF_UNIX;
+      strcpy(unix_serveraddr.sun_path, servername);
+      tcp_addrinfo->ai_addr = (struct sockaddr *)&unix_serveraddr;
+      tcp_addrinfo->ai_addrlen = SUN_LEN(&unix_serveraddr);
+      uds_socket = true;
+    } else
+#endif
 	if((res=getaddrinfo(idn(servername),port,&hint,&tcp_addrinfo))!=0)
 	{
 		if(!supress_errors)
@@ -395,7 +414,7 @@ inline int cvs_tcp_connect(const char *servername, const char *port, int supress
 		fcntl(sock,F_SETFL,b&~O_NONBLOCK);
 #endif
 	}
-
+	if (!uds_socket)
 	freeaddrinfo(tcp_addrinfo);
 
 	/* Disable socket send delay.  Since this is mostly used for cvslock over loopback this make sense */
