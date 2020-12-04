@@ -204,7 +204,7 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
 
 static void process_sha_directory()
 {
-  std::string dirPath = caddressed_fs::blobs_dir_path();
+  std::string dirPath = caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx());
   for (const auto & entry : fs::directory_iterator(dirPath.c_str()))
   {
     if (!entry.is_directory())
@@ -263,7 +263,6 @@ int main(int ac, const char* argv[])
   auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
   if (tmpDir.length() > 1)
     def_tmp_dir = tmpDir.c_str();
-  caddressed_fs::set_temp_dir(def_tmp_dir);
 
   bool help = options.passed("-h", "print help usage");
   if (help || !options.sane()) {
@@ -279,7 +278,10 @@ int main(int ac, const char* argv[])
     fprintf(stderr, "[E] Can't connect to lock server\n");
     exit(1);
   }
-  caddressed_fs::set_root(rootDir.c_str());
+  caddressed_fs::set_root(caddressed_fs::get_default_ctx(), rootDir.c_str());
+  if (tmpDir.length() > 1)
+    caddressed_fs::set_temp_dir(tmpDir.c_str());
+
 
   bool gather_broken = false, delete_unused = false;
   if (strcmp(argv[ac-1], "used") == 0)
@@ -328,7 +330,7 @@ int main(int ac, const char* argv[])
         char buf[1024];
         snprintf(buf, sizeof(buf),
          "%s/%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-         caddressed_fs::blobs_dir_path().c_str(), HASH_LIST(i.v.hash));
+         caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx()).c_str(), HASH_LIST(i.v.hash));
         printf("deleting <%s>...%s\n", buf, unlink(buf) ? "ERR" : "OK");
       } else
         printf(

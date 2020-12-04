@@ -13,22 +13,40 @@
 //we can implement remapping of hashes, or even different hash structure (hash_type->root_folder) with symlinks to same content
 namespace caddressed_fs
 {
-const char *blobs_sub_folder= "blobs";
-static std::string root_path = "./blobs";
-static std::string default_tmp_dir = "";
+#define BLOBS_SUB_FOLDER "blobs"
+
+static const char *blobs_sub_folder = BLOBS_SUB_FOLDER;
 static bool allow_trust = true;
 void set_allow_trust(bool p){allow_trust = p;}
-
-void set_temp_dir(const char *p){default_tmp_dir = p;}
-std::string blobs_dir_path(){return root_path;}
 const char* blobs_subfolder(){return blobs_sub_folder;}
-void set_root(const char *p)
+
+std::string dir_for_roots = "";
+void set_dir_for_roots(const char* s){dir_for_roots = s ? s : "";}
+
+std::string default_tmp_dir = "";
+void set_temp_dir(const char *p){default_tmp_dir = p ? p : "";}
+
+static struct context
 {
-  if (strncmp(root_path.c_str(), p, strlen(p)) == 0)
-    return;
-  root_path = std::string(p) + "/";
-  root_path += blobs_sub_folder;
-  blob_fileio_ensure_dir(root_path.c_str());
+  std::string root_path = "./" BLOBS_SUB_FOLDER;
+} def_ctx;
+
+context *get_default_ctx() {return &def_ctx;}
+context *create() {return new context;}
+void destroy(context *ctx) {if (ctx && ctx != &def_ctx) delete ctx;}
+std::string blobs_dir_path(const context *ctx){return ctx->root_path;}
+
+void set_root(context *ctx, const char *p)
+{
+  //better use std::format, but it is c++20
+  ctx->root_path = dir_for_roots;
+  if (ctx->root_path[ctx->root_path.length()-1] != '/' && p[0] != '/')
+    ctx->root_path += "/";
+  ctx->root_path += p;
+  if (ctx->root_path[ctx->root_path.length()-1] != '/')
+    ctx->root_path += "/";
+  ctx->root_path += blobs_sub_folder;
+  ctx->root_path += "/";
 }
 
 inline bool make_blob_dirs(std::string &fp)
@@ -45,36 +63,42 @@ inline bool make_blob_dirs(std::string &fp)
   return true;
 }
 
-std::string get_file_path(const char* hash_hex_string)
+inline std::string get_file_path(const std::string &root_path, const char* hash_hex_string)
 {
-  char buf[68];
-  std::snprintf(buf,sizeof(buf), "/%.2s/%.2s/%.60s", hash_hex_string, hash_hex_string+2, hash_hex_string+4);
+  char buf[74];
+  std::snprintf(buf,sizeof(buf), "%.2s/%.2s/%.60s", hash_hex_string, hash_hex_string+2, hash_hex_string+4);
   return root_path + buf;
 }
 
-size_t get_size(const char* hash_hex_string)
+std::string get_file_path(const context *ctx, const char* hash_hex_string)
 {
-  return blob_fileio_get_file_size(get_file_path(hash_hex_string).c_str());
+  return get_file_path(ctx->root_path, hash_hex_string);
 }
 
-bool exists(const char* hash_hex_string)
+size_t get_size(const context *ctx, const char* hash_hex_string)
 {
-  return blob_fileio_is_file_readable(get_file_path(hash_hex_string).c_str());
+  return blob_fileio_get_file_size(get_file_path(ctx->root_path, hash_hex_string).c_str());
+}
+
+bool exists(const context *ctx, const char* hash_hex_string)
+{
+  return blob_fileio_is_file_readable(get_file_path(ctx->root_path, hash_hex_string).c_str());
 }
 
 class PushData
 {
 public:
   FILE *fp;
+  std::string root;
   std::string temp_file_name;
   char provided_hash[64];
   DownloadBlobInfo info;
   blake3_hasher hasher;
 };
 
-PushData* start_push(const char* hash_hex_string)
+PushData* start_push(const context *ctx, const char* hash_hex_string)
 {
-  if (hash_hex_string && blob_fileio_is_file_readable(get_file_path(hash_hex_string).c_str()))
+  if (hash_hex_string && blob_fileio_is_file_readable(get_file_path(ctx->root_path, hash_hex_string).c_str()))
   {
     //magic number. we dont need to do anything if such exists, but that's not an error.
     //we save cpu by not decoding/encoding data and calc hash again. even if real hash is different, no real issue, we won't overwrite correct one. Only liars are 'harmed'
@@ -83,10 +107,10 @@ PushData* start_push(const char* hash_hex_string)
     return r;
   }
   std::string temp_file_name;
-  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : root_path.c_str());
+  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : ctx->root_path.c_str());
   if (!tmpf)
     return nullptr;
-  auto r = new PushData{tmpf, std::move(temp_file_name)};
+  auto r = new PushData{tmpf, ctx->root_path, std::move(temp_file_name)};
   if (hash_hex_string)
     memcpy(r->provided_hash, hash_hex_string, 64);
   else
@@ -156,7 +180,7 @@ PushResult finish(PushData *fp, char *actual_hash_str)
       return PushResult::WRONG_HASH;
   } else
     memcpy(final_hash_p, fp->provided_hash, 64);
-  std::string filepath = get_file_path(final_hash_p);
+  std::string filepath = get_file_path(fp->root, final_hash_p);
   if (blob_fileio_is_file_readable(filepath.c_str()))//was pushed by someone else
   {
     blob_fileio_unlink_file(fp->temp_file_name.c_str());
@@ -181,9 +205,9 @@ public:
   uint64_t size;
 };
 
-PullData* start_pull(const char* hash_hex_string, size_t &blob_sz)
+PullData* start_pull(const context *ctx, const char* hash_hex_string, size_t &blob_sz)
 {
-  std::string filepath = get_file_path(hash_hex_string);
+  std::string filepath = get_file_path(ctx->root_path, hash_hex_string);
   blob_sz = blob_fileio_get_file_size(filepath.c_str());
   if (!blob_sz)
     return 0;
@@ -250,9 +274,9 @@ public:
   char tempBuf[SIZE];
 };
 
-PullData* start_pull(const char* hash_hex_string, size_t &blob_sz)
+PullData* start_pull(const context *ctx, const char* hash_hex_string, size_t &blob_sz)
 {
-  std::string filepath = get_file_path(hash_hex_string);
+  std::string filepath = get_file_path(ctx->root_path, hash_hex_string);
   blob_sz = blob_fileio_get_file_size(filepath.c_str());
   if (!blob_sz)
     return 0;
@@ -288,7 +312,7 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
     return false;
   hash_hex_str[0] = 0;hash_hex_str[hash_len-1] = 0;
   FILE*fp;
-  if (!fopen_s(&fp, filename, "rb"))
+  if (fopen_s(&fp, filename, "rb"))
     return false;
   blake3_hasher hasher;
   blake3_hasher_init(&hasher);
@@ -308,11 +332,11 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
 }
 #endif
 
-int64_t repack(const char* hash_hex_string)
+int64_t repack(const context *ctx, const char* hash_hex_string)
 {
   using namespace streaming_compression;
   size_t curSize = 0;
-  std::unique_ptr<PullData, bool(*)(PullData*)> in(start_pull(hash_hex_string, curSize), caddressed_fs::destroy);
+  std::unique_ptr<PullData, bool(*)(PullData*)> in(start_pull(ctx, hash_hex_string, curSize), caddressed_fs::destroy);
   if (!in)
     return 0;
   //check if it is already repacked.
@@ -328,7 +352,7 @@ int64_t repack(const char* hash_hex_string)
     return 0;
   BlobHeader hdr = get_header(zstd_magic, wasHdr.uncompressedLen, BlobHeader::BEST_POSSIBLE_COMPRESSION);
   std::string temp_file_name;
-  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : root_path.c_str());
+  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : ctx->root_path.c_str());
   if (!tmpf)
     return 0;
   char cctx[CTX_SIZE];
@@ -382,7 +406,7 @@ int64_t repack(const char* hash_hex_string)
     return 0;
     //we probably should write BEST_POSSIBLE_COMPRESSION flag in current header, if it is not compressing
   }
- if (blob_fileio_rename_file(temp_file_name.c_str(), get_file_path(hash_hex_string).c_str()))
+ if (blob_fileio_rename_file(temp_file_name.c_str(), get_file_path(ctx->root_path, hash_hex_string).c_str()))
     return int64_t(curSize) - int64_t(finalSize);
   return 0;
 }

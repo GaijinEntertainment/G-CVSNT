@@ -10,6 +10,6 @@ libca_blobs_fs_la_SOURCES = \
 
 libca_blobs_fs_la_LDFLAGS = -release $(VERSION) -L$(DESTDIR)/$(libdir) 
 
-libca_blobs_fs_la_LIBADD = $(zlib_lib)  ../blake3/libblake3.la
+libca_blobs_fs_la_LIBADD = -lz -lzstd ../blake3/libblake3.la
 
 lib_LTLIBRARIES = libca_blobs_fs.la

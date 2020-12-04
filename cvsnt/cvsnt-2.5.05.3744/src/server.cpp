@@ -1728,8 +1728,8 @@ static void serve_blob (char *arg)
   xfree (size_text);
 
   size_t sizeLeft = size;
-  const bool exists = caddressed_fs::exists(arg);
-  caddressed_fs::PushData *pd = caddressed_fs::start_push(arg);
+  const bool exists = caddressed_fs::exists(caddressed_fs::get_default_ctx(), arg);
+  caddressed_fs::PushData *pd = caddressed_fs::start_push(caddressed_fs::get_default_ctx(), arg);
   while (sizeLeft>0)
   {
     int nread;
@@ -4325,12 +4325,12 @@ void server_updated (
         char hash_encoded[65];
         if (!get_blob_reference_content_hash((const unsigned char*)filebuf->data->bufp, filebuf->data->size, hash_encoded))
           error(1,0, "not a hash ref <%s>!", filebuf->data->text);
-        if (!caddressed_fs::exists(hash_encoded))
+        if (!caddressed_fs::exists(caddressed_fs::get_default_ctx(), hash_encoded))
           error(1,0, "blob <%s> doesnt exist!", hash_encoded);
         buf_free(filebuf);
         filebuf = buf_nonio_initialize((BUFMEMERRPROC) NULL);
         size_t blob_sz = 0, at = 0;
-        caddressed_fs::PullData *pd = caddressed_fs::start_pull(hash_encoded, blob_sz);
+        caddressed_fs::PullData *pd = caddressed_fs::start_pull(caddressed_fs::get_default_ctx(), hash_encoded, blob_sz);
         if (!pd)
           error(1,0, "blob <%s> can not be pulled!", hash_encoded);
         caddressed_fs::DownloadBlobInfo info;
@@ -5159,7 +5159,7 @@ int server (int argc, char **argv)
     argument_vector[0] = "cvs server";
 
     TRACE(3,"temp for CAFS %s", Tmpdir);
-    caddressed_fs::set_temp_dir(Tmpdir);
+    //caddressed_fs::set_temp_dir(Tmpdir);
     while (1)
     {
 	char *cmd, *orig_cmd;
@@ -5206,7 +5206,7 @@ error ENOMEM Virtual memory exhausted.\n");
 			}
 
             if (current_parsed_root && current_parsed_root->directory)
-              caddressed_fs::set_root(current_parsed_root->directory);
+              caddressed_fs::set_root(caddressed_fs::get_default_ctx(), current_parsed_root->directory);
 			/* By convention 'commands' start with lowercase, and 'flags' start with
 			   uppercase.  The extra check allows us to look for things like
 			   'version' and 'init */

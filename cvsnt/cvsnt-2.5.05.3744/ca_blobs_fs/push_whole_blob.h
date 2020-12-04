@@ -9,11 +9,11 @@ namespace caddressed_fs
 {
 
 template<typename GetUnpackedData>//GetUnpackedData StreamType(const char *&src, size_t &pos, size_t &sz)
-inline PushResult push_whole_blob_lambda(size_t unpacked_sz, char *resulted_hash, bool pack, GetUnpackedData cb)
+inline PushResult push_whole_blob_lambda(context *ctx, size_t unpacked_sz, char *resulted_hash, bool pack, GetUnpackedData cb)
 {
   using namespace caddressed_fs;
   using namespace streaming_compression;
-  PushData* pd = start_push();//pre-packed blobs
+  PushData* pd = start_push(ctx);//pre-packed blobs
   if (!pd)
     return PushResult::IO_ERROR;
   BlobHeader hdr = get_header(pack ? zstd_magic : noarc_magic, unpacked_sz, 0);
@@ -48,10 +48,10 @@ inline PushResult push_whole_blob_lambda(size_t unpacked_sz, char *resulted_hash
   return finish(pd, resulted_hash);
 }
 
-inline bool push_whole_blob_from_raw_data(const void *data, size_t sz, char *resulted_hash, bool pack)
+inline bool push_whole_blob_from_raw_data(context* ctx, const void *data, size_t sz, char *resulted_hash, bool pack)
 {
   using namespace streaming_compression;
-  return is_ok(push_whole_blob_lambda(sz, resulted_hash, pack,
+  return is_ok(push_whole_blob_lambda(ctx, sz, resulted_hash, pack,
       [&](const char *&src, size_t &src_pos, size_t &src_size){
         src = (const char*)data;src_size = sz;
         return src_pos < src_size ? StreamStatus::Continue : StreamStatus::Finished;

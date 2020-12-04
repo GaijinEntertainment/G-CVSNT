@@ -897,8 +897,9 @@ struct logfile_info
 				   NULL for add or import */
   char *rev_new;		/* rev number after a commit/modify,
 				   add, or import, NULL for remove */
+  unsigned kflags_flags;
 };
-
+
 /* Wrappers.  */
 
 typedef enum {

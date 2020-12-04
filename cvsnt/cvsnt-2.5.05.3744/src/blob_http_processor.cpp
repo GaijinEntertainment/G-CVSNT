@@ -7,12 +7,12 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
 {
   virtual bool canDownload() {return true;}
   virtual bool canUpload() {return false;}
-  virtual bool download(const char *repo, const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
+  virtual bool download(const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
   {
     char buf[128];
     std::snprintf(buf, sizeof(buf),
        "%s%.2s/%.2s/%.60s",
-       repo,
+       repo.c_str(),
        hex_hash, hex_hash + 2, hex_hash + 4);
     size_t current = 0;
     auto res = client->Get(buf,
@@ -27,7 +27,7 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
     }
     return true;
   }
-  virtual bool upload(const char *repo, const char *hex_hash, std::function<const char*(size_t from, size_t &data_provided)>, std::string &err) {
+  virtual bool upload(const char *file, bool compress, char *hex_hash, std::string &err) {
     //it is absolutely simple to implement uploading.
     //However, default nginx can't allow upload to subfolders (nor it will check validity of provided blob).
     //So, we first need to write our own nginx module, that will:
@@ -39,12 +39,14 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
     return false;
   }
   std::unique_ptr<httplib::Client> client;
+  std::string repo;
 };
 
-BlobNetworkProcessor *get_http_processor(const char *url, int port, const char *user, const char *passwd)
+BlobNetworkProcessor *get_http_processor(const char *url, int port, const char *repo, const char *user, const char *passwd)
 {
   auto ret =  new HttpNetworkProcessor();
   ret->client.reset(new httplib::Client(url, port));
+  ret->repo = repo;
   ret->client->set_keep_alive(true);
   ret->client->set_tcp_nodelay(true);
   if (user && passwd)

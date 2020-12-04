@@ -14,7 +14,10 @@
 static std::mutex mtx;
 static std::unordered_map<std::string, std::vector<uint8_t>> storage;
 
-size_t blob_get_hash_blob_size(const char* htype, const char* hhex) {
+void *blob_create_ctx(const char *root) {return (void *)uintptr_t(1);}
+void blob_destroy_ctx(void *ctx) {}
+
+size_t blob_get_hash_blob_size(void *, const char* htype, const char* hhex) {
   std::lock_guard<std::mutex> lck (mtx);
   auto it = storage.find(std::string(hhex));
   if (it != storage.end())
@@ -22,14 +25,14 @@ size_t blob_get_hash_blob_size(const char* htype, const char* hhex) {
   return 0;
 }
 
-bool blob_does_hash_blob_exist(const char* htype, const char* hhex) {
+bool blob_does_hash_blob_exist(void *, const char* htype, const char* hhex) {
   std::lock_guard<std::mutex> lck (mtx);
   return storage.find(std::string(hhex)) != storage.end();
 }
 
 typedef std::pair<std::string, std::vector<uint8_t>> PushData;
 
-uintptr_t blob_start_push_data(const char* htype, const char* hhex, uint64_t size){
+uintptr_t blob_start_push_data(void *, const char* htype, const char* hhex, uint64_t size){
   std::lock_guard<std::mutex> lck (mtx);
   auto it = storage.find(std::string(hhex));
   if (it != storage.end())
@@ -68,7 +71,7 @@ void blob_destroy_push_data(uintptr_t up)
   delete (PushData*)up;
 }
 
-uintptr_t blob_start_pull_data(const char* htype, const char* hhex, uint64_t &sz)
+uintptr_t blob_start_pull_data(void *, const char* htype, const char* hhex, uint64_t &sz)
 {
   std::lock_guard<std::mutex> lck (mtx);
   auto it = storage.find(std::string(hhex));

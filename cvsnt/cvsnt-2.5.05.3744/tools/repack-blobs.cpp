@@ -30,7 +30,7 @@ static std::atomic<size_t> lastMessaged = 0;
 void process_blob(const char *hash)
 {
   affected_files++;
-  int64_t ds = caddressed_fs::repack(hash);
+  int64_t ds = caddressed_fs::repack(caddressed_fs::get_default_ctx(), hash);
   if (ds != 0)
     repacked_files++;
   data_saved += ds;
@@ -110,7 +110,7 @@ inline unsigned char decode_symbol(unsigned char s, bool &err)
 
 static void process_sha_directory(time_t start_time)
 {
-  std::string dirPath = blobs_dir_path();
+  std::string dirPath = blobs_dir_path(caddressed_fs::get_default_ctx());
   int dirI = 0;
   for (const auto & entry : fs::directory_iterator(dirPath.c_str()))
   {
@@ -154,7 +154,7 @@ int main(int ac, const char* argv[])
   );
   auto rootDir = options.arg("-root", "Root dir for CVS");
   init_temp_dir();
-  auto tmpDir = options.arg("-tmp", "Tmp dir for blobs");
+  auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
   auto threads = options.arg_as_or<int>("-j", 0, "concurrency level(threads to run)");
   auto days_changed = options.arg_as_or<int>("-last_days", 0, "Convert only blobs that were written in last N days");
 
@@ -171,8 +171,9 @@ int main(int ac, const char* argv[])
     start = time(NULL) - (days_changed*60*60*24);
   if (tmpDir.length() > 1)
     def_tmp_dir = tmpDir.c_str();
-  set_temp_dir(def_tmp_dir);
-  set_root(rootDir.c_str());
+  set_root(caddressed_fs::get_default_ctx(), rootDir.c_str());
+  if (tmpDir.length() > 1)
+    caddressed_fs::set_temp_dir(tmpDir.c_str());
   if (threads>1)
   {
     printf("using %d threads\n", threads);

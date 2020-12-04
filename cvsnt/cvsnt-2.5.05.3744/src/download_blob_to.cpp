@@ -16,15 +16,24 @@ struct BlobTask
 {
   std::string message, dirpath, filename, encoded_hash, file_mode;
   time_t timestamp;
+  bool compress;
   enum class Type {Download, Upload} type;
 };
 
-static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *base_repo, const BlobTask &task);
+static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task);
+static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task);
 
-struct BackgroundDownloader
+static bool process_blob_task(BlobNetworkProcessor *processor, const BlobTask &task)
 {
-  BackgroundDownloader():queue(&threads){}
-  ~BackgroundDownloader()
+  if (task.type == BlobTask::Type::Download)
+    return download_blob_ref_file(processor, task);
+  return upload_blob_ref_file(processor, task);
+}
+
+struct BackgroundProcessor
+{
+  BackgroundProcessor():queue(&threads){}
+  ~BackgroundProcessor()
   {
   }
   void finishDownloads()
@@ -36,18 +45,18 @@ struct BackgroundDownloader
   void init();
   void wait();
 
-  static void downloader_thread_loop(BackgroundDownloader *downloader, BlobNetworkProcessor *processor)
+  static void processor_thread_loop(BackgroundProcessor *processors, BlobNetworkProcessor *processor)
   {
     BlobTask task;
-    while (downloader->queue.wait_and_pop(task))
-      download_blob_ref_file(processor, downloader->base_repo.c_str(), task);
+    while (processors->queue.wait_and_pop(task))
+      process_blob_task(processor, task);
   }
   void emplace(BlobTask &&task)
   {
     if (!is_inited())
       return;
     if (threads.empty())
-      download_blob_ref_file(clients[0].get(), base_repo.c_str(), task);
+      process_blob_task(clients[0].get(), task);
     else
     {
       //we can't guarantee, that user will finish download (not cancel it, kill the process or whatever)
@@ -58,12 +67,19 @@ struct BackgroundDownloader
       //  b) format of entries has to be known here
       //  While not a big deal, is still not that easy task
       // so we use simplest solution - we simply kill old binary file. It can also be renamed, but better to not bother
-      unlink_file(task.filename.c_str());
+      if (task.type == BlobTask::Type::Download)
+        unlink_file(task.filename.c_str());
+      else
+      {
+        //we preferrably lock file (by opening file handler) to prevent changing during commit
+        //but total amount of file handlers is limited, so we trust people to be reasonable
+      }
       queue.emplace(std::move(task));
     }
   }
   std::vector<std::thread> threads;//soa
   std::vector<std::unique_ptr<BlobNetworkProcessor>> clients;//soa
+  bool uploadEnabled = false;
 
   concurrent_queue<BlobTask> queue;
   std::string base_repo;
@@ -73,14 +89,15 @@ struct BackgroundDownloader
 #endif
 };
 
-static std::unique_ptr<BackgroundDownloader> downloader;
+static std::unique_ptr<BackgroundProcessor> processor;
 
 //link time resolved dependency
 extern void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count);
 
-extern BlobNetworkProcessor *get_http_processor(const char *url, int port, const char *user, const char *passwd);
+extern BlobNetworkProcessor *get_http_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
+extern BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
 
-void BackgroundDownloader::init()
+void BackgroundProcessor::init()
 {
   if (is_inited())
     return;
@@ -93,13 +110,33 @@ void BackgroundDownloader::init()
   if (base_repo[base_repo.length()] != '/')
     base_repo += "/";
   clients.resize(std::max(1, threads_count));
+  bool use_http = strcmp(url, "http://") == 0;
+  int http_port = use_http ? port : 80;
+  uploadEnabled = true;
   for (auto &cli : clients)
-    cli.reset(get_http_processor(url, port, user, passwd));
+  {
+    BlobNetworkProcessor * pr = nullptr;
+    if (!use_http)
+    {
+      pr = get_kv_processor(url, port, base_repo.c_str(), user, passwd);
+      if (!pr)
+      {
+        use_http = true;
+        http_port = 80;
+      }
+    }
+    if (use_http)
+    {
+      pr = get_http_processor(url, http_port, base_repo.c_str(), user, passwd);
+      uploadEnabled = false;
+    }
+    cli.reset(pr);
+  }
   for (int ti = 0; ti < threads_count; ++ti)
-    threads.emplace_back(std::thread(downloader_thread_loop, this, clients[ti].get()));
+    threads.emplace_back(std::thread(processor_thread_loop, this, clients[ti].get()));
 }
 
-void BackgroundDownloader::wait()
+void BackgroundProcessor::wait()
 {
   for (auto &t:threads)
     t.join();
@@ -108,33 +145,42 @@ void BackgroundDownloader::wait()
 
 extern char *xgetwd();
 extern void blob_free(void*);
-void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp)
+void add_upload_queue(const char *filename, bool compress, const char *message)
 {
-  if (!downloader)
+  if (!processor)
   {
-  	downloader.reset(new BackgroundDownloader);
-    downloader->init();
+  	processor.reset(new BackgroundProcessor);
+    processor->init();
   }
+  if (!processor->uploadEnabled)
+    return;
   char *cdir = xgetwd();
-  downloader->emplace(BlobTask{message, cdir, filename, encoded_hash, file_mode, timestamp, BlobTask::Type::Download});
+  processor->emplace(BlobTask{message, cdir, filename, "", "", 0, compress, BlobTask::Type::Upload});
   blob_free(cdir);
 }
 
-void wait_for_download_queue()
+void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp)
 {
-  if (!downloader || !downloader->is_inited())
-    return;
-  downloader->wait();
+  if (!processor)
+  {
+  	processor.reset(new BackgroundProcessor);
+    processor->init();
+  }
+  char *cdir = xgetwd();
+  processor->emplace(BlobTask{message, cdir, filename, encoded_hash, file_mode, timestamp, false, BlobTask::Type::Download});
+  blob_free(cdir);
 }
 
 void wait_threads()
 {
-  if (downloader)
-    downloader->finishDownloads();
-  downloader.reset();
+  if (processor)
+    processor->finishDownloads();
+  processor.reset();
+
 }
 void rename_file (const char *from, const char *to);
-static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *base_repo, const BlobTask &task)
+
+static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task)
 {
   std::string temp_filename = task.dirpath +"/_new_";
   temp_filename += task.filename;
@@ -143,7 +189,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *
     return false;
   std::string err;
   caddressed_fs::DownloadBlobInfo info;
-  if (!processor->download(base_repo, task.encoded_hash.data(),
+  if (!processor->download(task.encoded_hash.data(),
       [&](const char *data, size_t data_length) {
         return caddressed_fs::decode_stream_blob_data(info, data, data_length,
           [&](const void *data, size_t sz) { return fwrite(data, 1, sz, tmp) == sz; });//we can easily add hash validation here. but seems unnessasry
@@ -168,3 +214,24 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const char *
   printf("Ud %s\n", task.message.c_str());
   return true;
 }
+bool is_blob_file_sent(const char* file, char* hash_encoded);
+void finish_send_blob_file(const char* file, const char* hash_encoded);
+
+static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task)
+{
+  std::string fullPath = (task.dirpath+"/")+task.filename;
+  char hash[65]; hash[0]=hash[64] = 0;
+  if (is_blob_file_sent(fullPath.c_str(), hash))
+    return true;
+  std::string err;
+  if (!processor->upload(fullPath.c_str(), task.compress, hash, err))
+  {
+    printf("can't upload file <%s>, err = %s\n", fullPath.c_str(), err.c_str());
+    return false;
+  }
+  finish_send_blob_file(task.filename.c_str(), hash);
+  printf("Cd %s\n", task.message.c_str());
+
+  return true;
+}
+

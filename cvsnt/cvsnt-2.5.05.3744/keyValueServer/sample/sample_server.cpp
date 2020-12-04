@@ -12,12 +12,12 @@ int main(int argc, const char **argv)
   #ifdef CAFS//not required, but allows to set more params
     if (argc < 3)
     {
-      printf("Usage is sample_server root allow_trust(on|off) [port](2403) [max_pending_connections](1024)\n");
+      printf("Usage is sample_server dir_for_roots allow_trust(on|off) [port](2403) [max_pending_connections](1024)\n");
       return 1;
     }
     bool allow = strcmp(argv[2], "on") == 0;
-    printf("Starting content-addressed file server with root=<%s> and %s\n", argv[1], allow ? "truct client" : "don't trust client");
-    caddressed_fs::set_root(argv[1]);
+    printf("Starting content-addressed file server with root=<%s> and %s\n", argv[1], allow ? "trust client" : "don't trust client");
+    caddressed_fs::set_dir_for_roots(strcmp(argv[1], "/") == 0 ? "" : argv[1]);
     caddressed_fs::set_allow_trust(allow);
     const int pc = 3;
   #else

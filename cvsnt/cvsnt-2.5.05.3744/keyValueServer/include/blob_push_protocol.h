@@ -11,7 +11,7 @@ static constexpr int hash_len = bin_hash_len+6;
 
 //then, server waits for commands
 //all commands are 4 bytes. Currently we have just 4: "VERS", "CHCK", "PUSH", "PULL", "SIZE"
-//"VERS": has to be followed by "XXX" (client version). answers are ERBD or NONE
+//"VERS": has to be followed by "XXX" (client version), then 1byte of root length, then root. answers are ERBD or NONE
 //"SIZE": has to be followed by "blake3bin_hash_32". Responses are: "SIZE", "NONE", "ERXX" (xx - is error code).
 //"CHCK": has to be followed by "blake3bin_hash_32". Responses are: "HAVE", "NONE", "ERXX" (xx - is error code).
 //"PUSH": has to be followed by "blake3bin_hash_32bytes_size8". Responses are: "HAVE", "ERXX" (xx - is error code).

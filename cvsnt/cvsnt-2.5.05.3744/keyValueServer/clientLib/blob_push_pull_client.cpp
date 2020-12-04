@@ -13,8 +13,14 @@
 
 using namespace blob_push_proto;
 
-intptr_t start_blob_push_client(const char *url, int port)
+intptr_t start_blob_push_client(const char *url, int port, const char *root)
 {
+  const size_t rootLen = root ? strlen(root) : 1;
+  if (rootLen>255)
+  {
+    blob_logmessage(LOG_ERROR, "root len is too big %d", rootLen);
+    return -1;
+  }
   intptr_t sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
   {
@@ -52,7 +58,10 @@ intptr_t start_blob_push_client(const char *url, int port)
   blob_logmessage(LOG_NOTIFY, "greetings passed <%.*s>. Ask for version", int(greeting_length), greeting);
 
   char vers_response[response_len+1];
+  const uint8_t len = uint8_t(rootLen);
   if (!send_exact(int(sockfd), "VERS" BLOB_PUSH_PROTO_VERSION, command_len + vers_command_len)
+     || !send_exact(int(sockfd), &len, 1)
+     || !send_exact(int(sockfd), root, len)
      || !recv_exact(int(sockfd), vers_response, response_len))
   {
     blob_close_socket(int(sockfd));

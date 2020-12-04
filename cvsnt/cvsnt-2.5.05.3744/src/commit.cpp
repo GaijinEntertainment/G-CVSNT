@@ -319,10 +319,18 @@ static int find_fileproc(void *callerdat, struct file_info *finfo)
     data->tag = xstrdup (vers->tag);
 	data->bugid = xstrdup (bugid.size()?bugid.c_str():(vers?vers->edit_bugid:NULL));
     data->rev_old = data->rev_new = NULL;
+    data->kflags_flags = 0;
+	if (vers && vers->options)
+	{
+		kflag kflag;
+		RCS_get_kflags(vers->options, false, kflag); // Don't signal an error here.. corrupt kopt in the RCS file would make checkout blow up
+		data->kflags_flags = kflag.flags;
+	}
 
     node->type = UPDATE;
     node->delproc = update_delproc;
     node->data = (char *) data;
+
     (void)addnode (args->ulist, node);
 
     ++args->argc;
@@ -638,6 +646,9 @@ int commit (int argc, char **argv)
 	if (check_valid_edit>0)
 	    send_arg("-c");
 	send_arg("--");
+
+	void send_blob_files(List * list);
+	send_blob_files (find_args.ulist);//send all files
 
 	/* FIXME: This whole find_args.force/SEND_FORCE business is a
 	   kludge.  It would seem to be a server bug that we have to
@@ -1083,7 +1094,14 @@ warning: file `%s' seems to still contain conflict indicators",
 	    li->tag = xstrdup (vers->tag);
 	    li->rev_old = xstrdup (vers->vn_rcs);
 		li->bugid = xstrdup(bugid.size()?bugid.c_str():vers->edit_bugid);
-	    li->rev_new = NULL;
+        li->kflags_flags = 0;
+    	if (vers && vers->options)
+    	{
+    		kflag kflag;
+    		RCS_get_kflags(vers->options, false, kflag); // Don't signal an error here.. corrupt kopt in the RCS file would make checkout blow up
+    		li->kflags_flags = kflag.flags;
+    	}
+		li->rev_new = NULL;
 	    p->data = (char *) li;
 	    (void) addnode (ulist, p);
 

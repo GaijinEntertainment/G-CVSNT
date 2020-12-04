@@ -185,10 +185,10 @@ static void process_file_ver(const char *rootDir,
     unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
   #endif
 
-  size_t wr = pr == PushResult::OK ? get_size(hash_encoded) : 0;
+  size_t wr = pr == PushResult::OK ? get_size(get_default_ctx(), hash_encoded) : 0;
 
   //this details are only for conversion. We want to make times relevant, so repacking can be addressed to only recent blobs
-  std::string sha_file_name = get_file_path(hash_encoded);
+  std::string sha_file_name = get_file_path(get_default_ctx(), hash_encoded);
   if (pr == PushResult::OK)
     set_file_mtime(sha_file_name.c_str(), ver_atime);
   else if (pr == PushResult::DEDUPLICATED)
@@ -445,7 +445,6 @@ int main(int ac, const char* argv[])
   auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
   if (tmpDir.length() > 1)
     def_tmp_dir = tmpDir.c_str();
-  set_temp_dir(def_tmp_dir);
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
   auto file = options.arg_or("-file", "", "File to process (inside dir)");
   auto threads = options.arg_as_or<int>("-j", 0,"concurrency level(threads to run)");
@@ -474,8 +473,10 @@ int main(int ac, const char* argv[])
     printf("using %d threads\n", threads);
     processor.init(rootDir.c_str(), threads);
   }
-  set_root(rootDir.c_str());
-  mkdir(blobs_dir_path().c_str(), 0777);
+  set_root(caddressed_fs::get_default_ctx(), rootDir.c_str());
+  if (tmpDir.length() > 1)
+    caddressed_fs::set_temp_dir(tmpDir.c_str());
+  mkdir(blobs_dir_path(caddressed_fs::get_default_ctx()).c_str(), 0777);
 
   if (file.length()>0)
   {

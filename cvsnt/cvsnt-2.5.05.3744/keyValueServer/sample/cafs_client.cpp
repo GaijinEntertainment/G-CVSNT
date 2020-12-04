@@ -13,9 +13,9 @@ bool calc_file_hash(const char *f, char *hash);
 
 int main(int argc, const char **argv)
 {
-  if (argc < 5)
+  if (argc < 6)
   {
-    printf("Usage is blob_file_client [url] [port] command (file|arg). Command list: has hash; size hash; pushblob file; streamfile file; pushfile file; pull hash\n");
+    printf("Usage is blob_file_client [url] [port] [root] command (file|arg). Command list: has hash; size hash; pushblob file; streamfile file; pushfile file; pull hash\n");
     return 1;
   }
   if (!blob_init_sockets())
@@ -23,26 +23,28 @@ int main(int argc, const char **argv)
     blob_logmessage(LOG_ERROR, "Can't init sockets, %d", blob_get_last_sock_error());
     return 1;
   }
+  const char *cmdname = argv[4];
+  const char *argname = argv[5];
   enum {HAS, SIZE, PULL, STREAMFILE, PUSHFILE, PUSHBLOB, UNKNOWN} cmd = UNKNOWN;
-  if (strcmp(argv[3], "has") == 0)
+  if (strcmp(cmdname, "has") == 0)
     cmd = HAS;
-  else if (strcmp(argv[3], "size") == 0)
+  else if (strcmp(cmdname, "size") == 0)
     cmd = SIZE;
-  else if (strcmp(argv[3], "pull") == 0)
+  else if (strcmp(cmdname, "pull") == 0)
     cmd = PULL;
-  else if (strcmp(argv[3], "pushfile") == 0)
+  else if (strcmp(cmdname, "pushfile") == 0)
     cmd = PUSHFILE;
-  else if (strcmp(argv[3], "streamfile") == 0)
+  else if (strcmp(cmdname, "streamfile") == 0)
     cmd = STREAMFILE;
-  else if (strcmp(argv[3], "pushblob") == 0)
+  else if (strcmp(cmdname, "pushblob") == 0)
     cmd = PUSHBLOB;
   if (cmd == UNKNOWN)
   {
-    printf("unknown command %s\n", argv[3]);
+    printf("unknown command %s\n", cmdname);
     return 1;
   }
 
-  intptr_t client = start_blob_push_client(argv[1], atoi(argv[2]));
+  intptr_t client = start_blob_push_client(argv[1], atoi(argv[2]), argv[3]);
   if (client == -1)
   {
     blob_logmessage(LOG_ERROR, "Can't connect client %d", blob_get_last_sock_error());
@@ -52,38 +54,38 @@ int main(int argc, const char **argv)
   if (cmd == HAS)
   {
     bool has = false;
-    if (blob_check_on_server(client, ht, argv[4], has) != KVRet::OK)
-      printf("error in check %s\n", argv[4]);
+    if (blob_check_on_server(client, ht, argname, has) != KVRet::OK)
+      printf("error in check %s\n", argname);
     else
-      printf("%s is %son server\n", argv[4], has ? "" : "not");
+      printf("%s is %son server\n", argname, has ? "" : "not");
   }
   if (cmd == SIZE)
-    printf("%s size on server is %lld\n", argv[4], blob_size_on_server(client, ht, argv[4]));
+    printf("%s size on server is %lld\n", argname, blob_size_on_server(client, ht, argname));
   if (cmd == PULL)
   {
-    FILE *f=fopen(argv[4], "wb");
-    int64_t pulled = blob_pull_from_server(client, ht, argv[4], 0, 0, [&](const char *data, uint64_t at, uint64_t size){
+    FILE *f=fopen(argname, "wb");
+    int64_t pulled = blob_pull_from_server(client, ht, argname, 0, 0, [&](const char *data, uint64_t at, uint64_t size){
     //store
       return data ? fwrite(data, 1, size, f) == size : true;//at is ignored!
     });
     fclose(f);
-    printf("pulled %lld of %s\n", pulled, argv[4]);
+    printf("pulled %lld of %s\n", pulled, argname);
   }
   if (cmd == PUSHBLOB || cmd == PUSHFILE)
   {
     char hash[65];hash[0] = hash[64] = 0;
-    if (cmd == PUSHFILE && !calc_file_hash(argv[4], hash))
-      printf("Cant open calc hash for file %s\n", argv[4]);
+    if (cmd == PUSHFILE && !calc_file_hash(argname, hash))
+      printf("Cant open calc hash for file %s\n", argname);
     else if (cmd == PUSHBLOB)
     {
-      if (strlen(argv[4]) != 64)
-        printf("arg <%s> is not a hash string\n", argv[4]);
+      if (strlen(argname) != 64)
+        printf("arg <%s> is not a hash string\n", argname);
       else
-        strncpy(hash, argv[4], sizeof(hash));
+        strncpy(hash, argname, sizeof(hash));
     }
-    FILE *f = fopen(argv[4], "rb");
+    FILE *f = fopen(argname, "rb");
     if (!f)
-      printf("Cant open file %s for reading\n", argv[4]);
+      printf("Cant open file %s for reading\n", argname);
     else
     {
       fseek(f, 0, SEEK_END);
@@ -108,17 +110,17 @@ int main(int argc, const char **argv)
         return (const char*)(ferror(f) ? nullptr : buf);
       //store
       });
-      printf("pushed %lld of %s hash = %s\n", pushed, argv[4], hash);
+      printf("pushed %lld of %s hash = %s\n", pushed, argname, hash);
       fclose(f);
     }
   } else if (cmd == STREAMFILE)
   {
     char hash[65];hash[0] = hash[64] = 0;
-    if (!calc_file_hash(argv[4], hash))
-      printf("Cant open calc hash for file %s\n", argv[4]);
-    FILE *f = fopen(argv[4], "rb");
+    if (!calc_file_hash(argname, hash))
+      printf("Cant open calc hash for file %s\n", argname);
+    FILE *f = fopen(argname, "rb");
     if (!f)
-      printf("Cant open file %s for reading\n", argv[4]);
+      printf("Cant open file %s for reading\n", argname);
     else
     {
       fseek(f, 0, SEEK_END);
@@ -142,7 +144,7 @@ int main(int argc, const char **argv)
         return (const char*)(ferror(f) ? nullptr : buf);
       //store
       });
-      printf("pushed %lld of %s hash = %s, %s\n", sent, argv[4], hash, ret == KVRet::OK ? "ok" : "error");
+      printf("pushed %lld of %s hash = %s, %s\n", sent, argname, hash, ret == KVRet::OK ? "ok" : "error");
       fclose(f);
     }
   }

@@ -2082,7 +2082,7 @@ void get_download_source(const char *&url, int &port, const char *&auth_user, co
     port = blob_download_port;
   else
   {
-    port = 80;
+    port = 2403;
     if ((cp = getenv ("CVS_BLOBS_PORT")) != NULL)
       port = atoi(cp);
   }
@@ -2128,7 +2128,6 @@ void change_utime(const char* filename, time_t timestamp)
 
 static char *time_stamp (time_t mtime, int local)
 {
-  struct stat sb;
   char *cp;
   char *ts;
 
@@ -2231,7 +2230,6 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
     char *size_string;
     char *mode_string;
     int size;//since we use atoi
-    char *temp_filename;
     char *realfilename;
 
     read_line (&mode_string);
@@ -2538,8 +2536,6 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
   {
     char *size_string;
     char *mode_string;
-    char *temp_filename;
-    char *realfilename;
 
     read_line (&mode_string);
 
@@ -4860,6 +4856,7 @@ void send_arg (const char *string)
 /* VERS->OPTIONS specifies whether the file is binary or not.  NOTE: BEFORE
    using any other fields of the struct vers, we would need to fix
    client_process_import_file to set them up.  */
+bool send_blob_file(const char *file, char *hash_encoded, bool compress);
 
 static void send_modified (const char *file, const char *short_pathname, const Vers_TS *vers, bool send_blob_content)
 {
@@ -5026,49 +5023,10 @@ static void send_modified (const char *file, const char *short_pathname, const V
 
         if (send_blob_ref)
         {
-	      using namespace caddressed_fs;
-		  using namespace streaming_compression;
 		  char hash_encoded[65];hash_encoded[64] = 0;
           if (send_blob_content)
           {
-            //todo: replace with push to CA server (as soon as it is ready)
-            BlobHeader hdr = get_header(blob_binary_compressed ? zstd_magic : noarc_magic, sb.st_size, 0);
-            char hctx[HASH_CONTEXT_SIZE];
-            init_blob_hash_context(hctx, sizeof(hctx));
-            char bufIn[128<<10];
-            FILE* rf = fopen(file, "rb");
-            std::vector<char> blob;blob.resize(sb.st_size); size_t dataWritten = 0;
-            StreamStatus st = compress_lambda(
-              [&](const char *&src, size_t &src_pos, size_t &src_size)
-                {if (src_pos < src_size) return StreamStatus::Continue;//previously extracted wasn't consumed
-                 src = bufIn; src_pos = 0;
-                 src_size = fread(bufIn, 1, sizeof(bufIn), rf);
-                 update_blob_hash(hctx, bufIn, src_size);
-                 return ferror(rf) ? StreamStatus::Error : src_size == 0 ? StreamStatus::Finished : StreamStatus::Continue;
-                },
-              [&](char *&dst, size_t &dst_pos, size_t &dst_capacity)
-                {
-                  dataWritten = dst_pos;
-                  if (dst_pos + 16384 > blob.size())
-                    blob.resize(blob.size()*3/2 + 8192);
-                  dst = blob.data(); dst_capacity = blob.size();
-                  return StreamStatus::Continue;
-                }
-             , 6, blob_binary_compressed ? StreamType::ZSTD : StreamType::Unpacked);
-            if (st != StreamStatus::Finished)
-              error(1,0, "Can't send binary blob for %s", file);
-            fclose(rf);
-            uint8_t digest[32];
-            if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string(digest, hash_encoded))
-              error(1,0, "Can't calc hash for %s", file);
-            send_to_server("Blob-transfer ", 0);
-            send_to_server(hash_encoded, 0);
-            send_to_server("\n", 1);
-
-            sprintf (tmp, "%llu\n", (unsigned long long) (dataWritten + sizeof(hdr)));
-            send_to_server (tmp, 0);
-			send_to_server_untranslated((const char*)&hdr, sizeof(hdr));
-			send_to_server_untranslated((const char*)blob.data(), dataWritten);
+            send_blob_file(file, hash_encoded, blob_binary_compressed);
           } else
             if (!caddressed_fs::get_file_content_hash(file, hash_encoded, sizeof(hash_encoded)))
 			  error(1, 0, "Can't calculate hash for %s", file);
@@ -5597,6 +5555,125 @@ void send_file_names (int argc, char **argv, unsigned int flags)
     }
 }
 
+struct BlobFile{
+  size_t fsz;
+  time_t mtime;
+  char hash[64];
+};
+
+#include <mutex>
+#include <unordered_map>
+static std::mutex files_send_mutex;
+static std::unordered_map<std::string, BlobFile> files_send;
+
+bool send_blob_file_direct(const char *file, char *hash_encoded, bool blob_binary_compressed)
+{
+  size_t fsz = get_file_size(file);
+  using namespace caddressed_fs;
+  using namespace streaming_compression;
+  BlobHeader hdr = get_header(blob_binary_compressed ? zstd_magic : noarc_magic, fsz, 0);
+  char hctx[HASH_CONTEXT_SIZE];
+  init_blob_hash_context(hctx, sizeof(hctx));
+  char bufIn[128<<10];
+  FILE* rf = fopen(file, "rb");
+  std::vector<char> blob;blob.resize(fsz); size_t dataWritten = 0;
+  StreamStatus st = compress_lambda(
+    [&](const char *&src, size_t &src_pos, size_t &src_size)
+      {if (src_pos < src_size) return StreamStatus::Continue;//previously extracted wasn't consumed
+       src = bufIn; src_pos = 0;
+       src_size = fread(bufIn, 1, sizeof(bufIn), rf);
+       update_blob_hash(hctx, bufIn, src_size);
+       return ferror(rf) ? StreamStatus::Error : src_size == 0 ? StreamStatus::Finished : StreamStatus::Continue;
+      },
+    [&](char *&dst, size_t &dst_pos, size_t &dst_capacity)
+      {
+        dataWritten = dst_pos;
+        if (dst_pos + 16384 > blob.size())
+          blob.resize(blob.size()*3/2 + 8192);
+        dst = blob.data(); dst_capacity = blob.size();
+        return StreamStatus::Continue;
+      }
+   , 6, blob_binary_compressed ? StreamType::ZSTD : StreamType::Unpacked);
+  if (st != StreamStatus::Finished)
+    error(1,0, "Can't send binary blob for %s", file);
+  fclose(rf);
+  uint8_t digest[32];
+  if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string(digest, hash_encoded))
+    error(1,0, "Can't calc hash for %s", file);
+  send_to_server("Blob-transfer ", 0);
+  send_to_server(hash_encoded, 64);
+  send_to_server("\n", 1);
+  char tmp[64];
+  sprintf(tmp, "%llu\n", (unsigned long long) (dataWritten + sizeof(hdr)));
+  send_to_server(tmp, 0);
+  send_to_server_untranslated((const char*)&hdr, sizeof(hdr));
+  send_to_server_untranslated((const char*)blob.data(), dataWritten);
+  return true;
+}
+
+void finish_send_blob_file(const char *file, const char *hash_encoded)
+{
+  struct stat sb;
+  if (CVS_STAT (file, &sb) < 0)
+    error (1, errno, "cannot stat %s", file);
+
+  std::unique_lock<std::mutex> lock(files_send_mutex);
+  auto &res = files_send[file];
+  memcpy(res.hash, hash_encoded, 64);
+  res.mtime = sb.st_mtime;
+  res.fsz = sb.st_size;
+}
+
+bool is_blob_file_sent(const char *file, char *hash_encoded)
+{
+  std::unique_lock<std::mutex> lock(files_send_mutex);
+  auto it = files_send.find(file);
+  if (it == files_send.end())
+    return false;
+  struct stat sb;
+  if (CVS_STAT (file, &sb) < 0)
+    error (1, errno, "cannot stat %s", file);
+  memcpy(hash_encoded, it->second.hash, 64);
+  if (it->second.fsz != sb.st_size || it->second.mtime != sb.st_mtime)
+    error (1, errno, "file %s changed during commit", file);
+  return true;
+}
+
+bool send_blob_file(const char *file, char *hash_encoded, bool blob_binary_compressed)
+{
+  hash_encoded[0] = hash_encoded[64] = 0;
+  if (is_blob_file_sent(file, hash_encoded))
+    return true;
+  send_blob_file_direct(file, hash_encoded, blob_binary_compressed);
+  finish_send_blob_file(file, hash_encoded);
+  return true;
+}
+
+static int send_blob_file_proc(Node *node, void *)
+{
+  logfile_info *li = (logfile_info *)node->data;
+  if (li->type != T_ADDED && li->type != T_MODIFIED)
+    return 0;
+  if (!(li->kflags_flags &KFLAG_BINARY_DELTA))
+    return 0;
+  const char* message = node->key;
+  for (int l = strlen(node->key)-1; l > 0; --l)
+    if (node->key[l] == '\\' || node->key[l] == '/')
+    {
+	  message = node->key + l + 1;
+      break;
+    }
+  extern void add_upload_queue(const char* filename, bool compress, const char* message);
+  add_upload_queue(node->key, li->kflags_flags&KFLAG_COMPRESS_DELTA ? true : false, message);
+  return 0;
+}
+
+void send_blob_files (List *list)
+{
+  walklist (list, send_blob_file_proc, NULL);
+  void wait_threads();//wait for all files to be uploaded
+  wait_threads();
+}
 
 /* Send Repository, Modified and Entry.  argc and argv contain only
   the files to operate on (or empty for everything), not options.

@@ -51,6 +51,7 @@ cvsnt_SOURCES = \
     blob_operations.cpp \
     download_blob_to.cpp \
     blob_http_processor.cpp \
+    blob_kv_processor.cpp \
 	add.cpp \
 	admin.cpp \
 	annotate.cpp \
@@ -145,6 +146,8 @@ cvsnt_LDADD = \
 	../cvstools/libcvstools.la \
     ../blake3/libblake3.la \
     ../ca_blobs_fs/libca_blobs_fs.la \
+    ../keyValueServer/clientLib/libkv_client_lib.la \
+    ../keyValueServer/serverLib/libkv_server_lib.la \
 	$(zlib_lib) \
 	$(pam_lib) \
 	$(mac_hfs_lib)

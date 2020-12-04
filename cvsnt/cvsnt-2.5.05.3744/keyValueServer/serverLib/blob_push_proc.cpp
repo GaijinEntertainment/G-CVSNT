@@ -14,14 +14,42 @@
 
 using namespace blob_push_proto;
 
-static bool handle_chck(int socket);
-static bool handle_size(int socket);
-static bool handle_pull(int socket);
-static bool handle_strm(int socket);
-static bool handle_push(int socket);
+static bool handle_chck(void *, int socket);
+static bool handle_size(void *, int socket);
+static bool handle_pull(void *, int socket);
+static bool handle_strm(void *, int socket);
+static bool handle_push(void *, int socket);
 static bool send_simple_response(int socket, const char *resp, int len = response_len) { return send_exact(socket, resp, len); }
 
-static bool blob_push_thread_proc_int(int socket)
+static void *initiate(int socket)
+{
+  send_exact(socket, BLOB_PUSH_GREETING_STR BLOB_PUSH_PROTO_VERSION, greeting_length);
+  char commandBuf[command_len + 1];
+  if (!recv_exact(socket, commandBuf, command_len, 0))
+    return nullptr;
+  if (strncmp(commandBuf, vers_command, command_len) != 0)
+  {
+    blob_logmessage(LOG_ERROR, "first command should be VERS, not %.4s", commandBuf);
+    return nullptr;
+  }
+  char vers[3];
+  if (!recv_exact(socket, vers, 3))
+    return nullptr;
+  const bool good = memcmp(vers, BLOB_PUSH_PROTO_VERSION, 3) == 0;
+  blob_logmessage(LOG_NOTIFY, "%s version, connection=%d", good ? "good" : "bad", socket);
+  if (!good)
+    return nullptr;
+  uint8_t len;
+  if (!recv_exact(socket, &len, sizeof(len)))
+    return nullptr;
+  char buf[256];
+  if (!recv_exact(socket, buf, len))
+    return nullptr;
+  send_simple_response(socket, none_response);
+  return blob_create_ctx(buf);
+}
+
+static bool blob_push_thread_proc_int(void *ctx, int socket)
 {
   char commandBuf[command_len + 1];
   if (!recv_exact(socket, commandBuf, command_len, 0))
@@ -31,27 +59,19 @@ static bool blob_push_thread_proc_int(int socket)
   char *hash_str = commandBuf + command_len + 1;
   if (strncmp(commandBuf, chck_command, command_len) == 0)
   {
-    return handle_chck(socket);
+    return handle_chck(ctx, socket);
   } else if (strncmp(commandBuf, size_command, command_len) == 0)
   {
-    return handle_size(socket);
+    return handle_size(ctx, socket);
   } else if (strncmp(commandBuf, push_command, command_len) == 0)
   {
-    return handle_push(socket);
+    return handle_push(ctx, socket);
   } else if (strncmp(commandBuf, strm_command, command_len) == 0)
   {
-    return handle_strm(socket);
+    return handle_strm(ctx, socket);
   } else if (strncmp(commandBuf, pull_command, command_len) == 0)
   {
-    return handle_pull(socket);
-  } else if (strncmp(commandBuf, vers_command, command_len) == 0)
-  {
-    char vers[3];
-    if (!recv_exact(socket, vers, 3))
-      return false;
-    const bool good = memcmp(vers, BLOB_PUSH_PROTO_VERSION, 3) == 0;
-    blob_logmessage(LOG_NOTIFY, "%s version, connection=%d", good ? "good" : "bad", socket);
-    return send_simple_response(socket, good ? none_response : err_bad_command);
+    return handle_pull(ctx, socket);
   } else
   {
     blob_logmessage(LOG_ERROR, "unknown command <%s>", commandBuf);
@@ -60,24 +80,24 @@ static bool blob_push_thread_proc_int(int socket)
   return true;
 }
 
-static bool handle_chck(int socket)
+static bool handle_chck(void *ctx, int socket)
 {
   uint8_t commandBuf[chck_command_len];
   if (!recv_exact(socket, commandBuf, chck_command_len))
     return false;
   char hash_type[7], hash_hex_str[65];
   decode_blob_hash_to_hex_hash(commandBuf, hash_type, hash_hex_str);
-  return send_simple_response(socket, blob_does_hash_blob_exist(hash_type, hash_hex_str) ? have_response : none_response);
+  return send_simple_response(socket, blob_does_hash_blob_exist(ctx, hash_type, hash_hex_str) ? have_response : none_response);
 }
 
-static bool handle_size(int socket)
+static bool handle_size(void *ctx, int socket)
 {
   uint8_t commandBuf[size_command_len];
   if (!recv_exact(socket, commandBuf, size_command_len))
     return false;
   char hash_type[7], hash_hex_str[65];
   decode_blob_hash_to_hex_hash(commandBuf, hash_type, hash_hex_str);
-  uint64_t size = blob_get_hash_blob_size(hash_type, hash_hex_str);
+  uint64_t size = blob_get_hash_blob_size(ctx, hash_type, hash_hex_str);
   //maybe check if exist, and send none if not ?
   // but currently client returns 0 in both case
   char response[size_response_len];
@@ -88,7 +108,7 @@ static bool handle_size(int socket)
 }
 
 
-static bool handle_push(int socket)
+static bool handle_push(void *ctx, int socket)
 {
   uint8_t commandBuf[push_command_len];
   if (!recv_exact(socket, commandBuf, push_command_len))
@@ -100,7 +120,7 @@ static bool handle_push(int socket)
   uint64_t blob_sz; memcpy(&blob_sz, commandBuf + hash_len, sizeof(blob_sz));//start lifetime as
   blob_logmessage(LOG_NOTIFY, "client %d pushed %s:%s of %d sz", socket, hash_type, hash_hex_str, (int)blob_sz);
 
-  uintptr_t tempBlob = blob_start_push_data(hash_type, hash_hex_str, blob_sz);
+  uintptr_t tempBlob = blob_start_push_data(ctx, hash_type, hash_hex_str, blob_sz);
   bool ok = true;
   ok &= recv_lambda(socket, blob_sz, [&](const char *buf, int len){ok &= blob_push_data(buf, len, tempBlob);return true;});
   if (!ok)
@@ -111,7 +131,7 @@ static bool handle_push(int socket)
   return send_simple_response(socket, blob_end_push_data(tempBlob) ? have_response : err_file_error);
 }
 
-static bool handle_strm(int socket)
+static bool handle_strm(void *ctx, int socket)
 {
   uint8_t commandBuf[push_command_len];
   if (!recv_exact(socket, commandBuf, strm_command_len))
@@ -122,7 +142,7 @@ static bool handle_strm(int socket)
 
   blob_logmessage(LOG_NOTIFY, "client %d stream pushed %s:%s", socket, hash_type, hash_hex_str);
 
-  uintptr_t tempBlob = blob_start_push_data(hash_type, hash_hex_str, 0);
+  uintptr_t tempBlob = blob_start_push_data(ctx, hash_type, hash_hex_str, 0);
   uint16_t chunkSz = 0;
   bool ok = true;
   while (1){
@@ -152,7 +172,7 @@ static bool handle_strm(int socket)
   return send_simple_response(socket, blob_end_push_data(tempBlob) ? have_response : err_file_error);
 }
 
-static bool handle_pull(int socket)
+static bool handle_pull(void *ctx, int socket)
 {
   uint8_t commandBuf[pull_command_len];
   if (!recv_exact(socket, commandBuf, pull_command_len, 0))
@@ -166,7 +186,7 @@ static bool handle_pull(int socket)
   uint32_t blob_from_chunk; memcpy_from(&blob_from_chunk, from_cmd, sizeof(blob_from_chunk));//start lifetime as
   uint64_t blob_sz = 0;
 
-  uintptr_t readBlob = blob_start_pull_data(hash_type, hash_hex_str, blob_sz);//allows memory mapping
+  uintptr_t readBlob = blob_start_pull_data(ctx, hash_type, hash_hex_str, blob_sz);//allows memory mapping
   if (readBlob == 0)
     return send_simple_response(socket, none_response);
 
@@ -214,8 +234,14 @@ static bool handle_pull(int socket)
 
 void blob_push_thread_proc(int socket, volatile bool *should_stop)
 {
-  send_exact(socket, BLOB_PUSH_GREETING_STR BLOB_PUSH_PROTO_VERSION, greeting_length);
-  while (!(should_stop && *should_stop) && blob_push_thread_proc_int(socket))//command is processed
+  void *ctx = initiate(socket);
+  if (!ctx)
+  {
+    blob_logmessage(LOG_ERROR, "can't initiate ctx for %d", socket);
+    blob_close_socket(socket);
+    return;
+  }
+  while (!(should_stop && *should_stop) && blob_push_thread_proc_int(ctx, socket))//command is processed
   {
   }
   blob_logmessage(LOG_NOTIFY, "close connection %d", socket);
