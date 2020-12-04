@@ -310,19 +310,6 @@ again:
 	}
 
 	fprintf (fp,"%s----------------------------------------------------------------------\n",CVSEDITPREFIX);
-#ifdef CVSSPAM
-#ifdef _WIN32
-#if (CVSNT_SPECIAL_BUILD_FLAG != 0)
-	if (strcasecmp(CVSNT_SPECIAL_BUILD,"Suite")!=0)
-#endif
-	{
-	fprintf (fp,"%s     Committed on the Free edition of March Hare Software CVSNT Server\n",CVSEDITPREFIX);
-	fprintf (fp,"%s     Upgrade to CVS Suite for more features and support:\n",CVSEDITPREFIX);
-	fprintf (fp,"%s           http://march-hare.com/cvsnt/\n",CVSEDITPREFIX);
-	fprintf (fp,"%s----------------------------------------------------------------------\n",CVSEDITPREFIX);
-    }
-#endif
-#endif
 	fprintf (fp,"%sEnter Log.  Lines beginning with `%.*s' are removed automatically\n%s\n",
 				CVSEDITPREFIX, CVSEDITPREFIXLEN, CVSEDITPREFIX,CVSEDITPREFIX);
 	if (dir != NULL && *dir)
@@ -505,29 +492,6 @@ int do_verify (char **message, const char *repository)
 				if (fclose (fp) == EOF)
 	    				error (1, errno, "Couldn't close %s", fname);
 			}
-#ifdef CVSSPAM
-#ifdef _WIN32
-#if (CVSNT_SPECIAL_BUILD_FLAG != 0)
-	if (strcasecmp(CVSNT_SPECIAL_BUILD,"Suite")!=0)
-#endif
-	{
-			if (message!=NULL)
-			{
-				if (strstr(*message,"Committed on the Free edition of March Hare Software CVSNT")==NULL)
-				{
-				    if(CGlobalSettings::GetGlobalValue("cvsnt","PServer","HaveBoughtSuite",boughtsuite,sizeof(boughtsuite)))
-						strcpy(boughtsuite,"no");
-					if (strcasecmp(boughtsuite,"yes"))
-					{
-						len=strlen(*message);
-						*message=(char *)xrealloc(*message,len+400);
-						strcat(*message,"\nCommitted on the Free edition of March Hare Software CVSNT Server.\nUpgrade to CVS Suite for more features and support:\nhttp://march-hare.com/cvsnt/");
-					}
-				}
-			}
-    }
-#endif
-#endif
 		}
 
 		/* Delete the temp file  */

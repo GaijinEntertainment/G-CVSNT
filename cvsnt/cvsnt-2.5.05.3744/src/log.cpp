@@ -1795,17 +1795,6 @@ static void log_version (struct log_data *log_data, struct revlist *revlist, RCS
     {
 	/* FIXME: Technically, the log message could contain a null
            byte.  */
-#ifdef CVSSPAM
-#if (CVSNT_SPECIAL_BUILD_FLAG != 0)
-	if (strcasecmp(CVSNT_SPECIAL_BUILD,"Suite")==0)
-	{
-	char *advertpos=NULL;
-	// do not display old advertising messages which are committed by 2.5.04+ client and server
-	if ((advertpos=strstr(p->data,"Committed on the Free edition of March Hare Software CVSNT"))!=NULL)
-		*(advertpos)='\0';
-    }
-#endif
-#endif
 	cvs_output (p->data, 0);
 	if (p->data[strlen (p->data) - 1] != '\n')
 	    cvs_output ("\n", 1);

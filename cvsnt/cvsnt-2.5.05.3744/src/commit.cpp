@@ -363,7 +363,6 @@ int commit (int argc, char **argv)
     int c;
     int err = 0;
     int local = 0;
-	int mhadvertise = 0, mhadvertiseserver = 0;
 
     if (argc == -1)
 		usage (commit_usage);
@@ -389,12 +388,6 @@ int commit (int argc, char **argv)
 	    error (1, 0, "cannot commit files as 'root'");
     }
 #endif /* CVS_BADROOT */
-
-#ifdef _WIN32
-	char boughtsuite[100];
-    if(CGlobalSettings::GetGlobalValue("cvsnt","PServer","HaveBoughtSuite",boughtsuite,sizeof(boughtsuite)))
-		strcpy(boughtsuite,"no");
-#endif
 
     optind = 0;
 	while ((c = getopt (argc, argv, "+cnlRm:M:fF:Db:B:eTi")) != -1)
@@ -430,13 +423,6 @@ int commit (int argc, char **argv)
 		run_module_prog = 0;
 		break;
 	case 'm':
-#ifdef CVSSPAM
-#ifdef _WIN32
-		mhadvertiseserver = 1;
-		if (strcasecmp(boughtsuite,"yes"))
-			mhadvertise = 1;
-#endif
-#endif
 	case 'M':
 #ifdef FORCE_USE_EDITOR
 		use_editor = 1;
@@ -567,26 +553,6 @@ int commit (int argc, char **argv)
 	if (err)
 	    error (1, 0, "correct above errors first!");
 
-#ifdef CVSSPAM
-#if (CVSNT_SPECIAL_BUILD_FLAG != 0)
-	if (strcasecmp(CVSNT_SPECIAL_BUILD,"Suite")!=0)
-#endif
-	{
-	/* We always send some sort of message, even if empty.  */
-	if (mhadvertise)
-	{
-		if (saved_message!=NULL)
-		{
-		size_t saved_message_size=strlen(saved_message);
-		saved_message=(char *)xrealloc(saved_message,saved_message_size+250);
-		}
-		else
-		saved_message=(char *)xmalloc(250);
-		strcat(saved_message,"\nCommitted on the Free edition of March Hare Software CVSNT Client.\nUpgrade to CVS Suite for more features and support:\nhttp://march-hare.com/cvsnt/");
-		size_t saved_message_size=strlen(saved_message);
-	}
-    }
-#endif
 	/* FIXME: is that true?  There seems to be some code in do_editor
 	   which can leave the message NULL.  */
 	option_with_arg ("-m", saved_message);
@@ -722,19 +688,6 @@ int commit (int argc, char **argv)
 	    error (0, 0, "saving log message in %s", fname);
 	    xfree (fname);
 	}
-#ifdef CVSSPAM
-#ifdef _WIN32
-#if (CVSNT_SPECIAL_BUILD_FLAG != 0)
-	if (strcasecmp(CVSNT_SPECIAL_BUILD,"Suite")!=0)
-#endif
-	{
-	if (!mhadvertise)
-	{
-		error(0, 0, "Committed on the Free edition of March Hare Software CVSNT Client\n           Upgrade to CVS Suite for more features and support:\n           http://march-hare.com/cvsnt/");
-	}
-    }
-#endif
-#endif
 	return err;
     }
 
@@ -811,9 +764,9 @@ int commit (int argc, char **argv)
 	}
 
 #if (CVSNT_SPECIAL_BUILD_FLAG != 0)
-	TRACE(3,"commit server_active=%s, mhadvertiseserver=%s, CVSNT_SPECIAL_BUILD=%s",(server_active)?"yes":"no",(mhadvertiseserver)?"yes":"no",CVSNT_SPECIAL_BUILD);
+	TRACE(3,"commit CVSNT_SPECIAL_BUILD=%s",(server_active)?"yes":"no",CVSNT_SPECIAL_BUILD);
 #else
-	TRACE(3,"commit server_active=%s, mhadvertiseserver=%s",(server_active)?"yes":"no",(mhadvertiseserver)?"yes":"no");
+	TRACE(3,"commit server_active=%s",(server_active)?"yes":"no");
 #endif
 	if (server_active)
 	{

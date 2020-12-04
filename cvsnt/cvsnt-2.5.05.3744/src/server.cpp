@@ -6938,19 +6938,6 @@ int postcommand_proc(void *param, const trigger_interface *cb)
 #else
 		TRACE(3,"commit server_active=%s",(server_active)?"yes":"no");
 #endif
-#ifdef CVSSPAM
-#ifdef _WIN32
-		if (server_active)
-		{
-#if (CVSNT_SPECIAL_BUILD_FLAG != 0)
-			if (strcasecmp(CVSNT_SPECIAL_BUILD,"Suite")!=0)
-#endif
-			{
-				error(0, 0, "Committed on the Free edition of March Hare Software CVSNT Server\n           Upgrade to CVS Suite for more features and support:\n           http://march-hare.com/cvsnt/");
-			}
-		}
-#endif
-#endif
 
 	}
 	if(!ret && cb->postcommand)
