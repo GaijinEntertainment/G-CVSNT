@@ -27,18 +27,18 @@ intptr_t start_blob_push_client(const char *url, int port)
   struct hostent *hname = gethostbyname(url);
   memcpy(&server.sin_addr.s_addr, hname->h_addr, hname->h_length);
   server.sin_port = htons(port);
-  if (connect(sockfd, (struct sockaddr *) &server, sizeof(server)) < 0)
+  if (connect(int(sockfd), (struct sockaddr *) &server, sizeof(server)) < 0)
   {
     blob_logmessage(LOG_ERROR, "ERROR connecting to <%s:%d>", url, port);
-    blob_close_socket(sockfd);
+    blob_close_socket(int(sockfd));
     return -1;
   }
   blob_logmessage(LOG_NOTIFY, "Connected to <%s:%d>, connection = %d", url, port, sockfd);
   char greeting[greeting_length+1];
-  if (!recv_exact(sockfd, greeting, greeting_length))
+  if (!recv_exact(int(sockfd), greeting, greeting_length))
   {
     blob_logmessage(LOG_ERROR, "Can't receive greeting");
-    blob_close_socket(sockfd);
+    blob_close_socket(int(sockfd));
     return -1;
   }
 
@@ -46,27 +46,27 @@ intptr_t start_blob_push_client(const char *url, int port)
   {
     greeting[greeting_length] = 0;
     blob_logmessage(LOG_ERROR, "Incorrect greeting <%s>, expected <%s>", greeting, BLOB_PUSH_GREETING_STR);
-    blob_close_socket(sockfd);
+    blob_close_socket(int(sockfd));
     return -1;
   }
-  blob_logmessage(LOG_NOTIFY, "greetings passed <%*s>. Ask for version", int(greeting_length), greeting);
+  blob_logmessage(LOG_NOTIFY, "greetings passed <%.*s>. Ask for version", int(greeting_length), greeting);
 
-  char vers_responce[responce_len+1];
-  if (!send_exact(sockfd, "VERS" BLOB_PUSH_PROTO_VERSION, command_len + vers_command_len)
-     || !recv_exact(sockfd, vers_responce, responce_len))
+  char vers_response[response_len+1];
+  if (!send_exact(int(sockfd), "VERS" BLOB_PUSH_PROTO_VERSION, command_len + vers_command_len)
+     || !recv_exact(int(sockfd), vers_response, response_len))
   {
-    blob_close_socket(sockfd);
+    blob_close_socket(int(sockfd));
     blob_logmessage(LOG_ERROR, "Server socket error %d", blob_get_last_sock_error());
     return -1;
   }
-  if (memcmp(vers_responce, none_responce, responce_len) != 0)
+  if (memcmp(vers_response, none_response, response_len) != 0)
   {
-    vers_responce[responce_len] = 0;
-    blob_logmessage(LOG_ERROR, "Server doesn't accept %s, our version " BLOB_PUSH_PROTO_VERSION, vers_responce);
-    blob_close_socket(sockfd);
+    vers_response[response_len] = 0;
+    blob_logmessage(LOG_ERROR, "Server doesn't accept %s, our version " BLOB_PUSH_PROTO_VERSION, vers_response);
+    blob_close_socket(int(sockfd));
     return -1;
   }
-  blob_set_socket_no_delay(sockfd, true);
+  blob_set_socket_no_delay(int(sockfd), true);
   return sockfd;
 }
 
@@ -74,7 +74,7 @@ bool stop_blob_push_client(intptr_t &sockfd)
 {
   if (sockfd < 0)
     return false;
-  blob_close_socket(sockfd);
+  blob_close_socket(int(sockfd));
   sockfd = -1;
   return true;
 }

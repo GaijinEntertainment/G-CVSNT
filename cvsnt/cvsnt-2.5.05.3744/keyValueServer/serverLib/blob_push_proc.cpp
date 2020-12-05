@@ -17,8 +17,9 @@ using namespace blob_push_proto;
 static bool handle_chck(int socket);
 static bool handle_size(int socket);
 static bool handle_pull(int socket);
+static bool handle_strm(int socket);
 static bool handle_push(int socket);
-static bool send_simple_responce(int socket, const char *resp, int len = responce_len) { return send_exact(socket, resp, len); }
+static bool send_simple_response(int socket, const char *resp, int len = response_len) { return send_exact(socket, resp, len); }
 
 static bool blob_push_thread_proc_int(int socket)
 {
@@ -37,6 +38,9 @@ static bool blob_push_thread_proc_int(int socket)
   } else if (strncmp(commandBuf, push_command, command_len) == 0)
   {
     return handle_push(socket);
+  } else if (strncmp(commandBuf, strm_command, command_len) == 0)
+  {
+    return handle_strm(socket);
   } else if (strncmp(commandBuf, pull_command, command_len) == 0)
   {
     return handle_pull(socket);
@@ -47,7 +51,7 @@ static bool blob_push_thread_proc_int(int socket)
       return false;
     const bool good = memcmp(vers, BLOB_PUSH_PROTO_VERSION, 3) == 0;
     blob_logmessage(LOG_NOTIFY, "%s version, connection=%d", good ? "good" : "bad", socket);
-    return send_simple_responce(socket, good ? none_responce : err_bad_command);
+    return send_simple_response(socket, good ? none_response : err_bad_command);
   } else
   {
     blob_logmessage(LOG_ERROR, "unknown command <%s>", commandBuf);
@@ -63,7 +67,7 @@ static bool handle_chck(int socket)
     return false;
   char hash_type[7], hash_hex_str[65];
   decode_blob_hash_to_hex_hash(commandBuf, hash_type, hash_hex_str);
-  return send_simple_responce(socket, blob_does_hash_blob_exist(hash_type, hash_hex_str) ? have_responce : none_responce);
+  return send_simple_response(socket, blob_does_hash_blob_exist(hash_type, hash_hex_str) ? have_response : none_response);
 }
 
 static bool handle_size(int socket)
@@ -76,11 +80,11 @@ static bool handle_size(int socket)
   uint64_t size = blob_get_hash_blob_size(hash_type, hash_hex_str);
   //maybe check if exist, and send none if not ?
   // but currently client returns 0 in both case
-  char responce[size_responce_len];
-  void *to = responce;
-  memcpy_to(to, size_responce, responce_len);
+  char response[size_response_len];
+  void *to = response;
+  memcpy_to(to, size_response, response_len);
   memcpy_to(to, &size, sizeof(size));
-  return send_simple_responce(socket, responce, size_responce_len);
+  return send_simple_response(socket, response, size_response_len);
 }
 
 
@@ -99,7 +103,53 @@ static bool handle_push(int socket)
   uintptr_t tempBlob = blob_start_push_data(hash_type, hash_hex_str, blob_sz);
   bool ok = true;
   ok &= recv_lambda(socket, blob_sz, [&](const char *buf, int len){ok &= blob_push_data(buf, len, tempBlob);return true;});
-  return send_simple_responce(socket, blob_end_push_data(tempBlob, ok) ? have_responce : err_file_error);
+  if (!ok)
+  {
+    blob_destroy_push_data(tempBlob);
+    return send_simple_response(socket, err_file_error);
+  }
+  return send_simple_response(socket, blob_end_push_data(tempBlob) ? have_response : err_file_error);
+}
+
+static bool handle_strm(int socket)
+{
+  uint8_t commandBuf[push_command_len];
+  if (!recv_exact(socket, commandBuf, strm_command_len))
+    return false;
+
+  char hash_type[7], hash_hex_str[65];
+  decode_blob_hash_to_hex_hash(commandBuf, hash_type, hash_hex_str);
+
+  blob_logmessage(LOG_NOTIFY, "client %d stream pushed %s:%s", socket, hash_type, hash_hex_str);
+
+  uintptr_t tempBlob = blob_start_push_data(hash_type, hash_hex_str, 0);
+  uint16_t chunkSz = 0;
+  bool ok = true;
+  while (1){
+    if (!recv_exact(socket, &chunkSz, 2))
+    {
+      ok = false;
+      break;
+    }
+    if (!chunkSz)
+      break;
+    if (chunkSz == uint16_t(~uint16_t(0)))
+    {
+      ok = false;
+      break;
+    }
+    if (!recv_lambda(socket, chunkSz, [&](const char *buf, int len){ok &= blob_push_data(buf, len, tempBlob);return true;}))
+    {
+      ok = false;
+      break;
+    }
+  }
+  if (!ok)
+  {
+    blob_destroy_push_data(tempBlob);
+    return send_simple_response(socket, err_file_error);
+  }
+  return send_simple_response(socket, blob_end_push_data(tempBlob) ? have_response : err_file_error);
 }
 
 static bool handle_pull(int socket)
@@ -118,26 +168,26 @@ static bool handle_pull(int socket)
 
   uintptr_t readBlob = blob_start_pull_data(hash_type, hash_hex_str, blob_sz);//allows memory mapping
   if (readBlob == 0)
-    return send_simple_responce(socket, none_responce);
+    return send_simple_response(socket, none_response);
 
   uint64_t from = uint64_t(blob_from_chunk)*pull_chunk_size;
   if (request_sz + from > blob_sz)
   {
     blob_end_pull_data(readBlob);
-    return send_simple_responce(socket, err_file_error);
+    return send_simple_response(socket, err_file_error);
   }
 
   int64_t sizeLeft = blob_sz - from;
   sizeLeft = request_sz == 0 ? sizeLeft : std::min((int64_t)request_sz, sizeLeft);
 
-  char take[take_responce_len];
+  char take[take_response_len];
   void *to = take;
-  memcpy_to(to, take_responce, responce_len);
+  memcpy_to(to, take_response, response_len);
   memcpy_to(to, commandBuf, hash_len);//copy hash
   memcpy_to(to, &sizeLeft, sizeof(sizeLeft));
   memcpy_to(to, &blob_from_chunk, sizeof(blob_from_chunk));
 
-  if (!send_exact(socket, take, take_responce_len))
+  if (!send_exact(socket, take, take_response_len))
   {
     blob_end_pull_data(readBlob);
     return false;

@@ -21,7 +21,7 @@ int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const cha
   if (!encode_hash_str_to_blob_hash_s(hash_type, hash_hex_str, blob_hash, sizeof(blob_hash)))
   {
     blob_logmessage(LOG_ERROR, "<%s:%s> is not a valid hash_type:hex pair", hash_type, hash_hex_str);
-    return -1;
+    return 0;
   }
   char command[pull_command_len + command_len];
 
@@ -31,34 +31,34 @@ int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const cha
   memcpy_to(to, blob_hash, hash_len);//copy hash
   memcpy_to(to, &sz, sizeof(uint64_t));
   memcpy_to(to, &chunk, sizeof(chunk));
-  if (!send_exact(sockfd, command, sizeof(command)))
+  if (!send_exact(int(sockfd), command, sizeof(command)))
   {
     stop_blob_push_client(sockfd);
     return -1;
   }
 
-  char responce[responce_len+1];
-  if (!recv_exact(sockfd, responce, responce_len))
+  char response[response_len+1];
+  if (!recv_exact(int(sockfd), response, response_len))
   {
     stop_blob_push_client(sockfd);
     return -1;
   }
-  responce[responce_len] = 0;
-  if (strncmp(responce, none_responce, responce_len) == 0)
+  response[response_len] = 0;
+  if (strncmp(response, none_response, response_len) == 0)
   {
     blob_logmessage(LOG_NOTIFY, "%s:%s is not on server, can't pull", hash_type, hash_hex_str);
-    return -1;
+    return 0;
   }//no such file on server, can't pull data
 
-  if (strncmp(responce, take_responce, responce_len) != 0)
+  if (strncmp(response, take_response, response_len) != 0)
   {
-    blob_logmessage(LOG_ERROR, "unknown or error responce %s on pull request for <%s:%s>", responce, hash_type, hash_hex_str);
-    if (!is_error_responce(responce))
+    blob_logmessage(LOG_ERROR, "unknown or error response %s on pull request for <%s:%s>", response, hash_type, hash_hex_str);
+    if (!is_error_response(response))
       stop_blob_push_client(sockfd);
     return -1;
   }
-  unsigned char got_hash_size_from[take_responce_len-responce_len];
-  if (!recv_exact(sockfd, got_hash_size_from, sizeof(got_hash_size_from)))
+  unsigned char got_hash_size_from[take_response_len-response_len];
+  if (!recv_exact(int(sockfd), got_hash_size_from, sizeof(got_hash_size_from)))
     return -1;
   char got_hash_type[7], got_hash_hex[65];
   decode_blob_hash_to_hex_hash(got_hash_size_from, got_hash_type, got_hash_hex);
@@ -72,7 +72,7 @@ int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const cha
   if (memcmp(got_hash_size_from, blob_hash, hash_len) != 0)
   {
     blob_logmessage(LOG_WARNING, "for pull request for <%s:%s> we got<%s:%s>!", hash_type, hash_hex_str, got_hash_type, got_hash_hex);
-    if (!recv_lambda(sockfd, sz, [&](const char *data, int data_len) {from+=data_len;}))
+    if (!recv_lambda(int(sockfd), sz, [&](const char *data, int data_len) {from+=data_len;}))
     {
       blob_logmessage(LOG_ERROR, "can't skip data");
       stop_blob_push_client(sockfd);
@@ -80,7 +80,7 @@ int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const cha
     return -1;
   }
 
-  if (!recv_lambda(sockfd, sz, [&](const char *data, int data_len) {cb(data, from, data_len);from+=data_len;}))
+  if (!recv_lambda(int(sockfd), sz, [&](const char *data, int data_len) {cb(data, from, data_len);from+=data_len;}))
   {
     blob_logmessage(LOG_ERROR, "can't read data");
     stop_blob_push_client(sockfd);

@@ -1,0 +1,1 @@
+clang-cl -Zi /MD test_client.cpp ../../x64/Release/clientLib.lib

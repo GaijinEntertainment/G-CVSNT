@@ -803,6 +803,9 @@
       <Project>{c2cd3641-0f72-4c10-852b-caa694d28e86}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
+    <ProjectReference Include="keyValueServer\clientLib\clientLib.vcxproj">
+      <Project>{8ed98e97-7abe-4460-8c5b-2b626d4ab724}</Project>
+    </ProjectReference>
     <ProjectReference Include="lib\gnulib.vcxproj">
       <Project>{2b05202e-5dd0-4543-99b9-188a23e8139d}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>

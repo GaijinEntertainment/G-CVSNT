@@ -35,7 +35,7 @@ int main(int argc, const char **argv)
     return 1;
   }
   bool has = false;
-  if (!blob_check_on_server(client, hash_type, hash, has))
+  if (blob_check_on_server(client, hash_type, hash, has) != KVRet::OK)
   {
     blob_logmessage(LOG_ERROR, "Can't check %s", blob_get_last_sock_error());
     return 1;

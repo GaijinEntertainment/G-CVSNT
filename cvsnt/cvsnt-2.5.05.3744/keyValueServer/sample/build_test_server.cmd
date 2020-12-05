@@ -1,0 +1,1 @@
+clang-cl -Zi sample_server.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp  ../sampleImplementation/stub_file_lib.cpp
