@@ -1,6 +1,6 @@
 Microsoft Visual Studio Solution File, Format Version 12.00
-# Visual Studio 14
-VisualStudioVersion = 14.0.25420.1
+# Visual Studio Version 16
+VisualStudioVersion = 16.0.30011.22
 MinimumVisualStudioVersion = 10.0.40219.1
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ufc-crypt", "ufc-crypt\crypt.vcxproj", "{91F671E4-7F2F-4F32-B905-A5A6D1622B9F}"
 EndProject
@@ -114,6 +114,10 @@ EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libxml2", "libxml\win32\libxml2.vcxproj", "{A2BE1C87-2A3B-4252-A388-E19DB50ABA7B}"
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "zstd", "zstd\zstd.vcxproj", "{749F2EAB-B9E4-4A19-9F65-FDDED97FA75D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blake3", "blake3\blake3.vcxproj", "{418F49C2-AAEB-4B87-A65B-158E9945DB3D}"
+EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "ca_blobs_fs", "ca_blobs_fs\ca_blobs_fs.vcxproj", "{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}"
 EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
@@ -959,9 +963,44 @@ Global
 		{749F2EAB-B9E4-4A19-9F65-FDDED97FA75D}.Release|Win32.Build.0 = Release|Win32
 		{749F2EAB-B9E4-4A19-9F65-FDDED97FA75D}.Release|x64.ActiveCfg = Release|x64
 		{749F2EAB-B9E4-4A19-9F65-FDDED97FA75D}.Release|x64.Build.0 = Release|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug - amd64|Win32.ActiveCfg = Debug|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug - amd64|Win32.Build.0 = Debug|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug - amd64|x64.ActiveCfg = Debug|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug - amd64|x64.Build.0 = Debug|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug|Win32.ActiveCfg = Debug|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug|Win32.Build.0 = Debug|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug|x64.ActiveCfg = Debug|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Debug|x64.Build.0 = Debug|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release - amd64|Win32.ActiveCfg = Release|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release - amd64|Win32.Build.0 = Release|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release - amd64|x64.ActiveCfg = Release|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release - amd64|x64.Build.0 = Release|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release|Win32.ActiveCfg = Release|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release|Win32.Build.0 = Release|Win32
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release|x64.ActiveCfg = Release|x64
+		{418F49C2-AAEB-4B87-A65B-158E9945DB3D}.Release|x64.Build.0 = Release|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug - amd64|Win32.ActiveCfg = Debug|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug - amd64|Win32.Build.0 = Debug|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug - amd64|x64.ActiveCfg = Debug|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug - amd64|x64.Build.0 = Debug|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug|Win32.ActiveCfg = Debug|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug|Win32.Build.0 = Debug|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug|x64.ActiveCfg = Debug|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Debug|x64.Build.0 = Debug|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release - amd64|Win32.ActiveCfg = Release|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release - amd64|Win32.Build.0 = Release|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release - amd64|x64.ActiveCfg = Release|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release - amd64|x64.Build.0 = Release|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release|Win32.ActiveCfg = Release|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release|Win32.Build.0 = Release|Win32
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release|x64.ActiveCfg = Release|x64
+		{8D3C11A5-B8D2-4A08-A736-0036A4FA1AA0}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE
+	EndGlobalSection
+	GlobalSection(ExtensibilityGlobals) = postSolution
+		SolutionGuid = {21513734-6966-409D-9A6F-87AD761433D3}
 	EndGlobalSection
 	GlobalSection(DPCodeReviewSolutionGUID) = preSolution
 		DPCodeReviewSolutionGUID = {00000000-0000-0000-0000-000000000000}

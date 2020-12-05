@@ -4,7 +4,7 @@
 #include <string>
 #include <memory>
 #include "fileio.h"
-#include "../blake3/blake3.h"
+#include "../../blake3/blake3.h"
 #include "../content_addressed_fs.h"
 #include "../ca_blob_format.h"
 #include "../calc_hash.h"
@@ -111,7 +111,7 @@ bool stream_push(PushData *fp, const void *data, size_t data_size)
   if (!decode_stream_blob_data(fp->info, (const char*)data, data_size, [&](const void *unpacked_data, size_t sz)
     {blake3_hasher_update(&fp->hasher, unpacked_data, sz);return true;}))
   {
-    fclose(fp->fp);
+    fclose(fp->fp); fp->fp = nullptr;
     blob_fileio_unlink_file(fp->temp_file_name.c_str());
     return false;
   }
@@ -125,7 +125,7 @@ void destroy(PushData *fp)
   std::unique_ptr<PushData> kill(fp);
   if (!fp->fp || uintptr_t(fp->fp) == 1)
     return;
-  fclose(fp->fp);
+  fclose(fp->fp);fp->fp = nullptr;
   blob_fileio_unlink_file(fp->temp_file_name.c_str());
 }
 
@@ -142,7 +142,7 @@ PushResult finish(PushData *fp, char *actual_hash_str)
   }
   if (!fp->fp)
     return PushResult::IO_ERROR;
-  fclose(fp->fp);
+  fclose(fp->fp);fp->fp = nullptr;
 
   char final_hash[64];
   char *final_hash_p = actual_hash_str ? actual_hash_str : final_hash;
@@ -245,9 +245,8 @@ class PullData
 {
 public:
   FILE *fp;
-  std::unique_ptr<char[]> tempBuf;
-  uint64_t pos;
   enum {SIZE = 1<<10};
+  char tempBuf[SIZE];
 };
 
 PullData* start_pull(const char* hash_hex_string, size_t &blob_sz)
@@ -259,24 +258,25 @@ PullData* start_pull(const char* hash_hex_string, size_t &blob_sz)
   FILE* f;
   if (fopen_s(&f, filepath.c_str(), "rb") != 0)
       return nullptr;
-  return new PullData{f, std::make_unique<char[]>(PullData::SIZE), 0};
+  return new PullData{f};
 }
 
 const char *pull(PullData* fp, uint64_t from, size_t &data_pulled)
 {
   if (!fp)
     return nullptr;
-  if (fp->pos != from)
-    fseek(fp->fp, long(int64_t(from) - int64_t(fp->pos)), SEEK_CUR);
-  data_pulled = fread(fp->tempBuf.get(), 1, PullData::SIZE, fp->fp);
-  return fp->tempBuf.get();
+  size_t fppos = ftell(fp->fp);
+  if (fppos != from)
+    fseek(fp->fp, long(int64_t(from) - int64_t(fppos)), SEEK_CUR);
+  data_pulled = fread(fp->tempBuf, 1, PullData::SIZE, fp->fp);
+  return fp->tempBuf;
 }
 
 bool destroy(PullData* fp)
 {
   if (!fp)
     return false;
-  fclose(fp->fp);
+  fclose(fp->fp);fp->fp = nullptr;
   delete fp;
   return true;
 }

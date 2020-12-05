@@ -1,3 +1,4 @@
+#include <stdint.h>
 #include <zlib.h>
 #include <zstd.h>
 #include "../streaming_compressors.h"
@@ -14,9 +15,9 @@ StreamStatus decompress(const char *src, size_t src_size, char *dest, size_t des
   {
     z_stream stream = {0};
     inflateInit(&stream);
-    stream.avail_in = src_size;
+    stream.avail_in = (uint32_t)src_size;
     stream.next_in = (Bytef*)src;
-    stream.avail_out = dest_capacity;
+    stream.avail_out = (uint32_t)dest_capacity;
     stream.next_out = (Bytef*)dest;
     if(inflate(&stream, Z_FINISH)!=Z_STREAM_END)
       return StreamStatus::Error;
@@ -58,9 +59,9 @@ static StreamStatus decode_stream_zlib(z_stream* stream, const char *src, size_t
 {
   while (src_pos < src_size && dest_pos < dest_capacity)
   {
-    stream->avail_in = src_size - src_pos;
+    stream->avail_in = (uint32_t)(src_size - src_pos);
     stream->next_in = (Bytef*)(src + src_pos);
-    stream->avail_out = dest_capacity - dest_pos;
+    stream->avail_out = (uint32_t)(dest_capacity - dest_pos);
     stream->next_out = (Bytef*)(dest + dest_pos);
     int result = inflate(stream, Z_NO_FLUSH);
     dest_pos = dest_capacity - stream->avail_out;
@@ -157,7 +158,7 @@ bool init_compress_stream(char *ctx_, size_t ctx_size, int compression, StreamTy
 size_t compress_bound(char *ctx, size_t src_size)
 {
   if (*(StreamType*)ctx == StreamType::ZLIB)
-    return deflateBound((z_stream*)(ctx+sizeof(StreamType)), src_size);
+    return deflateBound((z_stream*)(ctx+sizeof(StreamType)), (uint32_t)src_size);
   else if (*(StreamType*)ctx == StreamType::ZSTD)
     return ZSTD_compressBound(src_size);
   else if (*(StreamType*)ctx == StreamType::Unpacked)
@@ -171,9 +172,9 @@ StreamStatus compress_stream(char *ctx_, const char *src, size_t src_size, char 
   if (*(StreamType*)ctx_ == StreamType::ZLIB)
   {
     z_stream &stream = *(z_stream *)ctx;
-    stream.avail_in = src_size;
+    stream.avail_in = (uint32_t)src_size;
     stream.next_in = (Bytef*)src;
-    stream.avail_out = dest_size;
+    stream.avail_out = (uint32_t)dest_size;
     stream.next_out = (Bytef*)dest;
     const bool error = deflate(&stream, Z_FINISH) != Z_STREAM_END;
     deflateEnd(&stream);
@@ -218,9 +219,9 @@ static StreamStatus compress_stream_zlib(z_stream* stream, const char *src, size
 {
   while (src_pos < src_size && dest_pos < dest_capacity)
   {
-    stream->avail_in = src_size - src_pos;
+    stream->avail_in = (uint32_t)(src_size - src_pos);
     stream->next_in = (Bytef*)(src + src_pos);
-    stream->avail_out = dest_capacity - dest_pos;
+    stream->avail_out = (uint32_t)(dest_capacity - dest_pos);
     stream->next_out = (Bytef*)(dest + dest_pos);
     int result = inflate (stream, Z_NO_FLUSH);
     dest_pos = dest_capacity - stream->avail_out;
@@ -318,7 +319,7 @@ StreamStatus finalize_compress_stream(char *ctx, char *dest, size_t &dest_pos, s
   if (*(StreamType*)ctx == StreamType::ZLIB)
   {
     z_stream* stream = (z_stream*)(ctx+sizeof(StreamType));
-	stream->avail_out = dest_capacity - dest_pos;
+	stream->avail_out = (uint32_t)(dest_capacity - dest_pos);
 	stream->next_out = (unsigned char *)(dest + dest_pos);
 
 	const int result = deflate (stream, Z_FINISH);

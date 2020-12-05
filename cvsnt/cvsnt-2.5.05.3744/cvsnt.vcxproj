@@ -305,12 +305,6 @@
     </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemGroup>
-    <ClCompile Include="blake3\blake3.c" />
-    <ClCompile Include="blake3\blake3_portable.c" />
-    <ClCompile Include="ca_blobs_fs\src\calc_hash.cpp" />
-    <ClCompile Include="ca_blobs_fs\src\content_addressed_fs.cpp" />
-    <ClCompile Include="ca_blobs_fs\src\fileio.cpp" />
-    <ClCompile Include="ca_blobs_fs\src\streaming_compressors.cpp" />
     <ClCompile Include="src\add.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
@@ -707,9 +701,6 @@
     <ClCompile Include="windows-NT\win32.cpp" />
   </ItemGroup>
   <ItemGroup>
-    <ClInclude Include="blake3\blake3.h" />
-    <ClInclude Include="blake3\blake3_impl.h" />
-    <ClInclude Include="ca_blobs_fs\src\fileio.h" />
     <ClInclude Include="cvsservice\ServiceMsg.h" />
     <ClInclude Include="src\blob_network_processor.h" />
     <ClInclude Include="src\buffer.h" />
@@ -750,6 +741,12 @@
     <None Include="windows-NT\VersionInfoCommon.rc2" />
   </ItemGroup>
   <ItemGroup>
+    <ProjectReference Include="blake3\blake3.vcxproj">
+      <Project>{418f49c2-aaeb-4b87-a65b-158e9945db3d}</Project>
+    </ProjectReference>
+    <ProjectReference Include="ca_blobs_fs\ca_blobs_fs.vcxproj">
+      <Project>{8d3c11a5-b8d2-4a08-a736-0036a4fa1aa0}</Project>
+    </ProjectReference>
     <ProjectReference Include="control-panel\cvscontrol.vcxproj">
       <Project>{03c78f20-271d-4e1b-8440-255e4b2939f3}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
@@ -925,12 +922,6 @@
     <ProjectReference Include="zstd\zstd.vcxproj">
       <Project>{749f2eab-b9e4-4a19-9f65-fdded97fa75d}</Project>
     </ProjectReference>
-  </ItemGroup>
-  <ItemGroup>
-    <MASM Include="blake3\blake3_avx2_x86-64_windows_msvc.asm" />
-    <MASM Include="blake3\blake3_avx512_x86-64_windows_msvc.asm" />
-    <MASM Include="blake3\blake3_sse2_x86-64_windows_msvc.asm" />
-    <MASM Include="blake3\blake3_sse41_x86-64_windows_msvc.asm" />
   </ItemGroup>
   <Import Project="$(VCTargetsPath)\Microsoft.Cpp.targets" />
   <ImportGroup Label="ExtensionTargets">
