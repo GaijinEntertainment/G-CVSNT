@@ -13,8 +13,8 @@
 //we can implement remapping of hashes, or even different hash structure (hash_type->root_folder) with symlinks to same content
 namespace caddressed_fs
 {
-const char *blobs_sub_folder= "/blobs";
-static std::string root_path = blobs_sub_folder;
+const char *blobs_sub_folder= "blobs";
+static std::string root_path = "./blobs";
 static std::string default_tmp_dir = "";
 static bool allow_trust = true;
 void set_allow_trust(bool p){allow_trust = p;}
@@ -26,8 +26,9 @@ void set_root(const char *p)
 {
   if (strncmp(root_path.c_str(), p, strlen(p)) == 0)
     return;
-  root_path = p;
+  root_path = std::string(p) + "/";
   root_path += blobs_sub_folder;
+  blob_fileio_ensure_dir(root_path.c_str());
 }
 
 inline bool make_blob_dirs(std::string &fp)
@@ -82,7 +83,7 @@ PushData* start_push(const char* hash_hex_string)
     return r;
   }
   std::string temp_file_name;
-  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : "");
+  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : root_path.c_str());
   if (!tmpf)
     return nullptr;
   auto r = new PushData{tmpf, std::move(temp_file_name)};
@@ -327,7 +328,7 @@ int64_t repack(const char* hash_hex_string)
     return 0;
   BlobHeader hdr = get_header(zstd_magic, wasHdr.uncompressedLen, BlobHeader::BEST_POSSIBLE_COMPRESSION);
   std::string temp_file_name;
-  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : "");
+  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : root_path.c_str());
   if (!tmpf)
     return 0;
   char cctx[CTX_SIZE];
