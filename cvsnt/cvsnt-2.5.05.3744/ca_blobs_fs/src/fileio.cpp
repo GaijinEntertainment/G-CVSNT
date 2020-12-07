@@ -103,7 +103,7 @@ FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const ch
     unlink(buf);
   } else
   {
-    chmod(buf, 666);//linux create temp files with very limited access writes
+    chmod(buf, 0666);//linux create temp files with very limited access writes
     fn = buf;
   }
   return fp;
