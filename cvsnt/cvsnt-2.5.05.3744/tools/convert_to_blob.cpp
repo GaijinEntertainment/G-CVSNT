@@ -442,7 +442,7 @@ int main(int ac, const char* argv[])
     lock_user = options.arg_or("-user", "not_needed in offline", "User name for lock server");
   auto rootDir = options.arg("-root", "Root dir for CVS");
   init_temp_dir();
-  auto tmpDir = options.arg("-tmp", "Tmp dir for blobs");
+  auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
   if (tmpDir.length() > 1)
     def_tmp_dir = tmpDir.c_str();
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
@@ -476,6 +476,8 @@ int main(int ac, const char* argv[])
   set_root(caddressed_fs::get_default_ctx(), rootDir.c_str());
   if (tmpDir.length() > 1)
     caddressed_fs::set_temp_dir(tmpDir.c_str());
+  else
+    def_tmp_dir = caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx());//use blobs folder for default tmp dir
   mkdir(blobs_dir_path(caddressed_fs::get_default_ctx()).c_str(), 0777);
 
   if (file.length()>0)
