@@ -477,7 +477,10 @@ int main(int ac, const char* argv[])
   if (tmpDir.length() > 1)
     caddressed_fs::set_temp_dir(tmpDir.c_str());
   else
-    def_tmp_dir = caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx());//use blobs folder for default tmp dir
+  {
+    tmpDir = caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx());//use blobs folder for default tmp dir
+    def_tmp_dir = tmpDir.c_str();
+  }
   mkdir(blobs_dir_path(caddressed_fs::get_default_ctx()).c_str(), 0777);
 
   if (file.length()>0)
