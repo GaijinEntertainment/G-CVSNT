@@ -147,7 +147,6 @@ cvsnt_LDADD = \
     ../blake3/libblake3.la \
     ../ca_blobs_fs/libca_blobs_fs.la \
     ../keyValueServer/clientLib/libkv_client_lib.la \
-    ../keyValueServer/serverLib/libkv_server_lib.la \
 	$(zlib_lib) \
 	$(pam_lib) \
 	$(mac_hfs_lib)

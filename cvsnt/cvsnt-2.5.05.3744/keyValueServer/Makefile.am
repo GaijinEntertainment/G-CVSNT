@@ -2,7 +2,9 @@ AM_CPPFLAGS = @PTHREAD_CPPFLAGS@ -DCAFS
 
 kv_server_SOURCES = \
 	sample/sample_server.cpp \
-    sampleImplementation/blob_file_lib.cpp
+    sampleImplementation/blob_file_lib.cpp \
+    serverLib/blob_push_proc.cpp \
+    serverLib/blob_push_server.cpp
 
 bin_PROGRAMS=kv_server
 

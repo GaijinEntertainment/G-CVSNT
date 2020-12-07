@@ -171,7 +171,7 @@ static void process_file_ver(const char *rootDir,
   const char* readData = wasPacked ? begin + sizeof(int) : begin;
   PushResult pr = PushResult::IO_ERROR;
   //just push data as is
-  PushData* pd = start_push(nullptr);
+  PushData* pd = start_push(get_default_ctx(), nullptr);
   BlobHeader hdr = get_header(wasPacked ? zlib_magic : noarc_magic, unpackedSz, 0);
   if (!stream_push(pd, &hdr, sizeof(hdr)) || !stream_push(pd, readData, readDataSz))
   {
@@ -442,7 +442,7 @@ int main(int ac, const char* argv[])
     lock_user = options.arg_or("-user", "not_needed in offline", "User name for lock server");
   auto rootDir = options.arg("-root", "Root dir for CVS");
   init_temp_dir();
-  auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
+  auto tmpDir = options.arg("-tmp", "Tmp dir for blobs");
   if (tmpDir.length() > 1)
     def_tmp_dir = tmpDir.c_str();
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
