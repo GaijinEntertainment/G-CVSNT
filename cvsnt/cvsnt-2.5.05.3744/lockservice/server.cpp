@@ -25,6 +25,7 @@
 #include <vector>
 #ifndef _WIN32
 #include <unistd.h>
+#include <sys/stat.h>
 #endif
 
 #include <cvsapi.h>
