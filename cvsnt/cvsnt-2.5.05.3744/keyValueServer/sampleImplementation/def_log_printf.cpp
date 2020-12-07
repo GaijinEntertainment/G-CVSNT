@@ -5,6 +5,8 @@
 
 void blob_logmessage(int log, const char *fmt,...)
 {
+  if (log < LOG_WARNING)
+    return;
   va_list va;
   va_start(va, fmt);
   vfprintf(log >= LOG_ERROR ? stderr : stdout, fmt, va);
