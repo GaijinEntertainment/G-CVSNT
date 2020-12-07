@@ -363,6 +363,7 @@ static void * uds_thread_proc(void*)
     close(uds);
     return NULL;
   }
+  chmod(uds_lock_socket_name, 0666);
   CServerIo::log(CServerIo::logNotice,"uds %d", uds);
   ::listen(uds, SOMAXCONN);
 
