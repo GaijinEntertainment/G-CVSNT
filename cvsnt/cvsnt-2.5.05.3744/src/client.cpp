@@ -1903,7 +1903,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 
 	    return;
 	}
-
+    if (stored_mode != NULL)
     {
 	    int status = change_mode (filename, mode_string, 1);
 	    if (status != 0)
