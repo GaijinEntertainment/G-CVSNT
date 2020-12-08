@@ -1416,6 +1416,15 @@ struct update_entries_data
     char *timestamp;
 };
 
+time_t get_file_mtime(const char *filename)
+{
+  struct stat sb;
+  if (CVS_LSTAT (filename, &sb) < 0)
+    return 0;
+  return sb.st_mtime;
+}
+static char *time_stamp (time_t mtime, int local);
+
 /* Update the Entries line for this file.  */
 static void update_entries (char *data_arg, List *ent_list, char *short_pathname, char *filename)
 {
@@ -1446,7 +1455,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 #ifdef UTIME_EXPECTS_WRITABLE
     int change_it_back = 0;
 #endif
-
+    time_t file_mtime = 0;
     read_line (&entries_line);
 
     /*
@@ -1741,7 +1750,24 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 				stored_checksum_valid = 0;
 			}
 		}
+        #if _WIN32
+        if (stored_modtime_valid)
+        {
+        	struct _utimbuf t;
 
+        	memset (&t, 0, sizeof (t));
+        	/* There is probably little point in trying to preserved the
+        	   actime (or is there? What about Checked-in?).  */
+        	t.modtime = t.actime = file_mtime = stored_modtime;
+
+        	if (_futime (fd, &t) < 0)
+            {
+        	    error (0, errno, "cannot set time on %s", filename);
+                file_mtime = 0;
+            }
+        	stored_modtime_valid = 0;
+        }
+        #endif
 	    if (close (fd) < 0)
 			error (1, errno, "writing %s", short_pathname);
 	}
@@ -1968,8 +1994,10 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	local_timestamp = data->timestamp;
 	if (local_timestamp == NULL || ts[0] == '+')
 	{
-	    file_timestamp = time_stamp (filename,0);
-	    localtime_timestamp = time_stamp (filename,1);
+        if (file_mtime == 0)
+            file_mtime = get_file_mtime(filename);
+	    file_timestamp = time_stamp (file_mtime,0);
+	    localtime_timestamp = time_stamp (file_mtime,1);
 	}
 	else
 	    file_timestamp = NULL;
@@ -2128,6 +2156,8 @@ void change_utime(const char* filename, time_t timestamp)
 
 static char *time_stamp (time_t mtime, int local)
 {
+  if (mtime == 0)
+    return NULL;
   char *cp;
   char *ts;
 
@@ -2583,8 +2613,9 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
     local_timestamp = data->timestamp;
     if (local_timestamp == NULL || ts[0] == '+')
     {
-        file_timestamp = time_stamp (filename,0);
-	    localtime_timestamp = time_stamp (filename,1);
+        const time_t mtime = get_file_mtime(filename);
+        file_timestamp = time_stamp (mtime,0);
+	    localtime_timestamp = time_stamp (mtime,1);
     }
     else
         file_timestamp = NULL;
