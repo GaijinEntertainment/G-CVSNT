@@ -56,10 +56,52 @@ FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const ch
   return f;
 }
 
+//todo: on windows we can also make mmap files
+class BlobFileIOPullData
+{
+public:
+  FILE *fp;
+  enum {SIZE = 1<<10};
+  char tempBuf[SIZE];
+};
+
+BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_sz)
+{
+  blob_sz = blob_fileio_get_file_size(filepath);
+  if (!blob_sz)
+    return 0;
+  FILE* f;
+  if (fopen_s(&f, filepath, "rb") != 0)
+      return nullptr;
+  return new BlobFileIOPullData{f};
+}
+
+const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, size_t &data_pulled)
+{
+  if (!fp)
+    return nullptr;
+  size_t fppos = ftell(fp->fp);
+  if (fppos != from)
+    fseek(fp->fp, long(int64_t(from) - int64_t(fppos)), SEEK_CUR);
+  data_pulled = fread(fp->tempBuf, 1, BlobFileIOPullData::SIZE, fp->fp);
+  return fp->tempBuf;
+}
+
+bool blobe_fileio_destroy(BlobFileIOPullData* fp)
+{
+  if (!fp)
+    return false;
+  fclose(fp->fp);fp->fp = nullptr;
+  delete fp;
+  return true;
+}
+
 #else
 #include <sys/types.h>
 #include <sys/stat.h>
 #include <unistd.h>
+#include <fcntl.h>
+#include <sys/mman.h>
 
 size_t blob_fileio_get_file_size(const char* fn)
 {
@@ -108,4 +150,48 @@ FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const ch
   }
   return fp;
 }
+
+//memory mapped files
+
+class BlobFileIOPullData
+{
+public:
+  const char* begin;
+  uint64_t size;
+};
+
+BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_sz)
+{
+  blob_sz = blob_fileio_get_file_size(filepath);
+  if (!blob_sz)
+    return 0;
+  int fd = open(filepath, O_RDONLY);
+  if (fd == -1)
+    return 0;
+
+  const char* begin = (const char*)(mmap(NULL, blob_sz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
+  close(fd);
+  return new BlobFileIOPullData{begin, blob_sz};
+}
+
+const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, size_t &data_pulled)
+{
+  if (!fp)
+    return nullptr;
+  const int64_t left = fp->size - from;
+  if (left < 0)
+    return nullptr;
+  data_pulled = left;
+  return fp->begin;
+}
+
+bool blobe_fileio_destroy(BlobFileIOPullData* up)
+{
+  if (!up)
+    return false;
+  munmap((void*)up->begin, up->size);
+  delete up;
+  return true;
+}
+
 #endif

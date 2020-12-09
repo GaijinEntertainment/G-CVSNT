@@ -14,3 +14,9 @@ extern bool blob_fileio_rename_file(const char*from, const char*to);
 extern void blob_fileio_unlink_file(const char*f);
 //with tmp_path = nullptr /tmp will be used on non-Windows, on windows we will use default temp dir
 extern FILE* blob_fileio_get_temp_file(std::string &fn, const char *tmp_path=nullptr, const char *mode="wb");
+
+class BlobFileIOPullData;
+BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_sz);
+const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, size_t &data_pulled);
+bool blobe_fileio_destroy(BlobFileIOPullData* fp);
+

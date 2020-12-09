@@ -190,55 +190,12 @@ PushResult finish(PushData *fp, char *actual_hash_str)
   return blob_fileio_rename_file(fp->temp_file_name.c_str(), filepath.c_str()) ? PushResult::OK : PushResult::IO_ERROR;
 }
 
-#if !_WIN32
-//memory mapped files
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-#include <unistd.h>
-
-class PullData
-{
-public:
-  const char* begin;
-  uint64_t size;
-};
-
 PullData* start_pull(const context *ctx, const char* hash_hex_string, size_t &blob_sz)
 {
-  std::string filepath = get_file_path(ctx->root_path, hash_hex_string);
-  blob_sz = blob_fileio_get_file_size(filepath.c_str());
-  if (!blob_sz)
-    return 0;
-  int fd = open(filepath.c_str(), O_RDONLY);
-  if (fd == -1)
-    return 0;
-
-  const char* begin = (const char*)(mmap(NULL, blob_sz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
-  close(fd);
-  return new PullData{begin, blob_sz};
+  return (PullData*)blobe_fileio_start_pull(get_file_path(ctx->root_path, hash_hex_string).c_str(), blob_sz);
 }
-
-const char *pull(PullData* fp, uint64_t from, size_t &data_pulled)
-{
-  if (!fp)
-    return nullptr;
-  const int64_t left = fp->size - from;
-  if (left < 0)
-    return nullptr;
-  data_pulled = left;
-  return fp->begin;
-}
-
-bool destroy(PullData* up)
-{
-  if (!up)
-    return false;
-  munmap((void*)up->begin, up->size);
-  delete up;
-  return true;
-}
+const char *pull(PullData* fp, uint64_t from, size_t &data_pulled){return blobe_fileio_pull((BlobFileIOPullData*)fp, from, data_pulled);}
+bool destroy(PullData* up) { return blobe_fileio_destroy((BlobFileIOPullData*)up);}
 
 bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash_len)
 {
@@ -246,91 +203,34 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
     return false;
   hash_hex_str[0] = 0;hash_hex_str[hash_len-1] = 0;
 
-  int fd = open(filename, O_RDONLY);
-  if (fd == -1)
-    return 0;
-  const size_t blob_sz = blob_fileio_get_file_size(filename);
-  blake3_hasher hasher;
-  blake3_hasher_init(&hasher);
-
-  const char* begin = (const char*)(mmap(NULL, blob_sz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
-  close(fd);
-  blake3_hasher_update(&hasher, begin, blob_sz);
-  munmap((void*)begin, blob_sz);
-  unsigned char digest[32];
-  blake3_hasher_finalize(&hasher, digest, sizeof(digest));
-  bin_hash_to_hex_string(digest, hash_hex_str);
-  return true;
-}
-
-#else
-//file io
-//todo: on windows we can also make mmap files
-class PullData
-{
-public:
-  FILE *fp;
-  enum {SIZE = 1<<10};
-  char tempBuf[SIZE];
-};
-
-PullData* start_pull(const context *ctx, const char* hash_hex_string, size_t &blob_sz)
-{
-  std::string filepath = get_file_path(ctx->root_path, hash_hex_string);
-  blob_sz = blob_fileio_get_file_size(filepath.c_str());
-  if (!blob_sz)
-    return 0;
-  FILE* f;
-  if (fopen_s(&f, filepath.c_str(), "rb") != 0)
-      return nullptr;
-  return new PullData{f};
-}
-
-const char *pull(PullData* fp, uint64_t from, size_t &data_pulled)
-{
-  if (!fp)
-    return nullptr;
-  size_t fppos = ftell(fp->fp);
-  if (fppos != from)
-    fseek(fp->fp, long(int64_t(from) - int64_t(fppos)), SEEK_CUR);
-  data_pulled = fread(fp->tempBuf, 1, PullData::SIZE, fp->fp);
-  return fp->tempBuf;
-}
-
-bool destroy(PullData* fp)
-{
-  if (!fp)
-    return false;
-  fclose(fp->fp);fp->fp = nullptr;
-  delete fp;
-  return true;
-}
-
-bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash_len)
-{
-  if (hash_len < 64)
-    return false;
-  hash_hex_str[0] = 0;hash_hex_str[hash_len-1] = 0;
-  FILE*fp;
-  if (fopen_s(&fp, filename, "rb"))
+  size_t blob_sz;
+  BlobFileIOPullData* pd = blobe_fileio_start_pull(filename, blob_sz);
+  if (!pd)
     return false;
   blake3_hasher hasher;
   blake3_hasher_init(&hasher);
-  char buf[16384];
-  while (1)
-  {
-    size_t read = fread(buf, 1, sizeof(buf), fp);
-    blake3_hasher_update(&hasher, buf, read);
-    if (read < sizeof(buf))
+  uint64_t at = 0;
+  bool ok = true;
+
+  do {
+    size_t data_pulled = 0;
+    const char *data = blobe_fileio_pull(pd, at, data_pulled);
+    if (!data)
+    {
+      ok = false;
       break;
-  };
-  fclose(fp);
+    }
+    at += data_pulled;
+  } while(at < blob_sz);
+
   unsigned char digest[32];
   blake3_hasher_finalize(&hasher, digest, sizeof(digest));
   bin_hash_to_hex_string(digest, hash_hex_str);
-  return true;
+
+  if (!blobe_fileio_destroy(pd))
+    return false;
+  return ok;
 }
-#endif
 
 int64_t repack(const context *ctx, const char* hash_hex_string)
 {
