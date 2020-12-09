@@ -962,7 +962,8 @@ AC_CONFIG_FILES([Makefile \
       blake3/Makefile \
       ca_blobs_fs/Makefile \
       keyValueServer/clientLib/Makefile \
-      keyValueServer/Makefile \
+      keyValueServer/proxy/Makefile \
+      keyValueServer/server/Makefile \
 	  cvsapi/Makefile \
 	  cvsapi/db/Makefile \
 	  cvsapi/mdns/Makefile \

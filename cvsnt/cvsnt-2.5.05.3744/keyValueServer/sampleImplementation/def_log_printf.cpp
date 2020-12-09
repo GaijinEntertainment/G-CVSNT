@@ -3,9 +3,13 @@
 #include <stdarg.h>
 #include "../blob_push_log.h"
 
+#ifndef BLOB_LOG_LEVEL
+#define BLOB_LOG_LEVEL LOG_WARNING
+#endif
+
 void blob_logmessage(int log, const char *fmt,...)
 {
-  if (log < LOG_WARNING)
+  if (log < BLOB_LOG_LEVEL)
     return;
   va_list va;
   va_start(va, fmt);

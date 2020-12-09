@@ -1,0 +1,1 @@
+clang-cl /MD -DCAFS -Zi cafs_server.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp  ../sampleImplementation/blob_file_lib.cpp ../../x64/Release/ca_blobs_fs.lib  ../../x64/Release/blake3.lib  ../../x64/Release/zlib.lib  ../../x64/Release/zstd.lib 

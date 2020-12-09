@@ -1,0 +1,12 @@
+AM_CPPFLAGS = @PTHREAD_CPPFLAGS@ -std=c++17
+cafs_proxy_server_SOURCES = \
+	free_disk_space.cpp \
+    cafs_proxy_server.cpp \
+    proxy_file_lib.cpp \
+    ../../ca_blobs_fs/src/fileio.cpp \
+    ../serverLib/blob_push_proc.cpp \
+    ../serverLib/blob_push_server.cpp
+
+bin_PROGRAMS=cafs_proxy_server
+
+cafs_proxy_server_LDADD = -lstdc++fs ../clientLib/libkv_client_lib.la @PTHREAD_LIBS@ 
