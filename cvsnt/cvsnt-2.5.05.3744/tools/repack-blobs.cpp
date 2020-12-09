@@ -73,7 +73,7 @@ void BlobProcessor::processor_thread_loop()
     process_blob(task.c_str());
 }
 
-static void process_sha_files_directory(const char *dir, unsigned char sha0, unsigned char sha1, time_t start_time)
+static void process_sha_files_directory(const char *dir, time_t start_time)
 {
   char hash[65];hash[64]=0;
   while (processor.is_inited() && maxQueuedItems < processed_files-affected_files)
@@ -83,29 +83,28 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
     if (entry.is_directory())
       continue;
     std::string filename = entry.path().filename().string();
-    if (filename.length()!=64-4)
+    if (filename.length()!=64)
     {
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
       continue;
     }
     if (start_time == 0 || get_file_mtime(entry.path().c_str()) > start_time)
     {
-      std::snprintf(hash, sizeof(hash), "%02x%02x%.60s", sha0, sha1, filename.c_str());
       ++processed_files;
       if (processor.is_inited())
-        processor.emplace(std::string(hash));
+        processor.emplace(std::move(filename));
       else
         process_blob(hash);
     }
   }
 }
 
-inline unsigned char decode_symbol(unsigned char s, bool &err)
+inline bool is_hex_symbol(unsigned char s)
 {
-  if (s >= '0' && s <= '9') return s-'0';
-  if (s >= 'a' && s <= 'f') return s-'a'+10;
-  err = true;
-  return 0;
+  if (s >= '0' && s <= '9') return true;
+  if (s >= 'a' && s <= 'f') return true;
+  if (s >= 'A' && s <= 'F') return true;
+  return false;
 }
 
 static void process_sha_directory(time_t start_time)
@@ -116,18 +115,9 @@ static void process_sha_directory(time_t start_time)
   {
     if (!entry.is_directory())
       continue;
-    auto checkShaDirName = [](const std::string &dirName, unsigned char &symbol)
-    {
-      if (dirName.length() != 2)
-        return false;
-      bool err = false;
-      symbol = (decode_symbol(dirName[0], err)<<4)|(decode_symbol(dirName[1], err));
-      if (err)
-        return false;
-      return true;
-    };
-    unsigned char sha0;
-    if (!checkShaDirName(entry.path().filename().string(), sha0))
+    auto checkShaDirName = [](const std::string &dirName)
+    { return (dirName.length() == 2) && is_hex_symbol(dirName[0]) && is_hex_symbol(dirName[1]); };
+    if (!checkShaDirName(entry.path().filename().string()))
     {
       printf("[E] <%s>(%s) is not a sha directory!\n", entry.path().string().c_str(), entry.path().filename().string().c_str());
       continue;
@@ -135,13 +125,12 @@ static void process_sha_directory(time_t start_time)
     printf("dir <%d/255> %s scheduled, %d\n", dirI++, entry.path().string().c_str(), (int)processed_files);
     for (const auto & entry2 : fs::directory_iterator(entry.path()))
     {
-      unsigned char sha1;
-      if (!checkShaDirName(entry2.path().filename().string(), sha1))
+      if (!checkShaDirName(entry2.path().filename().string()))
       {
         printf("[E] <%s>(%s) is not a sha directory!\n", entry2.path().string().c_str(), entry2.path().filename().string().c_str());
         continue;
       }
-      process_sha_files_directory(entry2.path().string().c_str(), sha0, sha1, start_time);
+      process_sha_files_directory(entry2.path().string().c_str(), start_time);
     }
   }
 }

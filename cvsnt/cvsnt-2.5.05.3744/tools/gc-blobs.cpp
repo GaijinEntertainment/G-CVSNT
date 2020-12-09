@@ -43,6 +43,7 @@ inline unsigned char decode_symbol(unsigned char s, bool &err)
 {
   if (s >= '0' && s <= '9') return s-'0';
   if (s >= 'a' && s <= 'f') return s-'a'+10;
+  if (s >= 'A' && s <= 'F') return s-'A'+10;
   err = true;
   return 0;
 }
@@ -173,7 +174,7 @@ static void process_directory(const char *rootDir, const char *dir)
   }
 }
 
-static void process_sha_files_directory(const char *dir, unsigned char sha0, unsigned char sha1)
+static void process_sha_files_directory(const char *dir)
 {
   for (const auto & entry : fs::directory_iterator(dir))
   {
@@ -181,15 +182,15 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
       continue;
     std::string filename = entry.path().filename().string();
 
-    if (filename.length()!=64-4)
+    if (filename.length()!=64)
     {
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
       continue;
     }
     bool err = false;
-    ShaKey k;k.v.hash[0] = sha0;k.v.hash[1] = sha1;
-    for (int i = 0; i < 30; ++i)
-      k.v.hash[i+2] = (decode_symbol(filename[i*2], err)<<4)|(decode_symbol(filename[i*2+1], err));//strtol(sha+i*2, sha+i*2+2, 16);//can be
+    ShaKey k;
+    for (int i = 0; i < 32; ++i)
+      k.v.hash[i] = (decode_symbol(filename[i*2], err)<<4)|(decode_symbol(filename[i*2+1], err));//strtol(sha+i*2, sha+i*2+2, 16);//can be
     if (err)
     {
       printf("[E] <%s> is not a sha blob!\n", filename.c_str());
@@ -202,6 +203,14 @@ static void process_sha_files_directory(const char *dir, unsigned char sha0, uns
   }
 }
 
+inline bool is_hex_symbol(unsigned char s)
+{
+  if (s >= '0' && s <= '9') return true;
+  if (s >= 'a' && s <= 'f') return true;
+  if (s >= 'A' && s <= 'F') return true;
+  return false;
+}
+
 static void process_sha_directory()
 {
   std::string dirPath = caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx());
@@ -209,18 +218,9 @@ static void process_sha_directory()
   {
     if (!entry.is_directory())
       continue;
-    auto checkShaDirName = [](const std::string &dirName, unsigned char &symbol)
-    {
-      if (dirName.length() != 2)
-        return false;
-      bool err = false;
-      symbol = (decode_symbol(dirName[0], err)<<4)|(decode_symbol(dirName[1], err));
-      if (err)
-        return false;
-      return true;
-    };
-    unsigned char sha0;
-    if (!checkShaDirName(entry.path().filename().string(), sha0))
+    auto checkShaDirName = [](const std::string &dirName)
+    { return (dirName.length() == 2) && is_hex_symbol(dirName[0]) && is_hex_symbol(dirName[1]); };
+    if (!checkShaDirName(entry.path().filename().string()))
     {
       printf("[E] <%s>(%s) is not a sha directory!\n", entry.path().string().c_str(), entry.path().filename().string().c_str());
       continue;
@@ -228,13 +228,12 @@ static void process_sha_directory()
     printf("process sha dir <%s>\n", entry.path().string().c_str());
     for (const auto & entry2 : fs::directory_iterator(entry.path()))
     {
-      unsigned char sha1;
-      if (!checkShaDirName(entry2.path().filename().string(), sha1))
+      if (!checkShaDirName(entry2.path().filename().string()))
       {
         printf("[E] <%s>(%s) is not a sha directory!\n", entry2.path().string().c_str(), entry2.path().filename().string().c_str());
         continue;
       }
-      process_sha_files_directory(entry2.path().string().c_str(), sha0, sha1);
+      process_sha_files_directory(entry2.path().string().c_str());
     }
   }
 }
@@ -329,13 +328,13 @@ int main(int ac, const char* argv[])
       {
         char buf[1024];
         snprintf(buf, sizeof(buf),
-         "%s/%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
-         caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx()).c_str(), HASH_LIST(i.v.hash));
+         "%s/%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x",
+         caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx()).c_str(), i.v.hash[0], i.v.hash[1], HASH_LIST(i.v.hash));
         printf("deleting <%s>...%s\n", buf, unlink(buf) ? "ERR" : "OK");
       } else
         printf(
-         "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n",
-          HASH_LIST(i.v.hash));
+         "%02x/%02x/%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x%02x\n",
+          i.v.hash[0], i.v.hash[1], HASH_LIST(i.v.hash));
     }
   }
 
