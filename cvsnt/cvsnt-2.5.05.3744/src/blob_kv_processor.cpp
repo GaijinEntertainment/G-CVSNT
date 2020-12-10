@@ -38,7 +38,7 @@ inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const c
       {
         if (dst_pos && r == KVRet::OK)
           r = blob_stream_to_server(*strm, bufOut, dst_pos);
-        dst_pos = 0; dst_capacity = sizeof(bufOut);
+        dst_pos = 0; dst_capacity = sizeof(bufOut); dst = bufOut;
         return StreamStatus::Continue;
       }
    , 6, blob_binary_compressed ? StreamType::ZSTD : StreamType::Unpacked);
