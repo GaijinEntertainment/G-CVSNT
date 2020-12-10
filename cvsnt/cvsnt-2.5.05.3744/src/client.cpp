@@ -5646,7 +5646,10 @@ void finish_send_blob_file(const char *file, const char *hash_encoded)
 {
   struct stat sb;
   if (CVS_STAT (file, &sb) < 0)
-    error (1, errno, "cannot stat %s", file);
+  {
+    error (0, errno, "file disappeared during commit %s", file);
+    return;
+  }
 
   std::unique_lock<std::mutex> lock(files_send_mutex);
   auto &res = files_send[file];
@@ -5663,10 +5666,16 @@ bool is_blob_file_sent(const char *file, char *hash_encoded)
     return false;
   struct stat sb;
   if (CVS_STAT (file, &sb) < 0)
-    error (1, errno, "cannot stat %s", file);
+  {
+    error (0, errno, "file disappeared during commit %s", file);
+    return false;
+  }
   memcpy(hash_encoded, it->second.hash, 64);
   if (it->second.fsz != sb.st_size || it->second.mtime != sb.st_mtime)
-    error (1, errno, "file %s changed during commit", file);
+  {
+    error (0, errno, "file %s changed during commit", file);
+    return false;
+  }
   return true;
 }
 
