@@ -156,7 +156,7 @@ bool blob_push_data(const void *data, size_t data_size, uintptr_t up)
     return true;
   if (!data)
     return false;
-  PushData *pd = (PushData*)pd;
+  PushData *pd = (PushData*)up;
   if (!pd->ok)//why bother stream data after error
     return false;
   auto ret = blob_stream_to_server(*pd->ss, data, data_size);
