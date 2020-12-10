@@ -77,11 +77,11 @@ struct BackgroundProcessor
       queue.emplace(std::move(task));
     }
   }
-  std::vector<std::thread> threads;//soa
+  concurrent_queue<BlobTask> queue;
   std::vector<std::unique_ptr<BlobNetworkProcessor>> clients;//soa
+  std::vector<std::thread> threads;//soa
   bool uploadEnabled = false;
 
-  concurrent_queue<BlobTask> queue;
   std::string base_repo;
   protected:
 #if defined(_WIN32) && 0
@@ -110,7 +110,7 @@ void BackgroundProcessor::init()
   if (base_repo[base_repo.length()] != '/')
     base_repo += "/";
   clients.resize(std::max(1, threads_count));
-  bool use_http = strcmp(url, "http://") == 0;
+  bool use_http = strstr(url, "http://") == url;
   int http_port = use_http ? port : 80;
   uploadEnabled = true;
   for (auto &cli : clients)
@@ -226,7 +226,7 @@ static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask
   std::string err;
   if (!processor->upload(fullPath.c_str(), task.compress, hash, err))
   {
-    printf("can't upload file <%s>, err = %s\n", fullPath.c_str(), err.c_str());
+    fprintf(stderr, "can't upload file <%s>, err = %s\n", fullPath.c_str(), err.c_str());
     return false;
   }
   finish_send_blob_file(task.filename.c_str(), hash);

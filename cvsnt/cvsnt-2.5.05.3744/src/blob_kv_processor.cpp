@@ -1,3 +1,4 @@
+#include <sstream>
 #include "blob_network_processor.h"
 #include "sha_blob_reference.h"
 #include <../keyValueServer/include/blob_client_lib.h>
@@ -5,8 +6,9 @@
 
 void error(int, int, const char*, ...);
 
-inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const char *hash, bool blob_binary_compressed)
+inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const char *hash, bool blob_binary_compressed, std::string &err)
 {
+  auto output = std::stringstream("");
   using namespace caddressed_fs;
   using namespace streaming_compression;
   FILE* rf = fopen(file, "rb");
@@ -16,7 +18,7 @@ inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const c
   StreamToServerData *strm = start_blob_stream_to_server(client, HASH_TYPE_REV_STRING, hash);
   if (!strm)
   {
-    error(1,0, "Can't start sending binary blob data for %s", file);
+    output << "Can't start sending binary blob data for " << file; err = output.str();
     return client < 0 ? KVRet::Fatal : KVRet::Error;
   }
 
@@ -46,27 +48,28 @@ inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const c
 
   if (st != StreamStatus::Finished)
   {
-    error(1,0, "Can't compress binary blob for %s", file);
+    output << "Can't compress binary blob for " << file << "\n";
     if (r == KVRet::OK)
       r = KVRet::Error;
   }
   uint8_t digest[32];char real_hash[65];real_hash[0]=real_hash[64]=0;
   if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string(digest, real_hash))
   {
-    error(1,0, "Can't calc hash for %s", file);
+    output << "Can't calc hash for " << file;
     if (r == KVRet::OK)
       r = KVRet::Error;
   }
   if (memcmp(real_hash, hash, 64))
   {
-    error(1,0, "File %s changed it's hash from %s to %s. Failing", file, hash, real_hash);
+    output << "File " << file << " changed it's hash from " << hash << " to "<<real_hash<<". Failing!\n";
     if (r == KVRet::OK)
       r = KVRet::Error;
   }
   if (r == KVRet::Fatal || (r = finish_blob_stream_to_server(client, strm, r == KVRet::OK)) == KVRet::Fatal)
     stop_blob_push_client(client);
   if (r != KVRet::OK)
-    error(1,0, "Can't send binary blob for %s", file);
+    output << "Can't send binary blob data for " << file;
+  err = output.str();
   return r;
 }
 
@@ -112,7 +115,7 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     }
     if (sz > 0)//already on server
       return true;
-    KVRet r = send_blob_file_data_net(client, file, hex_hash, compress);
+    KVRet r = send_blob_file_data_net(client, file, hex_hash, compress, err);
     if (r == KVRet::Fatal)
       init();
     return r == KVRet::OK;

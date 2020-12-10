@@ -220,6 +220,7 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
       ok = false;
       break;
     }
+    blake3_hasher_update(&hasher, data, data_pulled);
     at += data_pulled;
   } while(at < blob_sz);
 
