@@ -122,7 +122,11 @@ static bool handle_push(void *ctx, int socket)
 
   uintptr_t tempBlob = blob_start_push_data(ctx, hash_type, hash_hex_str, blob_sz);
   bool ok = true;
-  ok &= recv_lambda(socket, blob_sz, [&](const char *buf, int len){ok &= blob_push_data(buf, len, tempBlob);return true;});
+  if (!recv_lambda(socket, blob_sz, [&](const char *buf, int len){ok &= blob_push_data(buf, len, tempBlob);return true;}))
+  {
+    blob_destroy_push_data(tempBlob);
+    return false;
+  }
   if (!ok)
   {
     blob_destroy_push_data(tempBlob);
@@ -148,8 +152,8 @@ static bool handle_strm(void *ctx, int socket)
   while (1){
     if (!recv_exact(socket, &chunkSz, 2))
     {
-      ok = false;
-      break;
+      blob_destroy_push_data(tempBlob);
+      return false;
     }
     if (!chunkSz)
       break;
@@ -160,8 +164,8 @@ static bool handle_strm(void *ctx, int socket)
     }
     if (!recv_lambda(socket, chunkSz, [&](const char *buf, int len){ok &= blob_push_data(buf, len, tempBlob);return true;}))
     {
-      ok = false;
-      break;
+      blob_destroy_push_data(tempBlob);
+      return false;
     }
   }
   if (!ok)
@@ -226,7 +230,10 @@ static bool handle_pull(void *ctx, int socket)
     from += data_pulled;
     sizeLeft -= data_pulled;
     if (!send_exact(socket, buf, data_pulled))
+    {
+      blob_end_pull_data(readBlob);
       return false;
+    }
   }
   blob_end_pull_data(readBlob);
   return true;
