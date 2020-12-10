@@ -1,4 +1,4 @@
-#if defined(BLAKE3_DISPATCH)
+#if !defined(BLAKE3_NO_DISPATCH)
 
 #include <stdbool.h>
 #include <stddef.h>

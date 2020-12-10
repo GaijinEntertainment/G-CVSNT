@@ -49,7 +49,7 @@ enum blake3_flags {
 //#define BLAKE3_NO_AVX2
 //#define BLAKE3_NO_SSE41
 //#define BLAKE3_NO_SSE2
-#if !defined(BLAKE3_NO_DISPATCH)
+#if defined(BLAKE3_NO_DISPATCH)
 #if __AVX512__ && !defined(BLAKE3_NO_AVX512)
   #define BLAKE3_REQUIRE_AVX512
 #elif __AVX2__ && !defined(BLAKE3_NO_AVX2)
@@ -96,7 +96,7 @@ inline size_t blake3_simd_degree(void) {return 4;}
 #define blake3_compress_in_place blake3_compress_in_place_portable
 #define blake3_compress_xof blake3_compress_xof_portable
 #define blake3_hash_many blake3_hash_many_neon
-#elif defined(BLAKE3_DISPATCH)
+#elif !defined(BLAKE3_NO_DISPATCH)
 //use blake3_dispatch.c
 size_t blake3_simd_degree(void);
 #else
