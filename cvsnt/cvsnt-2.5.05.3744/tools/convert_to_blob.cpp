@@ -316,7 +316,7 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
       FILE *tmpf = cvs_temp_file (&tempFilename, "wb");
       if (tmpf)
       {
-        if (fwrite(rcsData.c_str(), 1, rcsData.length(), tmpf) == rcsData.length())
+        if (fwrite(rcsData.c_str(), 1, rcsData.length()-1, tmpf) == rcsData.length()-1)
         {
           change_file_mode(tempFilename, rcs_mode);
           if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
