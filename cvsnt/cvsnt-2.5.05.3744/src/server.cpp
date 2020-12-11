@@ -878,6 +878,8 @@ static int supported_response (char *name)
     return 0;
 }
 
+static void send_blob_url_to_client();
+
 static void serve_valid_responses (char *arg)
 {
     char *p = arg;
@@ -936,6 +938,7 @@ static void serve_valid_responses (char *arg)
 		compat_level = 1; /* CVSNT client */
 	else
 		compat_level = 0; /* Legacy client */
+    send_blob_url_to_client();
 	TRACE(3,"Client compatibility level is %d",compat_level);
 }
 
@@ -3235,6 +3238,23 @@ static void output_dir(const char *update_dir, const char *repository)
 	buf_output0(buf_to_net,"/");
 }
 
+static void send_blob_url_to_client()
+{
+  char buffer[256];
+  if(CGlobalSettings::GetGlobalValue("cvsnt","PServer","BlobURL",buffer,sizeof(buffer)))
+  {
+    TRACE(3,"Client blob url (PServer/BlobURL) is not defined");
+    return;
+  }
+  TRACE(3,"Try Client blob url %s", buffer);
+  if (supported_response("Blob-url"))
+  {
+    TRACE(3,"Client blob url %s", buffer);
+    buf_output0(buf_to_net, "Blob-url ");
+    buf_output0(buf_to_net, buffer);
+    buf_output0(buf_to_net, "\n");
+  }
+}
 /* This feeds temporary renames back to the client */
 int send_rename_to_client(const char *oldfile, const char *newfile)
 {

@@ -2097,6 +2097,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 void add_download_queue(const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp);
 
 int blob_concurrency_download_level = -1;
+char blob_default_download_url[256] = {0};
 char blob_download_url[256] = {0};
 int blob_download_port = -1;
 
@@ -2108,7 +2109,13 @@ void get_download_source(const char *&url, int &port, const char *&auth_user, co
   auth_passwd = current_parsed_root->password;
   if (blob_download_port >= 0)
     port = blob_download_port;
-  else
+  else if (blob_default_download_url[0])
+  {
+    char *portstr = strstr(blob_default_download_url, "@");
+    if (portstr)
+      portstr[0] = 0;
+    blob_download_port = port = (portstr ? atoi(portstr+1) : 2403);
+  } else
   {
     port = 2403;
     if ((cp = getenv ("CVS_BLOBS_PORT")) != NULL)
@@ -2120,8 +2127,9 @@ void get_download_source(const char *&url, int &port, const char *&auth_user, co
     threads_count = atoi(cp);
   if (blob_download_url[0])
     url = blob_download_url;
-  else
-  {
+  else if (blob_default_download_url[0])
+    url = blob_default_download_url;
+  else {
     url = current_parsed_root->hostname;
     if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)//we don't do copy, as we dont call other getenv
       url = cp;
@@ -2802,6 +2810,12 @@ static void handle_rcs_diff (char *args, int len)
     dat.existp = UPDATE_ENTRIES_EXISTING_OR_NEW;
     dat.timestamp = NULL;
     call_in_directory (args, update_entries, (char *)&dat);
+}
+
+static void handle_blob_url (char *args, int len)
+{
+   memcpy(blob_default_download_url, args, len);
+   blob_default_download_url[len] = 0;
 }
 
 static void update_baserev(char *data, List *ent_list, char *short_pathname, char *filename)
@@ -3889,6 +3903,7 @@ struct response responses[] =
     RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
     RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
     RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, rs_optional),
+    RSP_LINE("Blob-url", handle_blob_url, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
     RSP_LINE("Updated-meta", handle_updated_meta, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Created", handle_created, proxy_updated, response_type_normal, rs_optional),
