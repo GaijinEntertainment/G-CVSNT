@@ -238,8 +238,8 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
     while ((tmpf = download_blob(cc->cs, tmpfn, htype, hhex, pulledSz)) == nullptr && pulledSz>0)
     {
       //not enough space!
-      if (cache_occupied_size.load() >= pulledSz)//there was occupied enough space, explicitly free it now and try again
-        cache_occupied_size -= free_space(cache_folder.c_str(), cache_occupied_size.load() - pulledSz);
+      if (cache_occupied_size.load() > 0)//there was occupied space, explicitly free it now and try again
+        cache_occupied_size -= free_space(cache_folder.c_str(), std::max(int64_t(0), int64_t(cache_occupied_size.load()) - pulledSz));
       else
       {
         fprintf(stderr, "There is no enough space on proxy cache folder to even download one file of %lld size\n", (long long int)pulledSz);
