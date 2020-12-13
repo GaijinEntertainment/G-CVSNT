@@ -61,7 +61,6 @@ int main(int argc, const char **argv)
           pulled.resize(at + size);
         if (data)
           memcpy(pulled.data()+at, data, size);
-        return true;
       });
     pulled.push_back('\0');
     printf("<%s> %d %d pulled from server<%s>, eq=%d\n", hash, int(pulledData), int(pulled.size()), pulled.data(), strcmp(pulled.data(), text) == 0);

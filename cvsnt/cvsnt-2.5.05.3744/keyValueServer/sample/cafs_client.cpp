@@ -66,7 +66,8 @@ int main(int argc, const char **argv)
     FILE *f=fopen(argname, "wb");
     int64_t pulled = blob_pull_from_server(client, ht, argname, 0, 0, [&](const char *data, uint64_t at, uint64_t size){
     //store
-      return data ? fwrite(data, 1, size, f) == size : true;//at is ignored!
+      if (data)
+        fwrite(data, 1, size, f);//at is ignored!
     });
     fclose(f);
     printf("pulled %lld of %s\n", pulled, argname);

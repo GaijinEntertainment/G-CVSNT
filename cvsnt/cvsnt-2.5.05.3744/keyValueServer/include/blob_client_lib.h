@@ -11,7 +11,11 @@ int64_t blob_size_on_server(intptr_t &client, const char *hash_type, const char 
 
 int64_t blob_pull_from_server(intptr_t &client, const char *hash_type, const char *hash_hex_str,
   uint64_t from, uint64_t sz,
-  std::function<bool(const char *data, uint64_t at, uint64_t size)> cb);//<0 if error
+  std::function<void(const char *data, uint64_t at, uint64_t size)> cb);//<0 if error
+
+KVRet blob_start_pull_from_server(intptr_t &sockfd, const char *hash_type, const char *hash_hex_str,
+  uint64_t &from, uint64_t &sz);
+int64_t blob_pull_some_from_server(intptr_t &sockfd, char *data, size_t data_capacity, int64_t &szLeft);//if <= 0, socket closed. Should not be called when szLeft = 0
 
 int64_t blob_push_to_server(intptr_t &client, size_t blob_sz,
   const char *hash_type, const char *hash_hex_str,

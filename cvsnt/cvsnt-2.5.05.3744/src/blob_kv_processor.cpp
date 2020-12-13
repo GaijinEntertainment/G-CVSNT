@@ -84,9 +84,8 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
   {
     int64_t pulled = blob_pull_from_server(client, HASH_TYPE_REV_STRING, hex_hash, 0, 0, [&](const char *data, uint64_t , uint64_t size)
     {
-      if (!data)//that's hint of size
-        return true;
-      return cb(data, size);
+      if (data)//that's hint of size
+         cb(data, size);
     });
     if (pulled == 0)
     {

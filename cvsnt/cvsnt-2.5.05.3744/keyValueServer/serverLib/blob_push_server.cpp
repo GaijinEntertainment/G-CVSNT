@@ -15,7 +15,7 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
   int sockfd = socket(AF_INET, SOCK_STREAM, 0);
   if (sockfd < 0)
   {
-    blob_logmessage(LOG_ERROR, "can't open socket");
+    blob_logmessage(LOG_ERROR, "can't open socket %d", blob_get_last_sock_error());
     return false;
   }
   blob_set_socket_no_delay(sockfd, true);
@@ -30,7 +30,7 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
   serv_addr.sin_port = htons(portno);
   if (bind(sockfd, (struct sockaddr *) &serv_addr, sizeof(serv_addr)) < 0)
   {
-    blob_logmessage(LOG_ERROR, "can't bind socket");
+    blob_logmessage(LOG_ERROR, "can't bind socket %d", blob_get_last_sock_error());
     blob_close_socket(sockfd);
     return false;
   }
@@ -48,7 +48,7 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
     client_thread.detach();
   }
 
-  blob_logmessage(LOG_ERROR, "can't bind accept connection");
+  blob_logmessage(LOG_ERROR, "can't bind accept connection %d", blob_get_last_sock_error());
   blob_close_socket(sockfd);
   return true;
 }

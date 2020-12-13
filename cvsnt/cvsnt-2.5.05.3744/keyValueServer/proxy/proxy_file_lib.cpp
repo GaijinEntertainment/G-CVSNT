@@ -188,43 +188,92 @@ void blob_destroy_push_data(uintptr_t up)
     pd->cc->restart();
 }
 
+static inline FILE* download_blob(intptr_t &sock, std::string &tmpfn, const char* htype, const char* hhex, int64_t &pulledSz)
+{
+  pulledSz = 0;
+  FILE* tmpf = blob_fileio_get_temp_file(tmpfn, cache_folder.c_str());
+  if (!tmpf)
+  {
+    fprintf(stderr, "Can't open temp file\n");
+    return NULL;
+  }
+  bool ok = true;
+  pulledSz = blob_pull_from_server(sock, htype, hhex,
+    0, 0, [&](const char *data, uint64_t at, uint64_t size)
+    {
+      if (data)
+        ok &= (fwrite(data, 1, size, tmpf) == size);
+    });
+  if (!ok || pulledSz <= 0)
+  {
+    fclose(tmpf);
+    blob_fileio_unlink_file(tmpfn.c_str());
+    tmpf = NULL;
+  }
+  return tmpf;
+}
+
+inline uintptr_t attempt_pull_cache(const char *fn, uint64_t &sz){
+  size_t cachedSz;
+  uintptr_t ret = (uintptr_t)blobe_fileio_start_pull(fn, cachedSz);
+  sz = cachedSz;
+  return ret;
+}
+
 uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhex, uint64_t &sz)
 {
   std::string fn = get_hash_file_name(htype, hhex);
   if (!fn.length())
     return 0;
   const ClientConnection *cc = (const ClientConnection *)c;
-  size_t cachedSz;
-  uintptr_t ret = (uintptr_t)blobe_fileio_start_pull(fn.c_str(), cachedSz);
-  sz = cachedSz;
-  if (ret)//already in cache
-    return ret;
-  //we have to pull it from cache
   std::string tmpfn;
-  FILE* tmpf = blob_fileio_get_temp_file(tmpfn, cache_folder.c_str());
-  int64_t pulledSz = blob_pull_from_server(cc->cs, htype, hhex,
-    0, 0, [&](const char *data, uint64_t at, uint64_t size)
-    {
-      if (!data)
-        return true;
-      return fwrite(data, 1, size, tmpf) == size;
-    });
-  fclose(tmpf);
-  if (pulledSz < 0)
+  FILE *tmpf = nullptr;
+  uintptr_t ret = 0;
+  for (int i = 0; i < 100; ++i)//100 attempts to restart socket
   {
-    blob_fileio_unlink_file(tmpfn.c_str());
+    if ((ret = attempt_pull_cache(fn.c_str(), sz)) != 0)//already in cache
+      return ret;
+    //we have to pull it from server to cache
+    int64_t pulledSz;
+    while ((tmpf = download_blob(cc->cs, tmpfn, htype, hhex, pulledSz)) == nullptr && pulledSz>0)
+    {
+      //not enough space!
+      if (cache_occupied_size.load() >= pulledSz)//there was occupied enough space, explicitly free it now and try again
+        cache_occupied_size -= free_space(cache_folder.c_str(), cache_occupied_size.load() - pulledSz);
+      else
+      {
+        fprintf(stderr, "There is no enough space on proxy cache folder to even download one file of %lld size\n", (long long int)pulledSz);
+        return 0;
+      }
+    }
+    if (pulledSz <= 0 && tmpf)
+    {
+      fprintf(stderr, "ASSERT!");
+      fclose(tmpf);
+      return 0;
+    }
+
+    if (pulledSz == 0)
+      return 0;
+    if (pulledSz > 0)
+      break;
     cc->restart();
   }
+
   blob_fileio_ensure_dir(get_hash_file_folder(htype, hhex).c_str());
-  if (!blob_fileio_rename_file(tmpfn.c_str(), fn.c_str()))
+  if (!blob_fileio_rename_file(tmpfn.c_str(), fn.c_str()))//can't rename
   {
+    fclose(tmpf);
     blob_fileio_unlink_file(tmpfn.c_str());
+    fprintf(stderr, "Can't rename file %s to %s\n", tmpfn.c_str(), fn.c_str());
     return 0;
   }
-  ret = (uintptr_t)blobe_fileio_start_pull(fn.c_str(), cachedSz);
-  cache_occupied_size += pulledSz;// we increase occupied cache size only after we open file
-  sz = cachedSz;
+
+  if ((ret = attempt_pull_cache(fn.c_str(), sz)) == 0)
+    fprintf(stderr, "Can't start pull of just downloaded file %s!\n", fn.c_str());
+  fclose(tmpf);//we close file only after we have started pull. That way GC thread won't delete file
   //wake up GC thread
+  cache_occupied_size += sz;
   wakeup_gc_cond.notify_one();
   return ret;
 }
