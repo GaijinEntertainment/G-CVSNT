@@ -51,15 +51,15 @@ void set_root(context *ctx, const char *p)
 
 inline bool make_blob_dirs(std::string &fp)
 {
-  if (fp.length()<67)
+  if (fp.length()<69)
     return false;
-  if (fp[fp.length()-61] != '/' || fp[fp.length()-64] != '/')
+  if (fp[fp.length()-65] != '/' || fp[fp.length()-68] != '/')
     return false;
-  fp[fp.length()-64] = 0;
+  fp[fp.length()-68] = 0;
   blob_fileio_ensure_dir(fp.c_str());
-  fp[fp.length()-64] = '/'; fp[fp.length()-61] = 0;
+  fp[fp.length()-68] = '/'; fp[fp.length()-65] = 0;
   blob_fileio_ensure_dir(fp.c_str());
-  fp[fp.length()-61] = '/';
+  fp[fp.length()-65] = '/';
   return true;
 }
 
