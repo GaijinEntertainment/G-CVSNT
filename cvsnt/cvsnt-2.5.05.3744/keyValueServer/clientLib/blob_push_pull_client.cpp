@@ -2,6 +2,7 @@
 #include <stdint.h>
 #include <stdlib.h>
 #include <string.h>
+#include <string>
 #include <thread>
 #include <algorithm>
 #include "../include/blob_sockets.h"
@@ -15,34 +16,49 @@ using namespace blob_push_proto;
 
 intptr_t start_blob_push_client(const char *url, int port, const char *root)
 {
-  struct hostent *hname = gethostbyname(url);
-  if (!hname)
-  {
-    blob_logmessage(LOG_ERROR, "can't resolve URL <%s>", url);
-    return -1;
-  }
-
   const size_t rootLen = root ? strlen(root) : 1;
   if (rootLen>255)
   {
     blob_logmessage(LOG_ERROR, "root len is too big %d", rootLen);
     return -1;
   }
-  intptr_t sockfd = socket(AF_INET, SOCK_STREAM, 0);
+
+  struct addrinfo hints;
+  memset(&hints, 0, sizeof(hints));
+  hints.ai_family = AF_INET;
+  hints.ai_socktype = SOCK_STREAM;
+  hints.ai_flags = 0;
+  hints.ai_protocol = IPPROTO_TCP;
+  hints.ai_canonname = NULL;
+  hints.ai_addr = NULL;
+  hints.ai_next = NULL;
+  struct addrinfo *result;
+  char portS[32]; std::snprintf(portS, sizeof(portS), "%d", port);
+  int err = 0;
+  if ((err = getaddrinfo(url, portS, &hints, &result)) != 0)
+  {
+    blob_logmessage(LOG_ERROR, "can't resolve URL <%s> %s", url, gai_strerror(err));
+    return -1;
+  }
+  intptr_t sockfd = -1;
+  for (struct addrinfo *rp = result; rp != NULL; rp = rp->ai_next)
+  {
+    auto sfd = socket(rp->ai_family, rp->ai_socktype, rp->ai_protocol);
+    if (sfd == -1)
+      continue;
+
+    if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
+    {
+      sockfd = sfd;
+      break;
+    }
+    blob_close_socket(sfd);
+  }
+
+  freeaddrinfo(result);
   if (sockfd < 0)
   {
-    blob_logmessage(LOG_ERROR, "can't open socket");
-    return sockfd;
-  }
-  struct sockaddr_in server;
-  memset(&server, 0, sizeof(server));
-  server.sin_family = AF_INET;
-  memcpy(&server.sin_addr.s_addr, hname->h_addr, hname->h_length);
-  server.sin_port = htons(port);
-  if (connect(int(sockfd), (struct sockaddr *) &server, sizeof(server)) < 0)
-  {
     blob_logmessage(LOG_ERROR, "ERROR connecting to <%s:%d>", url, port);
-    blob_close_socket(int(sockfd));
     return -1;
   }
   blob_logmessage(LOG_NOTIFY, "Connected to <%s:%d>, connection = %d", url, port, sockfd);

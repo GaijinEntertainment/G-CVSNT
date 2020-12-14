@@ -3,7 +3,8 @@
 #include <stdio.h>
 #if _WIN32
   #pragma comment(lib,"Ws2_32.lib")
-  #include <winsock.h>
+  #include <winsock2.h>
+  #include <ws2tcpip.h>
   #include <stdlib.h>
   inline bool blob_init_sockets()
   {
