@@ -28,6 +28,7 @@ static inline bool recv_exact(int socket, void *data, unsigned int len, int flag
 
 static inline bool send_exact(int socket, const void *data, int len, int flags = 0)
 {
+  flags |= MSG_NOSIGNAL;
   while (len > 0)
   {
     int l = send(socket, (const char*)data, len, flags);

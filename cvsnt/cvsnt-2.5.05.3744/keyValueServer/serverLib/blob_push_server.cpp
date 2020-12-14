@@ -34,6 +34,7 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
     blob_close_socket(sockfd);
     return false;
   }
+  blob_set_socket_def_options((int)sockfd);
 
   listen(sockfd, max_connections);
   struct sockaddr_in client; socklen_t clientSz = sizeof(client);

@@ -52,7 +52,7 @@ intptr_t start_blob_push_client(const char *url, int port, const char *root)
       sockfd = sfd;
       break;
     }
-    blob_close_socket(sfd);
+    blob_close_socket((int)sfd);
   }
 
   freeaddrinfo(result);
@@ -61,6 +61,7 @@ intptr_t start_blob_push_client(const char *url, int port, const char *root)
     blob_logmessage(LOG_ERROR, "ERROR connecting to <%s:%d>", url, port);
     return -1;
   }
+  blob_set_socket_def_options((int)sockfd);
   blob_logmessage(LOG_NOTIFY, "Connected to <%s:%d>, connection = %d", url, port, sockfd);
   char greeting[greeting_length+1];
   if (!recv_exact(int(sockfd), greeting, greeting_length))
