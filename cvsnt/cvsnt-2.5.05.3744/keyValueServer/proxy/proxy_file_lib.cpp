@@ -224,7 +224,10 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
 {
   std::string fn = get_hash_file_name(htype, hhex);
   if (!fn.length())
+  {
+    fprintf(stderr, "invalid file name for %s %s\n", htype, hhex);
     return 0;
+  }
   const ClientConnection *cc = (const ClientConnection *)c;
   std::string tmpfn;
   FILE *tmpf = nullptr;

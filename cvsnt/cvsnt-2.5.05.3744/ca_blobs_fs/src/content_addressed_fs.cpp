@@ -66,7 +66,7 @@ inline bool make_blob_dirs(std::string &fp)
 inline std::string get_file_path(const std::string &root_path, const char* hash_hex_string)
 {
   char buf[74];
-  std::snprintf(buf,sizeof(buf), "%.2s/%.2s/%.60s", hash_hex_string, hash_hex_string+2, hash_hex_string);
+  std::snprintf(buf,sizeof(buf), "%.2s/%.2s/%.64s", hash_hex_string, hash_hex_string+2, hash_hex_string);
   return root_path + buf;
 }
 

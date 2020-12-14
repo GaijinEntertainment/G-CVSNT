@@ -11,9 +11,9 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
   {
     char buf[128];
     std::snprintf(buf, sizeof(buf),
-       "%s%.2s/%.2s/%.60s",
+       "%s%.2s/%.2s/%.64s",
        repo.c_str(),
-       hex_hash, hex_hash + 2, hex_hash + 4);
+       hex_hash, hex_hash + 2, hex_hash);
     size_t current = 0;
     auto res = client->Get(buf,
       [&](const char *data, size_t data_length) { return cb(data, data_length); }
