@@ -139,7 +139,7 @@ FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const ch
   int fd = mkstemp (buf);
   if (fd == -1)
     return nullptr;
-  if ((fp = fdopen (fd, mode = mode ? mode : "wb")) == NULL)
+  if ((fp = fdopen (fd, mode = mode ? mode : "wb+")) == NULL)
   {
     close (fd);
     unlink(buf);

@@ -268,9 +268,9 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
     fprintf(stderr, "Can't rename file %s to %s\n", tmpfn.c_str(), fn.c_str());
     return 0;
   }
-
+  fflush(tmpf);
   if ((ret = attempt_pull_cache(fn.c_str(), sz)) == 0)
-    fprintf(stderr, "Can't start pull of just downloaded file %s!\n", fn.c_str());
+    fprintf(stderr, "Can't start pull of just downloaded file %s, %d!\n", fn.c_str(), errno);
   fclose(tmpf);//we close file only after we have started pull. That way GC thread won't delete file
   //wake up GC thread
   cache_occupied_size += sz;
