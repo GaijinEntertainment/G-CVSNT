@@ -203,9 +203,12 @@ static void process_file_ver(const char *rootDir,
     deduplicatedData += fsz;
   }
   writtenData += wr;
-  std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
   if (is_ok(pr))
+  {
+    std::unique_lock<std::mutex> lockGuard(file_version_remap_mutex);
     memcpy(&file_version_remap[path.filename().string()][0], hash_encoded, hash_encoded_size+1);
+  } else
+    fprintf(stderr, "[E] Can't process %s->%s %d\n", filePath.c_str(), hash_encoded, (int)pr);
 }
 
 struct ProcessTask
