@@ -2126,8 +2126,14 @@ void get_download_source(const char *&url, int &port, const char *&auth_user, co
   else if ((cp = getenv ("CVS_BLOB_DOWNLOAD_THREADS")) != NULL)
     threads_count = atoi(cp);
   if (blob_download_url[0])
-    url = blob_download_url;
-  else if (blob_default_download_url[0])
+  {
+    if (strcmp(blob_download_url, "def") == 0 || strcmp(blob_download_url, "off") == 0)
+    {
+      url = current_parsed_root->hostname;
+      port = 2403;
+    } else
+      url = blob_download_url;
+  } else if (blob_default_download_url[0])
     url = blob_default_download_url;
   else {
     url = current_parsed_root->hostname;

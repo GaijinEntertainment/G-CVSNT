@@ -339,7 +339,7 @@ static const char *const opt_usage[] =
 	"                    Specifying a locale here overrides the default (autodetected on CVSNT 2.0.58+).\n",
 	"    -O              Disable client/server locale translation.\n",
 	"\n",
-    "    --blob_url url   Blob download url, can be in form of 127.0.0.1/something@80 (@80 - means port)\n",
+    "    --blob_url url   Blob download url, can be in form of 127.0.0.1/something@80 (@80 - means port). 'def' means master.\n",
     "    --version       CVS version and copyright.\n",
     "    --encrypt       Encrypt all net traffic (if supported by protocol).\n",
     "    --authenticate  Authenticate all net traffic (if supported by protocol).\n",
