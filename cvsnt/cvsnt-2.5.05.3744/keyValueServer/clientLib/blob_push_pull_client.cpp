@@ -15,6 +15,13 @@ using namespace blob_push_proto;
 
 intptr_t start_blob_push_client(const char *url, int port, const char *root)
 {
+  struct hostent *hname = gethostbyname(url);
+  if (!hname)
+  {
+    blob_logmessage(LOG_ERROR, "can't resolve URL <%s>", url);
+    return -1;
+  }
+
   const size_t rootLen = root ? strlen(root) : 1;
   if (rootLen>255)
   {
@@ -30,7 +37,6 @@ intptr_t start_blob_push_client(const char *url, int port, const char *root)
   struct sockaddr_in server;
   memset(&server, 0, sizeof(server));
   server.sin_family = AF_INET;
-  struct hostent *hname = gethostbyname(url);
   memcpy(&server.sin_addr.s_addr, hname->h_addr, hname->h_length);
   server.sin_port = htons(port);
   if (connect(int(sockfd), (struct sockaddr *) &server, sizeof(server)) < 0)
