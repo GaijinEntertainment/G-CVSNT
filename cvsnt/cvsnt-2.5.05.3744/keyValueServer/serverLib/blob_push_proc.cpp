@@ -46,6 +46,8 @@ static void *initiate(int socket)
   if (!recv_exact(socket, buf, len))
     return nullptr;
   send_simple_response(socket, none_response);
+  buf[len] = 0;
+  blob_logmessage(LOG_NOTIFY, "CVS root %s", buf);
   return blob_create_ctx(buf);
 }
 
@@ -251,6 +253,7 @@ void blob_push_thread_proc(int socket, volatile bool *should_stop)
   while (!(should_stop && *should_stop) && blob_push_thread_proc_int(ctx, socket))//command is processed
   {
   }
+  blob_destroy_ctx(ctx);
   blob_logmessage(LOG_NOTIFY, "close connection %d", socket);
   blob_close_socket(socket);
 }
