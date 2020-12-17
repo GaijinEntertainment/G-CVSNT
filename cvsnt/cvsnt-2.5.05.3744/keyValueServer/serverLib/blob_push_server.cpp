@@ -8,6 +8,8 @@
 #include <thread>
 #define MULTI_THREADED 1//on windows it is wy heavier to create process.
 //while multi-threaded should be fine for Linux also (as far as I know, there are no leaks), but why bother?
+#else
+#include <signal.h>
 #endif
 
 void blob_push_thread_proc(int socket, volatile bool *should_stop);
@@ -40,6 +42,9 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
     return false;
   }
   blob_set_socket_def_options((int)sockfd);
+  #if !MULTI_THREADED
+    signal(SIGCHLD,SIG_IGN);
+  #endif
 
   listen(sockfd, max_connections);
   struct sockaddr_in client; socklen_t clientSz = sizeof(client);
