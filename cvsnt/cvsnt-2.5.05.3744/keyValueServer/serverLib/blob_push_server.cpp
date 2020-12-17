@@ -1,9 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <thread>
 #include "../include/blob_sockets.h"
 #include "../blob_push_log.h"
+
+#if _WIN32
+#include <thread>
+#define MULTI_THREADED 1//on windows it is wy heavier to create process.
+//while multi-threaded should be fine for Linux also (as far as I know, there are no leaks), but why bother?
+#endif
 
 void blob_push_thread_proc(int socket, volatile bool *should_stop);
 
@@ -44,9 +49,23 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
     blob_set_socket_no_delay(client_sock, true);
     blob_logmessage(LOG_NOTIFY, "got connection %d from %s port %d",
         client_sock, inet_ntoa(client.sin_addr), ntohs(client.sin_port));
-
-    std::thread client_thread(blob_push_thread_proc, client_sock, should_stop);
-    client_thread.detach();
+    #if MULTI_THREADED
+    std::thread(blob_push_thread_proc, client_sock, should_stop).detach();
+    #else
+    const pid_t pid = fork();
+    if (pid == 0)
+    {
+      //we are in child process
+      blob_close_socket(sockfd);//doesn't affect parent
+      blob_push_thread_proc(client_sock, should_stop);
+      exit(0);
+    } else
+    {
+      blob_close_socket(client_sock);//doesn't affect child
+      if (pid < 0)//wtf
+        blob_logmessage(LOG_ERROR, "can't start child process %d", errno);
+    }
+    #endif
   }
 
   blob_logmessage(LOG_ERROR, "can't bind accept connection %d", blob_get_last_sock_error());

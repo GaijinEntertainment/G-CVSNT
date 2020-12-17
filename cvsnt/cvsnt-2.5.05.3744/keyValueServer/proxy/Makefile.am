@@ -1,4 +1,4 @@
-AM_CPPFLAGS = @PTHREAD_CPPFLAGS@ -std=c++17
+AM_CPPFLAGS = -std=c++17
 cafs_proxy_server_SOURCES = \
 	free_disk_space.cpp \
     cafs_proxy_server.cpp \
@@ -9,4 +9,4 @@ cafs_proxy_server_SOURCES = \
 
 bin_PROGRAMS=cafs_proxy_server
 
-cafs_proxy_server_LDADD = -lstdc++fs ../clientLib/libkv_client_lib.la @PTHREAD_LIBS@ 
+cafs_proxy_server_LDADD = -lstdc++fs ../clientLib/libkv_client_lib.la
