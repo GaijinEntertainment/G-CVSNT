@@ -1,1 +1,1 @@
-clang-cl /MD -DCAFS -Zi cafs_proxy_server.cpp free_disk_space.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp proxy_file_lib.cpp ../../x64/Release/clientLib.lib ../../ca_blobs_fs/src/fileio.cpp
+clang-cl /MD -DCAFS -Zi cafs_proxy_server.cpp free_disk_space.cpp gc_thread_monitor.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp proxy_file_lib.cpp ../../x64/Release/clientLib.lib ../../ca_blobs_fs/src/fileio.cpp

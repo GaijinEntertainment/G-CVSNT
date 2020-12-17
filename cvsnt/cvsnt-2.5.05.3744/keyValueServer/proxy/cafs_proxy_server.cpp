@@ -6,6 +6,7 @@
 #include "../sampleImplementation/def_log_printf.cpp"
 
 void init_proxy(const char *url, int port, const char *cache, size_t sz);
+void close_proxy();
 
 int main(int argc, const char **argv)
 {
@@ -24,6 +25,7 @@ int main(int argc, const char **argv)
   printf("Starting server listening at port %d\n", master_port);
   const bool result = start_push_server(master_port, 1024, nullptr);
   printf("server quit %s", result ? "with error\n" :"normally\n");
+  close_proxy();
   blob_close_sockets();
   return result ? 0 : 1;
 }

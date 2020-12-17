@@ -2,7 +2,6 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <string.h>
-#include <thread>
 #include <algorithm>
 #include "../include/blob_sockets.h"
 #include "../include/blob_push_protocol.h"

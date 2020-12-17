@@ -3,6 +3,7 @@ cafs_proxy_server_SOURCES = \
 	free_disk_space.cpp \
     cafs_proxy_server.cpp \
     proxy_file_lib.cpp \
+    gc_proc_monitor.cpp \
     ../../ca_blobs_fs/src/fileio.cpp \
     ../serverLib/blob_push_proc.cpp \
     ../serverLib/blob_push_server.cpp

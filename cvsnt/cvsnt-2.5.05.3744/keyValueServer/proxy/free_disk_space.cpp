@@ -27,7 +27,7 @@ uint64_t space_occupied(const char *dir)
   return space_occupied_now;
 }
 
-uint64_t free_space( const char *dir, size_t max_size )
+uint64_t free_space( const char *dir, int64_t max_size )
 {
   struct file_info
   {
@@ -50,8 +50,11 @@ uint64_t free_space( const char *dir, size_t max_size )
     flist.emplace_back(file_info{path, fs::last_write_time(path), fsz});
     space_occupied_now += fsz;
   }
+  if (max_size < 0)
+    max_size = space_occupied_now < max_size ? 0 : space_occupied_now + max_size;
+
   if (space_occupied_now <= max_size)
-    return (uint64_t)space_occupied_now;
+    return 0;
   std::sort( flist.begin(), flist.end(), [](auto& a, auto& b) { return a.last_write_time < b.last_write_time ; });
   uint64_t freed = 0;
   for (auto &i:flist)

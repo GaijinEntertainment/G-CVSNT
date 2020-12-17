@@ -1,8 +1,5 @@
-#include <thread>
 #include <string>
 #include <memory>
-#include <atomic>
-#include <mutex>
 #include <condition_variable>
 #include "../blob_server_func_deps.h"
 #include "../../ca_blobs_fs/content_addressed_fs.h"
@@ -11,58 +8,28 @@
 #include "../include/blob_client_lib.h"
 #include "../blob_push_log.h"
 
-//gc thread functions
-//these are consts! initialized once in main
-static uint64_t file_cache_size = uint64_t(20*1024)<<uint64_t(20);
 static std::string master_url;
 static std::string cache_folder;
 static int master_port = 2403;
 //--
-
-static std::atomic<int64_t> cache_occupied_size;
-static std::mutex gc_mutex;
-static std::condition_variable wakeup_gc_cond;
-uint64_t space_occupied(const char *dir);
-uint64_t free_space( const char *dir, uint64_t max_size );
-
-static void do_gc()
-{
-  if (cache_occupied_size.load() <= file_cache_size)
-    return;
-  //we have to do gc as occupied space is more than limit
-  //recurse over all files in cache_folder, and delete all old files until occupied size is less then file_cache_size
-  cache_occupied_size -= free_space(cache_folder.c_str(), uint64_t(file_cache_size));
-}
-
-static void gc_thread_proc()
-{
-  do_gc();
-  while(1)
-  {
-    std::unique_lock<std::mutex> lock(gc_mutex);
-    wakeup_gc_cond.wait(lock);
-    do_gc();
-  }
-}
+void init_gc(const char *folder, uint64_t max_size);
+void close_gc();
+void lazy_report_to_gc(uint64_t sz);
+bool perform_immediate_gc(int64_t needed_sz);
 
 //
+void close_proxy(){close_gc();}
 void init_proxy(const char *url, int port, const char *cache, size_t sz)
 {
   master_url = url;
   master_port = port;
-  file_cache_size = uint64_t(sz)<<uint64_t(20);
   cache_folder = cache;
   blob_fileio_ensure_dir(cache_folder.c_str());
   if (cache_folder.length()==0)
     cache_folder = ".";
   if (cache_folder[cache_folder.length() - 1] != '/')
     cache_folder += "/";
-  cache_occupied_size = space_occupied(cache_folder.c_str());
-  printf("Current space occupied by cache folder %dmb\n", (int)(cache_occupied_size.load()>>uint64_t(20)));
-  if (cache_occupied_size > file_cache_size)
-    printf("It is more than limit, bug GC will be only called on next pull to server\n");
-  std::thread gc(gc_thread_proc);
-  gc.detach();
+  init_gc(cache_folder.c_str(), uint64_t(sz)<<uint64_t(20));
 }
 ///
 
@@ -241,9 +208,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
     while ((tmpf = download_blob(cc->cs, tmpfn, htype, hhex, pulledSz)) == nullptr && pulledSz>0)
     {
       //not enough space!
-      if (cache_occupied_size.load() > 0)//there was occupied space, explicitly free it now and try again
-        cache_occupied_size -= free_space(cache_folder.c_str(), std::max(int64_t(0), int64_t(cache_occupied_size.load()) - pulledSz));
-      else
+      if (!perform_immediate_gc(pulledSz))
       {
         fprintf(stderr, "There is no enough space on proxy cache folder to even download one file of %lld size\n", (long long int)pulledSz);
         return 0;
@@ -275,9 +240,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
   if ((ret = attempt_pull_cache(fn.c_str(), sz)) == 0)
     fprintf(stderr, "Can't start pull of just downloaded file %s, %d!\n", fn.c_str(), errno);
   fclose(tmpf);//we close file only after we have started pull. That way GC thread won't delete file
-  //wake up GC thread
-  cache_occupied_size += sz;
-  wakeup_gc_cond.notify_one();
+  lazy_report_to_gc(sz);
   return ret;
 }
 
