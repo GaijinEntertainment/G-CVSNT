@@ -9,8 +9,7 @@ extern int change_mode(const char *filename, const char *mode_string, int respec
 extern int gzip_level;
 extern int file_gzip_level;
 extern int blob_concurrency_download_level;
-extern char blob_download_url[256];
-extern int blob_download_port;
+extern char blob_cmd_download_url[256];
 
 /* Whether the connection should be encrypted.  */
 extern int cvsencrypt;

@@ -2097,49 +2097,77 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 void add_download_queue(const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp);
 
 int blob_concurrency_download_level = -1;
-char blob_default_download_url[256] = {0};
-char blob_download_url[256] = {0};
-int blob_download_port = -1;
 
-void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count)
+char blob_default_download_url[256] = {0};
+char blob_cmd_download_url[256] = {0};
+char blob_master_url[256]= {0};
+char blob_parsed_download_url[256] = {0};
+int blob_parsed_download_port = -1;
+char blob_parsed_upload_url[256] = {0};
+int blob_parsed_upload_port = -1;
+
+static void parse_url_port(char *url_to, int &port_to, char *url)
 {
+  if (!url || url[0] == 0 || strcmp(url, "def") == 0 || strcmp(url, "off") == 0)
+  {
+    strcpy(url_to, current_parsed_root->hostname);
+    port_to = 2403;
+  } else
+  {
+    char *portstr = strstr(url, "@");
+    if (portstr)
+    {
+      portstr[0] = 0;
+      portstr++;
+    }
+    port_to = portstr ? atoi(portstr) : (strstr(url, "http") == url ? 80 : 2403);
+    strcpy(url_to, url);
+  }
+}
+
+static void parse_urls()
+{
+  if (blob_parsed_download_url[0])
+    return;
+  char* cp = NULL;
+  char * src_down_url = NULL;
+  char buf[512];
+  if (blob_cmd_download_url[0])//CMD has highest priority
+   src_down_url = blob_cmd_download_url;
+  else if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)// then env var
+  {
+    strcpy(buf, cp);
+    src_down_url = buf;
+  } else//then dvertised by server
+    src_down_url = blob_default_download_url;
+
+  char * src_up_url = strstr(src_down_url, "|");
+  if (src_up_url)
+  {
+    src_up_url[0] = 0; src_up_url++;
+  }
+  parse_url_port(blob_parsed_download_url, blob_parsed_download_port, src_down_url);
+  parse_url_port(blob_parsed_upload_url, blob_parsed_upload_port, src_up_url);
+  strcpy(blob_master_url, current_parsed_root->hostname);
+}
+
+void get_download_source(const char *&master_url, const char *&url, int &port, const char *&up_url, int &up_port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count)
+{
+  parse_urls();
+  url = blob_parsed_download_url;
+  port = blob_parsed_download_port;
+  up_url = blob_parsed_upload_url;
+  up_port = blob_parsed_upload_port;
+  master_url = blob_master_url;
+
   char *cp;
   repo = current_parsed_root->directory;
   auth_user = current_parsed_root->username;
   auth_passwd = current_parsed_root->password;
-  if (blob_download_port >= 0)
-    port = blob_download_port;
-  else if (blob_default_download_url[0])
-  {
-    char *portstr = strstr(blob_default_download_url, "@");
-    if (portstr)
-      portstr[0] = 0;
-    blob_download_port = port = (portstr ? atoi(portstr+1) : 2403);
-  } else
-  {
-    port = 2403;
-    if ((cp = getenv ("CVS_BLOBS_PORT")) != NULL)
-      port = atoi(cp);
-  }
   if (blob_concurrency_download_level >= 0)
     threads_count = blob_concurrency_download_level;
   else if ((cp = getenv ("CVS_BLOB_DOWNLOAD_THREADS")) != NULL)
     threads_count = atoi(cp);
-  if (blob_download_url[0])
-  {
-    if (strcmp(blob_download_url, "def") == 0 || strcmp(blob_download_url, "off") == 0)
-    {
-      url = current_parsed_root->hostname;
-      port = 2403;
-    } else
-      url = blob_download_url;
-  } else if (blob_default_download_url[0])
-    url = blob_default_download_url;
-  else {
-    url = current_parsed_root->hostname;
-    if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)//we don't do copy, as we dont call other getenv
-      url = cp;
-  }
 }
 
 void change_utime(const char* filename, time_t timestamp)

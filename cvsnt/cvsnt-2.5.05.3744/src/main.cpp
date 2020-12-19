@@ -339,7 +339,7 @@ static const char *const opt_usage[] =
 	"                    Specifying a locale here overrides the default (autodetected on CVSNT 2.0.58+).\n",
 	"    -O              Disable client/server locale translation.\n",
 	"\n",
-    "    --blob_url url   Blob download url, can be in form of 127.0.0.1/something@80 (@80 - means port). 'def' means master.\n",
+    "    --blob_url url   Blob download|upload url, each url can be in form of 127.0.0.1/something@80 (@80 - means port). 'def' means master. (examples: http://cvs-proxy.lan@8080 or localhost@2403|cvs-master.lan@2403)\n",
     "    --version       CVS version and copyright.\n",
     "    --encrypt       Encrypt all net traffic (if supported by protocol).\n",
     "    --authenticate  Authenticate all net traffic (if supported by protocol).\n",
@@ -977,12 +977,7 @@ int main (int argc, char **argv)
 		blob_concurrency_download_level = atoi (optarg);
 		break;
         case 11:
-        strcpy(blob_download_url, optarg);
-        if (char * port = strchr(blob_download_url, '@'))
-        {
-          blob_download_port = atoi(port+1);
-          *port = 0;
-        }
+        strcpy(blob_cmd_download_url, optarg);
 		break;
 	    case 's':
 		variable_set (optarg);

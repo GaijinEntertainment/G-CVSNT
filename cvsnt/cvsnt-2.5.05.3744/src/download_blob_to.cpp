@@ -23,11 +23,11 @@ struct BlobTask
 static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task);
 static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task);
 
-static bool process_blob_task(BlobNetworkProcessor *processor, const BlobTask &task)
+static bool process_blob_task(BlobNetworkProcessor *download_processor, BlobNetworkProcessor *upload_processor, const BlobTask &task)
 {
   if (task.type == BlobTask::Type::Download)
-    return download_blob_ref_file(processor, task);
-  return upload_blob_ref_file(processor, task);
+    return download_blob_ref_file(download_processor, task);
+  return upload_blob_ref_file(upload_processor, task);
 }
 
 struct BackgroundProcessor
@@ -41,22 +41,22 @@ struct BackgroundProcessor
     queue.finishWork();
   }
 
-  bool is_inited() const {return !clients.empty();}
+  bool is_inited() const {return !download_clients.empty();}
   void init();
   void wait();
 
-  static void processor_thread_loop(BackgroundProcessor *processors, BlobNetworkProcessor *processor)
+  static void processor_thread_loop(BackgroundProcessor *processors, BlobNetworkProcessor *download_processor, BlobNetworkProcessor *upload_processor)
   {
     BlobTask task;
     while (processors->queue.wait_and_pop(task))
-      process_blob_task(processor, task);
+      process_blob_task(download_processor, upload_processor, task);
   }
   void emplace(BlobTask &&task)
   {
     if (!is_inited())
       return;
     if (threads.empty())
-      process_blob_task(clients[0].get(), task);
+      process_blob_task(download_clients[0].get(), upload_clients[0].get(), task);
     else
     {
       //we can't guarantee, that user will finish download (not cancel it, kill the process or whatever)
@@ -78,9 +78,9 @@ struct BackgroundProcessor
     }
   }
   concurrent_queue<BlobTask> queue;
-  std::vector<std::unique_ptr<BlobNetworkProcessor>> clients;//soa
+  std::vector<std::unique_ptr<BlobNetworkProcessor>> download_clients;//soa
+  std::vector<std::unique_ptr<BlobNetworkProcessor>> upload_clients;//soa
   std::vector<std::thread> threads;//soa
-  bool uploadEnabled = false;
 
   std::string base_repo;
   protected:
@@ -92,7 +92,7 @@ struct BackgroundProcessor
 static std::unique_ptr<BackgroundProcessor> processor;
 
 //link time resolved dependency
-extern void get_download_source(const char *&url, int &port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count);
+extern void get_download_source(const char *&master_url, const char *&proxy_down_url, int &proxy_down_port, const char *&up_url, int &up_port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count);
 
 extern BlobNetworkProcessor *get_http_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
 extern BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
@@ -101,39 +101,50 @@ void BackgroundProcessor::init()
 {
   if (is_inited())
     return;
-  const char *url, *repo, *user = nullptr, *passwd = nullptr; int port;
+  const char *master_url = nullptr;
+  const char *download_url, *repo, *user = nullptr, *passwd = nullptr; int download_port;
+  const char *upload_url; int upload_port;
   int threads_count = std::min(8, std::max(1, (int)std::thread::hardware_concurrency()-1));//limit concurrency to fixed
-  get_download_source(url, port, user, passwd, repo, threads_count);
+  get_download_source(master_url, download_url, download_port, upload_url, upload_port, user, passwd, repo, threads_count);
   base_repo = repo;
   if (base_repo[0] != '/')
     base_repo = "/" + base_repo;
   if (base_repo[base_repo.length()] != '/')
     base_repo += "/";
-  clients.resize(std::max(1, threads_count));
-  bool use_http = strstr(url, "http://") == url;
-  int http_port = use_http ? port : 80;
-  uploadEnabled = true;
-  for (auto &cli : clients)
+  download_clients.resize(std::max(1, threads_count));
+  upload_clients.resize(download_clients.size());
+  bool use_http = strstr(download_url, "http") == download_url;
+  int http_port = use_http ? download_port : 80;
+  for (auto &cli : download_clients)
   {
     BlobNetworkProcessor * pr = nullptr;
     if (!use_http)
     {
-      pr = get_kv_processor(url, port, base_repo.c_str(), user, passwd);
-      if (!pr)
+      pr = get_kv_processor(download_url, download_port, base_repo.c_str(), user, passwd);
+      if (!pr && strcmp(master_url, download_url) != 0)
       {
-        use_http = true;
-        http_port = 80;
+        pr = get_kv_processor(master_url, 2403, base_repo.c_str(), user, passwd);
+        if (pr)
+        {
+          printf("Proxy <%s:%d> is not available, switching to master <%s:%d>. Contact IT!\n",
+            download_url, download_port, master_url, 2403);
+          download_url = master_url;
+          download_port = 2403;
+        } else
+        {
+          fprintf(stderr, "Nor proxy <%s:%d> neither master <%s:%d> are not available. Contact IT!\n",
+            download_url, download_port, master_url, 2403);
+        }
       }
-    }
-    if (use_http)
-    {
-      pr = get_http_processor(url, http_port, base_repo.c_str(), user, passwd);
-      uploadEnabled = false;
-    }
+    } else
+      pr = get_http_processor(download_url, http_port, base_repo.c_str(), user, passwd);//we can't check if http is available for now
     cli.reset(pr);
   }
+  for (auto &cli : upload_clients)
+    cli.reset(get_kv_processor(upload_url, upload_port, base_repo.c_str(), user, passwd));
+
   for (int ti = 0; ti < threads_count; ++ti)
-    threads.emplace_back(std::thread(processor_thread_loop, this, clients[ti].get()));
+    threads.emplace_back(std::thread(processor_thread_loop, this, download_clients[ti].get(), upload_clients[ti].get()));
 }
 
 void BackgroundProcessor::wait()
@@ -152,7 +163,7 @@ void add_upload_queue(const char *filename, bool compress, const char *message)
   	processor.reset(new BackgroundProcessor);
     processor->init();
   }
-  if (!processor->uploadEnabled)
+  if (!processor->upload_clients[0])
     return;
   char *cdir = xgetwd();
   processor->emplace(BlobTask{message, cdir, filename, "", "", 0, compress, BlobTask::Type::Upload});
