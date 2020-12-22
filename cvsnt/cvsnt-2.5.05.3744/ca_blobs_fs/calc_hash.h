@@ -16,3 +16,13 @@ inline bool bin_hash_to_hex_string(const unsigned char *blob_hash, char *to_hash
   *to_hash_hex_string = 0;
   return true;
 }
+
+inline bool is_encoded_hash(const char *d, size_t len)
+{
+  if (len != 64)
+    return false;
+  for (const char *e = d + len; d != e; ++d)
+    if ((*d < '0' || *d > '9') && (*d < 'a' || *d > 'f'))
+      return false;
+  return true;
+}

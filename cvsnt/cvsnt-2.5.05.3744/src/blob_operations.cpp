@@ -1,19 +1,10 @@
 //#include "cvs.h"
 #include "sha_blob_reference.h"
+#include "../ca_blobs_fs/calc_hash.h"
 #include <string.h>
 #include<stdio.h>
 
 void error (int, int, const char *, ...);
-
-inline bool is_encoded_hash(const char *d, size_t len)
-{
-  if (len != 64)
-    return false;
-  for (const char *e = d + len; d != e; ++d)
-    if ((*d < '0' || *d > '9') && (*d < 'a' || *d > 'f'))
-      return false;
-  return true;
-}
 
 bool is_blob_reference_data(const void *data, size_t len)
 {
