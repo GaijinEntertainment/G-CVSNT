@@ -313,7 +313,7 @@ static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_e
 
 static bool write_db(const char* DBName, const std::string &path_to_versions, const tsl::sparse_map<std::string, char[hash_encoded_size+1]> &db)
 {
-  FILE *dbf = fopen(DBName, "a+");
+  FILE *dbf = fopen(DBName, "wb+");
   if (!dbf)
     return false;
   for (auto &fi: db)
