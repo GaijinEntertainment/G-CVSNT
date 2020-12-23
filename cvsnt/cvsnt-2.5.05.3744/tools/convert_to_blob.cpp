@@ -311,14 +311,14 @@ static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_e
   printf("Database %s was read %d lines processed, with %d unique entries\n", DBName, line, (int)db.size());
 }
 
-static bool write_db(const char* DBName, const std::string &path_to_versions, const tsl::sparse_map<std::string, char[hash_encoded_size+1]> &db)
+static bool write_db(const char* DBName, const std::string &path_to_versions, const tsl::sparse_map<std::string, char[hash_encoded_size+1]> &db, const char *mode = "a+")
 {
-  FILE *dbf = fopen(DBName, "wb+");
+  FILE *dbf = fopen(DBName, mode);
   if (!dbf)
     return false;
   for (auto &fi: db)
   {
-    if (fprintf(dbf, "%s/%s:%s\n", path_to_versions.c_str(), fi.first.c_str(), fi.second)<0)
+    if (fprintf(dbf, "%s%s%s:%s\n", path_to_versions.c_str(), path_to_versions.length() ? "/" : "", fi.first.c_str(), fi.second)<0)
     {
       fprintf(stderr, "[E] can't write DB\n");
       fclose(dbf);
@@ -570,5 +570,13 @@ int main(int ac, const char* argv[])
     already_in_db.load());
 
   cvs_tcp_close(lock_server_socket);
+  if (assist_db_file_name.length())
+  {
+    assist_db.clear();
+    read_db(assist_db_file_name.c_str(), assist_db);
+    std::string tmp = assist_db_file_name + "_tmp";
+    if (write_db(tmp.c_str(), std::string(""), assist_db, "wb+"))
+      rename_file(tmp.c_str(), assist_db_file_name.c_str(), false);
+  }
   return 0;
 }
