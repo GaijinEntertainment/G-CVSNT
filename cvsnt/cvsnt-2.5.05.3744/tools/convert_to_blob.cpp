@@ -298,6 +298,8 @@ static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_e
     if (!hst || hst == buf || !is_encoded_hash(hst+1, strlen(hst+1)))
     {
       fprintf(stderr, "[E] invalid DB at line %d, <%s>\n", line, buf);
+      if (hst)
+        fprintf(stderr, "[E] incorrect hash %s (sz = %d)\n", hst+1, (int)strlen(hst+1));
       break;
     }
     *hst = 0;
