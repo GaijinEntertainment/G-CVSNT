@@ -304,6 +304,7 @@ static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_e
     }
     *hst = 0;
     hst++;
+    hst[64] = 0;
     memcpy(db[buf], hst, 65);
   }
   fclose(dbf);

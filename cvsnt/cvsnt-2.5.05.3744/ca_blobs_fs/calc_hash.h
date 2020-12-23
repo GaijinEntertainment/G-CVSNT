@@ -19,7 +19,7 @@ inline bool bin_hash_to_hex_string(const unsigned char *blob_hash, char *to_hash
 
 inline bool is_encoded_hash(const char *d, size_t len)
 {
-  if (len != 64 && (len != 65 || d[64] != 0))
+  if (len < 64)//longer lines are accepted
     return false;
   for (const char *e = d + 64; d != e; ++d)
     if ((*d < '0' || *d > '9') && (*d < 'a' || *d > 'f'))
