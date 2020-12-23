@@ -168,29 +168,34 @@ static void process_file_ver(const char *rootDir,
   const size_t fsz = get_file_size(srcPathString.c_str());
   readData += fsz;
 
-  int fd = open(srcPathString.c_str(), O_RDONLY);
-  if (fd == -1)
-    error(1, errno, "can't open for read <%s> of %d sz", srcPathString.c_str(), (int)fsz);
-  const char* begin = (const char*)(mmap(NULL, fsz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
-  close(fd);
-  const size_t unpackedSz = wasPacked  ? ntohl(*(int*)begin) : fsz;
-  const size_t readDataSz = wasPacked ? fsz - sizeof(int) : fsz;
-  const char* readData = wasPacked ? begin + sizeof(int) : begin;
-  PushResult pr = PushResult::IO_ERROR;
-  //just push data as is
-  BlobHeader hdr = get_header(wasPacked ? zlib_magic : noarc_magic, unpackedSz, 0);
   auto assistIt = assist_db.find(srcPathString);
   if (assistIt != assist_db.end())
     already_in_db++;
-  PushData* pd = start_push(get_default_ctx(), assistIt == assist_db.end() ? nullptr : assistIt->second);
-  if (!stream_push(pd, &hdr, sizeof(hdr)) || !stream_push(pd, readData, readDataSz))
+  PushResult pr = PushResult::IO_ERROR;
+  if (assistIt != assist_db.end() && get_size(get_default_ctx(), assistIt->second) > 0)
   {
-    error(0, errno, "can't push blob for <%s>", srcPathString.c_str());
-    destroy(pd);
+    pr = PushResult::DEDUPLICATED;
   } else
-    pr = finish(pd, hash_encoded);
-  munmap((void*)begin, fsz);
-
+  {
+    int fd = open(srcPathString.c_str(), O_RDONLY);
+    if (fd == -1)
+      error(1, errno, "can't open for read <%s> of %d sz", srcPathString.c_str(), (int)fsz);
+    const char* begin = (const char*)(mmap(NULL, fsz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
+    close(fd);
+    const size_t unpackedSz = wasPacked  ? ntohl(*(int*)begin) : fsz;
+    const size_t readDataSz = wasPacked ? fsz - sizeof(int) : fsz;
+    const char* readData = wasPacked ? begin + sizeof(int) : begin;
+    //just push data as is
+    BlobHeader hdr = get_header(wasPacked ? zlib_magic : noarc_magic, unpackedSz, 0);
+    PushData* pd = start_push(get_default_ctx(), assistIt == assist_db.end() ? nullptr : assistIt->second);
+    if (!stream_push(pd, &hdr, sizeof(hdr)) || !stream_push(pd, readData, readDataSz))
+    {
+      error(0, errno, "can't push blob for <%s>", srcPathString.c_str());
+      destroy(pd);
+    } else
+      pr = finish(pd, hash_encoded);
+    munmap((void*)begin, fsz);
+  }
   #if CONCURRENT_CONVERSION_TOOL
     unlock(lockId, filePath.c_str());//unLock1, so some other utility can lock
   #endif
