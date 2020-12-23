@@ -97,7 +97,8 @@ static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_r
 }
 
 static std::atomic<uint64_t> deduplicatedData = 0, readData = 0, writtenData = 0;
-std::atomic<uint32_t> processed_files = 0;
+static std::atomic<uint32_t> processed_files = 0;
+static std::atomic<uint32_t> already_in_db = 0;
 
 static std::mutex lock_id_mutex;
 static std::mutex  file_version_remap_mutex;
@@ -179,6 +180,8 @@ static void process_file_ver(const char *rootDir,
   //just push data as is
   BlobHeader hdr = get_header(wasPacked ? zlib_magic : noarc_magic, unpackedSz, 0);
   auto assistIt = assist_db.find(srcPathString);
+  if (assistIt != assist_db.end())
+    already_in_db++;
   PushData* pd = start_push(get_default_ctx(), assistIt == assist_db.end() ? nullptr : assistIt->second);
   if (!stream_push(pd, &hdr, sizeof(hdr)) || !stream_push(pd, readData, readDataSz))
   {
@@ -305,14 +308,14 @@ static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_e
   printf("Database %s was read %d lines processed, with %d unique entries\n", DBName, line, (int)db.size());
 }
 
-static bool write_db(const char* DBName, const tsl::sparse_map<std::string, char[hash_encoded_size+1]> &db)
+static bool write_db(const char* DBName, const std::string &path_to_versions, const tsl::sparse_map<std::string, char[hash_encoded_size+1]> &db)
 {
   FILE *dbf = fopen(DBName, "a+");
   if (!dbf)
     return false;
   for (auto &fi: db)
   {
-    if (fprintf(dbf, "%s:%s\n", fi.first.c_str(), fi.second)<0)
+    if (fprintf(dbf, "%s/%s:%s\n", path_to_versions.c_str(), fi.first.c_str(), fi.second)<0)
     {
       fprintf(stderr, "[E] can't write DB\n");
       fclose(dbf);
@@ -326,10 +329,13 @@ static bool write_db(const char* DBName, const tsl::sparse_map<std::string, char
 void process_queued_files(const char *filename, const char *lock_rcs_file_name, const std::string &rcs_file_name_full_path, const std::string &path_to_versions, int files_to_process)
 {
   finish_processing(files_to_process);
-  if (assist_db_file_name.length() && !write_db(assist_db_file_name.c_str(), file_version_remap))
+  if (assist_db_file_name.length() && !write_db(assist_db_file_name.c_str(), path_to_versions, file_version_remap))
     assist_db_file_name = "";
   if (!cvt_rcs_files)//if we are just writing assist DB, we don't need change rcs file
+  {
+    file_version_remap.clear();
     return;
+  }
   //replace references
   size_t lockId = get_lock(lock_rcs_file_name);//lock2
   mode_t rcs_mode; size_t rcs_sz;
@@ -555,9 +561,10 @@ int main(int ac, const char* argv[])
     process_directory(rootDir.c_str(), dir.c_str());
   }
   processor.finish();
-  printf("written %g mb, saved %g mb, de-duplicated %g mb\n", double(writtenData)/(1<<20),
+  printf("written %g mb, saved %g mb, de-duplicated %g mb, already_in_db = %d\n", double(writtenData)/(1<<20),
     (double(readData)-double(writtenData))/(1<<20),
-    double(deduplicatedData)/(1<<20));
+    double(deduplicatedData)/(1<<20),
+    already_in_db.load());
 
   cvs_tcp_close(lock_server_socket);
   return 0;

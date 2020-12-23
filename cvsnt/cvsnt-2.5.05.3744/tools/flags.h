@@ -155,7 +155,7 @@ class flags {
             if (type == detail::flag_type::optional)
                 output << " [=" << alt << "]" ;
              else if (type == detail::flag_type::flag)
-                output << " val";
+                output << " (flag)";
             return output.str();
         };
         auto flag_name2 = [&](auto& f) {
