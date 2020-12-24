@@ -298,22 +298,26 @@ static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_e
     return;
   }
   char buf[1024]; int line = 0;
+  std::string key;
   for (;fgets(buf, sizeof(buf), dbf); ++line)
   {
+    key = "";
     char *hst = strstr(buf, ":");
     if (!hst || hst == buf || !is_encoded_hash(hst+1, strlen(hst+1)))
     {
       fprintf(stderr, "[E] invalid DB at line %d, <%s>\n", line, buf);
-      if (hst)
-        fprintf(stderr, "[E] incorrect hash %s (sz = %d)\n", hst+1, (int)strlen(hst+1));
-      if (strlen(hst+1) < 64)
+      if (!hst || hst == buf)
+        break;
+      fprintf(stderr, "[E] incorrect hash %s (sz = %d)\n", hst+1, (int)strlen(hst+1));
+      *hst = 0;key = buf;
+      if (strlen(hst+1) < 64 || db.find(key) != db.end())
         continue;
-      break;
     }
-    *hst = 0;
-    hst++;
+    *hst = 0;hst++;
     hst[64] = 0;
-    memcpy(db[buf], hst, 65);
+    key = hst;
+    if (db.find(key) == db.end())
+      memcpy(db[buf], hst, 65);
   }
   fclose(dbf);
   printf("Database %s was read %d lines processed, with %d unique entries\n", DBName, line, (int)db.size());
