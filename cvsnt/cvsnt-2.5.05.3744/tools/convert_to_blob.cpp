@@ -159,7 +159,7 @@ static void process_file_ver(const char *rootDir,
   #endif
   std::string srcPathString = path.c_str();
   const bool wasPacked = (srcPathString[srcPathString.length()-1] == 'z' && srcPathString[srcPathString.length()-2] == '#');
-  char hash_encoded[hash_encoded_size+1];hash_encoded[hash_encoded_size] = 0;
+  char hash_encoded[hash_encoded_size+1];hash_encoded[0] = 0;hash_encoded[hash_encoded_size] = 0;
 
   time_t ver_atime = get_file_mtime(srcPathString.c_str());
   if (ver_atime > time(NULL) - 60)//if file is written less than 60 seconds ago, it may be is still being written by old CVS. Old CVS wasn't writing atomic! It can only happen if we are in old CVS
