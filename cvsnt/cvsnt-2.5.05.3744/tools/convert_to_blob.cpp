@@ -175,6 +175,7 @@ static void process_file_ver(const char *rootDir,
   if (assistIt != assist_db.end() && get_size(get_default_ctx(), assistIt->second) > 0)
   {
     pr = PushResult::DEDUPLICATED;
+    memcpy(hash_encoded, assistIt->second, 64);
   } else
   {
     int fd = open(srcPathString.c_str(), O_RDONLY);
