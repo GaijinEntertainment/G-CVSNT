@@ -108,7 +108,8 @@ static void process_file(const char *rootDir, const char *dir, const char *rcs_f
 
   const char *data = rcsData.c_str(), *end = data + rcsData.length();
   #define TEXT_COMMAND "@\ntext\n@"
-  while (const char *text_command = strstr(data, TEXT_COMMAND))//we found something looking like text command in rcs
+  //while (const char *text_command = strstr(data, TEXT_COMMAND))//we found something looking like text command in rcs
+  while (const char *text_command = (const char*)memmem(data, rcsData.length() - (data-rcsData.data()), TEXT_COMMAND, strlen(TEXT_COMMAND)))//we found something looking like text command in rcs
   {
     //text command found
     data = text_command + strlen(TEXT_COMMAND);
