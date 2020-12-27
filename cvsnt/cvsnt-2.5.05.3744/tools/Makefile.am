@@ -1,4 +1,4 @@
-AM_CPPFLAGS = @PTHREAD_CPPFLAGS@ -std=c++17 -mavx2 -I../src -I../ca_blobs_fs 
+AM_CPPFLAGS = @PTHREAD_CPPFLAGS@ -std=c++17 -mavx2 -I../src -I../ca_blobs_fs -fopenmp
 
 gc_blobs_SOURCES = gc-blobs.cpp ../src/blob_operations.cpp
 repack_blobs_SOURCES = repack-blobs.cpp

@@ -524,10 +524,10 @@ static void process_directory(const char *rootDir, const char *dir)
 void process_db(const char *rootDir, const db_map &db)
 {
   tsl::sparse_map<std::string, db_map> rcs_files;
+  int entries = 0;
   {
     const size_t rootDirLen = strlen(rootDir);
     std::string rcs_path;
-    int entries = 0;
     for (const auto &i: db)
     {
       if (strncmp(i.first.c_str(), rootDir, rootDirLen) != 0)
@@ -552,6 +552,8 @@ void process_db(const char *rootDir, const db_map &db)
   }
 
   printf("converting RCS\n");
+  std::atomic<int> processed = 0;
+  #pragma omp parallel for
   for (auto ri = rcs_files.cbegin(), re = rcs_files.cend(); ri != re; ri++)
   {
     const auto &rcs_map = *ri;
@@ -573,6 +575,9 @@ void process_db(const char *rootDir, const db_map &db)
     #endif
     prepare_strings(rootDir, dir.c_str(), file.c_str(), dirPath, pathToVersions, filePath, rcsFilePath);
     process_queued_files(file.c_str(), rcsFilePath.c_str(), rcsFilePath, pathToVersions, rcs_map.second, rcs_map.second.size());
+    const int cProcessed = processed++;
+    if (cProcessed&1023 == 0)
+      printf("processed %d/%d\n",cProcessed, entries);
   }
 }
 
