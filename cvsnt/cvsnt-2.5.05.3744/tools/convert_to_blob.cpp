@@ -553,10 +553,12 @@ void process_db(const char *rootDir, const db_map &db)
 
   printf("converting RCS\n");
   std::atomic<int> processed = 0;
+  auto ri = rcs_files.cbegin();
+  const size_t cnt = rcs_files.size();
   #pragma omp parallel for
-  for (auto ri = rcs_files.cbegin(), re = rcs_files.cend(); ri != re; ri++)
+  for (size_t i = 0; i < cnt; i++)
   {
-    const auto &rcs_map = *ri;
+    const auto &rcs_map = *ri; ri++;
     std::string dir, file;
     std::string dirPath, pathToVersions, filePath, rcsFilePath;
     dir = rcs_map.first;

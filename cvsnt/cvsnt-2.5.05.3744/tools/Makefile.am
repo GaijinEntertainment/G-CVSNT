@@ -7,7 +7,7 @@ blake3_calc_SOURCES = blake3-calc.cpp
 
 bin_PROGRAMS=gc_blobs repack_blobs convert_to_blob blake3_calc
 
-convert_to_blob_LDADD = -lstdc++fs -lblake3 -lca_blobs_fs -lz -lzstd @PTHREAD_LIBS@ 
+convert_to_blob_LDADD = -lstdc++fs -lblake3 -lca_blobs_fs -lz -lzstd -lgomp @PTHREAD_LIBS@ 
 gc_blobs_LDADD = -lstdc++fs -lblake3 -lca_blobs_fs -lz -lzstd @PTHREAD_LIBS@ 
 repack_blobs_LDADD = -lstdc++fs -lblake3 -lca_blobs_fs -lz -lzstd @PTHREAD_LIBS@ 
 blake3_calc_LDADD = -lblake3
