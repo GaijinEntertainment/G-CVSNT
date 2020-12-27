@@ -87,7 +87,7 @@ void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, co
     {
       //it is dangerous to remove file then
       printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
-      if (!remove_old)
+      if (remove_old)
         keep_files_list.emplace(fv.first);
     } else
       anyReplaced = true;
