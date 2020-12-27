@@ -40,12 +40,93 @@ using namespace streaming_compression;
 
 //this, and only this is amount of work to be done in parallel.
 static size_t max_files_to_process = 256;// to limit amount of double sized data
+typedef tsl::sparse_map<std::string, char[hash_encoded_size+1]> db_map;
 
 static void ensure_blob_mtime(time_t ver_atime, const char *blob_file)
 {
   time_t blob_mtime = get_file_mtime(blob_file);
   if (ver_atime > blob_mtime)
     set_file_mtime(blob_file, ver_atime);
+}
+
+static size_t get_lock(const char *lock_file_name);
+static void unlock(size_t lockId, const char *debug_text = nullptr);
+static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length);
+
+void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, const std::string &rcs_file_name_full_path, const std::string &path_to_versions, const db_map &db, bool remove_old)
+{
+  size_t lockId = get_lock(lock_rcs_file_name);//lock2
+  mode_t rcs_mode; size_t rcs_sz;
+  if (!get_file_mode_and_size(rcs_file_name_full_path.c_str(), rcs_mode, rcs_sz))
+  {
+    unlock(lockId, lock_rcs_file_name);//unlock2
+    fprintf(stderr, "[E] no rcs file <%s>\n", rcs_file_name_full_path.c_str());
+    return;
+  }
+  std::string rcsData;rcsData.resize(rcs_sz+1);
+  {
+    std::ifstream f(rcs_file_name_full_path.c_str(), std::ios::in | std::ios::binary);
+    f.read(rcsData.data(), rcs_sz);rcsData[rcs_sz] = 0;
+  }
+  std::string oldVerRCS;
+  char sha_ref[blob_reference_size+2];
+  memcpy(sha_ref, HASH_TYPE_REV_STRING, hash_type_magic_len);
+  sha_ref[blob_reference_size] = '@';
+  sha_ref[blob_reference_size+1] = 0;
+  tsl::sparse_set<std::string> keep_files_list;
+  std::string filenameDir = std::string(filename) + "/";
+  bool anyReplaced = false;
+  for (auto &fv: db)
+  {
+    oldVerRCS = filenameDir + fv.first;
+    if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
+      oldVerRCS.erase(oldVerRCS.length()-2);
+    oldVerRCS += "@";
+    memcpy(sha_ref+hash_type_magic_len, fv.second, hash_encoded_size);
+    if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1))
+    {
+      //it is dangerous to remove file then
+      printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
+      if (!remove_old)
+        keep_files_list.emplace(fv.first);
+    } else
+      anyReplaced = true;
+  }
+  bool rcsChanged = false;
+  if (anyReplaced)
+  {
+    char *tempFilename;
+    FILE *tmpf = cvs_temp_file (&tempFilename, "wb");
+    if (tmpf)
+    {
+      if (fwrite(rcsData.c_str(), 1, rcsData.length()-1, tmpf) == rcsData.length()-1)
+      {
+        change_file_mode(tempFilename, rcs_mode);
+        if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
+          rcsChanged = true;
+        else
+        {
+          printf("[E] can'rename  temp file <%s> to <%s>\n", tempFilename, rcs_file_name_full_path.c_str());
+          unlink(tempFilename);
+        }
+      } else
+        printf("[E] can't write temp file for <%s>\n", tempFilename);
+      fclose(tmpf);
+      blob_free(tempFilename);
+    } else
+      printf("[E] can't write temp file for <%s>\n", rcs_file_name_full_path.c_str());
+  }
+
+  unlock(lockId, lock_rcs_file_name);//unlock2
+
+  if (rcsChanged && remove_old)//unlink all replaced files
+  {
+    std::string pathtoVersionDir = path_to_versions + "/";
+    for (auto &fv: db)
+      if (keep_files_list.find(fv.first) == keep_files_list.end())
+        unlink((pathtoVersionDir + fv.first).c_str());
+    rmdir(path_to_versions.c_str());//will delete only empty folder
+  }
 }
 
 static int find_rcs_data(const char* rcs_data, const char *text_to_find, size_t text_to_find_length)
@@ -96,13 +177,13 @@ static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_r
   return found;
 }
 
+
 static std::atomic<uint64_t> deduplicatedData = 0, readData = 0, writtenData = 0;
 static std::atomic<uint32_t> processed_files = 0;
 static std::atomic<uint32_t> already_in_db = 0;
 
 static std::mutex lock_id_mutex;
 static std::mutex  file_version_remap_mutex;
-typedef tsl::sparse_map<std::string, char[hash_encoded_size+1]> db_map;
 static db_map file_version_remap;
 static db_map assist_db;
 static bool cvt_rcs_files = true, remove_old_blobs = true;
@@ -115,7 +196,7 @@ struct ThreadData
 
 static int lock_server_socket = -1;
 
-size_t get_lock(const char *lock_file_name)
+static size_t get_lock(const char *lock_file_name)
 {
   if (lock_server_socket == -1)
     return 0;
@@ -138,7 +219,7 @@ size_t get_lock(const char *lock_file_name)
   return lockId;
 }
 
-static void unlock(size_t lockId, const char *debug_text = nullptr)
+static void unlock(size_t lockId, const char *debug_text)
 {
   if (!lockId)
     return;
@@ -343,88 +424,14 @@ static bool write_db(const char* DBName, const std::string &path_to_versions, co
   return true;
 }
 
+
 void process_queued_files(const char *filename, const char *lock_rcs_file_name, const std::string &rcs_file_name_full_path, const std::string &path_to_versions, const db_map &db, int files_to_process)
 {
   finish_processing(files_to_process);
   if (assist_db_file_name.length() && !write_db(assist_db_file_name.c_str(), path_to_versions, db))
     assist_db_file_name = "";
-  if (!cvt_rcs_files)//if we are just writing assist DB, we don't need change rcs file
-  {
-    file_version_remap.clear();
-    return;
-  }
-  //replace references
-  size_t lockId = get_lock(lock_rcs_file_name);//lock2
-  mode_t rcs_mode; size_t rcs_sz;
-  if (!get_file_mode_and_size(rcs_file_name_full_path.c_str(), rcs_mode, rcs_sz))
-  {
-    unlock(lockId, lock_rcs_file_name);//unlock2
-    fprintf(stderr, "[E] no rcs file <%s>\n", rcs_file_name_full_path.c_str());
-    file_version_remap.clear();
-    return;
-  }
-  std::string rcsData;rcsData.resize(rcs_sz+1);
-  {
-    std::ifstream f(rcs_file_name_full_path.c_str(), std::ios::in | std::ios::binary);
-    f.read(rcsData.data(), rcs_sz);rcsData[rcs_sz] = 0;
-  }
-  std::string oldVerRCS;
-  char sha_ref[blob_reference_size+2];
-  memcpy(sha_ref, HASH_TYPE_REV_STRING, hash_type_magic_len);
-  sha_ref[blob_reference_size] = '@';
-  sha_ref[blob_reference_size+1] = 0;
-  tsl::sparse_set<std::string> keep_files_list;
-  std::string filenameDir = std::string(filename) + "/";
-  bool anyReplaced = false;
-  for (auto &fv: db)
-  {
-    oldVerRCS = filenameDir + fv.first;
-    if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
-      oldVerRCS.erase(oldVerRCS.length()-2);
-    oldVerRCS += "@";
-    memcpy(sha_ref+hash_type_magic_len, fv.second, hash_encoded_size);
-    if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1))
-    {
-      //it is dangerous to remove file then
-      printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
-      keep_files_list.emplace(fv.first);
-    } else
-      anyReplaced = true;
-  }
-  bool rcsChanged = false;
-  if (anyReplaced)
-  {
-    char *tempFilename;
-    FILE *tmpf = cvs_temp_file (&tempFilename, "wb");
-    if (tmpf)
-    {
-      if (fwrite(rcsData.c_str(), 1, rcsData.length()-1, tmpf) == rcsData.length()-1)
-      {
-        change_file_mode(tempFilename, rcs_mode);
-        if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
-          rcsChanged = true;
-        else
-        {
-          printf("[E] can'rename  temp file <%s> to <%s>\n", tempFilename, rcs_file_name_full_path.c_str());
-          unlink(tempFilename);
-        }
-      } else
-        printf("[E] can't write temp file for <%s>\n", tempFilename);
-      fclose(tmpf);
-      blob_free(tempFilename);
-    } else
-      printf("[E] can't write temp file for <%s>\n", rcs_file_name_full_path.c_str());
-  }
-  unlock(lockId, lock_rcs_file_name);//unlock2
-
-  if (rcsChanged && remove_old_blobs)//unlink all replaced files
-  {
-    std::string pathtoVersionDir = path_to_versions + "/";
-    for (auto &fv: file_version_remap)
-      if (keep_files_list.find(fv.first) == keep_files_list.end())
-        unlink((pathtoVersionDir + fv.first).c_str());
-    rmdir(path_to_versions.c_str());//will delete only empty folder
-  }
+  if (cvt_rcs_files)//if we are just writing assist DB, we don't need change rcs file
+    actual_rcs_replace(filename, lock_rcs_file_name, rcs_file_name_full_path, path_to_versions, db, remove_old_blobs);//replace references, remove old
   file_version_remap.clear();
 }
 
@@ -517,36 +524,39 @@ static void process_directory(const char *rootDir, const char *dir)
 void process_db(const char *rootDir, const db_map &db)
 {
   tsl::sparse_map<std::string, db_map> rcs_files;
-  const size_t rootDirLen = strlen(rootDir);
-  std::string rcs_path;
-  int entries = 0;
-  for (const auto &i: db)
   {
-    if (strncmp(i.first.c_str(), rootDir, rootDirLen) != 0)
+    const size_t rootDirLen = strlen(rootDir);
+    std::string rcs_path;
+    int entries = 0;
+    for (const auto &i: db)
     {
-      fprintf(stderr, "incorrect db entry path (not from root): %s, root = %s", i.first.c_str(), rootDir);
-      continue;
+      if (strncmp(i.first.c_str(), rootDir, rootDirLen) != 0)
+      {
+        fprintf(stderr, "incorrect db entry path (not from root): %s, root = %s", i.first.c_str(), rootDir);
+        continue;
+      }
+      rcs_path = i.first.c_str() + rootDirLen + (rootDir[rootDirLen-1] == '/' ? 0 : 1);
+      const size_t at = rcs_path.rfind("/CVS/");
+      if (at == std::string::npos)
+      {
+        fprintf(stderr, "incorrect db entry path (no /CVS/): %s", rcs_path.c_str());
+        continue;
+      }
+      rcs_path.erase(at, 4);
+      const size_t verAt = rcs_path.rfind("/");
+      rcs_path[verAt] = 0;
+      memcpy(rcs_files[rcs_path][rcs_path.c_str() + verAt+1], i.second, 65);
+      entries++;
     }
-    rcs_path = i.first.c_str() + rootDirLen + (rootDir[rootDirLen-1] == '/' ? 0 : 1);
-    const size_t at = rcs_path.rfind("/CVS/");
-    if (at == std::string::npos)
-    {
-      fprintf(stderr, "incorrect db entry path (no /CVS/): %s", rcs_path.c_str());
-      continue;
-    }
-    rcs_path.erase(at, 4);
-    const size_t verAt = rcs_path.rfind("/");
-    rcs_path[verAt] = 0;
-    memcpy(rcs_files[rcs_path][rcs_path.c_str() + verAt+1], i.second, 65);
-    entries++;
+    printf("DB conversion finished, %d processed entries, %d rcs files\n", entries, (int)rcs_files.size());
   }
-  printf("DB conversion finished, %d processed entries, %d rcs files\n", entries, (int)rcs_files.size());
 
   printf("converting RCS\n");
-  std::string dir, file;
-  std::string dirPath, pathToVersions, filePath, rcsFilePath;
-  for (const auto &rcs_map: rcs_files)
+  for (auto ri = rcs_files.cbegin(), re = rcs_files.cend(); ri != re; ri++)
   {
+    const auto &rcs_map = *ri;
+    std::string dir, file;
+    std::string dirPath, pathToVersions, filePath, rcsFilePath;
     dir = rcs_map.first;
     size_t e = dir.rfind("/");
     if (e == std::string::npos)
