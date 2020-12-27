@@ -156,7 +156,9 @@ char *md5_crypt(const char *pw, const char *salt)
 
 int compare_crypt(const char *text, const char *crypt_pw)
 {
-	const char *test_pw;
+	if (!text)
+         return 1;
+    const char *test_pw;
 
 	if(is_md5_salt(crypt_pw))
 		test_pw = md5_crypt(text,crypt_pw+strlen(magic));
