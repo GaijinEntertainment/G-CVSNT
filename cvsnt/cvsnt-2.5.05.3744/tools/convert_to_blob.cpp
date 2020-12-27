@@ -102,8 +102,9 @@ static std::atomic<uint32_t> already_in_db = 0;
 
 static std::mutex lock_id_mutex;
 static std::mutex  file_version_remap_mutex;
-static tsl::sparse_map<std::string, char[hash_encoded_size+1]> file_version_remap;
-static tsl::sparse_map<std::string, char[hash_encoded_size+1]> assist_db;
+typedef tsl::sparse_map<std::string, char[hash_encoded_size+1]> db_map;
+static db_map file_version_remap;
+static db_map assist_db;
 static bool cvt_rcs_files = true, remove_old_blobs = true;
 static std::string assist_db_file_name = "";
 
@@ -289,7 +290,7 @@ static void finish_processing(int files_to_process)
   processed_files.store(0);
 }
 
-static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_encoded_size+1]> &db)
+static void read_db(const char* DBName, db_map &db)
 {
   FILE *dbf = fopen(DBName, "rb");
   if (!dbf)
@@ -323,7 +324,7 @@ static void read_db(const char* DBName, tsl::sparse_map<std::string, char[hash_e
   printf("Database %s was read %d lines processed, with %d unique entries\n", DBName, line, (int)db.size());
 }
 
-static bool write_db(const char* DBName, const std::string &path_to_versions, const tsl::sparse_map<std::string, char[hash_encoded_size+1]> &db, const char *mode = "a+")
+static bool write_db(const char* DBName, const std::string &path_to_versions, const db_map &db, const char *mode = "a+")
 {
   FILE *dbf = fopen(DBName, mode);
   if (!dbf)
@@ -341,10 +342,10 @@ static bool write_db(const char* DBName, const std::string &path_to_versions, co
   return true;
 }
 
-void process_queued_files(const char *filename, const char *lock_rcs_file_name, const std::string &rcs_file_name_full_path, const std::string &path_to_versions, int files_to_process)
+void process_queued_files(const char *filename, const char *lock_rcs_file_name, const std::string &rcs_file_name_full_path, const std::string &path_to_versions, const db_map &db, int files_to_process)
 {
   finish_processing(files_to_process);
-  if (assist_db_file_name.length() && !write_db(assist_db_file_name.c_str(), path_to_versions, file_version_remap))
+  if (assist_db_file_name.length() && !write_db(assist_db_file_name.c_str(), path_to_versions, db))
     assist_db_file_name = "";
   if (!cvt_rcs_files)//if we are just writing assist DB, we don't need change rcs file
   {
@@ -374,7 +375,7 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
   tsl::sparse_set<std::string> keep_files_list;
   std::string filenameDir = std::string(filename) + "/";
   bool anyReplaced = false;
-  for (auto &fv: file_version_remap)
+  for (auto &fv: db)
   {
     oldVerRCS = filenameDir + fv.first;
     if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
@@ -426,15 +427,24 @@ void process_queued_files(const char *filename, const char *lock_rcs_file_name, 
   file_version_remap.clear();
 }
 
-static void process_file(const char *rootDir, const char *dir, const char *file)
+static void prepare_strings(const char *rootDir, const char *dir, const char *file,
+  std::string &dirPath, std::string &pathToVersions, std::string &filePath, std::string &rcsFilePath)
 {
-  std::string dirPath = rootDir;
+  dirPath = rootDir;
   if (dirPath[dirPath.length()-1] != '/' && dir[0]!='/')
     dirPath+="/";
   dirPath += dir;
   if (dirPath[dirPath.length()-1] != '/')
     dirPath+="/";
-  std::string pathToVersions = (dirPath + "CVS/")+file;
+  pathToVersions = (dirPath + "CVS/")+file;
+  filePath = dirPath + file;
+  rcsFilePath = filePath+",v";
+}
+
+static void process_file(const char *rootDir, const char *dir, const char *file)
+{
+  std::string dirPath, pathToVersions, filePath, rcsFilePath;
+  prepare_strings(rootDir, dir, file, dirPath, pathToVersions, filePath, rcsFilePath);
 
   if (!iswriteable(pathToVersions.c_str()))
   {
@@ -449,8 +459,6 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
   if (processed_files.load() != 0)
     fprintf(stderr, "[E] not all files were processed");
   processed_files.store(0);
-  std::string filePath = dirPath + file;
-  std::string rcsFilePath = filePath+",v";
   ThreadData data;
   for (const auto & entry : fs::directory_iterator(pathToVersions))
   {
@@ -464,11 +472,11 @@ static void process_file(const char *rootDir, const char *dir, const char *file)
       process_file_ver(rootDir, rcsFilePath, entry.path(), data);
     if (files_to_process > max_files_to_process)
     {
-      process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
+      process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, file_version_remap, files_to_process);
       files_to_process = 0;
     }
   }
-  process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, files_to_process);
+  process_queued_files(file, rcsFilePath.c_str(), rcsFilePath, pathToVersions, file_version_remap, files_to_process);
   files_to_process = 0;
 }
 
@@ -505,6 +513,55 @@ static void process_directory(const char *rootDir, const char *dir)
     printf("processed dir <%s>, saved %gkb\n", dir, double(int64_t(readData-readData_old) - int64_t(writtenData-writtenData_old))/1024.0);
 }
 
+void process_db(const char *rootDir, const db_map &db)
+{
+  tsl::sparse_map<std::string, db_map> rcs_files;
+  const size_t rootDirLen = strlen(rootDir);
+  std::string rcs_path;
+  int entries = 0;
+  for (const auto &i: db)
+  {
+    if (strncmp(i.first.c_str(), rootDir, rootDirLen) != 0)
+    {
+      fprintf(stderr, "incorrect db entry path (not from root): %s, root = %s", i.first.c_str(), rootDir);
+      continue;
+    }
+    rcs_path = i.first.c_str() + rootDirLen;
+    const size_t at = rcs_path.find("/CVS/");
+    if (at == std::string::npos)
+    {
+      fprintf(stderr, "incorrect db entry path (no /CVS/): %s", rcs_path.c_str());
+      continue;
+    }
+    rcs_path.erase(at, 4);
+    rcs_path[at] = 0;
+    std::string vFile;
+    memcpy(rcs_files[rcs_path][rcs_path.c_str() + at+1], i.second, 65);
+    entries++;
+  }
+  printf("DB conversion finished, %d processed entries\n", entries);
+
+  printf("converting RCS\n");
+  std::string dir, file;
+  std::string dirPath, pathToVersions, filePath, rcsFilePath;
+  for (const auto &rcs_map: rcs_files)
+  {
+    dir = rcs_map.first;
+    size_t e = dir.rfind("/");
+    if (e == std::string::npos)
+    {
+      file = dir;
+      dir = "";
+    } else
+    {
+      dir[e] = 0;
+      file = dir.c_str() + e + 1;
+    }
+    prepare_strings(rootDir, dir.c_str(), file.c_str(), dirPath, pathToVersions, filePath, rcsFilePath);
+    process_queued_files(file.c_str(), rcsFilePath.c_str(), rcsFilePath, pathToVersions, rcs_map.second, rcs_map.second.size());
+  }
+}
+
 int main(int ac, const char* argv[])
 {
   auto options = flags::flags{ac, argv};
@@ -521,9 +578,11 @@ int main(int ac, const char* argv[])
     lock_user = options.arg_or("-user", "not_needed in offline", "User name for lock server");
   auto rootDir = options.arg("-root", "Root dir for CVS");
   init_temp_dir();
-  auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
-  if (tmpDir.length() > 1)
-    def_tmp_dir = tmpDir.c_str();
+  auto tmpDirRCS = options.arg_or("-tmp_rcs", "", "Tmp dir for RCS");
+  if (tmpDirRCS.length() > 1)
+    def_tmp_dir = tmpDirRCS.c_str();
+
+  auto tmpDirBlobs = options.arg_or("-tmp_blobs", "", "Tmp dir for blobs");
   auto dir = options.arg_or("-dir", "", "Folder to process (inside root)");
   auto file = options.arg_or("-file", "", "File to process (inside dir)");
   auto threads = options.arg_as_or<int>("-j", 0,"concurrency level(threads to run)");
@@ -531,6 +590,7 @@ int main(int ac, const char* argv[])
   remove_old_blobs = !options.passed("-no_remove", "Don't remove old version files, when changing rcs.");
   assist_db_file_name = options.arg_or("-db", "cvs_cvt_db.txt", "Assist DB path");
   max_files_to_process = options.arg_as_or<int>("-max_files", 256, "max versions to process before changing rcs. Limits amount of space needed");
+  bool use_db_only = options.passed("-use_db_only", "Use DB and RCS only for source");
 
   bool help = options.passed("-h", "print help usage");
   if (help || !options.sane()) {
@@ -553,29 +613,35 @@ int main(int ac, const char* argv[])
     }
   } else
     printf("Running in lockless mode. That can damage your repo, if someone will work with it, during conversion.\n");
-  if (threads>1)
-  {
-    printf("using %d threads\n", threads);
-    processor.init(rootDir.c_str(), threads);
-  }
   set_root(caddressed_fs::get_default_ctx(), rootDir.c_str());
-  if (tmpDir.length() > 1)
-    caddressed_fs::set_temp_dir(tmpDir.c_str());
-  else
+  if (tmpDirBlobs.length() > 1)
+    caddressed_fs::set_temp_dir(tmpDirBlobs.c_str());
+
+  if (tmpDirRCS.length() < 1)
   {
-    tmpDir = caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx());//use blobs folder for default tmp dir
-    def_tmp_dir = tmpDir.c_str();
+    tmpDirRCS = caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx());//use blobs folder for default tmp dir
+    def_tmp_dir = tmpDirRCS.c_str();
   }
   mkdir(blobs_dir_path(caddressed_fs::get_default_ctx()).c_str(), 0777);
 
-  if (file.length()>0)
+  if (use_db_only)
   {
-    process_file(rootDir.c_str(), dir.c_str(), file.c_str());
+    if (assist_db.empty())
+      fprintf(stderr, "Can't use only DB for conversion, db is empty");
+    process_db(rootDir.c_str(), assist_db);
   } else
   {
-    process_directory(rootDir.c_str(), dir.c_str());
+    if (threads>1)
+    {
+      printf("using %d threads\n", threads);
+      processor.init(rootDir.c_str(), threads);
+    }
+    if (file.length()>0)
+      process_file(rootDir.c_str(), dir.c_str(), file.c_str());
+    else
+      process_directory(rootDir.c_str(), dir.c_str());
+    processor.finish();
   }
-  processor.finish();
   printf("written %g mb, saved %g mb, de-duplicated %g mb, already_in_db = %d\n", double(writtenData)/(1<<20),
     (double(readData)-double(writtenData))/(1<<20),
     double(deduplicatedData)/(1<<20),
