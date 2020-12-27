@@ -586,8 +586,8 @@ void process_db(const char *rootDir, const db_map &db)
     prepare_strings(rootDir, dir.c_str(), file.c_str(), dirPath, pathToVersions, filePath, rcsFilePath);
     actual_rcs_replace(file.c_str(), rcsFilePath.c_str(), rcsFilePath, pathToVersions, rcs_map.second, false);
     const int cProcessed = processed++;
-    if (cProcessed&1023 == 0)
-      printf("processed %d/%d\n",cProcessed, entries);
+    if ((cProcessed&1023) == 1023)
+      printf("processed %d/%d\n",cProcessed, сте);
   }
 }
 
