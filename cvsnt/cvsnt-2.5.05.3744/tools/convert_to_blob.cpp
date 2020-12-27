@@ -172,6 +172,7 @@ static void process_file_ver(const char *rootDir,
   auto assistIt = assist_db.find(srcPathString);
   if (assistIt != assist_db.end())
     already_in_db++;
+
   PushResult pr = PushResult::IO_ERROR;
   if (assistIt != assist_db.end() && get_size(get_default_ctx(), assistIt->second) > 0)
   {
@@ -526,20 +527,20 @@ void process_db(const char *rootDir, const db_map &db)
       fprintf(stderr, "incorrect db entry path (not from root): %s, root = %s", i.first.c_str(), rootDir);
       continue;
     }
-    rcs_path = i.first.c_str() + rootDirLen;
-    const size_t at = rcs_path.find("/CVS/");
+    rcs_path = i.first.c_str() + rootDirLen + (rootDir[rootDirLen-1] == '/' ? 0 : 1);
+    const size_t at = rcs_path.rfind("/CVS/");
     if (at == std::string::npos)
     {
       fprintf(stderr, "incorrect db entry path (no /CVS/): %s", rcs_path.c_str());
       continue;
     }
     rcs_path.erase(at, 4);
-    rcs_path[at] = 0;
-    std::string vFile;
-    memcpy(rcs_files[rcs_path][rcs_path.c_str() + at+1], i.second, 65);
+    const size_t verAt = rcs_path.rfind("/");
+    rcs_path[verAt] = 0;
+    memcpy(rcs_files[rcs_path][rcs_path.c_str() + verAt+1], i.second, 65);
     entries++;
   }
-  printf("DB conversion finished, %d processed entries\n", entries);
+  printf("DB conversion finished, %d processed entries, %d rcs files\n", entries, (int)rcs_files.size());
 
   printf("converting RCS\n");
   std::string dir, file;
@@ -557,6 +558,9 @@ void process_db(const char *rootDir, const db_map &db)
       dir[e] = 0;
       file = dir.c_str() + e + 1;
     }
+    #if VERBOSE
+    printf("process %s: <%s>/<%s>\n", rcs_map.first.c_str(), dir.c_str(), file.c_str());
+    #endif
     prepare_strings(rootDir, dir.c_str(), file.c_str(), dirPath, pathToVersions, filePath, rcsFilePath);
     process_queued_files(file.c_str(), rcsFilePath.c_str(), rcsFilePath, pathToVersions, rcs_map.second, rcs_map.second.size());
   }
@@ -654,7 +658,7 @@ int main(int ac, const char* argv[])
     read_db(assist_db_file_name.c_str(), assist_db);
     std::string tmp = assist_db_file_name + "_tmp";
     if (write_db(tmp.c_str(), std::string(""), assist_db, "wb+"))
-      rename_file(tmp.c_str(), assist_db_file_name.c_str(), false);
+      ;//rename_file(tmp.c_str(), assist_db_file_name.c_str(), false);
   }
   return 0;
 }
