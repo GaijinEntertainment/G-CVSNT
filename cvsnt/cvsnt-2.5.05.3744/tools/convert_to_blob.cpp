@@ -129,11 +129,11 @@ void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, co
   }
 }
 
-static int find_rcs_data(const char* rcs_data, const char *text_to_find, size_t text_to_find_length)
+static intptr_t find_rcs_data(const char* rcs_data, size_t rcs_data_sz, const char *text_to_find, size_t text_to_find_length)
 {
   const char *data = rcs_data;
   #define TEXT_COMMAND "@\ntext\n@"
-  while (const char *text_command = strstr(data, TEXT_COMMAND))//we found something looking like text command in rcs
+  while (const char *text_command = (const char*)memmem(data, rcs_data_sz - (data-rcs_data), TEXT_COMMAND, strlen(TEXT_COMMAND)))//we found something looking like text command in rcs
   {
     //text command found
     data = text_command + strlen(TEXT_COMMAND);
@@ -159,15 +159,15 @@ static int find_rcs_data(const char* rcs_data, const char *text_to_find, size_t 
     if (text_found)
       return data - rcs_data;
   }
-  return -1;
+  return intptr_t(-1);
 }
 
 static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length)
 {
   const char* data = rcs_data.data();
   bool found = false;
-  int text_found_start;
-  while ((text_found_start = find_rcs_data(data, text_to_replace.c_str(), text_to_replace.length())) >= 0)
+  intptr_t text_found_start;
+  while ((text_found_start = find_rcs_data(data, rcs_data.size() - (data-rcs_data.data()), text_to_replace.c_str(), text_to_replace.length())) >= 0)
   {
     size_t wasAt = data - rcs_data.data();
     rcs_data.replace(text_found_start, text_to_replace.length(), replace_text);
