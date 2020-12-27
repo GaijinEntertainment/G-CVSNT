@@ -75,10 +75,19 @@ void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, co
   sha_ref[blob_reference_size+1] = 0;
   tsl::sparse_set<std::string> keep_files_list;
   std::string filenameDir = std::string(filename) + "/";
+  std::string filenameEscapedDir = filenameDir;
+  {//escaping @ in filenames
+    size_t at = 0;
+    while ((at = filenameEscapedDir.find("@", at)) != std::string::npos)
+    {
+      filenameEscapedDir.insert(at, "@");
+      at+=2;
+    }
+  }
   bool anyReplaced = false;
   for (auto &fv: db)
   {
-    oldVerRCS = filenameDir + fv.first;
+    oldVerRCS = filenameEscapedDir + fv.first;
     if (fv.first[fv.first.length() - 1] == 'z' && fv.first[fv.first.length() - 2] == '#')
       oldVerRCS.erase(oldVerRCS.length()-2);
     oldVerRCS += "@";
@@ -86,7 +95,7 @@ void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, co
     if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1))
     {
       //it is dangerous to remove file then
-      printf("[E] can't find references to <%s> in <%s>. Keeping file!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
+      printf("[E] can't find references to <%s> in <%s>. Keeping version file (not RCS)!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
       if (remove_old)
         keep_files_list.emplace(fv.first);
     } else
