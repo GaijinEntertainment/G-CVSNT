@@ -587,7 +587,7 @@ void process_db(const char *rootDir, const db_map &db)
     actual_rcs_replace(file.c_str(), rcsFilePath.c_str(), rcsFilePath, pathToVersions, rcs_map.second, false);
     const int cProcessed = processed++;
     if ((cProcessed&1023) == 1023)
-      printf("processed %d/%d\n",cProcessed, сте);
+      printf("processed %d/%d\n",cProcessed, cnt);
   }
 }
 
