@@ -523,7 +523,7 @@ static void process_directory(const char *rootDir, const char *dir)
 
 void process_db(const char *rootDir, const db_map &db)
 {
-  tsl::sparse_map<std::string, db_map> rcs_files;
+  tsl::sparse_map<std::string, db_map> rcs_files_map;
   int entries = 0;
   {
     const size_t rootDirLen = strlen(rootDir);
@@ -545,20 +545,28 @@ void process_db(const char *rootDir, const db_map &db)
       rcs_path.erase(at, 4);
       const size_t verAt = rcs_path.rfind("/");
       rcs_path[verAt] = 0;
-      memcpy(rcs_files[rcs_path][rcs_path.c_str() + verAt+1], i.second, 65);
+      memcpy(rcs_files_map[rcs_path.c_str()][rcs_path.c_str() + verAt+1], i.second, 65);
       entries++;
     }
-    printf("DB conversion finished, %d processed entries, %d rcs files\n", entries, (int)rcs_files.size());
+    printf("DB conversion finished, %d processed entries, %d rcs files\n", entries, (int)rcs_files_map.size());
   }
 
+  std::vector<std::pair<std::string, db_map>> rcs_files;rcs_files.resize(rcs_files_map.size());
+  size_t vi = 0;
+  for (auto &&i:rcs_files_map)
+  {
+    rcs_files[vi].first = std::move(i.first);
+    rcs_files[vi].second = std::move(i.second);
+    ++vi;
+  }
+  rcs_files_map.clear();
   printf("converting RCS\n");
   std::atomic<int> processed = 0;
-  auto ri = rcs_files.cbegin();
   const size_t cnt = rcs_files.size();
   #pragma omp parallel for
   for (size_t i = 0; i < cnt; i++)
   {
-    const auto &rcs_map = *ri; ri++;
+    const auto &rcs_map = *(rcs_files.cbegin() + i);
     std::string dir, file;
     std::string dirPath, pathToVersions, filePath, rcsFilePath;
     dir = rcs_map.first;
@@ -573,10 +581,10 @@ void process_db(const char *rootDir, const db_map &db)
       file = dir.c_str() + e + 1;
     }
     #if VERBOSE
-    printf("process %s: <%s>/<%s>\n", rcs_map.first.c_str(), dir.c_str(), file.c_str());
+    printf("process %d %s: <%s>/<%s>\n", (int)i, rcs_map.first.c_str(), dir.c_str(), file.c_str());
     #endif
     prepare_strings(rootDir, dir.c_str(), file.c_str(), dirPath, pathToVersions, filePath, rcsFilePath);
-    process_queued_files(file.c_str(), rcsFilePath.c_str(), rcsFilePath, pathToVersions, rcs_map.second, rcs_map.second.size());
+    actual_rcs_replace(file.c_str(), rcsFilePath.c_str(), rcsFilePath, pathToVersions, rcs_map.second, false);
     const int cProcessed = processed++;
     if (cProcessed&1023 == 0)
       printf("processed %d/%d\n",cProcessed, entries);
