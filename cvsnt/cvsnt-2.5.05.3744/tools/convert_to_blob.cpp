@@ -592,7 +592,7 @@ void process_db(const char *rootDir, const db_map &db)
     {
       last_processed = cProcessed;
       const int ctime = time(NULL);
-      printf("%d: processed %d/%d, eta left %gmin\n", (int)ctime, cProcessed, entries, (double(entries-cProcessed)*cProcessed)/double(ctime - startTime+1)/60.);
+      printf("%d: processed %d/%d, eta left %gmin\n", (int)(ctime-startTime), cProcessed, entries, (double(entries-cProcessed)*double(ctime - startTime)/60.)/cProcessed);
     }
   }
 }
