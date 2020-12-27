@@ -563,6 +563,7 @@ void process_db(const char *rootDir, const db_map &db)
   printf("converting RCS\n");
   std::atomic<int> processed = 0, last_processed = 0;
   const size_t cnt = rcs_files.size();
+  const int startTime = time(NULL);
   #pragma omp parallel for
   for (size_t i = 0; i < cnt; i++)
   {
@@ -590,7 +591,8 @@ void process_db(const char *rootDir, const db_map &db)
     if (cProcessed > last_processed.load()+4096)
     {
       last_processed = cProcessed;
-      printf("processed %d/%d\n",cProcessed, entries);
+      const int ctime = time(NULL);
+      printf("%d: processed %d/%d, eta left %gmin\n", (int)ctime, cProcessed, entries, (double(entries-cProcessed)*cProcessed)/double(ctime - startTime+1)/60.);
     }
   }
 }
