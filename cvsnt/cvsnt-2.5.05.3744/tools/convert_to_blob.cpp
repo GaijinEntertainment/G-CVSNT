@@ -532,14 +532,14 @@ void process_db(const char *rootDir, const db_map &db)
     {
       if (strncmp(i.first.c_str(), rootDir, rootDirLen) != 0)
       {
-        fprintf(stderr, "incorrect db entry path (not from root): %s, root = %s", i.first.c_str(), rootDir);
+        fprintf(stderr, "incorrect db entry path (not from root): %s, root = %s\n", i.first.c_str(), rootDir);
         continue;
       }
       rcs_path = i.first.c_str() + rootDirLen + (rootDir[rootDirLen-1] == '/' ? 0 : 1);
       const size_t at = rcs_path.rfind("/CVS/");
       if (at == std::string::npos)
       {
-        fprintf(stderr, "incorrect db entry path (no /CVS/): %s", rcs_path.c_str());
+        fprintf(stderr, "incorrect db entry path (no /CVS/): %s\n", rcs_path.c_str());
         continue;
       }
       rcs_path.erase(at, 4);
