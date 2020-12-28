@@ -51,7 +51,7 @@ static void ensure_blob_mtime(time_t ver_atime, const char *blob_file)
 
 static size_t get_lock(const char *lock_file_name);
 static void unlock(size_t lockId, const char *debug_text = nullptr);
-static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length);
+static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length, bool case_insens);
 
 void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, const std::string &rcs_file_name_full_path, const std::string &path_to_versions, const db_map &db, bool remove_old)
 {
@@ -92,12 +92,19 @@ void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, co
       oldVerRCS.erase(oldVerRCS.length()-2);
     oldVerRCS += "@";
     memcpy(sha_ref+hash_type_magic_len, fv.second, hash_encoded_size);
-    if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1))
+    if (!replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1, false))
     {
       //it is dangerous to remove file then
-      printf("[E] can't find references to <%s> in <%s>. Keeping version file (not RCS)!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
-      if (remove_old)
-        keep_files_list.emplace(fv.first);
+      if (replace_rcs_data(rcsData, oldVerRCS, sha_ref, sizeof(sha_ref)-1, true))
+      {
+        printf("[W] references to <%s> in <%s> was case insensitive!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
+        anyReplaced = true;
+      } else
+      {
+         printf("[E] can't find references to <%s> in <%s>. Keeping version file (not RCS)!\n", oldVerRCS.c_str(), rcs_file_name_full_path.c_str());
+        if (remove_old)
+          keep_files_list.emplace(fv.first);
+      }
     } else
       anyReplaced = true;
   }
@@ -138,7 +145,15 @@ void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, co
   }
 }
 
-static intptr_t find_rcs_data(const char* rcs_data, size_t rcs_data_sz, const char *text_to_find, size_t text_to_find_length)
+static int my_strncmpi(const char *s1, const char *s2, size_t len)
+{
+  for (size_t i = 0; i != len && *s1 && *s2; ++i, ++s1, ++s2)
+    if (tolower(*s1) != tolower(*s2))
+      return false;
+  return true;
+}
+
+static intptr_t find_rcs_data(const char* rcs_data, size_t rcs_data_sz, const char *text_to_find, size_t text_to_find_length, const bool case_ins = false)
 {
   const char *data = rcs_data;
   #define TEXT_COMMAND "@\ntext\n@"
@@ -159,7 +174,7 @@ static intptr_t find_rcs_data(const char* rcs_data, size_t rcs_data_sz, const ch
         data++;//escaped '@'
         continue;
       }
-      if (strncmp(data, text_to_find, text_to_find_length) == 0)
+      if ( (case_ins ? my_strncmpi(data, text_to_find, text_to_find_length) : (strncmp(data, text_to_find, text_to_find_length) == 0)))
       {
         text_found = true;
         break;
@@ -171,12 +186,12 @@ static intptr_t find_rcs_data(const char* rcs_data, size_t rcs_data_sz, const ch
   return intptr_t(-1);
 }
 
-static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length)
+static bool replace_rcs_data(std::string &rcs_data, const std::string &text_to_replace, const char *replace_text, size_t replace_text_length, bool case_ins)
 {
   const char* data = rcs_data.data();
   bool found = false;
   intptr_t text_found_start;
-  while ((text_found_start = find_rcs_data(data, rcs_data.size() - (data-rcs_data.data()), text_to_replace.c_str(), text_to_replace.length())) >= 0)
+  while ((text_found_start = find_rcs_data(data, rcs_data.size() - (data-rcs_data.data()), text_to_replace.c_str(), text_to_replace.length(), case_ins)) >= 0)
   {
     size_t wasAt = data - rcs_data.data();
     rcs_data.replace(text_found_start, text_to_replace.length(), replace_text);
