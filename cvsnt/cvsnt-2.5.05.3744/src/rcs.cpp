@@ -5902,10 +5902,10 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
           if (!write_file_line(workfile, dtext->text, dtext->len))
             error(1,0,"cant write workfile %s", workfile);
 
-          diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
+          diff_res = diff_exec (tmpfile, workfile, NULL, NULL, diffopts, changefile);
           //diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
 		} else
-          diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
+          diff_res = diff_exec (tmpfile, workfile, NULL, NULL, diffopts, changefile);
 
 		{
 			switch (diff_res)
