@@ -1886,6 +1886,7 @@
             <Custom Action="SystemFolder.30729.4148.Microsoft_VC90_ATL_x86.QFE.0901F145_82C9_3BF6_A91B_31F6791950EA" Sequence="8" />
             <Show Dialog="FatalError" OnExit="error" />
             <Show Dialog="UserExit" OnExit="cancel" />
+            <Show Dialog="ExitDialog" OnExit="success"/>
             <Show Dialog="PrepareDlg" Sequence="101" />
             <Show Dialog="WelcomeDlg" Sequence="1201">NOT Installed</Show>
             <Show Dialog="ResumeDlg" Sequence="1202">Installed AND (RESUME OR Preselected)</Show>
