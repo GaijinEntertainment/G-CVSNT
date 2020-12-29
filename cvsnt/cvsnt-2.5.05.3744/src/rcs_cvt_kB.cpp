@@ -20,11 +20,12 @@ static void RCS_write_binary_rev_data_blob(const char *fn, char *&data, size_t &
 static bool RCS_read_binary_rev_data_direct(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed);
 
 
-inline bool pull_at_once(const char* hash_hex_string, size_t &blob_sz, char **decoded)
+inline bool pull_at_once(const char* hash_hex_string, size_t &sz, char **decoded)
 {
   //this is for compatibility with old clients
   using namespace caddressed_fs;
   using namespace streaming_compression;
+  size_t blob_sz;
   PullData *pd = start_pull(get_default_ctx(), hash_hex_string, blob_sz);
   if (!pd)
     return false;
@@ -51,6 +52,7 @@ inline bool pull_at_once(const char* hash_hex_string, size_t &blob_sz, char **de
       break;
   }
   *decoded = dest;
+  sz = info.hdr.uncompressedLen;
   return destroy(pd);
 }
 
