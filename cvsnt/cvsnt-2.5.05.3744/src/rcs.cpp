@@ -72,8 +72,8 @@ const kflag_t kflag_flags[] =
 };
 
 static void RCS_convert_to_new_binary(RCSNode *rcs);
-static void RCS_write_binary_rev_data(const char *rcs_version, const char *rcs_path, const char *workfile, char * &data, size_t &len, bool guessed_compression, bool write_it);
-static bool RCS_read_binary_rev_data(const char *fn, char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, bool *is_ref);
+static void RCS_write_binary_rev_data(const char *context, char * &data, size_t &len, bool guessed_compression, bool write_it);
+static bool RCS_read_binary_rev_data(char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, bool *is_ref);
 
 static void rcsbuf_setpos_to_delta_base(RCSNode *rcsbuf);
 static void rcsbuf_reuse_delta_buffer(RCSNode *rcs);
@@ -4525,18 +4525,13 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
   FILE *fp = nullptr, *ofp = nullptr;
   if(expand.flags&KFLAG_BINARY_DELTA)
   {
-    char *data_path;
-    char *rev_file_name = get_binary_blob_ver_file_path(data_path, rcs, value, len);
-
-    if (!RCS_read_binary_rev_data(rev_file_name, &value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, is_ref))
+    if (!RCS_read_binary_rev_data(&value, &len, &free_value, expand.flags&KFLAG_COMPRESS_DELTA, is_ref))
     {
       rcsbuf_valfree(&rcs->rcsbuf, &log);
       if (free_rev)
         xfree (rev);
-      xfree(data_path);
       return 0;
     }
-    xfree(data_path);
   }
 
   /* Handle permissions */
@@ -5673,7 +5668,7 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 
         if(kf.flags&KFLAG_BINARY_DELTA)
         {
-          RCS_write_binary_rev_data(rcs->head, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, true);
+          RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, true);
           bufsize = dtext->len+1;
         }
 
@@ -5786,10 +5781,10 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 
 		if(kf.flags&KFLAG_BINARY_DELTA)
 		{
-          RCS_write_binary_rev_data(delta->version, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
+          RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
           bufsize = dtext->len+1;
           if (!write_file_line(workfile, dtext->text, dtext->len))
-            error(1,0,"cant write workfile %s", workfile);
+            error(1,errno,"cant write workfile %s", workfile);
           diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
 		} else
           diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
@@ -5897,7 +5892,7 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 		{
           if (!delta->dead)
         		get_file (workfile, workfile, "rb", &dtext->text, &bufsize, &dtext->len, kf);
-          RCS_write_binary_rev_data(delta->version, rcs->path, workfile, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
+          RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
           bufsize = dtext->len+1;
           if (!write_file_line(workfile, dtext->text, dtext->len))
             error(1,0,"cant write workfile %s", workfile);
