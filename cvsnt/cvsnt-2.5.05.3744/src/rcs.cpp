@@ -5783,9 +5783,12 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 		{
           RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
           bufsize = dtext->len+1;
-          if (!write_file_line(workfile, dtext->text, dtext->len))
-            error(1,errno,"cant write workfile %s", workfile);
-          diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
+          char *tmp_work_file = cvs_temp_name();
+          if (!write_file_line(tmp_work_file, dtext->text, dtext->len))
+            error(1,errno,"cant write workfile %s", tmp_work_file);
+          diff_res = diff_exec (tmp_work_file, tmpfile, NULL, NULL, diffopts, changefile);
+          unlink_file(tmp_work_file);
+          xfree(tmp_work_file);
 		} else
           diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
       	bufsize = 0;
@@ -5894,10 +5897,13 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
         		get_file (workfile, workfile, "rb", &dtext->text, &bufsize, &dtext->len, kf);
           RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
           bufsize = dtext->len+1;
-          if (!write_file_line(workfile, dtext->text, dtext->len))
-            error(1,0,"cant write workfile %s", workfile);
+          char *tmp_work_file = cvs_temp_name();
+          if (!write_file_line(tmp_work_file, dtext->text, dtext->len))
+            error(1,errno,"cant write workfile %s", tmp_work_file);
 
-          diff_res = diff_exec (tmpfile, workfile, NULL, NULL, diffopts, changefile);
+          diff_res = diff_exec (tmpfile, tmp_work_file, NULL, NULL, diffopts, changefile);
+          unlink_file(tmp_work_file);
+          xfree(tmp_work_file);
           //diff_res = diff_exec (workfile, tmpfile, NULL, NULL, diffopts, changefile);
 		} else
           diff_res = diff_exec (tmpfile, workfile, NULL, NULL, diffopts, changefile);
