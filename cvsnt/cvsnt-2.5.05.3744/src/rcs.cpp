@@ -5781,8 +5781,11 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 
 		if(kf.flags&KFLAG_BINARY_DELTA)
 		{
-          RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
-          bufsize = dtext->len+1;
+          if (!delta->dead || !is_blob_reference_data(dtext->text, dtext->len))
+          {
+            RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
+            bufsize = dtext->len+1;
+          }
           char *tmp_work_file = cvs_temp_name();
           if (!write_file_line(tmp_work_file, dtext->text, dtext->len))
             error(1,errno,"cant write workfile %s", tmp_work_file);
@@ -5895,7 +5898,8 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 		{
           if (!delta->dead)
         		get_file (workfile, workfile, "rb", &dtext->text, &bufsize, &dtext->len, kf);
-          RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
+          if (!delta->dead || !is_blob_reference_data(dtext->text, dtext->len))
+            RCS_write_binary_rev_data(rcs->path, dtext->text, dtext->len, kf.flags&KFLAG_COMPRESS_DELTA, !delta->dead);
           bufsize = dtext->len+1;
           char *tmp_work_file = cvs_temp_name();
           if (!write_file_line(tmp_work_file, dtext->text, dtext->len))

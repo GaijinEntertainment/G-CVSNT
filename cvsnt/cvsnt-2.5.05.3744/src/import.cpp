@@ -1910,9 +1910,10 @@ static int remove_file (RCSNode *rcs, const char *filename, const char *tag, con
 
     /* check something out.  Generally this is the head.  If we have a
        particular rev, then name it.  */
+    bool is_ref = false;
     retcode = RCS_checkout (rcs, filename, rev ? corev : NULL,
 			    options, (char *) NULL, RUN_TTY,
-			    (RCSCHECKOUTPROC) NULL, (void *) NULL, NULL);
+			    (RCSCHECKOUTPROC) NULL, (void *) NULL, NULL, &is_ref);
     if (retcode != 0)
     {
 	error (0, 0,

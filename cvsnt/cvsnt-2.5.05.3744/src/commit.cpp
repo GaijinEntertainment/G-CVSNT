@@ -1850,9 +1850,10 @@ static int remove_file (struct file_info *finfo, const char *tag, const char *me
 
     /* check something out.  Generally this is the head.  If we have a
        particular rev, then name it.  */
+    bool is_ref = false;
     retcode = RCS_checkout (finfo->rcs, finfo->file, rev ? corev : NULL,
 			    options, (char *) NULL, RUN_TTY,
-			    (RCSCHECKOUTPROC) NULL, (void *) NULL, NULL);
+			    (RCSCHECKOUTPROC) NULL, (void *) NULL, NULL, &is_ref);
     if (retcode != 0)
     {
 	error (0, 0,
