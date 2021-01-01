@@ -516,6 +516,9 @@ int add (int argc, char **argv)
 			    vers->options = wrap_rcsoption (finfo.file);
 			}
 		    }
+    	    if (vers->options != NULL && *vers->options != '\0')
+              if (char *b = strstr(vers->options, "b"))
+                *b = 'B';
 
 		    if (vers->nonbranch)
 		    {

@@ -3376,7 +3376,6 @@ bool RCS_get_kflags(const char *arg, bool err, kflag& result)
       "%s %s: invalid RCS expansion flags\n",
 	  "Valid flags are one of:\n",
 	  "t\tText file (default)\n",
-      "b\tBinary file (merges not allowed).\n",
       "B\tBinary file using binary deltas (merges not allowed).\n",
       "u\tUnicode (UCS-2) file with BOM.\n",
 	  "{encoding}\tExtended encoding type\n",
