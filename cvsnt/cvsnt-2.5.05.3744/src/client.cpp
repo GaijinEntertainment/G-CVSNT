@@ -5678,7 +5678,7 @@ bool send_blob_file_direct(const char *file, char *hash_encoded, bool blob_binar
     error(1,0, "Can't send binary blob for %s", file);
   fclose(rf);
   uint8_t digest[32];
-  if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string(digest, hash_encoded))
+  if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string_64(digest, hash_encoded))
     error(1,0, "Can't calc hash for %s", file);
   send_to_server("Blob-transfer ", 0);
   send_to_server(hash_encoded, 64);

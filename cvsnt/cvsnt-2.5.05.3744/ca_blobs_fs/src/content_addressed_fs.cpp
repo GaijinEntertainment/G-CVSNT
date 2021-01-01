@@ -28,7 +28,7 @@ void set_temp_dir(const char *p){default_tmp_dir = p ? p : "";}
 
 static struct context
 {
-  std::string root_path = "./" BLOBS_SUB_FOLDER;
+  std::string root_path = "./" BLOBS_SUB_FOLDER "/";
 } def_ctx;
 
 context *get_default_ctx() {return &def_ctx;}
@@ -175,7 +175,7 @@ PushResult finish(PushData *fp, char *actual_hash_str)
   {
     unsigned char digest[32];
     blake3_hasher_finalize(&fp->hasher, digest, sizeof(digest));
-    bin_hash_to_hex_string(digest, final_hash_p);
+    bin_hash_to_hex_string_64(digest, final_hash_p);
     if (fp->provided_hash[0] && memcmp(fp->provided_hash, final_hash_p, 64) != 0)
       return PushResult::WRONG_HASH;
   } else
@@ -226,7 +226,9 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
 
   unsigned char digest[32];
   blake3_hasher_finalize(&hasher, digest, sizeof(digest));
-  bin_hash_to_hex_string(digest, hash_hex_str);
+  bin_hash_to_hex_string_64(digest, hash_hex_str);
+  if (hash_len > 64)
+   hash_hex_str[64] = 0;
 
   if (!blobe_fileio_destroy(pd))
     return false;

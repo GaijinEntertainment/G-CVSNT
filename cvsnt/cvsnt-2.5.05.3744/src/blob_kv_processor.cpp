@@ -53,7 +53,7 @@ inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const c
       r = KVRet::Error;
   }
   uint8_t digest[32];char real_hash[65];real_hash[0]=real_hash[64]=0;
-  if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string(digest, real_hash))
+  if (!finalize_blob_hash(hctx, digest) || !bin_hash_to_hex_string_64(digest, real_hash))
   {
     output << "Can't calc hash for " << file;
     if (r == KVRet::OK)
