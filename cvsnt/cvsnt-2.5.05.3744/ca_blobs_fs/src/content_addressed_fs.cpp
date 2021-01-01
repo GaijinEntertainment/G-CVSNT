@@ -40,7 +40,7 @@ void set_root(context *ctx, const char *p)
 {
   //better use std::format, but it is c++20
   ctx->root_path = dir_for_roots;
-  if (ctx->root_path[ctx->root_path.length()-1] != '/' && p[0] != '/')
+  if (ctx->root_path.length() && ctx->root_path[ctx->root_path.length()-1] != '/' && p[0] != '/')
     ctx->root_path += "/";
   ctx->root_path += p;
   if (ctx->root_path[ctx->root_path.length()-1] != '/')
