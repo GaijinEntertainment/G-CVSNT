@@ -37,7 +37,7 @@ cvs_config_dir=@cvs_config_dir@
 
 # All other subdirs:
 SUBDIRS = lib $(MDNSCLIENT_SUBDIR) cvsapi diff cvsgui cvstools xdiff blake3 ca_blobs_fs keyValueServer/clientLib keyValueServer/server keyValueServer/proxy tools \
-	  protocols triggers cvsdelta $(MACOSX_SUBDIR) src lockservice $(RCSTOOLS_SUBDIR) man run_script
+	  protocols triggers cvsdelta $(MACOSX_SUBDIR) src lockservice $(RCSTOOLS_SUBDIR) man run_script rcs_convert
 
 .PHONY: remotecheck
 remotecheck: all

@@ -965,6 +965,7 @@ AC_CONFIG_FILES([Makefile \
       keyValueServer/proxy/Makefile \
       keyValueServer/server/Makefile \
       tools/Makefile \
+      rcs_convert/Makefile \
 	  cvsapi/Makefile \
 	  cvsapi/db/Makefile \
 	  cvsapi/mdns/Makefile \
