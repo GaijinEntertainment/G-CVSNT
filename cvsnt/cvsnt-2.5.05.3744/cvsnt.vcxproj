@@ -537,7 +537,7 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\perms.cpp" />
-    <ClCompile Include="src\rcs.cpp">
+    <ClCompile Include="src\rcs_checkin.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">

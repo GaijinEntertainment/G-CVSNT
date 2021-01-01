@@ -95,7 +95,7 @@ cvsnt_SOURCES = \
 	passwd.cpp \
 	patch.cpp \
 	perms.cpp \
-	rcs.cpp \
+	rcs_checkin.cpp \
 	rcscmds.cpp \
 	recurse.cpp \
 	release.cpp \
