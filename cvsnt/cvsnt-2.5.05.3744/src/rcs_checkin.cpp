@@ -509,6 +509,9 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 	size_t lockId_temp;
 	int ret;
 
+    if (options)
+      while (char*s = strstr(const_cast<char*>(options), "b"))//on checkin do not allow old binary files
+        *s = 'B';
 	RCS_get_kflags(options, true, kf);
 
 	if(!options)
