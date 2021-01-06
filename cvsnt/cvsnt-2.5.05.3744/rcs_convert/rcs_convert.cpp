@@ -579,6 +579,9 @@ int main(int ac,  const char *av[])
   #endif
   lock_register_client("rcs_binary_cvt", av[1]);
   RCSNode *node = RCS_fopen(av[2]);
-  RCS_convert_to_new_binary(node);
+  if (node)
+    RCS_convert_to_new_binary(node);
+  else
+    frpintf(stderr, "Can't open file %s\n", av[2]);
   return 0;
 }
