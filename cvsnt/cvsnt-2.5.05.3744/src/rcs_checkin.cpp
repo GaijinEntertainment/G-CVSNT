@@ -996,17 +996,11 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
       status = RCS_checkout (rcs, NULL, commitpt->version, NULL, "B",
 			   tmpfile,
 			   (RCSCHECKOUTPROC)0, NULL, NULL, &is_ref);
-       if (!is_ref)//old revision. todo: remove me, when db is converted
-       {
-         FILE *fp = fopen(tmpfile,"wb");
-         fprintf(fp, "%s/#%s", workfile, commitpt->version);
-         fclose(fp);
-       }
     }
     else
       status = RCS_checkout (rcs, NULL, commitpt->version, NULL,
 			   (kf.flags&KFLAG_BINARY)
-			    ? "b"
+			    ? "b"//should not be happening
 			    : "o",
 			   tmpfile,
 			   (RCSCHECKOUTPROC)0, NULL, NULL);
