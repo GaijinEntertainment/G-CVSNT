@@ -582,6 +582,6 @@ int main(int ac,  const char *av[])
   if (node)
     RCS_convert_to_new_binary(node);
   else
-    frpintf(stderr, "Can't open file %s\n", av[2]);
+    fprintf(stderr, "Can't open file %s\n", av[2]);
   return 0;
 }
