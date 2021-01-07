@@ -191,3 +191,4 @@ cvsroot *current_parsed_root = NULL;
 bool is_session_blob_reference_data(const void *data, size_t len){return false;}
 
 const char *Tmpdir = TMPDIR_DFLT;
+char global_session_id[GLOBAL_SESSION_ID_LENGTH]={0};
