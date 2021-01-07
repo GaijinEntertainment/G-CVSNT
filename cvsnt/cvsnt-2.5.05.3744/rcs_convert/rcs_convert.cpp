@@ -144,7 +144,7 @@ static void RCS_extract_rev_data(RCSNode *rcs, RCSVers *rev, RevStringList &lst,
     *cpversion = '\0';
 
   do {
-    bool is_kb = false;
+    bool is_convert = false;
     if (! rcsbuf_getrevnum (rcsbuf, &key))
       error (1, 0, "unexpected EOF reading RCS file %s", fn_root(rcs->path));
 
@@ -173,7 +173,7 @@ static void RCS_extract_rev_data(RCSNode *rcs, RCSVers *rev, RevStringList &lst,
 
       kflag expand;
       if (vers->kopt && vers->kopt[0] && RCS_get_kflags(vers->kopt, false, expand))
-        is_kb = (expand.flags&KFLAG_BINARY) && !(expand.flags&KFLAG_BINARY_DELTA);
+        is_convert = !(expand.flags&KFLAG_BINARY_DELTA);
       /* Hack */
       if(STREQ(*deltatype,"(null)"))
         deltatype=&dt_text;
@@ -305,7 +305,7 @@ static void RCS_extract_rev_data(RCSNode *rcs, RCSVers *rev, RevStringList &lst,
 
           if (text)
           {
-            if (is_kb)
+            if (is_convert)
               RCS_write_binary_rev_data(rcs->path, text, len, packed, true);
             Deltatext *d = (Deltatext *) xmalloc (sizeof (Deltatext));
             memset(d,0,sizeof(Deltatext));
@@ -443,7 +443,7 @@ static void RCS_convert_to_new_binary(RCSNode *rcs)
   bool packed = true;
   if (!should_try_convert(rcs, packed))
     return;
-  bool has_kb = false;
+  bool has_convert = false;
   for (;;)
   {
     char *key, *value;
@@ -465,7 +465,7 @@ static void RCS_convert_to_new_binary(RCSNode *rcs)
     {
       kflag expand;
       if (RCS_get_kflags(options, false, expand))
-        has_kb |= (expand.flags&KFLAG_BINARY) && !(expand.flags&KFLAG_BINARY_DELTA);
+        has_convert |= !(expand.flags&KFLAG_BINARY_DELTA);
     }
 
     while (rcsbuf_getkey (&rcs->rcsbuf, &key, &value))
@@ -493,7 +493,7 @@ static void RCS_convert_to_new_binary(RCSNode *rcs)
     rcsbuf_reuse_delta_buffer(rcs);
   }
 
-  if (!has_kb)
+  if (!has_convert)
   {
     rcsbuf_close (&rcs->rcsbuf);
     free_rcsnode_contents(rcs);
