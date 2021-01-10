@@ -75,14 +75,15 @@ std::string get_hash_file_name(const char* htype, const char* hhex)
 }
 
 size_t blob_get_hash_blob_size(const void *c, const char* htype, const char* hhex) {
+  //we return local file size if exist. If blob was removed from master that would cause ability to checkout non-existent blob (but the one that existed earlier)
+  //if blob has changed on server (repacked) we will return cached local size anyway
+  const size_t cachedSz = blob_fileio_get_file_size(get_hash_file_name(htype, hhex).c_str());
+  if (cachedSz > 0)
+    return cachedSz;
   const ClientConnection *cc = (const ClientConnection *)c;
   const int64_t sz = blob_size_on_server(cc->cs, htype, hhex);
   if (sz > 0)
-  {
-    //we need to return local size if present in cache! Server blob could be repacked.
-    size_t cachedSz = blob_fileio_get_file_size(get_hash_file_name(htype, hhex).c_str());
-    return cachedSz > 0 ? cachedSz : (size_t)sz;
-  }
+    return (size_t)sz;
   if (sz < 0)
     cc->restart();
   return 0;
