@@ -26,13 +26,14 @@ static std::atomic<size_t> repacked_files = 0, affected_files = 0;
 static std::atomic<int64_t> data_saved = 0;
 static constexpr size_t maxQueuedItems = 1024;
 static std::atomic<size_t> lastMessaged = 0;
+static bool repack_unpacked = false;
 
 void process_blob(const char *hash)
 {
   affected_files++;
   const std::string filePath = caddressed_fs::get_file_path(caddressed_fs::get_default_ctx(), hash);
   const time_t mtime = get_file_mtime(filePath.c_str());
-  int64_t ds = caddressed_fs::repack(caddressed_fs::get_default_ctx(), hash);
+  int64_t ds = caddressed_fs::repack(caddressed_fs::get_default_ctx(), hash, repack_unpacked);
   if (ds != 0)
   {
     set_file_mtime(filePath.c_str(), mtime);
@@ -152,6 +153,7 @@ int main(int ac, const char* argv[])
   auto tmpDir = options.arg_or("-tmp", "", "Tmp dir for blobs");
   auto threads = options.arg_as_or<int>("-j", 0, "concurrency level(threads to run)");
   auto days_changed = options.arg_as_or<int>("-last_days", 0, "Convert only blobs that were written in last N days");
+  repack_unpacked = options.passed("-unpacked", "try to repack unpacked blobs also");
 
   bool help = options.passed("-h", "print help usage");
   if (help || !options.sane()) {

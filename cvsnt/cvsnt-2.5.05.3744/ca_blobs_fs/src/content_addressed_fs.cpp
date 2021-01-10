@@ -235,7 +235,7 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
   return ok;
 }
 
-int64_t repack(const context *ctx, const char* hash_hex_string)
+int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpacked)
 {
   using namespace streaming_compression;
   size_t curSize = 0;
@@ -252,6 +252,8 @@ int64_t repack(const context *ctx, const char* hash_hex_string)
     wasHdr = hdr;
   }
   if ((wasHdr.flags&BlobHeader::BEST_POSSIBLE_COMPRESSION) != 0)
+    return 0;
+  if (!repack_unpacked && !is_packed_blob(wasHdr))
     return 0;
   BlobHeader hdr = get_header(zstd_magic, wasHdr.uncompressedLen, BlobHeader::BEST_POSSIBLE_COMPRESSION);
   std::string temp_file_name;
