@@ -75,7 +75,6 @@ void BlobProcessor::processor_thread_loop()
 
 static void process_sha_files_directory(const char *dir, time_t start_time)
 {
-  char hash[65];hash[64]=0;
   while (processor.is_inited() && maxQueuedItems < processed_files-affected_files)
     sleep_ms(100);
   for (const auto & entry : fs::directory_iterator(dir))
@@ -94,7 +93,7 @@ static void process_sha_files_directory(const char *dir, time_t start_time)
       if (processor.is_inited())
         processor.emplace(std::move(filename));
       else
-        process_blob(hash);
+        process_blob(filename.c_str());
     }
   }
 }
