@@ -43,6 +43,7 @@ void process_blob(const char *hash)
   {
     lastMessaged = size_t(affected_files);
     printf("...%lld processed, %lld repacked, saved %gMb\n", (long long)processed_files, (long long)repacked_files, data_saved/1024./1024.);
+    fflush(stdout);
   }
 }
 
@@ -137,6 +138,7 @@ static void process_sha_directory(time_t start_time)
       process_sha_files_directory(entry2.path().string().c_str(), start_time);
     }
   }
+  fflush(stdout);
 }
 
 int main(int ac, const char* argv[])
