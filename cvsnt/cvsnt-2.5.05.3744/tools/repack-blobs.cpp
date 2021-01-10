@@ -30,9 +30,14 @@ static std::atomic<size_t> lastMessaged = 0;
 void process_blob(const char *hash)
 {
   affected_files++;
+  const std::string filePath = caddressed_fs::get_file_path(caddressed_fs::get_default_ctx(), hash);
+  const time_t mtime = get_file_mtime(filePath.c_str());
   int64_t ds = caddressed_fs::repack(caddressed_fs::get_default_ctx(), hash);
   if (ds != 0)
+  {
+    set_file_mtime(filePath.c_str(), mtime);
     repacked_files++;
+  }
   data_saved += ds;
   if (affected_files > lastMessaged+32)
   {
