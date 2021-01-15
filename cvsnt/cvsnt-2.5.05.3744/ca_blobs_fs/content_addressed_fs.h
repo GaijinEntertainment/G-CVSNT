@@ -34,6 +34,7 @@ namespace caddressed_fs
   class PushData;
   class PullData;
 
+  static constexpr size_t invalid_size = size_t(~size_t(0));
   size_t get_size(const context *ctx, const char* hash_hex_string);
   bool exists(const context *ctx, const char* hash_hex_string);
 

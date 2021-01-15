@@ -5,6 +5,7 @@
 void *blob_create_ctx(const char *root);
 void blob_destroy_ctx(void *ctx);
 
+//return ~0 if mising
 extern size_t blob_get_hash_blob_size(const void *ctx, const char* hash_type, const char* hash_hex_string);//hash_type = "blake3" hash_hex_string = "fe12bc56...."
 extern bool blob_does_hash_blob_exist(const void *ctx, const char* hash_type, const char* hash_hex_string);//hash_type = "blake3" hash_hex_string = "fe12bc56...."
 extern uintptr_t blob_start_push_data(const void *ctx, const char* hash_type, const char* hash_hex_string, uint64_t guessed_size);//hash_type = "blake3" hash_hex_string = "fe12bc56...."

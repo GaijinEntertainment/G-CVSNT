@@ -22,7 +22,7 @@ size_t blob_get_hash_blob_size(const void *, const char* htype, const char* hhex
   auto it = storage.find(std::string(hhex));
   if (it != storage.end())
     return it->second.size();
-  return 0;
+  return ~size_t(0);
 }
 
 bool blob_does_hash_blob_exist(const void *, const char* htype, const char* hhex) {

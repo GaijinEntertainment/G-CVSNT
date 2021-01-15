@@ -78,15 +78,17 @@ size_t blob_get_hash_blob_size(const void *c, const char* htype, const char* hhe
   //we return local file size if exist. If blob was removed from master that would cause ability to checkout non-existent blob (but the one that existed earlier)
   //if blob has changed on server (repacked) we will return cached local size anyway
   const size_t cachedSz = blob_fileio_get_file_size(get_hash_file_name(htype, hhex).c_str());
-  if (cachedSz > 0)
+  if (cachedSz != invalid_blob_file_size)
     return cachedSz;
   const ClientConnection *cc = (const ClientConnection *)c;
   const int64_t sz = blob_size_on_server(cc->cs, htype, hhex);
-  if (sz > 0)
+  if (sz >= 0)
     return (size_t)sz;
-  if (sz < 0)
+  if (size_t(sz) == invalid_blob_file_size)
+    return invalid_blob_file_size;
+  if (sz < -1)
     cc->restart();
-  return 0;
+  return invalid_blob_file_size;
 }
 
 bool blob_does_hash_blob_exist(const void *c, const char* htype, const char* hhex) {

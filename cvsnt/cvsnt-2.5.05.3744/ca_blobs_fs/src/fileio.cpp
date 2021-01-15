@@ -19,7 +19,7 @@ size_t blob_fileio_get_file_size(const char* fn)
 {
   struct __stat64 buf;
   if (_stat64(fn, &buf) != 0)
-      return 0; // error, could use errno to find out more
+      return invalid_blob_file_size; // error, could use errno to find out more
 
   return buf.st_size;
 }
@@ -68,7 +68,7 @@ public:
 BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_sz)
 {
   blob_sz = blob_fileio_get_file_size(filepath);
-  if (!blob_sz)
+  if (blob_sz == invalid_blob_file_size)
     return 0;
   FILE* f;
   if (fopen_s(&f, filepath, "rb") != 0)
@@ -107,7 +107,7 @@ size_t blob_fileio_get_file_size(const char* fn)
 {
   struct stat sb;
   if (stat(fn, &sb) == -1)
-    return 0;
+    return invalid_blob_file_size;
   return sb.st_size;
 }
 
@@ -163,7 +163,7 @@ public:
 BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_sz)
 {
   blob_sz = blob_fileio_get_file_size(filepath);
-  if (!blob_sz)
+  if (blob_sz == invalid_blob_file_size)
     return 0;
   int fd = open(filepath, O_RDONLY);
   if (fd == -1)

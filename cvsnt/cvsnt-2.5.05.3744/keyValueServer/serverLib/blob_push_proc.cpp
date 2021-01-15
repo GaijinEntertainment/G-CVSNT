@@ -98,7 +98,11 @@ static bool handle_size(void *ctx, int socket)
     return false;
   char hash_type[7], hash_hex_str[65];
   decode_blob_hash_to_hex_hash(commandBuf, hash_type, hash_hex_str);
-  uint64_t size = blob_get_hash_blob_size(ctx, hash_type, hash_hex_str);
+  const size_t sz = blob_get_hash_blob_size(ctx, hash_type, hash_hex_str);
+  if (sz == size_t(~size_t(0)))
+    return send_simple_response(socket, none_response);
+
+  uint64_t size = sz;
   //maybe check if exist, and send none if not ?
   // but currently client returns 0 in both case
   char response[size_response_len];

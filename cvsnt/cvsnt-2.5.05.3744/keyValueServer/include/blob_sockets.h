@@ -49,3 +49,8 @@ inline void blob_set_socket_no_delay(int socket, bool no_delay)
   int v = no_delay ? 1 : 0;
   setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char *) &v, sizeof(v));
 }
+
+inline void enable_keepalive(int sock, bool keep_alive) {
+  int v = keep_alive ? 1 : 0;
+  setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&v, sizeof(int));
+}

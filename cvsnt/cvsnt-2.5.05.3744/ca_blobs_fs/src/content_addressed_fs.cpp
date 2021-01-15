@@ -126,7 +126,7 @@ bool stream_push(PushData *fp, const void *data, size_t data_size)
     return false;
   if (uintptr_t(fp->fp) == 1)
     return true;
-  if (!fp->fp)
+  if (!fp->fp || data_size == invalid_size)
     return false;
   if (fwrite(data, 1, data_size, fp->fp) != data_size)//we write packed data as is
     return false;
@@ -305,7 +305,8 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
   fclose(tmpf);
 
   size_t finalSize = blob_fileio_get_file_size(temp_file_name.c_str());
-  if (at < curSize || st != StreamStatus::Finished || (finalSize > curSize && !is_zlib_blob(wasHdr)))//if it was unpacked file and not zlib, then keep it unpacked. Unpacked files are faster to update
+  if (finalSize == invalid_blob_file_size ||
+      at < curSize || st != StreamStatus::Finished || (finalSize > curSize && !is_zlib_blob(wasHdr)))//if it was unpacked file and not zlib, then keep it unpacked. Unpacked files are faster to update
   {
     blob_fileio_unlink_file(temp_file_name.c_str());
     return 0;

@@ -17,8 +17,8 @@ int64_t blob_push_to_server(intptr_t &sockfd, size_t blob_sz,
   const char *hash_type, const char *hash_hex_str,
   std::function<const char*(uint64_t at, size_t &data_pulled)> pull_data)
 {
-  if (!blob_sz)
-    return 0;
+  if (blob_sz == ~size_t(0))
+    return -1;
   unsigned char blob_hash[hash_len];
   if (!encode_hash_str_to_blob_hash_s(hash_type, hash_hex_str, blob_hash, sizeof(blob_hash)))
     return -1;
@@ -28,7 +28,7 @@ int64_t blob_push_to_server(intptr_t &sockfd, size_t blob_sz,
   memcpy_to(to, blob_hash, hash_len);//copy hash
   memcpy_to(to, &blob_sz, sizeof(blob_sz));
   if (!send_exact(int(sockfd), command, sizeof(command)))
-    {stop_blob_push_client(sockfd); return -1;}
+    {stop_blob_push_client(sockfd); return -2;}
 
   uint64_t from = 0;
   int64_t sizeLeft = blob_sz;
@@ -44,7 +44,7 @@ int64_t blob_push_to_server(intptr_t &sockfd, size_t blob_sz,
     from += data_pulled;
     sizeLeft -= data_pulled;
     if (!send_exact(int(sockfd), buf, (int)data_pulled))
-      {stop_blob_push_client(sockfd); return -1;}
+      {stop_blob_push_client(sockfd); return -2;}
   }
   const int64_t sent = blob_sz-sizeLeft;
   if (sizeLeft > 0)//if there was io error, we still have to finish send. Server will handle bad data gracefully (ignoring)
@@ -52,14 +52,14 @@ int64_t blob_push_to_server(intptr_t &sockfd, size_t blob_sz,
     char buf[256]; memset(buf, 0, sizeof(buf));
     for (;sizeLeft > 0; sizeLeft -= sizeof(buf))
       if (!send_exact(int(sockfd), buf, (int)std::min(sizeLeft, (int64_t)sizeof(buf))))
-        {stop_blob_push_client(sockfd); return -1;}
+        {stop_blob_push_client(sockfd); return -2;}
   }
 
   char response[response_len+1];
   if (!recv_exact(int(sockfd), response, (int)response_len))
   {
     stop_blob_push_client(sockfd);
-    return -1;
+    return -2;
   }
   if (strncmp(response, have_response, response_len) == 0)
     return sent;//successfully sent

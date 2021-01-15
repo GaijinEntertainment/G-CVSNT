@@ -7,7 +7,7 @@ bool stop_blob_push_client(intptr_t &client);
 enum class KVRet{OK, Error, Fatal}; //on fatal protocol error, client will become invalid
 
 KVRet blob_check_on_server(intptr_t &client, const char *hash_type, const char *hash_hex_str, bool &has);
-int64_t blob_size_on_server(intptr_t &client, const char *hash_type, const char *hash_hex_str); //<0 if fatal error
+int64_t blob_size_on_server(intptr_t &client, const char *hash_type, const char *hash_hex_str); //<-1 if fatal error, -1 if file is missing
 
 int64_t blob_pull_from_server(intptr_t &client, const char *hash_type, const char *hash_hex_str,
   uint64_t from, uint64_t sz,

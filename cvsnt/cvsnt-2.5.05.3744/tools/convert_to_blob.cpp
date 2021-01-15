@@ -279,7 +279,7 @@ static void process_file_ver(const char *rootDir,
     already_in_db++;
 
   PushResult pr = PushResult::IO_ERROR;
-  if (assistIt != assist_db.end() && get_size(get_default_ctx(), assistIt->second) > 0)
+  if (assistIt != assist_db.end() && get_size(get_default_ctx(), assistIt->second) != invalid_size)
   {
     pr = PushResult::DEDUPLICATED;
     memcpy(hash_encoded, assistIt->second, 64);
@@ -309,7 +309,8 @@ static void process_file_ver(const char *rootDir,
   #endif
 
   size_t wr = pr == PushResult::OK ? get_size(get_default_ctx(), hash_encoded) : 0;
-
+  if (wr == invalid_size)
+    wr = 0;
   //this details are only for conversion. We want to make times relevant, so repacking can be addressed to only recent blobs
   std::string sha_file_name = get_file_path(get_default_ctx(), hash_encoded);
   if (pr == PushResult::OK)

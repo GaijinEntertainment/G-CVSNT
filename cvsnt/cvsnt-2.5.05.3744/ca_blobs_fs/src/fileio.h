@@ -3,7 +3,8 @@
 #include <string>
 //this is link time dependencies, some implementation is in fileio.cpp
 //if you use static library, you can override all of it in your app, or replace with your own fileio.cpp
-extern size_t blob_fileio_get_file_size(const char*);//to get blob file size for SIZE request
+static constexpr size_t invalid_blob_file_size = size_t(~size_t(0));
+extern size_t blob_fileio_get_file_size(const char*);//to get blob file size for SIZE request, invalid_blob_file_size if missing
 extern bool blob_fileio_is_file_readable(const char*);//to check if blob already exist (CHCK, PULL and PUSH requests)
 //we store blobs in sub folders, so FS wont get mad on millions of files in one folder. We need to either create all 65536 folders initially (xx/yy) or create them on demand
 // returns true if dir exist, or if what was created (if it was created, it will be created with 0777 provided)

@@ -95,7 +95,7 @@ int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const cha
 {
   KVRet ret = blob_start_pull_from_server(sockfd, hash_type, hash_hex_str, from, sz);
   if (ret == KVRet::Fatal)
-    return -1;
+    return -2;
   if (ret == KVRet::Error)
     return 0;
 
@@ -105,7 +105,7 @@ int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const cha
   {
     blob_logmessage(LOG_ERROR, "can't read data");
     stop_blob_push_client(sockfd);
-    return -1;
+    return -2;
   }
   return sz;
 }

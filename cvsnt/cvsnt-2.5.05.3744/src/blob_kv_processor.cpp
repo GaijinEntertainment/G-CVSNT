@@ -106,13 +106,13 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     if (!caddressed_fs::get_file_content_hash(file, hex_hash, 64))
       return false;
 
-    int64_t sz = blob_size_on_server(client, HASH_TYPE_REV_STRING, hex_hash); //<0 if error
-    if (sz < 0)
+    int64_t sz = blob_size_on_server(client, HASH_TYPE_REV_STRING, hex_hash); //<-1 if error, -1 if missing
+    if (sz < -1)
     {
       init();
       return false;
     }
-    if (sz > 0)//already on server
+    if (sz >= 0)//already on server
       return true;
     KVRet r = send_blob_file_data_net(client, file, hex_hash, compress, err);
     if (r == KVRet::Fatal)
