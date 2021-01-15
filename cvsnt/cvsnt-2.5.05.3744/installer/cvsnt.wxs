@@ -101,22 +101,9 @@
                 </Component>
                 <Component Id="CvsntStartMenuDoc" Guid="398ACBE2-6BF2-4532-B9D8-41E598F58005" DiskId="1">
 		    <RegistryValue Id="keyCvsntStartMenuDoc" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsntStartMenuDoc" Type="string" Value="1" KeyPath="yes" />
-                    <File Id="marchhare.url" Name="march-hare.url" Source="./march-hare.url">
+                    <File Id="github.url" Name="github.url" Source="./github.url">
                         <Shortcut Id="cvsntpro.lnk" Advertise="no" Name="CVSNT Professional Support And Training.lnk" Directory="CvsntDocumentationFolder" />
                     </File>
-                    <File Id="cvsntwiki.url" Name="cvsnt-wiki.url" Source="./cvsnt-wiki.url">
-                        <Shortcut Id="cvsntope.lnk" Advertise="no" Name="CVSNT Opensource Support.lnk" Directory="CvsntDocumentationFolder" />
-                    </File>
-	            <File Id="twitter.url" Name="twitter.url" Source="./twitter.url">
-    	                <Shortcut Id="twitter.lnk" Advertise="no" Directory="CvsntDocumentationFolder" Name="CVS Suite on Twitter.lnk" Icon="twitter.ico" >
-    	                  <Icon Id="twitter.ico" SourceFile="./Binary/twitter.ico" />
-    	                </Shortcut>
-	            </File>
-	            <File Id="facebook.url" Name="facebook.url" Source="./facebook.url">
-    	                <Shortcut Id="facebook.lnk" Advertise="no" Directory="CvsntDocumentationFolder" Name="CVS Suite on Facebook.lnk" Icon="facebook.ico" >
-    	                  <Icon Id="facebook.ico" SourceFile="./Binary/facebook.ico" />
-    	                </Shortcut>
-	            </File>
                 </Component>
                 <Component Id="CvsAgent" Guid="a6522da3-a6bf-4080-9eb6-7b65e6b8c1a6" DiskId="1">
 		    <RegistryValue Id="keyCvsAgent" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsAgent" Type="string" Value="1" KeyPath="yes" />
