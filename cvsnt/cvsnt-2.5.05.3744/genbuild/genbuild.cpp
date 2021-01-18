@@ -53,7 +53,7 @@ int main(int argc, char **argv)
 	days -= (365*30);
 	days += BUILD_FROB;
 
-	FILE *f=fopen("c:\\forcebuild.txt","r");
+	FILE *f=fopen("d:\\forcebuild.txt","r");
 	if(f)
 	{
 		fscanf(f,"%d",&days);
