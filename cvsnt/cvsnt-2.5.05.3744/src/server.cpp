@@ -1755,7 +1755,11 @@ static void serve_blob (char *arg)
     if (caddressed_fs::is_ok(res))
       return;
     if (res == caddressed_fs::PushResult::WRONG_HASH)
-      error(1,0, "received hash %.64s, actual = %.64s.", arg, actual_hash);
+    {
+      char hash1Z[65];memcpy(hash1Z, arg, 64); hash1Z[64]=0;
+      char hash2Z[65];memcpy(hash2Z, actual_hash, 64); hash2Z[64]=0;
+      error(1,0, "received hash %.64s, actual = %.64s.", hash1Z, hash2Z);
+    }
     if (res == caddressed_fs::PushResult::IO_ERROR)
       error(1,0,"io failed <%s>", arg);
     error(1,0, "other error for %s", arg);
