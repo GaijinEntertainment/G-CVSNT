@@ -96,7 +96,10 @@ void RCS_write_binary_rev_data(const char *fn_context, char * &data, size_t &len
     len = blob_reference_size; //shrink data;
     data[len] = 0;
     if (!caddressed_fs::exists(caddressed_fs::get_default_ctx(), data + hash_type_magic_len))
-      error(1,0,"hash %.64s referenced by client doesn't yet exist!", data + hash_type_magic_len);
+    {
+      char hashZ[65];memcpy(hashZ, data + hash_type_magic_len, 64); hashZ[64]=0;
+      error(1,0,"hash %s referenced by client doesn't yet exist!", hashZ);
+    }
     //write_direct_blob_reference(fn, data, blob_reference_size);
   } else
     RCS_write_binary_rev_data_blob(fn_context, data, len, guessed_compression, write_it);//we should rely on packed sent by client. it know not only is src_packed but also if it was reasonable to pack
