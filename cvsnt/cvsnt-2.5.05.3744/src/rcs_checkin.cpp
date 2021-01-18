@@ -482,7 +482,7 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
    error), positive for error (and an error message has been printed),
    or zero for success.  */
 
-static const size_t blobrefdifflen = blob_reference_size+1 + strlen("d1 1\na1 1\n");
+static const size_t blobrefdifflen = blob_reference_size + strlen("d1 1\na1 1\n");
 int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const char *rev, const char *options, int flags,
 			 const char *merge_from_tag1, const char *merge_from_tag2, RCSCHECKINPROC callback, char **pnewversion, const char *bugid, variable_list_t *props)
 {
@@ -1087,6 +1087,10 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
       			&commitpt->text->text, &bufsize, &commitpt->text->len, kf_binary);
 
 
+        if (commitpt->text->text && (kf.flags&KFLAG_BINARY_DELTA) && commitpt->text->len != 0 && commitpt->text->len != blobrefdifflen && commitpt->text->len != blob_reference_size)//for initial/head revision it is blake3:hash, for others it is d1 1\na1 1\nblake3:hash
+        {
+          error(1,0, "internal error, kB HEAD change has invalid length of %d, should be %d or %d", (int)commitpt->text->len, (int)blobrefdifflen, (int)blob_reference_size);
+        }
 		{
 
 			calc_add_remove(rcs,commitpt->text->text, commitpt->text->len, rcsdiff_args.removed, rcsdiff_args.added);
@@ -1202,6 +1206,10 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 					&dtext->text, &bufsize,
 					&dtext->len, kf_binary);
 
+                if (dtext->text && (kf.flags&KFLAG_BINARY_DELTA) && dtext->len != 0 && dtext->len != blobrefdifflen && dtext->len != blob_reference_size)//for initial/head revision it is blake3:hash, for others it is d1 1\na1 1\nblake3:hash
+                {
+                  error(1,0, "internal error, kB branch change has invalid length of %d, should be %d or %d", (int)dtext->len, (int)blobrefdifflen, (int)blob_reference_size);
+                }
 				calc_add_remove(rcs,dtext->text, dtext->len, rcsdiff_args.added, rcsdiff_args.removed);
 		}
 		if (dtext->text == NULL)
