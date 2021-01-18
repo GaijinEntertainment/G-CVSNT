@@ -112,7 +112,7 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
   cb->streamOut.size = size;
   cb->streamOut.pos = 0;
 
-  while (1)
+  while (cb->zds)
   {
     int sofar, status, nread;
 
@@ -201,7 +201,7 @@ static int zstd_buffer_output (void *closure, const char *data, int have, int *w
   cb->streamIn.size = have;
   cb->streamIn.pos = 0;
 
-  while (cb->streamIn.pos < cb->streamIn.size)
+  while (cb->zcs && cb->streamIn.pos < cb->streamIn.size)
   {
     char buffer[BUFFER_DATA_SIZE];
     int zstatus;
@@ -236,7 +236,7 @@ static int zstd_buffer_flush (void *closure)
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
 
 
-  while (1)
+  while (cb->zcs)
   {
     char buffer[BUFFER_DATA_SIZE];
     cb->streamOut.dst  = (unsigned char *) buffer;
@@ -284,14 +284,14 @@ static int zstd_buffer_block (void *closure, int block)
 static int zstd_buffer_shutdown_input (void *closure)
 {
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
+  int ret = buf_shutdown (cb->buf);
   size_t sz = ZSTD_freeDStream(cb->zds);cb->zds= nullptr;
   if (ZSTD_isError(sz))
   {
     zstd_error (0, sz, "inflateEnd");
     return EIO;
   }
-
-  return buf_shutdown (cb->buf);
+  return ret;
 }
 
 /* Shut down an output buffer.  */
@@ -299,7 +299,7 @@ static int zstd_buffer_shutdown_input (void *closure)
 static int zstd_buffer_shutdown_output (void *closure)
 {
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
-  while (1)
+  while (cb->zcs)
   {
     char buffer[BUFFER_DATA_SIZE];
     cb->streamOut.dst= (unsigned char *) buffer;
@@ -322,14 +322,6 @@ static int zstd_buffer_shutdown_output (void *closure)
         break;
   }
 
-  size_t sz = ZSTD_freeCStream(cb->zcs);
-  if (ZSTD_isError(sz))
-  {
-    zstd_error (0, sz, "inflateEnd");
-    return EIO;
-  }
-  cb->zcs = nullptr;
-
 /* Now flush the underlying buffer.  Note that if the original
    call to buf_flush passed 1 for the BLOCK argument, then the
    buffer will already have been set into blocking mode, so we
@@ -338,5 +330,13 @@ static int zstd_buffer_shutdown_output (void *closure)
   if (status != 0)
     return status;
 
-  return buf_shutdown (cb->buf);
+  int ret = buf_shutdown (cb->buf);
+  size_t sz = cb->zcs ? ZSTD_freeCStream(cb->zcs) : 0;
+  cb->zcs = nullptr;
+  if (ZSTD_isError(sz))
+  {
+    zstd_error (0, sz, "inflateEnd");
+    return EIO;
+  }
+  return ret;
 }
