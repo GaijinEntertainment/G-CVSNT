@@ -2408,7 +2408,7 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
        to various error messages.  */
     if (!quiet && updated_fname != NULL)
     {
-      cvs_output ("Ub ", 0);
+      cvs_output ("U ", 0);
       cvs_output (updated_fname, 0);
       cvs_output ("...\n", 4);
       xfree (updated_fname);

@@ -222,7 +222,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   }
   std::string fullPath = (task.dirpath+"/")+task.filename;
   rename_file (temp_filename.c_str(), fullPath.c_str());
-  printf("Ud %s\n", task.message.c_str());
+  printf("u %s\n", task.message.c_str());
   return true;
 }
 bool is_blob_file_sent(const char* file, char* hash_encoded);
@@ -241,8 +241,7 @@ static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask
     return false;
   }
   finish_send_blob_file(task.filename.c_str(), hash);
-  printf("Cd %s\n", task.message.c_str());
-
+  printf("b %s\n", task.message.c_str());
   return true;
 }
 
