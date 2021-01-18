@@ -226,7 +226,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   return true;
 }
 bool is_blob_file_sent(const char* file, char* hash_encoded);
-void finish_send_blob_file(const char* file, const char* hash_encoded);
+bool finish_send_blob_file(const char* file, const char* hash_encoded);
 
 static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task)
 {
@@ -240,8 +240,10 @@ static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask
     fprintf(stderr, "can't upload file <%s>, err = %s\n", fullPath.c_str(), err.c_str());
     return false;
   }
-  finish_send_blob_file(task.filename.c_str(), hash);
-  printf("b %s\n", task.message.c_str());
+  if (finish_send_blob_file(task.filename.c_str(), hash))
+    printf("b %s\n", task.message.c_str());
+  else
+    error(1,0,"can't finish sending blob %s\n", task.message.c_str());
   return true;
 }
 

@@ -5106,7 +5106,8 @@ static void send_modified (const char *file, const char *short_pathname, const V
 		  char hash_encoded[65];hash_encoded[64] = 0;
           if (send_blob_content)
           {
-            send_blob_file(file, hash_encoded, blob_binary_compressed);
+            if (!send_blob_file(file, hash_encoded, blob_binary_compressed))
+    		  error(1, 0, "Can't send blob for %s", file);
           } else
             if (!caddressed_fs::get_file_content_hash(file, hash_encoded, sizeof(hash_encoded)))
 			  error(1, 0, "Can't calculate hash for %s", file);
@@ -5691,13 +5692,13 @@ bool send_blob_file_direct(const char *file, char *hash_encoded, bool blob_binar
   return true;
 }
 
-void finish_send_blob_file(const char *file, const char *hash_encoded)
+bool finish_send_blob_file(const char *file, const char *hash_encoded)
 {
   struct stat sb;
   if (CVS_STAT (file, &sb) < 0)
   {
     error (0, errno, "file disappeared during commit %s", file);
-    return;
+    return false;
   }
 
   std::unique_lock<std::mutex> lock(files_send_mutex);
@@ -5705,6 +5706,7 @@ void finish_send_blob_file(const char *file, const char *hash_encoded)
   memcpy(res.hash, hash_encoded, 64);
   res.mtime = sb.st_mtime;
   res.fsz = sb.st_size;
+  return true;
 }
 
 bool is_blob_file_sent(const char *file, char *hash_encoded)
@@ -5734,8 +5736,7 @@ bool send_blob_file(const char *file, char *hash_encoded, bool blob_binary_compr
   if (is_blob_file_sent(file, hash_encoded))
     return true;
   send_blob_file_direct(file, hash_encoded, blob_binary_compressed);
-  finish_send_blob_file(file, hash_encoded);
-  return true;
+  return finish_send_blob_file(file, hash_encoded);
 }
 
 static int send_blob_file_proc(Node *node, void *)
