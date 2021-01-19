@@ -4936,7 +4936,7 @@ void send_arg (const char *string)
 /* VERS->OPTIONS specifies whether the file is binary or not.  NOTE: BEFORE
    using any other fields of the struct vers, we would need to fix
    client_process_import_file to set them up.  */
-bool send_blob_file(const char* file_path, const char *file_open, char *hash_encoded, bool compress);
+bool send_blob_file(const char *filepath, const char* fileopen, char *hash_encoded, bool blob_binary_compressed, bool &was_sent);
 
 static void send_modified (const char *file, const char *short_pathname, const Vers_TS *vers, bool send_blob_content)
 {
@@ -5106,8 +5106,11 @@ static void send_modified (const char *file, const char *short_pathname, const V
 		  char hash_encoded[65];hash_encoded[64] = 0;
           if (send_blob_content)
           {
-            if (!send_blob_file(short_pathname, file, hash_encoded, blob_binary_compressed))
+            bool was_sent;
+            if (!send_blob_file(short_pathname, file, hash_encoded, blob_binary_compressed, was_sent))
     		  error(1, 0, "Can't send blob for %s", short_pathname);
+            else if (!was_sent && blob_concurrency_download_level > 0)
+    		  error(0, 0, "Blob for %s wasn't pre-sent", short_pathname);
           } else
             if (!caddressed_fs::get_file_content_hash(file, hash_encoded, sizeof(hash_encoded)))
 			  error(1, 0, "Can't calculate hash for %s", short_pathname);
@@ -5730,13 +5733,20 @@ bool is_blob_file_sent(const char* filepath, const char *fileopen, char *hash_en
   return true;
 }
 
-bool send_blob_file(const char *filepath, const char* fileopen, char *hash_encoded, bool blob_binary_compressed)
+bool send_blob_file(const char *filepath, const char* fileopen, char *hash_encoded, bool blob_binary_compressed, bool &was_sent)
 {
+  was_sent = false;
   hash_encoded[0] = hash_encoded[64] = 0;
   if (is_blob_file_sent(filepath, fileopen, hash_encoded))
-    return true;
+    return was_sent = true;
   send_blob_file_direct(fileopen, hash_encoded, blob_binary_compressed);
   return finish_send_blob_file(filepath, fileopen, hash_encoded);
+}
+
+bool send_blob_file(const char *filepath, const char* fileopen, char *hash_encoded, bool blob_binary_compressed)
+{
+  bool was_sent;
+  return send_blob_file(filepath, fileopen, hash_encoded, blob_binary_compressed, was_sent);
 }
 
 static int send_blob_file_proc(Node *node, void *)
