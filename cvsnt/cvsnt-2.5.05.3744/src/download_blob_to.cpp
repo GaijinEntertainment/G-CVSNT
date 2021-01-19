@@ -225,14 +225,14 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   printf("u %s\n", task.message.c_str());
   return true;
 }
-bool is_blob_file_sent(const char* file, char* hash_encoded);
-bool finish_send_blob_file(const char* file, const char* hash_encoded);
+bool is_blob_file_sent(const char* filepath, const char* fileopen, char* hash_encoded);
+bool finish_send_blob_file(const char* filepath, const char* fileopen, const char* hash_encoded);
 
 static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task)
 {
   std::string fullPath = (task.dirpath+"/")+task.filename;
   char hash[65]; hash[0]=hash[64] = 0;
-  if (is_blob_file_sent(fullPath.c_str(), hash))
+  if (is_blob_file_sent(task.filename.c_str(), fullPath.c_str(), hash))
     return true;
   std::string err;
   if (!processor->upload(fullPath.c_str(), task.compress, hash, err))
@@ -240,7 +240,7 @@ static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask
     fprintf(stderr, "can't upload file <%s>, err = %s\n", fullPath.c_str(), err.c_str());
     return false;
   }
-  if (finish_send_blob_file(task.filename.c_str(), hash))
+  if (finish_send_blob_file(task.filename.c_str(), fullPath.c_str(), hash))
     printf("b %s\n", task.message.c_str());
   else
     error(1,0,"can't finish sending blob %s\n", task.message.c_str());
