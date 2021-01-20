@@ -2910,6 +2910,8 @@ char *RCS_getdate (RCSNode * rcs, const char *date, int force_tag_match)
      */
     if (retval != NULL)
 	return (retval);
+    if (!vers)//should not be happening, but apparently it does
+      return NULL;
 
     if (!force_tag_match || RCS_datecmp (vers->date, date) <= 0)
 	return (xstrdup (vers->version));
