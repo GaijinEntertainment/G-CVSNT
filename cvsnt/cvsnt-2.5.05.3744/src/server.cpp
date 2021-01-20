@@ -4921,6 +4921,8 @@ void server_cleanup (int sig)
   if (server_cleanup_already_done)
     return;
 
+  server_cleanup_already_done = true;
+
     /* Do "rm -rf" on the temp directory.  */
     int status;
     int save_noexec;
@@ -4985,8 +4987,6 @@ void server_cleanup (int sig)
 
 	CProtocolLibrary lib;
 	lib.UnloadProtocol(server_protocol);
-
-  server_cleanup_already_done = true;
 }
 
 int server_active = 0;
