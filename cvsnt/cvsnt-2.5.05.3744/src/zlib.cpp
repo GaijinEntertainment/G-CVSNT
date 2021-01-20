@@ -337,7 +337,7 @@ static int compress_buffer_shutdown_input (void *closure)
 	return EIO;
     }
 
-    status = buf_shutdown (cb->buf);cb->buf = NULL;
+    int status = buf_shutdown (cb->buf);cb->buf = NULL;
     return status;
 }
 
