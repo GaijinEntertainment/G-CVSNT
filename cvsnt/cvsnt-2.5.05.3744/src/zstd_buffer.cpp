@@ -284,7 +284,7 @@ static int zstd_buffer_block (void *closure, int block)
 static int zstd_buffer_shutdown_input (void *closure)
 {
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
-  int ret = buf_shutdown (cb->buf);
+  int ret = buf_shutdown (cb->buf);cb->buf = NULL;
   size_t sz = ZSTD_freeDStream(cb->zds);cb->zds= nullptr;
   if (ZSTD_isError(sz))
   {
@@ -330,7 +330,7 @@ static int zstd_buffer_shutdown_output (void *closure)
   if (status != 0)
     return status;
 
-  int ret = buf_shutdown (cb->buf);
+  int ret = buf_shutdown (cb->buf);cb->buf = NULL;
   size_t sz = cb->zcs ? ZSTD_freeCStream(cb->zcs) : 0;
   cb->zcs = nullptr;
   if (ZSTD_isError(sz))

@@ -161,6 +161,8 @@ buf_count_mem (struct buffer *buf)
 void
 buf_output (struct buffer *buf, const char *data, size_t len)
 {
+    if (!buf)
+        return;
     if (buf->data != NULL
 	&& (((buf->last->text + BUFFER_DATA_SIZE)
 	     - (buf->last->bufp + buf->last->size))
@@ -246,6 +248,8 @@ buf_append_char (struct buffer *buf, int ch)
 int
 buf_send_output (struct buffer *buf)
 {
+    if (!buf)
+        return 0;
     if (buf->output == NULL)
 	abort ();
 
@@ -308,6 +312,8 @@ buf_send_output (struct buffer *buf)
 int
 buf_flush (struct buffer *buf, int block)
 {
+    if (!buf)
+        return 0;
     int nonblocking;
     int status;
 
