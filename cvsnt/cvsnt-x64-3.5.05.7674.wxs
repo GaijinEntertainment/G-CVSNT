@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" Codepage="65001" Language="1033" Manufacturer="Gaijin" Name="CVSNT" UpgradeCode="{5762A261-935C-4342-BA9F-9AC239E24660}" Version="3.5.05.7698">
+    <Product Id="*" Codepage="65001" Language="1033" Manufacturer="Gaijin" Name="CVSNT" UpgradeCode="{5762A261-935C-4342-BA9F-9AC239E24660}" Version="3.5.06.7699">
         <Package Comments="The contents of this package are licensed under the GNU GPL." Compressed="yes" Description="CVSNT Version Control System" InstallerVersion="300" Keywords="CVS,CVSNT,Installer,Version Control,VSS" Languages="1033" Manufacturer="Gaijin" Platform="x86" />
         <Binary Id="dlgbmp" SourceFile="msi_tools\extras\Binary\dlgbmp" />
         <Binary Id="License" SourceFile="msi_tools\extras\Binary\License" />
@@ -1820,9 +1820,7 @@
                 <Control Id="BottomLine" Type="Line" X="0" Y="234" Width="369" Height="0" TabSkip="yes" Disabled="yes" />
             </Dialog>
         </UI>
-        <Upgrade Id="{5762A261-935C-4342-BA9F-9AC239E24660}">
-            <UpgradeVersion Maximum="3.5.05.7673" Property="UC7351A99252D643BBB18A2A8A004E3567" MigrateFeatures="yes" IncludeMinimum="yes" IncludeMaximum="no" />
-        </Upgrade>
+        <MajorUpgrade DowngradeErrorMessage="A newer version of [ProductName] is already installed." />
         <InstallExecuteSequence>
             <Custom Action="SystemFolder.30729.4148.Microsoft_VC90_MFCLOC_x86.QFE.1D3B0A01_2635_3323_932D_3D66D5C4B0FD" Sequence="1" />
             <Custom Action="SystemFolder.30729.4148.Microsoft_VC90_MFC_x86.QFE.1B1242B0_08E9_3D59_826D_ADAA4BB763B5" Sequence="2" />
@@ -1867,7 +1865,6 @@
             <PublishFeatures Sequence="6300" />
             <PublishProduct Sequence="6400" />
             <InstallFinalize Sequence="6600" />
-            <RemoveExistingProducts After="InstallValidate" /> 
             <MsiPublishAssemblies Sequence="6250" />
             <MsiUnpublishAssemblies Sequence="1750" />
         </InstallExecuteSequence>
