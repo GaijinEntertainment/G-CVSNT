@@ -3135,9 +3135,7 @@ struct save_dir {
     struct save_dir *next;
 };
 
-struct save_dir *prune_candidates;
-
-static void add_prune_candidate (const char *dir)
+static void add_prune_candidate (const char *dir, save_dir *&prune_candidates)
 {
     struct save_dir *p;
 
@@ -3151,7 +3149,7 @@ static void add_prune_candidate (const char *dir)
     prune_candidates = p;
 }
 
-static void process_prune_candidates ()
+static void process_prune_candidates (save_dir *&prune_candidates)
 {
     struct save_dir *p;
     struct save_dir *q;
@@ -3202,6 +3200,11 @@ static void process_prune_candidates ()
 	xfree(saved_cwd);
     prune_candidates = NULL;
 }
+
+struct save_dir *prune_candidates;
+
+static void add_prune_candidate (const char *dir){add_prune_candidate(dir, prune_candidates);}
+static void process_prune_candidates (){process_prune_candidates(prune_candidates);}
 
 void send_renames(const char *dir)
 {

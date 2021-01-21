@@ -170,6 +170,21 @@ void add_upload_queue(const char *filename, bool compress, const char *message)
   blob_free(cdir);
 }
 
+#include <unordered_set>
+static std::unordered_set<std::string> download_dirs;
+bool dir_being_downloaded_to(const char *s)
+{
+  return download_dirs.find(s) != download_dirs.end();
+}
+
+bool cur_dir_being_downloaded_to()
+{
+  char *cdir = xgetwd();
+  const bool ret = dir_being_downloaded_to(cdir);
+  blob_free(cdir);
+  return ret;
+}
+
 void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp)
 {
   if (!processor)
@@ -178,6 +193,7 @@ void add_download_queue(const char *message, const char *filename, const char *e
     processor->init();
   }
   char *cdir = xgetwd();
+  download_dirs.emplace(cdir);
   processor->emplace(BlobTask{message, cdir, filename, encoded_hash, file_mode, timestamp, false, BlobTask::Type::Download});
   blob_free(cdir);
 }
@@ -197,7 +213,10 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   temp_filename += task.filename;
   FILE *tmp = fopen(temp_filename.c_str(), "wb");
   if (!tmp)
-    return false;
+  {
+      printf("can't write temp %s\n", temp_filename.c_str());
+      return false;
+  }
   std::string err;
   caddressed_fs::DownloadBlobInfo info;
   if (!processor->download(task.encoded_hash.data(),

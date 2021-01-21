@@ -1390,64 +1390,69 @@ int isemptydir (const char *dir, int might_not_exist)
 
     if ((dirp = opendir (dir)) == NULL)
     {
-	if (might_not_exist && existence_error (errno))
-	    return 0;
-	error (0, errno, "cannot open directory %s for empty check", dir);
-	return (0);
+    	if (might_not_exist && existence_error (errno))
+    	    return 0;
+    	error (0, errno, "cannot open directory %s for empty check", dir);
+    	return (0);
     }
     errno = 0;
     while ((dp = readdir (dirp)) != NULL)
     {
-	if (strcmp (dp->d_name, ".") != 0
-	    && strcmp (dp->d_name, "..") != 0)
-	{
-	    if (strcmp (dp->d_name, CVSADM) != 0)
-	    {
-		/* An entry other than the CVS directory.  The directory
-		   is certainly not empty. */
-		(void) closedir (dirp);
-		return (0);
-	    }
-	    else
-	    {
-		/* The CVS directory entry.  We don't have to worry about
-		   this unless the Entries file indicates that files have
-		   been removed, but not committed, in this directory.
-		   (Removing the directory would prevent people from
-		   comitting the fact that they removed the files!) */
-		List *l;
-		int files_removed;
-		struct saved_cwd cwd;
+    	if (strcmp (dp->d_name, ".") != 0
+    	    && strcmp (dp->d_name, "..") != 0)
+    	{
+    	    if (strcmp (dp->d_name, CVSADM) != 0)
+    	    {
+        		/* An entry other than the CVS directory.  The directory
+        		   is certainly not empty. */
+        		(void) closedir (dirp);
+        		return (0);
+    	    }
+    	    else
+    	    {
+        		/* The CVS directory entry.  We don't have to worry about
+        		   this unless the Entries file indicates that files have
+        		   been removed, but not committed, in this directory.
+        		   (Removing the directory would prevent people from
+        		   comitting the fact that they removed the files!) */
+        		List *l;
+        		int files_removed = 0;
+        		struct saved_cwd cwd;
 
-		if (save_cwd (&cwd))
-		    error_exit ();
+        		if (save_cwd (&cwd))
+        		    error_exit ();
 
-		if (CVS_CHDIR (dir) < 0)
-		    error (1, errno, "cannot change directory to %s", fn_root(dir));
-		l = Entries_Open (0, NULL);
-		files_removed = walklist (l, isremoved, 0);
-		Entries_Close (l);
+        		if (CVS_CHDIR (dir) < 0)
+        		    error (1, errno, "cannot change directory to %s", fn_root(dir));
+				extern bool cur_dir_being_downloaded_to();
+                const bool download_in_process = cur_dir_being_downloaded_to();
+                if (!download_in_process)
+                {
+                    l = Entries_Open (0, NULL);
+                    files_removed = walklist (l, isremoved, 0);
+                    Entries_Close (l);
+                }
 
-		if (restore_cwd (&cwd, NULL))
-		    error_exit ();
-		free_cwd (&cwd);
+        		if (restore_cwd (&cwd, NULL))
+        		    error_exit ();
+        		free_cwd (&cwd);
 
-		if (files_removed != 0)
-		{
-		    /* There are files that have been removed, but not
-		       committed!  Do not consider the directory empty. */
-		    (void) closedir (dirp);
-		    return (0);
-		}
-	    }
-	}
-	errno = 0;
+        		if (files_removed != 0 || download_in_process)
+        		{
+        		    /* There are files that have been removed, but not
+        		       committed!  Do not consider the directory empty. */
+        		    (void) closedir (dirp);
+        		    return (0);
+        		}
+    	    }
+    	}
+    	errno = 0;
     }
     if (errno != 0)
     {
-	error (0, errno, "cannot read directory %s", dir);
-	(void) closedir (dirp);
-	return (0);
+    	error (0, errno, "cannot read directory %s", dir);
+    	(void) closedir (dirp);
+    	return (0);
     }
     (void) closedir (dirp);
     return (1);
