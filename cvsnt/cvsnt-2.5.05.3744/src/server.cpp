@@ -6275,7 +6275,8 @@ int cvs_output_raw(const char *str, size_t len, bool flush)
 
 /* Output LEN bytes at STR.  If LEN is zero, then output up to (not including)
    the first '\0' byte.  */
-
+#include <mutex>
+static std::mutex output_mutex;
 int cvs_output (const char *str, size_t len)
 {
 	cvs_flusherr();
@@ -6327,6 +6328,7 @@ int cvs_output (const char *str, size_t len)
 	else
 #endif
 	{
+      std::unique_lock<std::mutex> lock(output_mutex);
 #if defined(_WIN32) && !defined(CVS95)
 	// Convert the UTF8 string to Unicode/ANSI for console output
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -6477,7 +6479,7 @@ int cvs_outerr (const char *str, size_t len)
 	   point to the same place.  For the server case this is taken
 	   care of by the fact that saved_outerr always holds less
 	   than a line.  */
-	cvs_flushout();
+    cvs_flushout();
 
     if (len == 0)
 		len = strlen (str);
@@ -6531,6 +6533,7 @@ int cvs_outerr (const char *str, size_t len)
 	else
 #endif
 	{
+        std::unique_lock<std::mutex> lock(output_mutex);
 #if defined(_WIN32) && !defined(CVS95)
 		// Convert the UTF8 string to Unicode/ANSI for console output
 		HANDLE hConsole = GetStdHandle(STD_OUTPUT_HANDLE);
@@ -6589,7 +6592,10 @@ cvs_flusherr ()
 		temp_protocol->server_flush_data(temp_protocol);
     else
 #endif
+    {
+    std::unique_lock<std::mutex> lock(output_mutex);
 	fflush (stderr);
+    }
 }
 
 /* Make it possible for the user to see what has been written to
@@ -6610,7 +6616,10 @@ cvs_flushout ()
     }
     else
 #endif
+    {
+        std::unique_lock<std::mutex> lock(output_mutex);
 		fflush (stdout);
+    }
 }
 
 /* Output TEXT, tagging it according to TAG.  There are lots more

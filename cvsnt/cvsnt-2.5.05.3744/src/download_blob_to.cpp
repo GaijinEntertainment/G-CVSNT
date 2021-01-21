@@ -169,6 +169,8 @@ void add_upload_queue(const char *filename, bool compress, const char *message)
   processor->emplace(BlobTask{message, cdir, filename, "", "", 0, compress, BlobTask::Type::Upload});
   blob_free(cdir);
 }
+int cvs_output(const char *, size_t);
+int cvs_outerr(const char *, size_t);
 
 #include <unordered_set>
 static std::unordered_set<std::string> download_dirs;
@@ -214,8 +216,9 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   FILE *tmp = fopen(temp_filename.c_str(), "wb");
   if (!tmp)
   {
-      printf("can't write temp %s\n", temp_filename.c_str());
-      return false;
+    char buf[512];std::snprintf(buf, sizeof(buf), "can't write temp %s\n", temp_filename.c_str());
+    cvs_outerr(buf, 0);
+    return false;
   }
   std::string err;
   caddressed_fs::DownloadBlobInfo info;
@@ -227,7 +230,8 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
       err))
   {
     unlink_file(temp_filename.c_str());
-    printf("can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
+    char buf[256];std::snprintf(buf, sizeof(buf), "can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
+    cvs_outerr(buf, 0);
     return false;
   }
   if (tmp)
@@ -241,7 +245,8 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   }
   std::string fullPath = (task.dirpath+"/")+task.filename;
   rename_file (temp_filename.c_str(), fullPath.c_str());
-  printf("u %s\n", task.message.c_str());
+  char buf[256];std::snprintf(buf, sizeof(buf),"u %s\n", task.message.c_str());
+  cvs_output(buf, 0);
   return true;
 }
 bool is_blob_file_sent(const char* filepath, const char* fileopen, char* hash_encoded);
@@ -256,12 +261,15 @@ static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask
   std::string err;
   if (!processor->upload(fullPath.c_str(), task.compress, hash, err))
   {
-    fprintf(stderr, "can't upload file <%s>, err = %s\n", fullPath.c_str(), err.c_str());
+    char buf[512];std::snprintf(buf, sizeof(buf), "can't upload file <%s>, err = %s\n", fullPath.c_str(), err.c_str());
+    cvs_outerr(buf, 0);
     return false;
   }
   if (finish_send_blob_file(task.filename.c_str(), fullPath.c_str(), hash))
-    printf("b %s\n", task.message.c_str());
-  else
+  {
+    char buf[256];std::snprintf(buf, sizeof(buf),"b %s\n", task.message.c_str());
+    cvs_output(buf, 0);
+  } else
     error(1,0,"can't finish sending blob %s\n", task.message.c_str());
   return true;
 }
