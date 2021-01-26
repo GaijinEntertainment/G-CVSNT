@@ -338,6 +338,7 @@ static size_t do_lock_server(const char *object, const char *directory, const ch
 
 				if(!(bWaited%5)) // No need to keep going on about it..
 				{
+                    sleep(5);//increase amount of time waiting for obtain lock
 					if(host && *host)
 						error(0,0,"[%s] waiting for %s on %s's lock in %s", tm, owner, host, fn_root(path));
 					else
