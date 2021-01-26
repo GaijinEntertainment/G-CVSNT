@@ -28,7 +28,7 @@ int local_port = 1;
 
 static void usage(const char *prog)
 {
-  fprintf(stderr,"Usage: %s [-d] [-l] [-g] [-p port]\n",prog);
+  fprintf(stderr,"Usage: %s [-n] [-d] [-l] [-g] [-p port]\n",prog);
   exit(-1);
 }
 
@@ -36,6 +36,7 @@ int main(int argc, char *argv[])
 {
   int c;
   int digit_optind = 0;
+  bool g_Daemon = true;
   char buf[32];
 	char*		cp;
 
@@ -63,7 +64,7 @@ int main(int argc, char *argv[])
       {0,0,0,0}
     };
 
-    c = getopt_long (argc,argv,"+dp:lg",long_options, &option_index);
+    c = getopt_long (argc,argv,"+dnp:lg",long_options, &option_index);
     if (c == -1)
       break;
 
@@ -72,6 +73,9 @@ int main(int argc, char *argv[])
       case 'd':
         g_bTestMode = true;
 		CServerIo::loglevel(3);
+        break;
+      case 'n':
+        g_Daemon = false;
         break;
       case 'p':
         listen_port = atoi(optarg);
@@ -90,7 +94,7 @@ int main(int argc, char *argv[])
   if(optind < argc)
     usage(argv[0]);
 
-  if(!g_bTestMode)
+  if(!g_bTestMode && g_Daemon)
   {
     if(daemon(0,0))
     {
