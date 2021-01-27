@@ -587,8 +587,10 @@ static int client_protocol_buffer_shutdown (void *closure)
 {
 	client_protocol_data *data = (client_protocol_data*)closure;
 	if(data->protocol && data->protocol->server_shutdown)
+    {
 		data->protocol->server_shutdown(data->protocol);
-	else if(data->server_io_socket)
+        data->protocol = NULL;
+	} else if(data->server_io_socket)
 	{
 #ifdef _WIN32
 		shutdown(_get_osfhandle(data->server_io_socket),2);
