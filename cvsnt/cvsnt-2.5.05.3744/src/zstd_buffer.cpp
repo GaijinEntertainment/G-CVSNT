@@ -12,8 +12,6 @@ struct zstd_buffer
     ZSTD_DStream* zds;
 	ZSTD_CStream* zcs;
   };
-  ZSTD_outBuffer_s streamOut;
-  ZSTD_inBuffer_s streamIn;
 };
 
 static void zstd_error (int, size_t, const char *);
@@ -108,9 +106,11 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
     cb->buf->data = bd;
   }
 
-  cb->streamOut.dst = data;
-  cb->streamOut.size = size;
-  cb->streamOut.pos = 0;
+  ZSTD_outBuffer_s streamOut;
+  ZSTD_inBuffer_s streamIn;
+  streamOut.dst = data;
+  streamOut.size = size;
+  streamOut.pos = 0;
 
   while (cb->zds)
   {
@@ -121,17 +121,17 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
        because there may be data buffered inside the z_stream
        structure.  */
 
-    cb->streamIn.src = bd->bufp;
-    cb->streamIn.size = bd->size;
-    cb->streamIn.pos = 0;
+    streamIn.src = bd->bufp;
+    streamIn.size = bd->size;
+    streamIn.pos = 0;
     size_t sz = 0;
 
     do {
-      sz = ZSTD_decompressStream(cb->zds, &cb->streamOut, &cb->streamIn);
+      sz = ZSTD_decompressStream(cb->zds, &streamOut, &streamIn);
       if (sz == 0)
         break;
-      if (cb->streamOut.pos == cb->streamOut.size && !ZSTD_isError(sz))
-        sz = ZSTD_decompressStream(cb->zds, &cb->streamOut, &cb->streamIn);
+      if (streamOut.pos == streamOut.size && !ZSTD_isError(sz))
+        sz = ZSTD_decompressStream(cb->zds, &streamOut, &streamIn);
       if (sz == 0)
         break;
       if (ZSTD_isError(sz))
@@ -139,17 +139,17 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
       	zstd_error (0, sz, "inflate");
       	return EIO;
       }
-    } while(cb->streamIn.pos < cb->streamIn.size && cb->streamOut.pos < cb->streamOut.size);
+    } while(streamIn.pos < streamIn.size && streamOut.pos < streamOut.size);
 
-    bd->size = cb->streamIn.size - cb->streamIn.pos;
-    bd->bufp = (char *)cb->streamIn.src + cb->streamIn.pos;
+    bd->size = streamIn.size - streamIn.pos;
+    bd->bufp = (char *)streamIn.src + streamIn.pos;
 
     /* If we have obtained NEED bytes, then return, unless NEED is
            zero and we haven't obtained anything at all.  If NEED is
            zero, we will keep reading from the underlying buffer until
            we either can't read anything, or we have managed to
            inflate at least one byte.  */
-    sofar = size - (cb->streamOut.size - cb->streamOut.pos);
+    sofar = size - (streamOut.size - streamOut.pos);
     if (sofar > 0 && sofar >= need)
       break;
 
@@ -186,7 +186,7 @@ static int zstd_buffer_input (void *closure, char *data, int need, int size, int
     bd->size = nread;
   }
 
-  *got = cb->streamOut.pos;
+  *got = streamOut.pos;
 
   return 0;
 }
@@ -197,28 +197,30 @@ static int zstd_buffer_output (void *closure, const char *data, int have, int *w
 {
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
 
-  cb->streamIn.src = (unsigned char *) data;
-  cb->streamIn.size = have;
-  cb->streamIn.pos = 0;
+  ZSTD_outBuffer_s streamOut;
+  ZSTD_inBuffer_s streamIn;
+  streamIn.src = (unsigned char *) data;
+  streamIn.size = have;
+  streamIn.pos = 0;
 
-  while (cb->zcs && cb->streamIn.pos < cb->streamIn.size)
+  while (cb->zcs && streamIn.pos < streamIn.size)
   {
     char buffer[BUFFER_DATA_SIZE];
     int zstatus;
 
-    cb->streamOut.dst = (unsigned char *) buffer;
-    cb->streamOut.size = sizeof(buffer);
-    cb->streamOut.pos = 0;
+    streamOut.dst = (unsigned char *) buffer;
+    streamOut.size = sizeof(buffer);
+    streamOut.pos = 0;
 
-    size_t sz = ZSTD_compressStream(cb->zcs, &cb->streamOut, &cb->streamIn);
+    size_t sz = ZSTD_compressStream(cb->zcs, &streamOut, &streamIn);
     if (ZSTD_isError(sz))
     {
       zstd_error (0, sz, "inflate");
       return EIO;
     }
 
-    if (cb->streamOut.pos != 0)
-      buf_output (cb->buf, buffer, cb->streamOut.pos);
+    if (streamOut.pos != 0)
+      buf_output (cb->buf, buffer, streamOut.pos);
   }
 
   *wrote = have;
@@ -236,13 +238,14 @@ static int zstd_buffer_flush (void *closure)
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
 
 
+  ZSTD_outBuffer_s streamOut;
   while (cb->zcs)
   {
     char buffer[BUFFER_DATA_SIZE];
-    cb->streamOut.dst  = (unsigned char *) buffer;
-    cb->streamOut.size = sizeof(buffer);
-    cb->streamOut.pos = 0;
-    size_t sz = ZSTD_flushStream(cb->zcs, &cb->streamOut);
+    streamOut.dst  = (unsigned char *) buffer;
+    streamOut.size = sizeof(buffer);
+    streamOut.pos = 0;
+    size_t sz = ZSTD_flushStream(cb->zcs, &streamOut);
 
     if (ZSTD_isError(sz))
     {
@@ -250,13 +253,13 @@ static int zstd_buffer_flush (void *closure)
         return EIO;
     }
 
-    if (cb->streamOut.pos != 0)
-        buf_output (cb->buf, buffer, cb->streamOut.pos);
+    if (streamOut.pos != 0)
+        buf_output (cb->buf, buffer, streamOut.pos);
     if (sz == 0)
       break;
     /* If the deflate function did not fill the output buffer,
            then all data has been flushed.  */
-    //if (cb->streamOut.pos < cb->streamOut.size)
+    //if (streamOut.pos < streamOut.size)
     //    break;
   }
 
@@ -299,13 +302,14 @@ static int zstd_buffer_shutdown_input (void *closure)
 static int zstd_buffer_shutdown_output (void *closure)
 {
   struct zstd_buffer *cb = (struct zstd_buffer *) closure;
+  ZSTD_outBuffer_s streamOut;
   while (cb->zcs)
   {
     char buffer[BUFFER_DATA_SIZE];
-    cb->streamOut.dst= (unsigned char *) buffer;
-    cb->streamOut.size = sizeof(buffer);
-    cb->streamOut.pos = 0;
-    size_t sz = ZSTD_endStream(cb->zcs, &cb->streamOut);
+    streamOut.dst= (unsigned char *) buffer;
+    streamOut.size = sizeof(buffer);
+    streamOut.pos = 0;
+    size_t sz = ZSTD_endStream(cb->zcs, &streamOut);
 
     if (ZSTD_isError(sz))
     {
@@ -313,12 +317,12 @@ static int zstd_buffer_shutdown_output (void *closure)
         return EIO;
     }
 
-    if (cb->streamOut.pos != 0)
-        buf_output (cb->buf, buffer, cb->streamOut.pos);
+    if (streamOut.pos != 0)
+        buf_output (cb->buf, buffer, streamOut.pos);
 
     /* If the deflate function did not fill the output buffer,
            then all data has been flushed.  */
-    if (sz == 0)//(cb->streamOut.pos < cb->streamOut.size)
+    if (sz == 0)//(streamOut.pos < streamOut.size)
         break;
   }
 
