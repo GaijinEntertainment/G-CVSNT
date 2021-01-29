@@ -119,7 +119,7 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
       init();
     return r == KVRet::OK;
   }
-  intptr_t client;
+  intptr_t client = intptr_t(-1);
   std::string url, root; int port;
 };
 
