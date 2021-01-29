@@ -208,6 +208,7 @@ void wait_threads()
 
 }
 void rename_file (const char *from, const char *to);
+static bool validate_downloaded_blobs = true;
 
 static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task)
 {
@@ -222,13 +223,22 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   }
   std::string err;
   caddressed_fs::DownloadBlobInfo info;
+  char hashCtx[HASH_CONTEXT_SIZE];
+  if (validate_downloaded_blobs)
+    init_blob_hash_context(hashCtx, sizeof(hashCtx));
   if (!processor->download(task.encoded_hash.data(),
       [&](const char *data, size_t data_length) {
         return caddressed_fs::decode_stream_blob_data(info, data, data_length,
-          [&](const void *data, size_t sz) { return fwrite(data, 1, sz, tmp) == sz; });//we can easily add hash validation here. but seems unnessasry
+          [&](const void *data, size_t sz) {
+            if (validate_downloaded_blobs)
+              update_blob_hash(hashCtx, (const char *)data, sz);
+            return fwrite(data, 1, sz, tmp) == sz;
+          });//we can easily add hash validation here. but seems unnessasry
       },
       err))
   {
+    if (tmp)
+      fclose(tmp);
     unlink_file(temp_filename.c_str());
     char buf[256];std::snprintf(buf, sizeof(buf), "can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
     cvs_outerr(buf, 0);
@@ -236,6 +246,21 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   }
   if (tmp)
     fclose(tmp);
+  if (validate_downloaded_blobs)
+  {
+    char recievedHash[65];recievedHash[0]=recievedHash[64]=0;
+    unsigned char digest[32];
+    finalize_blob_hash(hashCtx, digest, sizeof(digest));
+    bin_hash_to_hex_string_64(digest, recievedHash);
+    if (memcmp(task.encoded_hash.data(), recievedHash, 64) != 0)
+    {
+      unlink_file(temp_filename.c_str());
+      char buf[256];std::snprintf(buf, sizeof(buf),
+        "downloaded hash <%.64s> is different from requested <%.64s> for <%s>\n", recievedHash, task.encoded_hash.data(), task.message.c_str());
+      cvs_outerr(buf, 0);
+      return false;
+    }
+  }
 
   change_utime(temp_filename.c_str(), task.timestamp);
   {
@@ -245,6 +270,19 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   }
   std::string fullPath = (task.dirpath+"/")+task.filename;
   rename_file (temp_filename.c_str(), fullPath.c_str());
+  if (validate_downloaded_blobs)
+  {
+    extern size_t get_file_size(const char* file);
+    const size_t fsz = get_file_size(fullPath.c_str());
+    if (fsz != info.realUncompressedSize)
+    {
+      unlink_file(fullPath.c_str());
+      char buf[256];std::snprintf(buf, sizeof(buf),
+        "file <%s> has size of %lld after downloading, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
+      cvs_outerr(buf, 0);
+      return false;
+    }
+  }
   char buf[256];std::snprintf(buf, sizeof(buf),"u %s\n", task.message.c_str());
   cvs_output(buf, 0);
   return true;
