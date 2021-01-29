@@ -72,8 +72,11 @@ void error_exit ()
    */
 
 /* VARARGS */
+#include <mutex>
+static std::recursive_mutex error_mutex;
 void error (int status, int errnum, const char *message, ...)
 {
+    std::unique_lock<std::recursive_mutex> lock(error_mutex);
 	static int in_error = 0;
 
     int save_errno = errno;
