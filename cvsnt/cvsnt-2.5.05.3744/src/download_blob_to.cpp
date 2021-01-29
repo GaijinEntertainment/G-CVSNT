@@ -246,6 +246,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   }
   if (tmp)
     fclose(tmp);
+  extern size_t get_file_size(const char* file);
   if (validate_downloaded_blobs)
   {
     char recievedHash[65];recievedHash[0]=recievedHash[64]=0;
@@ -260,8 +261,17 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
       cvs_outerr(buf, 0);
       return false;
     }
-  }
 
+    const size_t fsz = get_file_size(temp_filename.c_str());//validate file system
+    if (fsz != info.realUncompressedSize)
+    {
+      unlink_file(temp_filename.c_str());
+      char buf[256];std::snprintf(buf, sizeof(buf),
+        "file <%s> has size of %lld after downloading, while we downloaded %lld\n", temp_filename.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
+      cvs_outerr(buf, 0);
+      return false;
+    }
+  }
   change_utime(temp_filename.c_str(), task.timestamp);
   {
     int status = change_mode (temp_filename.c_str(), task.file_mode.c_str(), 1);
@@ -272,11 +282,9 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   rename_file (temp_filename.c_str(), fullPath.c_str());
   if (validate_downloaded_blobs)
   {
-    extern size_t get_file_size(const char* file);
-    const size_t fsz = get_file_size(fullPath.c_str());
+    const size_t fsz = get_file_size(fullPath.c_str());//validate file system again
     if (fsz != info.realUncompressedSize)
     {
-      unlink_file(fullPath.c_str());
       char buf[256];std::snprintf(buf, sizeof(buf),
         "file <%s> has size of %lld after downloading, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
       cvs_outerr(buf, 0);
