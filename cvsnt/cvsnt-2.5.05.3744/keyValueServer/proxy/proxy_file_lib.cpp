@@ -63,13 +63,22 @@ void blob_destroy_ctx(void *ctx) {
 
 std::string get_hash_file_folder(const char* /*htype*/, const char* hhex)
 {
-  char sub[4] = {hhex[0], hhex[1], '/', '\0'};
+  char sub[7] = {hhex[0], hhex[1], '/', hhex[2], hhex[3], '/', '\0'};
   return (cache_folder + sub);
+}
+
+static void ensure_dir(const char* htype, const char* hhex)
+{
+  std::string dir = get_hash_file_folder(htype, hhex);
+  dir[dir.length()-4] = 0;
+  blob_fileio_ensure_dir(dir.c_str());
+  dir[dir.length()-4] = '/';
+  blob_fileio_ensure_dir(dir.c_str());
 }
 
 std::string get_hash_file_name(const char* htype, const char* hhex)
 {
-  if (!hhex || !hhex[0] || !hhex[1])
+  if (!hhex || !hhex[0] || !hhex[1] || !hhex[2] || !hhex[3])
     return std::string();
   return get_hash_file_folder(htype, hhex) + hhex;
 }
@@ -230,8 +239,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
       break;
     cc->restart();
   }
-
-  blob_fileio_ensure_dir(get_hash_file_folder(htype, hhex).c_str());
+  ensure_dir(htype, hhex);
   if (!blob_fileio_rename_file(tmpfn.c_str(), fn.c_str()))//can't rename
   {
     fclose(tmpf);
