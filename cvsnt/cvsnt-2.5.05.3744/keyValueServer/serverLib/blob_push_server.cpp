@@ -4,9 +4,8 @@
 #include "../include/blob_sockets.h"
 #include "../blob_push_log.h"
 
-#if _WIN32
+#if MULTI_THREADED
 #include <thread>
-#define MULTI_THREADED 1//on windows it is wy heavier to create process.
 //while multi-threaded should be fine for Linux also (as far as I know, there are no leaks), but why bother?
 #else
 #include <signal.h>

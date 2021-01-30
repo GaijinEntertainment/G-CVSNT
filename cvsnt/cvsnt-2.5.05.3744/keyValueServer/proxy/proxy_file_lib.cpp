@@ -35,7 +35,7 @@ void init_proxy(const char *url, int port, const char *cache, size_t sz)
 
 struct ClientConnection
 {
-  mutable intptr_t cs;
+  mutable intptr_t cs = intptr_t(-1);
   std::string root;
   ClientConnection(const char*root_):root(root_)
   {

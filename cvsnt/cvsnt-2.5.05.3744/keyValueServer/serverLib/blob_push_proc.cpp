@@ -256,7 +256,7 @@ void blob_push_thread_proc(int socket, volatile bool *should_stop)
   while (!(should_stop && *should_stop) && blob_push_thread_proc_int(ctx, socket))//command is processed
   {
   }
-  blob_destroy_ctx(ctx);
   blob_logmessage(LOG_NOTIFY, "close connection %d", socket);
   blob_close_socket(socket);
+  blob_destroy_ctx(ctx);
 }

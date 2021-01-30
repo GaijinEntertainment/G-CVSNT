@@ -1,1 +1,1 @@
-clang-cl -Zi sample_server.cpp stub_file_lib.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp 
+clang-cl -Zi -DMULTI_THREADED=1 sample_server.cpp stub_file_lib.cpp ../serverLib/blob_push_proc.cpp ../serverLib/blob_push_server.cpp 
