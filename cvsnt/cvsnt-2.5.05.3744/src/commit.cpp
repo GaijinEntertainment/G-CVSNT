@@ -1906,6 +1906,82 @@ static int remove_file (struct file_info *finfo, const char *tag, const char *me
     return 0;
 }
 
+char *get_options(const char *file, const char *options, bool check_content)
+{
+  if (options && !options[0])
+    options = nullptr;
+
+  const char *old_opt;
+  if(server_active && compat[compat_level].ignore_client_wrappers)
+	old_opt = wrap_rcsoption(file);
+  else
+	old_opt = options;
+
+  if (!old_opt)
+	old_opt="kv";
+  if (server_active && strstr(old_opt, "B")==nullptr && strstr(old_opt, "b")==nullptr)
+  {
+    //TRACE(3,"old_opt = %s, options %s", old_opt, options ? options : "NULL");
+
+    const char *opt = nullptr;
+    if (server_active && compat[compat_level].ignore_client_wrappers)
+    {
+      opt = wrap_rcsoption(file);
+    }
+    else
+    {
+      const char *server_opt = wrap_rcsoption(file);
+      TRACE(3,"server_opt = %s", server_opt ? server_opt : "null");
+      if (server_opt)
+      {
+        if (!options)
+          opt = server_opt;
+        else if (strcmp(server_opt, options) == 0)
+          opt = options;
+        else if (strstr(server_opt, "B") || strstr(server_opt, "b"))
+          opt = server_opt;
+        else
+          opt = options;
+      }
+    }
+
+    if (!opt || !opt[0])
+      opt = "kv";
+
+    if (check_content && strstr(opt, "kv"))
+    {
+      FILE *f = fopen(file, "rb");
+      if (f)
+      {
+        char buf[4096];
+        bool textFile = true;
+        while (textFile)
+        {
+          size_t sz = fread(buf, 1, sizeof(buf), f);
+          for (size_t i = 0; i < sz; ++i)
+            if (!buf[i])
+            {
+              textFile = false;
+              break;
+            }
+          if (sz < sizeof(buf))
+            break;
+        }
+        fclose(f);
+        if (!textFile)
+          opt = "B";
+      }
+    }
+    //TRACE(3,"opt = %s old_opt %s", opt ? opt : "null", old_opt ? old_opt : "null");
+    if (strstr(opt, "B")!=nullptr || strstr(opt, "b")!=nullptr)
+      error(1,0, "file <%s> has conflicting options. You are adding it as text file, while it should be binary", file);
+  }
+  char *ret = strdup(old_opt);//memleak
+  if (char *b = strstr(ret, "b"))
+    *b = 'B';
+  return ret;
+}
+
 /*
  * Do the actual checkin for added files
  */
@@ -1917,13 +1993,7 @@ static int finaladd(struct file_info *finfo, char *rev, char *tag, char *options
 
 	/* Set RCS keyword expansion options.  */
 	/* If we're ignoring client side cvswrappers, then override the options string */
-	if(server_active && compat[compat_level].ignore_client_wrappers)
-	{
-		opt = wrap_rcsoption(finfo->file);
-		if(!opt) opt="kv";
-	}
-	else
-		opt = options;
+    opt = get_options(finfo->file, options, true);
 
 	assert(opt);
 
@@ -2125,15 +2195,7 @@ int checkaddfile (const char *file, const char *mapped_file, const char *dir, co
 
 	/* Set RCS keyword expansion options.  */
 	/* If we're ignoring client side cvswrappers, then override the options string */
-	if(server_active && compat[compat_level].ignore_client_wrappers)
-	{
-		opt = wrap_rcsoption(file);
-	}
-	else
-		opt = options;
-
-	if(!opt)
-		opt="kv";
+    opt = get_options(file, options, true);
 
 	/* This message is an artifact of the time when this
 	   was implemented via "rcs -i".  It should be revised at
