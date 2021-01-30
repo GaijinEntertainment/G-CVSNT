@@ -253,7 +253,8 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
   }
   if ((wasHdr.flags&BlobHeader::BEST_POSSIBLE_COMPRESSION) != 0)
     return 0;
-  if (!repack_unpacked && !is_packed_blob(wasHdr))
+  const bool is_unpacked_blob = !is_packed_blob(wasHdr);
+  if (!repack_unpacked && is_unpacked_blob)
     return 0;
   BlobHeader hdr = get_header(zstd_magic, wasHdr.uncompressedLen, BlobHeader::BEST_POSSIBLE_COMPRESSION);
   std::string temp_file_name;
@@ -271,6 +272,7 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
   uint64_t at = 0;
   char buf[65536];
   DownloadBlobInfo info;
+  size_t compressedSize = 0, uncompressedSize = 0;
   do {// with mmap that's one iteration
     size_t sz = 0;
     const char *got = pull(in.get(), at, sz);
@@ -282,9 +284,15 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
         while (src_pos < unpacked_sz)
         {
           size_t dst_pos = 0;
+          size_t wasSrcPos = src_pos;
           if (compress_stream(cctx, unpacked_data, src_pos, unpacked_sz, buf, dst_pos, sizeof(buf)) == StreamStatus::Error)
             return false;
+          compressedSize += dst_pos;
+          uncompressedSize += src_pos-wasSrcPos;
           if (fwrite(buf, 1, dst_pos, tmpf) != dst_pos)
+            return false;
+          //if already tried to encode 1mb of data, without any success - stop trying
+          if (is_unpacked_blob && uncompressedSize > (1<<20) && compressedSize >= uncompressedSize)
             return false;
         }
         return true;
