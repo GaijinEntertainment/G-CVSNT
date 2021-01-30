@@ -9,7 +9,7 @@
 #include "../blob_push_log.h"
 
 static std::string master_url;
-static std::string cache_folder;
+static std::string cache_folder, blobs_folder;
 static int master_port = 2403;
 //--
 void init_gc(const char *folder, uint64_t max_size);
@@ -24,11 +24,16 @@ void init_proxy(const char *url, int port, const char *cache, size_t sz)
   master_url = url;
   master_port = port;
   cache_folder = cache;
-  blob_fileio_ensure_dir(cache_folder.c_str());
   if (cache_folder.length()==0)
     cache_folder = ".";
+  else
+    blob_fileio_ensure_dir(cache_folder.c_str());
   if (cache_folder[cache_folder.length() - 1] != '/')
     cache_folder += "/";
+
+  blobs_folder = cache_folder + "blobs/";
+  blob_fileio_ensure_dir(blobs_folder.c_str());
+
   init_gc(cache_folder.c_str(), uint64_t(sz)<<uint64_t(20));
 }
 ///
@@ -64,7 +69,7 @@ void blob_destroy_ctx(void *ctx) {
 std::string get_hash_file_folder(const char* /*htype*/, const char* hhex)
 {
   char sub[7] = {hhex[0], hhex[1], '/', hhex[2], hhex[3], '/', '\0'};
-  return (cache_folder + sub);
+  return (blobs_folder + sub);
 }
 
 static void ensure_dir(const char* htype, const char* hhex)
@@ -170,7 +175,7 @@ void blob_destroy_push_data(uintptr_t up)
 static inline FILE* download_blob(intptr_t &sock, std::string &tmpfn, const char* htype, const char* hhex, int64_t &pulledSz)
 {
   pulledSz = 0;
-  FILE* tmpf = blob_fileio_get_temp_file(tmpfn, cache_folder.c_str());
+  FILE* tmpf = blob_fileio_get_temp_file(tmpfn, blobs_folder.c_str());
   if (!tmpf)
   {
     fprintf(stderr, "Can't open temp file\n");
