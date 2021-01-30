@@ -1086,8 +1086,15 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
       			"rb", 
       			&commitpt->text->text, &bufsize, &commitpt->text->len, kf_binary);
 
+        kflag kf_old = kf;
+        if (commitpt->kopt)
+          RCS_get_kflags(commitpt->kopt, false, kf_old);
 
-        if (commitpt->text->text && (kf.flags&KFLAG_BINARY_DELTA) && commitpt->text->len != 0 && commitpt->text->len != blobrefdifflen && commitpt->text->len != blob_reference_size)//for initial/head revision it is blake3:hash, for others it is d1 1\na1 1\nblake3:hash
+        if (commitpt->text->text && (kf.flags&KFLAG_BINARY_DELTA) &&
+            (kf_old.flags&KFLAG_BINARY_DELTA) &&
+            commitpt->text->len != 0 &&
+            commitpt->text->len != blobrefdifflen && commitpt->text->len != blob_reference_size)
+        //for initial/head revision it is blake3:hash, for others it is d1 1\na1 1\nblake3:hash
         {
           error(1,0, "internal error, kB HEAD change has invalid length of %d, should be %d or %d", (int)commitpt->text->len, (int)blobrefdifflen, (int)blob_reference_size);
         }
