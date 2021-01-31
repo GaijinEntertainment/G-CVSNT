@@ -63,7 +63,7 @@ inline void set_priority(bool low)
 extern bool repack_immediately;
 void finish_hashes(caddressed_fs::context* ctx)
 {
-  if (!repack_immediately)
+  if (!new_hashes.size())
     return;
   set_priority(true);
   for (auto &h:new_hashes)
