@@ -5,6 +5,8 @@
 #include <string>
 #include <thread>
 #include <algorithm>
+#include <time.h>
+
 #include "../include/blob_sockets.h"
 #include "../include/blob_push_protocol.h"
 #include "../include/blob_push_proto_ver.h"
@@ -14,7 +16,47 @@
 
 using namespace blob_push_proto;
 
-intptr_t start_blob_push_client(const char *url, int port, const char *root)
+int connect_with_timeout(SOCKET sock, const struct sockaddr *addr, size_t addr_len, int timeout_sec)
+{
+  if (timeout_sec <= 0)
+    return connect(sock, addr, addr_len);//no timeout
+  timeval timeout;
+  timeout.tv_sec = timeout_sec;
+  timeout.tv_usec = 0;
+
+  //set the socket in non-blocking
+  if (!blob_set_non_blocking(sock, true))
+    blob_logmessage(LOG_ERROR, "ioctlsocket failed with error: %d (%d)\n", blob_get_last_sock_error());
+  auto connectRet = connect(sock,addr,addr_len);
+  if (connectRet == -1 && !blob_socket_would_block(blob_get_last_sock_error()))
+  {
+    blob_logmessage(LOG_ERROR, "connect failed with error: %d\n", blob_get_last_sock_error());
+    return -1;
+  }
+
+  // restart the socket mode
+  fd_set Write, Err;
+  FD_ZERO(&Write);
+  FD_ZERO(&Err);
+  FD_SET(sock, &Write);
+  FD_SET(sock, &Err);
+
+  // check if the socket is ready
+  if (select(0,NULL,&Write,&Err,&timeout) == -1)
+  {
+    blob_logmessage(LOG_ERROR, "select failed with error: %d\n", blob_get_last_sock_error());
+    return -1;
+  }
+  if (FD_ISSET(sock, &Write))
+  {
+    if (!blob_set_non_blocking(sock, false))
+      blob_logmessage(LOG_ERROR, "ioctlsocket failed with error: %d (%d)\n", blob_get_last_sock_error());
+    return 0;
+  }
+  return -1;
+}
+
+intptr_t start_blob_push_client(const char *url, int port, const char *root, int timeout_sec)
 {
   const size_t rootLen = root ? strlen(root) : 1;
   if (rootLen>255)
@@ -47,7 +89,7 @@ intptr_t start_blob_push_client(const char *url, int port, const char *root)
     if (sfd == -1)
       continue;
 
-    if (connect(sfd, rp->ai_addr, rp->ai_addrlen) != -1)
+    if (connect_with_timeout(sfd, rp->ai_addr, rp->ai_addrlen, timeout_sec) != -1)
     {
       sockfd = sfd;
       break;

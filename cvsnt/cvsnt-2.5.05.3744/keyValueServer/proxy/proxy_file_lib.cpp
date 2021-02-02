@@ -45,7 +45,7 @@ struct ClientConnection
   ClientConnection(const char*root_):root(root_)
   {
   }
-  bool start()const{cs = start_blob_push_client(master_url.c_str(), master_port, root.c_str());return cs >= 0;}
+  bool start()const{cs = start_blob_push_client(master_url.c_str(), master_port, root.c_str(), 0);return cs >= 0;}//infinite timeout on proxy
   void kill() const{stop_blob_push_client(cs);}
   void restart() const{kill();start();}
   ~ClientConnection(){kill();}

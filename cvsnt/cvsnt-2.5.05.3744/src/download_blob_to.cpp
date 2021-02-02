@@ -126,13 +126,13 @@ void BackgroundProcessor::init()
         pr = get_kv_processor(master_url, 2403, base_repo.c_str(), user, passwd);
         if (pr)
         {
-          printf("Proxy <%s:%d> is not available, switching to master <%s:%d>. Contact IT!\n",
+          error(0,0, "Proxy <%s:%d> is not available, switching to master <%s:%d>. Contact IT!\n",
             download_url, download_port, master_url, 2403);
           download_url = master_url;
           download_port = 2403;
         } else
         {
-          fprintf(stderr, "Nor proxy <%s:%d> neither master <%s:%d> are not available. Contact IT!\n",
+          error(1,0, "Nor proxy <%s:%d> neither master <%s:%d> are not available. Contact IT!\n",
             download_url, download_port, master_url, 2403);
         }
       }

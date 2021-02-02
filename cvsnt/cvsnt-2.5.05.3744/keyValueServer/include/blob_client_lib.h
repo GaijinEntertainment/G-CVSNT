@@ -2,7 +2,7 @@
 #include <stdint.h>
 #include <functional>
 
-intptr_t start_blob_push_client(const char *url, int port, const char *root);
+intptr_t start_blob_push_client(const char *url, int port, const char *root, int timeout_sec = 2);
 bool stop_blob_push_client(intptr_t &client);
 enum class KVRet{OK, Error, Fatal}; //on fatal protocol error, client will become invalid
 
