@@ -310,6 +310,8 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
     if ( fwrite(buf, 1, dst_pos, tmpf) != dst_pos )
       break;
   }
+  if (st != StreamStatus::Finished)
+    kill_compress_stream(cctx);
   fclose(tmpf);
 
   size_t finalSize = blob_fileio_get_file_size(temp_file_name.c_str());
