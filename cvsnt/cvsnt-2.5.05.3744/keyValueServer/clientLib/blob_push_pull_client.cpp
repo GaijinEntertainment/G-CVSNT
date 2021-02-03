@@ -42,7 +42,7 @@ int connect_with_timeout(SOCKET sock, const struct sockaddr *addr, size_t addr_l
   FD_SET(sock, &Err);
 
   // check if the socket is ready
-  if (select(0,NULL,&Write,&Err,&timeout) == -1)
+  if (select(sock+1,NULL,&Write,&Err,&timeout) == -1)
   {
     blob_logmessage(LOG_ERROR, "select failed with error: %d\n", blob_get_last_sock_error());
     return -1;
