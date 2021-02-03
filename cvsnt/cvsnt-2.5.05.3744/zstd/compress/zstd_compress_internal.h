@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
+ * Copyright (c) 2016-2021, Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -63,7 +63,7 @@ typedef struct {
 } ZSTD_localDict;
 
 typedef struct {
-    U32 CTable[HUF_CTABLE_SIZE_U32(255)];
+    HUF_CElt CTable[HUF_CTABLE_SIZE_U32(255)];
     HUF_repeat repeatMode;
 } ZSTD_hufCTables_t;
 

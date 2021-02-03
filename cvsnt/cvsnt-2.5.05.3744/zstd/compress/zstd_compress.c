@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
+ * Copyright (c) 2016-2021, Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -109,7 +109,7 @@ ZSTD_CCtx* ZSTD_initStaticCCtx(void* workspace, size_t workspaceSize)
     ZSTD_CCtx* cctx;
     if (workspaceSize <= sizeof(ZSTD_CCtx)) return NULL;  /* minimum size */
     if ((size_t)workspace & 7) return NULL;  /* must be 8-aligned */
-    ZSTD_cwksp_init(&ws, workspace, workspaceSize);
+    ZSTD_cwksp_init(&ws, workspace, workspaceSize, ZSTD_cwksp_static_alloc);
 
     cctx = (ZSTD_CCtx*)ZSTD_cwksp_reserve_object(&ws, sizeof(ZSTD_CCtx));
     if (cctx == NULL) return NULL;
@@ -457,12 +457,12 @@ ZSTD_bounds ZSTD_cParam_getBounds(ZSTD_cParameter param)
         bounds.lowerBound = (int)ZSTD_bm_buffered;
         bounds.upperBound = (int)ZSTD_bm_stable;
         return bounds;
-    
+
     case ZSTD_c_blockDelimiters:
         bounds.lowerBound = (int)ZSTD_sf_noBlockDelimiters;
         bounds.upperBound = (int)ZSTD_sf_explicitBlockDelimiters;
         return bounds;
-    
+
     case ZSTD_c_validateSequences:
         bounds.lowerBound = 0;
         bounds.upperBound = 1;
@@ -781,12 +781,12 @@ size_t ZSTD_CCtxParams_setParameter(ZSTD_CCtx_params* CCtxParams,
         BOUNDCHECK(ZSTD_c_stableOutBuffer, value);
         CCtxParams->outBufferMode = (ZSTD_bufferMode_e)value;
         return CCtxParams->outBufferMode;
-    
+
     case ZSTD_c_blockDelimiters:
         BOUNDCHECK(ZSTD_c_blockDelimiters, value);
         CCtxParams->blockDelimiters = (ZSTD_sequenceFormat_e)value;
         return CCtxParams->blockDelimiters;
-    
+
     case ZSTD_c_validateSequences:
         BOUNDCHECK(ZSTD_c_validateSequences, value);
         CCtxParams->validateSequences = value;
@@ -1188,15 +1188,26 @@ ZSTD_adjustCParams_internal(ZSTD_compressionParameters cPar,
     const U64 maxWindowResize = 1ULL << (ZSTD_WINDOWLOG_MAX-1);
     assert(ZSTD_checkCParams(cPar)==0);
 
-    if (dictSize && srcSize == ZSTD_CONTENTSIZE_UNKNOWN)
-        srcSize = minSrcSize;
-
     switch (mode) {
-    case ZSTD_cpm_noAttachDict:
     case ZSTD_cpm_unknown:
+    case ZSTD_cpm_noAttachDict:
+        /* If we don't know the source size, don't make any
+         * assumptions about it. We will already have selected
+         * smaller parameters if a dictionary is in use.
+         */
+        break;
     case ZSTD_cpm_createCDict:
+        /* Assume a small source size when creating a dictionary
+         * with an unkown source size.
+         */
+        if (dictSize && srcSize == ZSTD_CONTENTSIZE_UNKNOWN)
+            srcSize = minSrcSize;
         break;
     case ZSTD_cpm_attachDict:
+        /* Dictionary has its own dedicated parameters which have
+         * already been selected. We are selecting parameters
+         * for only the source.
+         */
         dictSize = 0;
         break;
     default:
@@ -1213,7 +1224,8 @@ ZSTD_adjustCParams_internal(ZSTD_compressionParameters cPar,
                             ZSTD_highbit32(tSize-1) + 1;
         if (cPar.windowLog > srcLog) cPar.windowLog = srcLog;
     }
-    {   U32 const dictAndWindowLog = ZSTD_dictAndWindowLog(cPar.windowLog, (U64)srcSize, (U64)dictSize);
+    if (srcSize != ZSTD_CONTENTSIZE_UNKNOWN) {
+        U32 const dictAndWindowLog = ZSTD_dictAndWindowLog(cPar.windowLog, (U64)srcSize, (U64)dictSize);
         U32 const cycleLog = ZSTD_cycleLog(cPar.chainLog, cPar.strategy);
         if (cPar.hashLog > dictAndWindowLog+1) cPar.hashLog = dictAndWindowLog+1;
         if (cycleLog > dictAndWindowLog)
@@ -1711,11 +1723,11 @@ static size_t ZSTD_resetCCtx_internal(ZSTD_CCtx* zc,
         /* ldm bucketOffsets table */
         if (params.ldmParams.enableLdm) {
             /* TODO: avoid memset? */
-            size_t const ldmBucketSize =
+            size_t const numBuckets =
                   ((size_t)1) << (params.ldmParams.hashLog -
                                   params.ldmParams.bucketSizeLog);
-            zc->ldmState.bucketOffsets = ZSTD_cwksp_reserve_buffer(ws, ldmBucketSize);
-            ZSTD_memset(zc->ldmState.bucketOffsets, 0, ldmBucketSize);
+            zc->ldmState.bucketOffsets = ZSTD_cwksp_reserve_buffer(ws, numBuckets);
+            ZSTD_memset(zc->ldmState.bucketOffsets, 0, numBuckets);
         }
 
         /* sequences storage */
@@ -2954,6 +2966,26 @@ static size_t ZSTD_writeFrameHeader(void* dst, size_t dstCapacity,
     return pos;
 }
 
+/* ZSTD_writeSkippableFrame_advanced() :
+ * Writes out a skippable frame with the specified magic number variant (16 are supported),
+ * from ZSTD_MAGIC_SKIPPABLE_START to ZSTD_MAGIC_SKIPPABLE_START+15, and the desired source data.
+ *
+ * Returns the total number of bytes written, or a ZSTD error code.
+ */
+size_t ZSTD_writeSkippableFrame(void* dst, size_t dstCapacity,
+                                const void* src, size_t srcSize, unsigned magicVariant) {
+    BYTE* op = (BYTE*)dst;
+    RETURN_ERROR_IF(dstCapacity < srcSize + ZSTD_SKIPPABLEHEADERSIZE /* Skippable frame overhead */,
+                    dstSize_tooSmall, "Not enough room for skippable frame");
+    RETURN_ERROR_IF(srcSize > (unsigned)0xFFFFFFFF, srcSize_wrong, "Src size too large for skippable frame");
+    RETURN_ERROR_IF(magicVariant > 15, parameter_outOfBound, "Skippable frame magic number variant not supported");
+
+    MEM_writeLE32(op, (U32)(ZSTD_MAGIC_SKIPPABLE_START + magicVariant));
+    MEM_writeLE32(op+4, (U32)srcSize);
+    ZSTD_memcpy(op+8, src, srcSize);
+    return srcSize + ZSTD_SKIPPABLEHEADERSIZE;
+}
+
 /* ZSTD_writeLastEmptyBlock() :
  * output an empty Block with end-of-frame mark to complete a frame
  * @return : size of data written into `dst` (== ZSTD_blockHeaderSize (defined in zstd_internal.h))
@@ -3258,7 +3290,7 @@ size_t ZSTD_loadCEntropy(ZSTD_compressedBlockState_t* bs, void* workspace,
 
 /* Dictionary format :
  * See :
- * https://github.com/facebook/zstd/blob/master/doc/zstd_compression_format.md#dictionary-format
+ * https://github.com/facebook/zstd/blob/release/doc/zstd_compression_format.md#dictionary-format
  */
 /*! ZSTD_loadZstdDictionary() :
  * @return : dictID, or an error code
@@ -3574,7 +3606,7 @@ size_t ZSTD_compress(void* dst, size_t dstCapacity,
     ZSTD_CCtx* cctx = ZSTD_createCCtx();
     RETURN_ERROR_IF(!cctx, memory_allocation, "ZSTD_createCCtx failed");
     result = ZSTD_compressCCtx(cctx, dst, dstCapacity, src, srcSize, compressionLevel);
-    ZSTD_freeCCtx(cctx);;
+    ZSTD_freeCCtx(cctx);
 #else
     ZSTD_CCtx ctxBody;
     ZSTD_initCCtx(&ctxBody, ZSTD_defaultCMem);
@@ -3692,7 +3724,7 @@ static ZSTD_CDict* ZSTD_createCDict_advanced_internal(size_t dictSize,
             return NULL;
         }
 
-        ZSTD_cwksp_init(&ws, workspace, workspaceSize);
+        ZSTD_cwksp_init(&ws, workspace, workspaceSize, ZSTD_cwksp_dynamic_alloc);
 
         cdict = (ZSTD_CDict*)ZSTD_cwksp_reserve_object(&ws, sizeof(ZSTD_CDict));
         assert(cdict != NULL);
@@ -3836,7 +3868,7 @@ const ZSTD_CDict* ZSTD_initStaticCDict(
 
     {
         ZSTD_cwksp ws;
-        ZSTD_cwksp_init(&ws, workspace, workspaceSize);
+        ZSTD_cwksp_init(&ws, workspace, workspaceSize, ZSTD_cwksp_static_alloc);
         cdict = (ZSTD_CDict*)ZSTD_cwksp_reserve_object(&ws, sizeof(ZSTD_CDict));
         if (cdict == NULL) return NULL;
         ZSTD_cwksp_move(&cdict->workspace, &ws);
@@ -4441,26 +4473,42 @@ size_t ZSTD_compressStream2( ZSTD_CCtx* cctx,
     /* compression stage */
 #ifdef ZSTD_MULTITHREAD
     if (cctx->appliedParams.nbWorkers > 0) {
-        int const forceMaxProgress = (endOp == ZSTD_e_flush || endOp == ZSTD_e_end);
         size_t flushMin;
-        assert(forceMaxProgress || endOp == ZSTD_e_continue /* Protection for a new flush type */);
         if (cctx->cParamsChanged) {
             ZSTDMT_updateCParams_whileCompressing(cctx->mtctx, &cctx->requestedParams);
             cctx->cParamsChanged = 0;
         }
-        do {
+        for (;;) {
+            size_t const ipos = input->pos;
+            size_t const opos = output->pos;
             flushMin = ZSTDMT_compressStream_generic(cctx->mtctx, output, input, endOp);
             if ( ZSTD_isError(flushMin)
               || (endOp == ZSTD_e_end && flushMin == 0) ) { /* compression completed */
                 ZSTD_CCtx_reset(cctx, ZSTD_reset_session_only);
             }
             FORWARD_IF_ERROR(flushMin, "ZSTDMT_compressStream_generic failed");
-        } while (forceMaxProgress && flushMin != 0 && output->pos < output->size);
+
+            if (endOp == ZSTD_e_continue) {
+                /* We only require some progress with ZSTD_e_continue, not maximal progress.
+                 * We're done if we've consumed or produced any bytes, or either buffer is
+                 * full.
+                 */
+                if (input->pos != ipos || output->pos != opos || input->pos == input->size || output->pos == output->size)
+                    break;
+            } else {
+                assert(endOp == ZSTD_e_flush || endOp == ZSTD_e_end);
+                /* We require maximal progress. We're done when the flush is complete or the
+                 * output buffer is full.
+                 */
+                if (flushMin == 0 || output->pos == output->size)
+                    break;
+            }
+        }
         DEBUGLOG(5, "completed ZSTD_compressStream2 delegating to ZSTDMT_compressStream_generic");
         /* Either we don't require maximum forward progress, we've finished the
          * flush, or we are out of output space.
          */
-        assert(!forceMaxProgress || flushMin == 0 || output->pos == output->size);
+        assert(endOp == ZSTD_e_continue || flushMin == 0 || output->pos == output->size);
         ZSTD_setBufferExpectations(cctx, output, input);
         return flushMin;
     }
@@ -4524,7 +4572,7 @@ typedef struct {
 
 /* Returns a ZSTD error code if sequence is not valid */
 static size_t ZSTD_validateSequence(U32 offCode, U32 matchLength,
-                                    size_t posInSrc, U32 windowLog, size_t dictSize) {
+                                    size_t posInSrc, U32 windowLog, size_t dictSize, U32 minMatch) {
     size_t offsetBound;
     U32 windowSize = 1 << windowLog;
     /* posInSrc represents the amount of data the the decoder would decode up to this point.
@@ -4534,7 +4582,7 @@ static size_t ZSTD_validateSequence(U32 offCode, U32 matchLength,
      */
     offsetBound = posInSrc > windowSize ? (size_t)windowSize : posInSrc + (size_t)dictSize;
     RETURN_ERROR_IF(offCode > offsetBound + ZSTD_REP_MOVE, corruption_detected, "Offset too large!");
-    RETURN_ERROR_IF(matchLength < MINMATCH, corruption_detected, "Matchlength too small");
+    RETURN_ERROR_IF(matchLength < minMatch, corruption_detected, "Matchlength too small");
     return 0;
 }
 
@@ -4594,9 +4642,12 @@ static size_t ZSTD_copySequencesToSeqStoreExplicitBlockDelim(ZSTD_CCtx* cctx, ZS
         if (cctx->appliedParams.validateSequences) {
             seqPos->posInSrc += litLength + matchLength;
             FORWARD_IF_ERROR(ZSTD_validateSequence(offCode, matchLength, seqPos->posInSrc,
-                                                cctx->appliedParams.cParams.windowLog, dictSize),
+                                                cctx->appliedParams.cParams.windowLog, dictSize,
+                                                cctx->appliedParams.cParams.minMatch),
                                                 "Sequence validation failed");
         }
+        RETURN_ERROR_IF(idx - seqPos->idx > cctx->seqStore.maxNbSeq, memory_allocation,
+                        "Not enough memory allocated. Try adjusting ZSTD_c_minMatch.");
         ZSTD_storeSeq(&cctx->seqStore, litLength, ip, iend, offCode, matchLength - MINMATCH);
         ip += matchLength + litLength;
     }
@@ -4616,10 +4667,10 @@ static size_t ZSTD_copySequencesToSeqStoreExplicitBlockDelim(ZSTD_CCtx* cctx, ZS
 /* Returns the number of bytes to move the current read position back by. Only non-zero
  * if we ended up splitting a sequence. Otherwise, it may return a ZSTD error if something
  * went wrong.
- * 
+ *
  * This function will attempt to scan through blockSize bytes represented by the sequences
- * in inSeqs, storing any (partial) sequences. 
- * 
+ * in inSeqs, storing any (partial) sequences.
+ *
  * Occasionally, we may want to change the actual number of bytes we consumed from inSeqs to
  * avoid splitting a match, or to avoid splitting a match such that it would produce a match
  * smaller than MINMATCH. In this case, we return the number of bytes that we didn't read from this block.
@@ -4640,7 +4691,7 @@ static size_t ZSTD_copySequencesToSeqStoreNoBlockDelim(ZSTD_CCtx* cctx, ZSTD_seq
     U32 matchLength;
     U32 rawOffset;
     U32 offCode;
-    
+
     if (cctx->cdict) {
         dictSize = cctx->cdict->dictContentSize;
     } else if (cctx->prefixDict.dict) {
@@ -4679,13 +4730,13 @@ static size_t ZSTD_copySequencesToSeqStoreNoBlockDelim(ZSTD_CCtx* cctx, ZSTD_seq
                 U32 firstHalfMatchLength;
                 litLength = startPosInSequence >= litLength ? 0 : litLength - startPosInSequence;
                 firstHalfMatchLength = endPosInSequence - startPosInSequence - litLength;
-                if (matchLength > blockSize && firstHalfMatchLength >= MINMATCH) {
+                if (matchLength > blockSize && firstHalfMatchLength >= cctx->appliedParams.cParams.minMatch) {
                     /* Only ever split the match if it is larger than the block size */
                     U32 secondHalfMatchLength = currSeq.matchLength + currSeq.litLength - endPosInSequence;
-                    if (secondHalfMatchLength < MINMATCH) {
-                        /* Move the endPosInSequence backward so that it creates match of MINMATCH length */
-                        endPosInSequence -= MINMATCH - secondHalfMatchLength;
-                        bytesAdjustment = MINMATCH - secondHalfMatchLength;
+                    if (secondHalfMatchLength < cctx->appliedParams.cParams.minMatch) {
+                        /* Move the endPosInSequence backward so that it creates match of minMatch length */
+                        endPosInSequence -= cctx->appliedParams.cParams.minMatch - secondHalfMatchLength;
+                        bytesAdjustment = cctx->appliedParams.cParams.minMatch - secondHalfMatchLength;
                         firstHalfMatchLength -= bytesAdjustment;
                     }
                     matchLength = firstHalfMatchLength;
@@ -4716,10 +4767,13 @@ static size_t ZSTD_copySequencesToSeqStoreNoBlockDelim(ZSTD_CCtx* cctx, ZSTD_seq
         if (cctx->appliedParams.validateSequences) {
             seqPos->posInSrc += litLength + matchLength;
             FORWARD_IF_ERROR(ZSTD_validateSequence(offCode, matchLength, seqPos->posInSrc,
-                                                   cctx->appliedParams.cParams.windowLog, dictSize),
+                                                   cctx->appliedParams.cParams.windowLog, dictSize,
+                                                   cctx->appliedParams.cParams.minMatch),
                                                    "Sequence validation failed");
         }
         DEBUGLOG(6, "Storing sequence: (of: %u, ml: %u, ll: %u)", offCode, matchLength, litLength);
+        RETURN_ERROR_IF(idx - seqPos->idx > cctx->seqStore.maxNbSeq, memory_allocation,
+                        "Not enough memory allocated. Try adjusting ZSTD_c_minMatch.");
         ZSTD_storeSeq(&cctx->seqStore, litLength, ip, iend, offCode, matchLength - MINMATCH);
         ip += matchLength + litLength;
     }
@@ -4771,7 +4825,7 @@ static size_t ZSTD_compressSequences_internal(ZSTD_CCtx* cctx,
     size_t compressedSeqsSize;
     size_t remaining = srcSize;
     ZSTD_sequencePosition seqPos = {0, 0, 0};
-    
+
     BYTE const* ip = (BYTE const*)src;
     BYTE* op = (BYTE*)dst;
     ZSTD_sequenceCopier sequenceCopier = ZSTD_selectSequenceCopier(cctx->appliedParams.blockDelimiters);
@@ -4857,7 +4911,7 @@ static size_t ZSTD_compressSequences_internal(ZSTD_CCtx* cctx,
 
         cSize += cBlockSize;
         DEBUGLOG(4, "cSize running total: %zu", cSize);
-        
+
         if (lastBlock) {
             break;
         } else {
@@ -4868,7 +4922,7 @@ static size_t ZSTD_compressSequences_internal(ZSTD_CCtx* cctx,
             cctx->isFirstBlock = 0;
         }
     }
-    
+
     return cSize;
 }
 
@@ -5133,13 +5187,21 @@ static ZSTD_compressionParameters ZSTD_getCParams_internal(int compressionLevel,
 {
     U64 const rSize = ZSTD_getCParamRowSize(srcSizeHint, dictSize, mode);
     U32 const tableID = (rSize <= 256 KB) + (rSize <= 128 KB) + (rSize <= 16 KB);
-    int row = compressionLevel;
+    int row;
     DEBUGLOG(5, "ZSTD_getCParams_internal (cLevel=%i)", compressionLevel);
+
+    /* row */
     if (compressionLevel == 0) row = ZSTD_CLEVEL_DEFAULT;   /* 0 == default */
-    if (compressionLevel < 0) row = 0;   /* entry 0 is baseline for fast mode */
-    if (compressionLevel > ZSTD_MAX_CLEVEL) row = ZSTD_MAX_CLEVEL;
+    else if (compressionLevel < 0) row = 0;   /* entry 0 is baseline for fast mode */
+    else if (compressionLevel > ZSTD_MAX_CLEVEL) row = ZSTD_MAX_CLEVEL;
+    else row = compressionLevel;
+
     {   ZSTD_compressionParameters cp = ZSTD_defaultCParameters[tableID][row];
-        if (compressionLevel < 0) cp.targetLength = (unsigned)(-compressionLevel);   /* acceleration factor */
+        /* acceleration factor */
+        if (compressionLevel < 0) {
+            int const clampedCompressionLevel = MAX(ZSTD_minCLevel(), compressionLevel);
+            cp.targetLength = (unsigned)(-clampedCompressionLevel);
+        }
         /* refine parameters based on srcSize & dictSize */
         return ZSTD_adjustCParams_internal(cp, srcSizeHint, dictSize, mode);
     }

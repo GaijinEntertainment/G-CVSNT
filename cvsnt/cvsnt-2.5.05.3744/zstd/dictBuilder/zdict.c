@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2016-2020, Yann Collet, Facebook, Inc.
+ * Copyright (c) 2016-2021, Yann Collet, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -23,9 +23,13 @@
 /* Unix Large Files support (>4GB) */
 #define _FILE_OFFSET_BITS 64
 #if (defined(__sun__) && (!defined(__LP64__)))   /* Sun Solaris 32-bits requires specific definitions */
+#  ifndef _LARGEFILE_SOURCE
 #  define _LARGEFILE_SOURCE
+#  endif
 #elif ! defined(__LP64__)                        /* No point defining Large file for 64 bit */
+#  ifndef _LARGEFILE64_SOURCE
 #  define _LARGEFILE64_SOURCE
+#  endif
 #endif
 
 
@@ -62,7 +66,6 @@
 
 #define NOISELENGTH 32
 
-static const int g_compressionLevel_default = 3;
 static const U32 g_selectivity_default = 9;
 
 
@@ -706,7 +709,7 @@ static void ZDICT_flatLit(unsigned* countLit)
 
 #define OFFCODE_MAX 30  /* only applicable to first block */
 static size_t ZDICT_analyzeEntropy(void*  dstBuffer, size_t maxDstSize,
-                                   unsigned compressionLevel,
+                                   int compressionLevel,
                              const void*  srcBuffer, const size_t* fileSizes, unsigned nbFiles,
                              const void* dictBuffer, size_t  dictBufferSize,
                                    unsigned notificationLevel)
@@ -741,7 +744,7 @@ static size_t ZDICT_analyzeEntropy(void*  dstBuffer, size_t maxDstSize,
     memset(repOffset, 0, sizeof(repOffset));
     repOffset[1] = repOffset[4] = repOffset[8] = 1;
     memset(bestRepOffset, 0, sizeof(bestRepOffset));
-    if (compressionLevel==0) compressionLevel = g_compressionLevel_default;
+    if (compressionLevel==0) compressionLevel = ZSTD_CLEVEL_DEFAULT;
     params = ZSTD_getParams(compressionLevel, averageSampleSize, dictBufferSize);
 
     esr.dict = ZSTD_createCDict_advanced(dictBuffer, dictBufferSize, ZSTD_dlm_byRef, ZSTD_dct_rawContent, params.cParams, ZSTD_defaultCMem);
@@ -893,7 +896,7 @@ size_t ZDICT_finalizeDictionary(void* dictBuffer, size_t dictBufferCapacity,
     size_t hSize;
 #define HBUFFSIZE 256   /* should prove large enough for all entropy headers */
     BYTE header[HBUFFSIZE];
-    int const compressionLevel = (params.compressionLevel == 0) ? g_compressionLevel_default : params.compressionLevel;
+    int const compressionLevel = (params.compressionLevel == 0) ? ZSTD_CLEVEL_DEFAULT : params.compressionLevel;
     U32 const notificationLevel = params.notificationLevel;
 
     /* check conditions */
@@ -939,7 +942,7 @@ static size_t ZDICT_addEntropyTablesFromBuffer_advanced(
         const void* samplesBuffer, const size_t* samplesSizes, unsigned nbSamples,
         ZDICT_params_t params)
 {
-    int const compressionLevel = (params.compressionLevel == 0) ? g_compressionLevel_default : params.compressionLevel;
+    int const compressionLevel = (params.compressionLevel == 0) ? ZSTD_CLEVEL_DEFAULT : params.compressionLevel;
     U32 const notificationLevel = params.notificationLevel;
     size_t hSize = 8;
 
@@ -968,16 +971,11 @@ static size_t ZDICT_addEntropyTablesFromBuffer_advanced(
     return MIN(dictBufferCapacity, hSize+dictContentSize);
 }
 
-/* Hidden declaration for dbio.c */
-size_t ZDICT_trainFromBuffer_unsafe_legacy(
-                            void* dictBuffer, size_t maxDictSize,
-                            const void* samplesBuffer, const size_t* samplesSizes, unsigned nbSamples,
-                            ZDICT_legacy_params_t params);
 /*! ZDICT_trainFromBuffer_unsafe_legacy() :
-*   Warning : `samplesBuffer` must be followed by noisy guard band.
+*   Warning : `samplesBuffer` must be followed by noisy guard band !!!
 *   @return : size of dictionary, or an error code which can be tested with ZDICT_isError()
 */
-size_t ZDICT_trainFromBuffer_unsafe_legacy(
+static size_t ZDICT_trainFromBuffer_unsafe_legacy(
                             void* dictBuffer, size_t maxDictSize,
                             const void* samplesBuffer, const size_t* samplesSizes, unsigned nbSamples,
                             ZDICT_legacy_params_t params)
@@ -1114,8 +1112,8 @@ size_t ZDICT_trainFromBuffer(void* dictBuffer, size_t dictBufferCapacity,
     memset(&params, 0, sizeof(params));
     params.d = 8;
     params.steps = 4;
-    /* Default to level 6 since no compression level information is available */
-    params.zParams.compressionLevel = 3;
+    /* Use default level since no compression level information is available */
+    params.zParams.compressionLevel = ZSTD_CLEVEL_DEFAULT;
 #if defined(DEBUGLEVEL) && (DEBUGLEVEL>=1)
     params.zParams.notificationLevel = DEBUGLEVEL;
 #endif

@@ -1,5 +1,5 @@
 /*
- * Copyright (c) 2018-2020, Facebook, Inc.
+ * Copyright (c) 2018-2021, Facebook, Inc.
  * All rights reserved.
  *
  * This source code is licensed under both the BSD-style license (found in the
@@ -487,7 +487,7 @@ static void FASTCOVER_tryParameters(void *opaque)
                                                     parameters, segmentFreqs);
 
     const unsigned nbFinalizeSamples = (unsigned)(ctx->nbTrainSamples * ctx->accelParams.finalize / 100);
-    selection = COVER_selectDict(dict + tail, dictBufferCapacity - tail,
+    selection = COVER_selectDict(dict + tail, dictBufferCapacity, dictBufferCapacity - tail,
          ctx->samples, ctx->samplesSizes, nbFinalizeSamples, ctx->nbTrainSamples, ctx->nbSamples, parameters, ctx->offsets,
          totalCompressedSize);
 
