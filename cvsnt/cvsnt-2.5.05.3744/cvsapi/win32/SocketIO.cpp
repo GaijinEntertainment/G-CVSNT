@@ -412,7 +412,7 @@ bool CSocketIO::init()
 	// Initialisation
 	WSADATA data;
 
-	if(WSAStartup (MAKEWORD (1, 1), &data))
+	if(WSAStartup (MAKEWORD (2, 2), &data))
 		return false;
     	bInitCalled = true;
     }

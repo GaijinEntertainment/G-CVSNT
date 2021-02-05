@@ -185,7 +185,7 @@ static int tcp_init()
 {
     WSADATA data;
 
-    if (WSAStartup (MAKEWORD (1, 1), &data))
+    if (WSAStartup (MAKEWORD (2, 2), &data))
     {
 		fprintf (stderr, "cvs: unable to initialize winsock\n");
 		return -1;

@@ -1,6 +1,6 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
-    <Product Id="*" Codepage="65001" Language="1033" Manufacturer="Gaijin" Name="CVSNT" UpgradeCode="{5762A261-935C-4342-BA9F-9AC239E24660}" Version="3.5.10.7699">
+    <Product Id="*" Codepage="65001" Language="1033" Manufacturer="Gaijin" Name="CVSNT" UpgradeCode="{5762A261-935C-4342-BA9F-9AC239E24660}" Version="3.5.11.7699">
         <Package Comments="The contents of this package are licensed under the GNU GPL." Compressed="yes" Description="CVSNT Version Control System" InstallerVersion="300" Keywords="CVS,CVSNT,Installer,Version Control,VSS" Languages="1033" Manufacturer="Gaijin" Platform="x86" />
         <Binary Id="dlgbmp" SourceFile="msi_tools\extras\Binary\dlgbmp" />
         <Binary Id="License" SourceFile="msi_tools\extras\Binary\License" />
