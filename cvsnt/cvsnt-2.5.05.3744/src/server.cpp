@@ -589,7 +589,6 @@ static int client_protocol_buffer_shutdown (void *closure)
 	if(data->protocol && data->protocol->server_shutdown)
     {
 		data->protocol->server_shutdown(data->protocol);
-        data->protocol = NULL;
 	} else if(data->server_io_socket)
 	{
 #ifdef _WIN32
@@ -599,7 +598,9 @@ static int client_protocol_buffer_shutdown (void *closure)
 		shutdown(data->server_io_socket,2);
 		close(data->server_io_socket);
 #endif
+        data->server_io_socket = -1;
 	}
+    data->protocol = NULL;
     return 0;
 }
 
