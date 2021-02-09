@@ -73,6 +73,7 @@ static int validate_file(const char *filename, char **root, char **repository, c
 
 int cvsrename(int argc, char **argv)
 {
+    error(1,0, "Rename operation is not supported anymore");
     int c;
     int err = 0;
 	char *repos_file1, *repos_file2;
