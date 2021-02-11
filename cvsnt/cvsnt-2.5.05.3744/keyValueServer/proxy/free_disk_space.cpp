@@ -16,10 +16,9 @@ uint64_t space_occupied(const char *dir)
   std::error_code ec;
   for ( const auto& p : fs::recursive_directory_iterator(dir) )
   {
-    const auto& path = p.path();
-    if (!fs::is_regular_file(path, ec))
+    if (!p.is_regular_file(ec))
       continue;
-    std::uintmax_t fsz = fs::file_size(path, ec);
+    std::uintmax_t fsz = p.file_size(ec);
     if (fsz == static_cast<std::uintmax_t>(-1))
       continue;
     space_occupied_now += fsz;
