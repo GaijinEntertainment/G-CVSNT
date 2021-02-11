@@ -82,10 +82,11 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
   virtual bool canUpload() {return true;}
   virtual bool download(const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
   {
+    bool ok = true;
     int64_t pulled = blob_pull_from_server(client, HASH_TYPE_REV_STRING, hex_hash, 0, 0, [&](const char *data, uint64_t , uint64_t size)
     {
-      if (data)//that's hint of size
-         cb(data, size);
+      if (data && ok)//that's hint of size
+         ok = cb(data, size);
     });
     if (pulled == 0)
     {
@@ -98,6 +99,12 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
       err = "Error reading data ";
       err += hex_hash;
       init();
+      return false;
+    }
+    if (!ok)
+    {
+      err = "Error writing data ";
+      err += hex_hash;
       return false;
     }
     return true;

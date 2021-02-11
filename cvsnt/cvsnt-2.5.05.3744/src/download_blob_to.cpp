@@ -230,9 +230,10 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
       [&](const char *data, size_t data_length) {
         return caddressed_fs::decode_stream_blob_data(info, data, data_length,
           [&](const void *data, size_t sz) {
+            const size_t written = fwrite(data, 1, sz, tmp);
             if (validate_downloaded_blobs)
-              update_blob_hash(hashCtx, (const char *)data, sz);
-            return fwrite(data, 1, sz, tmp) == sz;
+              update_blob_hash(hashCtx, (const char *)data, std::min(written, sz));
+            return written == sz;
           });//we can easily add hash validation here. but seems unnessasry
       },
       err))
