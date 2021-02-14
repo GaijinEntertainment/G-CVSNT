@@ -100,7 +100,7 @@ KVRet blob_stream_to_server(intptr_t &sockfd,
     const char *buf = pull_data(data_pulled);
     if (!buf)
     {
-      blob_logmessage(LOG_ERROR, "IO errosr on %s:%s", hash_type, hash_hex_str);//we cant continue. we need to read size, and there is no guarantee it is correct
+      blob_logmessage(LOG_ERROR, "IO errors on %s:%s", hash_type, hash_hex_str);//we cant continue. we need to read size, and there is no guarantee it is correct
       r = end_blob_stream_to_server(strm, false);
       break;
     }
