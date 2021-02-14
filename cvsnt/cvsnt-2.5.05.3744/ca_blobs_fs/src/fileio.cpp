@@ -77,7 +77,7 @@ bool blob_fileio_ensure_dir(const char* name)
 }
 
 
-inline const void* os_mmap(const char *fp, std::uintmax_t flen)
+const void* blob_fileio_os_mmap(const char *fp, std::uintmax_t flen)
 {
   HANDLE fh = CreateFileA(fp, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
   if (fh == INVALID_HANDLE_VALUE)
@@ -95,7 +95,7 @@ inline const void* os_mmap(const char *fp, std::uintmax_t flen)
   return ret;
 }
 
-inline void os_unmap(const void* start, std::uintmax_t length)
+void blob_fileio_os_unmap(const void* start, std::uintmax_t length)
 {
   if (!start)
     return;
@@ -143,7 +143,7 @@ bool blob_fileio_ensure_dir(const char* name)
 }
 
 
-inline const void* os_mmap(const char *filepath, std::uintmax_t flen)
+const void* blob_fileio_os_mmap(const char *filepath, std::uintmax_t flen)
 {
   int fd = open(filepath, O_RDONLY);
   if (fd == -1)
@@ -153,7 +153,7 @@ inline const void* os_mmap(const char *filepath, std::uintmax_t flen)
   return ret;
 }
 
-inline void os_unmap(const void* start, std::uintmax_t length)
+void blob_fileio_os_unmap(const void* start, std::uintmax_t length)
 {
   if (!start)
     return;
@@ -179,47 +179,6 @@ FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const ch
   return f;
 }
 
-//todo: on windows we can also make mmap files
-class BlobFileIOPullData
-{
-public:
-  FILE *fp;
-  enum {SIZE = 1<<10};
-  char tempBuf[SIZE];
-};
-
-BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, uint64_t &blob_sz)
-{
-  blob_sz = blob_fileio_get_file_size(filepath);
-  if (blob_sz == invalid_blob_file_size)
-    return 0;
-  FILE* f;
-  if (fopen_s(&f, filepath, "rb") != 0)
-      return nullptr;
-  return new BlobFileIOPullData{f};
-}
-#define ftello64 _ftelli64
-#define fseeko64 _fseeki64
-const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, uint64_t &data_pulled)
-{
-  if (!fp)
-    return nullptr;
-  uint64_t fppos = ftello64(fp->fp);
-  if (fppos != from)
-    fseeko64(fp->fp, (int64_t(from) - int64_t(fppos)), SEEK_CUR);
-  data_pulled = fread(fp->tempBuf, 1, BlobFileIOPullData::SIZE, fp->fp);
-  return fp->tempBuf;
-}
-
-bool blobe_fileio_destroy(BlobFileIOPullData* fp)
-{
-  if (!fp)
-    return false;
-  fclose(fp->fp);fp->fp = nullptr;
-  delete fp;
-  return true;
-}
-
 #else
 
 FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const char *mode)
@@ -243,6 +202,7 @@ FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const ch
   return fp;
 }
 
+#endif
 //memory mapped files
 
 class BlobFileIOPullData
@@ -257,12 +217,10 @@ BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, uint64_t &blob
   blob_sz = blob_fileio_get_file_size(filepath);
   if (blob_sz == invalid_blob_file_size)
     return 0;
-  int fd = open(filepath, O_RDONLY);
-  if (fd == -1)
-    return 0;
 
-  const char* begin = (const char*)(mmap(NULL, blob_sz, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0));
-  close(fd);
+  const char *begin = (const char *) blob_fileio_os_mmap(filepath, blob_sz);
+  if (!begin)
+    return nullptr;
   return new BlobFileIOPullData{begin, blob_sz};
 }
 
@@ -281,9 +239,9 @@ bool blobe_fileio_destroy(BlobFileIOPullData* up)
 {
   if (!up)
     return false;
-  munmap((void*)up->begin, up->size);
+  blob_fileio_os_unmap((void*)up->begin, up->size);
   delete up;
   return true;
 }
 
-#endif
+
