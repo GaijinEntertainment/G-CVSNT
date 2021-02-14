@@ -1,12 +1,27 @@
+#define _FILE_OFFSET_BITS 64
+
 #include "fileio.h"
 #include <stdio.h>
 #if !_MSC_VER
 #include <unistd.h>
 #endif
 
-bool blob_fileio_rename_file(const char*from, const char*to)//the only common implementation on posix and windows
+uint64_t blob_fwrite64(const void *data_, size_t esz, uint64_t cnt, FILE *f)
 {
-  return rename(from, to) >= 0;
+  uint64_t written = 0;
+  const char *data = (const char *)data_;
+  const size_t quant = 1073741824;//1Gb
+  while (cnt >= quant)
+  {
+    const size_t wr = fwrite(data, esz, quant, f);
+    written += (uint64_t)wr;
+    if (wr != quant)
+      return written;
+    cnt -= quant;
+    data += quant;
+  }
+  written += (uint64_t)fwrite(data, esz, (size_t)cnt, f);
+  return written;
 }
 
 #if _MSC_VER
@@ -14,8 +29,29 @@ bool blob_fileio_rename_file(const char*from, const char*to)//the only common im
 #include <stdlib.h>
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
+#include <shellapi.h>
 
-size_t blob_fileio_get_file_size(const char* fn)
+bool blob_fileio_rename_file(const char*from, const char*to)//the only common implementation on posix and windows
+{
+  //the only atomic rename on windows which is portable
+  //https://stackoverflow.com/questions/167414/is-an-atomic-file-rename-with-overwrite-possible-on-windows
+  //https://github.com/golang/go/issues/8914
+  //MoveFileTransacted is discouraged to use
+  //MoveFileEx isn't atomic, if destination file exist
+  //the only correct way to do it, is SetFileInformationByHandle, but it requires wide char conversion, so for now we keep current code
+  //if dest file not exist, this is atomic (we do not allow copy)
+  if (MoveFileExA(from, to, MOVEFILE_WRITE_THROUGH) == TRUE)
+    return true;
+
+  //if dest file exists, this is also atomic (we do not allow copy).
+  //however, it has an issue - dest file won't be opening during renaming, resulting in potential race
+  //We don't use production servers on windows, so we are fine.
+  //if you ever want to do that, replace that with SetFileInformationByHandle
+  return ReplaceFileA(to, from, NULL, 0, 0, 0) == TRUE;
+}
+
+
+uint64_t blob_fileio_get_file_size(const char* fn)
 {
   struct __stat64 buf;
   if (_stat64(fn, &buf) != 0)
@@ -41,6 +77,93 @@ bool blob_fileio_ensure_dir(const char* name)
 }
 
 
+inline const void* os_mmap(const char *fp, std::uintmax_t flen)
+{
+  HANDLE fh = CreateFileA(fp, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+  if (fh == INVALID_HANDLE_VALUE)
+    return nullptr;
+
+  HANDLE hmap = CreateFileMappingA(fh, NULL, PAGE_READONLY, 0, 0, NULL);
+  if (!hmap)
+  {
+    CloseHandle(fh);
+    return nullptr;
+  }
+  void* ret = MapViewOfFileEx(hmap, FILE_MAP_READ, 0, 0, flen, NULL);
+  CloseHandle(hmap);
+  CloseHandle(fh);
+  return ret;
+}
+
+inline void os_unmap(const void* start, std::uintmax_t length)
+{
+  if (!start)
+    return;
+  (void) length;
+  UnmapViewOfFile((void*)start);
+}
+
+#else
+
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <fcntl.h>
+#include <sys/mman.h>
+
+bool blob_fileio_rename_file(const char*from, const char*to)
+{
+  return rename(from, to) >= 0;
+}
+
+uint64_t blob_fileio_get_file_size(const char* fn)
+{
+  struct stat sb;
+  if (stat(fn, &sb) == -1)
+    return invalid_blob_file_size;
+  return sb.st_size;
+}
+
+
+bool blob_fileio_is_file_readable(const char* fn)
+{
+  return access(fn, R_OK) == 0;
+}
+
+
+void blob_fileio_unlink_file(const char* f) { unlink(f); }
+
+bool blob_fileio_ensure_dir(const char* name)
+{
+  int ret = mkdir(name, 0777);
+  if (ret == 0)
+    return true;
+  if (ret == -1 && errno == EEXIST)
+    return true;
+  return false;
+}
+
+
+inline const void* os_mmap(const char *filepath, std::uintmax_t flen)
+{
+  int fd = open(filepath, O_RDONLY);
+  if (fd == -1)
+    return nullptr;
+  void *ret = mmap(NULL, flen, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+  close(fd);
+  return ret;
+}
+
+inline void os_unmap(const void* start, std::uintmax_t length)
+{
+  if (!start)
+    return;
+  munmap((void*)start, length);
+}
+
+#endif
+
+#if _MSC_VER
+
 FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const char *mode)
 {
   char tempdir[_MAX_PATH];
@@ -65,7 +188,7 @@ public:
   char tempBuf[SIZE];
 };
 
-BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_sz)
+BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, uint64_t &blob_sz)
 {
   blob_sz = blob_fileio_get_file_size(filepath);
   if (blob_sz == invalid_blob_file_size)
@@ -75,14 +198,15 @@ BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_s
       return nullptr;
   return new BlobFileIOPullData{f};
 }
-
-const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, size_t &data_pulled)
+#define ftello64 _ftelli64
+#define fseeko64 _fseeki64
+const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, uint64_t &data_pulled)
 {
   if (!fp)
     return nullptr;
-  size_t fppos = ftell(fp->fp);
+  uint64_t fppos = ftello64(fp->fp);
   if (fppos != from)
-    fseek(fp->fp, long(int64_t(from) - int64_t(fppos)), SEEK_CUR);
+    fseeko64(fp->fp, (int64_t(from) - int64_t(fppos)), SEEK_CUR);
   data_pulled = fread(fp->tempBuf, 1, BlobFileIOPullData::SIZE, fp->fp);
   return fp->tempBuf;
 }
@@ -97,38 +221,6 @@ bool blobe_fileio_destroy(BlobFileIOPullData* fp)
 }
 
 #else
-#include <sys/types.h>
-#include <sys/stat.h>
-#include <unistd.h>
-#include <fcntl.h>
-#include <sys/mman.h>
-
-size_t blob_fileio_get_file_size(const char* fn)
-{
-  struct stat sb;
-  if (stat(fn, &sb) == -1)
-    return invalid_blob_file_size;
-  return sb.st_size;
-}
-
-bool blob_fileio_is_file_readable(const char* fn)
-{
-  return access(fn, R_OK) == 0;
-}
-
-
-void blob_fileio_unlink_file(const char* f) { unlink(f); }
-
-bool blob_fileio_ensure_dir(const char* name)
-{
-  int ret = mkdir(name, 0777);
-  if (ret == 0)
-    return true;
-  if (ret == -1 && errno == EEXIST)
-    return true;
-  return false;
-}
-
 
 FILE* blob_fileio_get_temp_file (std::string &fn, const char *tmp_path, const char *mode)
 {
@@ -160,7 +252,7 @@ public:
   uint64_t size;
 };
 
-BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_sz)
+BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, uint64_t &blob_sz)
 {
   blob_sz = blob_fileio_get_file_size(filepath);
   if (blob_sz == invalid_blob_file_size)
@@ -174,7 +266,7 @@ BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, size_t &blob_s
   return new BlobFileIOPullData{begin, blob_sz};
 }
 
-const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, size_t &data_pulled)
+const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, uint64_t &data_pulled)
 {
   if (!fp)
     return nullptr;

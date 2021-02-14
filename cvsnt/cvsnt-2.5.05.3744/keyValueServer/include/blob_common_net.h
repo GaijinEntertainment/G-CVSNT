@@ -26,12 +26,14 @@ static inline bool recv_exact(int socket, void *data, unsigned int len, int flag
   return true;
 }
 
-static inline bool send_exact(int socket, const void *data, int len, int flags = 0)
+static inline bool send_exact(int socket, const void *data, uint64_t len, int flags = 0)
 {
   flags |= MSG_NOSIGNAL;
   while (len > 0)
   {
-    int l = send(socket, (const char*)data, len, flags);
+    constexpr uint64_t quant = (1<<30);//1Gb of data
+    uint64_t sendQuant = std::min(quant, len);
+    int l = send(socket, (const char*)data, (int)sendQuant, flags);
     HANDLE_SOCKET_ERROR(l)
     data = (const char*)data + l;
     len -= l;

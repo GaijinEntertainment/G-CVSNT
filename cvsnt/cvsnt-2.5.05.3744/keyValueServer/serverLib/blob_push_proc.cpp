@@ -98,8 +98,8 @@ static bool handle_size(void *ctx, int socket)
     return false;
   char hash_type[7], hash_hex_str[65];
   decode_blob_hash_to_hex_hash(commandBuf, hash_type, hash_hex_str);
-  const size_t sz = blob_get_hash_blob_size(ctx, hash_type, hash_hex_str);
-  if (sz == size_t(~size_t(0)))
+  const uint64_t sz = blob_get_hash_blob_size(ctx, hash_type, hash_hex_str);
+  if (sz == uint64_t(~uint64_t(0)))
     return send_simple_response(socket, none_response);
 
   uint64_t size = sz;
@@ -224,7 +224,7 @@ static bool handle_pull(void *ctx, int socket)
 
   while (sizeLeft > 0)
   {
-    size_t data_pulled;
+    uint64_t data_pulled;
     const char *buf = blob_pull_data(readBlob, from, data_pulled);
     if (!buf)
     {

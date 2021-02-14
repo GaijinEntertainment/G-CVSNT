@@ -17,12 +17,12 @@ static std::unordered_map<std::string, std::vector<uint8_t>> storage;
 void *blob_create_ctx(const char *root) {return (void *)uintptr_t(1);}
 void blob_destroy_ctx(void *ctx) {}
 
-size_t blob_get_hash_blob_size(const void *, const char* htype, const char* hhex) {
+uint64_t blob_get_hash_blob_size(const void *, const char* htype, const char* hhex) {
   std::lock_guard<std::mutex> lck (mtx);
   auto it = storage.find(std::string(hhex));
   if (it != storage.end())
     return it->second.size();
-  return ~size_t(0);
+  return ~uint64_t(0);
 }
 
 bool blob_does_hash_blob_exist(const void *, const char* htype, const char* hhex) {
@@ -40,7 +40,7 @@ uintptr_t blob_start_push_data(const void *, const char* htype, const char* hhex
   return uintptr_t(new PushData(hhex, std::vector<uint8_t>()));
 }
 
-bool blob_push_data(const void *data, size_t data_size, uintptr_t up)
+bool blob_push_data(const void *data, uint64_t data_size, uintptr_t up)
 {
   if (up == uintptr_t(1))
     return true;
@@ -78,7 +78,7 @@ uintptr_t blob_start_pull_data(const void *, const char* htype, const char* hhex
   return (it != storage.end()) ? uintptr_t(&it->second) : uintptr_t(0);//pointer never changes, as we don't allow overwriting data
 }
 
-const char *blob_pull_data(uintptr_t up, uint64_t from, size_t &read){
+const char *blob_pull_data(uintptr_t up, uint64_t from, uint64_t &read){
   if (!up){read = 0;return nullptr;}
   auto &v = *(const std::vector<uint8_t>*)up;
   if (v.size() < from)

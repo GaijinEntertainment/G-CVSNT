@@ -19,7 +19,7 @@ bool perform_immediate_gc(int64_t needed_sz);
 
 //
 void close_proxy(){close_gc();}
-void init_proxy(const char *url, int port, const char *cache, size_t sz)
+void init_proxy(const char *url, int port, const char *cache, uint64_t sz)
 {
   master_url = url;
   master_port = port;
@@ -186,7 +186,7 @@ static inline FILE* download_blob(intptr_t &sock, std::string &tmpfn, const char
     0, 0, [&](const char *data, uint64_t at, uint64_t size)
     {
       if (data)
-        ok &= (fwrite(data, 1, size, tmpf) == size);
+        ok &= (blob_fwrite64(data, 1, size, tmpf) == size);
     });
   if (!ok || pulledSz <= 0)
   {

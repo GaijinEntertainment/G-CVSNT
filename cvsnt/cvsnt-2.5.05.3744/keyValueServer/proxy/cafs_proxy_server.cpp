@@ -5,7 +5,7 @@
 #define BLOB_LOG_LEVEL LOG_WARNING
 #include "../sampleImplementation/def_log_printf.cpp"
 
-void init_proxy(const char *url, int port, const char *cache, size_t sz);
+void init_proxy(const char *url, int port, const char *cache, uint64_t sz);
 void close_proxy();
 
 int main(int argc, const char **argv)

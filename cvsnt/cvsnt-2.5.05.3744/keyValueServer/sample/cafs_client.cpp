@@ -4,6 +4,7 @@
 #include <vector>
 #include "../include/blob_hash_util.h"
 #include "../include/blob_client_lib.h"
+#define BLOB_LOG_LEVEL 0
 #include "../sampleImplementation/def_log_printf.cpp"
 #include "../include/blob_sockets.h"//move init to out of line
 #include "../../ca_blobs_fs/ca_blob_format.h"//move init to out of line
@@ -97,13 +98,13 @@ int main(int argc, const char **argv)
       const size_t hdrSize = cmd == PUSHBLOB ? 0 : sizeof(caddressed_fs::BlobHeader);
       const size_t blob_sz = fsz + hdrSize;
       caddressed_fs::BlobHeader hdr = caddressed_fs::get_header(caddressed_fs::noarc_magic, fsz, 0);
-      int64_t pushed = blob_push_to_server(client, blob_sz, ht, hash, [&](uint64_t at, size_t &data_pulled) {
+      int64_t pushed = blob_push_to_server(client, blob_sz, ht, hash, [&](uint64_t at, uint64_t &data_pulled) {
         if (at < hdrSize)
         {
           data_pulled = hdrSize-at;
           return ((const char*)&hdr) + at;
         }
-        size_t was = ftell(f)+hdrSize;
+        uint64_t was = ftell(f)+hdrSize;
         if (at != was)
           fseek(f, int(int64_t(at)-hdrSize-int64_t(was)), SEEK_CUR);
         data_pulled = fread(buf, 1, sizeof(buf), f);
@@ -132,7 +133,7 @@ int main(int argc, const char **argv)
       caddressed_fs::BlobHeader hdr = caddressed_fs::get_header(caddressed_fs::noarc_magic, fsz, 0);
       bool headerSend = false;
       int64_t sent = 0;
-      KVRet ret = blob_stream_to_server(client, ht, hash, [&](size_t &data_pulled) {
+      KVRet ret = blob_stream_to_server(client, ht, hash, [&](uint64_t &data_pulled) {
         if (!headerSend)
         {
           data_pulled = sizeof(hdr);

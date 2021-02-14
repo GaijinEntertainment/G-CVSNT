@@ -81,7 +81,7 @@ KVRet blob_start_pull_from_server(intptr_t &sockfd, const char *hash_type, const
   return KVRet::OK;
 }
 
-int64_t blob_pull_some_from_server(intptr_t &socket, char *data, size_t data_capacity, int64_t &szLeft)
+int64_t blob_pull_some_from_server(intptr_t &socket, char *data, uint64_t data_capacity, int64_t &szLeft)
 {
   const int l = recv(socket, data, (int)std::min((int64_t)data_capacity, (int64_t)szLeft), 0);
   if (l > 0)

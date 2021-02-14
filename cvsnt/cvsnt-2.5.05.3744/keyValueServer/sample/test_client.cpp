@@ -8,8 +8,8 @@
 
 int main(int argc, const char **argv)
 {
-  if (argc < 2)
-    printf("Usage is blob_file_client [url] [port]\n");
+  if (argc < 3)
+    printf("Usage is blob_file_client root [url] [port]\n");
   if (!blob_init_sockets())
   {
     blob_logmessage(LOG_ERROR, "Can't init sockets, %d", blob_get_last_sock_error());
@@ -19,6 +19,7 @@ int main(int argc, const char **argv)
   const char *hash_type = "sha256";
   const char* hash = "C38DD6C8F7F1BB198A754532B284B951BDF59C220F2FA48F24051B474812FDC5";//sha256, hash of text
   //const char* hash = "D38DD6C8F7F1BB198A754532B284B951BDF59C220F2FA48F24051B474812FDC5";//spoiled
+  const char *root = argv[1];
   uint8_t binhash[32];
   if (!hex_string_to_bin_hash(hash, binhash))
     blob_logmessage(LOG_ERROR, "Can't cvt hash %s", hash);
@@ -26,9 +27,9 @@ int main(int argc, const char **argv)
   bin_hash_to_hex_string(binhash, hash2);
   printf("hash %s->%s\n", hash, hash2);
 
-  const char *url = argc>1 ? argv[1] : "127.0.0.1";
-  int port = argc>2 ? atoi(argv[2]) : 2403;
-  intptr_t client = start_blob_push_client(url, port);
+  const char *url = argc>2 ? argv[2] : "127.0.0.1";
+  int port = argc>3 ? atoi(argv[3]) : 2403;
+  intptr_t client = start_blob_push_client(url, port, root);
   if (client == -1)
   {
     blob_logmessage(LOG_ERROR, "Can't connect client %d", blob_get_last_sock_error());
@@ -70,7 +71,7 @@ int main(int argc, const char **argv)
   auto push = [&]()
   {
     int64_t pushedData = blob_push_to_server(client, strlen(text), hash_type, hash,
-      [&](uint64_t at, size_t &data_pulled) {data_pulled = strlen(text) - at; return text + at;});
+      [&](uint64_t at, uint64_t &data_pulled) {data_pulled = strlen(text) - at; return text + at;});
     printf("<%s>, we pushed %d, size on server now is %d vs %d\n", hash, (int)pushedData, (int)blob_size_on_server(client, hash_type, hash), (int)strlen(text));
     if (pushedData < 0)
       blob_logmessage(LOG_ERROR, "Can't push data %s", blob_get_last_sock_error());

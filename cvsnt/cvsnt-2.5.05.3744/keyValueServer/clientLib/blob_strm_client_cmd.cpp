@@ -42,13 +42,13 @@ inline KVRet end_blob_stream_to_server(StreamToServerData &strm, bool ok)
   return strncmp(response, have_response, response_len) == 0 ? KVRet::OK : KVRet::Error;
 }
 
-KVRet blob_stream_to_server(StreamToServerData &strm, const void *data, size_t data_size)
+KVRet blob_stream_to_server(StreamToServerData &strm, const void *data, uint64_t data_size)
 {
   uint16_t send = 0;
   const char* buf = (const char*)data;
   while (data_size > 0)
   {
-    uint16_t send = (int)std::min((size_t)65534, data_size);
+    uint16_t send = (int)std::min((uint64_t)65534, data_size);
     if (!strm.wr.send(&send, 2) || !strm.wr.send(buf, send))
       return KVRet::Fatal;
     buf += send;
@@ -82,7 +82,7 @@ KVRet finish_blob_stream_to_server(intptr_t &sockfd, StreamToServerData *s, bool
 
 KVRet blob_stream_to_server(intptr_t &sockfd,
   const char *hash_type, const char *hash_hex_str,
-  std::function<const char*(size_t &data_pulled)> pull_data)
+  std::function<const char*(uint64_t &data_pulled)> pull_data)
 {
   StreamToServerData strm((int)sockfd);
   KVRet rs = start_blob_stream_to_server(strm, hash_type, hash_hex_str);
@@ -96,7 +96,7 @@ KVRet blob_stream_to_server(intptr_t &sockfd,
   KVRet r = KVRet::Fatal;
   while (1)
   {
-    size_t data_pulled;
+    uint64_t data_pulled;
     const char *buf = pull_data(data_pulled);
     if (!buf)
     {

@@ -13,11 +13,11 @@
 
 using namespace blob_push_proto;
 
-int64_t blob_push_to_server(intptr_t &sockfd, size_t blob_sz,
+int64_t blob_push_to_server(intptr_t &sockfd, uint64_t blob_sz,
   const char *hash_type, const char *hash_hex_str,
-  std::function<const char*(uint64_t at, size_t &data_pulled)> pull_data)
+  std::function<const char*(uint64_t at, uint64_t &data_pulled)> pull_data)
 {
-  if (blob_sz == ~size_t(0))
+  if (blob_sz == ~uint64_t(0))
     return -1;
   unsigned char blob_hash[hash_len];
   if (!encode_hash_str_to_blob_hash_s(hash_type, hash_hex_str, blob_hash, sizeof(blob_hash)))
@@ -34,7 +34,7 @@ int64_t blob_push_to_server(intptr_t &sockfd, size_t blob_sz,
   int64_t sizeLeft = blob_sz;
   while (sizeLeft > 0)
   {
-    size_t data_pulled;
+    uint64_t data_pulled;
     const char *buf = pull_data(from, data_pulled);
     if (!buf)
     {
