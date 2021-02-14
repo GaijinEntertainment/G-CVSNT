@@ -1,1 +1,1 @@
-clang-cl -Zi /MD cafs_client.cpp ../../x64/Release/clientLib.lib ../../x64/Release/blake3.lib
+clang-cl -Zi /MD cafs_client.cpp ../../x64/Release/clientLib.lib ../../x64/Release/blake3.lib ../../x64/Release/ca_blobs_fs.lib ../../x64/Release/zstd.lib ../../x64/Release/zlib.lib

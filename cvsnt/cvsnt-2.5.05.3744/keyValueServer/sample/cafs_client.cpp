@@ -1,3 +1,4 @@
+#define _FILE_OFFSET_BITS 64
 #define _CRT_SECURE_NO_DEPRECATE
 #include <stdio.h>
 #include <stdlib.h>
@@ -8,9 +9,17 @@
 #include "../sampleImplementation/def_log_printf.cpp"
 #include "../include/blob_sockets.h"//move init to out of line
 #include "../../ca_blobs_fs/ca_blob_format.h"//move init to out of line
+#include "../../ca_blobs_fs/streaming_blobs.h"
 #include "../../blake3/blake3.h"//move init to out of line
 
 bool calc_file_hash(const char *f, char *hash);
+#ifdef _WIN32
+#define ftello _ftelli64
+#endif
+
+extern uint64_t blob_fileio_get_file_size(const char*);//to get blob file size for SIZE request, invalid_blob_file_size if missing
+extern const void* blob_fileio_os_mmap(const char *fp, std::uintmax_t flen);
+extern void blob_fileio_os_unmap(const void* start, std::uintmax_t length);
 
 int main(int argc, const char **argv)
 {
@@ -26,11 +35,13 @@ int main(int argc, const char **argv)
   }
   const char *cmdname = argv[4];
   const char *argname = argv[5];
-  enum {HAS, SIZE, PULL, STREAMFILE, PUSHFILE, PUSHBLOB, UNKNOWN} cmd = UNKNOWN;
+  enum {HAS, SIZE, PULLRAW, PULL, STREAMFILE, PUSHFILE, PUSHBLOB, UNKNOWN} cmd = UNKNOWN;
   if (strcmp(cmdname, "has") == 0)
     cmd = HAS;
   else if (strcmp(cmdname, "size") == 0)
     cmd = SIZE;
+  else if (strcmp(cmdname, "pullraw") == 0)
+    cmd = PULLRAW;
   else if (strcmp(cmdname, "pull") == 0)
     cmd = PULL;
   else if (strcmp(cmdname, "pushfile") == 0)
@@ -62,13 +73,34 @@ int main(int argc, const char **argv)
   }
   if (cmd == SIZE)
     printf("%s size on server is %lld\n", argname, blob_size_on_server(client, ht, argname));
-  if (cmd == PULL)
+
+  if (cmd == PULLRAW)
   {
     FILE *f=fopen(argname, "wb");
     int64_t pulled = blob_pull_from_server(client, ht, argname, 0, 0, [&](const char *data, uint64_t at, uint64_t size){
     //store
       if (data)
         fwrite(data, 1, size, f);//at is ignored!
+    });
+    fclose(f);
+    printf("pulled %lld of %s\n", pulled, argname);
+  }
+
+  if (cmd == PULL)
+  {
+    FILE *f=fopen(argname, "wb");
+    caddressed_fs::DownloadBlobInfo info;
+    bool ok = true;
+    int64_t pulled = blob_pull_from_server(client, ht, argname, 0, 0, [&](const char *data, uint64_t at, uint64_t size){
+      if (!data)
+        return;
+      ok &= caddressed_fs::decode_stream_blob_data(info, data, size,
+        [&](const void *data, size_t sz) {
+          return fwrite(data, 1, sz, f) == sz;
+        });
+    //store
+      //if (data)
+      //  fwrite(data, 1, size, f);//at is ignored!
     });
     fclose(f);
     printf("pulled %lld of %s\n", pulled, argname);
@@ -85,50 +117,39 @@ int main(int argc, const char **argv)
       else
         strncpy(hash, argname, sizeof(hash));
     }
-    FILE *f = fopen(argname, "rb");
-    if (!f)
+    const uint64_t fsz = blob_fileio_get_file_size(argname);
+    if (fsz == uint64_t(~uint64_t(0)))
       printf("Cant open file %s for reading\n", argname);
     else
     {
-      fseek(f, 0, SEEK_END);
-      const size_t fsz = ftell(f);
-      fseek(f, 0, SEEK_SET);
-
-      char buf[65536];
       const size_t hdrSize = cmd == PUSHBLOB ? 0 : sizeof(caddressed_fs::BlobHeader);
+      const void* data = blob_fileio_os_mmap(argname, fsz);
       const size_t blob_sz = fsz + hdrSize;
-      caddressed_fs::BlobHeader hdr = caddressed_fs::get_header(caddressed_fs::noarc_magic, fsz, 0);
+      const caddressed_fs::BlobHeader hdr = caddressed_fs::get_header(caddressed_fs::noarc_magic, fsz, 0);
       int64_t pushed = blob_push_to_server(client, blob_sz, ht, hash, [&](uint64_t at, uint64_t &data_pulled) {
         if (at < hdrSize)
         {
           data_pulled = hdrSize-at;
           return ((const char*)&hdr) + at;
         }
-        uint64_t was = ftell(f)+hdrSize;
-        if (at != was)
-          fseek(f, int(int64_t(at)-hdrSize-int64_t(was)), SEEK_CUR);
-        data_pulled = fread(buf, 1, sizeof(buf), f);
-        printf("pushing %lld at %lld\n", data_pulled, at);
-        return (const char*)(ferror(f) ? nullptr : buf);
+        data_pulled = fsz - at - hdrSize;
+        return ((const char*)data) + (at-hdrSize);
       //store
       });
+      blob_fileio_os_unmap(data, fsz);
       printf("pushed %lld of %s hash = %s\n", pushed, argname, hash);
-      fclose(f);
     }
   } else if (cmd == STREAMFILE)
   {
     char hash[65];hash[0] = hash[64] = 0;
     if (!calc_file_hash(argname, hash))
       printf("Cant open calc hash for file %s\n", argname);
-    FILE *f = fopen(argname, "rb");
-    if (!f)
+    const uint64_t fsz = blob_fileio_get_file_size(argname);
+    if (fsz == uint64_t(~uint64_t(0)))
       printf("Cant open file %s for reading\n", argname);
     else
     {
-      fseek(f, 0, SEEK_END);
-      const size_t fsz = ftell(f);
-      fseek(f, 0, SEEK_SET);
-      char buf[65536];
+      const void* data = blob_fileio_os_mmap(argname, fsz);
       const size_t hdrSize = sizeof(caddressed_fs::BlobHeader);
       caddressed_fs::BlobHeader hdr = caddressed_fs::get_header(caddressed_fs::noarc_magic, fsz, 0);
       bool headerSend = false;
@@ -140,14 +161,15 @@ int main(int argc, const char **argv)
           headerSend= true;
           return ((const char*)&hdr);
         }
-        data_pulled = fread(buf, 1, sizeof(buf), f);
+        const char* ret = ((const char*)data) + sent;
+        data_pulled = fsz-sent;
         printf("stream pushing %lld\n", data_pulled);
         sent += data_pulled;
-        return (const char*)(ferror(f) ? nullptr : buf);
+        return ret;
       //store
       });
+      blob_fileio_os_unmap(data, fsz);
       printf("pushed %lld of %s hash = %s, %s\n", sent, argname, hash, ret == KVRet::OK ? "ok" : "error");
-      fclose(f);
     }
   }
   stop_blob_push_client(client);
