@@ -245,7 +245,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
     cc->restart();
   }
   ensure_dir(htype, hhex);
-  if (!blob_fileio_rename_file(tmpfn.c_str(), fn.c_str()))//can't rename
+  if (!blob_fileio_rename_file_if_nexist(tmpfn.c_str(), fn.c_str()))//can't rename
   {
     fclose(tmpf);
     blob_fileio_unlink_file(tmpfn.c_str());

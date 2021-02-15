@@ -187,7 +187,7 @@ PushResult finish(PushData *fp, char *actual_hash_str)
     return PushResult::DEDUPLICATED;
   }
   make_blob_dirs(filepath);
-  return blob_fileio_rename_file(fp->temp_file_name.c_str(), filepath.c_str()) ? PushResult::OK : PushResult::IO_ERROR;
+  return blob_fileio_rename_file_if_nexist(fp->temp_file_name.c_str(), filepath.c_str()) ? PushResult::OK : PushResult::IO_ERROR;
 }
 
 PullData* start_pull(const context *ctx, const char* hash_hex_string, uint64_t &blob_sz)
