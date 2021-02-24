@@ -334,7 +334,7 @@ inline int cvs_tcp_connect(const char *servername, const char *port, int supress
 	hint.ai_socktype=SOCK_STREAM;
 #ifndef _WIN32
     struct sockaddr_un unix_serveraddr;
-    if (strstr(servername, "/run/") == servername)
+    if (strstr(servername, "lockserver_addr.sock") == servername)
     {
       TRACE(3,"cvs_tcp_connect to unix domain socket %s", servername);
       tcp_addrinfo = &hint;
