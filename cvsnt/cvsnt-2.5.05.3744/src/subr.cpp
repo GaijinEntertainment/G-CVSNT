@@ -367,6 +367,8 @@ void line2argv (int *pargc, char ***argv, const char *line, const char *sepchars
 int numdots (const char *s)
 {
     int dots = 0;
+    if (!s)
+       return 0;
 
     for (; *s; s++)
     {
