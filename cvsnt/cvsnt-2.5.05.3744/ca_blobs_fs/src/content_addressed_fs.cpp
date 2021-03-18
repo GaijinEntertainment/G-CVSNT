@@ -212,7 +212,7 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
   uint64_t at = 0;
   bool ok = true;
 
-  do {
+  while (at < blob_sz) {
     uint64_t data_pulled = 0;
     const char *data = blobe_fileio_pull(pd, at, data_pulled);
     if (!data)
@@ -222,7 +222,7 @@ bool get_file_content_hash(const char *filename, char *hash_hex_str, size_t hash
     }
     blake3_hasher_update(&hasher, data, data_pulled);
     at += data_pulled;
-  } while(at < blob_sz);
+  }
 
   unsigned char digest[32];
   blake3_hasher_finalize(&hasher, digest, sizeof(digest));

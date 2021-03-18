@@ -217,6 +217,8 @@ BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, uint64_t &blob
   blob_sz = blob_fileio_get_file_size(filepath);
   if (blob_sz == invalid_blob_file_size)
     return 0;
+  if (blob_sz == 0)
+    return new BlobFileIOPullData{ nullptr, blob_sz };
 
   const char *begin = (const char *) blob_fileio_os_mmap(filepath, blob_sz);
   if (!begin)

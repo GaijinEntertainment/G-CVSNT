@@ -29,7 +29,7 @@
 // cvsnt version
 #define CVSNT_PRODUCT_MAJOR 3
 #define CVSNT_PRODUCT_MINOR 5
-#define CVSNT_PRODUCT_PATCHLEVEL 12
+#define CVSNT_PRODUCT_PATCHLEVEL 13
 #define CVSNT_PRODUCT_PATCHLEVELS 5
 #include "build.h"
 #define CVSNT_PRODUCT_NAME " (Gan + [Gaijin -kB/-kBz patch])"
