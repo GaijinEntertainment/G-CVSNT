@@ -11,15 +11,13 @@ int cvs_tcp_connect(const char *servername, const char *port, int supress_errors
 int cvs_tcp_close(int sock);
 const char *fn_root(const char*s){return s;}
 
-static int lock_register_client(const char *username, const char *root, const char *lock_server_)
+static int open_lock_server_socket(const char *lock_server_)
 {
   char line[1024];
 
   int lock_server_socket = -1;
   char *lock_server = strdup(lock_server_);
   const char *serv;
-  char *_root = strdup(root);
-  const char *roo = _root;
 
   /* First time - connect to lock server & register ourselves */
   char *p=strchr(lock_server,':');
@@ -61,6 +59,22 @@ static int lock_register_client(const char *username, const char *root, const ch
   	}
   }
 
+
+  free(lock_server);
+  return lock_server_socket;
+}
+
+static int lock_register_client(const char *username, const char *root, const char *lock_server_)
+{
+  char line[1024];
+
+  int lock_server_socket = open_lock_server_socket(lock_server_);
+  if (lock_server_socket < 0)
+    return -1;
+  const char *serv;
+  char *_root = strdup(root);
+  const char *roo = _root;
+
   switch(lock_server_command(lock_server_socket, line,sizeof(line),"Client %s|%s|%s\n",username,roo,""))
   {
   case 0:
@@ -70,8 +84,7 @@ static int lock_register_client(const char *username, const char *root, const ch
   }
 
   free(_root);
-  free(lock_server);
- return lock_server_socket;
+  return lock_server_socket;
 }
 
 static int lock_server_command(int lock_server_socket, char *line, int line_len, const char *cmd, ...)
@@ -207,20 +220,26 @@ int do_unlock_file(int lock_server_socket, size_t lockId)
 	return 0;
 }
 
-static void print_status(int lock_server_socket)
+static void print_status(const char *srv)
 {
-	char line[65536];
-	size_t ret;
-	unsigned helper;
+  int lock_server_socket = open_lock_server_socket(srv);
+  if (lock_server_socket < 0)
+ 	error(1,0,"Unknown response from lock server: %s", srv);
+  char line[65536];
+  size_t ret;
+  unsigned helper;
 
-	if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Monitor\n")) != 0)
-		error(1,0,"Failed to set monitor on: %lld %s",ret,line);
+  if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Monitor\n")) != 0)
+  	error(1,0,"Failed to set monitor on: %lld %s",ret,line);
 
-    if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Clients\n")) != 0)
-		error(1,0,"Failed to get clients on: %lld %s",ret,line);
-    printf("clients:\n%s\n", line);
+  ret = lock_server_command(lock_server_socket, line,sizeof(line),"Clients\n");
+  if (ret != 0 && ret != 99)
+  	error(1,0,"Failed to get clients on: %lld %s",ret,line);
+  printf("clients:\n%s\n================\n", line);
 
-    if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Locks\n")) != 0)
-		error(1,0,"Failed to get locks on: %lld %s",ret,line);
-    printf("locks:\n%s\n", line);
+
+  ret = lock_server_command(lock_server_socket, line,sizeof(line),"Locks\n");
+  if (ret != 0 && ret != 99)
+  	error(1,0,"Failed to get locks on: %lld %s",ret,line);
+  printf("locks:\n%s\n-----------------\n", line);
 }

@@ -99,6 +99,9 @@ void error(int a, int b, const char *cmd, ...)
 }
 
 #if _WIN32
+typedef uint16_t mode_t;
+#pragma comment(lib, "ws2_32")
+
 size_t get_file_size(const char *file)
 {
   struct __stat64 buf;
@@ -334,7 +337,7 @@ inline int cvs_tcp_connect(const char *servername, const char *port, int supress
 	hint.ai_socktype=SOCK_STREAM;
 #ifndef _WIN32
     struct sockaddr_un unix_serveraddr;
-    if (strstr(servername, "lockserver_addr.sock") == servername)
+    if (strstr(servername, "lockserver_addr") != NULL)
     {
       TRACE(3,"cvs_tcp_connect to unix domain socket %s", servername);
       tcp_addrinfo = &hint;
