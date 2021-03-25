@@ -2,15 +2,14 @@
 static void usage()
 {
   printf("Usage: <server> <user> <full_root/> (<full_directory/file,v> | <lock_id))\n");
-  printf("Or: <server> (for monitoring)\n");
+  printf("Or: <server> (for monitoring, default 127.0.0.1)\n");
   printf("example:simplelock 127.0.0.1 some_user /home/some_user/test/ testDir/a.png,v\n");
 }
 
 int main(int ac, const char* argv[])
 {
-  if (ac < 2)
+  if (ac < 1)
   {
-    printf("%d args 2 needed\n", ac);
     usage();
     exit(1);
   }
@@ -19,7 +18,7 @@ int main(int ac, const char* argv[])
   if (ac < 5)
   {
     printf("monitoring\n");
-    print_status(argv[1]);
+    print_status(ac > 1 ? argv[1] : "127.0.0.1");
   } else
   {
     lock_server_socket = lock_register_client(argv[2], argv[3], argv[1]);
