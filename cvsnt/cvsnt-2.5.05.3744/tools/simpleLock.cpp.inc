@@ -279,3 +279,21 @@ static void print_status(const char *srv)
   	error(1,0,"Failed to get locks on: %lld %s",ret,line);
   printf("================\n");
 }
+
+static void force_unlock(const char *srv, uint32_t lock)
+{
+  int lock_server_socket = open_lock_server_socket(srv);
+  if (lock_server_socket < 0)
+ 	error(1,0,"Unknown response from lock server: %s", srv);
+  char line[65536];
+  size_t ret;
+  unsigned helper;
+
+  if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Monitor\n")) != 0)
+  	error(1,0,"Failed to set monitor on: %lld %s",ret,line);
+
+  if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Unlock %u\n", lock)) != 0)
+  	error(1,0,"Failed to force unlock on: %lld %s",ret,line);
+
+  printf("Forced unlocked!\n");
+}
