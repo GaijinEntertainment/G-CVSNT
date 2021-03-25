@@ -112,6 +112,40 @@ static int lock_server_command(int lock_server_socket, char *line, int line_len,
 	return atoi(line);
 }
 
+template <typename Cb>
+static int lock_server_multi_command(int lock_server_socket, const char *cmd, Cb cb)
+{
+  int l;
+  if(send(lock_server_socket,cmd,strlen(cmd),0)<=0)
+  {
+  	error(1,errno,"Error communicating with lock server (send)");
+  }
+  size_t total = 0, partial = 0;
+  char retLine[65536];
+  while ((l=recv(lock_server_socket,retLine + partial,sizeof(retLine) - partial-1,0)) > 0)
+  {
+    partial += l;
+    retLine[partial] = 0;
+    char *nline;
+    while ((nline = strstr(retLine, "\n")) != 0)
+    {
+      size_t newLinesStartsAt = nline - retLine + 1;
+      *nline = 0;
+      int v = 99;
+      if(!isdigit(retLine[0]) || !isdigit(retLine[1]) || !isdigit(retLine[2]) || retLine[3]!=' ')
+      	v = 99; // Unknown
+      else
+        v = atoi(retLine);
+      const bool finish = cb(v, retLine);
+      memmove(retLine, retLine + newLinesStartsAt, partial - newLinesStartsAt);
+      partial -= newLinesStartsAt;
+      if (finish)
+        return v;
+    }
+  }
+  return -1;
+}
+
 /* Connect to the lock server and attain a lock */
 static size_t do_lock_server(int lock_server_socket, const char *object, const char *flags, int wait)
 {
@@ -232,14 +266,16 @@ static void print_status(const char *srv)
   if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Monitor\n")) != 0)
   	error(1,0,"Failed to set monitor on: %lld %s",ret,line);
 
-  ret = lock_server_command(lock_server_socket, line,sizeof(line),"Clients\n");
-  if (ret != 0 && ret != 99)
+  printf("clients:\n");
+  ret = lock_server_multi_command(lock_server_socket, "Clients\n", [](int v, const char *str){if (v)printf("  %s\n", str);return v != 99;});
+  if (ret != 0)
   	error(1,0,"Failed to get clients on: %lld %s",ret,line);
-  printf("clients:\n%s\n================\n", line);
+  printf("================\n");
 
 
-  ret = lock_server_command(lock_server_socket, line,sizeof(line),"Locks\n");
-  if (ret != 0 && ret != 99)
+  printf("locks:\n");
+  ret = lock_server_multi_command(lock_server_socket, "Locks\n", [](int v, const char *str){if (v)printf("  %s\n", str);return v != 99;});
+  if (ret != 0)
   	error(1,0,"Failed to get locks on: %lld %s",ret,line);
-  printf("locks:\n%s\n-----------------\n", line);
+  printf("================\n");
 }
