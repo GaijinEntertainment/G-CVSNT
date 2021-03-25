@@ -206,3 +206,21 @@ int do_unlock_file(int lock_server_socket, size_t lockId)
  	}
 	return 0;
 }
+
+static void print_status(int lock_server_socket)
+{
+	char line[65536];
+	size_t ret;
+	unsigned helper;
+
+	if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Monitor\n")) != 0)
+		error(1,0,"Failed to set monitor on: %lld %s",ret,line);
+
+    if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Clients\n")) != 0)
+		error(1,0,"Failed to get clients on: %lld %s",ret,line);
+    printf("clients:\n%s\n", line);
+
+    if ((ret = lock_server_command(lock_server_socket, line,sizeof(line),"Locks\n")) != 0)
+		error(1,0,"Failed to get locks on: %lld %s",ret,line);
+    printf("locks:\n%s\n", line);
+}
