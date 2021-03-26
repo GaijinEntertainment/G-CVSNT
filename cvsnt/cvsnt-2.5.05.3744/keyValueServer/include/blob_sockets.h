@@ -77,6 +77,13 @@ inline void blob_set_socket_no_delay(int socket, bool no_delay)
   setsockopt(socket, IPPROTO_TCP, TCP_NODELAY, (char *) &v, sizeof(v));
 }
 
+inline bool blob_set_socket_reuse_addr(int socket, bool reuse_addr)
+{
+  int v = reuse_addr ? 1 : 0;
+  //todo: may be add SO_EXCLUSIVEADDRUSE on Windows? otherwise there is a possibility of malicious
+  return setsockopt(socket, SOL_SOCKET, SO_REUSEADDR, (char *) &v, sizeof(v)) == 0;
+}
+
 inline void enable_keepalive(int sock, bool keep_alive) {
   int v = keep_alive ? 1 : 0;
   setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&v, sizeof(int));

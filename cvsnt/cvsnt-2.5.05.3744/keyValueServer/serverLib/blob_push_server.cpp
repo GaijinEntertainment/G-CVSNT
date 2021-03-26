@@ -25,6 +25,7 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
     return false;
   }
   blob_set_socket_no_delay(sockfd, true);
+  blob_set_socket_reuse_addr(sockfd, true);
   struct sockaddr_in serv_addr;
   memset(&serv_addr, 0, sizeof(serv_addr));
   serv_addr.sin_family = AF_INET;
