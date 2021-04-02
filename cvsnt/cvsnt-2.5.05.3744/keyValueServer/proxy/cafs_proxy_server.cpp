@@ -1,5 +1,6 @@
 #include <stdio.h>
 #include <stdlib.h>
+#include <stdint.h>
 #include "../include/blob_server.h"
 #include "../include/blob_sockets.h"//move init to out of line
 #define BLOB_LOG_LEVEL LOG_WARNING
