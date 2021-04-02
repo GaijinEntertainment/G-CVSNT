@@ -13,6 +13,7 @@ extern bool blob_fileio_ensure_dir(const char* name);
 //these three (rename, unlink, blob_get_temp_file) is only to work with temp files. Basically, we want to ensure that blobs are correct, so we atomically rename tmpfile to final blob
 extern bool blob_fileio_rename_file(const char*from, const char*to);
 extern void blob_fileio_unlink_file(const char*f);
+extern int blob_fileio_get_last_error();
 
 inline bool blob_fileio_rename_file_if_nexist(const char*from, const char*to)
 {

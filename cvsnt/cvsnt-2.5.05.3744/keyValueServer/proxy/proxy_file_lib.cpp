@@ -245,17 +245,28 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
     cc->restart();
   }
   ensure_dir(htype, hhex);
+  #if _MSC_VER
+  fclose(tmpf);
+  //we should close file only after we have started pull. That way GC thread won't delete file
+  //however, windows isn't capable of that
+  tmpf = NULL;
+  #else
+  fflush(tmpf);
+  #endif
+
   if (!blob_fileio_rename_file_if_nexist(tmpfn.c_str(), fn.c_str()))//can't rename
   {
-    fclose(tmpf);
+    const int err = blob_fileio_get_last_error();
+    if (tmpf)
+      fclose(tmpf);
     blob_fileio_unlink_file(tmpfn.c_str());
-    fprintf(stderr, "Can't rename file %s to %s\n", tmpfn.c_str(), fn.c_str());
+    fprintf(stderr, "Can't rename file %s to %s, because of %d\n", tmpfn.c_str(), fn.c_str(), err);
     return 0;
   }
-  fflush(tmpf);
   if ((ret = attempt_pull_cache(fn.c_str(), sz)) == 0)
     fprintf(stderr, "Can't start pull of just downloaded file %s, %d!\n", fn.c_str(), errno);
-  fclose(tmpf);//we close file only after we have started pull. That way GC thread won't delete file
+  if (tmpf)
+    fclose(tmpf);//we close file only after we have started pull. That way GC thread won't delete file
   lazy_report_to_gc(sz);
   return ret;
 }

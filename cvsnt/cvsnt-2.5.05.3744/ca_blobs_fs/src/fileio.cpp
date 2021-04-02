@@ -30,8 +30,35 @@ uint64_t blob_fwrite64(const void *data_, size_t esz, uint64_t cnt, FILE *f)
 #define WIN32_LEAN_AND_MEAN
 #include <windows.h>
 #include <shellapi.h>
+//#include <wstring>
+static std::wstring to_wstring(const char* ansiString)
+{
+  std::wstring returnValue;
+  auto wideCharSize = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, ansiString, -1, nullptr, 0);
+  if (wideCharSize == 0)
+    return returnValue;
+  //#define LONG_PREFIX L"\\\\?\\"
+  //const size_t prefixlen = wcslen(LONG_PREFIX);
+  //returnValue = LONG_PREFIX;
+  const size_t prefixlen = 0;
+  returnValue.resize(wideCharSize + prefixlen);
+  wideCharSize = MultiByteToWideChar(CP_ACP, MB_PRECOMPOSED, ansiString, -1, &returnValue[prefixlen], wideCharSize-prefixlen)+prefixlen;
+  if (wideCharSize == 0)
+  {
+    returnValue.resize(0);
+    return returnValue;
+  }
+  returnValue.resize(wideCharSize-1);
+  return returnValue;
+}
 
-bool blob_fileio_rename_file(const char*from, const char*to)//the only common implementation on posix and windows
+int blob_fileio_get_last_error()
+{
+  return GetLastError();
+}
+
+
+static bool blob_fileio_rename_file_a(const char*from, const char*to)//the only common implementation on posix and windows
 {
   //the only atomic rename on windows which is portable
   //https://stackoverflow.com/questions/167414/is-an-atomic-file-rename-with-overwrite-possible-on-windows
@@ -50,6 +77,28 @@ bool blob_fileio_rename_file(const char*from, const char*to)//the only common im
   return ReplaceFileA(to, from, NULL, 0, 0, 0) == TRUE;
 }
 
+bool blob_fileio_rename_file(const char*from_, const char*to_)//the only common implementation on posix and windows
+{
+  if (strlen(from_) < MAX_PATH && strlen(to_) < MAX_PATH)
+    return blob_fileio_rename_file_a(from_, to_);
+  std::wstring from = to_wstring(from_), to = to_wstring(to_);
+  //the only atomic rename on windows which is portable
+  //https://stackoverflow.com/questions/167414/is-an-atomic-file-rename-with-overwrite-possible-on-windows
+  //https://github.com/golang/go/issues/8914
+  //MoveFileTransacted is discouraged to use
+  //MoveFileEx isn't atomic, if destination file exist
+  //the only correct way to do it, is SetFileInformationByHandle, but it requires wide char conversion, so for now we keep current code
+  //if dest file not exist, this is atomic (we do not allow copy)
+  if (MoveFileExW(from.c_str(), to.c_str(), MOVEFILE_WRITE_THROUGH) == TRUE)
+    return true;
+
+  //if dest file exists, this is also atomic (we do not allow copy).
+  //however, it has an issue - dest file won't be opening during renaming, resulting in potential race
+  //We don't use production servers on windows, so we are fine.
+  //if you ever want to do that, replace that with SetFileInformationByHandle
+  return ReplaceFileW(to.c_str(), from.c_str(), NULL, 0, 0, 0) == TRUE;
+}
+
 
 uint64_t blob_fileio_get_file_size(const char* fn)
 {
@@ -62,7 +111,11 @@ uint64_t blob_fileio_get_file_size(const char* fn)
 
 bool blob_fileio_is_file_readable(const char* fn)
 {
-  DWORD fa = GetFileAttributesA(fn);
+  DWORD fa;
+  if (strlen(fn) < MAX_PATH)
+    fa = GetFileAttributesA(fn);
+  else
+    fa = GetFileAttributesW(to_wstring(fn).c_str());
   if (fa == INVALID_FILE_ATTRIBUTES)
 	return false;
   return true;
@@ -73,13 +126,18 @@ void blob_fileio_unlink_file(const char* f) { _unlink(f); }
 
 bool blob_fileio_ensure_dir(const char* name)
 {
-  return CreateDirectoryA(name, NULL) != FALSE;
+  if (strlen(name) < MAX_PATH)
+    return CreateDirectoryA(name, NULL) != FALSE;
+  else
+    return CreateDirectoryW(to_wstring(name).c_str(), NULL) != FALSE;
 }
 
 
 const void* blob_fileio_os_mmap(const char *fp, std::uintmax_t flen)
 {
-  HANDLE fh = CreateFileA(fp, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
+  HANDLE fh =
+    strlen(fp)<MAX_PATH ? CreateFileA(fp, GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0) :
+           CreateFileW(to_wstring(fp).c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE | FILE_SHARE_DELETE, 0, OPEN_EXISTING, FILE_ATTRIBUTE_NORMAL, 0);
   if (fh == INVALID_HANDLE_VALUE)
     return nullptr;
 
@@ -109,6 +167,11 @@ void blob_fileio_os_unmap(const void* start, std::uintmax_t length)
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+
+int blob_fileio_get_last_error()
+{
+  return errno;
+}
 
 bool blob_fileio_rename_file(const char*from, const char*to)
 {
