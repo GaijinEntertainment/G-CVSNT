@@ -205,8 +205,8 @@ static int finalwrite;
 static int merge;
 
 /* I/O mode: nonzero only if using binary input/output.  */
-int binary_input;
-int binary_output;
+extern int binary_input;
+extern int binary_output;
 
 diff_encoding_type encoding3 = {0};
 int no_unlink;
