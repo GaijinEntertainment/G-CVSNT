@@ -1,6 +1,6 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CPPFLAGS = $(includeopt) $(INCLTDL) -msse4.1
+AM_CPPFLAGS = $(includeopt) $(INCLTDL) -msse4.1 -std=c++17
 
 libca_blobs_fs_la_SOURCES = \
   src/fileio.cpp \
