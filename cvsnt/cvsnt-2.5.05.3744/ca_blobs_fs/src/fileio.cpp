@@ -167,6 +167,7 @@ void blob_fileio_os_unmap(const void* start, std::uintmax_t length)
 #include <sys/stat.h>
 #include <fcntl.h>
 #include <sys/mman.h>
+#include <sys/errno.h>
 
 int blob_fileio_get_last_error()
 {
