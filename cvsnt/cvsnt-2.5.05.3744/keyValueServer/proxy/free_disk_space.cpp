@@ -4,7 +4,7 @@
 #include <chrono>
 #include <vector>
 #include <algorithm>
-#if _MSVC_LANG < 201703
+#if defined(_MSVC_LANG) && _MSVC_LANG < 201703
 namespace fs = std::experimental::filesystem;
 #else
 namespace fs = std::filesystem;
