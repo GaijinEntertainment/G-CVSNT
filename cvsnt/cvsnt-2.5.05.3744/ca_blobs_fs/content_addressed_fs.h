@@ -40,14 +40,14 @@ namespace caddressed_fs
 
   //if we provide hash_hex_string, we will trust it. this is for tools, networking server never trusts
   PushData* start_push(const context *ctx, const char* hash_hex_string = nullptr);
-  bool stream_push(PushData *pd, const void *data, size_t data_size);
+  bool stream_push(PushData *pd, const void *data, uint64_t data_size);
   PushResult finish(PushData *pd, char *actual_hash_str);//will destroy it. if actual_hash_str = null, hash won't be returned
   void destroy(PushData *pd);
 
   //pull allows random access
   //will do memory mapping. blob_sz is the size of whole blob. if invalid returns nullptr
-  PullData *start_pull(const context *ctx, const char* hash_hex_string, size_t &blob_sz);
-  const char *pull(PullData *pd, uint64_t from, size_t &data_pulled);//returned data_pulled != 0, unless error
+  PullData *start_pull(const context *ctx, const char* hash_hex_string, uint64_t &blob_sz);
+  const char *pull(PullData *pd, uint64_t from, uint64_t &data_pulled);//returned data_pulled != 0, unless error
   bool destroy(PullData *pd);//will destroy it
 
   //
