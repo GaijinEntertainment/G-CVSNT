@@ -1,4 +1,4 @@
-AM_CPPFLAGS = -std=c++11
+AM_CPPFLAGS = -std=c++17
 
 cafs_server_SOURCES = \
 	cafs_server.cpp \
