@@ -271,7 +271,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
   return ret;
 }
 
-const char *blob_pull_data(uintptr_t up, uint64_t from, size_t &read){
+const char *blob_pull_data(uintptr_t up, uint64_t from, uint64_t &read){
   if (!up){read = 0;return nullptr;}
   return blobe_fileio_pull((BlobFileIOPullData*)up, from, read);
 }
