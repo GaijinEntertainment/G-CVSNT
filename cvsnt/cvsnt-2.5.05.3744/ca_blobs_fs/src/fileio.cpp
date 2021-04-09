@@ -206,13 +206,25 @@ bool blob_fileio_ensure_dir(const char* name)
   return false;
 }
 
+#if __linux__
+#include <linux/version.h>
+#if LINUX_VERSION_CODE > KERNEL_VERSION(2,6,22)
+#define _MAP_POPULATE_AVAILABLE
+#endif
+#endif
+
+#ifdef _MAP_POPULATE_AVAILABLE
+#define MMAP_FLAGS (MAP_PRIVATE | MAP_POPULATE)
+#else
+#define MMAP_FLAGS MAP_PRIVATE
+#endif
 
 const void* blob_fileio_os_mmap(const char *filepath, std::uintmax_t flen)
 {
   int fd = open(filepath, O_RDONLY);
   if (fd == -1)
     return nullptr;
-  void *ret = mmap(NULL, flen, PROT_READ, MAP_PRIVATE | MAP_POPULATE, fd, 0);
+  void *ret = mmap(NULL, flen, PROT_READ, MMAP_FLAGS, fd, 0);
   close(fd);
   return ret;
 }
