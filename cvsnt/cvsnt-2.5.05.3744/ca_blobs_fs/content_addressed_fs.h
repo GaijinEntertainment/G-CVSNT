@@ -34,8 +34,8 @@ namespace caddressed_fs
   class PushData;
   class PullData;
 
-  static constexpr size_t invalid_size = size_t(~size_t(0));
-  size_t get_size(const context *ctx, const char* hash_hex_string);
+  static constexpr uint64_t invalid_size = uint64_t(~uint64_t(0));
+  uint64_t get_size(const context *ctx, const char* hash_hex_string);
   bool exists(const context *ctx, const char* hash_hex_string);
 
   //if we provide hash_hex_string, we will trust it. this is for tools, networking server never trusts
