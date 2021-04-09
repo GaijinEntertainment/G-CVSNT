@@ -29,7 +29,7 @@ extern FILE* blob_fileio_get_temp_file(std::string &fn, const char *tmp_path=nul
 
 class BlobFileIOPullData;
 BlobFileIOPullData* blobe_fileio_start_pull(const char* filepath, uint64_t &blob_sz);
-const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, size_t &data_pulled);
+const char *blobe_fileio_pull(BlobFileIOPullData* fp, uint64_t from, uint64_t &data_pulled);
 bool blobe_fileio_destroy(BlobFileIOPullData* fp);
 
 uint64_t blob_fwrite64(const void *data_, size_t esz, uint64_t cnt, FILE *f);
