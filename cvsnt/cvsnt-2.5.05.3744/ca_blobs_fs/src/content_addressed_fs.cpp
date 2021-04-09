@@ -280,11 +280,11 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
       break;
     if (!decode_stream_blob_data(info, got, sz, [&](const char *unpacked_data, uint64_t unpacked_sz)
       {
-        uint64_t src_pos = 0;
+        size_t src_pos = 0;
         while (src_pos < unpacked_sz)
         {
-          uint64_t dst_pos = 0;
-          uint64_t wasSrcPos = src_pos;
+          size_t dst_pos = 0;
+          size_t wasSrcPos = src_pos;
           if (compress_stream(cctx, unpacked_data, src_pos, unpacked_sz, buf, dst_pos, sizeof(buf)) == StreamStatus::Error)
             return false;
           compressedSize += dst_pos;
@@ -305,7 +305,7 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
   StreamStatus st = StreamStatus::Continue;
   while (at == curSize && st == StreamStatus::Continue)
   {
-    uint64_t dst_pos = 0;
+    size_t dst_pos = 0;
     st = finalize_compress_stream(cctx, buf, dst_pos, sizeof(buf));
     if ( blob_fwrite64(buf, 1, dst_pos, tmpf) != dst_pos )
       break;
