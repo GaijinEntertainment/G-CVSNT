@@ -52,6 +52,7 @@ bool start_push_server(int portno, int max_connections, volatile bool *should_st
   while(!should_stop && (client_sock = accept(sockfd, (struct sockaddr *)&client, (socklen_t*)&clientSz)) >= 0)
   {
     blob_set_socket_no_delay(client_sock, true);
+    set_keepalive_tcp(client_sock);
     blob_logmessage(LOG_NOTIFY, "got connection %d from %s port %d",
         client_sock, inet_ntoa(client.sin_addr), ntohs(client.sin_port));
     #if MULTI_THREADED

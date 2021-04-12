@@ -60,6 +60,11 @@
   {
     return err == EWOULDBLOCK || err==EINPROGRESS;
   }
+
+#if defined(__APPLE__) && !defined(SOL_TCP)
+  #define SOL_TCP IPPROTO_TCP
+#endif
+
 #endif
 
 inline void blob_set_socket_def_options(int socket)
@@ -87,4 +92,19 @@ inline bool blob_set_socket_reuse_addr(int socket, bool reuse_addr)
 inline void enable_keepalive(int sock, bool keep_alive) {
   int v = keep_alive ? 1 : 0;
   setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&v, sizeof(int));
+}
+
+inline void set_keepalive_tcp(int sock, int keep_cnt=5, int keep_interval=30, int keep_idle=60) {
+  (void)keep_idle;
+  (void)keep_cnt;
+  (void)keep_interval;
+
+  #if !_WIN32
+  #ifndef __APPLE__
+  setsockopt(sock, SOL_TCP, TCP_KEEPIDLE, (char *)&keep_idle, sizeof(keep_idle));
+  #endif
+  setsockopt(sock, SOL_TCP, TCP_KEEPCNT, (char *)&keep_cnt, sizeof(keep_cnt));
+  setsockopt(sock, SOL_TCP, TCP_KEEPINTVL, (char *)&keep_interval, sizeof(keep_interval));
+  #endif
+  enable_keepalive(sock, true);
 }
