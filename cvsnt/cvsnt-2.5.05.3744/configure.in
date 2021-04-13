@@ -184,6 +184,10 @@ if test x$enable_mdns = xyes; then
 	LIBS="$saved_libs"
 	AM_CONDITIONAL(WITH_AVAHI,test x$ac_cv_lib_avahi_client_avahi_client_new = xyes)
 	AM_CONDITIONAL(WITH_MINI_MDNS, true)
+        else
+          AM_CONDITIONAL(WITH_DNS_SD,test x$ac_cv_lib_dns_sd_DNSServiceRegister = xyes)
+          AM_CONDITIONAL(WITH_AVAHI,test x$ac_cv_lib_avahi_client_avahi_client_new = xyes)
+          AM_CONDITIONAL(WITH_MINI_MDNS, false)
 fi
 
 AC_HEADER_STDC
