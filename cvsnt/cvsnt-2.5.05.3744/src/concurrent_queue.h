@@ -25,6 +25,11 @@ public:
     cancel(Status::Finish);
     waitAll();
   }
+  void cancel()
+  {
+    cancel(Status::Cancel);
+    waitAll();
+  }
   void waitAll()
   {
     if (!waiting_threads)

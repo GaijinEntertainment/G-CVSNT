@@ -30,6 +30,8 @@ static bool process_blob_task(BlobNetworkProcessor *download_processor, BlobNetw
   return upload_blob_ref_file(upload_processor, task);
 }
 
+static std::atomic<int> isOK = 1;
+extern void cvs_flusherr();
 struct BackgroundProcessor
 {
   BackgroundProcessor():queue(&threads){}
@@ -38,6 +40,12 @@ struct BackgroundProcessor
   }
   void finishDownloads()
   {
+    if (isOK.load())
+    {
+      queue.cancel();
+      cvs_flusherr();
+      error_exit();
+    }
     queue.finishWork();
   }
 
@@ -48,16 +56,21 @@ struct BackgroundProcessor
   static void processor_thread_loop(BackgroundProcessor *processors, BlobNetworkProcessor *download_processor, BlobNetworkProcessor *upload_processor)
   {
     BlobTask task;
-    while (processors->queue.wait_and_pop(task))
-      process_blob_task(download_processor, upload_processor, task);
+    while (isOK.load() == 1 && processors->queue.wait_and_pop(task))
+      isOK.fetch_and(process_blob_task(download_processor, upload_processor, task) ? 1 : 0);
   }
   void emplace(BlobTask &&task)
   {
     if (!is_inited())
       return;
     if (threads.empty())
-      process_blob_task(download_clients[0].get(), upload_clients[0].get(), task);
-    else
+    {
+      if (!process_blob_task(download_clients[0].get(), upload_clients[0].get(), task))
+      {
+    	cvs_flusherr();
+		error_exit();
+      }
+    } else
     {
       //we can't guarantee, that user will finish download (not cancel it, kill the process or whatever)
       //if he won't, then entries would still be updated with new version, but the file will be old (while be shown as Modified)
@@ -317,7 +330,11 @@ static bool upload_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask
     char buf[256];std::snprintf(buf, sizeof(buf),"b %s\n", task.message.c_str());
     cvs_output(buf, 0);
   } else
-    error(1,0,"can't finish sending blob %s\n", task.message.c_str());
+  {
+    char buf[512];std::snprintf(buf, sizeof(buf),"can't finish sending blob %s\n", task.message.c_str());
+    cvs_outerr(buf, 0);
+    return false;
+  }
   return true;
 }
 
