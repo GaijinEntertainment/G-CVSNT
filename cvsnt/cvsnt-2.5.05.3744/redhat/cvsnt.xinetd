@@ -1,0 +1,16 @@
+service cvspserver
+{
+	disable		= no
+	socket_type     = stream
+	wait            = no
+	user            = cvs
+	server          = /usr/bin/cvsnt
+	server_args     = authserver
+	groups		= yes
+	log_on_failure  += USERID
+	flags		= IPv4
+        env             += LD_LIBRARY_PATH=/usr/lib64/cvsnt:$LD_LIBRARY_PATH
+        env             += TMPDIR=/tmp
+        env             += CVS_PSERVER_PORT=2401
+}
+

@@ -1,0 +1,15 @@
+[Unit]
+Description=CAFS CVS server
+After=network.target
+
+[Service]
+Type=simple
+PIDFile=/run/cafs.pid
+OOMScoreAdjust=-100
+EnvironmentFile=-/etc/sysconfig/cafs
+ExecStart=/usr/bin/cafs_server $DIR_FOR_ROOTS $ALLOW_TRUST $PORT $MAX_PEND_CONN
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

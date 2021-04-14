@@ -1,0 +1,16 @@
+[Unit]
+Description=CAFS CVS Proxy server
+After=network.target
+
+[Service]
+Type=simple
+WorkingDirectory=/data/cafs
+PIDFile=/run/cafs_proxy.pid
+OOMScoreAdjust=-100
+EnvironmentFile=-/etc/sysconfig/cafs-proxy
+ExecStart=/usr/local/bin/cafs_proxy_server $MASTER_URL $CACHE_FOLDER $CACHE_SOFT_LIMIT_SIZE
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+

@@ -1,0 +1,17 @@
+[Unit]
+Description=Handles file level locking for the cvsnt server
+After=network.target
+
+[Service]
+Type=simple
+LOCKFILE=/var/lock/subsys/cvslockd
+PIDFile=/run/cvslockd.pid
+OOMScoreAdjust=-100
+EnvironmentFile=-/etc/sysconfig/cvslockd
+ExecStart=/usr/bin/cvslockd --lockfile "$LOCKFILE" --pidfile "$PIDFile"
+KillMode=control-group
+Restart=on-failure
+
+[Install]
+WantedBy=multi-user.target
+
