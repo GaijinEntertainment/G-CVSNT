@@ -40,7 +40,7 @@ struct BackgroundProcessor
   }
   void finishDownloads()
   {
-    if (isOK.load())
+    if (!isOK.load())
     {
       queue.cancel();
       cvs_flusherr();
