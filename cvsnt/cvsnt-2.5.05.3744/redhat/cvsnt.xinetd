@@ -9,7 +9,7 @@ service cvspserver
 	groups		= yes
 	log_on_failure  += USERID
 	flags		= IPv4
-        env             += LD_LIBRARY_PATH=/usr/lib64/cvsnt:$LD_LIBRARY_PATH
+        env             += LD_LIBRARY_PATH=/usr/lib64/cvsnt/zlib:$LD_LIBRARY_PATH
         env             += TMPDIR=/tmp
         env             += CVS_PSERVER_PORT=2401
 }
