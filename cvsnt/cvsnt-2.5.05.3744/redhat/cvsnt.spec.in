@@ -1,330 +1,296 @@
-Name: cvsnt
-Version: @VERSION@
-Release: 1
-Vendor: March Hare Software Ltd
-Packager: CVS Professional Support <support@march-hare.com>
-License: GPL
-Group: Development/Tools
-Summary: CVSNT - Concurrent version control system
-Source: http://www.cvsnt.org/archive/cvsnt-%{version}.tar.gz
-Obsoletes: cvs
-URL: http://www.march-hare.com/cvspro
-Prefix: %{_prefix}
-Buildroot: %{_tmppath}/%{name}-root
+%define   _system_user    cvs
+Summary:  Concurrent Versioning System
+Name:     cvsnt
+Version:  @VERSION@
+Release:  1%{?dist}
+License:  GPL v2+/LGPL v2+
+Group:    Development/Version Control
+Source0:  %{name}-%{version}.tar.gz
+Source1:  zlib-1.2.8.tar.gz
+URL:      https://github.com/GaijinEntertainment/G-CVSNT
+
+BuildRequires:  gcc-c++
+BuildRequires:  pcre-devel
+BuildRequires:  libxml2-devel
+BuildRequires:  openssl-devel
+BuildRequires:  libzstd-devel
+BuildRequires:  xmlto
+BuildRequires:  dh-autoreconf
+BuildRequires:  libtool-ltdl-devel
+BuildRequires:  pam-devel
+BuildRequires:  libtool
+BuildRequires:  devtoolset-9
+BuildRequires:  glibc-static
+BuildRequires:  libstdc++-static
+
+Provides:       cvsnt = %{version}
+Obsoletes:      cvs
+BuildRoot:      %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
+
+%define          _cvs_root  /var/lib/cvs
 
 %description
-CVSNT (Concurrent Version System) is a version control system which can
-record the history of your files (usually, but not always, source
-code). CVSNT only stores the differences between versions, instead of
-every version of every file you've ever created. CVSNT also keeps a log
-of who, when and why changes occurred.
+CVSNT Gaijin (and Gamedev) CVSNT version - modified for large amounts of binary data (typically for gamedev)
 
-CVSNT is very helpful for managing releases and controlling the
-concurrent editing of source files among multiple authors. Instead of
-providing version control for a collection of files in a single
-directory, CVSNT provides version control for a hierarchical collection
-of directories consisting of revision controlled files.  These
-directories and files can then be combined together to form a software
-release.
+%package server
+Summary:            xinetd config files to run CVS server
+Group:              Development/Version Control
+Requires(post):     fileutils
+Requires(pre):      /usr/bin/id
+Requires(pre):      /usr/sbin/groupadd
+Requires(pre):      /usr/sbin/useradd
+Requires(post):     /usr/bin/systemctl
+Requires(preun):    /usr/bin/systemctl
+Requires:           %{name} = %{version}-%{release}
+Requires:           cvslockd = %{version}-%{release}
+Requires:           xinetd
+Provides:           group(cvs)
+Provides:           user(cvs)
+Obsoletes:          cvs-server
 
-Install the cvsnt package if you need to use a version control system.
+%description server
+Config files for xinetd that are necessary to run CVS in server
+mode.
 
-CVSNT is much improved from the older CVS and now has many modern
-version control features.  See http://www.march-hare.com/cvspro
+%package cafs-tools
+Summary:            CVSNT CAFS Server tools
+Group:              Development/Version Control
 
-%package database-mysql
-Summary: Mysql support for CVSNT
-Group: Development/tools
-Requires: cvsnt
-%description database-mysql
-CVSNT (Concurrent Version System) is a version control system which can
-record the history of your files (usually, but not always, source
-code). CVSNT only stores the differences between versions, instead of
-every version of every file you've ever created. CVSNT also keeps a log
-of who, when and why changes occurred.
+%description cafs-tools
+CAFS Tools for CVSNT server
 
-CVSNT is very helpful for managing releases and controlling the
-concurrent editing of source files among multiple authors. Instead of
-providing version control for a collection of files in a single
-directory, CVSNT provides version control for a hierarchical collection
-of directories consisting of revision controlled files.  These
-directories and files can then be combined together to form a software
-release.
+%package cafs
+Summary:            CAFS server
+Group:              Development/Version Control
 
-This is the mysql support library for CVSNT.
+%description cafs
+CAFS server for CVSNT
 
-%package database-oracle
-Summary: Oracle support for CVSNT
-Group: Development/tools
-Requires: cvsnt
-%description database-oracle
-CVSNT (Concurrent Version System) is a version control system which can
-record the history of your files (usually, but not always, source
-code). CVSNT only stores the differences between versions, instead of
-every version of every file you've ever created. CVSNT also keeps a log
-of who, when and why changes occurred.
+%package proxy
+Summary:            CAFS proxy server
+Group:              Development/Version Control
 
-CVSNT is very helpful for managing releases and controlling the
-concurrent editing of source files among multiple authors. Instead of
-providing version control for a collection of files in a single
-directory, CVSNT provides version control for a hierarchical collection
-of directories consisting of revision controlled files.  These
-directories and files can then be combined together to form a software
-release.
+%description proxy
+CAFS proxy server for CVSNT
 
-This is the Oracle support library for CVSNT.
+%package cvslockd
+Summary:            CVS locking daemon
+Group:              Development/Version Control
+Requires(post):     /usr/bin/systemctl
+Requires(preun):    /usr/bin/systemctl
 
-%package database-odbc
-Summary: Odbc support for CVSNT
-Group: Development/tools
-Requires: cvsnt
-%description database-odbc
-CVSNT (Concurrent Version System) is a version control system which can
-record the history of your files (usually, but not always, source
-code). CVSNT only stores the differences between versions, instead of
-every version of every file you've ever created. CVSNT also keeps a log
-of who, when and why changes occurred.
+%description cvslockd
+CVS locking daemon.
 
-CVSNT is very helpful for managing releases and controlling the
-concurrent editing of source files among multiple authors. Instead of
-providing version control for a collection of files in a single
-directory, CVSNT provides version control for a hierarchical collection
-of directories consisting of revision controlled files.  These
-directories and files can then be combined together to form a software
-release.
+%package docs
+Summary:            CVST html docs
+Group:              Development/Version Control
 
-This is the odbc support library for CVSNT.
+%description docs
+Documentation for CVSNT
 
-%package database-sqlite
-Summary: Sqlite support for CVSNT
-Group: Development/tools
-Requires: cvsnt
-%description database-sqlite
-CVSNT (Concurrent Version System) is a version control system which can
-record the history of your files (usually, but not always, source
-code). CVSNT only stores the differences between versions, instead of
-every version of every file you've ever created. CVSNT also keeps a log
-of who, when and why changes occurred.
-
-CVSNT is very helpful for managing releases and controlling the
-concurrent editing of source files among multiple authors. Instead of
-providing version control for a collection of files in a single
-directory, CVSNT provides version control for a hierarchical collection
-of directories consisting of revision controlled files.  These
-directories and files can then be combined together to form a software
-release.
-
-This is the sqlite support library for CVSNT.
-
-%package protocol-gserver
-Summary: gssapi (gserver) support for CVSNT
-Group: Development/tools
-Requires: cvsnt
-%description protocol-gserver
-CVSNT (Concurrent Version System) is a version control system which can
-record the history of your files (usually, but not always, source
-code). CVSNT only stores the differences between versions, instead of
-every version of every file you've ever created. CVSNT also keeps a log
-of who, when and why changes occurred.
-
-CVSNT is very helpful for managing releases and controlling the
-concurrent editing of source files among multiple authors. Instead of
-providing version control for a collection of files in a single
-directory, CVSNT provides version control for a hierarchical collection
-of directories consisting of revision controlled files.  These
-directories and files can then be combined together to form a software
-release.
-
-This is the gserver protocol library for CVSNT.
-
-%package protocol-sserver
-Summary: SSL (sserver) support for CVSNT
-Group: Development/tools
-Requires: cvsnt
-%description protocol-sserver
-CVSNT (Concurrent Version System) is a version control system which can
-record the history of your files (usually, but not always, source
-code). CVSNT only stores the differences between versions, instead of
-every version of every file you've ever created. CVSNT also keeps a log
-of who, when and why changes occurred.
-
-CVSNT is very helpful for managing releases and controlling the
-concurrent editing of source files among multiple authors. Instead of
-providing version control for a collection of files in a single
-directory, CVSNT provides version control for a hierarchical collection
-of directories consisting of revision controlled files.  These
-directories and files can then be combined together to form a software
-release.
-
-This is the sserver protocol library for CVSNT.
 
 %prep
 %setup -q
-
+%setup -q -T -D -a 1
 %build
-%configure --mandir=%{_mandir} --disable-postgres
+cd zlib-1.2.8
+./configure --prefix=/tmp/zlib --libdir=%{_libdir}/cvsnt/zlib --sharedlibdir=%{_libdir}/cvsnt/zlib
+%__make -j4
+cd ..
+export CPPFLAGS="-I$(pwd)/zlib-1.2.8"
+export PKG_CONFIG_PATH="$(pwd)/zlib-1.2.8"
+export LD_LIBRARY_PATH="$(pwd)/ca_blobs_fs/.libs:$(pwd)/blake3/.libs:$LD_LIBRARY_PATH"
 
-make
+autoreconf -if
+scl enable devtoolset-9 '%configure  \
+        --prefix=/usr \
+        --enable-pam \
+        --enable-server \
+        --enable-pserver \
+        --enable-ext \
+        --disable-mdns \
+        --disable-mysql \
+        --disable-postgres \
+        --disable-sqlite \
+        --enable-64bit'
+
+scl enable devtoolset-9 '%__make -j4'
+cd tools
+scl enable devtoolset-9 '%__make -j4'
+scl enable devtoolset-9 'g++ -std=c++11 simplelock.cpp -o simplelock'
+scl enable devtoolset-9 'g++ -std=c++11 unlock.cpp -o unlock'
+cd ..
+cd doc
+sed "s/__VERSION__/%{version}/" < cvs.dbk > cvs2.dbk
+sed "s/__VERSION__/%{version}/" < cvsclient.dbk > cvsclient2.dbk
+xmlto --skip-validation -o html_cvs html cvs2.dbk
+xmlto --skip-validation -o html_cvsclient html cvsclient2.dbk
 
 %install
 rm -rf $RPM_BUILD_ROOT
-make DESTDIR=$RPM_BUILD_ROOT install-strip
-gzip $RPM_BUILD_ROOT%{_mandir}/man1/*
-gzip $RPM_BUILD_ROOT%{_mandir}/man5/*
-mkdir -p $RPM_BUILD_ROOT/etc/init.d
-mkdir -p $RPM_BUILD_ROOT/etc/pam.d
-mkdir -p $RPM_BUILD_ROOT/etc/xinetd.d
-install redhat/cvslockd $RPM_BUILD_ROOT/etc/init.d/cvslockd
-install redhat/cvsnt-pam $RPM_BUILD_ROOT/etc/pam.d/cvsnt
-install redhat/cvsnt-xinetd $RPM_BUILD_ROOT/etc/xinetd.d/cvsnt
-ln -sf cvsnt %{_bindir}/cvs
+install -d $RPM_BUILD_ROOT{%{_sysconfdir}/{pam.d,xinetd.d,sysconfig,systemd/system},%{_cvs_root}}
+
+%{__make} install -j1 \
+  DESTDIR=$RPM_BUILD_ROOT
+
+cd tools
+%{__make} install -j1 \
+  DESTDIR=$RPM_BUILD_ROOT
+cd ..
+cd zlib-1.2.8
+%{__make} install -j1 \
+  DESTDIR=$RPM_BUILD_ROOT
+rm -rf $RPM_BUILD_ROOT/tmp/zlib
+rm -rf $RPM_BUILD_ROOT/%{_libdir}/cvsnt/zlib/pkgconfig
+cd ..
+install -m 755 -d $RPM_BUILD_ROOT%{_sbindir}
+install -m 755 tools/unlock $RPM_BUILD_ROOT%{_sbindir}/%{name}-unlock
+install -m 755 tools/simplelock $RPM_BUILD_ROOT%{_sbindir}/%{name}-simplelock
+install redhat/cvsnt.xinetd $RPM_BUILD_ROOT%{_sysconfdir}/xinetd.d/%{name}
+install redhat/cvslockd.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cvslockd.service
+install redhat/cvsnt.pam $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/cvsnt
+install redhat/cafs $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/cafs
+install redhat/cafs.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cafs.service
+install redhat/cafs-proxy $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/cafs-proxy
+install redhat/cafs-proxy.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cafs-proxy.service
+mv $RPM_BUILD_ROOT%{_sysconfdir}/cvsnt/PServer{.example,}
+mv $RPM_BUILD_ROOT%{_sysconfdir}/cvsnt/Plugins{.example,}
+
 
 %clean
 rm -rf $RPM_BUILD_ROOT
 
+
+%post -p /sbin/ldconfig
+%postun -p /sbin/ldconfig
+
+
+
+%pre server
+if [[ `/usr/bin/id %{_system_user} &> /dev/null; echo $?` > 0 ]]; then
+    /usr/sbin/groupadd -f -g 52 %{_system_user}
+    /usr/sbin/useradd -g %{_system_user} -r -c "System CVSNT user" -d %{_cvs_root} -u 52 -s /bin/false %{_system_user}
+fi
+%post server
+/usr/bin/systemctl daemon-reload
+if [[ `/sbin/service xinetd status &> /dev/null; echo $?` == 0 ]]; then
+  /sbin/service  xinetd reload &> /dev/null
+fi
+
+%postun server
+/usr/bin/systemctl daemon-reload
+
+%post cafs
+/usr/bin/systemctl daemon-reload
+
+%postun cafs
+/usr/bin/systemctl daemon-reload
+
+%post proxy
+/usr/bin/systemctl daemon-reload
+
+%postun proxy
+/usr/bin/systemctl daemon-reload
+
+%post cvslockd
+/usr/bin/systemctl daemon-reload
+
+%postun cvslockd
+/usr/bin/systemctl daemon-reload
+
 %files
-%defattr(-,root,root)
-%doc FAQ README
-%doc doc/RCSFILES
-%{_bindir}
-%{_mandir}
-%{_prefix}/lib/lib*
-%{_prefix}/lib/cvsnt/mdns/*
-%{_prefix}/lib/cvsnt/xdiff/*
-%{_prefix}/lib/cvsnt/triggers/*
-%{_prefix}/lib/cvsnt/protocols/ext*
-%{_prefix}/lib/cvsnt/protocols/pserver*
-%{_prefix}/lib/cvsnt/protocols/server*
-%{_prefix}/lib/cvsnt/protocols/sspi*
-%{_prefix}/lib/cvsnt/protocols/sync*
-%{_prefix}/lib/cvsnt/protocols/enum*
-%{_sysconfdir}/cvsnt
-%{_sysconfdir}/init.d/cvslockd
-%{_sysconfdir}/pam.d/cvsnt
-%{_sysconfdir}/xinetd.d/cvsnt
+%defattr(644,root,root,755)
+%dir %{_sysconfdir}/cvsnt
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/cvsnt/*
+%{_bindir}/cvs
+%attr(755,root,root) %{_bindir}/cvsnt
+%attr(755,root,root) %{_bindir}/cvsscript
+%dir %{_libdir}/cvsnt/protocols
+%attr(755,root,root) %{_libdir}/cvsnt/protocols/*.so
+%attr(755,root,root) %{_libdir}/cvsnt/protocols/*.la
+%dir %{_libdir}/cvsnt/triggers
+%attr(755,root,root) %{_libdir}/cvsnt/triggers/*.so
+%attr(755,root,root) %{_libdir}/cvsnt/triggers/*.la
+%dir %{_libdir}/cvsnt/xdiff
+%attr(755,root,root) %{_libdir}/cvsnt/xdiff/*.so
+%attr(755,root,root) %{_libdir}/cvsnt/xdiff/*.la
+%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.a
+%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so
+%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so.*
+%attr(755,root,root) %{_libdir}/libcvsapi-%{version}.so
+%attr(755,root,root) %{_libdir}/libcvsapi.la
+%attr(755,root,root) %{_libdir}/libcvstools-%{version}.so
+%attr(755,root,root) %{_libdir}/libcvstools.la
+%attr(755,root,root) %{_libdir}/libblake3-%{version}.so
+%attr(755,root,root) %{_libdir}/libblake3.la
+%attr(755,root,root) %{_libdir}/libca_blobs_fs-%{version}.so
+%attr(755,root,root)  %{_libdir}/libca_blobs_fs.la
+%attr(755,root,root) %{_libdir}/libkv_client_lib-%{version}.so
+%attr(755,root,root)  %{_libdir}/libkv_client_lib.la
 
-%files database-mysql
-%{_prefix}/lib/cvsnt/database/mysql*
+%{_libdir}/libblake3.so
+%{_libdir}/libca_blobs_fs.so
+%{_libdir}/libkv_client_lib.so
+%{_libdir}/libcvsapi.so
+%{_libdir}/libcvstools.so
+%{_mandir}/man[15]/*
 
-%files database-oracle
-%{_prefix}/lib/cvsnt/database/oracle*
+%files server
+%defattr(644,root,root,755)
+%attr(770,root,cvs) %dir %{_cvs_root}
+%attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/pam.d/cvsnt
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/xinetd.d/cvsnt
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/sysconfig/cafs
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemd/system/cafs.service
 
-%files database-odbc
-%{_prefix}/lib/cvsnt/database/odbc*
+%files cafs-tools
+%defattr(755,root,root,755)
+%attr(755,root,root) %{_bindir}/blake3_calc
+%attr(755,root,root) %{_bindir}/gc_blobs
+%attr(755,root,root) %{_bindir}/convert_to_blob
+%attr(755,root,root) %{_bindir}/rcs_bin_convert
 
-%files database-sqlite
-%{_prefix}/lib/cvsnt/database/sqlite*
+%files cafs
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/cafs_server
+%attr(755,root,root) %{_bindir}/repack_blobs
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/sysconfig/cafs
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemd/system/cafs.service
 
-%files protocol-gserver
-%{_prefix}/lib/cvsnt/protocols/gserver*
+%files proxy
+%defattr(644,root,root,755)
+%attr(755,root,root)  %{_bindir}/cafs_proxy_server
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/sysconfig/cafs-proxy
+%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemd/system/cafs-proxy.service
 
-%files protocol-sserver
-%{_prefix}/lib/cvsnt/protocols/sserver*
+%files cvslockd
+%defattr(644,root,root,755)
+%attr(755,root,root) %{_bindir}/cvslockd
+%attr(754,root,root) %{_sysconfdir}/systemd/system/cvslockd.service
+%attr(754,root,root) %{_sbindir}/%{name}-simplelock
+%attr(754,root,root) %{_sbindir}/%{name}-unlock
+%define date  %(echo `LC_ALL="C" date +"%a %b %d %Y"`)
+
+%files docs
+%doc doc/html_cvsclient
+%doc AUTHORS README
+%doc triggers/examples/*.txt
+%doc doc/html_cvs
+
 
 %changelog
-* Tue Jan  9 2006 Tony Hoyle <tony.hoyle@march-hare.com>
-- Added requires: lines to subpackages
+* Wed Apr 14 2021 Ilya Volnistov <i.volnistov@gaijijn.team> - 3.5.05.7699
+- Separate packages docs server/cafs/proxy/cafs tools 
 
-* Thu Aug 18 2005 Tony Hoyle <tmh@nodomain.org>
-- Updated for cvsnt 2.5.02
-  Created sub packages for gserver/sserver & databases.
+* Wed Dec 23 2020 Maxim Markov <m.markov@gaijijn.team> - 3.5.05.7607
+- New G-CVSNT
 
-* Thu Jul 29 2004 Tony Hoyle <tmh@nodomain.org>
-- Updated for cvsnt 2.0.51
+* Mon Oct 16 2017 Ilya Volnstov <i.volnistov@gaijin.ru> - 2.5.05.3744-3
+- Fix cvsconvert now converts files with any size
 
-* Wed Feb  4 2004 Alon Ziv <alonz@emblazesemi.com>
-- Updated for cvsnt 2.0.24
+* Wed Aug 06 2014 Ilya Volnstov <i.volnistov@gaijin.ru> - 2.5.05.3744-1
+- Fix init Script
+- Workaround add missing libpcreposix.pc for pkg-config in rhel6
+- Update to commit e6b674ca8998c52eb6f795783abf6ffb75203cac
 
-* Sat Feb 23 2002 Tony Hoyle <tmh@magenta-netlogic.com>
-- Modified for cvsnt
-
-* Fri Aug 17 2001 Corey Minyard <minyard@acm.org>
-- Rewrote the spec file to make it sane.
-
-* Thu Apr 26 2001 Derek Price <dprice@collab.net>
-- avoid picking up %{_infodir}/dir.
-- remove krb5-configs from requirements since RedHat doesn't use it anymore.
-
-* Wed Nov 29 2000 Derek Price <dprice@openavenue.com>
-- Use _infodir consistently for info pages and _bindir for binaries.
-- use more succinct file list
-
-* Wed Oct 18 2000 Derek Price <dprice@openavenue.com>
-- Make the Kerberos binary a subpackage.
-- fix the info & man pages too
-
-* Wed Sep 27 2000 Derek Price <dprice@openavenue.com>
-- updated for cvs 1.11
-
-* Wed Mar  1 2000 Nalin Dahyabhai <nalin@redhat.com>
-- make kerberos support conditional at build-time
-
-* Wed Mar  1 2000 Bill Nottingham <notting@redhat.com>
-- integrate kerberos support into main tree
-
-* Mon Feb 14 2000 Nalin Dahyabhai <nalin@redhat.com>
-- build with gssapi auth (--with-gssapi, --with-encryption)
-- apply patch to update libs to krb5 1.1.1
-
-* Fri Feb 04 2000 Cristian Gafton <gafton@redhat.com>
-- fix the damn info pages too while we're at it.
-- fix description
-- man pages are compressed
-- make sure %post and %preun work okay
-
-* Sun Jan 9 2000  Jim Kingdon <http://bugzilla.redhat.com/bugzilla>
-- update to 1.10.7.
-
-* Wed Jul 14 1999 Jim Kingdon <http://developer.redhat.com>
-- add the patch to make 1.10.6 usable
-  (http://www.cyclic.com/cvs/dev-known.html).
-
-* Tue Jun  1 1999 Jeff Johnson <jbj@redhat.com>
-- update to 1.10.6.
-
-* Sun Mar 21 1999 Cristian Gafton <gafton@redhat.com> 
-- auto rebuild in the new build environment (release 2)
-
-* Mon Feb 22 1999 Jeff Johnson <jbj@redhat.com>
-- updated text in spec file.
-
-* Mon Feb 22 1999 Jeff Johnson <jbj@redhat.com>
-- update to 1.10.5.
-
-* Tue Feb  2 1999 Jeff Johnson <jbj@redhat.com>
-- update to 1.10.4.
-
-* Tue Oct 20 1998 Jeff Johnson <jbj@redhat.com>
-- update to 1.10.3.
-
-* Mon Sep 28 1998 Jeff Johnson <jbj@redhat.com>
-- update to 1.10.2.
-
-* Wed Sep 23 1998 Jeff Johnson <jbj@redhat.com>
-- remove trailing characters from rcs2log mktemp args
-
-* Thu Sep 10 1998 Jeff Johnson <jbj@redhat.com>
-- update to 1.10.1
-
-* Mon Aug 31 1998 Jeff Johnson <jbj@redhat.com>
-- fix race conditions in cvsbug/rcs2log
-
-* Sun Aug 16 1998 Jeff Johnson <jbj@redhat.com>
-- update to 1.10.
-
-* Wed Aug 12 1998 Jeff Johnson <jbj@redhat.com>
-- update to 1.9.30.
-
-* Mon Jun 08 1998 Prospector System <bugs@redhat.com>
-- translations modified for de, fr
-
-* Mon Jun  8 1998 Jeff Johnson <jbj@redhat.com>
-- build root
-- update to 1.9.28
-
-* Mon Apr 27 1998 Prospector System <bugs@redhat.com>
-- translations modified for de, fr, tr
-
-* Wed Oct 29 1997 Otto Hammersmith <otto@redhat.com>
-- added install-info stuff
-- added changelog section
