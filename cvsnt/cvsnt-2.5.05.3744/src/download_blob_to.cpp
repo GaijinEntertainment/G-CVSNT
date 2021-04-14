@@ -31,7 +31,7 @@ static bool process_blob_task(BlobNetworkProcessor *download_processor, BlobNetw
   return upload_blob_ref_file(upload_processor, task);
 }
 
-static std::atomic<int> isOK = 1;
+static std::atomic<int> hasErrors;
 extern void cvs_flusherr();
 struct BackgroundProcessor
 {
@@ -41,7 +41,7 @@ struct BackgroundProcessor
   }
   void finishDownloads()
   {
-    if (!isOK.load())
+    if (hasErrors.load())
     {
       queue.cancel();
       cvs_flusherr();
@@ -57,8 +57,8 @@ struct BackgroundProcessor
   static void processor_thread_loop(BackgroundProcessor *processors, BlobNetworkProcessor *download_processor, BlobNetworkProcessor *upload_processor)
   {
     BlobTask task;
-    while (isOK.load() == 1 && processors->queue.wait_and_pop(task))
-      isOK.fetch_and(process_blob_task(download_processor, upload_processor, task) ? 1 : 0);
+    while (hasErrors.load() == 0 && processors->queue.wait_and_pop(task))
+      hasErrors.fetch_or(process_blob_task(download_processor, upload_processor, task) ? 0 : 1);
   }
   void emplace(BlobTask &&task)
   {
