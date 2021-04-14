@@ -4,6 +4,7 @@
 #include <string>
 #include "concurrent_queue.h"
 #include <thread>
+#include <atomic>
 #include "blob_network_processor.h"
 #include "../ca_blobs_fs/streaming_blobs.h"
 
