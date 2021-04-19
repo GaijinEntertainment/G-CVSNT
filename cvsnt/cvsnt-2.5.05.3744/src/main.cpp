@@ -68,7 +68,7 @@ const char *remote_init_root;
 int noexec = 0;
 int atomic_commits = 0;
 int no_reverse_dns = 0;
-int server_io_socket = 0;
+int server_io_socket = -1;
 int force_network_share = 0;
 int locale_active = 1;
 const char *force_locale = NULL;
@@ -1263,7 +1263,7 @@ int main (int argc, char **argv)
 	{
 		_fmode = _O_BINARY; /* In Win32 server pretend we are unix by setting the default to binary */
 		/* we must assume that the connection is expected to be binary. */
-		if(!server_io_socket)
+		if(server_io_socket != -1)
 		{
 			fflush(stdout);
 			fflush(stdin);

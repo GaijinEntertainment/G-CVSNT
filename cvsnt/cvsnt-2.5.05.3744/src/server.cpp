@@ -539,7 +539,7 @@ static int client_protocol_buffer_output (void *closure, const char *data, int h
 	if(dat->protocol && dat->protocol->server_write_data)
 		nbytes = dat->protocol->server_write_data (dat->protocol, data, have);
 	else
-		nbytes = write (dat->server_io_socket?dat->server_io_socket:STDOUT_FILENO, data, have);
+		nbytes = write (dat->server_io_socket != -1 ? dat->server_io_socket:STDOUT_FILENO, data, have);
 
 	if (nbytes <= 0)
 	{
@@ -589,7 +589,7 @@ static int client_protocol_buffer_shutdown (void *closure)
 	if(data->protocol && data->protocol->server_shutdown)
     {
 		data->protocol->server_shutdown(data->protocol);
-	} else if(data->server_io_socket)
+	} else if(data->server_io_socket != -1)
 	{
 #ifdef _WIN32
 		shutdown(_get_osfhandle(data->server_io_socket),2);
