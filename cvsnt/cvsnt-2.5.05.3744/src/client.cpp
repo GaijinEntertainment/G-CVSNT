@@ -5176,7 +5176,7 @@ struct send_data
 	int case_sensitive;
 };
 
-
+extern int backup_local_files;
 /* Deal with one file.  */
 static int send_fileproc (void *callerdat, struct file_info *finfo)
 {
@@ -5317,14 +5317,17 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 
 			if (args->backup_modified)
 			{
-				char *bakname;
-				bakname = backup_file (filename, vers->vn_user);
-				/* This behavior is sufficiently unexpected to
-				justify overinformativeness, I think. */
-				if (! really_quiet)
-					printf ("(Locally modified %s moved to %s)\n",
-							filename, bakname);
-				xfree (bakname);
+                if (backup_local_files)
+                {
+    				char *bakname;
+    				bakname = backup_file (filename, vers->vn_user);
+    				/* This behavior is sufficiently unexpected to
+    				justify overinformativeness, I think. */
+    				if (! really_quiet)
+    					printf ("(Locally modified %s moved to %s)\n",
+    							filename, bakname);
+    				xfree (bakname);
+                }
 				client_overwrite_existing = 1;
 			}
 		}

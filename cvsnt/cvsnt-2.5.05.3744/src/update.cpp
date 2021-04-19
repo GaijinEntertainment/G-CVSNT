@@ -96,6 +96,7 @@ static const char *tag_update_dir;
 static const char *join_rev1, *date_rev1;
 static const char *join_rev2, *date_rev2;
 static int aflag = 0;
+int backup_local_files = 1;
 static int toss_local_changes;
 static int force_tag_match = 1;
 static int update_build_dirs;
@@ -144,6 +145,7 @@ static const char *const update_usage[] =
     "\t-r rev\tUpdate using specified revision/tag (is sticky).\n",
 	"\t-S\tSelect between conflicting case sensitive names.\n",
 	"\t-t\tUpdate using last checkin time.\n",
+    "\t-n\tDo not backup local files(silently remove). Irreversibly deletes locally modified files.\n",
     "\t-W spec\tWrappers specification line (! to reset).\n",
     "(Specify the --help global option for a list of other help options)\n",
     NULL
@@ -163,7 +165,7 @@ int update (int argc, char **argv)
 
     /* parse the args */
     optind = 0;
-	while ((c = getopt (argc, argv, "+AB:pCcPflRQqduk:r:D:j:bmI:W:3Stxe::i")) != -1)
+	while ((c = getopt (argc, argv, "+AB:pCcPflRQqdnuk:r:D:j:bmI:W:3Stxe::i")) != -1)
     {
 	switch (c)
 	{
@@ -179,6 +181,9 @@ int update (int argc, char **argv)
 			break;
 	    case 'C':
 		toss_local_changes = 1;
+		break;
+        case 'n':
+		backup_local_files = 0;
 		break;
 		case 'c':
 		update_baserev = 1;
@@ -722,15 +727,17 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 			retval = 0;
             if (toss_local_changes)
             {
-                char *bakname;
-                bakname = backup_file (finfo->file, vers->vn_user);
-                /* This behavior is sufficiently unexpected to
-                    justify overinformativeness, I think. */
-                if ((! really_quiet) && (! server_active))
-                    (void) printf ("(Locally modified %s moved to %s)\n",
-                                    finfo->file, bakname);
-                xfree (bakname);
-
+                if (backup_local_files)
+                {
+                    char *bakname;
+                    bakname = backup_file (finfo->file, vers->vn_user);
+                    /* This behavior is sufficiently unexpected to
+                        justify overinformativeness, I think. */
+                    if ((! really_quiet) && (! server_active))
+                        (void) printf ("(Locally modified %s moved to %s)\n",
+                                        finfo->file, bakname);
+                    xfree (bakname);
+                }
                 /* The locally modified file is still present, but
                     it will be overwritten by the repository copy
                     after this. */
