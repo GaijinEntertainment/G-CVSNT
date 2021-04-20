@@ -1,4 +1,10 @@
 %define   _system_user    cvs
+%if 0%{?rhel} == 7
+%define   _toolset_name     devtoolset-9
+%else
+%define   _toolset_name     gcc-toolset-9
+%endif
+
 Summary:  Concurrent Versioning System
 Name:     cvsnt
 Version:  @VERSION@
@@ -9,7 +15,6 @@ Source0:  %{name}-%{version}.tar.gz
 Source1:  zlib-1.2.8.tar.gz
 URL:      https://github.com/GaijinEntertainment/G-CVSNT
 
-BuildRequires:  gcc-c++
 BuildRequires:  pcre-devel
 BuildRequires:  libxml2-devel
 BuildRequires:  openssl-devel
@@ -19,7 +24,9 @@ BuildRequires:  dh-autoreconf
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  pam-devel
 BuildRequires:  libtool
-BuildRequires:  devtoolset-9
+BuildRequires:  %{_toolset_name}-gcc
+BuildRequires:  %{_toolset_name}-gcc-c++
+BuildRequires:  %{_toolset_name}-toolchain
 BuildRequires:  glibc-static
 BuildRequires:  libstdc++-static
 
@@ -95,15 +102,16 @@ Documentation for CVSNT
 %setup -q -T -D -a 1
 %build
 cd zlib-1.2.8
-./configure --prefix=/tmp/zlib --libdir=%{_libdir}/cvsnt/zlib --sharedlibdir=%{_libdir}/cvsnt/zlib
-%__make -j4
+scl enable %{_toolset_name} './configure --prefix=/tmp/zlib --libdir=%{_libdir}/cvsnt/zlib --sharedlibdir=%{_libdir}/cvsnt/zlib'
+scl enable %{_toolset_name} '%__make -j4'
 cd ..
 export CPPFLAGS="-I$(pwd)/zlib-1.2.8"
 export PKG_CONFIG_PATH="$(pwd)/zlib-1.2.8"
 export LD_LIBRARY_PATH="$(pwd)/ca_blobs_fs/.libs:$(pwd)/blake3/.libs:$LD_LIBRARY_PATH"
+export CXXFLAGS="$(rpm --eval "%{optflags}" | sed 's/-Werror=format-security //')"
 
 autoreconf -if
-scl enable devtoolset-9 '%configure  \
+scl enable %{_toolset_name} '%configure  \
         --prefix=/usr \
         --enable-pam \
         --enable-server \
@@ -115,11 +123,11 @@ scl enable devtoolset-9 '%configure  \
         --disable-sqlite \
         --enable-64bit'
 
-scl enable devtoolset-9 '%__make -j4'
+scl enable %{_toolset_name} '%__make -j4'
 cd tools
-scl enable devtoolset-9 '%__make -j4'
-scl enable devtoolset-9 'g++ -std=c++11 simplelock.cpp -o simplelock'
-scl enable devtoolset-9 'g++ -std=c++11 unlock.cpp -o unlock'
+scl enable %{_toolset_name} '%__make -j4'
+scl enable %{_toolset_name} 'g++ -std=c++11 simplelock.cpp -o simplelock'
+scl enable %{_toolset_name} 'g++ -std=c++11 unlock.cpp -o unlock'
 cd ..
 cd doc
 sed "s/__VERSION__/%{version}/" < cvs.dbk > cvs2.dbk
