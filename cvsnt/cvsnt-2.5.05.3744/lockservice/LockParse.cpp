@@ -307,24 +307,30 @@ bool CloseLockClient(CSocketIOPtr s)
 
 	uint32_t client = stcI->second;
 	int count=0;
-	for(LockMapType::iterator i = LockMap.begin(); i!=LockMap.end();)
-	{
-		if(i->second.owner == client)
-		{
-			count++;
-			LockMap.erase(i++);
-		}
-		else
-			++i;
-	}
 	DEBUG("Destroyed %d locks\n",count);
 	SockToClient.erase(stcI);
     auto &clMap = LockClientMap[client];
 	clMap.state=lcClosed;
 	clMap.endtime=lock_time();
-	if(LockClientMap.size()<=1)
+
+    if (LockClientMap.size() > 1)
+    {
+        for(LockMapType::iterator i = LockMap.begin(); i!=LockMap.end();)
+    	{
+    		if(i->second.owner == client)
+    		{
+    			count++;
+    			LockMap.erase(i);
+                i = LockMap.begin();
+    		}
+    		else
+    			++i;
+    	}
+    }
+    if(LockClientMap.size()<=1)
 	{
 		// No clients, just empty the transaction store
+        LockMap.clear();
 		LockClientMap.clear();
 		TransactionList.clear();
 		DEBUG("No more clients\n");
@@ -579,10 +585,11 @@ bool DoLock(CSocketIOPtr s,uint32_t client, char *param)
 			if(i!=TransactionList.end())
 			{
 				/* This is where atomicity really 'happens' */
+                auto lmClientOwnerIt = LockClientMap.find(i->owner);
 				if(i->owner!=client &&   /* Not us */
-				   LockClientMap.find(i->owner)!=LockClientMap.end() && /* Exists */
-				   TimeIntersects(LockClientMap[i->owner].starttime,LockClientMap[i->owner].endtime,
-					   LockClientMap[client].starttime,LockClientMap[client].endtime)) /* Overlaps us */
+				   lmClientOwnerIt!=LockClientMap.end() && /* Exists */
+				   TimeIntersects(lmClientOwnerIt->second.starttime, lmClientOwnerIt->second.endtime,
+					   lcmI.starttime, lcmI.endtime)) /* Overlaps us */
 				{
 					printf("Found version %s:%s\n",i->branch.c_str(),i->oldversion.c_str());
 					ver[i->branch]=i->oldversion;
@@ -592,7 +599,7 @@ bool DoLock(CSocketIOPtr s,uint32_t client, char *param)
 					if(uFlags&lfWrite)
 					{
 						DEBUG("(#%d) Lock request on %s (%s) (wait for transaction by client %d)\n",(int)client,path,FlagToString(uFlags),(unsigned)i->owner);
-						s->printf("002 WAIT Lock busy|%s|%s|%s\n",LockClientMap[i->owner].user.c_str(),LockClientMap[i->owner].client_host.c_str(),path);
+						s->printf("002 WAIT Lock busy|%s|%s|%s\n",lmClientOwnerIt->second.user.c_str(),lmClientOwnerIt->second.client_host.c_str(),path);
 						return true;
 					}
 				}
@@ -610,7 +617,8 @@ bool DoLock(CSocketIOPtr s,uint32_t client, char *param)
 	else
 	{
 		DEBUG("(#%d) Lock request on %s (%s) (wait for %u)\n",(int)client,path,FlagToString(uFlags),(unsigned)lock_to_wait_for);
-		s->printf("002 busy|%s|%s|%s\n",LockClientMap[LockMap[lock_to_wait_for].owner].user.c_str(),LockClientMap[LockMap[lock_to_wait_for].owner].client_host.c_str(),LockMap[lock_to_wait_for].path.c_str());
+        auto &lmWaitFor = LockMap[lock_to_wait_for];
+		s->printf("002 busy|%s|%s|%s\n",LockClientMap[lmWaitFor.owner].user.c_str(),LockClientMap[lmWaitFor.owner].client_host.c_str(),lmWaitFor.path.c_str());
 	}
 
 	return true;
