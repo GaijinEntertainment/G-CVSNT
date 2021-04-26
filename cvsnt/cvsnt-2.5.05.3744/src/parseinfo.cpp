@@ -41,7 +41,7 @@ int run_trigger(void *param, CALLPROC callproc)
 	{
 #ifdef _WIN32
 		/* We do this here so it's done before the CRT in the DLL/COM object initialises */
-		if(server_active && server_io_socket != -1)
+		if(server_active && server_io_socket)
 		{
 			SetStdHandle(STD_INPUT_HANDLE,(HANDLE)_get_osfhandle(server_io_socket));
 			SetStdHandle(STD_OUTPUT_HANDLE,(HANDLE)_get_osfhandle(server_io_socket));
