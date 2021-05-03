@@ -20,7 +20,6 @@ BuildRequires:  libxml2-devel
 BuildRequires:  openssl-devel
 BuildRequires:  libzstd-devel
 BuildRequires:  xmlto
-BuildRequires:  dh-autoreconf
 BuildRequires:  libtool-ltdl-devel
 BuildRequires:  pam-devel
 BuildRequires:  libtool
@@ -29,7 +28,7 @@ BuildRequires:  %{_toolset_name}-gcc-c++
 BuildRequires:  %{_toolset_name}-toolchain
 BuildRequires:  glibc-static
 BuildRequires:  libstdc++-static
-
+Requires:       %{name}-libs = %{version}-%{release}
 Provides:       cvsnt = %{version}
 Obsoletes:      cvs
 BuildRoot:      %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
@@ -39,17 +38,36 @@ BuildRoot:      %{tmpdir}/%{name}-%{version}-root-%(id -u -n)
 %description
 CVSNT Gaijin (and Gamedev) CVSNT version - modified for large amounts of binary data (typically for gamedev)
 
+%package libs
+Summary:            Libs for cvsnt package
+Group:              Development/Version Control
+
+%description libs
+CVSNT Gaijin libs for cafs and cvsnt servers and client
+
+%package server-commons
+Summary:            User and files for cvsnt servers
+Group:              Development/Version Control
+Requires(pre):      /usr/bin/id
+Requires(pre):      /usr/sbin/groupadd
+Requires(pre):      /usr/sbin/useradd
+Provides:           group(cvs)
+Provides:           user(cvs)
+
+%description server-commons
+CVSNT User and files for servers
+
 %package server
 Summary:            xinetd config files to run CVS server
 Group:              Development/Version Control
-Requires(post):     fileutils
 Requires(pre):      /usr/bin/id
 Requires(pre):      /usr/sbin/groupadd
 Requires(pre):      /usr/sbin/useradd
 Requires(post):     /usr/bin/systemctl
 Requires(preun):    /usr/bin/systemctl
 Requires:           %{name} = %{version}-%{release}
-Requires:           cvslockd = %{version}-%{release}
+Requires:           %{name}-server-commons = %{version}-%{release}
+Requires:           %{name}-cvslockd = %{version}-%{release}
 Requires:           xinetd
 Provides:           group(cvs)
 Provides:           user(cvs)
@@ -69,6 +87,11 @@ CAFS Tools for CVSNT server
 %package cafs
 Summary:            CAFS server
 Group:              Development/Version Control
+Requires(post):     /usr/bin/systemctl
+Requires(preun):    /usr/bin/systemctl
+Requires:           %{name}-server-commons = %{version}-%{release}
+Requires:           %{name}-cafs-tools = %{version}-%{release}
+Requires:           %{name}-libs = %{version}-%{release}
 
 %description cafs
 CAFS server for CVSNT
@@ -76,6 +99,10 @@ CAFS server for CVSNT
 %package proxy
 Summary:            CAFS proxy server
 Group:              Development/Version Control
+Requires(post):     /usr/bin/systemctl
+Requires(preun):    /usr/bin/systemctl
+Requires:           %{name}-server-commons = %{version}-%{release}
+Requires:           %{name}-libs = %{version}-%{release}
 
 %description proxy
 CAFS proxy server for CVSNT
@@ -85,6 +112,8 @@ Summary:            CVS locking daemon
 Group:              Development/Version Control
 Requires(post):     /usr/bin/systemctl
 Requires(preun):    /usr/bin/systemctl
+Requires:           %{name}-server-commons = %{version}-%{release}
+Obsoletes:          cvslockd
 
 %description cvslockd
 CVS locking daemon.
@@ -110,7 +139,7 @@ export PKG_CONFIG_PATH="$(pwd)/zlib-1.2.8"
 export LD_LIBRARY_PATH="$(pwd)/ca_blobs_fs/.libs:$(pwd)/blake3/.libs:$LD_LIBRARY_PATH"
 export CXXFLAGS="$(rpm --eval "%{optflags}" | sed 's/-Werror=format-security //')"
 
-autoreconf -if
+scl enable %{_toolset_name} 'autoreconf -if'
 scl enable %{_toolset_name} '%configure  \
         --prefix=/usr \
         --enable-pam \
@@ -174,16 +203,10 @@ rm -rf $RPM_BUILD_ROOT
 %postun -p /sbin/ldconfig
 
 
-
-%pre server
+%pre server-commons
 if [[ `/usr/bin/id %{_system_user} &> /dev/null; echo $?` > 0 ]]; then
     /usr/sbin/groupadd -f -g 52 %{_system_user}
     /usr/sbin/useradd -g %{_system_user} -r -c "System CVSNT user" -d %{_cvs_root} -u 52 -s /bin/false %{_system_user}
-fi
-%post server
-/usr/bin/systemctl daemon-reload
-if [[ `/sbin/service xinetd status &> /dev/null; echo $?` == 0 ]]; then
-  /sbin/service  xinetd reload &> /dev/null
 fi
 
 %postun server
@@ -223,34 +246,42 @@ fi
 %dir %{_libdir}/cvsnt/xdiff
 %attr(755,root,root) %{_libdir}/cvsnt/xdiff/*.so
 %attr(755,root,root) %{_libdir}/cvsnt/xdiff/*.la
-%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.a
-%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so
-%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so.*
+%attr(755,root,root) %{_libdir}/libcvsapi.so
+%attr(755,root,root) %{_libdir}/libcvstools.so
 %attr(755,root,root) %{_libdir}/libcvsapi-%{version}.so
 %attr(755,root,root) %{_libdir}/libcvsapi.la
 %attr(755,root,root) %{_libdir}/libcvstools-%{version}.so
 %attr(755,root,root) %{_libdir}/libcvstools.la
+%attr(644,root,root) %{_mandir}/man[15]/*
+
+%files libs
+%defattr(755,root,root,755)
 %attr(755,root,root) %{_libdir}/libblake3-%{version}.so
 %attr(755,root,root) %{_libdir}/libblake3.la
 %attr(755,root,root) %{_libdir}/libca_blobs_fs-%{version}.so
-%attr(755,root,root)  %{_libdir}/libca_blobs_fs.la
+%attr(755,root,root) %{_libdir}/libca_blobs_fs.la
 %attr(755,root,root) %{_libdir}/libkv_client_lib-%{version}.so
-%attr(755,root,root)  %{_libdir}/libkv_client_lib.la
+%attr(755,root,root) %{_libdir}/libkv_client_lib.la
+%attr(755,root,root) %{_libdir}/libblake3.so
+%attr(755,root,root) %{_libdir}/libca_blobs_fs.so
+%attr(755,root,root) %{_libdir}/libkv_client_lib.so
 
-%{_libdir}/libblake3.so
-%{_libdir}/libca_blobs_fs.so
-%{_libdir}/libkv_client_lib.so
-%{_libdir}/libcvsapi.so
-%{_libdir}/libcvstools.so
-%{_mandir}/man[15]/*
+%files server-commons
+%defattr(644,root,root,755)
+%dir %{_sysconfdir}/cvsnt
 
 %files server
 %defattr(644,root,root,755)
 %attr(770,root,cvs) %dir %{_cvs_root}
 %attr(644,root,root) %config(noreplace) %verify(not md5 mtime size) /etc/pam.d/cvsnt
+%dir %{_libdir}/cvsnt/zlib
+%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.a
+%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so
+%attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so.*
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/xinetd.d/cvsnt
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/sysconfig/cafs
 %config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemd/system/cafs.service
+
 
 %files cafs-tools
 %defattr(755,root,root,755)
@@ -289,7 +320,7 @@ fi
 
 %changelog
 * Wed Apr 14 2021 Ilya Volnistov <i.volnistov@gaijijn.team> - 3.5.05.7699
-- Separate packages docs server/cafs/proxy/cafs tools 
+- Separate packages docs server/cafs/proxy/cafs tools
 
 * Wed Dec 23 2020 Maxim Markov <m.markov@gaijijn.team> - 3.5.05.7607
 - New G-CVSNT
@@ -301,4 +332,3 @@ fi
 - Fix init Script
 - Workaround add missing libpcreposix.pc for pkg-config in rhel6
 - Update to commit e6b674ca8998c52eb6f795783abf6ffb75203cac
-
