@@ -8,7 +8,7 @@ LOCKFILE=/var/lock/subsys/cvslockd
 PIDFile=/run/cvslockd.pid
 OOMScoreAdjust=-100
 EnvironmentFile=-/etc/sysconfig/cvslockd
-ExecStart=/usr/bin/cvslockd --lockfile "$LOCKFILE" --pidfile "$PIDFile"
+ExecStart=/usr/bin/cvslockd -n
 KillMode=control-group
 Restart=on-failure
 
