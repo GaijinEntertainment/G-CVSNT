@@ -1,0 +1,9 @@
+
+/etc/cvsnt/*
+/etc/pam.d/cvsnt
+/etc/xinetd.d/cvsnt
+/etc/systemd/system/cvsnt-cafs.service
+/etc/default/cvsnt-cafs
+/etc/systemd/system/cvsnt-cafs.service
+/etc/default/cvsnt-proxy
+/etc/systemd/system/cvsnt-proxy.service

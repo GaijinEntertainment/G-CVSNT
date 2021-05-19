@@ -1,0 +1,57 @@
+Source: cvsnt
+Section: vcs
+Priority: optional
+Maintainer: Ilya Volnistov <i.volnistov@gaijin.team>
+Build-Depends: debhelper-compat (= 12), autoconf, g++, libtool, libxml2-dev, libpam0g-dev, libpcre3-dev, pkg-config, zlib1g-dev, libzstd-dev
+Standards-Version: 4.4.1
+Homepage: https://github.com/GaijinEntertainment/G-CVSNT
+Vcs-Browser: https://github.com/GaijinEntertainment/G-CVSNT
+Vcs-Git: https://github.com/GaijinEntertainment/G-CVSNT.git
+
+Package: cvsnt
+Architecture: any
+Depends: cvsnt-libs (= ${binary:Version}), ${shlibs:Depends}, ${misc:Depends}
+Description: Concurrent Versioning System
+ CVSNT Gaijin (and Gamedev) CVSNT version - modified for large amounts of binary data (typically for gamedev)
+
+Package: cvsnt-libs
+Architecture: any
+Description: Concurrent Versioning System
+ CVSNT Gaijin (and Gamedev) CVSNT version - modified for large amounts of binary data (typically for gamedev)
+
+Package: cvsnt-server-commons
+Architecture: any
+Description: User and files for cvsnt servers
+ CVSNT User and files for servers
+
+Package: cvsnt-server
+Architecture: any
+Depends: cvsnt (= ${binary:Version}), cvsnt-server-commons (= ${binary:Version}), cvsnt-cvslockd (= ${binary:Version}), xinetd
+Description: xinetd config files to run CVS server
+ Config files for xinetd that are necessary to run CVS in server
+ mode.
+
+Package: cvsnt-cafs-tools
+Architecture: any
+Depends: cvsnt (= ${binary:Version}), ${misc:Depends}
+Description: CVSNT CAFS Server tools
+ CAFS Tools for CVSNT server
+
+Package: cvsnt-cafs
+Architecture: any
+Depends: cvsnt-cafs-tools (= ${binary:Version}), cvsnt-server-commons (= ${binary:Version})
+Description: CAFS server
+ CAFS server for CVSNT
+
+Package: cvsnt-proxy
+Architecture: any
+Depends: cvsnt (= ${binary:Version}), cvsnt-server-commons (= ${binary:Version})
+Description: CAFS proxy server
+ CAFS proxy server for CVSNT
+
+Package: cvsnt-cvslockd
+Architecture: any
+Depends: cvsnt-server-commons (= ${binary:Version})
+Description: CVS locking daemon
+ CVS locking daemon
+

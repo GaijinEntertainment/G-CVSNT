@@ -1,0 +1,6 @@
+#!/bin/bash
+if   [ "configure" = "$1" ] && [ "." = ".$2" ]; then  shift ; set -- "1" "$@"
+elif [ "configure" = "$1" ] && [ "." != ".$2" ]; then shift ; set -- "2" "$@"
+fi
+
+/usr/bin/systemctl daemon-reload

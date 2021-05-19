@@ -1,0 +1,4 @@
+etc/cvsnt
+usr/lib/cvsnt/protocols
+usr/lib/cvsnt/triggers
+usr/lib/cvsnt/xdiff

@@ -1,3 +1,0 @@
-$MASTER_URL=cvs
-$CACHE_FOLDER=/var/cache/cafs
-$CACHE_SOFT_LIMIT_SIZE=20480

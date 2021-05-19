@@ -1,0 +1,11 @@
+#!/bin/bash
+if   [ "install" = "$1" ]; then
+shift
+set -- "0" "$@"
+if [[ `/usr/bin/id cvs &> /dev/null; echo $?` > 0 ]]; then
+    /usr/sbin/groupadd -f -g 52 cvs
+    /usr/sbin/useradd -g cvs -r -c "System CVSNT user" -d /var/lib/cvs -u 52 -s /bin/false cvs
+fi
+elif [ "update" = "$1" ]; then   shift ; set -- "1" "$@"
+fi
+

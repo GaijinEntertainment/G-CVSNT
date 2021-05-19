@@ -1,0 +1,9 @@
+#!/bin/bash
+if   [ "configure" = "$1" ] && [ "." = ".$2" ]; then shift ; set -- "1" "$@"
+elif [ "configure" = "$1" ] && [ "." != ".$2" ]; then shift ; set -- "2" "$@"
+fi
+if [ "configure" = "$1" ]; then
+    chmod 755 /var/cache/cafs
+    chown cvs:cvs /var/cache/cafs
+fi
+/usr/bin/systemctl daemon-reload
