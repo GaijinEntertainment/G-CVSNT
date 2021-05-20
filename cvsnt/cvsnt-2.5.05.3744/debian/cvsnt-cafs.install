@@ -1,0 +1,4 @@
+usr/bin/cafs_server
+usr/bin/repack_blobs
+etc/default/cvsnt-cafs
+etc/systemd/system/cvsnt-cafs.service

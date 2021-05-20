@@ -48,9 +48,6 @@ CVSNT Gaijin libs for cafs and cvsnt servers and client
 %package server-commons
 Summary:            User and files for cvsnt servers
 Group:              Development/Version Control
-Requires(pre):      /usr/bin/id
-Requires(pre):      /usr/sbin/groupadd
-Requires(pre):      /usr/sbin/useradd
 Provides:           group(cvs)
 Provides:           user(cvs)
 
@@ -60,11 +57,6 @@ CVSNT User and files for servers
 %package server
 Summary:            xinetd config files to run CVS server
 Group:              Development/Version Control
-Requires(pre):      /usr/bin/id
-Requires(pre):      /usr/sbin/groupadd
-Requires(pre):      /usr/sbin/useradd
-Requires(post):     /usr/bin/systemctl
-Requires(preun):    /usr/bin/systemctl
 Requires:           %{name} = %{version}-%{release}
 Requires:           %{name}-server-commons = %{version}-%{release}
 Requires:           %{name}-cvslockd = %{version}-%{release}
@@ -87,8 +79,6 @@ CAFS Tools for CVSNT server
 %package cafs
 Summary:            CAFS server
 Group:              Development/Version Control
-Requires(post):     /usr/bin/systemctl
-Requires(preun):    /usr/bin/systemctl
 Requires:           %{name}-server-commons = %{version}-%{release}
 Requires:           %{name}-cafs-tools = %{version}-%{release}
 Requires:           %{name}-libs = %{version}-%{release}
@@ -99,8 +89,6 @@ CAFS server for CVSNT
 %package proxy
 Summary:            CAFS proxy server
 Group:              Development/Version Control
-Requires(post):     /usr/bin/systemctl
-Requires(preun):    /usr/bin/systemctl
 Requires:           %{name}-server-commons = %{version}-%{release}
 Requires:           %{name}-libs = %{version}-%{release}
 
@@ -110,8 +98,6 @@ CAFS proxy server for CVSNT
 %package cvslockd
 Summary:            CVS locking daemon
 Group:              Development/Version Control
-Requires(post):     /usr/bin/systemctl
-Requires(preun):    /usr/bin/systemctl
 Requires:           %{name}-server-commons = %{version}-%{release}
 Obsoletes:          cvslockd
 
@@ -185,12 +171,12 @@ install -m 755 -d $RPM_BUILD_ROOT%{_sbindir}
 install -m 755 tools/unlock $RPM_BUILD_ROOT%{_sbindir}/%{name}-unlock
 install -m 755 tools/simplelock $RPM_BUILD_ROOT%{_sbindir}/%{name}-simplelock
 install redhat/cvsnt.xinetd $RPM_BUILD_ROOT%{_sysconfdir}/xinetd.d/%{name}
-install redhat/cvslockd.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cvslockd.service
+install redhat/cvsnt-cvslockd.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cvsnt-cvslockd.service
 install redhat/cvsnt.pam $RPM_BUILD_ROOT%{_sysconfdir}/pam.d/cvsnt
-install redhat/cafs $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/cafs
-install redhat/cafs.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cafs.service
-install redhat/cafs-proxy $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/cafs-proxy
-install redhat/cafs-proxy.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cafs-proxy.service
+install redhat/cvsnt-cafs $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/cvsnt-cafs
+install redhat/cvsnt-cafs.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cvsnt-cafs.service
+install redhat/cvsnt-proxy $RPM_BUILD_ROOT%{_sysconfdir}/sysconfig/cvsnt-proxy
+install redhat/cvsnt-proxy.service $RPM_BUILD_ROOT%{_sysconfdir}/systemd/system/cvsnt-proxy.service
 mv $RPM_BUILD_ROOT%{_sysconfdir}/cvsnt/PServer{.example,}
 mv $RPM_BUILD_ROOT%{_sysconfdir}/cvsnt/Plugins{.example,}
 
@@ -233,7 +219,6 @@ fi
 %files
 %defattr(644,root,root,755)
 %dir %{_sysconfdir}/cvsnt
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/cvsnt/*
 %{_bindir}/cvs
 %attr(755,root,root) %{_bindir}/cvsnt
 %attr(755,root,root) %{_bindir}/cvsscript
@@ -253,6 +238,7 @@ fi
 %attr(755,root,root) %{_libdir}/libcvstools-%{version}.so
 %attr(755,root,root) %{_libdir}/libcvstools.la
 %attr(644,root,root) %{_mandir}/man[15]/*
+%config(noreplace) %{_sysconfdir}/cvsnt/*
 
 %files libs
 %defattr(755,root,root,755)
@@ -278,9 +264,7 @@ fi
 %attr(755,root,root) %{_libdir}/cvsnt/zlib/*.a
 %attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so
 %attr(755,root,root) %{_libdir}/cvsnt/zlib/*.so.*
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/xinetd.d/cvsnt
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/sysconfig/cafs
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemd/system/cafs.service
+%config(noreplace) %{_sysconfdir}/xinetd.d/cvsnt
 
 
 %files cafs-tools
@@ -294,19 +278,19 @@ fi
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/cafs_server
 %attr(755,root,root) %{_bindir}/repack_blobs
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/sysconfig/cafs
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemd/system/cafs.service
+%config(noreplace) %{_sysconfdir}/sysconfig/cvsnt-cafs
+%config(noreplace) %{_sysconfdir}/systemd/system/cvsnt-cafs.service
 
 %files proxy
 %defattr(644,root,root,755)
 %attr(755,root,root)  %{_bindir}/cafs_proxy_server
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/sysconfig/cafs-proxy
-%config(noreplace) %verify(not md5 mtime size) %{_sysconfdir}/systemd/system/cafs-proxy.service
+%config(noreplace) %{_sysconfdir}/sysconfig/cvsnt-proxy
+%config(noreplace) %{_sysconfdir}/systemd/system/cvsnt-proxy.service
 
 %files cvslockd
 %defattr(644,root,root,755)
 %attr(755,root,root) %{_bindir}/cvslockd
-%attr(754,root,root) %{_sysconfdir}/systemd/system/cvslockd.service
+%attr(754,root,root) %{_sysconfdir}/systemd/system/cvsnt-cvslockd.service
 %attr(754,root,root) %{_sbindir}/%{name}-simplelock
 %attr(754,root,root) %{_sbindir}/%{name}-unlock
 %define date  %(echo `LC_ALL="C" date +"%a %b %d %Y"`)

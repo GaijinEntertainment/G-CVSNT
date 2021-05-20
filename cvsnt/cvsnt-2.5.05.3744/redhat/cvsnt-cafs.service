@@ -4,13 +4,14 @@ After=network.target
 
 [Service]
 Type=simple
-PIDFile=/run/cafs.pid
+PIDFile=/run/cvsnt-cafs.pid
 LimitNOFILE=128000
 OOMScoreAdjust=-100
-EnvironmentFile=-/etc/sysconfig/cafs
+EnvironmentFile=-/etc/sysconfig/cvsnt-cafs
 ExecStart=/usr/bin/cafs_server $DIR_FOR_ROOTS $ALLOW_TRUST $PORT $MAX_PEND_CONN
+User=cvs
+Group=cvs
 Restart=on-failure
-KillMode=control-group
 KillSignal=SIGINT
 
 
