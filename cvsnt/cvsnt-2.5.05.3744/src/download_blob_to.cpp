@@ -255,7 +255,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     if (tmp)
       fclose(tmp);
     unlink_file(temp_filename.c_str());
-    char buf[256];std::snprintf(buf, sizeof(buf), "can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
+    char buf[256];std::snprintf(buf, sizeof(buf), "ERROR: can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
     cvs_outerr(buf, 0);
     return false;
   }
@@ -272,7 +272,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     {
       unlink_file(temp_filename.c_str());
       char buf[256];std::snprintf(buf, sizeof(buf),
-        "downloaded hash <%.64s> is different from requested <%.64s> for <%s>\n", recievedHash, task.encoded_hash.data(), task.message.c_str());
+        "ERROR: downloaded hash <%.64s> is different from requested <%.64s> for <%s>\n", recievedHash, task.encoded_hash.data(), task.message.c_str());
       cvs_outerr(buf, 0);
       return false;
     }
@@ -282,7 +282,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     {
       unlink_file(temp_filename.c_str());
       char buf[256];std::snprintf(buf, sizeof(buf),
-        "file <%s> has size of %lld after downloading, while we downloaded %lld\n", temp_filename.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
+        "ERROR: file <%s> has size of %lld after downloading, while we downloaded %lld\n", temp_filename.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
       cvs_outerr(buf, 0);
       return false;
     }
@@ -301,7 +301,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     if (fsz != info.realUncompressedSize)
     {
       char buf[256];std::snprintf(buf, sizeof(buf),
-        "file <%s> has size of %lld after downloading, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
+        "ERROR: file <%s> has size of %lld after downloading, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
       cvs_outerr(buf, 0);
       return false;
     }
