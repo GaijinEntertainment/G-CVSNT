@@ -190,6 +190,7 @@ static inline FILE* download_blob(intptr_t &sock, std::string &tmpfn, const char
     });
   if (!ok || pulledSz <= 0)
   {
+    fprintf(stderr, "Couldn't download <%.64s> from master. pulled = %lld\n", hhex, pulledSz);
     fclose(tmpf);
     blob_fileio_unlink_file(tmpfn.c_str());
     tmpf = NULL;
