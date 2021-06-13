@@ -111,6 +111,9 @@ extern void get_download_source(const char *&master_url, const char *&proxy_down
 extern BlobNetworkProcessor *get_http_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
 extern BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
 
+static std::string master_url_str, master_user, master_passwd;
+static int master_port = 2403;
+
 void BackgroundProcessor::init()
 {
   if (is_inited())
@@ -120,6 +123,7 @@ void BackgroundProcessor::init()
   const char *upload_url; int upload_port;
   int threads_count = std::min(8, std::max(1, (int)std::thread::hardware_concurrency()-1));//limit concurrency to fixed
   get_download_source(master_url, download_url, download_port, upload_url, upload_port, user, passwd, repo, threads_count);
+  master_url_str = master_url;
   base_repo = repo;
   if (base_repo[0] != '/')
     base_repo = "/" + base_repo;
@@ -137,17 +141,17 @@ void BackgroundProcessor::init()
       pr = get_kv_processor(download_url, download_port, base_repo.c_str(), user, passwd);
       if (!pr && strcmp(master_url, download_url) != 0)
       {
-        pr = get_kv_processor(master_url, 2403, base_repo.c_str(), user, passwd);
+        pr = get_kv_processor(master_url, master_port, base_repo.c_str(), user, passwd);
         if (pr)
         {
           error(0,0, "Proxy <%s:%d> is not available, switching to master <%s:%d>. Contact IT!\n",
-            download_url, download_port, master_url, 2403);
-          download_url = master_url;
-          download_port = 2403;
+            download_url, download_port, master_url, master_port);
+          download_url = master_url_str.c_str();
+          download_port = master_port;
         } else
         {
-          error(1,0, "Nor proxy <%s:%d> neither master <%s:%d> are not available. Contact IT!\n",
-            download_url, download_port, master_url, 2403);
+          error(1,0, "ERROR: Nor proxy <%s:%d> neither master <%s:%d> are not available. Contact IT!\n",
+            download_url, download_port, master_url, master_port);
         }
       }
     } else
@@ -222,69 +226,92 @@ void wait_threads()
 
 }
 void rename_file (const char *from, const char *to);
+size_t get_file_size(const char* file);
 static bool validate_downloaded_blobs = true;
+char *cvs_temp_name();
 
 static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task)
 {
   std::string temp_filename = task.dirpath +"/_new_";
   temp_filename += task.filename;
-  FILE *tmp = fopen(temp_filename.c_str(), "wb");
-  if (!tmp)
+  size_t readUncompressedSz = ~size_t(0);
+  for (int i = 0; i < 2; ++i)
   {
-    char buf[512];std::snprintf(buf, sizeof(buf), "can't write temp %s\n", temp_filename.c_str());
-    cvs_outerr(buf, 0);
-    return false;
-  }
-  std::string err;
-  caddressed_fs::DownloadBlobInfo info;
-  char hashCtx[HASH_CONTEXT_SIZE];
-  if (validate_downloaded_blobs)
-    init_blob_hash_context(hashCtx, sizeof(hashCtx));
-  if (!processor->download(task.encoded_hash.data(),
-      [&](const char *data, size_t data_length) {
-        return caddressed_fs::decode_stream_blob_data(info, data, data_length,
-          [&](const void *data, size_t sz) {
-            const size_t written = fwrite(data, 1, sz, tmp);
-            if (validate_downloaded_blobs)
-              update_blob_hash(hashCtx, (const char *)data, std::min(written, sz));
-            return written == sz;
-          });//we can easily add hash validation here. but seems unnessasry
-      },
-      err))
-  {
-    if (tmp)
-      fclose(tmp);
-    unlink_file(temp_filename.c_str());
-    char buf[256];std::snprintf(buf, sizeof(buf), "ERROR: can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
-    cvs_outerr(buf, 0);
-    return false;
-  }
-  if (tmp)
-    fclose(tmp);
-  extern size_t get_file_size(const char* file);
-  if (validate_downloaded_blobs)
-  {
-    char recievedHash[65];recievedHash[0]=recievedHash[64]=0;
-    unsigned char digest[32];
-    finalize_blob_hash(hashCtx, digest, sizeof(digest));
-    bin_hash_to_hex_string_64(digest, recievedHash);
-    if (memcmp(task.encoded_hash.data(), recievedHash, 64) != 0)
+    FILE* tmp = fopen(temp_filename.c_str(), "wb");
+    if (!tmp)
     {
-      unlink_file(temp_filename.c_str());
-      char buf[256];std::snprintf(buf, sizeof(buf),
-        "ERROR: downloaded hash <%.64s> is different from requested <%.64s> for <%s>\n", recievedHash, task.encoded_hash.data(), task.message.c_str());
+      char buf[512]; std::snprintf(buf, sizeof(buf), "can't write temp %s\n", temp_filename.c_str());
       cvs_outerr(buf, 0);
       return false;
     }
-
-    const size_t fsz = get_file_size(temp_filename.c_str());//validate file system
-    if (fsz != info.realUncompressedSize)
+    std::string err;
+    char buf[512];
+    caddressed_fs::DownloadBlobInfo info;
+    char hashCtx[HASH_CONTEXT_SIZE];
+    if (validate_downloaded_blobs)
+      init_blob_hash_context(hashCtx, sizeof(hashCtx));
+    bool downloadRet = processor->download(task.encoded_hash.data(),
+        [&](const char *data, size_t data_length) {
+          return caddressed_fs::decode_stream_blob_data(info, data, data_length,
+            [&](const void *data, size_t sz) {
+              const size_t written = fwrite(data, 1, sz, tmp);
+              if (validate_downloaded_blobs)
+                update_blob_hash(hashCtx, (const char *)data, std::min(written, sz));
+              return written == sz;
+            });//we can easily add hash validation here. but seems unnessasry
+        },
+        err);
+    if (tmp)
+      fclose(tmp);
+    if (!downloadRet)
+      std::snprintf(buf, sizeof(buf), "ERROR: can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
+    bool validated = true;
+    if (downloadRet && validate_downloaded_blobs)
+    {
+      char recievedHash[65];recievedHash[0]=recievedHash[64]=0;
+      unsigned char digest[32];
+      finalize_blob_hash(hashCtx, digest, sizeof(digest));
+      bin_hash_to_hex_string_64(digest, recievedHash);
+      if (memcmp(task.encoded_hash.data(), recievedHash, 64) != 0)
+      {
+        //rename to something!
+        char *tempName = cvs_temp_name();
+        rename_file(temp_filename.c_str(), tempName);
+        std::snprintf(buf, sizeof(buf),
+          "ERROR: downloaded hash <%.64s> is different from requested <%.64s> for <%s>.\n"
+          "File renamed to <%s>. Check it's content!!!\n",
+          recievedHash, task.encoded_hash.data(), task.message.c_str(),
+          tempName);
+        validated = false;
+      } else
+      {
+        const size_t fsz = get_file_size(temp_filename.c_str());//validate file system
+        if (fsz != info.realUncompressedSize)
+        {
+          std::snprintf(buf, sizeof(buf),
+            "ERROR: file <%s> has size of %lld after downloading, while we downloaded %lld\n",
+            temp_filename.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
+          validated = false;
+        }
+      }
+    }
+    if (!downloadRet || !validated)
     {
       unlink_file(temp_filename.c_str());
-      char buf[256];std::snprintf(buf, sizeof(buf),
-        "ERROR: file <%s> has size of %lld after downloading, while we downloaded %lld\n", temp_filename.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
-      cvs_outerr(buf, 0);
-      return false;
+      if (processor->reinit(master_url_str.c_str(), master_port, master_user.c_str(), master_passwd.c_str()))
+      {
+        error(0,0, "%s\nSwitching to master <%s:%d>. Contact IT!\n",
+          buf, master_url_str.c_str(), master_port);
+      } else
+      {
+        cvs_outerr(buf, 0);
+        return false;
+      }
+    }
+    else
+    {
+      readUncompressedSz = info.realUncompressedSize;
+      break;
     }
   }
   change_utime(temp_filename.c_str(), task.timestamp);
@@ -298,10 +325,10 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   if (validate_downloaded_blobs)
   {
     const size_t fsz = get_file_size(fullPath.c_str());//validate file system again
-    if (fsz != info.realUncompressedSize)
+    if (fsz != readUncompressedSz)
     {
       char buf[256];std::snprintf(buf, sizeof(buf),
-        "ERROR: file <%s> has size of %lld after downloading, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)info.realUncompressedSize);
+        "ERROR: file <%s> has size of %lld after downloading, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)readUncompressedSz);
       cvs_outerr(buf, 0);
       return false;
     }

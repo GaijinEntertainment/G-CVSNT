@@ -77,6 +77,12 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
 {
   KVNetworkProcessor(const char *url_, int port_, const char* root_):url(url_), port(port_), root(root_){}
   ~KVNetworkProcessor() { stop_blob_push_client(client); }
+  bool reinit(const char *url2, int port2, const char *, const char *) {
+    if (url == url2 && port == port2)
+      return false;
+    url = url2; port = port2;
+    return init();
+  }
   bool init() { stop_blob_push_client(client); return (client = start_blob_push_client(url.c_str(), port, root.c_str())) >= 0; }
   virtual bool canDownload() {return true;}
   virtual bool canUpload() {return true;}
