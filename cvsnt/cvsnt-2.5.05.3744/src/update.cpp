@@ -147,6 +147,7 @@ static const char *const update_usage[] =
 	"\t-t\tUpdate using last checkin time.\n",
     "\t-n\tDo not backup local files(silently remove). Irreversibly deletes locally modified files.\n",
     "\t-W spec\tWrappers specification line (! to reset).\n",
+    "\t--blob_zero\tDownloaded blobs would be written as zero length file. That is for 'hot-proxy' scenario (to save space and optimize performance of update).\n",
     "(Specify the --help global option for a list of other help options)\n",
     NULL
 };
@@ -164,11 +165,22 @@ int update (int argc, char **argv)
 		usage (update_usage);
 
     /* parse the args */
+    static struct option long_update_options[] =
+    {
+    	{"blob_zero", 0, NULL, 1},
+    	{0, 0, NULL, 0},
+    };
+
     optind = 0;
-	while ((c = getopt (argc, argv, "+AB:pCcPflRQqdnuk:r:D:j:bmI:W:3Stxe::i")) != -1)
+    int options_index = 0;//not used
+	while ((c = getopt_long (argc, argv, "+AB:pCcPflRQqdnuk:r:D:j:bmI:W:3Stxe::i", long_update_options, &options_index)) != EOF)
     {
 	switch (c)
 	{
+        case 1:
+        extern bool blob_downloaded_no_write;
+        blob_downloaded_no_write = true;
+		break;
 	    case 'A':
 		aflag = 1;
 		break;

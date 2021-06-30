@@ -17,8 +17,8 @@ struct BlobTask
 {
   std::string message, dirpath, filename, encoded_hash, file_mode;
   time_t timestamp;
-  bool compress;
-  enum class Type {Download, Upload} type;
+  bool compress, noWrite;
+  enum class Type { Download, Upload } type;
 };
 
 static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task);
@@ -184,7 +184,7 @@ void add_upload_queue(const char *filename, bool compress, const char *message)
   if (!processor->upload_clients[0])
     return;
   char *cdir = xgetwd();
-  processor->emplace(BlobTask{message, cdir, filename, "", "", 0, compress, BlobTask::Type::Upload});
+  processor->emplace(BlobTask{message, cdir, filename, "", "", 0, compress, false, BlobTask::Type::Upload});
   blob_free(cdir);
 }
 int cvs_output(const char *, size_t);
@@ -205,7 +205,7 @@ bool cur_dir_being_downloaded_to()
   return ret;
 }
 
-void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp)
+void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp, bool no_write)
 {
   if (!processor)
   {
@@ -214,7 +214,7 @@ void add_download_queue(const char *message, const char *filename, const char *e
   }
   char *cdir = xgetwd();
   download_dirs.emplace(cdir);
-  processor->emplace(BlobTask{message, cdir, filename, encoded_hash, file_mode, timestamp, false, BlobTask::Type::Download});
+  processor->emplace(BlobTask{message, cdir, filename, encoded_hash, file_mode, timestamp, false, no_write, BlobTask::Type::Download});
   blob_free(cdir);
 }
 
@@ -232,11 +232,13 @@ char *cvs_temp_name();
 
 static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTask &task)
 {
+  const bool validateHash = !task.noWrite && validate_downloaded_blobs;
   std::string temp_filename = task.dirpath +"/_new_";
   temp_filename += task.filename;
   size_t readUncompressedSz = ~size_t(0);
   for (int i = 0; i < 2; ++i)
   {
+
     FILE* tmp = fopen(temp_filename.c_str(), "wb");
     if (!tmp)
     {
@@ -254,8 +256,8 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
         [&](const char *data, size_t data_length) {
           return caddressed_fs::decode_stream_blob_data(info, data, data_length,
             [&](const void *data, size_t sz) {
-              const size_t written = fwrite(data, 1, sz, tmp);
-              if (validate_downloaded_blobs)
+              const size_t written = task.noWrite ? sz : fwrite(data, 1, sz, tmp);
+              if (validateHash)
                 update_blob_hash(hashCtx, (const char *)data, std::min(written, sz));
               return written == sz;
             });//we can easily add hash validation here. but seems unnessasry
@@ -266,7 +268,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     if (!downloadRet)
       std::snprintf(buf, sizeof(buf), "ERROR: can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
     bool validated = true;
-    if (downloadRet && validate_downloaded_blobs)
+    if (downloadRet && validateHash)
     {
       char recievedHash[65];recievedHash[0]=recievedHash[64]=0;
       unsigned char digest[32];
@@ -314,15 +316,15 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
       break;
     }
   }
+  std::string fullPath = (task.dirpath+"/")+task.filename;
   change_utime(temp_filename.c_str(), task.timestamp);
   {
     int status = change_mode (temp_filename.c_str(), task.file_mode.c_str(), 1);
     if (status != 0)
       error (0, status, "cannot change mode of %s", task.filename.c_str());
   }
-  std::string fullPath = (task.dirpath+"/")+task.filename;
   rename_file (temp_filename.c_str(), fullPath.c_str());
-  if (validate_downloaded_blobs)
+  if (validateHash)
   {
     const size_t fsz = get_file_size(fullPath.c_str());//validate file system again
     if (fsz != readUncompressedSz)

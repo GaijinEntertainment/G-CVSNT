@@ -2094,7 +2094,8 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     xfree (entries_line);
 }
 
-void add_download_queue(const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp);
+void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp, bool no_write);
+bool blob_downloaded_no_write = false;
 
 int blob_concurrency_download_level = -1;
 
@@ -2394,10 +2395,10 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
       return;
     }
 
-    extern void add_download_queue(const char *message, const char *filename, const char *encoded_hash, const char *file_mode, time_t timestamp);
     add_download_queue(short_pathname, filename, blob_ref+hash_type_magic_len,
       stored_mode ? stored_mode : mode_string,
-      file_mtime);
+      file_mtime,
+      blob_downloaded_no_write);
 
     /* This is after we have read the file from the net (a change
        from previous versions, where the server would send us
