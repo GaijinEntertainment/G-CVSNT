@@ -25,7 +25,7 @@ inline bool pull_at_once(const char* hash_hex_string, size_t &sz, char **decoded
   //this is for compatibility with old clients
   using namespace caddressed_fs;
   using namespace streaming_compression;
-  size_t blob_sz;
+  uint64_t blob_sz;
   PullData *pd = start_pull(get_default_ctx(), hash_hex_string, blob_sz);
   if (!pd)
     return false;
@@ -34,7 +34,7 @@ inline bool pull_at_once(const char* hash_hex_string, size_t &sz, char **decoded
   char *dest = nullptr;
   while (at < blob_sz)
   {
-    size_t data_pulled = 0;
+    uint64_t data_pulled = 0;
     const char *some = pull(pd, at, data_pulled);//returned data_pulled != 0, unless error
     if (!data_pulled)
       break;

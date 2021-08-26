@@ -99,7 +99,10 @@ libcvsapi_la_LIBADD = \
         $(libxml_lib) \
         $(zlib_lib) \
         $(pcre_lib) \
-        $(mdns_client_lib) \
-        $(LIBLTDL)
+        $(mdns_client_lib)
+
+if WITH_LIBLTDL
+libcvsapi_la_LIBADD += $(LIBLTDL)
+endif
 
 lib_LTLIBRARIES = libcvsapi.la

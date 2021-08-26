@@ -731,6 +731,19 @@ fi
 AM_CONDITIONAL(WITH_MAC_HFS_SUPPORT, test "x$acx_mac_hfs_support" = "xyes" )
 AC_MSG_RESULT($acx_mac_hfs_support)
 
+case "${target_os}" in
+  darwin*)
+    acx_mac_build=yes
+    ;;
+  *)
+    ;;
+esac
+
+AC_MSG_RESULT($acx_mac_build)
+AM_CONDITIONAL(WITH_LIBLTDL, test "x$acx_mac_build" != "xyes" )
+AM_CONDITIONAL(ALLOW_OPENMP, test "x$acx_mac_build" != "xyes" )
+AM_CONDITIONAL(ALLOW_LIBSTDC_FS, test "x$acx_mac_build" != "xyes" )
+
 saved_libs="$LIBS"
 LIBS=""
 ACX_WITH_GSSAPI

@@ -10,4 +10,8 @@ cafs_proxy_server_SOURCES = \
 
 bin_PROGRAMS=cafs_proxy_server
 
-cafs_proxy_server_LDADD = -lstdc++fs ../clientLib/libkv_client_lib.la
+cafs_proxy_server_LDADD = ../clientLib/libkv_client_lib.la
+
+if ALLOW_LIBSTDC_FS
+cafs_proxy_server_LDADD += -lstdc++fs
+endif

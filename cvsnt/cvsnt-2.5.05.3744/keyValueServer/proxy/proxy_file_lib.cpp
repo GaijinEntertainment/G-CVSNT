@@ -88,7 +88,7 @@ std::string get_hash_file_name(const char* htype, const char* hhex)
   return get_hash_file_folder(htype, hhex) + hhex;
 }
 
-size_t blob_get_hash_blob_size(const void *c, const char* htype, const char* hhex) {
+uint64_t blob_get_hash_blob_size(const void *c, const char* htype, const char* hhex) {
   //we return local file size if exist. If blob was removed from master that would cause ability to checkout non-existent blob (but the one that existed earlier)
   //if blob has changed on server (repacked) we will return cached local size anyway
   const size_t cachedSz = blob_fileio_get_file_size(get_hash_file_name(htype, hhex).c_str());
@@ -132,7 +132,7 @@ uintptr_t blob_start_push_data(const void *c, const char* htype, const char* hhe
   return uintptr_t(new PushData{cc,ss, true});
 }
 
-bool blob_push_data(const void *data, size_t data_size, uintptr_t up)
+bool blob_push_data(const void *data, uint64_t data_size, uintptr_t up)
 {
   if (!up)
     return false;
@@ -199,7 +199,7 @@ static inline FILE* download_blob(intptr_t &sock, std::string &tmpfn, const char
 }
 
 inline uintptr_t attempt_pull_cache(const char *fn, uint64_t &sz){
-  size_t cachedSz;
+  uint64_t cachedSz;
   uintptr_t ret = (uintptr_t)blobe_fileio_start_pull(fn, cachedSz);
   sz = cachedSz;
   return ret;

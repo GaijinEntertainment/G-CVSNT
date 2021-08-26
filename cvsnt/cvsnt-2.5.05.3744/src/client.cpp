@@ -25,6 +25,9 @@
 #include "edit.h"
 #include "buffer.h"
 #include "sha_blob_reference.h"
+#ifdef MAC_HFS_STUFF
+#include "osx/mac_hfs_stuff.h"
+#endif
 
 #include <vector>
 int client_overwrite_existing;

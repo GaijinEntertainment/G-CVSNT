@@ -42,7 +42,7 @@
   inline bool blob_init_sockets(){return true;}
   inline void blob_close_sockets(){}
   inline int blob_get_last_sock_error() { return errno; }
-  #ifdef __APPLE__
+  #if defined(__APPLE__) && !defined(MSG_NOSIGNAL)
   enum {MSG_NOSIGNAL = 0};
   #endif
   #define SOCKET_EWOULDBLOCK EWOULDBLOCK

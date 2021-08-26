@@ -138,12 +138,15 @@ void tm_to_rcsdiff(char *dest, const struct tm *source)
 
 int annotate_width = 8;
 
-int trace = 0, noexec = 0, server_active = 0, atomic_checkouts = 0, allow_trace = 0, proxy_active = 0, quiet = 0;
+int trace = 0, noexec = 0, atomic_checkouts = 0, allow_trace = 0, quiet = 0;
+#ifdef SERVER_SUPPORT
+int server_active = 0, proxy_active = 0;
+#endif
 FILE *trace_file_fp = NULL;
 const char *CVS_Username = "rcs_cvt";
 const char *trace_file = NULL;
-int cvs_output(char const *s, uint64_t len){if (len) fprintf(stdout, "%.*s", (int)len, s); else fprintf(stdout, "%s", s); return 0;}
-int cvs_outerr(char const *s, uint64_t len){if (len) fprintf(stderr, "%.*s", (int)len, s); else fprintf(stderr, "%s", s); return 0;}
+int cvs_output(char const *s, size_t len){if (len) fprintf(stdout, "%.*s", (int)len, s); else fprintf(stdout, "%s", s); return 0;}
+int cvs_outerr(char const *s, size_t len){if (len) fprintf(stderr, "%.*s", (int)len, s); else fprintf(stderr, "%s", s); return 0;}
 void cvs_flusherr(){fflush(stderr);}
 
 

@@ -1165,17 +1165,17 @@ int main (int argc, char **argv)
 		l=strrchr(loc,'.');
 		if(l)
 		   *l='\0';
-		strcat(loc,"."UTF8_CHARSET);
+		strcat(loc,"." UTF8_CHARSET);
 	   }
 	   else
-		strcpy(loc,"C."UTF8_CHARSET);
+		strcpy(loc,"C." UTF8_CHARSET);
 	  
 	   if(setlocale(LC_CTYPE,UTF8_CHARSET)
-	      || setlocale(LC_CTYPE,"."UTF8_CHARSET)
+	      || setlocale(LC_CTYPE,"." UTF8_CHARSET)
 	      || setlocale(LC_CTYPE,loc)
-	      || setlocale(LC_CTYPE,"C."UTF8_CHARSET)
-	      || setlocale(LC_CTYPE,"en_US."UTF8_CHARSET)
-	      || setlocale(LC_CTYPE,"en_GB."UTF8_CHARSET))
+	      || setlocale(LC_CTYPE,"C." UTF8_CHARSET)
+	      || setlocale(LC_CTYPE,"en_US." UTF8_CHARSET)
+	      || setlocale(LC_CTYPE,"en_GB." UTF8_CHARSET))
 		{
 			TRACE(3,"utf8 locale successfully set");
 		}

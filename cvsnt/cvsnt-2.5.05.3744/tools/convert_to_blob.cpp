@@ -29,6 +29,9 @@ namespace fs = std::experimental::filesystem;
 #include <unistd.h>
 namespace fs = std::filesystem;
 #endif
+#if __APPLE__
+enum { MAP_POPULATE = 0 };
+#endif
 
 // enable if we want to allow concurrent conversion of SAME dir (it's ok to convert different dirs)
 // that's insane to do, really

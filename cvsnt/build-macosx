@@ -1,6 +1,36 @@
-cd cvsnt-2.5.05.3744/osx
-sudo mkdir /usr/local/include
-sudo tar -xzf usr_local_include_pcre.tar.gz -C /usr/local/include
+if ! command -v brew &> /dev/null
+then
+    echo "brew not found but required"
+    echo "install brew with:"
+    echo "  /bin/bash -c \"\$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/install.sh)\""
+    exit 1
+
+    # brew may be later uninstalled with
+    #   /bin/bash -c "$(curl -fsSL https://raw.githubusercontent.com/Homebrew/install/master/uninstall.sh)"
+fi
+
+brew install autoconf
+brew install automake
+brew install pkg-config
+brew install libtool
+brew install pcre
+
+cd cvsnt-2.5.05.3744
+autoreconf -i --force
+if [ $? != 0 ]; then
+  echo "ERROR: autoconf failed!"
+  exit 2
+fi
+
+cd zstd
+CFLAGS="-arch x86_64" LDFLAGS="-arch x86_64" make install
+cd ..
+
+cd osx
 ./build-mac
+if [ $? != 0 ]; then
+  echo "ERROR: build-mac failed!"
+  exit 3
+fi
 cd ../..
-cp cvsnt-2.5.05.3744/osx/cvsnt-2.*.tar.gz .
+cp cvsnt-2.5.05.3744/osx/cvsnt-*.tar.gz .
