@@ -1,6 +1,8 @@
 #!/bin/bash
 export BUILD_ARCH="-arch x86_64 -msse4.1 -mmacosx-version-min=10.11"
 export PKG_BUILD_SUFFIX="-osx10.11-x64"
+#export BUILD_ARCH="-arch arm64 -mmacosx-version-min=11.0"
+#export PKG_BUILD_SUFFIX="-osx11-arm64"
 
 if ! command -v brew &> /dev/null
 then

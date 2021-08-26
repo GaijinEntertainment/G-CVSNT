@@ -1,15 +1,19 @@
 ## Process this file with automake to produce Makefile.in
 
-AM_CPPFLAGS = $(includeopt) $(INCLTDL) -msse4.1
+AM_CPPFLAGS = $(includeopt) $(INCLTDL)
 
 libblake3_la_SOURCES = \
-  blake3_avx2_x86-64_unix.S \
-  blake3_avx512_x86-64_unix.S \
-  blake3_sse2_x86-64_unix.S \
-  blake3_sse41_x86-64_unix.S \
   blake3.c \
   blake3_portable.c \
   blake3_dispatch.c
+
+if BUILD_ARM64
+AM_CPPFLAGS += -DBLAKE3_USE_NEON
+libblake3_la_SOURCES += blake3_neon.c
+else
+AM_CPPFLAGS += -msse4.1
+libblake3_la_SOURCES += blake3_avx2_x86-64_unix.S blake3_avx512_x86-64_unix.S blake3_sse2_x86-64_unix.S blake3_sse41_x86-64_unix.S
+endif
 
 libblake3_la_LDFLAGS = -release $(VERSION) -L$(DESTDIR)/$(libdir) 
 

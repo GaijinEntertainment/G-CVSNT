@@ -7068,7 +7068,15 @@ void server_buf_output(buffer *buf, const char *data, int len)
 
 static uint64_t user_session_bits = 0;
 
-# ifdef _MSC_VER
+# if __aarch64__
+static uint64_t __rdtsc()
+{
+  uint64_t ticks;
+  asm volatile("isb" : : : "memory");
+  asm volatile("mrs %0, cntvct_el0" : "=r" (ticks));
+  return ticks;
+}
+# elif defined(_MSC_VER)
   #include <intrin.h>
 # else
   #include <x86intrin.h>
