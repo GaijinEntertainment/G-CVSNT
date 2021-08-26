@@ -41,7 +41,7 @@ if [ $? != 0 ]; then
   exit 2
 fi
 make clean
-./configure --prefix=/usr/local --with-config-dir=/private/etc/cvsnt CC="clang $BUILD_ARCH" CPP="clang $BUILD_ARCH -E" CXX="clang++ $BUILD_ARCH -std=gnu++14" --with-internal-zlib --disable-ltdl --disable-odbc --disable-postgres --disable-server --disable-mysql --disable-sspi --disable-sqlite --disable-odbc --enable-64bit
+./configure --prefix=/usr/local --with-config-dir=/private/etc/cvsnt CC="clang $BUILD_ARCH" CPP="clang $BUILD_ARCH -E" CXX="clang++ $BUILD_ARCH -std=gnu++14" --disable-hfs --with-internal-zlib --disable-ltdl --disable-odbc --disable-postgres --disable-server --disable-mysql --disable-sspi --disable-sqlite --disable-odbc --enable-64bit
 if [ $? != 0 ]; then
   echo "ERROR: configure failed!"
   exit 1

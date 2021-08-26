@@ -5010,7 +5010,28 @@ static void send_modified (const char *file, const char *short_pathname, const V
 
         bufsize = sb.st_size;
         buf = (char*)xmalloc (bufsize);
+
+#ifdef MAC_HFS_STUFF
+	{
+#	ifndef _POSIX_NO_TRUNC
+		char tfile[1024]; strcpy(tfile, file); strcat(tfile, ".CVSBFCTMP");
+#	else
+		char tfile[1024]; sprintf (tfile, "%.9s%s", file, ".CVSBFCTMP");
+#	endif
+		/* encode data & resource fork into flat file if needed and adjust character encoding if needed */
+		mac_encode_file(file, tfile, open_binary);
+		xfree (buf);
+		if ( CVS_STAT (tfile, &sb) < 0)
+			error (1, errno, "reading %s", tfile);
+		bufsize = sb.st_size;
+		buf = (char*)xmalloc (bufsize);
+		fd = CVS_OPEN (tfile, O_RDONLY | OPEN_BINARY,0);
+		if (fd < 0)
+			error (1, errno, "reading %s", short_pathname);
+	}
+#else
     	fd = CVS_OPEN (file, O_RDONLY | (open_binary ? OPEN_BINARY : 0),0);
+#endif
 
         if (fd < 0)
         	error (1, errno, "reading %s", short_pathname);
