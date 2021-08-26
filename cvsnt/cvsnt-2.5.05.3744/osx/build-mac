@@ -1,6 +1,11 @@
 #!/bin/bash
-set -x
-set -v
+#set -x
+#set -v
+if [ "$BUILD_ARCH" = "" ]; then
+  BUILD_ARCH="-arch x86_64 -msse4.1 -mmacosx-version-min=10.11"
+  echo "BUILD_ARCH was not set, using $BUILD_ARCH"
+fi
+
 BuildPackage=1
 BuildODBC=0
 PackageName="g-cvsnt"
@@ -36,18 +41,20 @@ if [ $? != 0 ]; then
   exit 2
 fi
 make clean
-./configure --with-config-dir=/private/etc/cvsnt CC="clang -arch x86_64 -msse4.1" CPP="clang -arch x86_64 -msse4.1 -E" CXX="clang++ -arch x86_64 -msse4.1 -std=gnu++14" --with-internal-zlib --disable-ltdl --disable-odbc --disable-postgres --disable-server --disable-mysql --disable-sspi --disable-sqlite --disable-odbc --enable-64bit
+./configure --prefix=/usr/local --with-config-dir=/private/etc/cvsnt CC="clang $BUILD_ARCH" CPP="clang $BUILD_ARCH -E" CXX="clang++ $BUILD_ARCH -std=gnu++14" --with-internal-zlib --disable-ltdl --disable-odbc --disable-postgres --disable-server --disable-mysql --disable-sspi --disable-sqlite --disable-odbc --enable-64bit
 if [ $? != 0 ]; then
   echo "ERROR: configure failed!"
   exit 1
 fi
 rm -rf $InstallerRoot/* 
+mkdir -p $InstallerRoot/usr/local/lib
+mkdir -p $InstallerRoot/usr/local/bin
+cp -r /usr/local/lib/libzstd*.dylib $InstallerRoot/usr/local/lib
 make -j8 install DESTDIR=$InstallerRoot
 if [ $? != 0 ]; then
   echo "ERROR: make failed!"
   exit 3
 fi
-# make install DESTDIR=$InstallerRoot
 cd $SAVEDIR
 
 if [ $BuildPackage -eq 1 ]; then
@@ -84,11 +91,13 @@ if [ $BuildPackage -eq 1 ]; then
 	
 	rm cvsnt-$BUILD.tar.gz
 	cd Distribution_folder
-	tar -czvpf ../cvsnt-$BUILD.tar.gz *
+	tar -czvpf ../../../../cvsnt-$BUILD$PKG_BUILD_SUFFIX.tar.gz *
 	cd ..
+        if [ $? = 0 ]; then
+	  echo "=== built cvsnt-$BUILD$PKG_BUILD_SUFFIX.tar.gz"
+	fi
 
-	echo $PackageMakerPath -build -p $InstallerPackageName -f $InstallerRoot -r $InstallerResources -i $InstallerFilesInfo -d $InstallerFilesDescription
-	
-	echo hdiutil create -fs HFS+ -format UDZO -volname $BaseName -imagekey zlib-level=9 -ov -srcfolder $InstallerPackageName $DmgFileName
-	echo rm -rf $InstallerPackageName
+	#echo $PackageMakerPath -build -p $InstallerPackageName -f $InstallerRoot -r $InstallerResources -i $InstallerFilesInfo -d $InstallerFilesDescription
+	#echo hdiutil create -fs HFS+ -format UDZO -volname $BaseName -imagekey zlib-level=9 -ov -srcfolder $InstallerPackageName $DmgFileName
+	#echo rm -rf $InstallerPackageName
 fi
