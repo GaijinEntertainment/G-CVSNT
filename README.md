@@ -6,19 +6,17 @@ G-CVSNT Gaijin (and Gamedev) CVSNT version - modified for large amounts of binar
 
 OSX 10.9+ notes:
 
-* pcre headers are required
-  (unpack cvsnt/cvsnt-2.5.05.3744/osx/usr_local_include_pcre.tar.gz to /usr/local/include)
+* HomeBrew is required (build-macosx will give instruction how to install)
 
 * build cvsnt client package with:
-  ./build-mac
-  in  cvsnt/cvsnt-2.5.05.3744/osx  directory
+  ./build-macosx
+  in  cvsnt  directory
 
-* resulting archive (cvsnt/cvsnt-2.5.05.3744/osx/cvsnt-2.XX.tar.gz) is prebuilt and added to repository
-  (cvsnt/cvsnt-2.5.05.3744/osx/cvsnt-2.5.05.4452.tar.gz built with Xcode7 on OSX 10.11)
-  it can be directly used for installing without code rebuild
+* resulting archive (cvsnt/cvsnt-2.5.05.3744/osx/cvsnt-3.XX.tar.gz) is copied after build
+  to cvsnt/cvsnt-3.5.16.7699.tar.gz
 
 * in order to "install" cvsnt client unpack
-  cvsnt/cvsnt-2.5.05.3744/osx/cvsnt-2.XX.tar.gz
+  cvsnt/cvsnt-3.5.16.7699.tar.gz
   and run
   ./install_copy_cvsnt.sh
   (this will copy relevant files to /usr/local/bin, /usr/local/lib, etc.)
