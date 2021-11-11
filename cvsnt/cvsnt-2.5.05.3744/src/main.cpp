@@ -36,6 +36,7 @@
   #include <netdb.h>
   #define SET_BINARY_MODE(file) do { } while(0);
 #endif
+#include <memory>
 
 const char *program_name;
 const char *command_name;
@@ -222,7 +223,7 @@ static const char *const usg[] =
        the end of each line.  I haven't tried to duplicate this style
        in --help as it is a rather different format from the rest.  */
 
-    "Usage: %s [cvs-options] command [command-options-and-arguments]\n",
+    "Usage: %s [cvs-options] command [command-options-and-arguments] [@response-file]\n",
     "  where cvs-options are -q, -n, etc.\n",
     "    (specify --help-options for a list of options)\n",
     "  where command is add, admin, etc.\n",
@@ -230,6 +231,8 @@ static const char *const usg[] =
     "     or --help-synonyms for a list of command synonyms)\n",
     "  where command-options-and-arguments depend on the specific command\n",
     "    (specify -H followed by a command name for command-specific help)\n",
+    "  response-file is a file where rest of command line arguments are, separated with end-of-line\n",
+    "  response-file should be preceded with @ and it has to be the last command line argument",
     "  Specify --help to receive this message\n",
     "\n",
 
@@ -673,12 +676,43 @@ static int main_trace(int lvl, const char *out)
 	cvs_trace(lvl,"%s",out);
 	return 0;
 }
+static std::vector<std::unique_ptr<char[]>> response_args;
 #ifndef _WIN32
 CVSNT_EXPORT int main (int argc, char **argv)
 #else
 int main (int argc, char **argv)
 #endif 
 {
+    if (argc >= 2 && argv[argc-1] && argv[argc - 1][0]=='@')
+    {
+      const char *respFile = argv[argc-1]+1;
+      FILE *f = fopen(respFile, "r");
+      if (!f)
+      {
+        fprintf(stderr, "Can't open response file <%s>\n", respFile);
+        return 1;
+      }
+      else
+      {
+        char buf[8192];
+        for (int i = 0; i < argc-1; ++i)
+  		response_args.emplace_back(strdup(argv[i]));
+		while (const char* s = fgets(buf, sizeof(buf), f))
+		{
+		  char* copy = strdup(s);
+          size_t len = strlen(copy);
+          if (len)
+          {
+            copy[len - 1] = 0;
+            response_args.emplace_back(copy);
+          }
+		}
+		printf("parsed response file <%s>...\n", respFile);
+		fclose(f);
+      }
+      argc = (int)response_args.size();
+      argv = (char**)response_args.data();
+    }
     const char *CVSroot = CVSROOT_DFLT;
 	char *end;
 	const char *ccp;
