@@ -2243,7 +2243,6 @@ static int _statcore(HANDLE hFile, const char *filename, struct stat *buf)
 
 	if(is_gmt_fs) // NTFS or similar - everything is in GMT already
 	{
-		printf("gmt fs\n");
 		FileTimeToUnixTime ( &bhfi.ftLastAccessTime, &buf->st_atime, FALSE );
 		FileTimeToUnixTime ( &bhfi.ftLastWriteTime, &buf->st_mtime, FALSE );
 		FileTimeToUnixTime ( &bhfi.ftCreationTime, &buf->st_ctime, FALSE );
