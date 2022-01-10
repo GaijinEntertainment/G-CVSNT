@@ -1756,14 +1756,13 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
         #if _WIN32
         if (stored_modtime_valid)
         {
-        	struct _utimbuf t;
+        	struct utimbuf t;
 
         	memset (&t, 0, sizeof (t));
         	/* There is probably little point in trying to preserved the
         	   actime (or is there? What about Checked-in?).  */
         	t.modtime = t.actime = file_mtime = stored_modtime;
-
-        	if (_futime (fd, &t) < 0)
+        	if (wnt_futime (fd, &t) < 0)
             {
         	    error (0, errno, "cannot set time on %s", filename);
                 file_mtime = 0;

@@ -2108,70 +2108,9 @@ static int _statcore(HANDLE hFile, const char *filename, struct stat *buf)
      */
     buf->st_ino = buf->st_uid = buf->st_gid = buf->st_mode = 0;
     buf->st_nlink = 1;
+    is_gmt_fs = 1;
 
 
-	if(!filename)
-	{
-		// We have to assume here that the repository doesn't span drives, so the
-		// current directory is correct.
-		*szFs='\0';
-		GetVolumeInformation(NULL,NULL,0,NULL,NULL,NULL,szFs,32);
-
-		is_gmt_fs = GMT_FS(szFs);
-	}
-	else
-	{
-		uc_name fn = filename;
-
-		if(fn[1]!=':')
-		{
-			if((fn[0]=='\\' || fn[0]=='/') && (fn[1]=='\\' || fn[1]=='/'))
-			{
-				// UNC pathname: Extract server and share and pass it to GVI
-				TCHAR szRootPath[MAX_PATH + 1] = _T("\\\\");
-				const TCHAR *p = &fn[2];
-				TCHAR *q = &szRootPath[2];
-				int n;
-				for (n = 0; n < 2; n++)
-				{
-					// Get n-th path element
-					while (*p != 0 && *p != '/' && *p != '\\')
-					{
-						*q = *p;
-						p++;
-						q++;
-					}
-					// Add separator
-					if (*p != 0)
-					{
-						*q = '\\';
-						p++;
-						q++;
-					}
-				}
-				*q = 0;
-
-				*szFs='\0';
-				GetVolumeInformation(szRootPath,NULL,0,NULL,NULL,NULL,szFs,sizeof(szFs));
-				is_gmt_fs = GMT_FS(szFs);
-			}
-			else
-			{
-				// Relative path, treat as local
-				GetVolumeInformation(NULL,NULL,0,NULL,NULL,NULL,szFs,sizeof(szFs));
-				is_gmt_fs = GMT_FS(szFs);
-			}
-		}
-		else
-		{
-			// Drive specified...
-			TCHAR szRootPath[4] = _T("?:\\");
-			szRootPath[0]=fn[0];
-			*szFs='\0';
-			GetVolumeInformation(szRootPath,NULL,0,NULL,NULL,NULL,szFs,sizeof(szFs));
-			is_gmt_fs = GMT_FS(szFs);
-		}
-	}
 
 	if(hFile)
 	{
@@ -2304,6 +2243,7 @@ static int _statcore(HANDLE hFile, const char *filename, struct stat *buf)
 
 	if(is_gmt_fs) // NTFS or similar - everything is in GMT already
 	{
+		printf("gmt fs\n");
 		FileTimeToUnixTime ( &bhfi.ftLastAccessTime, &buf->st_atime, FALSE );
 		FileTimeToUnixTime ( &bhfi.ftLastWriteTime, &buf->st_mtime, FALSE );
 		FileTimeToUnixTime ( &bhfi.ftCreationTime, &buf->st_ctime, FALSE );
@@ -2397,62 +2337,13 @@ int wnt_chmod (const char *name, mode_t mode)
 int wnt_utime(const char *filename, struct utimbuf *uf)
 {
 	HANDLE h;
-	int is_gmt_fs;
+	int is_gmt_fs = 1;
 	TCHAR szFs[32];
 	FILETIME At,Wt;
 
 	if(!validate_filename(filename,false))
 		return -1;
 	uc_name fn = filename;
-	if(fn[1]!=':')
-	{
-		if((fn[0]=='\\' || fn[0]=='/') && (fn[1]=='\\' || fn[1]=='/'))
-		{
-			// UNC pathname: Extract server and share and pass it to GVI
-			TCHAR szRootPath[MAX_PATH + 1] = _T("\\\\");
-			const TCHAR *p = &fn[2];
-			TCHAR *q = &szRootPath[2];
-			int n;
-			for (n = 0; n < 2; n++)
-			{
-				// Get n-th path element
-				while (*p != 0 && *p != '/' && *p != '\\')
-				{
-					*q = *p;
-					p++;
-					q++;
-				}
-				// Add separator
-				if (*p != 0)
-				{
-					*q = '\\';
-					p++;
-					q++;
-				}
-			}
-			*q = 0;
-
-			*szFs='\0';
-			GetVolumeInformation(szRootPath,NULL,0,NULL,NULL,NULL,szFs,sizeof(szFs));
-			is_gmt_fs = GMT_FS(szFs);
-		}
-		else
-		{
-			// Relative path, treat as local
-			GetVolumeInformation(NULL,NULL,0,NULL,NULL,NULL,szFs,sizeof(szFs));
-			is_gmt_fs = GMT_FS(szFs);
-		}
-	}
-	else
-	{
-		// Drive specified...
-		TCHAR szRootPath[4] = _T("?:\\");
-		szRootPath[0]=fn[0];
-		*szFs='\0';
-		GetVolumeInformation(szRootPath,NULL,0,NULL,NULL,NULL,szFs,sizeof(szFs));
-		is_gmt_fs = GMT_FS(szFs);
-	}
-
 	if(is_gmt_fs) // NTFS or similar - everything is in GMT already
 	{
 		UnixTimeToFileTime ( uf->actime, &At, FALSE);
@@ -2478,6 +2369,21 @@ int wnt_utime(const char *filename, struct utimbuf *uf)
 	}
 	SetFileTime(h,NULL,&At,&Wt);
 	CloseHandle(h);
+	return 0;
+}
+
+int wnt_futime(int f, struct utimbuf *uf)
+{
+	HANDLE h = (HANDLE)_get_osfhandle(f);
+	int is_gmt_fs = 1;
+	FILETIME At,Wt;
+
+	if(h!=INVALID_HANDLE_VALUE)
+	{
+    	UnixTimeToFileTime ( uf->actime, &At, FALSE);
+    	UnixTimeToFileTime ( uf->modtime, &Wt, FALSE);
+    	SetFileTime(h,NULL,&At,&Wt);
+  	}
 	return 0;
 }
 

@@ -515,6 +515,8 @@ int wnt_open(const char *filename, int mode, int umask = 0);
 int wnt_fclose(FILE *file);
 int wnt_access(const char *path, int mode);
 int wnt_utime(const char *filename, struct utimbuf *uf);
+int wnt_futime(int fd, struct utimbuf *uf);
+
 
 void preparse_filename(char *filename);
 
