@@ -35,6 +35,7 @@
 
 #include "LockService.h"
 
+typedef uint32_t hash_t;
 static uint32_t hash_fnv1(const char* s)
 {
   uint32_t result = 2166136261U;
@@ -58,11 +59,12 @@ static bool DoModified(CSocketIOPtr s,uint32_t client, char *param);
 static bool DoVersion(CSocketIOPtr s,uint32_t client, char *param);
 static bool DoClose(CSocketIOPtr s,uint32_t client, char *param);
 
-static bool request_lock(uint32_t client, const char *path, uint32_t hash, unsigned flags, uint32_t& lock_to_wait_for);
+static bool request_lock(uint32_t client, const char *path, hash_t hash, unsigned flags, uint32_t& lock_to_wait_for);
 
 extern bool g_bTestMode;
 //#define DEBUG if(g_bTestMode) printf
 #define DEBUG(...)
+#define FATAL_DEBUG printf
 
 static uint32_t global_lockId;
 
@@ -147,9 +149,9 @@ struct Lock
 {
 	cvs::string path;
     uint32_t owner;
-    uint32_t hash; /* hash of path */
-    VersionMapType versions;
 	unsigned flags;
+    VersionMapType versions;
+    hash_t hash; /* hash of path */
 };
 
 struct TransactionStruct
@@ -182,8 +184,15 @@ struct LockClient
 };
 typedef tsl::robin_map<uint32_t,LockClient> LockClientMapType;
 typedef tsl::robin_map<uint32_t,Lock> LockMapType;
+typedef tsl::robin_map<hash_t,std::vector<uint32_t>> PathToLockType;//path hash to locks map
+typedef tsl::robin_map<uint32_t, int> ClientLocksCounterType;//path hash to locks map
+bool del_lock(LockMapType::const_iterator i);
+void add_lock(uint32_t lockId, uint32_t uFlags, const char* path, hash_t hash, uint32_t client, const VersionMapType& ver);
 LockClientMapType LockClientMap;
 LockMapType LockMap;
+PathToLockType PathToLocks;
+ClientLocksCounterType ClientLocksCounter;//
+
 TransactionListType TransactionList;
 
 TransactionStruct::TransactionStruct()
@@ -312,26 +321,32 @@ bool CloseLockClient(CSocketIOPtr s)
     auto &clMap = LockClientMap[client];
 	clMap.state=lcClosed;
 	clMap.endtime=lock_time();
-
-    if (LockClientMap.size() > 1)
+	auto clientCounterI = ClientLocksCounter.find(client);
+    if (clientCounterI != ClientLocksCounter.end())
     {
-        for(LockMapType::iterator i = LockMap.begin(); i!=LockMap.end();)
+        int locksCount = clientCounterI->second;
+        for(LockMapType::iterator i = LockMap.begin(); locksCount > 0 && i!=LockMap.end();)//todo: client to lock map
     	{
     		if(i->second.owner == client)
     		{
     			count++;
-    			LockMap.erase(i);
+    			del_lock(i);
                 i = LockMap.begin();
+                locksCount--;
     		}
     		else
     			++i;
     	}
     }
+
+    if (clientCounterI != ClientLocksCounter.end())
+        ClientLocksCounter.erase(clientCounterI);
     if(LockClientMap.size()<=1)
 	{
 		// No clients, just empty the transaction store
         LockMap.clear();
 		LockClientMap.clear();
+		PathToLocks.clear();
 		TransactionList.clear();
 		DEBUG("No more clients\n");
 	}
@@ -574,7 +589,7 @@ bool DoLock(CSocketIOPtr s,uint32_t client, char *param)
 		s->printf("001 FAIL Lock not within repository\n");
 		return false;
 	}
-    const uint32_t hash = hash_fnv1(path);
+    const hash_t hash = hash_fnv1(path);
 	if(request_lock(client,path, hash, uFlags,lock_to_wait_for))
 	{
 		VersionMapType ver;
@@ -607,12 +622,7 @@ bool DoLock(CSocketIOPtr s,uint32_t client, char *param)
 		}
 		DEBUG("(#%d) Lock request on %s (%s) (granted %u)\n",(int)client,path,FlagToString(uFlags),(unsigned)newId);
 		s->printf("000 grant (%u)\n",(unsigned)newId);
-        auto &lm = LockMap[newId];
-		lm.flags=uFlags;
-		lm.path=path;
-        lm.hash = hash;
-		lm.owner=client;
-		lm.versions = ver;
+    	add_lock(newId, uFlags, path, hash, client, ver);
 	}
 	else
 	{
@@ -647,8 +657,11 @@ bool DoUnlock(CSocketIOPtr s,uint32_t client, char *param)
 		s->printf("001 FAIL Do not own lock id %u\n",(unsigned)lockId);
 		return false;
 	}
-
-	LockMap.erase(lmI);
+    if (!del_lock(lmI))
+	{
+		s->printf("001 FAIL Can not unlock id %u\n",(unsigned)lockId);
+		return false;
+	}
 
 	DEBUG("(#%d) Unlock request on lock %u\n",(int)client,(unsigned)lockId);
 
@@ -851,32 +864,98 @@ bool DoClose(CSocketIOPtr s,uint32_t client, char *param)
 	return true;
 }
 
-bool request_lock(uint32_t client, const char *path, uint32_t hash, unsigned flags, uint32_t& lock_to_wait_for)
+inline bool can_get_lock(LockMapType::const_iterator i, uint32_t client, const char *path, hash_t hash, unsigned flags)
 {
-	LockMapType::const_iterator i, e;
-	for(i=LockMap.begin(), e = LockMap.end(); i!=e; ++i)
+	if((hash == i->second.hash && !strcmp(path,i->second.path.c_str())))
 	{
-		if((hash == i->second.hash && !strcmp(path,i->second.path.c_str())))
+		if(flags&lfWrite)
 		{
-			if(flags&lfWrite)
-			{
-				/* Mixed Write lock only possible with the same client */
-				if(i->second.owner!=client)
-					break;
-			}
-			else /* read lock */
-			{
-				/* If there is a write lock on this object then fail */
-				if((i->second.flags&lfWrite) && i->second.owner!=client)
-					break;
-			}
+			/* Mixed Write lock only possible with the same client */
+			if(i->second.owner!=client)
+				return false;
 		}
-	}
-	if(i!=e)
-	{
-		lock_to_wait_for = i->first;
-		return false;
+		else /* read lock */
+		{
+			/* If there is a write lock on this object then fail */
+			if((i->second.flags&lfWrite) && i->second.owner!=client)
+				return false;
+		}
 	}
 	return true;
 }
 
+bool request_lock(uint32_t client, const char *path, hash_t hash, unsigned flags, uint32_t& lock_to_wait_for)
+{
+    auto lockCounterI = PathToLocks.find(hash);//path hash to locks map
+    if (lockCounterI == PathToLocks.end())
+		return true;
+	auto& pathLocks = lockCounterI.value();
+	for (auto locksI = pathLocks.begin(), locksE = pathLocks.end(); locksI != locksE; ++locksI)
+	{
+		LockMapType::const_iterator i = LockMap.find(*locksI);
+		if (i == LockMap.end())//this could not happen
+		{
+			FATAL_DEBUG("file <%s> supposed to has lock %d, but this lock is deleted (hash = %d)\n", path, *locksI, hash);
+			fflush(stdout);
+			locksI = pathLocks.erase(locksI);
+			locksE = pathLocks.end();
+			if (locksI == locksE)
+				break;
+		}
+		if (!can_get_lock(i, client, path, hash, flags))
+		{
+			lock_to_wait_for = *locksI;
+			return false;
+		}
+	}
+	return true;
+}
+//todo: client-to-lock map, for fast destroy client
+bool del_lock(LockMapType::const_iterator i)
+{
+	if (i == LockMap.end())
+	{
+		FATAL_DEBUG("incorrect lock");
+		return false;
+	}
+	auto p2lI = PathToLocks.find(i->second.hash);
+	if (p2lI == PathToLocks.end())
+	{
+		FATAL_DEBUG("file <%s> has lock %d, but it is not in it's path-to-lock map\n", i->second.path.c_str(), i->first);
+		fflush(stdout);
+		LockMap.erase(i);
+		return false;
+	}
+	auto lockInPathI = std::find(p2lI->second.begin(), p2lI->second.end(), i->first);
+	if (lockInPathI == p2lI->second.end())
+	{
+		FATAL_DEBUG("file <%s> has lock %d, and there are locks of that path, but not this\n", i->second.path.c_str(), i->first);
+		fflush(stdout);
+		LockMap.erase(i);
+		return false;
+	}
+	p2lI.value().erase(lockInPathI);
+	if (p2lI->second.empty())
+		PathToLocks.erase(p2lI);
+	ClientLocksCounter[i->second.owner]--;
+	LockMap.erase(i);
+	return true;
+}
+
+void add_lock(uint32_t lockId, uint32_t uFlags, const char* path, hash_t hash, uint32_t client, const VersionMapType& ver)
+{
+	auto lmi = LockMap.find(lockId);
+	if (lmi != LockMap.end())
+	{
+		FATAL_DEBUG("file <%s> already has lock %d, which is supposed to be new\n", path, lockId);
+		del_lock(lmi);
+	}
+	auto &lm = LockMap[lockId];
+	lm.flags=uFlags;
+	lm.path=path;
+	lm.hash = hash;
+	lm.owner=client;
+	lm.versions = ver;
+	PathToLocks[hash].push_back(lockId);
+	ClientLocksCounter[client]++;
+}
