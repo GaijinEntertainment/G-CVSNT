@@ -24,6 +24,8 @@
 #include <sys/types.h>
 #include <sys/wait.h>
 
+#include <stdio.h>
+#include <unistd.h>
 #include <signal.h>
 
 #include "../RunFile.h"
@@ -152,6 +154,14 @@ bool CRunFile::run(const char *path, bool bShow /* = false */)
 	if(path)
 	  m_args->insertArg(0,path);
 
+	if(m_outFd>=0)
+		fcntl(m_outFd,F_SETFL, O_NONBLOCK);
+	if(m_errFd>=0)
+		fcntl(m_errFd,F_SETFL, O_NONBLOCK);
+	if(m_inFd>=0)
+		fcntl(m_errFd,F_SETFL, O_NONBLOCK);
+
+
 	pid = fork();
 	if(pid<0)
 		return false;
@@ -207,6 +217,12 @@ bool CRunFile::run(const char *path, bool bShow /* = false */)
    reliable threads this wouldn't be necessary... fork()
    isolates the address spaces so is not suitable for this
    task */
+void alrm_action(int signo)
+{
+    printf("Write blocked after pipe limit exhausted\n", count);
+    exit(-1);
+}
+
 bool CRunFile::wait(int& result, int timeout)
 {	
 	char buf[BUFSIZ],inbuf[BUFSIZ];
@@ -217,13 +233,6 @@ bool CRunFile::wait(int& result, int timeout)
 	if(!m_child)
 	  return -1;
 		
-	if(m_outFd>=0)
-		fcntl(m_outFd,F_SETFL, O_NONBLOCK);
-	if(m_errFd>=0)
-    		fcntl(m_errFd,F_SETFL, O_NONBLOCK);
-	if(m_inFd>=0)
-    		fcntl(m_errFd,F_SETFL, O_NONBLOCK);
-
 	size = 0;
 	if(m_inFd>=0)
 	{
@@ -234,6 +243,8 @@ bool CRunFile::wait(int& result, int timeout)
 			m_inFd=-1;
 		}
 	}
+	signal(SIGALRM, alrm_action);
+	alarm(30);//30 seconds is enough to alarm
 	w = waitpid(m_child,&status,WNOHANG);
 	while((timeout==-1 || timeout>0) && ((m_inFd>=0 && size>0) || m_outFd>=0 || m_errFd>=0) && !w)
 	{
@@ -295,6 +306,7 @@ bool CRunFile::wait(int& result, int timeout)
 			if(timeout==-1) timeout--;
 		}
 	}
+	//alarm(0);//we intentionally not switch off alarm
 	if(!w && timeout!=-1 && timeout<=0) /* timed out */
 	   return false;
 	if(m_inFd)
