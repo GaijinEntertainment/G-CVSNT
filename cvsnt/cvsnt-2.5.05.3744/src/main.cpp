@@ -1359,7 +1359,7 @@ int main (int argc, char **argv)
 #ifdef SIGALARM
     (void) SIG_register (SIGALRM, main_cleanup);
     #if !defined(_WIN32)
-    alarm(60);//set pipe write alarm to 60 seconds
+    alarm(600);//set pipe write alarm to 600 seconds
     #endif
 #endif
 #endif /* !DONT_USE_SIGNALS */
