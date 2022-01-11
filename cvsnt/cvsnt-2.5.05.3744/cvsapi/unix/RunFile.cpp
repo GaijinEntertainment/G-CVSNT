@@ -217,11 +217,6 @@ bool CRunFile::run(const char *path, bool bShow /* = false */)
    reliable threads this wouldn't be necessary... fork()
    isolates the address spaces so is not suitable for this
    task */
-void alrm_action(int signo)
-{
-    printf("Write blocked after pipe limit exhausted\n", count);
-    exit(-1);
-}
 
 bool CRunFile::wait(int& result, int timeout)
 {	
