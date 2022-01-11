@@ -45,3 +45,6 @@ protocols/ntlm/libntlm.spec
 protocols/ntlm/ntlm.h
 protocols/ntlm/INSTALL
 redhat/cvsnt.spec
+Releasex64/*
+Debugx64/*
+ReleaseWin32/*
