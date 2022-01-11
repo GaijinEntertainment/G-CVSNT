@@ -4356,14 +4356,14 @@ void server_updated (
           error(1,0, "blob <%s> doesnt exist!", hash_encoded);
         buf_free(filebuf);
         filebuf = buf_nonio_initialize((BUFMEMERRPROC) NULL);
-        size_t blob_sz = 0, at = 0;
+        uint64_t blob_sz = 0, at = 0;
         caddressed_fs::PullData *pd = caddressed_fs::start_pull(caddressed_fs::get_default_ctx(), hash_encoded, blob_sz);
         if (!pd)
           error(1,0, "blob <%s> can not be pulled!", hash_encoded);
         caddressed_fs::DownloadBlobInfo info;
         while (at < blob_sz)
         {
-          size_t sz = 0;
+          uint64_t sz = 0;
           const char *data = caddressed_fs::pull(pd, at, sz);//returned data_pulled != 0, unless error
           if (!sz || !data)
             error(1,0, "blob <%s> can not be pulled!", hash_encoded);

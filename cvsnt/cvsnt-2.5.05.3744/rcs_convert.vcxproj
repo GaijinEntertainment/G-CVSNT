@@ -140,7 +140,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalDependencies>comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)cvs.exe</OutputFile>
+      <OutputFile>$(OutDir)rcs_convert.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)/$(TargetName).pdb</ProgramDatabaseFile>
@@ -237,7 +237,7 @@
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
       <AdditionalDependencies>comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
-      <OutputFile>$(OutDir)cvs.exe</OutputFile>
+      <OutputFile>$(OutDir)rcs_convert.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
       <ProgramDatabaseFile>$(TargetDir)/$(TargetName).pdb</ProgramDatabaseFile>
