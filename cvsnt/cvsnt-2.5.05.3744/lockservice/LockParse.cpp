@@ -27,6 +27,7 @@
 #include <sys/times.h>
 #endif
 #include <vector>
+#include <unordered_map>
 #include <string>
 #include <map>
 #include <algorithm>
@@ -182,8 +183,8 @@ struct LockClient
 	locktime_t starttime;
 	locktime_t endtime;
 };
-typedef tsl::robin_map<uint32_t,LockClient> LockClientMapType;
-typedef tsl::robin_map<uint32_t,Lock> LockMapType;
+typedef std::unordered_map<uint32_t,LockClient> LockClientMapType;
+typedef std::unordered_map<uint32_t,Lock> LockMapType;
 typedef tsl::robin_map<hash_t,std::vector<uint32_t>> PathToLockType;//path hash to locks map
 typedef tsl::robin_map<uint32_t, int> ClientLocksCounterType;//path hash to locks map
 bool del_lock(LockMapType::const_iterator i);
