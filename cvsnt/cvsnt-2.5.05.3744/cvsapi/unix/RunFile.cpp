@@ -243,8 +243,6 @@ bool CRunFile::wait(int& result, int timeout)
 			m_inFd=-1;
 		}
 	}
-	signal(SIGALRM, alrm_action);
-	alarm(30);//30 seconds is enough to alarm
 	w = waitpid(m_child,&status,WNOHANG);
 	while((timeout==-1 || timeout>0) && ((m_inFd>=0 && size>0) || m_outFd>=0 || m_errFd>=0) && !w)
 	{
@@ -306,7 +304,6 @@ bool CRunFile::wait(int& result, int timeout)
 			if(timeout==-1) timeout--;
 		}
 	}
-	//alarm(0);//we intentionally not switch off alarm
 	if(!w && timeout!=-1 && timeout<=0) /* timed out */
 	   return false;
 	if(m_inFd)

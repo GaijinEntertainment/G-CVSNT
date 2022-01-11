@@ -33,6 +33,7 @@
   #define SET_BINARY_MODE(file) _setmode(fileno(file), _O_BINARY);
 #else
   #include <sys/socket.h>
+  #include <unistd.h>
   #include <netdb.h>
   #define SET_BINARY_MODE(file) do { } while(0);
 #endif
@@ -1354,6 +1355,12 @@ int main (int argc, char **argv)
 #endif
 #ifdef SIGTERM
 	(void) SIG_register (SIGTERM, main_cleanup);
+#endif
+#ifdef SIGALARM
+    (void) SIG_register (SIGALRM, main_cleanup);
+    #if !defined(_WIN32)
+    alarm(60);//set pipe write alarm to 60 seconds
+    #endif
 #endif
 #endif /* !DONT_USE_SIGNALS */
 
