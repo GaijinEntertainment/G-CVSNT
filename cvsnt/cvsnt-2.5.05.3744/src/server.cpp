@@ -4773,6 +4773,7 @@ static void serve_valid_requests(char *arg);
  * then the additional flags could be added to require that Root, etc.
  * come after the encryption/authentication request.
  */
+#define GAIJIN_RQ_ESSENTIAL RQ_ESSENTIAL//define to 0, if you want to support old clients
 struct request requests[] =
 {
 #ifdef SERVER_SUPPORT
@@ -4795,7 +4796,7 @@ struct request requests[] =
   REQ_LINE("Checkin-time", serve_checkin_time, 0),
   REQ_LINE("Checksum", serve_checksum, 0),
   REQ_LINE("Modified", serve_modified, RQ_ESSENTIAL),
-  REQ_LINE("Blob-transfer", serve_blob, 0),
+  REQ_LINE("Blob-transfer", serve_blob, GAIJIN_RQ_ESSENTIAL),
   REQ_LINE("Blob-ref-transfer", serve_blob_ref, 0),
   REQ_LINE("Binary-transfer", serve_binary_transfer, 0),
   REQ_LINE("Is-modified", serve_is_modified, 0),

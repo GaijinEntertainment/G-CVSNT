@@ -3928,6 +3928,7 @@ static void proxy_file(char *cmd)
 #endif
 }
 
+#define GAIJIN_rs_essential rs_essential//define to rs_optional if you want to support old server
 /* This table must be writeable if the server code is included.  */
 struct response responses[] =
 {
@@ -3942,7 +3943,7 @@ struct response responses[] =
     RSP_LINE("New-entry", handle_new_entry, proxy_line2, response_type_normal, rs_optional),
     RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
     RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
-    RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, rs_optional),
+    RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, GAIJIN_rs_essential),
     RSP_LINE("Blob-url", handle_blob_url, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
     RSP_LINE("Updated-meta", handle_updated_meta, proxy_updated, response_type_normal, rs_optional),
