@@ -97,7 +97,7 @@ inline void enable_keepalive(int sock, bool keep_alive) {
 
 inline void blob_send_recieve_sock_timeout(int sock, int timeout_sec) {
   #if !_WIN32
-  struct timeval tv; memset(&tv, 0, sizeof(tv)); tv.tv_sec = timeout_sec;
+  struct timeval timeout; memset(&timeout, 0, sizeof(timeout)); timeout.tv_sec = timeout_sec;
   #else
   DWORD timeout = timeout_sec* 1000;
   #endif
