@@ -104,6 +104,7 @@ intptr_t start_blob_push_client(const char *url, int port, const char *root, int
     return -1;
   }
   blob_set_socket_def_options((int)sockfd);
+  blob_send_recieve_sock_timeout((int)sockfd, 10*60);//set timeout to 10 minutes
   blob_logmessage(LOG_NOTIFY, "Connected to <%s:%d>, connection = %d", url, port, sockfd);
   char greeting[greeting_length+1];
   if (!recv_exact(int(sockfd), greeting, greeting_length))

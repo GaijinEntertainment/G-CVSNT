@@ -29,6 +29,7 @@
   }
 #else
   #include <sys/socket.h>
+  #include <sys/time.h>
   #include <netinet/tcp.h>
   #include <arpa/inet.h>
   #include <stdlib.h>
@@ -92,6 +93,16 @@ inline bool blob_set_socket_reuse_addr(int socket, bool reuse_addr)
 inline void enable_keepalive(int sock, bool keep_alive) {
   int v = keep_alive ? 1 : 0;
   setsockopt(sock, SOL_SOCKET, SO_KEEPALIVE, (char*)&v, sizeof(int));
+}
+
+inline void blob_send_recieve_sock_timeout(int sock, int timeout_sec) {
+  #if !_WIN32
+  struct timeval tv; memset(&tv, 0, sizeof(tv)); tv.tv_sec = timeout_sec;
+  #else
+  DWORD timeout = timeout_sec* 1000;
+  #endif
+  setsockopt(sock, SOL_SOCKET, SO_RCVTIMEO, (char*)&timeout, sizeof(timeout));
+  setsockopt(sock, SOL_SOCKET, SO_SNDTIMEO, (char*)&timeout, sizeof(timeout));
 }
 
 inline void set_keepalive_tcp(int sock, int keep_cnt=5, int keep_interval=30, int keep_idle=60) {
