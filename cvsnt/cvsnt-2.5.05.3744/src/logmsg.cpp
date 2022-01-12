@@ -570,7 +570,8 @@ static int update_logfile_proc (void *params, const trigger_interface *cb)
 				status[len]='\0';
 		}
 		setup_arrays("",args->changes);
-		ret = cb->loginfo(cb,args->message,status,args->directory,loginfo_count,loginfo_array);
+		if (!args->message || strstr(args->message, "NOLOGINFO") == NULL)
+			ret = cb->loginfo(cb,args->message,status,args->directory,loginfo_count,loginfo_array);
 		xfree(status);
 		xfree(loginfo_array);
 	}
