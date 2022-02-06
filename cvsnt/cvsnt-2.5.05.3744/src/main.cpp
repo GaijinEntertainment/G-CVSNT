@@ -702,11 +702,10 @@ int main (int argc, char **argv)
 		{
 		  char* copy = strdup(s);
           size_t len = strlen(copy);
+          while (len && (copy[len - 1] == '\r' || copy[len - 1] == '\n'))
+            copy[(len--) - 1] = 0;
           if (len)
-          {
-            copy[len - 1] = 0;
             response_args.emplace_back(copy);
-          }
 		}
 		printf("parsed response file <%s>...\n", respFile);
 		fclose(f);
