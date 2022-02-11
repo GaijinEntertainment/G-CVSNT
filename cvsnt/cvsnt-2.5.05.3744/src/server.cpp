@@ -17,6 +17,8 @@
 #include "savecwd.h"
 #include "sha_blob_reference.h"
 #include "../ca_blobs_fs/streaming_blobs.h"
+#include <../keyValueServer/include/blob_sockets.h>
+#include <../keyValueServer/include/blob_hash_util.h>
 
 #include "../version.h"
 
@@ -882,6 +884,7 @@ static int supported_response (char *name)
 }
 
 static void send_blob_url_to_client();
+static void send_blob_otp_to_client();
 
 static void serve_valid_responses (char *arg)
 {
@@ -942,6 +945,7 @@ static void serve_valid_responses (char *arg)
 	else
 		compat_level = 0; /* Legacy client */
     send_blob_url_to_client();
+    send_blob_otp_to_client();
 	TRACE(3,"Client compatibility level is %d",compat_level);
 }
 
@@ -3262,6 +3266,35 @@ static void send_blob_url_to_client()
     buf_output0(buf_to_net, "\n");
   }
 }
+
+static void send_blob_otp_to_client()
+{
+  char buffer[1024+1];
+  if(CGlobalSettings::GetGlobalValue("cvsnt","PServer","BlobOTP",buffer,sizeof(buffer)-1))
+  {
+    TRACE(3,"Client blob url (PServer/BlobOTP) is not defined");
+    return;
+  }
+  //TRACE(3,"Try Client blob otp %s", buffer);// for security reasons do not type OTP page
+  if (supported_response("Blob-OTP"))
+  {
+    buffer[sizeof(buffer)-1] = 0;
+    uint64_t page = blob_get_otp_page();
+    unsigned char totp[key_plus_iv_size];
+    blob_gen_totp_secret(totp, (const uint8_t*)buffer, strlen(buffer), page);
+    char totp_encoded[key_plus_iv_size*2 + 1], page_encoded[sizeof(page)*2 + 1];
+    if (!bin_hash_to_hex_string_s(totp, sizeof(totp), totp_encoded, sizeof(totp_encoded)) ||
+        !bin_hash_to_hex_string_s((const uint8_t*)&page, sizeof(page), page_encoded, sizeof(page_encoded)))
+    	error(0,0,"can't encode totp.");
+
+    //TRACE(3,"Client blob otp %s", buffer);//for security reason do not type OTP page
+    buf_output0(buf_to_net, "Blob-OTP ");
+    buf_output0(buf_to_net, totp_encoded);
+    buf_output0(buf_to_net, page_encoded);
+    buf_output0(buf_to_net, "\n");
+  }
+}
+
 /* This feeds temporary renames back to the client */
 int send_rename_to_client(const char *oldfile, const char *newfile)
 {

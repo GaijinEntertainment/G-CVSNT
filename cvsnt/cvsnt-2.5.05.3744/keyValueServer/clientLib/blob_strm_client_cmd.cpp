@@ -16,7 +16,7 @@ class StreamToServerData
 {
 public:
   BufferedSocketOutput<65536> wr;
-  StreamToServerData(int sock):wr(sock) {}
+  StreamToServerData(BlobSocket &sock):wr(sock) {}
   void finish();
 };
 
@@ -57,9 +57,9 @@ KVRet blob_stream_to_server(StreamToServerData &strm, const void *data, uint64_t
   return KVRet::OK;
 }
 
-StreamToServerData *start_blob_stream_to_server(intptr_t &sockfd, const char *hash_type, const char *hash_hex_str)
+StreamToServerData *start_blob_stream_to_server(BlobSocket &sockfd, const char *hash_type, const char *hash_hex_str)
 {
-  StreamToServerData *s = new StreamToServerData((int)sockfd);
+  StreamToServerData *s = new StreamToServerData(sockfd);
   KVRet ret = start_blob_stream_to_server(*s, hash_type, hash_hex_str);
   if (ret == KVRet::OK)
     return s;
@@ -69,7 +69,7 @@ StreamToServerData *start_blob_stream_to_server(intptr_t &sockfd, const char *ha
   return nullptr;
 }
 
-KVRet finish_blob_stream_to_server(intptr_t &sockfd, StreamToServerData *s, bool ok)
+KVRet finish_blob_stream_to_server(BlobSocket &sockfd, StreamToServerData *s, bool ok)
 {
   if (!s)
     return KVRet::Error;
@@ -80,11 +80,11 @@ KVRet finish_blob_stream_to_server(intptr_t &sockfd, StreamToServerData *s, bool
   return ret;
 }
 
-KVRet blob_stream_to_server(intptr_t &sockfd,
+KVRet blob_stream_to_server(BlobSocket &sockfd,
   const char *hash_type, const char *hash_hex_str,
   std::function<const char*(uint64_t &data_pulled)> pull_data)
 {
-  StreamToServerData strm((int)sockfd);
+  StreamToServerData strm(sockfd);
   KVRet rs = start_blob_stream_to_server(strm, hash_type, hash_hex_str);
   if (rs != KVRet::OK)
   {

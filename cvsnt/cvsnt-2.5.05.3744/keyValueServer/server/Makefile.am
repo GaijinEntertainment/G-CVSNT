@@ -8,5 +8,5 @@ cafs_server_SOURCES = \
 
 bin_PROGRAMS=cafs_server
 
-cafs_server_LDADD = -lz -lzstd  ../../ca_blobs_fs/libca_blobs_fs.la
+cafs_server_LDADD = -lz -lzstd  ../../ca_blobs_fs/libca_blobs_fs.la ../blob_sockets/libblob_sockets_lib.la
 

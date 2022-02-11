@@ -13,7 +13,7 @@
 
 using namespace blob_push_proto;
 
-int64_t blob_push_to_server(intptr_t &sockfd, uint64_t blob_sz,
+int64_t blob_push_to_server(BlobSocket &sockfd, uint64_t blob_sz,
   const char *hash_type, const char *hash_hex_str,
   std::function<const char*(uint64_t at, uint64_t &data_pulled)> pull_data)
 {
@@ -27,7 +27,7 @@ int64_t blob_push_to_server(intptr_t &sockfd, uint64_t blob_sz,
   memcpy_to(to, push_command, command_len);//copy command
   memcpy_to(to, blob_hash, hash_len);//copy hash
   memcpy_to(to, &blob_sz, sizeof(blob_sz));
-  if (!send_exact(int(sockfd), command, sizeof(command)))
+  if (!send_exact(sockfd, command, sizeof(command)))
     {stop_blob_push_client(sockfd); return -2;}
 
   uint64_t from = 0;
@@ -43,7 +43,7 @@ int64_t blob_push_to_server(intptr_t &sockfd, uint64_t blob_sz,
     }
     from += data_pulled;
     sizeLeft -= data_pulled;
-    if (!send_exact(int(sockfd), buf, (int)data_pulled))
+    if (!send_exact(sockfd, buf, (int)data_pulled))
       {stop_blob_push_client(sockfd); return -2;}
   }
   const int64_t sent = blob_sz-sizeLeft;
@@ -51,12 +51,12 @@ int64_t blob_push_to_server(intptr_t &sockfd, uint64_t blob_sz,
   {
     char buf[256]; memset(buf, 0, sizeof(buf));
     for (;sizeLeft > 0; sizeLeft -= sizeof(buf))
-      if (!send_exact(int(sockfd), buf, (int)std::min(sizeLeft, (int64_t)sizeof(buf))))
+      if (!send_exact(sockfd, buf, (int)std::min(sizeLeft, (int64_t)sizeof(buf))))
         {stop_blob_push_client(sockfd); return -2;}
   }
 
   char response[response_len+1];
-  if (!recv_exact(int(sockfd), response, (int)response_len))
+  if (!recv_exact(sockfd, response, (int)response_len))
   {
     stop_blob_push_client(sockfd);
     return -2;

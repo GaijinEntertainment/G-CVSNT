@@ -1,12 +1,14 @@
 #include <sstream>
 #include "blob_network_processor.h"
 #include "sha_blob_reference.h"
+#include <../keyValueServer/include/blobs_encryption.h>
 #include <../keyValueServer/include/blob_client_lib.h>
+#include <../keyValueServer/include/blob_sockets.h>
 #include <memory>
 
 void error(int, int, const char*, ...);
 
-inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const char *hash, bool blob_binary_compressed, std::string &err)
+inline KVRet send_blob_file_data_net(BlobSocket &client, const char *file, const char *hash, bool blob_binary_compressed, std::string &err)
 {
   auto output = std::stringstream("");
   using namespace caddressed_fs;
@@ -19,7 +21,7 @@ inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const c
   if (!strm)
   {
     output << "Can't start sending binary blob data for " << file; err = output.str();
-    return client < 0 ? KVRet::Fatal : KVRet::Error;
+    return !is_valid(client) ? KVRet::Fatal : KVRet::Error;
   }
 
   BlobHeader hdr = get_header(blob_binary_compressed ? zstd_magic : noarc_magic, fsz, 0);
@@ -73,9 +75,12 @@ inline KVRet send_blob_file_data_net(intptr_t &client, const char *file, const c
   return r;
 }
 
+extern uint32_t get_current_otp_info(uint8_t *otp, uint32_t otp_len, uint64_t& otp_page);
+extern bool always_demand_blob_encryption();
+
 struct KVNetworkProcessor:public BlobNetworkProcessor
 {
-  KVNetworkProcessor(const char *url_, int port_, const char* root_):url(url_), port(port_), root(root_){}
+  KVNetworkProcessor(const char *url_, int port_, const char* root_, bool is_master_):url(url_), port(port_), root(root_), is_master(is_master_){}
   ~KVNetworkProcessor() { stop_blob_push_client(client); }
   bool reinit(const char *url2, int port2, const char *, const char *) {
     if (url == url2 && port == port2)
@@ -83,7 +88,17 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     url = url2; port = port2;
     return init();
   }
-  bool init() { stop_blob_push_client(client); return (client = start_blob_push_client(url.c_str(), port, root.c_str())) >= 0; }
+
+  bool init() {
+    stop_blob_push_client(client);
+    uint8_t otp[48]; uint64_t otp_page = 0;
+    const bool has_otp = get_current_otp_info(otp, sizeof(otp), otp_page) == sizeof(otp);
+    //demand encryption if url is domain name, and not master
+    //todo: Geo probing, explicit info in url if it is encrypted
+    const bool demand_encryption = always_demand_blob_encryption();
+    CafsClientAuthentication auth = always_demand_blob_encryption() ? CafsClientAuthentication::RequiresAuth : CafsClientAuthentication::AllowNoAuthPrivate;
+    return is_valid(client = start_blob_push_client(url.c_str(), port, root.c_str(), 2, has_otp ? otp : nullptr, otp_page, auth));
+  }
   virtual bool canDownload() {return true;}
   virtual bool canUpload() {return true;}
   virtual bool download(const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
@@ -132,13 +147,14 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
       init();
     return r == KVRet::OK;
   }
-  intptr_t client = intptr_t(-1);
+  BlobSocket client;
   std::string url, root; int port;
+  bool is_master = false;
 };
 
-BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char *root, const char *user, const char *passwd)
+BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char *root, const char *user, const char *passwd, bool no_encryption)
 {
-  auto ret =  new KVNetworkProcessor(url, port, root);
+  auto ret =  new KVNetworkProcessor(url, port, root, no_encryption);
   if (!ret->init())
   {
     delete ret;

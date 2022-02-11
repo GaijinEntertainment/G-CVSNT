@@ -983,6 +983,7 @@ AC_CONFIG_FILES([Makefile \
 	  rcs/Makefile \
       blake3/Makefile \
       ca_blobs_fs/Makefile \
+      keyValueServer/blob_sockets/Makefile \
       keyValueServer/clientLib/Makefile \
       keyValueServer/proxy/Makefile \
       keyValueServer/server/Makefile \

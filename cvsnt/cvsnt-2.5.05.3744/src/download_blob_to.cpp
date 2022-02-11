@@ -109,7 +109,7 @@ static std::unique_ptr<BackgroundProcessor> processor;
 extern void get_download_source(const char *&master_url, const char *&proxy_down_url, int &proxy_down_port, const char *&up_url, int &up_port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count);
 
 extern BlobNetworkProcessor *get_http_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
-extern BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
+extern BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char* repo, const char *user, const char *passwd, bool is_master);
 
 static std::string master_url_str, master_user, master_passwd;
 static int master_port = 2403;
@@ -138,10 +138,11 @@ void BackgroundProcessor::init()
     BlobNetworkProcessor * pr = nullptr;
     if (!use_http)
     {
-      pr = get_kv_processor(download_url, download_port, base_repo.c_str(), user, passwd);
+      const bool isMaster = strcmp(download_url,master_url) == 0;
+      pr = get_kv_processor(download_url, download_port, base_repo.c_str(), user, passwd, isMaster);
       if (!pr && strcmp(master_url, download_url) != 0)
       {
-        pr = get_kv_processor(master_url, master_port, base_repo.c_str(), user, passwd);
+        pr = get_kv_processor(master_url, master_port, base_repo.c_str(), user, passwd, true);
         if (pr)
         {
           error(0,0, "Proxy <%s:%d> is not available, switching to master <%s:%d>. Contact IT!\n",
@@ -159,7 +160,7 @@ void BackgroundProcessor::init()
     cli.reset(pr);
   }
   for (auto &cli : upload_clients)
-    cli.reset(get_kv_processor(upload_url, upload_port, base_repo.c_str(), user, passwd));
+    cli.reset(get_kv_processor(upload_url, upload_port, base_repo.c_str(), user, passwd, true));
 
   for (int ti = 0; ti < threads_count; ++ti)
     threads.emplace_back(std::thread(processor_thread_loop, this, download_clients[ti].get(), upload_clients[ti].get()));

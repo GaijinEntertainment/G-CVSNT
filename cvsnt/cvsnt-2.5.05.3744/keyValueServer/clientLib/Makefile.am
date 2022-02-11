@@ -15,7 +15,7 @@ libkv_client_lib_la_SOURCES = \
   blob_push_client_cmd.cpp 
 
 libkv_client_lib_la_LDFLAGS = -release $(VERSION) -L$(DESTDIR)/$(libdir) 
-libkv_client_lib_la_LIBADD = ../../ca_blobs_fs/libca_blobs_fs.la
+libkv_client_lib_la_LIBADD = ../../ca_blobs_fs/libca_blobs_fs.la ../blob_sockets/libblob_sockets_lib.la
 
 ##libblake3_la_LIBADD = $(LIBLTDL)
 

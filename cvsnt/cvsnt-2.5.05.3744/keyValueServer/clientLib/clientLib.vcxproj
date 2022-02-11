@@ -25,6 +25,11 @@
     <ClCompile Include="blob_push_pull_client.cpp" />
     <ClCompile Include="blob_strm_client_cmd.cpp" />
   </ItemGroup>
+  <ItemGroup>
+    <ProjectReference Include="..\blob_sockets\blob_sockets.vcxproj">
+      <Project>{489a16ac-4557-4adc-bd57-b9b2d384353a}</Project>
+    </ProjectReference>
+  </ItemGroup>
   <PropertyGroup Label="Globals">
     <VCProjectVersion>16.0</VCProjectVersion>
     <ProjectGuid>{8ED98E97-7ABE-4460-8C5B-2B626D4AB724}</ProjectGuid>

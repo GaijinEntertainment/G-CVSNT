@@ -151,6 +151,7 @@ cvsnt_LDADD = \
 	../cvstools/libcvstools.la \
     ../blake3/libblake3.la \
     ../ca_blobs_fs/libca_blobs_fs.la \
+    ../keyValueServer/blob_sockets/libblob_sockets_lib.la \
     ../keyValueServer/clientLib/libkv_client_lib.la \
 	$(zlib_lib) \
 	$(pam_lib) \

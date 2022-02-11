@@ -29,8 +29,8 @@ int main(int argc, const char **argv)
 
   const char *url = argc>2 ? argv[2] : "127.0.0.1";
   int port = argc>3 ? atoi(argv[3]) : 2403;
-  intptr_t client = start_blob_push_client(url, port, root);
-  if (client == -1)
+  BlobSocket client = start_blob_push_client(url, port, root, 2, nullptr, false);
+  if (!is_valid(client))
   {
     blob_logmessage(LOG_ERROR, "Can't connect client %d", blob_get_last_sock_error());
     return 1;

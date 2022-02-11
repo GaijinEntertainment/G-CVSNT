@@ -36,7 +36,7 @@ endif
 cvs_config_dir=@cvs_config_dir@
 
 # All other subdirs:
-SUBDIRS = lib $(MDNSCLIENT_SUBDIR) cvsapi diff cvsgui cvstools xdiff blake3 ca_blobs_fs keyValueServer/clientLib \
+SUBDIRS = lib $(MDNSCLIENT_SUBDIR) cvsapi diff cvsgui cvstools xdiff blake3 ca_blobs_fs keyValueServer/blob_sockets keyValueServer/clientLib \
 	  protocols triggers cvsdelta $(MACOSX_SUBDIR) src lockservice $(RCSTOOLS_SUBDIR) man run_script
 if WITH_SERVER_AND_TOOLS
 SUBDIRS += keyValueServer/server keyValueServer/proxy tools rcs_convert

@@ -13,12 +13,11 @@ if (socket_ret < 0)\
   return false;\
 }
 
-
-static inline bool recv_exact(int socket, void *data, unsigned int len, int flags = 0)
+static inline bool recv_exact(BlobSocket socket, void *data, uint64_t len)
 {
   while (len > 0)
   {
-    int l = recv(socket, (char*)data, len, 0);
+    int l = recv(socket, (char*)data, (int)std::min(len, uint64_t(1<<30)));
     HANDLE_SOCKET_ERROR(l);
     data = (char*)data + l;
     len -= l;
@@ -26,14 +25,13 @@ static inline bool recv_exact(int socket, void *data, unsigned int len, int flag
   return true;
 }
 
-static inline bool send_exact(int socket, const void *data, uint64_t len, int flags = 0)
+static inline bool send_exact(BlobSocket socket, const void *data, uint64_t len)
 {
-  flags |= MSG_NOSIGNAL;
   while (len > 0)
   {
     constexpr uint64_t quant = (1<<30);//1Gb of data
     uint64_t sendQuant = std::min(quant, len);
-    int l = send(socket, (const char*)data, (int)sendQuant, flags);
+    int l = send_msg_no_signal(socket, (const char*)data, (int)sendQuant);
     HANDLE_SOCKET_ERROR(l)
     data = (const char*)data + l;
     len -= l;
@@ -42,13 +40,13 @@ static inline bool send_exact(int socket, const void *data, uint64_t len, int fl
 }
 
 template<typename Callback>
-static inline bool recv_lambda(int socket, uint64_t total, Callback cb,int flags = 0)
+static inline bool recv_lambda(BlobSocket socket, uint64_t total, Callback cb)
 {
   uint64_t sizeLeft = total;
   char buf[65536];
   while (sizeLeft > 0)
   {
-    int l = recv(socket, buf, (int)std::min(sizeLeft, (uint64_t)sizeof(buf)), 0);
+    int l = recv(socket, buf, (int)std::min(sizeLeft, (uint64_t)sizeof(buf)));
     HANDLE_SOCKET_ERROR(l)
     cb(buf, l);
     sizeLeft -= l;
@@ -62,7 +60,7 @@ static inline bool recv_lambda(int socket, uint64_t total, Callback cb,int flags
 template<int bufSize>
 struct BufferedSocketOutput
 {
-  BufferedSocketOutput(int sockfd): sock(sockfd) {}
+  BufferedSocketOutput(BlobSocket sockfd): sock(sockfd) {}
   ~BufferedSocketOutput(){sendBuf();}
   BufferedSocketOutput(const BufferedSocketOutput&) = delete;
   BufferedSocketOutput &operator =(const BufferedSocketOutput&) = delete;
@@ -85,7 +83,7 @@ struct BufferedSocketOutput
     return send_and_bufferize_reminder(data, data_size);
   }
   bool finish(){return sendBuf();}
-  int sock = -1;
+  BlobSocket sock;
 protected:
   bool sendBuf()
   {

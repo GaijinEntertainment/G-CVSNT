@@ -1,12 +1,14 @@
 #include <stdio.h>
 #include <stdlib.h>
 #include <stdint.h>
+#include <string.h>
+#include "../include/blobs_encryption.h"
 #include "../include/blob_server.h"
 #include "../include/blob_sockets.h"//move init to out of line
 #define BLOB_LOG_LEVEL LOG_WARNING
 #include "../sampleImplementation/def_log_printf.cpp"
 
-void init_proxy(const char *url, int port, const char *cache, uint64_t sz);
+void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *encryption_secret);
 void close_proxy();
 extern bool proxy_allow_push;
 
@@ -14,7 +16,7 @@ int main(int argc, const char **argv)
 {
   if (argc < 3)
   {
-    printf("Usage is cafs_proxy_server master_url cache_folder [cache_soft_limit_size (mb). default is 20480 == 20Gb]\n");
+    printf("Usage is cafs_proxy_server master_url cache_folder [encryption/mandatory_encryption secret] [cache_soft_limit_size (mb). default is 102400 == 100Gb]\n");
     return 1;
   }
   if (!blob_init_sockets())
@@ -22,11 +24,26 @@ int main(int argc, const char **argv)
     blob_logmessage(LOG_ERROR, "Can't init sockets, %d", blob_get_last_sock_error());
     return 1;
   }
+  const char *encryption_secret = 0;
+  CafsServerEncryption encryption = CafsServerEncryption::Local;
+  int pc = 3;
+  if (argc > pc && (strcmp(argv[pc], "encryption") == 0 || strcmp(argv[pc], "mandatory_encryption") == 0))
+  {
+    if (argc <= pc + 1 || strlen(argv[pc+1]) < minimum_shared_secret_length)
+    {
+      fprintf(stderr, "encrypted server has to be started with secret of valid length > %d", (int)minimum_shared_secret_length);
+      return 1;
+    }
+    encryption = strcmp(argv[pc], "encryption") == 0 ? CafsServerEncryption::Public : CafsServerEncryption::All;
+    encryption_secret = argv[pc+1];
+    pc += 2;
+  }
   const int master_port = 2403;
-  init_proxy(argv[1], master_port, argv[2], argc>3 ? atoi(argv[3]) : 20*1024);
+  init_proxy(argv[1], master_port, argv[2], argc>pc ? atoi(argv[pc]) : 100*1024, encryption_secret);
   proxy_allow_push = false;//we don't use write through
-  printf("Starting server listening at port %d\n", master_port);
-  const bool result = start_push_server(master_port, 1024, nullptr);
+  printf("Starting %s%s server listening at port %d\n",
+    encryption == CafsServerEncryption::Public ? "optional " : " ", encryption_secret ? "encrypted" : "local only", master_port);
+  const bool result = start_push_server(master_port, 1024, nullptr, encryption_secret, encryption);
   printf("server quit %s", result ? "with error\n" :"normally\n");
   close_proxy();
   blob_close_sockets();

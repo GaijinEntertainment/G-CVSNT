@@ -1,17 +1,16 @@
 #include <string>
 #include <memory>
 #include <condition_variable>
-#include <chrono>
-#include <thread>
 #include "../blob_server_func_deps.h"
 #include "../../ca_blobs_fs/content_addressed_fs.h"
 #include "../../ca_blobs_fs/src/fileio.h"
 #include "../../ca_blobs_fs/src/details.h"
 #include "../include/blob_client_lib.h"
+#include "../include/blob_sockets.h"
 #include "../blob_push_log.h"
 
 static std::string master_url;
-static std::string cache_folder, blobs_folder;
+static std::string cache_folder, blobs_folder, encryption_secret;
 static int master_port = 2403;
 //--
 void init_gc(const char *folder, uint64_t max_size);
@@ -21,11 +20,12 @@ bool perform_immediate_gc(int64_t needed_sz);
 
 //
 void close_proxy(){close_gc();}
-void init_proxy(const char *url, int port, const char *cache, uint64_t sz)
+void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *secret)
 {
   master_url = url;
   master_port = port;
   cache_folder = cache;
+  encryption_secret = secret ? secret : "";
   if (cache_folder.length()==0)
     cache_folder = ".";
   else
@@ -42,19 +42,40 @@ void init_proxy(const char *url, int port, const char *cache, uint64_t sz)
 
 struct ClientConnection
 {
-  mutable intptr_t cs = intptr_t(-1);
+  mutable BlobSocket cs;
   mutable uint32_t failedAttempts = 0;
   uint32_t maxFailedAttempts = 100;
   std::string root;
   ClientConnection(const char*root_):root(root_)
   {
   }
-  bool start()const{cs = start_blob_push_client(master_url.c_str(), master_port, root.c_str(), 0);return cs >= 0;}//infinite timeout on proxy
+  bool start() const
+  {
+    uint64_t otpPage = 0;
+    uint8_t otp[key_plus_iv_size];
+    bool clientEncryption = false;
+    if (encryption_secret.length() != 0)
+    {
+      otpPage = blob_get_otp_page();
+      if (!blob_gen_totp_secret(otp, (const unsigned char *)encryption_secret.c_str(), (uint32_t)encryption_secret.length(), otpPage))
+      {
+        blob_logmessage(LOG_WARNING, "failed attempt to generate otp");
+      } else
+        clientEncryption = true;
+    }
+    cs = start_blob_push_client(master_url.c_str(), master_port, root.c_str(), 0,
+                                clientEncryption ? otp : nullptr,//allow to connect to encrypted proxies
+                                otpPage,//get current otp page
+                                clientEncryption ? CafsClientAuthentication::RequiresAuth : CafsClientAuthentication::AllowNoAuthPrivate//do not demand encryption on proxy from server, even if it is encrypting as server
+                                );
+    return is_valid(cs);
+  }//infinite timeout on proxy
   void kill() const{stop_blob_push_client(cs);}
   void restart() const{kill();start();}
   ~ClientConnection(){kill();}
 };
 
+extern void blob_sleep_for_msec(unsigned int msec);
 bool blob_is_under_attack(bool failed_attempt, void *c) {
   if (!c)
     return false;
@@ -71,7 +92,7 @@ bool blob_is_under_attack(bool failed_attempt, void *c) {
     const double biggestDelaySeconds = 100;//100 seconds
     //quadratic growth of delay. if we allow 100 attempts prior to ban IP, than first failed attempt 10msec, 10th attempt one second delay, 100th attempt 1000second delay
     const double delaySeconds = ratio*ratio*biggestDelaySeconds;
-    std::this_thread::sleep_for(std::chrono::microseconds(uint32_t(delaySeconds*1000000)));
+    blob_sleep_for_msec(uint32_t(delaySeconds*1000));
     blob_logmessage(LOG_WARNING, "failed attempt to get something, delaying %gsec", delaySeconds);
     return false;
   } else
@@ -157,7 +178,7 @@ uintptr_t blob_start_push_data(const void *c, const char* htype, const char* hhe
     return 0;
   const ClientConnection *cc = (const ClientConnection *)c;
   StreamToServerData *ss = start_blob_stream_to_server(cc->cs, htype, hhex);
-  if (!ss || cc->cs < 0)
+  if (!ss || !is_valid(cc->cs))
   {
     cc->restart();
     return 0;
@@ -207,7 +228,7 @@ void blob_destroy_push_data(uintptr_t up)
     pd->cc->restart();
 }
 
-static inline FILE* download_blob(intptr_t &sock, std::string &tmpfn, const char* htype, const char* hhex, int64_t &pulledSz)
+static inline FILE* download_blob(BlobSocket &sock, std::string &tmpfn, const char* htype, const char* hhex, int64_t &pulledSz)
 {
   pulledSz = 0;
   FILE* tmpf = blob_fileio_get_temp_file(tmpfn, blobs_folder.c_str());
@@ -225,7 +246,7 @@ static inline FILE* download_blob(intptr_t &sock, std::string &tmpfn, const char
     });
   if (!ok || pulledSz <= 0)
   {
-    fprintf(stderr, "Couldn't download <%.64s> from master. pulled = %lld\n", hhex, pulledSz);
+    fprintf(stderr, "Couldn't download <%.64s> from master. pulled = %lld\n", hhex, (long long int)pulledSz);
     fclose(tmpf);
     blob_fileio_unlink_file(tmpfn.c_str());
     tmpf = NULL;

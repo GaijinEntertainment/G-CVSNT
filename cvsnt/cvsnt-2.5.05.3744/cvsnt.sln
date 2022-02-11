@@ -125,6 +125,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "rcs_convert", "rcs_convert.
 EndProject
 Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "cafs_proxy", "keyValueServer\proxy\cafs_proxy.vcxproj", "{668DE428-1A0C-449A-BE4F-8F6ADC678903}"
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "blob_sockets", "keyValueServer\blob_sockets\blob_sockets.vcxproj", "{489A16AC-4557-4ADC-BD57-B9B2D384353A}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug - amd64|Win32 = Debug - amd64|Win32
@@ -1049,6 +1051,22 @@ Global
 		{668DE428-1A0C-449A-BE4F-8F6ADC678903}.Release|Win32.Build.0 = Release|Win32
 		{668DE428-1A0C-449A-BE4F-8F6ADC678903}.Release|x64.ActiveCfg = Release|x64
 		{668DE428-1A0C-449A-BE4F-8F6ADC678903}.Release|x64.Build.0 = Release|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug - amd64|Win32.ActiveCfg = Debug|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug - amd64|Win32.Build.0 = Debug|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug - amd64|x64.ActiveCfg = Debug|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug - amd64|x64.Build.0 = Debug|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug|Win32.ActiveCfg = Debug|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug|Win32.Build.0 = Debug|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug|x64.ActiveCfg = Debug|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Debug|x64.Build.0 = Debug|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release - amd64|Win32.ActiveCfg = Release|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release - amd64|Win32.Build.0 = Release|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release - amd64|x64.ActiveCfg = Release|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release - amd64|x64.Build.0 = Release|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release|Win32.ActiveCfg = Release|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release|Win32.Build.0 = Release|Win32
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release|x64.ActiveCfg = Release|x64
+		{489A16AC-4557-4ADC-BD57-B9B2D384353A}.Release|x64.Build.0 = Release|x64
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

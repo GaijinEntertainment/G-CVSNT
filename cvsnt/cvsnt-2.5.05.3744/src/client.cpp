@@ -25,6 +25,8 @@
 #include "edit.h"
 #include "buffer.h"
 #include "sha_blob_reference.h"
+#include <../keyValueServer/include/blob_sockets.h>
+#include <../keyValueServer/include/blob_hash_util.h>
 #ifdef MAC_HFS_STUFF
 #include "osx/mac_hfs_stuff.h"
 #endif
@@ -2101,6 +2103,20 @@ bool blob_downloaded_no_write = false;
 
 int blob_concurrency_download_level = -1;
 
+static uint8_t blob_current_otp[48];
+static uint64_t blob_current_otp_page = 0;
+static bool blob_has_otp = false;
+static bool blob_always_demand_encryption = false;
+
+bool always_demand_blob_encryption() {return blob_always_demand_encryption;}
+uint32_t get_current_otp_info(uint8_t *otp, uint32_t otp_len, uint64_t& otp_page)
+{
+  if (!blob_has_otp || otp_len < sizeof(blob_current_otp))
+    return 0;
+  memcpy(otp, blob_current_otp, sizeof(blob_current_otp));
+  otp_page = blob_current_otp_page;
+  return sizeof(blob_current_otp);
+}
 char blob_default_download_url[256] = {0};
 char blob_cmd_download_url[256] = {0};
 char blob_master_url[256]= {0};
@@ -2133,6 +2149,10 @@ static void parse_urls()
   if (blob_parsed_download_url[0])
     return;
   char* cp = NULL;
+  if ((cp = getenv ("CVS_ENCRYPT_BLOBS")) != NULL)// then env var
+  {
+    blob_always_demand_encryption = strcmp(cp, "ALWAYS") == 0 || strcmp(cp, "ON") == 0;
+  }
   char * src_down_url = NULL;
   char buf[512];
   if (blob_cmd_download_url[0])//CMD has highest priority
@@ -2853,6 +2873,20 @@ static void handle_blob_url (char *args, int len)
 {
    memcpy(blob_default_download_url, args, len);
    blob_default_download_url[len] = 0;
+}
+
+static void handle_blob_otp(char *args, int len)
+{
+	if (len < sizeof(blob_current_otp)*2 + sizeof(blob_current_otp_page)*2)
+	{
+		error(0,0,"invalid otp info len '%d'", len);
+	}
+	uint8_t page[sizeof(blob_current_otp_page)];
+    if (!hex_string_to_bin_hash(args, sizeof(blob_current_otp)*2, blob_current_otp, sizeof(blob_current_otp)) ||
+        !hex_string_to_bin_hash(args + sizeof(blob_current_otp)*2, sizeof(page)*2, page, sizeof(page)))
+		error(0,0,"invalid otp info decoding '%d'", len);
+	memcpy(&blob_current_otp_page, page, sizeof(blob_current_otp_page));
+	blob_has_otp = true;
 }
 
 static void update_baserev(char *data, List *ent_list, char *short_pathname, char *filename)
@@ -3944,6 +3978,7 @@ struct response responses[] =
     RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
     RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
     RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, GAIJIN_rs_essential),
+    RSP_LINE("Blob-OTP", handle_blob_otp, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Blob-url", handle_blob_url, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
     RSP_LINE("Updated-meta", handle_updated_meta, proxy_updated, response_type_normal, rs_optional),

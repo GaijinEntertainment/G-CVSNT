@@ -11,7 +11,18 @@ static constexpr int hash_len = bin_hash_len+6;
 
 //then, server waits for commands
 //all commands are 4 bytes. Currently we have just 4: "VERS", "CHCK", "PUSH", "PULL", "SIZE"
-//"VERS": has to be followed by "XXX" (client version), then 1byte of root length, then root. answers are ERBD or NONE
+//root is not a command, it is part of VERS. it is 1byte of root length, then root of up to 255 bytes.
+//"VERS": is first and unencrypted, this is AUTH. Has to be always followed by "XXX" (client version), then
+
+//A) if it is auth+ version, then otp page of 8 bytes, and then the answer is two encryption keys (encrypted with OTP)
+//   client should immediately respond with encrypted (using provided key) it's current 64bit of timestamp, and 64 bits of ones to finalize handshake.
+//   and then encrypted root
+//   server will answer (using same encryption key pair) 'HAVE' (yes, encryption will be used), 'NONE' (encryption won't be used anymore), 'ERIO' (invalid timestamp) or EBRD (invalid version)
+
+//B) if it is prototype version, then immediately root should be sent
+//  the answer is either NONE (which is OK, if we can work with unencrypted protocol then), or EBRD (invalid version, not allowing prototype clients)
+
+//all these commands can be encrypted (all or nothing):
 //"SIZE": has to be followed by "blake3bin_hash_32". Responses are: "SIZE", "NONE", "ERXX" (xx - is error code).
 //"CHCK": has to be followed by "blake3bin_hash_32". Responses are: "HAVE", "NONE", "ERXX" (xx - is error code).
 //"PUSH": has to be followed by "blake3bin_hash_32bytes_size8". Responses are: "HAVE", "ERXX" (xx - is error code).

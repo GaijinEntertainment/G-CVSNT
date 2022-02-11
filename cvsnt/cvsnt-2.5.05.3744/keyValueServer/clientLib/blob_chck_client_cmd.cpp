@@ -12,17 +12,17 @@
 #include "../include/blob_client_lib.h"
 
 using namespace blob_push_proto;
-KVRet blob_check_on_server(intptr_t &sockfd, const char *hash_type, const char *hash_hex_str, bool &has)
+KVRet blob_check_on_server(BlobSocket &sockfd, const char *hash_type, const char *hash_hex_str, bool &has)
 {
   has = false;
   uint8_t command[chck_command_len + command_len];
   memcpy(command, chck_command, command_len);//copy command
   if (!encode_hash_str_to_blob_hash_s(hash_type, hash_hex_str, command+command_len, hash_len))
     return KVRet::Error;
-  if (!send_exact(int(sockfd), command, sizeof(command)))
+  if (!send_exact(sockfd, command, sizeof(command)))
     {stop_blob_push_client(sockfd); return KVRet::Fatal;}
   char response[response_len+1];
-  if (!recv_exact(int(sockfd), response, response_len))
+  if (!recv_exact(sockfd, response, response_len))
     {stop_blob_push_client(sockfd); return KVRet::Fatal;}
   if (strncmp(response, have_response, response_len) == 0)
   {
@@ -42,23 +42,23 @@ KVRet blob_check_on_server(intptr_t &sockfd, const char *hash_type, const char *
   return KVRet::Fatal;
 }
 
-int64_t blob_size_on_server(intptr_t &sockfd, const char *hash_type, const char *hash_hex_str)
+int64_t blob_size_on_server(BlobSocket &sockfd, const char *hash_type, const char *hash_hex_str)
 {
   uint8_t command[size_command_len + command_len];
   memcpy(command, size_command, command_len);//copy command
   if (!encode_hash_str_to_blob_hash_s(hash_type, hash_hex_str, command+command_len, hash_len))
     return -1;
 
-  if (!send_exact(int(sockfd), command, sizeof(command)))
+  if (!send_exact(sockfd, command, sizeof(command)))
     {stop_blob_push_client(sockfd); return -2;}
   char response[response_len+1];
-  if (!recv_exact(int(sockfd), response, response_len))
+  if (!recv_exact(sockfd, response, response_len))
     {stop_blob_push_client(sockfd); return -2;}
   response[response_len] = 0;
   if (strncmp(response, size_response, response_len) == 0)
   {
     int64_t blob_sz;
-    if (!recv_exact(int(sockfd), (char*)&blob_sz, sizeof(blob_sz)))
+    if (!recv_exact(sockfd, (char*)&blob_sz, sizeof(blob_sz)))
       {stop_blob_push_client(sockfd); return -2;}
     return blob_sz;
   }

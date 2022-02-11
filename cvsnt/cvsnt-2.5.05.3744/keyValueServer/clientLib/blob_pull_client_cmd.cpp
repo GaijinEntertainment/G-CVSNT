@@ -13,7 +13,7 @@
 
 using namespace blob_push_proto;
 
-KVRet blob_start_pull_from_server(intptr_t &sockfd, const char *hash_type, const char *hash_hex_str,
+KVRet blob_start_pull_from_server(BlobSocket &sockfd, const char *hash_type, const char *hash_hex_str,
   uint64_t &from, uint64_t &sz)
 {
   unsigned char blob_hash[hash_len];
@@ -30,14 +30,14 @@ KVRet blob_start_pull_from_server(intptr_t &sockfd, const char *hash_type, const
   memcpy_to(to, blob_hash, hash_len);//copy hash
   memcpy_to(to, &sz, sizeof(uint64_t));
   memcpy_to(to, &chunk, sizeof(chunk));
-  if (!send_exact(int(sockfd), command, sizeof(command)))
+  if (!send_exact(sockfd, command, sizeof(command)))
   {
     stop_blob_push_client(sockfd);
     return KVRet::Fatal;
   }
 
   char response[response_len+1];
-  if (!recv_exact(int(sockfd), response, response_len))
+  if (!recv_exact(sockfd, response, response_len))
   {
     stop_blob_push_client(sockfd);
     return KVRet::Fatal;
@@ -57,7 +57,7 @@ KVRet blob_start_pull_from_server(intptr_t &sockfd, const char *hash_type, const
     return KVRet::Fatal;
   }
   unsigned char got_hash_size_from[take_response_len-response_len];
-  if (!recv_exact(int(sockfd), got_hash_size_from, sizeof(got_hash_size_from)))
+  if (!recv_exact(sockfd, got_hash_size_from, sizeof(got_hash_size_from)))
     return KVRet::Fatal;
   char got_hash_type[7], got_hash_hex[65];
   decode_blob_hash_to_hex_hash(got_hash_size_from, got_hash_type, got_hash_hex);
@@ -70,7 +70,7 @@ KVRet blob_start_pull_from_server(intptr_t &sockfd, const char *hash_type, const
   if (memcmp(got_hash_size_from, blob_hash, hash_len) != 0)
   {
     blob_logmessage(LOG_ERROR, "for pull request for <%s:%s> we got<%s:%s>!", hash_type, hash_hex_str, got_hash_type, got_hash_hex);
-    if (!recv_lambda(int(sockfd), sz, [&](const char *data, int data_len) {from+=data_len;}))
+    if (!recv_lambda(sockfd, sz, [&](const char *data, intptr_t data_len) {from+=data_len;}))
     {
       blob_logmessage(LOG_ERROR, "can't skip data");
       stop_blob_push_client(sockfd);
@@ -81,15 +81,7 @@ KVRet blob_start_pull_from_server(intptr_t &sockfd, const char *hash_type, const
   return KVRet::OK;
 }
 
-int64_t blob_pull_some_from_server(intptr_t &socket, char *data, uint64_t data_capacity, int64_t &szLeft)
-{
-  const int l = recv(socket, data, (int)std::min((int64_t)data_capacity, (int64_t)szLeft), 0);
-  if (l > 0)
-    szLeft -= l;
-  return l;
-}
-
-int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const char *hash_hex_str,
+int64_t blob_pull_from_server(BlobSocket &sockfd, const char *hash_type, const char *hash_hex_str,
   uint64_t from, uint64_t sz,
   std::function<void (const char *data, uint64_t at, uint64_t size)> cb)
 {
@@ -101,7 +93,7 @@ int64_t blob_pull_from_server(intptr_t &sockfd, const char *hash_type, const cha
 
   cb(nullptr, from, sz);
 
-  if (!recv_lambda(int(sockfd), sz, [&](const char *data, int data_len) {cb(data, from, data_len);from+=data_len;}))
+  if (!recv_lambda(sockfd, sz, [&](const char *data, intptr_t data_len) {cb(data, from, data_len);from+=data_len;}))
   {
     blob_logmessage(LOG_ERROR, "can't read data");
     stop_blob_push_client(sockfd);
