@@ -25,6 +25,8 @@ uint64_t blob_get_hash_blob_size(const void *, const char* htype, const char* hh
   return ~uint64_t(0);
 }
 
+bool blob_is_under_attack(bool , void *){return false;}
+
 bool blob_does_hash_blob_exist(const void *, const char* htype, const char* hhex) {
   std::lock_guard<std::mutex> lck (mtx);
   return storage.find(std::string(hhex)) != storage.end();

@@ -11,6 +11,7 @@ void blob_destroy_ctx(void *ctx) {
   return caddressed_fs::destroy((caddressed_fs::context*) ctx);
 }
 
+bool blob_is_under_attack(bool , void *) {return false;}
 uint64_t blob_get_hash_blob_size(const void *ctx, const char* htype, const char* hhex) {return caddressed_fs::get_size((const caddressed_fs::context*)ctx, hhex);}
 bool blob_does_hash_blob_exist(const void *ctx, const char* htype, const char* hhex) {return caddressed_fs::exists((const caddressed_fs::context*)ctx, hhex);}
 

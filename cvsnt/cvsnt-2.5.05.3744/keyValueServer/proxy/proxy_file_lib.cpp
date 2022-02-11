@@ -1,6 +1,8 @@
 #include <string>
 #include <memory>
 #include <condition_variable>
+#include <chrono>
+#include <thread>
 #include "../blob_server_func_deps.h"
 #include "../../ca_blobs_fs/content_addressed_fs.h"
 #include "../../ca_blobs_fs/src/fileio.h"
@@ -41,6 +43,8 @@ void init_proxy(const char *url, int port, const char *cache, uint64_t sz)
 struct ClientConnection
 {
   mutable intptr_t cs = intptr_t(-1);
+  mutable uint32_t failedAttempts = 0;
+  uint32_t maxFailedAttempts = 100;
   std::string root;
   ClientConnection(const char*root_):root(root_)
   {
@@ -50,6 +54,32 @@ struct ClientConnection
   void restart() const{kill();start();}
   ~ClientConnection(){kill();}
 };
+
+bool blob_is_under_attack(bool failed_attempt, void *c) {
+  if (!c)
+    return false;
+  if (failed_attempt)
+  {
+    ClientConnection *cc = (ClientConnection *)c;
+    cc->failedAttempts++;
+    if (cc->failedAttempts >= cc->maxFailedAttempts)//attacker!
+    {
+      blob_logmessage(LOG_ERROR, "Server is probably under attack, %d/%d failed attempts", cc->failedAttempts, cc->maxFailedAttempts);
+      return true;
+    }
+    const double ratio = cc->failedAttempts/cc->maxFailedAttempts;
+    const double biggestDelaySeconds = 100;//100 seconds
+    //quadratic growth of delay. if we allow 100 attempts prior to ban IP, than first failed attempt 10msec, 10th attempt one second delay, 100th attempt 1000second delay
+    const double delaySeconds = ratio*ratio*biggestDelaySeconds;
+    std::this_thread::sleep_for(std::chrono::microseconds(uint32_t(delaySeconds*1000000)));
+    blob_logmessage(LOG_WARNING, "failed attempt to get something, delaying %gsec", delaySeconds);
+    return false;
+  } else
+  {
+    //we can't decrease number of failed attempts, that allows to write attack
+  }
+  return false;
+}
 
 void *blob_create_ctx(const char *root) {
   ClientConnection *cc = new ClientConnection(root);
@@ -120,8 +150,11 @@ struct PushData
   StreamToServerData *ss;
   bool ok;
 };
+bool proxy_allow_push = true;
 
 uintptr_t blob_start_push_data(const void *c, const char* htype, const char* hhex, uint64_t size){
+  if (!proxy_allow_push)
+    return 0;
   const ClientConnection *cc = (const ClientConnection *)c;
   StreamToServerData *ss = start_blob_stream_to_server(cc->cs, htype, hhex);
   if (!ss || cc->cs < 0)
@@ -134,6 +167,8 @@ uintptr_t blob_start_push_data(const void *c, const char* htype, const char* hhe
 
 bool blob_push_data(const void *data, uint64_t data_size, uintptr_t up)
 {
+  if (!proxy_allow_push)
+    return false;
   if (!up)
     return false;
   if (!data_size)

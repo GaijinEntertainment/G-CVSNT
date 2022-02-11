@@ -29,6 +29,7 @@ data handling is done as link time dependency to:
 
 extern size_t blob_get_hash_blob_size(const char* full_hash_str);//hash_str is blake3:hex_encoded_hash
 extern bool blob_does_hash_blob_exist(const char* full_hash_str);//hash_str is blake3:hex_encoded_hash
+extern bool blob_is_under_attack(bool failed_attempt, void *ctx);//returns true if we think client is attacking us
 
 extern uintptr_t blob_start_push_data(const char* full_hash_str, uint64_t size);//hash_str is blake3:hex_encoded_hash
 extern void blob_push_data(const void *data, size_t data_size, uintptr_t up);

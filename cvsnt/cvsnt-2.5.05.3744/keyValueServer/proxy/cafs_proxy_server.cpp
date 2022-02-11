@@ -8,6 +8,7 @@
 
 void init_proxy(const char *url, int port, const char *cache, uint64_t sz);
 void close_proxy();
+extern bool proxy_allow_push;
 
 int main(int argc, const char **argv)
 {
@@ -23,6 +24,7 @@ int main(int argc, const char **argv)
   }
   const int master_port = 2403;
   init_proxy(argv[1], master_port, argv[2], argc>3 ? atoi(argv[3]) : 20*1024);
+  proxy_allow_push = false;//we don't use write through
   printf("Starting server listening at port %d\n", master_port);
   const bool result = start_push_server(master_port, 1024, nullptr);
   printf("server quit %s", result ? "with error\n" :"normally\n");

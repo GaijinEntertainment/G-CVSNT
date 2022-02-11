@@ -11,7 +11,7 @@
 #include <signal.h>
 #endif
 
-void blob_push_thread_proc(int socket, volatile bool *should_stop);
+bool blob_push_thread_proc(int socket, volatile bool *should_stop);//returns false on attach
 
 bool start_push_server(int portno, int max_connections, volatile bool *should_stop)
 {
