@@ -483,6 +483,8 @@
                                 <File Id="cvsdiag.exe" Name="cvsdiag.exe" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\cvsdiag.exe" />
                                 <File Id="extnt.exe" Name="extnt.exe" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\extnt.exe" />
                                 <File Id="cvsservice.dll" Name="cvsservice.dll" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\cvsservice.dll" />
+                                <File Id="libssl-1_1.dll" Name="libssl-1_1.dll" DiskId="1" Source="cvsnt-2.5.05.3744\external_libs\x64\dll\libssl-1_1.dll" />
+                                <File Id="libcrypto-1_1.dll" Name="libcrypto-1_1.dll" DiskId="1" Source="cvsnt-2.5.05.3744\external_libs\x64\dll\libcrypto-1_1.dll" />
                             </Component>
                             <Component Id="CommandLineIniFiles" Guid="{81446A48-4FB4-4C15-9ED3-D21C4557FDA8}" NeverOverwrite="yes">
                                 <File Id="extnt.ini" Name="extnt.ini" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\extnt.ini" />

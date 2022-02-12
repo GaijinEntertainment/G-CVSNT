@@ -94,7 +94,7 @@ CVSNT_EXPORT int main(int argc, char *argv[])
 	X509_free(x509); 
 	EVP_PKEY_free(pkey);
 
-	CRYPTO_mem_leaks(bio_err);
+	//CRYPTO_mem_leaks(bio_err);
 	BIO_free(bio_err);
 	return(0);
 }
