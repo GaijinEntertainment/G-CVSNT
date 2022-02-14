@@ -385,9 +385,10 @@ static inline ServerRet sleep_on_attack(ServerRet ret)
 }
 
 void blob_syslog(ServerRet err, uint32_t client_ip);
-static ServerRet syslog_on_authentication(ServerRet ret, uint32_t client_ip)//we need up
+static ServerRet syslog_on_authentication(ServerRet ret, uint32_t client_ip, bool need_syslog)//we need up
 {
-  blob_syslog(ret, client_ip);
+  if (need_syslog)
+    blob_syslog(ret, client_ip);
   return sleep_on_attack(ret);
 }
 
@@ -404,7 +405,7 @@ bool blob_push_thread_proc(intptr_t raw_socket, uint32_t client_ip, volatile boo
   raw_set_keepalive_tcp(raw_socket);
   BlobSocket socket;
   void* ctx  = 0;
-  ServerRet authRet = syslog_on_authentication(authenticate_client(socket, ctx, is_public_client_ip, raw_socket, encryption_secret, encryption), client_ip);
+  ServerRet authRet = syslog_on_authentication(authenticate_client(socket, ctx, is_public_client_ip, raw_socket, encryption_secret, encryption), client_ip, is_public_client_ip);
   if (authRet != ServerRet::OK)
   {
     blob_logmessage(LOG_ERROR, "can't send greeting for %d", raw_socket);
