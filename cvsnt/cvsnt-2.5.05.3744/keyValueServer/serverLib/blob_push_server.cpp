@@ -54,32 +54,42 @@ bool start_push_server(int portno, int max_connections, volatile bool* should_st
 
   listen(sockfd, max_connections);
   struct sockaddr_in client; socklen_t clientSz = sizeof(client);
-  intptr_t client_raw_sock = -1;
-  while(!should_stop && (client_raw_sock = accept(sockfd, (struct sockaddr *)&client, (socklen_t*)&clientSz)) >= 0)
+  while (!should_stop)
   {
-    uint32_t ip; memcpy(&ip, &client.sin_addr.s_addr, sizeof(ip));
-    blob_logmessage(LOG_NOTIFY, "got connection %d from %s port %d",
-        client_raw_sock, inet_ntoa(client.sin_addr), ntohs(client.sin_port));
-    #if MULTI_THREADED
-    std::thread(blob_push_thread_proc, client_raw_sock, ip, should_stop, encryption_secret, encryption).detach();
-    #else
-    const pid_t pid = fork();
-    if (pid == 0)
+    intptr_t client_raw_sock = (client_raw_sock = accept(sockfd, (struct sockaddr *)&client, (socklen_t*)&clientSz));
+    if (client_raw_sock >= 0)
     {
-      //we are in child process
-      raw_close_socket(sockfd);//doesn't affect parent
-      blob_push_thread_proc(client_raw_sock, ip, should_stop, encryption_secret, encryption);
-      exit(0);
+      uint32_t ip; memcpy(&ip, &client.sin_addr.s_addr, sizeof(ip));
+      blob_logmessage(LOG_NOTIFY, "got connection %d from %s port %d",
+          client_raw_sock, inet_ntoa(client.sin_addr), ntohs(client.sin_port));
+      #if MULTI_THREADED
+      std::thread(blob_push_thread_proc, client_raw_sock, ip, should_stop, encryption_secret, encryption).detach();
+      #else
+      const pid_t pid = fork();
+      if (pid == 0)
+      {
+        //we are in child process
+        raw_close_socket(sockfd);//doesn't affect parent
+        blob_push_thread_proc(client_raw_sock, ip, should_stop, encryption_secret, encryption);
+        exit(0);
+      } else
+      {
+        raw_close_socket(client_raw_sock);//doesn't affect child
+        if (pid < 0)//wtf
+          blob_logmessage(LOG_ERROR, "can't start child process %d", errno);
+      }
+      #endif
     } else
     {
-      raw_close_socket(client_raw_sock);//doesn't affect child
-      if (pid < 0)//wtf
-        blob_logmessage(LOG_ERROR, "can't start child process %d", errno);
+      auto ret = raw_get_last_sock_error();
+      if (ret != EAGAIN)
+      {
+        blob_logmessage(LOG_ERROR, "can't bind accept connection %d", blob_get_last_sock_error());
+        break;
+      }
     }
-    #endif
   }
 
-  blob_logmessage(LOG_ERROR, "can't bind accept connection %d", blob_get_last_sock_error());
   raw_close_socket(sockfd);
   return true;
 }
