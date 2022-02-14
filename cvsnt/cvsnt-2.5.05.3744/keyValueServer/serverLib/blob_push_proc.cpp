@@ -285,7 +285,7 @@ static ServerRet authenticate_client(BlobSocket &blob_socket, void * &result, bo
     if (!blob_gen_totp_secret(otp_page, (const uint8_t*) encryption_secret, (uint32_t)strlen(encryption_secret), oneTimePadPageNo))
     {
       blob_logmessage(LOG_ERROR, "can't generate OTP secret for %d", raw_socket);
-      return ServerRet::ATTACK;
+      return ServerRet::ERR;
     }
     BlobSocket blobSocket = connect_to_client_blob_socket(raw_socket, otp_page);
     if (!is_valid(blobSocket))
