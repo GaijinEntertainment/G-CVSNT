@@ -37,10 +37,12 @@ void blob_close_encryption(BlobSocket& blob_socket) {
   if (blob_socket.encrypt)
   {
     EVP_CIPHER_CTX_free(blob_socket.encrypt);
+    blob_socket.encrypt = NULL;
   }
   if (blob_socket.decrypt)
   {
     EVP_CIPHER_CTX_free(blob_socket.decrypt);
+    blob_socket.decrypt = NULL;
   }
 }
 
