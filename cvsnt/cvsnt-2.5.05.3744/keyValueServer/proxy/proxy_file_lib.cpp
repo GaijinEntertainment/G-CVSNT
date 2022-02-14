@@ -52,7 +52,7 @@ struct ClientConnection
   bool start() const
   {
     uint64_t otpPage = 0;
-    uint8_t otp[key_plus_iv_size];
+    uint8_t otp[otp_page_size];
     bool clientEncryption = false;
     if (encryption_secret.length() != 0)
     {

@@ -1,6 +1,6 @@
 #pragma once
 #include <stdint.h>
-//Blob socket encryption is implemented with symmetrical AES-256
+//Blob socket encryption is implemented with symmetrical AES-128
 //
 //After initial greetings. Client & serer exchanges version's. New version (2+) client to new version server will require to send pageNo from OTP, based on time on a client.
 //
@@ -39,9 +39,10 @@ enum class CafsServerEncryption {Local, Public, All};
 //RequiresAuth - will accept only new versions servers with authentication
 enum class CafsClientAuthentication {AllowNoAuthPrivate, RequiresAuth};
 
-//we use AES256, so our key size is 32. and IV size is 16
-static constexpr size_t key_size = 32, iv_size = 16;
+//we use AES128, so our key size is 16. and IV size is 16
+static constexpr size_t key_size = 16, iv_size = 16;
 static constexpr size_t key_plus_iv_size = key_size+iv_size;
+static constexpr size_t otp_page_size = 48;//suitable for AES256 even
 
 //for security reasons, minimum shared secret length is 16
 static constexpr size_t minimum_shared_secret_length = 16;
@@ -51,7 +52,7 @@ static constexpr uint64_t timestamp_valid_for_seconds = 10*60;//allow 10 minutes
 
 extern uint64_t blob_get_timestamp();
 extern bool blob_is_valid_timestamp(uint64_t timestamp);
-extern bool blob_gen_totp_secret(unsigned char generated_totp[key_plus_iv_size], const unsigned char *shared_secret, const uint32_t shared_secret_len, uint64_t page);
+extern bool blob_gen_totp_secret(unsigned char generated_totp[otp_page_size], const unsigned char *shared_secret, const uint32_t shared_secret_len, uint64_t page);
 extern uint64_t blob_get_otp_page();
 extern bool blob_is_valid_otp_page(uint64_t page);
 extern void blob_sleep_for_usec(uint64_t usec);

@@ -3282,9 +3282,9 @@ static void send_blob_otp_to_client()
   {
     buffer[sizeof(buffer)-1] = 0;
     uint64_t page = blob_get_otp_page();
-    unsigned char totp[key_plus_iv_size];
+    unsigned char totp[otp_page_size];
     blob_gen_totp_secret(totp, (const uint8_t*)buffer, strlen(buffer), page);
-    char totp_encoded[key_plus_iv_size*2 + 1], page_encoded[sizeof(page)*2 + 1];
+    char totp_encoded[otp_page_size*2 + 1], page_encoded[sizeof(page)*2 + 1];
     if (!bin_hash_to_hex_string_s(totp, sizeof(totp), totp_encoded, sizeof(totp_encoded)) ||
         !bin_hash_to_hex_string_s((const uint8_t*)&page, sizeof(page), page_encoded, sizeof(page_encoded)))
     	error(0,0,"can't encode totp.");

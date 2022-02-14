@@ -94,7 +94,6 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     uint8_t otp[48]; uint64_t otp_page = 0;
     const bool has_otp = get_current_otp_info(otp, sizeof(otp), otp_page) == sizeof(otp);
     //demand encryption if url is domain name, and not master
-    //todo: Geo probing, explicit info in url if it is encrypted
     const bool demand_encryption = always_demand_blob_encryption();
     CafsClientAuthentication auth = always_demand_blob_encryption() ? CafsClientAuthentication::RequiresAuth : CafsClientAuthentication::AllowNoAuthPrivate;
     return is_valid(client = start_blob_push_client(url.c_str(), port, root.c_str(), 2, has_otp ? otp : nullptr, otp_page, auth));

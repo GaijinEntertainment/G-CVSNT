@@ -280,7 +280,7 @@ static ServerRet authenticate_client(BlobSocket &blob_socket, void * &result, bo
       blob_logmessage(LOG_ERROR, "Invalid OTP pageNo %lld", (long long int)oneTimePadPageNo);
       return ServerRet::ATTACK;
     }
-    uint8_t otp_page[key_plus_iv_size];
+    uint8_t otp_page[otp_page_size];
     memset(otp_page, 0, sizeof(otp_page));
     if (!blob_gen_totp_secret(otp_page, (const uint8_t*) encryption_secret, (uint32_t)strlen(encryption_secret), oneTimePadPageNo))
     {

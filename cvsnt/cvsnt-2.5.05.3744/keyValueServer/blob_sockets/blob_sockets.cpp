@@ -3,6 +3,7 @@
 #include <openssl/err.h>
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
+#include "../include/blobs_encryption.h"
 #include "../include/blob_sockets.h"
 #include "../include/blob_raw_sockets.h"
 #include <openssl/rand.h>
@@ -161,8 +162,8 @@ static bool create_encryption_pair(uint8_t encrypt_key[key_plus_iv_size], uint8_
 {
   if (!(encrypt = EVP_CIPHER_CTX_new()) || !(decrypt = EVP_CIPHER_CTX_new()))
     return false;
-  if (1 != EVP_EncryptInit_ex(encrypt, EVP_aes_256_cfb1(), NULL, encrypt_key, encrypt_key+key_size) ||
-      1 != EVP_DecryptInit_ex(decrypt, EVP_aes_256_cfb1(), NULL, decrypt_key, decrypt_key+key_size))
+  if (1 != EVP_EncryptInit_ex(encrypt, EVP_aes_128_ctr(), NULL, encrypt_key, encrypt_key+key_size) ||
+      1 != EVP_DecryptInit_ex(decrypt, EVP_aes_128_ctr(), NULL, decrypt_key, decrypt_key+key_size))
     return false;
   return true;
 }
@@ -170,7 +171,7 @@ static bool create_encryption_pair(uint8_t encrypt_key[key_plus_iv_size], uint8_
 static bool receive_encryption(intptr_t sock, const uint8_t otp_page[key_plus_iv_size], EVP_CIPHER_CTX *&encrypt, EVP_CIPHER_CTX *&decrypt)
 {
   EVP_CIPHER_CTX *decryptKeysCipher = EVP_CIPHER_CTX_new();
-  if (1 != EVP_DecryptInit_ex(decryptKeysCipher, EVP_aes_256_cfb1(), NULL, otp_page, otp_page+key_size))
+  if (1 != EVP_DecryptInit_ex(decryptKeysCipher, EVP_aes_128_ctr(), NULL, otp_page, otp_page+key_size))
     return false;
   uint8_t encrypted_encrypt_key[key_plus_iv_size], encrypted_decrypt_key[key_plus_iv_size];
   memset(encrypted_encrypt_key, 0, sizeof(encrypted_encrypt_key)); memset(encrypted_decrypt_key, 0, sizeof(encrypted_decrypt_key));
@@ -239,7 +240,7 @@ BlobSocket connect_to_server_blob_socket(intptr_t raw_socket, const uint8_t otp_
 static bool send_encryption(intptr_t sock, const uint8_t otp_page[key_plus_iv_size], EVP_CIPHER_CTX *&encrypt, EVP_CIPHER_CTX *&decrypt)
 {
   EVP_CIPHER_CTX *encryptKeysCipher= EVP_CIPHER_CTX_new();
-  if (1 != EVP_EncryptInit_ex(encryptKeysCipher, EVP_aes_256_cfb1(), NULL, otp_page, otp_page+key_size))
+  if (1 != EVP_EncryptInit_ex(encryptKeysCipher, EVP_aes_128_ctr(), NULL, otp_page, otp_page+key_size))
     return false;
 
   //generate random keys
@@ -337,13 +338,13 @@ bool blob_is_valid_timestamp(uint64_t timestamp)
 }
 
 // just sha384 from page number & shared secret
-bool blob_gen_totp_secret(unsigned char generated_totp[key_plus_iv_size], const unsigned char *shared_secret, const uint32_t shared_secret_len, uint64_t page)
+bool blob_gen_totp_secret(unsigned char generated_totp[otp_page_size], const unsigned char *shared_secret, const uint32_t shared_secret_len, uint64_t page)
 {
   if (shared_secret_len < minimum_shared_secret_length)
     return false;
   unsigned len = 0;
   unsigned char md[EVP_MAX_MD_SIZE];
-  //EVP_sha384 is enough as it returns key_plus_iv_size
+  //EVP_sha384 is enough as it returns 48
   if ( HMAC(EVP_sha384(), shared_secret, shared_secret_len, (const uint8_t*) &page, sizeof(page), md, &len) != md || len < key_plus_iv_size)
     return false;
   memcpy(generated_totp, md, key_plus_iv_size);

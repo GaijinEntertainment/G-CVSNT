@@ -25,6 +25,7 @@
 #include "edit.h"
 #include "buffer.h"
 #include "sha_blob_reference.h"
+#include <../keyValueServer/include/blobs_encryption.h>
 #include <../keyValueServer/include/blob_sockets.h>
 #include <../keyValueServer/include/blob_hash_util.h>
 #ifdef MAC_HFS_STUFF
@@ -2103,7 +2104,7 @@ bool blob_downloaded_no_write = false;
 
 int blob_concurrency_download_level = -1;
 
-static uint8_t blob_current_otp[48];
+static uint8_t blob_current_otp[otp_page_size];
 static uint64_t blob_current_otp_page = 0;
 static bool blob_has_otp = false;
 static bool blob_always_demand_encryption = false;
