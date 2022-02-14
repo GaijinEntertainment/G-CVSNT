@@ -883,7 +883,7 @@ static int supported_response (char *name)
     return 0;
 }
 
-static void send_blob_url_to_client();
+static bool send_blob_url_to_client(const char *configURL="BlobURL");
 static void send_blob_otp_to_client();
 
 static void serve_valid_responses (char *arg)
@@ -3249,13 +3249,13 @@ static void output_dir(const char *update_dir, const char *repository)
 	buf_output0(buf_to_net,"/");
 }
 
-static void send_blob_url_to_client()
+static bool send_blob_url_to_client(const char *configURL)
 {
   char buffer[256];
-  if(CGlobalSettings::GetGlobalValue("cvsnt","PServer","BlobURL",buffer,sizeof(buffer)))
+  if(CGlobalSettings::GetGlobalValue("cvsnt","PServer", configURL, buffer,sizeof(buffer)))
   {
-    TRACE(3,"Client blob url (PServer/BlobURL) is not defined");
-    return;
+    TRACE(3,"Client blob url (PServer/%s) is not defined", configURL);
+    return false;
   }
   TRACE(3,"Try Client blob url %s", buffer);
   if (supported_response("Blob-url"))
@@ -3264,7 +3264,9 @@ static void send_blob_url_to_client()
     buf_output0(buf_to_net, "Blob-url ");
     buf_output0(buf_to_net, buffer);
     buf_output0(buf_to_net, "\n");
+    return true;
   }
+  return false;
 }
 
 static void send_blob_otp_to_client()
@@ -3292,6 +3294,15 @@ static void send_blob_otp_to_client()
     buf_output0(buf_to_net, totp_encoded);
     buf_output0(buf_to_net, page_encoded);
     buf_output0(buf_to_net, "\n");
+    for (int i = 0; i < 9; ++i)
+    {
+      char configBuf[256];
+      sprintf (configBuf, "BlobEncryptedURL%d", i);
+      // will overwrite original Blob-url, as follows the previous.
+      // client can also support round-robin for several proxies
+      if (!send_blob_url_to_client(configBuf))
+        break;
+    }
   }
 }
 
