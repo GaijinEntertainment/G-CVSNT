@@ -33,6 +33,7 @@
 #endif
 
 #include <vector>
+#include <memory>
 int client_overwrite_existing;
 int client_max_dotdot;
 int is_cvsnt = 1;
@@ -2118,80 +2119,107 @@ uint32_t get_current_otp_info(uint8_t *otp, uint32_t otp_len, uint64_t& otp_page
   otp_page = blob_current_otp_page;
   return sizeof(blob_current_otp);
 }
-char blob_default_download_url[256] = {0};
-char blob_cmd_download_url[256] = {0};
-char blob_master_url[256]= {0};
-char blob_parsed_download_url[256] = {0};
-int blob_parsed_download_port = -1;
-char blob_parsed_upload_url[256] = {0};
-int blob_parsed_upload_port = -1;
 
-static void parse_url_port(char *url_to, int &port_to, char *url)
+static int parse_url_port(char *url)
 {
-  if (!url || url[0] == 0 || strcmp(url, "def") == 0 || strcmp(url, "off") == 0)
+  char *portstr = strstr(url, "@");
+  if (portstr)
   {
-    strcpy(url_to, current_parsed_root->hostname);
-    port_to = 2403;
-  } else
-  {
-    char *portstr = strstr(url, "@");
-    if (portstr)
-    {
-      portstr[0] = 0;
-      portstr++;
-    }
-    port_to = portstr ? atoi(portstr) : (strstr(url, "http") == url ? 80 : 2403);
-    strcpy(url_to, url);
+    portstr[0] = 0;
+    portstr++;
   }
+  return portstr ? atoi(portstr) : 2403;
 }
 
-static void parse_urls()
+
+static std::vector<
+    std::pair<std::unique_ptr<char[]>, int>//url, port
+  > private_urls, encrypting_urls;
+
+static void add_blobs_url(const char *args, int len, bool encryption)
 {
-  if (blob_parsed_download_url[0])
+  std::unique_ptr<char[]> m = std::make_unique<char[]>(len + 1);
+  memcpy(m.get(), args, len);
+  int port = parse_url_port(m.get());
+  (encryption ? encrypting_urls : private_urls).emplace_back(std::move(m), std::move(port));
+}
+
+char blob_cmd_download_url[256] = {0};
+
+static char config_blob_url[512] = {0};
+static int config_blob_port = 2403;
+
+static char blob_master_url[256]= {0};
+static int config_threads_count = 0;
+
+static void parse_config()
+{
+  static bool config_parsed = false;
+  if (config_parsed)
     return;
+  config_parsed = true;
   char* cp = NULL;
   if ((cp = getenv ("CVS_ENCRYPT_BLOBS")) != NULL)// then env var
   {
     blob_always_demand_encryption = strcmp(cp, "ALWAYS") == 0 || strcmp(cp, "ON") == 0;
   }
-  char * src_down_url = NULL;
-  char buf[512];
+  const char * src_url = NULL;
   if (blob_cmd_download_url[0])//CMD has highest priority
-   src_down_url = blob_cmd_download_url;
+   src_url = blob_cmd_download_url;
   else if ((cp = getenv ("CVS_BLOBS_URL")) != NULL)// then env var
+    src_url = cp;
+  if (src_url)
   {
-    strcpy(buf, cp);
-    src_down_url = buf;
-  } else//then dvertised by server
-    src_down_url = blob_default_download_url;
-
-  char * src_up_url = strstr(src_down_url, "|");
-  if (src_up_url)
-  {
-    src_up_url[0] = 0; src_up_url++;
+    strncpy(config_blob_url, src_url, sizeof(config_blob_url));
+    config_blob_port = parse_url_port(config_blob_url);
   }
-  parse_url_port(blob_parsed_download_url, blob_parsed_download_port, src_down_url);
-  parse_url_port(blob_parsed_upload_url, blob_parsed_upload_port, src_up_url);
   strcpy(blob_master_url, current_parsed_root->hostname);
+  if (blob_concurrency_download_level >= 0)
+    config_threads_count = blob_concurrency_download_level;
+  else if ((cp = getenv ("CVS_BLOB_DOWNLOAD_THREADS")) != NULL)
+    config_threads_count = atoi(cp);
 }
 
-void get_download_source(const char *&master_url, const char *&url, int &port, const char *&up_url, int &up_port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count)
+template <class T>
+inline int get_round_robin_blob_url(T &v, uint32_t i, const char *&url, int &port)
 {
-  parse_urls();
-  url = blob_parsed_download_url;
-  port = blob_parsed_download_port;
-  up_url = blob_parsed_upload_url;
-  up_port = blob_parsed_upload_port;
-  master_url = blob_master_url;
+  if (v.empty())
+    return -1;
+  i %= v.size();
+  url = v[i].first.get();
+  port = v[i].second;
+  return i;
+}
 
-  char *cp;
+int get_public_blob_url(uint32_t i, const char *&url, int &port)
+{
+  return get_round_robin_blob_url(encrypting_urls, i, url, port);
+}
+
+int get_private_blob_url(uint32_t i, const char *&url, int &port)
+{
+  return get_round_robin_blob_url(private_urls, i, url, port);
+}
+
+const char *get_master_blob_url(int &port)
+{
+  port = 2403;
+  return blob_master_url;
+}
+
+void get_download_source(const char *&config_url, int &config_port, const char *&repo, int &private_urls, int &public_urls, int &threads_count)
+{
+  parse_config();
+  if (config_threads_count)
+    threads_count = config_threads_count;
+  if (config_blob_url[0])//config overrides everything
+  {
+    config_url = config_blob_url;
+    config_port = config_blob_port;
+  }
   repo = current_parsed_root->directory;
-  auth_user = current_parsed_root->username;
-  auth_passwd = current_parsed_root->password;
-  if (blob_concurrency_download_level >= 0)
-    threads_count = blob_concurrency_download_level;
-  else if ((cp = getenv ("CVS_BLOB_DOWNLOAD_THREADS")) != NULL)
-    threads_count = atoi(cp);
+  public_urls = ::encrypting_urls.size();
+  private_urls = ::private_urls.size();
 }
 
 void change_utime(const char* filename, time_t timestamp)
@@ -2872,8 +2900,7 @@ static void handle_rcs_diff (char *args, int len)
 
 static void handle_blob_url (char *args, int len)
 {
-   memcpy(blob_default_download_url, args, len);
-   blob_default_download_url[len] = 0;
+  add_blobs_url(args, len, blob_has_otp);
 }
 
 static void handle_blob_otp(char *args, int len)
@@ -3523,8 +3550,8 @@ void send_a_repository (const char *dir, const char *repository, const char *upd
 
 		int repository_len, update_dir_len;
 
-		repository_len = (repository)? strlen (repository) : 0;
-		update_dir_len = (update_dir)? strlen (update_dir) : 0;
+		repository_len = (repository)? int(strlen (repository)) : 0;
+		update_dir_len = (update_dir)? int(strlen (update_dir)) : 0;
 		while (update_dir_len >= 0 && ISDIRSEP(update_dir[update_dir_len-1]))
 			update_dir_len--;
 

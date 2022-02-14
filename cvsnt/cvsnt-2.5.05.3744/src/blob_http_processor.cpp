@@ -5,10 +5,10 @@
 
 struct HttpNetworkProcessor:public BlobNetworkProcessor
 {
-  virtual bool canDownload() {return true;}
-  virtual bool canUpload() {return false;}
-  virtual bool reinit(const char *, int , const char *, const char *) {return false;}
-  virtual bool download(const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
+  bool reconnect() override {return false;}
+  bool canDownload() override {return true;}
+  bool canUpload() override {return false;}
+  bool download(const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
   {
     char buf[128];
     std::snprintf(buf, sizeof(buf),

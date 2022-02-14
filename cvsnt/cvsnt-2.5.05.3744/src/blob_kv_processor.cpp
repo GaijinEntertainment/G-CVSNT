@@ -75,33 +75,40 @@ inline KVRet send_blob_file_data_net(BlobSocket &client, const char *file, const
   return r;
 }
 
-extern uint32_t get_current_otp_info(uint8_t *otp, uint32_t otp_len, uint64_t& otp_page);
-extern bool always_demand_blob_encryption();
-
 struct KVNetworkProcessor:public BlobNetworkProcessor
 {
-  KVNetworkProcessor(const char *url_, int port_, const char* root_, bool is_master_):url(url_), port(port_), root(root_), is_master(is_master_){}
+  KVNetworkProcessor(const UrlProvider& provider_, int id_):provider(provider_), id(id_){}
   ~KVNetworkProcessor() { stop_blob_push_client(client); }
-  bool reinit(const char *url2, int port2, const char *, const char *) {
-    if (url == url2 && port == port2)
-      return false;
-    url = url2; port = port2;
-    return init();
-  }
 
-  bool init() {
+  bool start() {return is_valid(client) ? true : init(); }
+  bool attemptReconnect(int attemptNo)
+  {
+    if (attemptNo >= provider.attemptsCount(id))
+      return false;
+    uint8_t otp[otp_page_size]; uint64_t otp_page = 0;
+    const bool has_otp = provider.getOTP(otp, sizeof(otp), otp_page);
+    std::string url; int port;
+    if (!provider.getNext(attemptNo, id, url, port))
+      return false;
+    CafsClientAuthentication auth = provider.demandAuth() ? CafsClientAuthentication::RequiresAuth : CafsClientAuthentication::AllowNoAuthPrivate;
     stop_blob_push_client(client);
-    uint8_t otp[48]; uint64_t otp_page = 0;
-    const bool has_otp = get_current_otp_info(otp, sizeof(otp), otp_page) == sizeof(otp);
-    //demand encryption if url is domain name, and not master
-    const bool demand_encryption = always_demand_blob_encryption();
-    CafsClientAuthentication auth = always_demand_blob_encryption() ? CafsClientAuthentication::RequiresAuth : CafsClientAuthentication::AllowNoAuthPrivate;
-    return is_valid(client = start_blob_push_client(url.c_str(), port, root.c_str(), 2, has_otp ? otp : nullptr, otp_page, auth));
+    if (is_valid(client = start_blob_push_client(url.c_str(), port, provider.getRoot(), 2/*timeout*/, has_otp ? otp : nullptr, otp_page, auth)))
+      return true;
+    provider.fail(attemptNo, id);
+    return false;
+  }
+  bool reconnect() { return init(); }
+  bool init() {
+    for (int e = provider.attemptsCount(id); attempt < e; ++attempt)
+      if (attemptReconnect(attempt))
+        return true;
+    return false;
   }
   virtual bool canDownload() {return true;}
   virtual bool canUpload() {return true;}
   virtual bool download(const char *hex_hash, std::function<bool(const char *data, size_t data_length)> cb, std::string &err)
   {
+    start();
     bool ok = true;
     int64_t pulled = blob_pull_from_server(client, HASH_TYPE_REV_STRING, hex_hash, 0, 0, [&](const char *data, uint64_t , uint64_t size)
     {
@@ -130,6 +137,7 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     return true;
   }
   virtual bool upload(const char *file, bool compress, char *hex_hash, std::string &err) {
+    start();
     if (!caddressed_fs::get_file_content_hash(file, hex_hash, 64))
       return false;
 
@@ -147,20 +155,15 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     return r == KVRet::OK;
   }
   BlobSocket client;
-  std::string url, root; int port;
-  bool is_master = false;
+  const UrlProvider& provider;
+  int id = 0, attempt = 0;
 };
 
-BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char *root, const char *user, const char *passwd, bool no_encryption)
+BlobNetworkProcessor *get_kv_processor(const UrlProvider& provider_, int id)
 {
-  auto ret =  new KVNetworkProcessor(url, port, root, no_encryption);
-  if (!ret->init())
-  {
-    delete ret;
-    return nullptr;
-  }
-  return ret;
+  return new KVNetworkProcessor(provider_, id);
 }
+
 #include <../keyValueServer/blob_push_log.h>
 #include <stdarg.h>
 void blob_logmessage(int log, const char *fmt,...)

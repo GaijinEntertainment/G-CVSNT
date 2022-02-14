@@ -1,5 +1,8 @@
 #include <stdio.h>
 #include "sha_blob_reference.h"
+#include <random>
+#include <algorithm>
+#include <iterator>
 #include <vector>
 #include <string>
 #include "concurrent_queue.h"
@@ -33,8 +36,30 @@ static bool process_blob_task(BlobNetworkProcessor *download_processor, BlobNetw
 
 static std::atomic<int> hasErrors;
 extern void cvs_flusherr();
-struct BackgroundProcessor
+
+template <typename T>
+struct atomic_wrapper
 {
+  std::atomic<T> _a;
+
+  atomic_wrapper():_a(){}
+  atomic_wrapper(const std::atomic<T> &a):_a(a.load()){}
+  atomic_wrapper(const atomic_wrapper &other):_a(other._a.load()){}
+  atomic_wrapper &operator=(const atomic_wrapper &other) {_a.store(other._a.load());}
+  operator T() {return T(_a);}
+  atomic_wrapper(const T& other) { _a = other; }
+  atomic_wrapper& operator=(const T& other) { _a = other; return *this; }
+};
+
+struct BackgroundProcessor:public UrlProvider
+{
+  bool demandAuth() const override;
+  bool getOTP(uint8_t *otp, size_t otp_size, uint64_t &otp_page) const override;
+  const char* getRoot() const override;
+  int attemptsCount(int id) const override;
+  bool getNext(int attempt, int id, std::string &url, int &port) const override;//shuffled with id
+  void fail(int attempt, int id) const override;
+
   BackgroundProcessor():queue(&threads){}
   ~BackgroundProcessor()
   {
@@ -98,6 +123,23 @@ struct BackgroundProcessor
 
   std::string base_repo;
   protected:
+
+  struct DownloadURL
+  {
+    std::string url; int port;
+    mutable atomic_wrapper<bool> failed = false;
+  };
+  struct RoundRobin
+  {
+    std::vector<DownloadURL> urls;//last one is always master
+    uint32_t shuffleStart = 0, publicCount = 0, privateCount = 0;
+    uint32_t shuffle(uint32_t attempt, uint32_t id) const;
+    void createShuffles(uint32_t count, uint16_t publicCnt, uint16_t privateCnt);
+  } roundRobin;
+
+  uint32_t shuffle(uint32_t attempt, uint32_t id) const;
+  void prepareShuffles(uint32_t count);
+
 #if defined(_WIN32) && 0
   httplib::detail::WSInit wsinit_;
 #endif
@@ -105,62 +147,152 @@ struct BackgroundProcessor
 
 static std::unique_ptr<BackgroundProcessor> processor;
 
+extern BlobNetworkProcessor *get_kv_processor(const UrlProvider& provider_, int id);
+
+bool BackgroundProcessor::demandAuth() const
+{
+  extern bool always_demand_blob_encryption();
+  return always_demand_blob_encryption();
+}
+
+bool BackgroundProcessor::getOTP(uint8_t *otp, size_t otp_size, uint64_t &otp_page) const
+{
+  extern uint32_t get_current_otp_info(uint8_t *otp, uint32_t otp_len, uint64_t& otp_page);
+  memset(otp, 0, otp_size);
+  return get_current_otp_info(otp, uint32_t(otp_size), otp_page) == uint32_t(otp_size);
+}
+
+const char* BackgroundProcessor::getRoot() const {  return base_repo.c_str(); }
+
+int BackgroundProcessor::attemptsCount(int id) const
+{
+  return id < 0 ? 1 : (int)roundRobin.urls.size();
+}
+
+void BackgroundProcessor::fail(int attempt, int id) const
+{
+  if (uint32_t(attempt) >= roundRobin.urls.size())
+    return;
+  const int ui = roundRobin.shuffle(attempt, id);
+  if (roundRobin.urls[ui].failed)//already failed
+    return;
+  error(0,0, "Blobs server %s:%d failed\n%s. Contact IT!\n",
+    roundRobin.urls[ui].url.c_str(), roundRobin.urls[ui].port,
+    attempt < roundRobin.urls.size()-2 ? "Switching to next." :
+      (attempt < roundRobin.urls.size()-1 ? "Switching to master." : "Master is not available!"));
+  roundRobin.urls[ui].failed = true;
+}
+
+void BackgroundProcessor::RoundRobin::createShuffles(uint32_t count, uint16_t publicCnt, uint16_t privateCnt)
+{
+  //just use round robin with shuffled start
+  const size_t urlsCnt = urls.size();
+  std::random_device rd;
+  std::mt19937 g(rd());
+  shuffleStart = uint32_t(g());
+  publicCount = publicCnt;
+  privateCount = privateCnt;
+}
+
+uint32_t BackgroundProcessor::RoundRobin::shuffle(uint32_t attempt, uint32_t id) const
+{
+  if (urls.empty())
+    return 0;
+  const uint32_t urlsCnt = uint32_t(urls.size());
+  if (publicCount <= 1 && privateCount <= 1)//last one is Master, and nothing to shuffle
+    return attempt%urlsCnt;
+  const uint32_t shuffledId = id + shuffleStart;
+  if (attempt < publicCount)//first round robin on all public addresses
+    return (attempt + shuffledId)%publicCount;
+  if (attempt < privateCount)//then round robin on all private addresses
+    return publicCount + uint32_t(attempt-publicCount + shuffledId)%privateCount;
+  return urlsCnt-1;//master
+}
+
+bool BackgroundProcessor::getNext(int attempt, int id, std::string &url, int &port) const
+{
+  if (uint32_t(attempt) >= roundRobin.urls.size())
+    return false;
+  if (id < 0)
+  {
+    if (attempt != 0)
+      return false;
+    url = roundRobin.urls.back().url.c_str();
+    port = roundRobin.urls.back().port;
+    return true;
+  }
+  const int ui = roundRobin.shuffle(attempt, id);
+  url = roundRobin.urls[ui].url.c_str();
+  port = roundRobin.urls[ui].port;
+  return true;
+}
+
 //link time resolved dependency
-extern void get_download_source(const char *&master_url, const char *&proxy_down_url, int &proxy_down_port, const char *&up_url, int &up_port, const char *&auth_user, const char *&auth_passwd, const char *&repo, int &threads_count);
-
-extern BlobNetworkProcessor *get_http_processor(const char *url, int port, const char* repo, const char *user, const char *passwd);
-extern BlobNetworkProcessor *get_kv_processor(const char *url, int port, const char* repo, const char *user, const char *passwd, bool is_master);
-
-static std::string master_url_str, master_user, master_passwd;
-static int master_port = 2403;
+void get_download_source(const char *&config_url, int &config_port, const char *&repo, int &private_urls, int &public_urls, int &threads_count);
+int get_public_blob_url(uint32_t i, const char *&url, int &port);
+int get_private_blob_url(uint32_t i, const char *&url, int &port);
+const char *get_master_blob_url(int &port);
 
 void BackgroundProcessor::init()
 {
   if (is_inited())
     return;
-  const char *master_url = nullptr;
-  const char *download_url, *repo, *user = nullptr, *passwd = nullptr; int download_port;
-  const char *upload_url; int upload_port;
+
   int threads_count = std::min(8, std::max(1, (int)std::thread::hardware_concurrency()-1));//limit concurrency to fixed
-  get_download_source(master_url, download_url, download_port, upload_url, upload_port, user, passwd, repo, threads_count);
-  master_url_str = master_url;
+  const char *config_url = nullptr;
+  const char *repo = nullptr;
+  int config_port = 2403;
+  int private_urls = 0, public_urls = 0;
+  get_download_source(config_url, config_port, repo, private_urls, public_urls, threads_count);
   base_repo = repo;
   if (base_repo[0] != '/')
     base_repo = "/" + base_repo;
   if (base_repo[base_repo.length()] != '/')
     base_repo += "/";
-  download_clients.resize(std::max(1, threads_count));
-  upload_clients.resize(download_clients.size());
-  bool use_http = strstr(download_url, "http") == download_url;
-  int http_port = use_http ? download_port : 80;
-  for (auto &cli : download_clients)
+
+  uint32_t publicUrlsCnt = 0, privateUrlsCnt = 0;
+  if (config_url)
   {
-    BlobNetworkProcessor * pr = nullptr;
-    if (!use_http)
+    private_urls = 0, public_urls = 0;//force using config
+    //only one URL, no round robin
+    roundRobin.urls.push_back(DownloadURL{config_url, config_port});
+  } else
+  {
+    for (int i = 0; i < public_urls; ++i)
     {
-      const bool isMaster = strcmp(download_url,master_url) == 0;
-      pr = get_kv_processor(download_url, download_port, base_repo.c_str(), user, passwd, isMaster);
-      if (!pr && strcmp(master_url, download_url) != 0)
+      const char *url = nullptr; int port = 0;
+      if (get_public_blob_url(i, url, port) >= 0)
       {
-        pr = get_kv_processor(master_url, master_port, base_repo.c_str(), user, passwd, true);
-        if (pr)
-        {
-          error(0,0, "Proxy <%s:%d> is not available, switching to master <%s:%d>. Contact IT!\n",
-            download_url, download_port, master_url, master_port);
-          download_url = master_url_str.c_str();
-          download_port = master_port;
-        } else
-        {
-          error(1,0, "ERROR: Nor proxy <%s:%d> neither master <%s:%d> are not available. Contact IT!\n",
-            download_url, download_port, master_url, master_port);
-        }
+        roundRobin.urls.push_back(DownloadURL{url, port});//the last one
+        publicUrlsCnt++;
       }
-    } else
-      pr = get_http_processor(download_url, http_port, base_repo.c_str(), user, passwd);//we can't check if http is available for now
-    cli.reset(pr);
+    }
+    for (int i = 0; i < private_urls; ++i)
+    {
+      const char *url = nullptr; int port = 0;
+      if (get_public_blob_url(i, url, port) >= 0)
+      {
+        roundRobin.urls.push_back(DownloadURL{url, port});//the last one
+        privateUrlsCnt++;
+      }
+    }
   }
+
+  int master_port = 2403;
+  const char *master_url = get_master_blob_url(master_port);
+  roundRobin.urls.push_back(DownloadURL{master_url, master_port});//the last one
+
+  const uint32_t clientsCount = (uint32_t)std::max(1, threads_count);
+  roundRobin.createShuffles(clientsCount, publicUrlsCnt, privateUrlsCnt);
+
+  download_clients.resize(clientsCount);
+  upload_clients.resize(clientsCount);
+  int id = 0;
+  for (auto &cli : download_clients)
+    cli.reset(get_kv_processor(*this, id++));
+
   for (auto &cli : upload_clients)
-    cli.reset(get_kv_processor(upload_url, upload_port, base_repo.c_str(), user, passwd, true));
+    cli.reset(get_kv_processor(*this, -1));
 
   for (int ti = 0; ti < threads_count; ++ti)
     threads.emplace_back(std::thread(processor_thread_loop, this, download_clients[ti].get(), upload_clients[ti].get()));
@@ -301,15 +433,12 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     if (!downloadRet || !validated)
     {
       unlink_file(temp_filename.c_str());
-      if (processor->reinit(master_url_str.c_str(), master_port, master_user.c_str(), master_passwd.c_str()))
-      {
-        error(0,0, "%s\nSwitching to master <%s:%d>. Contact IT!\n",
-          buf, master_url_str.c_str(), master_port);
-      } else
+      if (!processor->reconnect())
       {
         cvs_outerr(buf, 0);
         return false;
-      }
+      } else
+        error(0,0, "%s\n");
     }
     else
     {

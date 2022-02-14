@@ -3257,7 +3257,7 @@ static bool send_blob_url_to_client(const char *configURL)
     TRACE(3,"Client blob url (PServer/%s) is not defined", configURL);
     return false;
   }
-  TRACE(3,"Try Client blob url %s", buffer);
+  TRACE(3,"Try Client %s %s", configURL, buffer);
   if (supported_response("Blob-url"))
   {
     TRACE(3,"Client blob url %s", buffer);
@@ -3280,6 +3280,7 @@ static void send_blob_otp_to_client()
   //TRACE(3,"Try Client blob otp %s", buffer);// for security reasons do not type OTP page
   if (supported_response("Blob-OTP"))
   {
+    TRACE(3,"Send Client otp");
     buffer[sizeof(buffer)-1] = 0;
     uint64_t page = blob_get_otp_page();
     unsigned char totp[otp_page_size];
@@ -3294,7 +3295,7 @@ static void send_blob_otp_to_client()
     buf_output0(buf_to_net, totp_encoded);
     buf_output0(buf_to_net, page_encoded);
     buf_output0(buf_to_net, "\n");
-    for (int i = 0; i < 9; ++i)
+    for (int i = 0; i < 32; ++i)
     {
       char configBuf[256];
       sprintf (configBuf, "BlobEncryptedURL%d", i);
@@ -3303,6 +3304,9 @@ static void send_blob_otp_to_client()
       if (!send_blob_url_to_client(configBuf))
         break;
     }
+  } else
+  {
+    TRACE(3,"Client doesn't support encryption");
   }
 }
 
