@@ -1,13 +1,17 @@
 #include <openssl/conf.h>
+#include <openssl/opensslv.h>
 #include <openssl/evp.h>
 #include <openssl/ec.h>
 #include <openssl/err.h>
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
+#include <openssl/crypto.h>
 #include "../include/blobs_encryption.h"
 #include "../include/blob_sockets.h"
 #include "../include/blob_raw_sockets.h"
 #include <openssl/rand.h>
+#include <mutex>
+#include <thread>
 
 
 //we are using CTR mode, which is streaming
@@ -23,16 +27,62 @@ IpType blob_classify_ip(uint32_t ip)
     return IpType::PRIVATE;
   if ( (ip&0xFFF) >= 0x10ac && (ip&0xFFF) <= 0x1fac)//172.16.x.x -- 172.31.x.x
     return IpType::PRIVATE;
-  return IpType::PUBLIC;;
+  return IpType::PUBLIC;
+}
+
+static std::mutex *lockarray = NULL;
+
+static void lock_callback(int mode, int type, char *file, int line)
+{
+  (void)file;
+  (void)line;
+  if (mode & CRYPTO_LOCK) {
+    lockarray[type].lock();
+  }
+  else {
+    lockarray[type].unlock();
+  }
+}
+
+static unsigned long thread_id(void)
+{
+  return (unsigned long)(std::hash<std::thread::id>{}(std::this_thread::get_id()));
+}
+
+static void init_locks()
+{
+  lockarray = new std::mutex[CRYPTO_num_locks()];
+
+  CRYPTO_set_id_callback((unsigned long (*)())thread_id);
+  CRYPTO_set_locking_callback((void (*)(int, int, const char*, int))lock_callback);
+}
+
+static void kill_locks()
+{
+  CRYPTO_set_locking_callback(NULL);
+  delete[] lockarray;
+  lockarray = NULL;
 }
 
 bool blob_init_sockets() {
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+  OPENSSL_config(NULL);
+  CRYPTO_malloc_init();
+  SSL_library_init();
+  ERR_load_crypto_strings();
+
+  OpenSSL_add_all_algorithms();
+  ENGINE_load_builtin_engines();
+  SSL_load_error_strings();
+#else
   ERR_load_CRYPTO_strings();
   OPENSSL_add_all_algorithms_noconf();
+#endif
+  init_locks();
   return raw_init_sockets();
 }
 
-void blob_close_sockets(){ raw_close_sockets();}
+void blob_close_sockets(){ kill_locks(); raw_close_sockets();}
 
 void blob_close_encryption(BlobSocket& blob_socket) {
   if (blob_socket.encrypt)
@@ -174,6 +224,58 @@ static EVP_CIPHER_CTX *init_cipher_from_otp(const uint8_t otp_page[otp_page_size
 
 static EVP_PKEY * get_peerkey(const unsigned char * buffer, size_t buffer_len)
 {
+  EC_POINT *retPoint = NULL;
+  EC_KEY *tempEcKey = NULL;
+  EVP_PKEY *peerkey = NULL;
+  const EC_GROUP* group = NULL;
+  bool ret = true;
+  tempEcKey = EC_KEY_new_by_curve_name(NID_X9_62_prime256v1);
+  if(tempEcKey == NULL) {ret = false; goto end;}
+  if((group = EC_KEY_get0_group(tempEcKey)) == NULL) { ret = false; goto end; }
+
+  if ((retPoint = EC_POINT_new(group)) == NULL) {ret = false; goto end;}
+  if (EC_POINT_oct2point(group, retPoint, buffer, buffer_len, NULL) != 1) {ret = false; goto end;}
+  if (EC_KEY_set_public_key(tempEcKey, retPoint) != 1) {ret = false; goto end;}
+
+  if(EC_KEY_check_key(tempEcKey) != 1) {ret = false; goto end;}
+
+  peerkey = EVP_PKEY_new();
+  if(peerkey == NULL) {ret = false; goto end;}
+
+  if(EVP_PKEY_assign_EC_KEY(peerkey, tempEcKey)!= 1) {ret = false; goto end;}
+end:;
+  EC_POINT_free(retPoint);
+  if (!ret)
+  {
+    EC_KEY_free(tempEcKey);
+    EVP_PKEY_free(peerkey);
+    peerkey = NULL;
+  }
+  return peerkey;
+}
+
+static size_t get_buffer(EVP_PKEY * pkey, unsigned char ** client_pub_key)
+{
+  size_t len = 0;
+  #if OPENSSL_VERSION_NUMBER < 0x10100000L
+  if (!pkey || pkey->type != EVP_PKEY_EC) return 0;
+  EC_KEY *tempEcKey = pkey->pkey.ec;
+  #else
+  EC_KEY *tempEcKey = EVP_PKEY_get0_EC_KEY(pkey);
+  #endif
+  if (tempEcKey == NULL) return false;
+  const EC_GROUP* group = NULL;
+  if ((group = EC_KEY_get0_group(tempEcKey)) == NULL) { return 0; }
+  const EC_POINT * tempPoint = EC_KEY_get0_public_key(tempEcKey);
+  if (tempPoint == NULL) return false;
+  if ((len = EC_POINT_point2oct(group, tempPoint, POINT_CONVERSION_COMPRESSED, NULL, 0, NULL)) == 0) {return 0;}
+  if ((*client_pub_key = (unsigned char*)OPENSSL_malloc(len)) == NULL) return 0;
+  return EC_POINT_point2oct(group, tempPoint, POINT_CONVERSION_COMPRESSED, *client_pub_key, len, NULL);
+}
+/*
+//OpenSSL 1.1.0 version
+static EVP_PKEY * get_peerkey(const unsigned char * buffer, size_t buffer_len)
+{
   EC_KEY *tempEcKey = NULL;
   EVP_PKEY *peerkey = NULL;
   bool ret = true;
@@ -206,7 +308,7 @@ static size_t get_buffer(EVP_PKEY * pkey, unsigned char ** client_pub_key)
   //write in the buffer
   return EC_KEY_key2buf(tempEcKey, POINT_CONVERSION_COMPRESSED, client_pub_key, NULL);
 }
-
+*/
 /* Never use a derived secret directly. */
 template <class CB>
 static bool ecdh(uint8_t *secret, size_t &secret_len, CB get_peer_key_data)
