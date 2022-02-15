@@ -118,7 +118,7 @@ static int send(BlobSocket &socket, const void *buf_, int len, int flags)
   int encrypted = 0;
   for (int lenLeft = len; lenLeft > 0;)
   {
-    const int curLen = size_t(lenLeft) > sizeof(encryptedBuf) ? lenLeft : (int)sizeof(encryptedBuf);
+    const int curLen = size_t(lenLeft) < sizeof(encryptedBuf) ? lenLeft : (int)sizeof(encryptedBuf);
     const int curEncrypted = encrypt_and_finalize(socket.encrypt, encryptedBuf, sizeof(encryptedBuf), buf, curLen);
     if (curEncrypted < 0)
       return -1;
