@@ -1151,8 +1151,8 @@ static int do_dir_proc (Node *p, void *closure)
 		    /* Some commands like update may have printed "? foo" but
 		       if we were planning to recurse, and don't on account of
 		       CVS/Repository, we want to say why.  */
-		    error (0, 0, "ignoring %s (%s missing)", update_dir,
-			   CVSADM_ENT);
+		    error (1, 0, "while updating %s, %s is missing (%s). If intentional, create empty Entries to get all files.", update_dir,
+			   CVSADM_ENT, cvsadmdir);
 		    dir_return = R_SKIP_ALL;
 		}
 	    }
