@@ -39,9 +39,10 @@ enum class CafsServerEncryption {Local, Public, All};
 //RequiresAuth - will accept only new versions servers with authentication
 enum class CafsClientAuthentication {AllowNoAuthPrivate, RequiresAuth};
 
-//we use AES128, so our key size is 16. and IV size is 16
-static constexpr size_t key_size = 16, iv_size = 16;
-static constexpr size_t key_plus_iv_size = key_size+iv_size;
+//we use AES128, so our key size is 16. and IV size is 16. Use upper 8 for counter, so there are 2^64 starting vectors.
+static constexpr size_t key_size = 16, full_iv_size = 16, start_iv_size = 8;
+static constexpr size_t sent_key_size = key_size+start_iv_size;
+static constexpr size_t key_plus_iv_size = key_size+full_iv_size;
 static constexpr size_t otp_page_size = 48;//suitable for AES256 even
 
 //for security reasons, minimum shared secret length is 16
@@ -56,4 +57,3 @@ extern bool blob_gen_totp_secret(unsigned char generated_totp[otp_page_size], co
 extern uint64_t blob_get_otp_page();
 extern bool blob_is_valid_otp_page(uint64_t page);
 extern void blob_sleep_for_usec(uint64_t usec);
-

@@ -57,7 +57,7 @@ int connect_with_timeout(intptr_t raw_sock, const struct sockaddr *addr, size_t 
   return -1;
 }
 
-BlobSocket start_blob_push_client(const char* url, int port, const char* root, int timeout_sec, const uint8_t *otp, uint64_t otp_page, CafsClientAuthentication encryption)
+BlobSocket start_blob_push_client(const char* url, int port, const char* root, int timeout_sec, const uint8_t *otp, uint64_t otp_page_no, CafsClientAuthentication encryption)
 {
   if (encryption == CafsClientAuthentication::RequiresAuth && !otp)
   {
@@ -145,7 +145,7 @@ BlobSocket start_blob_push_client(const char* url, int port, const char* root, i
     }
   }
 
-  uint8_t authComand[command_len + vers_command_len+1 + sizeof(otp_page)];
+  uint8_t authComand[command_len + vers_command_len+1 + sizeof(otp_page_no)];
   const char* clientVersion = authServer ? BLOB_PUSH_AUTH_VERSION : BLOB_PUSH_PROTO_VERSION;
   size_t authCommandTotalLen = 0;
   {
@@ -154,7 +154,7 @@ BlobSocket start_blob_push_client(const char* url, int port, const char* root, i
     memcpy(authAt, clientVersion, vers_command_len); authAt += vers_command_len;
     if (authServer)
     {
-      memcpy(authAt, &otp_page, sizeof(otp_page)); authAt += sizeof(otp_page);
+      memcpy(authAt, &otp_page_no, sizeof(otp_page_no)); authAt += sizeof(otp_page_no);
     }
     authCommandTotalLen = authAt - authComand;
     if ( authCommandTotalLen >= sizeof(authComand))
@@ -186,6 +186,19 @@ BlobSocket start_blob_push_client(const char* url, int port, const char* root, i
     if (!send_exact(blobSocket, paddedTimeStamp, sizeof(paddedTimeStamp)))
     {
       blob_logmessage(LOG_ERROR, "Can't send timestamp");
+      blob_close_socket(blobSocket);
+      return BlobSocket();
+    }
+    uint64_t pad = 0;
+    if (!recv_exact(blobSocket, &pad, sizeof(pad)))
+    {
+      blob_logmessage(LOG_ERROR, "Can't receive from server");
+      blob_close_socket(blobSocket);
+      return BlobSocket();
+    }
+    if (pad != uint64_t(~uint64_t(0)))
+    {
+      blob_logmessage(LOG_ERROR, "Can't authenticate server! MITM Attack %llx?", (long long int)pad);
       blob_close_socket(blobSocket);
       return BlobSocket();
     }

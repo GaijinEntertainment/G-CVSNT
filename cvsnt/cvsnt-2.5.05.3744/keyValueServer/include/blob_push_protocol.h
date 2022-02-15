@@ -12,7 +12,17 @@ static constexpr int hash_len = bin_hash_len+6;
 //then, server waits for commands
 //all commands are 4 bytes. Currently we have just 4: "VERS", "CHCK", "PUSH", "PULL", "SIZE"
 //root is not a command, it is part of VERS. it is 1byte of root length, then root of up to 255 bytes.
-//"VERS": is first and unencrypted, this is AUTH. Has to be always followed by "XXX" (client version), then
+//"VERS": is first and unencrypted, this is auth prompt. Has to be always followed by "XXX" (client version), then
+
+//A) if client is at auth+ version, then client will sends otp page no of 8 bytes, and then 8 random bytes and DH parameters encrypted with OTP
+//   server will send it's 8 random bytes and its DH parameters encrypted with OTP
+//   server and client both generate same session keys using 8+8 decrypted random bytes OTP page and DH parameters.
+//     they should both get same results
+//   client should then immediately send with encrypted (using session keys) it's current 64bit of timestamp, and 64 bits of ones (padding) to finalize handshake.
+//     (that's "Client Ready" message)
+//   server will answer (using same session keys pair) 64 bit of ones 'HAVE' (yes, encryption will be used), 'NONE' (encryption won't be used anymore), 'ERIO' (invalid timestamp) or EBRD (invalid version)
+//     (that's "Server Ready" message)
+//   clients always send encrypted root, regardless of if we want to continue negotiotion
 
 //A) if it is auth+ version, then otp page of 8 bytes, and then the answer is two encryption keys (encrypted with OTP)
 //   client should immediately respond with encrypted (using provided key) it's current 64bit of timestamp, and 64 bits of ones to finalize handshake.

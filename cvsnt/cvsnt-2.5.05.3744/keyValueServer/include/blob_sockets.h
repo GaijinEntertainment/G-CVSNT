@@ -11,9 +11,9 @@ struct BlobSocket
 
 void blob_close_encryption(BlobSocket &);
 BlobSocket connect_to_server_blob_socket_no_auth(intptr_t raw_socket);
-BlobSocket connect_to_server_blob_socket(intptr_t raw_socket, const uint8_t otp_page[key_plus_iv_size]);
+BlobSocket connect_to_server_blob_socket(intptr_t raw_socket, const uint8_t otp_page[otp_page_size]);
 BlobSocket connect_to_client_blob_socket_no_auth(intptr_t raw_socket);
-BlobSocket connect_to_client_blob_socket(intptr_t raw_socket, uint8_t otp_page[key_plus_iv_size]);
+BlobSocket connect_to_client_blob_socket(intptr_t raw_socket, uint8_t otp_page[otp_page_size]);
 
 inline bool is_valid(const BlobSocket &b){return b.opaque != uintptr_t(~(uintptr_t(0)));}
 enum class IpType {LOCAL, PRIVATE, PUBLIC};

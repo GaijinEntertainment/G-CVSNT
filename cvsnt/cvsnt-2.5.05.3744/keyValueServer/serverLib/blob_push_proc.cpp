@@ -307,9 +307,14 @@ static ServerRet authenticate_client(BlobSocket &blob_socket, void * &result, bo
     memcpy(&padding, paddedTimeStamp+sizeof(clientTimeStamp), sizeof(padding));
     if (padding != uint64_t(~uint64_t(0)) || (clientTimeStamp>>40ULL) != uint64_t(0))//we couldn't receive expected magic. Encryption is broken, auth not passed
     {
-      //blob_logmessage(LOG_ERROR, "Incorrect timestamp, or broken encoding. We under attack");
+      //blob_logmessage(LOG_ERROR, "Incorrect timestamp, or broken encoding. We under attack pad %llx", (long long int)padding);
       blob_close_encryption(blobSocket);
       return ServerRet::ATTACK;
+    }
+    if (!send_exact(blobSocket, &padding, sizeof(padding)))//send back encrypted 64 bit of ones
+    {
+      blob_close_encryption(blobSocket);
+      return ServerRet::ERR;
     }
     if (!blob_is_valid_timestamp(clientTimeStamp))//time stamp is invalid. we stop working to prevent traffic replication attack
     {
