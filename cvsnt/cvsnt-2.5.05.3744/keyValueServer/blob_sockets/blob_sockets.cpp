@@ -9,8 +9,7 @@
 #include <openssl/rand.h>
 
 
-//we are using CFB mode, which is blocked
-#define CIPHER_BLOCK_SZ 1
+//we are using CTR mode, which is streaming
 
 IpType blob_classify_ip(uint32_t ip)
 {
@@ -74,14 +73,7 @@ static int decrypt_and_finalize(evp_cipher_ctx_st *cipher, unsigned char *to, si
   int outLen;
   if (1 != EVP_DecryptUpdate(cipher, to, &outLen, from, encrypted_len) || outLen > space_left || outLen > encrypted_len)
     return -1;
-#if CIPHER_BLOCK_SZ != 1
-  int finalLen;
-  if (1 != EVP_DecryptFinal_ex(cipher, to + outLen, &finalLen) || outLen + finalLen > space_left)
-    return -1;
-  return outLen + finalLen;
-#else
   return outLen;
-#endif
 }
 
 static int encrypt_and_finalize(evp_cipher_ctx_st *cipher, unsigned char *to, size_t space_left, const unsigned char *from, int decrypted_len)
@@ -89,14 +81,7 @@ static int encrypt_and_finalize(evp_cipher_ctx_st *cipher, unsigned char *to, si
   int outLen;
   if (1 != EVP_EncryptUpdate(cipher, to, &outLen, from, decrypted_len) || outLen > space_left || outLen > decrypted_len)
     return -1;
-#if CIPHER_BLOCK_SZ != 1
-  int finalLen;
-  if (1 != EVP_EncryptFinal_ex(cipher, to + outLen, &finalLen) || outLen + finalLen > space_left)
-    return -1;
-  return outLen + finalLen;
-#else
   return outLen;
-#endif
 }
 
 int recv(BlobSocket &socket, void *buf_, int len)
@@ -104,7 +89,7 @@ int recv(BlobSocket &socket, void *buf_, int len)
   if (!socket.decrypt)
     return recv((SOCKET)socket.opaque, (char*)buf_, len, 0);
   unsigned char* buf = (unsigned char*)buf_;
-  const int lenRead = ((len+CIPHER_BLOCK_SZ-1)&~(CIPHER_BLOCK_SZ-1));
+  const int lenRead = len;
   int read = 0, decrypted = 0;
   for (int lenLeft = lenRead; lenLeft > 0;)
   {
@@ -143,7 +128,7 @@ static int send(BlobSocket &socket, const void *buf_, int len, int flags)
     if (ret <= 0)
       return ret;
   }
-  if (encrypted != ((len + CIPHER_BLOCK_SZ-1)&~(CIPHER_BLOCK_SZ-1)))
+  if (encrypted != len)
     return -1;
   return len;
 }
