@@ -1,3 +1,4 @@
+#include <openssl/engine.h>
 #include <openssl/conf.h>
 #include <openssl/opensslv.h>
 #include <openssl/evp.h>
@@ -12,7 +13,9 @@
 #include <openssl/rand.h>
 #include <mutex>
 #include <thread>
-
+#if OPENSSL_VERSION_NUMBER < 0x10100000L
+#include <openssl/openssl.h>
+#endif
 
 //we are using CTR mode, which is streaming
 
@@ -68,12 +71,12 @@ bool blob_init_sockets() {
 #if OPENSSL_VERSION_NUMBER < 0x10100000L
   OPENSSL_config(NULL);
   CRYPTO_malloc_init();
-  SSL_library_init();
+//  SSL_library_init();//not sure if it is needed. if so add -lssl to Makefile.am
   ERR_load_crypto_strings();
 
   OpenSSL_add_all_algorithms();
   ENGINE_load_builtin_engines();
-  SSL_load_error_strings();
+//  SSL_load_error_strings();//not sure if it is needed. if so add -lssl to Makefile.am
 #else
   ERR_load_CRYPTO_strings();
   OPENSSL_add_all_algorithms_noconf();
@@ -141,7 +144,7 @@ int recv(BlobSocket &socket, void *buf_, int len)
     return recv((SOCKET)socket.opaque, (char*)buf_, len, 0);
   unsigned char* buf = (unsigned char*)buf_;
   const int lenRead = len;
-  int read = 0, decrypted = 0;
+  int decrypted = 0;
   for (int lenLeft = lenRead; lenLeft > 0;)
   {
     unsigned char decryptedBuf[32768];//decode by 32768
