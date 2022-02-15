@@ -108,7 +108,7 @@ BlobSocket start_blob_push_client(const char* url, int port, const char* root, i
   freeaddrinfo(result);
   if (raw_sockfd < 0)
   {
-    blob_logmessage(LOG_ERROR, "ERROR connecting to <%s:%d>", url, port);
+    blob_logmessage(LOG_WARNING, "Can't connect to <%s:%d>", url, port);//it is not an error, iternet can be of that kind
     return BlobSocket();
   }
   raw_set_socket_def_options(raw_sockfd);

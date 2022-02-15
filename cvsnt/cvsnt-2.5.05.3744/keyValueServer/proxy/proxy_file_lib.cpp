@@ -71,7 +71,12 @@ struct ClientConnection
     return is_valid(cs);
   }//infinite timeout on proxy
   void kill() const{stop_blob_push_client(cs);}
-  void restart() const{kill();start();}
+  void restart() const
+  {
+    kill();
+    if (!start())
+      blob_logmessage(LOG_ERROR, "Can't reconnect to %s:%d", master_url.c_str(), master_port);
+  }
   ~ClientConnection(){kill();}
 };
 
