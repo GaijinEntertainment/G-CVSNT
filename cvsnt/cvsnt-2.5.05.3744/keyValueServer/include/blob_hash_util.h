@@ -19,7 +19,7 @@ inline bool bin_hash_to_hex_string_noend(const unsigned char *hash, size_t hash_
   if (hash_hex_string_capacity < hash_len*2)
     return false;
   static const char *hex_remap ="0123456789abcdef";
-  for (int i = 0; i < hash_len; ++i, ++hash, to_hash_hex_string+=2)
+  for (size_t i = 0; i < hash_len; ++i, ++hash, to_hash_hex_string+=2)
   {
     to_hash_hex_string[0] = hex_remap[(*hash)>>4];
     to_hash_hex_string[1] = hex_remap[(*hash)&0xF];
@@ -60,7 +60,7 @@ inline bool hex_string_to_bin_hash(const char *from_hash_hex_string, size_t stri
 {
   if (hash_capacity < string_len/2)
     return false;
-  for (int i = 0; i < string_len/2; ++i, from_hash_hex_string+=2, ++hash)
+  for (size_t i = 0; i < string_len/2; ++i, from_hash_hex_string+=2, ++hash)
   {
     int s0 = decode_hash_symbol(from_hash_hex_string[0]);
     if (s0 < 0)

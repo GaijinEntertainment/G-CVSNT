@@ -4,7 +4,6 @@
 #include <openssl/err.h>
 #include <openssl/sha.h>
 #include <openssl/hmac.h>
-#include "../include/blob_hash_util.h"
 #include "../include/blobs_encryption.h"
 #include "../include/blob_sockets.h"
 #include "../include/blob_raw_sockets.h"
@@ -73,7 +72,7 @@ void blob_send_recieve_sock_timeout(BlobSocket &blob_socket, int timeout_sec) {
 static int decrypt_and_finalize(evp_cipher_ctx_st *cipher, unsigned char *to, size_t space_left, const unsigned char *from, int encrypted_len)
 {
   int outLen;
-  if (1 != EVP_DecryptUpdate(cipher, to, &outLen, from, encrypted_len) || outLen > space_left || outLen > encrypted_len)
+  if (1 != EVP_DecryptUpdate(cipher, to, &outLen, from, encrypted_len) || size_t(outLen) > space_left || outLen > encrypted_len)
     return -1;
   return outLen;
 }
@@ -81,7 +80,7 @@ static int decrypt_and_finalize(evp_cipher_ctx_st *cipher, unsigned char *to, si
 static int encrypt_and_finalize(evp_cipher_ctx_st *cipher, unsigned char *to, size_t space_left, const unsigned char *from, int decrypted_len)
 {
   int outLen;
-  if (1 != EVP_EncryptUpdate(cipher, to, &outLen, from, decrypted_len) || outLen > space_left || outLen > decrypted_len)
+  if (1 != EVP_EncryptUpdate(cipher, to, &outLen, from, decrypted_len) || size_t(outLen) > space_left || outLen > decrypted_len)
     return -1;
   return outLen;
 }
@@ -96,7 +95,7 @@ int recv(BlobSocket &socket, void *buf_, int len)
   for (int lenLeft = lenRead; lenLeft > 0;)
   {
     unsigned char decryptedBuf[32768];//decode by 32768
-    const int curLen = lenLeft < sizeof(decryptedBuf) ? lenLeft : (int)sizeof(decryptedBuf);
+    const int curLen = size_t(lenLeft) < sizeof(decryptedBuf) ? lenLeft : (int)sizeof(decryptedBuf);
     const int ret = (int)raw_recv_exact((SOCKET)socket.opaque, (char*)decryptedBuf, curLen);
     if (ret <= 0)
       return ret;
@@ -119,7 +118,7 @@ static int send(BlobSocket &socket, const void *buf_, int len, int flags)
   int encrypted = 0;
   for (int lenLeft = len; lenLeft > 0;)
   {
-    const int curLen = sizeof(encryptedBuf) < lenLeft ? (int)sizeof(encryptedBuf) : lenLeft;
+    const int curLen = size_t(lenLeft) > sizeof(encryptedBuf) ? lenLeft : (int)sizeof(encryptedBuf);
     const int curEncrypted = encrypt_and_finalize(socket.encrypt, encryptedBuf, sizeof(encryptedBuf), buf, curLen);
     if (curEncrypted < 0)
       return -1;
