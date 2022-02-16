@@ -249,12 +249,97 @@ static int server_read_line(struct buffer *buf, char **line, int *lenp);
 static void server_buf_output0(buffer *buf, const char *string);
 static void server_buf_output(buffer *buf, const char *data, int len);
 #endif
+
+#include <fcntl.h>
+#ifndef _WIN32
+#include <sys/types.h>
+#include <sys/socket.h>
+#endif
+enum {TIMEOUT_SECONDS = 10*60};//10 minutes is big enough timeout
+template <typename T> inline intptr_t handle_EINTR(T fn) {
+  intptr_t res = false;
+  while (true) {
+    res = fn();
+    if (res < 0 && errno == EINTR) { continue; }
+    break;
+  }
+  return res;
+}
+
+
+static inline int is_blocking_socket(int fd)
+{
+  #ifdef F_GETFL
+  struct stat statbuf;
+  fstat(fd, &statbuf);
+  if (!S_ISSOCK(statbuf.st_mode))
+    return 0;
+  int flags = fcntl (fd, F_GETFL, 0);
+  if (flags < 0)//error
+	return 0;
+  return !(flags & O_NONBLOCK);
+  #else
+  return 0;
+  #endif
+}
+
+inline int blocking_socket_select_read(int fd) {
+#ifndef _WIN32
+  SOCKET sock = fd;
+  if (sock >= FD_SETSIZE) { return 1; }
+  if (!is_blocking_socket(fd))
+    return 1;
+
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(sock, &fds);
+
+  timeval tv;
+  tv.tv_sec = static_cast<long>(TIMEOUT_SECONDS);
+  tv.tv_usec = 0;
+
+  return handle_EINTR([&]() {
+    return select(static_cast<int>(sock + 1), &fds, nullptr, nullptr, &tv);
+  });
+#else
+  return 1;
+#endif
+}
+
+inline int blocking_socket_select_write(int fd) {
+#ifndef _WIN32
+  SOCKET sock = fd;
+  if (sock >= FD_SETSIZE) { return 1; }
+  if (!is_blocking_socket(fd))
+    return 1;
+
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(sock, &fds);
+
+  timeval tv;
+  tv.tv_sec = static_cast<long>(TIMEOUT_SECONDS);
+  tv.tv_usec = 0;
+
+  return handle_EINTR([&]() {
+    return select(static_cast<int>(sock + 1), nullptr, &fds, nullptr, &tv);
+  });
+#else
+  return 1;
+#endif
+}
+
 static inline int read_with_timeout(int fd, void* data, int len)
 {
+  if (blocking_socket_select_read(fd) <= 0)
+    return -1;
   return read(fd, (char*)data, len);
 }
+
 static inline int write_with_timeout(int fd, const void* data, int len)
 {
+  if (blocking_socket_select_write(fd) <= 0)
+    return -1;
   return write(fd, (const char*)data, len);
 }
 
