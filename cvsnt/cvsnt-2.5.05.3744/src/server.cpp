@@ -977,6 +977,7 @@ static int supported_response (char *name)
 }
 
 static bool send_blob_url_to_client(const char *configURL="BlobURL");
+static void send_blob_private_blob_urls_to_client();
 static void send_blob_otp_to_client();
 
 static void serve_valid_responses (char *arg)
@@ -1037,7 +1038,7 @@ static void serve_valid_responses (char *arg)
 		compat_level = 1; /* CVSNT client */
 	else
 		compat_level = 0; /* Legacy client */
-    send_blob_url_to_client();
+    send_blob_private_blob_urls_to_client();
     send_blob_otp_to_client();
 	TRACE(3,"Client compatibility level is %d",compat_level);
 }
@@ -3360,6 +3361,20 @@ static bool send_blob_url_to_client(const char *configURL)
     return true;
   }
   return false;
+}
+
+static void send_blob_private_blob_urls_to_client()
+{
+  send_blob_url_to_client("BlobURL");
+  for (int i = 0; i < 32; ++i)
+  {
+    char configBuf[256];
+    sprintf (configBuf, "BlobURL%d", i);
+    // will overwrite original Blob-url, as follows the previous.
+    // client can also support round-robin for several proxies
+    if (!send_blob_url_to_client(configBuf))
+      break;
+  }
 }
 
 static void send_blob_otp_to_client()
