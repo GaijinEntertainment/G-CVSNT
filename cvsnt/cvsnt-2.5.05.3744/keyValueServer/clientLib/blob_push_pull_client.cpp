@@ -139,7 +139,7 @@ BlobSocket start_blob_push_client(const char* url, int port, const char* root, i
     if (encryption == CafsClientAuthentication::RequiresAuth || blob_classify_ip(serverIP) == IpType::PUBLIC)
     {
       blob_logmessage(LOG_ERROR, "Server <%s:%d> doesn't support authentication, and client demands it for %s ip, %d",
-                      url, port, raw_sockfd, blob_classify_ip(serverIP) == IpType::PUBLIC ? "public" : "private");
+                      url, port, blob_classify_ip(serverIP) == IpType::PUBLIC ? "public" : "private", raw_sockfd);
       raw_close_socket(raw_sockfd);
       return BlobSocket();
     }
