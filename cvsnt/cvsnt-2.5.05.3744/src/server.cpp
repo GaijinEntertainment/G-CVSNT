@@ -249,11 +249,19 @@ static int server_read_line(struct buffer *buf, char **line, int *lenp);
 static void server_buf_output0(buffer *buf, const char *string);
 static void server_buf_output(buffer *buf, const char *data, int len);
 #endif
+static inline int read_with_timeout(int fd, void* data, int len)
+{
+  return read(fd, (char*)data, len);
+}
+static inline int write_with_timeout(int fd, const void* data, int len)
+{
+  return write(fd, (const char*)data, len);
+}
 
 static int io_getc(int fd)
 {
 	char c;
-	if(read(fd,&c,1)<1)
+	if(read_with_timeout(fd,&c,1)<1)
 		return EOF;
 	return c;
 }
@@ -370,7 +378,7 @@ static int fd_buffer_output (void *closure, const char *data, int have, int *wro
     {
 	int nbytes;
 
-	nbytes = write (fd->fd, data, have);
+	nbytes = write_with_timeout (fd->fd, data, have);
 
 	if (nbytes <= 0)
 	{
@@ -493,7 +501,7 @@ static int client_protocol_buffer_input (void *closure, char *data, int need, in
 	if(dat->protocol && dat->protocol->server_read_data)
 		nbytes = dat->protocol->server_read_data(dat->protocol, data, size);
 	else
-		nbytes = read(dat->server_io_socket, data, size);
+		nbytes = read_with_timeout(dat->server_io_socket, data, size);
 
     if (nbytes > 0)
     {
@@ -541,7 +549,7 @@ static int client_protocol_buffer_output (void *closure, const char *data, int h
 	if(dat->protocol && dat->protocol->server_write_data)
 		nbytes = dat->protocol->server_write_data (dat->protocol, data, have);
 	else
-		nbytes = write (dat->server_io_socket?dat->server_io_socket:STDOUT_FILENO, data, have);
+		nbytes = write_with_timeout(dat->server_io_socket?dat->server_io_socket:STDOUT_FILENO, data, have);
 
 	if (nbytes <= 0)
 	{
