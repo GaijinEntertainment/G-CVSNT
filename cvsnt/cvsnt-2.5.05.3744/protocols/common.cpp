@@ -582,24 +582,6 @@ win32_port_reuse_hack:
 	return sock;
 }
 
-int tcp_setblock(int block)
-{
-#ifndef _WIN32
-  if(tcp_fd != -1)
-  {
-    int flags;
-    fcntl(tcp_fd, F_GETFL, &flags);
-    if(block)
-	flags&=~O_NONBLOCK;
-    else
-	flags|=O_NONBLOCK;
-    fcntl(tcp_fd, F_SETFL, flags);
-    return 0;
-  }
-#endif
-  return -1;
-}
-
 int tcp_disconnect()
 {
 	if (tcp_fd != -1)
@@ -612,13 +594,62 @@ int tcp_disconnect()
 	return 0;
 }
 
+enum {TIMEOUT_SECONDS = 10*60};//10 minutes is big enough timeout
+template <typename T> inline intptr_t handle_EINTR(T fn) {
+  intptr_t res = false;
+  while (true) {
+    res = fn();
+    if (res < 0 && errno == EINTR) { continue; }
+    break;
+  }
+  return res;
+}
+
+inline int select_read(SOCKET  sock, time_t sec, time_t usec) {
+#ifndef _WIN32
+  if (sock >= FD_SETSIZE) { return 1; }
+#endif
+
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(sock, &fds);
+
+  timeval tv;
+  tv.tv_sec = static_cast<long>(sec);
+  tv.tv_usec = static_cast<decltype(tv.tv_usec)>(usec);
+
+  return handle_EINTR([&]() {
+    return select(static_cast<int>(sock + 1), &fds, nullptr, nullptr, &tv);
+  });
+}
+
+inline int select_write(SOCKET sock, time_t sec, time_t usec) {
+#ifndef _WIN32
+  if (sock >= FD_SETSIZE) { return 1; }
+#endif
+
+  fd_set fds;
+  FD_ZERO(&fds);
+  FD_SET(sock, &fds);
+
+  timeval tv;
+  tv.tv_sec = static_cast<long>(sec);
+  tv.tv_usec = static_cast<decltype(tv.tv_usec)>(usec);
+
+  return handle_EINTR([&]() {
+    return select(static_cast<int>(sock + 1), nullptr, &fds, nullptr, &tv);
+  });
+}
+
 int tcp_read(void *data, int length)
 {
 	if(!tcp_fd) /* Using stdin/out, probably */
 		return read(_current_server->in_fd,data,length);
 	else
 	{
-		int err = recv(tcp_fd,(char*)data,length,0);
+  		int err = select_read(tcp_fd, TIMEOUT_SECONDS, 0);
+		if (err > 0)
+			err = recv(tcp_fd, (char*)data, length, 0);
 #ifdef _WIN32
 		if(err<0)
 			errno = -socket_errno;
@@ -633,7 +664,9 @@ int tcp_write(const void *data, int length)
 		return write(_current_server->out_fd,data,length);
 	else
 	{
-		int err = send(tcp_fd,(const char *)data,length,0);
+  		int err = select_write(tcp_fd, TIMEOUT_SECONDS, 0);
+		if (err > 0)
+			err = send(tcp_fd, (const char*)data, length, 0);
 #ifdef _WIN32
 		if(err<0)
 			errno = -socket_errno;
