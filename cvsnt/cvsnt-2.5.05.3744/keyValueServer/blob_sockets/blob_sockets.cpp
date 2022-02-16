@@ -13,9 +13,6 @@
 #include <openssl/rand.h>
 #include <mutex>
 #include <thread>
-#if OPENSSL_VERSION_NUMBER < 0x10100000L
-#include <openssl/openssl.h>
-#endif
 
 //we are using CTR mode, which is streaming
 
