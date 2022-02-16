@@ -11,6 +11,7 @@
 
 static std::string master_url;
 static std::string cache_folder, blobs_folder, encryption_secret;
+static CafsClientAuthentication auth_on_master_as_client = CafsClientAuthentication::AllowNoAuthPrivate;
 static int master_port = 2403;
 //--
 void init_gc(const char *folder, uint64_t max_size);
@@ -20,12 +21,19 @@ bool perform_immediate_gc(int64_t needed_sz);
 
 //
 void close_proxy(){close_gc();}
-void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *secret)
+void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *secret, CafsClientAuthentication auth_on_master)
 {
+  if (auth_on_master == CafsClientAuthentication::RequiresAuth && !secret)
+  {
+    blob_logmessage(LOG_ERROR, "You can't demand auth from server if you don't provide secret");
+    return;
+  }
   master_url = url;
   master_port = port;
   cache_folder = cache;
   encryption_secret = secret ? secret : "";
+  //do not demand encryption on proxy from server, even if it is encrypting as server
+  auth_on_master_as_client = auth_on_master;
   if (cache_folder.length()==0)
     cache_folder = ".";
   else
@@ -51,22 +59,30 @@ struct ClientConnection
   }
   bool start() const
   {
-    uint64_t otpPage = 0;
+    uint64_t otpPage = 0; bool hasOTP = false;
     uint8_t otp[otp_page_size];
-    bool clientEncryption = false;
+    CafsClientAuthentication clientAuth = auth_on_master_as_client;
     if (encryption_secret.length() != 0)
     {
       otpPage = blob_get_otp_page();
-      if (!blob_gen_totp_secret(otp, (const unsigned char *)encryption_secret.c_str(), (uint32_t)encryption_secret.length(), otpPage))
+      hasOTP = blob_gen_totp_secret(otp, (const unsigned char*)encryption_secret.c_str(), (uint32_t)encryption_secret.length(), otpPage);
+      if (!hasOTP)
       {
-        blob_logmessage(LOG_WARNING, "failed attempt to generate otp");
-      } else
-        clientEncryption = true;
+        if (clientAuth == CafsClientAuthentication::RequiresAuth)
+        {
+          blob_logmessage(LOG_ERROR, "failed attempt to generate otp, client requires auth from server");
+          return false;
+        } else
+        {
+          clientAuth = CafsClientAuthentication::AllowNoAuthPrivate;
+          blob_logmessage(LOG_WARNING, "failed attempt to generate otp");
+        }
+      }
     }
     cs = start_blob_push_client(master_url.c_str(), master_port, root.c_str(), 0,
-                                clientEncryption ? otp : nullptr,//allow to connect to encrypted proxies
+                                hasOTP ? otp : nullptr,//allow to connect to encrypted proxies
                                 otpPage,//get current otp page
-                                clientEncryption ? CafsClientAuthentication::RequiresAuth : CafsClientAuthentication::AllowNoAuthPrivate//do not demand encryption on proxy from server, even if it is encrypting as server
+                                clientAuth
                                 );
     return is_valid(cs);
   }//infinite timeout on proxy
