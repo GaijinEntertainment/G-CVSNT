@@ -2222,6 +2222,24 @@ void get_download_source(const char *&config_url, int &config_port, const char *
   private_urls = ::private_urls.size();
 }
 
+int print_otp(int argc, char **argv)
+{
+  char buf[otp_page_size*2+1];buf[0] = 0;
+  if (!blob_has_otp || !bin_hash_to_hex_string_s(blob_current_otp, sizeof(blob_current_otp), buf, sizeof(buf)))
+  {
+    printf("Server with current root doesn't support sharing secrets");
+    return 1;
+  }
+  printf("page:%lld otp:%s\n", (long long int)blob_current_otp_page, buf);
+  for (auto &p:private_urls)
+    printf("private_url:%s@%d\n", p.first.get(), p.second);
+  for (auto &p:encrypting_urls)
+    printf("public_url:%s@%d\n", p.first.get(), p.second);
+  if (current_parsed_root->hostname)
+    printf("master_url:%s@2403\n", current_parsed_root->hostname);
+  return 0;
+}
+
 void change_utime(const char* filename, time_t timestamp)
 {
   struct utimbuf t;

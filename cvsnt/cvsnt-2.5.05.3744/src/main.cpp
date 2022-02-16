@@ -125,6 +125,7 @@ static char *current_root = NULL;
 
 /* Hostname of peer, if known */
 char *remote_host_name = NULL;
+extern int print_otp(int argc, char **argv);
 
 static const struct cmd
 {
@@ -203,6 +204,7 @@ static const struct cmd
     { "unedit",   NULL,       NULL,        unedit,    CVS_CMD_MODIFIES_REPOSITORY | CVS_CMD_USES_WORK_DIR },
     { "update",   "up",       "upd",       update,    CVS_CMD_USES_WORK_DIR },
     { "version",  "ve",       "ver",       version,   CVS_CMD_OPTIONAL_ROOT },
+    { "otp",      NULL,       NULL,        print_otp,  CVS_CMD_OPTIONAL_ROOT },
     { "watch",    NULL,       NULL,        watch,     CVS_CMD_MODIFIES_REPOSITORY | CVS_CMD_USES_WORK_DIR },
     { "watchers", NULL,       NULL,        watchers,  CVS_CMD_USES_WORK_DIR },
 	{ "xdiff",	  "xd",       NULL,        xdiff,     CVS_CMD_USES_WORK_DIR },
@@ -308,6 +310,7 @@ static const char *const cmd_usage[] =
     "        watch        Set watches\n",
     "        watchers     See who is watching a file\n",
 	"        xdiff        Show differences between revisions using an external diff program\n",
+    "        otp          Prints current OTP info\n",
     "(Specify the --help option for a list of other help options)\n",
     NULL,
 };
