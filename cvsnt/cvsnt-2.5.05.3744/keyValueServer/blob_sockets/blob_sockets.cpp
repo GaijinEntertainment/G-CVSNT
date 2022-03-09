@@ -348,6 +348,7 @@ static bool ecdh(uint8_t *secret, size_t &secret_len, CB get_peer_key_data)
   peerkey_data = get_peer_key_data(pubKey, (uint32_t)pubKeyLen);
   if (peerkey_data == NULL) { ret = false; goto end; }
   peerkey = get_peerkey(peerkey_data, pubKeyLen);
+  if (peerkey == NULL) { ret = false; goto end; }
 
   /* Create the context for the shared secret derivation */
   if(NULL == (ctx = EVP_PKEY_CTX_new(pkey, NULL))) {ret = false; goto end;}
@@ -422,7 +423,8 @@ static bool exchange_session_keys(intptr_t raw_socket, const uint8_t otp_page[ot
       }
       ))
   {
-    //blob_logmessage(LOG_ERROR, "Can't generate DH keys.");
+    char buf[256];
+    fprintf(stderr, "Can't handshake <%s>.", ERR_error_string(ERR_get_error(), buf));
     return false;
   }
   const uint8_t* otherRandom = otherDhAuthData + pub_key_data_len;
