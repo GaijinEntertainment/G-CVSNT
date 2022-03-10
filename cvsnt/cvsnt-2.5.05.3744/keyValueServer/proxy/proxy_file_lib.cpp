@@ -294,7 +294,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
   std::string tmpfn;
   FILE *tmpf = nullptr;
   uintptr_t ret = 0;
-  for (int i = 0; i < 100; ++i)//100 attempts to restart socket
+  for (int i = 0; i < 100; ++i)//100 attempts to restart socket/free space
   {
     if ((ret = attempt_pull_cache(fn.c_str(), sz)) != 0)//already in cache
       return ret;
@@ -303,7 +303,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
     while ((tmpf = download_blob(cc->cs, tmpfn, htype, hhex, pulledSz)) == nullptr && pulledSz>0)
     {
       //not enough space!
-      if (!perform_immediate_gc(pulledSz))
+      if (!perform_immediate_gc(pulledSz*(int64_t(i+1))))//free increasing amounts with each step, to avoid races
       {
         fprintf(stderr, "There is no enough space on proxy cache folder to even download one file of %lld size\n", (long long int)pulledSz);
         return 0;
