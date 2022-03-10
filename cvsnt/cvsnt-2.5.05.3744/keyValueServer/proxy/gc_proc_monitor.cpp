@@ -64,5 +64,16 @@ void lazy_report_to_gc(uint64_t )
 
 bool perform_immediate_gc(int64_t needed_sz)
 {
+  if (needed_sz < 0)
+  {
+    const int64_t space = available_disk_space(cache_folder.c_str());
+    if (space >= 0 && space > -needed_sz)
+      return space;
+  }
   return free_space(cache_folder.c_str(), -needed_sz) > 0;
+}
+
+void gc_sleep_msec(int msec)
+{
+  usleep(int64_t(msec)*1000);//sleep for 60 seconds, 1 minute.
 }

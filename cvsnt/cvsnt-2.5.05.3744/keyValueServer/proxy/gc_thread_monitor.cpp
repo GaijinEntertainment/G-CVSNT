@@ -67,3 +67,8 @@ bool perform_immediate_gc(int64_t needed_sz)
   cache_occupied_size -= freedSz;
   return freedSz > 0;
 }
+
+void gc_sleep_msec(int msec)
+{
+  std::this_thread::sleep_for(std::chrono::milliseconds(msec));
+}

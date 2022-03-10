@@ -18,6 +18,7 @@ void init_gc(const char *folder, uint64_t max_size);
 void close_gc();
 void lazy_report_to_gc(uint64_t sz);
 bool perform_immediate_gc(int64_t needed_sz);
+void gc_sleep_msec(int msec);
 
 //
 void close_proxy(){close_gc();}
@@ -302,8 +303,8 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
     int64_t pulledSz;
     while ((tmpf = download_blob(cc->cs, tmpfn, htype, hhex, pulledSz)) == nullptr && pulledSz>0)
     {
-      //not enough space!
-      if (!perform_immediate_gc(pulledSz*(int64_t(i+1))))//free increasing amounts with each step, to avoid races
+      //not enough space?!
+      if (!perform_immediate_gc(pulledSz*(i/2+1)))
       {
         fprintf(stderr, "There is no enough space on proxy cache folder to even download one file of %lld size\n", (long long int)pulledSz);
         return 0;
@@ -320,6 +321,7 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
       return 0;
     if (pulledSz > 0)
       break;
+    gc_sleep_msec(i*200);//sleep for longer and longer periods of time, up to 20sec
     cc->restart();
   }
   ensure_dir(htype, hhex);
