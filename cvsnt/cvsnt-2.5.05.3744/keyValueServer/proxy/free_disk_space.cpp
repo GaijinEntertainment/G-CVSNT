@@ -10,6 +10,15 @@ namespace fs = std::experimental::filesystem;
 namespace fs = std::filesystem;
 #endif
 
+uint64_t available_disk_space(const char *dir)
+{
+  std::error_code ec;
+  const std::filesystem::space_info si = std::filesystem::space(dir, ec);
+  if (!bool(ec))
+    return uint64_t(~uint64_t(0));
+  return si.available;
+}
+
 uint64_t space_occupied(const char *dir)
 {
   uint64_t space_occupied_now = 0;
@@ -26,7 +35,7 @@ uint64_t space_occupied(const char *dir)
   return space_occupied_now;
 }
 
-uint64_t free_space( const char *dir, int64_t max_size )
+uint64_t free_space(const char *dir, int64_t max_size, int64_t &space_occupied_now)
 {
   struct file_info
   {
@@ -35,7 +44,7 @@ uint64_t free_space( const char *dir, int64_t max_size )
     std::uintmax_t size;
   };
   std::vector<file_info> flist;flist.reserve(1024);
-  int64_t space_occupied_now = 0;
+  space_occupied_now = 0;
   std::error_code ec;
 
   for ( const auto& p : fs::recursive_directory_iterator(dir) )
@@ -66,4 +75,10 @@ uint64_t free_space( const char *dir, int64_t max_size )
       return freed;
   }
   return freed;
+}
+
+uint64_t free_space( const char *dir, int64_t max_size )
+{
+  int64_t space_occupied_now;
+  return free_space(dir, max_size, space_occupied_now);
 }

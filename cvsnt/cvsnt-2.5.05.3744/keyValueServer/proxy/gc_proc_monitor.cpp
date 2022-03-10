@@ -8,8 +8,11 @@
 //these are consts! initialized once in main
 static uint64_t file_cache_size = uint64_t(20*1024)<<uint64_t(20);
 static std::string cache_folder;
+uint64_t available_disk_space(const char *dir);
 uint64_t space_occupied(const char *dir);
+uint64_t free_space(const char *dir, int64_t max_size, int64_t &currentOccupied);
 uint64_t free_space(const char *dir, int64_t max_size);
+
 static pid_t gc_pid = 0;
 void init_gc(const char *folder, uint64_t max_size)
 {
@@ -18,9 +21,32 @@ void init_gc(const char *folder, uint64_t max_size)
   if ((gc_pid = fork()) != 0) //parent or error
     return;
 
+  int64_t lastOccupied = 0;
+  free_space(cache_folder.c_str(), uint64_t(file_cache_size), lastOccupied);//free space to required
+  int64_t lastAvail = available_disk_space(cache_folder.c_str());
   while(1) {//infinite loop
-    free_space(cache_folder.c_str(), uint64_t(file_cache_size));
-    usleep(600*1000000);//sleep for 600 seconds, 10 minutes.
+    for (int i = 0; i < 10; ++i)
+    {
+      const int64_t avail = available_disk_space(cache_folder.c_str());//current available space
+      //lastAvail - avail = <approximately additionally added data>
+      // so, (lastAvail - avail + lastOccupied) = <approximate current cache size>
+      // so, if (lastAvail - avail + lastOccupied) = <approximate current cache size> > file_cache_size then we are above the limit
+      // of course, someone else could allocate data as well
+      if (avail == 0 || (lastAvail + lastOccupied > int64_t(file_cache_size) + avail))
+      {
+        //if there is
+        if (free_space(cache_folder.c_str(), uint64_t(file_cache_size), lastOccupied) > 0)// if we have freed some data, change availble amount
+        {
+          lastAvail = available_disk_space(cache_folder.c_str());
+          i = 0;
+        }
+      }
+      usleep(60*1000000);//sleep for 60 seconds, 1 minute.
+    }
+    free_space(cache_folder.c_str(), uint64_t(file_cache_size), lastOccupied);
+    lastAvail = available_disk_space(cache_folder.c_str());
+    usleep(60*1000000);//sleep for 60 seconds, 1 minute.
+    //usleep(600*1000000);//sleep for 600 seconds, 10 minutes.
   }
 }
 
