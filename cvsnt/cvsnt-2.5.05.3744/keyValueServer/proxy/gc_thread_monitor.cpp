@@ -32,9 +32,10 @@ void init_gc(const char *folder, uint64_t max_size)
 void close_gc(){}//no bother, threads die with parent
 
 //--
+static inline bool should_do_gc() { return (cache_occupied_size.load() > file_cache_size); }
 static void do_gc()
 {
-  if (cache_occupied_size.load() <= file_cache_size)
+  if (!should_do_gc())
     return;
   //we have to do gc as occupied space is more than limit
   //recurse over all files in cache_folder, and delete all old files until occupied size is less then file_cache_size
@@ -56,7 +57,8 @@ void lazy_report_to_gc(uint64_t sz)
 {
   //wake up GC thread
   cache_occupied_size += sz;
-  wakeup_gc_cond.notify_one();
+  if (should_do_gc())
+    wakeup_gc_cond.notify_one();
 }
 
 bool perform_immediate_gc(int64_t needed_sz)
