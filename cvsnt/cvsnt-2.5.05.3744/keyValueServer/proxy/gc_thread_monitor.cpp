@@ -25,7 +25,7 @@ void init_gc(const char *folder, uint64_t max_size)
   file_cache_size = max_size;
   printf("Current space occupied by cache folder %dmb\n", (int)(cache_occupied_size.load()>>uint64_t(20)));
   if (cache_occupied_size > file_cache_size)
-    printf("It is more than limit, bug GC will be only called on next pull to server\n");
+    printf("It is more than limit, but GC will be only called on next pull to server\n");
   std::thread gc(gc_thread_proc);
   gc.detach();
 }
