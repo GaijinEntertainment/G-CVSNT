@@ -164,7 +164,7 @@ std::string get_hash_file_name(const char* htype, const char* hhex)
 uint64_t blob_get_hash_blob_size(const void *c, const char* htype, const char* hhex) {
   //we return local file size if exist. If blob was removed from master that would cause ability to checkout non-existent blob (but the one that existed earlier)
   //if blob has changed on server (repacked) we will return cached local size anyway
-  const size_t cachedSz = blob_fileio_get_file_size(get_hash_file_name(htype, hhex).c_str());
+  const uint64_t cachedSz = blob_fileio_get_file_size(get_hash_file_name(htype, hhex).c_str());
   if (cachedSz != invalid_blob_file_size)
     return cachedSz;
   const ClientConnection *cc = (const ClientConnection *)c;
@@ -323,10 +323,15 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
       return 0;
     }
 
-    if (pulledSz == 0)
-      return 0;
     if (pulledSz > 0)
-      break;
+    {
+      const int64_t fileSz = blob_fileio_get_file_size(tmpfn.c_str());
+      if (fileSz != pulledSz)
+        fprintf(stderr, "Downloaded file %s for %s is of %lld size, while should be %lld\n", tmpfn.c_str(), fn.c_str(),
+          (long long int)fileSz, (long long int)pulledSz);
+      else
+        break;
+    }
     gc_sleep_msec(i*200);//sleep for longer and longer periods of time, up to 20sec
     cc->restart();
   }
