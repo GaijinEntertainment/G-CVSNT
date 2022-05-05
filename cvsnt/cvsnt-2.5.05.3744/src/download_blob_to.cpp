@@ -400,8 +400,11 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
             });//we can easily add hash validation here. but seems unnessasry
         },
         err);
-    if (tmp)
-      fclose(tmp);
+    if (tmp && fclose(tmp) != 0)
+    {
+      err += "\nCan't write file - disk is full?";
+      downloadRet = false;
+    }
     if (!downloadRet)
       std::snprintf(buf, sizeof(buf), "ERROR: can't download <%.64s>, err = %s\n", task.encoded_hash.data(), err.c_str());
     bool validated = true;
@@ -464,7 +467,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     if (fsz != readUncompressedSz)
     {
       char buf[256];std::snprintf(buf, sizeof(buf),
-        "ERROR: file <%s> has size of %lld after downloading, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)readUncompressedSz);
+        "ERROR: file <%s> has size of %lld after renaming, while we downloaded %lld\n", fullPath.c_str(), (long long)fsz, (long long)readUncompressedSz);
       cvs_outerr(buf, 0);
       return false;
     }

@@ -167,7 +167,11 @@ PushResult finish(PushData *fp, char *actual_hash_str)
   }
   if (!fp->fp)
     return PushResult::IO_ERROR;
-  fclose(fp->fp);fp->fp = nullptr;
+  const int fcloseRet = fclose(fp->fp);
+  fp->fp = nullptr;
+
+  if (fcloseRet != 0)
+    return PushResult::IO_ERROR;
 
   char final_hash[64];
   char *final_hash_p = actual_hash_str ? actual_hash_str : final_hash;
@@ -312,10 +316,10 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
   }
   if (st != StreamStatus::Finished)
     kill_compress_stream(cctx);
-  fclose(tmpf);
+  const int fcloseRet = fclose(tmpf);
 
   uint64_t finalSize = blob_fileio_get_file_size(temp_file_name.c_str());
-  if (finalSize == invalid_blob_file_size ||
+  if (fcloseRet != 0 || finalSize == invalid_blob_file_size ||
       at < curSize || st != StreamStatus::Finished || (finalSize > curSize && !is_zlib_blob(wasHdr)))//if it was unpacked file and not zlib, then keep it unpacked. Unpacked files are faster to update
   {
     blob_fileio_unlink_file(temp_file_name.c_str());

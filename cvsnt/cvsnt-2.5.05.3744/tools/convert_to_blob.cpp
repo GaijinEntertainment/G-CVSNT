@@ -118,7 +118,7 @@ void actual_rcs_replace(const char *filename, const char *lock_rcs_file_name, co
     FILE *tmpf = cvs_temp_file (&tempFilename, "wb");
     if (tmpf)
     {
-      if (fwrite(rcsData.c_str(), 1, rcsData.length()-1, tmpf) == rcsData.length()-1)
+      if (fwrite(rcsData.c_str(), 1, rcsData.length()-1, tmpf) == rcsData.length()-1 && fflush(tmpf) == 0)
       {
         change_file_mode(tempFilename, rcs_mode);
         if (rename_file(tempFilename, rcs_file_name_full_path.c_str(), false))
