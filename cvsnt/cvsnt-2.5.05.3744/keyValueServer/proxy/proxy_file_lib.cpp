@@ -260,18 +260,24 @@ static inline FILE* download_blob(BlobSocket &sock, std::string &tmpfn, const ch
     return NULL;
   }
   bool ok = true;
+  int64_t expectedSize = -1;
   pulledSz = blob_pull_from_server(sock, htype, hhex,
     0, 0, [&](const char *data, uint64_t at, uint64_t size)
     {
       if (data)
         ok &= (blob_fwrite64(data, 1, size, tmpf) == size);
+      else
+        expectedSize = size;
     });
-  if (!ok || pulledSz <= 0)
+  if (!ok || pulledSz <= 0 || (expectedSize > 0 && expectedSize != pulledSz) )
   {
-    fprintf(stderr, "Couldn't download <%.64s> from master. pulled = %lld\n", hhex, (long long int)pulledSz);
+    fprintf(stderr, "Couldn't download <%.64s> from master. pulled = %lld out of %lld\n", hhex, (long long int)pulledSz, (long long int)expectedSize);
     fclose(tmpf);
     blob_fileio_unlink_file(tmpfn.c_str());
     tmpf = NULL;
+  } else
+  {
+    fflush(tmpf);
   }
   return tmpf;
 }
@@ -330,8 +336,6 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
   //we should close file only after we have started pull. That way GC thread won't delete file
   //however, windows isn't capable of that
   tmpf = NULL;
-  #else
-  fflush(tmpf);
   #endif
 
   if (!blob_fileio_rename_file_if_nexist(tmpfn.c_str(), fn.c_str()))//can't rename
