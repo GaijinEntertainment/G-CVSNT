@@ -410,14 +410,14 @@ void Register (List *list, const char *fname, const char *vn, const char *ts, co
 		{
 			/* Warning, not error, as in write_entries.  */
 			/* FIXME-update-dir: should be including update_dir in message.  */
-			error (0, errno, "cannot open %s", entfilename);
+			error (0, errno, "cannot open %s", entexfilename);
 			return;
 		}
 
 		if (fprintf (entfile, "A ") < 0)
 			error (1, errno, "cannot write %s", entfilename);
 		if (fprintf (entexfile, "A ") < 0)
-			error (1, errno, "cannot write %s", entfilename);
+			error (1, errno, "cannot write %s", entexfilename);
 
 		write_ent_proc (node, NULL);
 		write_ent_ex_proc (node, NULL);

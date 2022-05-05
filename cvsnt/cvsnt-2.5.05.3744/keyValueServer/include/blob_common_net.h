@@ -13,11 +13,12 @@ if (socket_ret < 0)\
   return false;\
 }
 
-static inline bool recv_exact(BlobSocket socket, void *data, uint64_t len)
+static inline bool recv_exact(BlobSocket socket, void *data, uint64_t len_)
 {
+  int64_t len = len_;
   while (len > 0)
   {
-    int l = recv(socket, (char*)data, (int)std::min(len, uint64_t(1<<30)));
+    int l = recv(socket, (char*)data, (int)std::min(len, int64_t(1<<30)));
     HANDLE_SOCKET_ERROR(l);
     data = (char*)data + l;
     len -= l;
@@ -25,11 +26,12 @@ static inline bool recv_exact(BlobSocket socket, void *data, uint64_t len)
   return true;
 }
 
-static inline bool send_exact(BlobSocket socket, const void *data, uint64_t len)
+static inline bool send_exact(BlobSocket socket, const void *data, uint64_t len_)
 {
+  int64_t len = len_;
   while (len > 0)
   {
-    constexpr uint64_t quant = (1<<30);//1Gb of data
+    constexpr int64_t quant = (1<<30);//1Gb of data
     uint64_t sendQuant = std::min(quant, len);
     int l = send_msg_no_signal(socket, (const char*)data, (int)sendQuant);
     HANDLE_SOCKET_ERROR(l)
@@ -42,11 +44,11 @@ static inline bool send_exact(BlobSocket socket, const void *data, uint64_t len)
 template<typename Callback>
 static inline bool recv_lambda(BlobSocket socket, uint64_t total, Callback cb)
 {
-  uint64_t sizeLeft = total;
+  int64_t sizeLeft = total;
   char buf[65536];
   while (sizeLeft > 0)
   {
-    int l = recv(socket, buf, (int)std::min(sizeLeft, (uint64_t)sizeof(buf)));
+    int l = recv(socket, buf, (int)std::min(sizeLeft, (int64_t)sizeof(buf)));
     HANDLE_SOCKET_ERROR(l)
     cb(buf, l);
     sizeLeft -= l;

@@ -97,7 +97,7 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     provider.fail(attemptNo, id);
     return false;
   }
-  bool reconnect() { return init(); }
+  bool reconnect() { ++attempt;  return init(); }
   bool init() {
     for (int e = provider.attemptsCount(id); attempt < e; ++attempt)
       if (attemptReconnect(attempt))
@@ -112,14 +112,14 @@ struct KVNetworkProcessor:public BlobNetworkProcessor
     bool ok = true;
     int64_t pulled = blob_pull_from_server(client, HASH_TYPE_REV_STRING, hex_hash, 0, 0, [&](const char *data, uint64_t , uint64_t size)
     {
-      if (data && ok)//that's hint of size
+       if (data && ok)//that's hint of size
          ok = cb(data, size);
     });
     if (pulled == 0)
     {
       err = "No blob ";
       err += hex_hash;
-      return 0;
+      return false;
     }
     if (pulled < 0)
     {

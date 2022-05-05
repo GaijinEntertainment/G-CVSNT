@@ -1318,7 +1318,7 @@ int wnt_fclose(FILE *file)
 
 //	FlushFileBuffers((HANDLE)_get_osfhandle(fileno(file)));
 
-	return fclose(file);
+	return file ? fclose(file) : EOF;
 }
 
 void _dosmaperr(DWORD dwErr)

@@ -253,7 +253,7 @@ void BackgroundProcessor::init()
   uint32_t publicUrlsCnt = 0, privateUrlsCnt = 0;
   if (config_url)
   {
-    private_urls = 0, public_urls = 0;//force using config
+    private_urls = 1, public_urls = 0;//force using config
     //only one URL, no round robin
     roundRobin.urls.push_back(DownloadURL{config_url, config_port});
   } else
@@ -270,7 +270,7 @@ void BackgroundProcessor::init()
     for (int i = 0; i < private_urls; ++i)
     {
       const char *url = nullptr; int port = 0;
-      if (get_public_blob_url(i, url, port) >= 0)
+      if (get_private_blob_url(i, url, port) >= 0)
       {
         roundRobin.urls.push_back(DownloadURL{url, port});//the last one
         privateUrlsCnt++;
@@ -369,7 +369,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
   std::string temp_filename = task.dirpath +"/_new_";
   temp_filename += task.filename;
   size_t readUncompressedSz = ~size_t(0);
-  for (int i = 0; i < 2; ++i)
+  for (int i = 0; i < 16; ++i)//make 16 attempts
   {
 
     FILE* tmp = fopen(temp_filename.c_str(), "wb");
@@ -381,6 +381,10 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     }
     std::string err;
     char buf[512];
+    if (memcmp(task.encoded_hash.data(), "de4c8375f402fb25162f207d6203519314bd8183f12e3969751b6394908aee81", 64) == 0)
+    {
+        std::snprintf(buf, sizeof(buf), "check it!");
+    }
     caddressed_fs::DownloadBlobInfo info;
     char hashCtx[HASH_CONTEXT_SIZE];
     if (validate_downloaded_blobs)
@@ -438,7 +442,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
         cvs_outerr(buf, 0);
         return false;
       } else
-        error(0,0, "%s\n");
+        error(0,0, "%s Reconnecting!\n", buf);
     }
     else
     {
