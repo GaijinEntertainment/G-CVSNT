@@ -178,8 +178,8 @@ void BackgroundProcessor::fail(int attempt, int id) const
     return;
   error(0,0, "Blobs server %s:%d failed\n%s. Contact IT!\n",
     roundRobin.urls[ui].url.c_str(), roundRobin.urls[ui].port,
-    attempt < roundRobin.urls.size()-2 ? "Switching to next." :
-      (attempt < roundRobin.urls.size()-1 ? "Switching to master." : "Master is not available!"));
+    attempt < int(roundRobin.urls.size())-2 ? "Switching to next." :
+      (attempt < int(roundRobin.urls.size())-1 ? "Switching to master." : "Master is not available!"));
   roundRobin.urls[ui].failed = true;
 }
 
