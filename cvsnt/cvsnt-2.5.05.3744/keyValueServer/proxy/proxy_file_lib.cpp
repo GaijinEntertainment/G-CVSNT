@@ -275,9 +275,12 @@ static inline FILE* download_blob(BlobSocket &sock, std::string &tmpfn, const ch
     fclose(tmpf);
     blob_fileio_unlink_file(tmpfn.c_str());
     tmpf = NULL;
-  } else
+  } else if (fflush(tmpf) != 0)
   {
-    fflush(tmpf);
+    fprintf(stderr, "Couldn't flush download <%s> from master, pulled = %lld \n", tmpfn.c_str(), (long long int)pulledSz);
+    fclose(tmpf);
+    blob_fileio_unlink_file(tmpfn.c_str());
+    tmpf = NULL;
   }
   return tmpf;
 }
