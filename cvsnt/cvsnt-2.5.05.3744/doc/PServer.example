@@ -243,3 +243,18 @@
 # 2 - Require a password and a certificate
 #
 #CertificatesOnly=0
+
+#
+# Shared secret allow encryption
+# it must be the same on cafs server and cafs proxies
+#
+#BlobOTP=SomeSampleSecretOfLengthNotLessThan32Symbols
+
+#
+# This DNS should resolve to local cafs server or cafs proxy inside a private network, but not in VPN.
+# If we are in VPN, it should resolve to address of public proxy(proxies)
+# It is possible to add more than one address for round robin BlobEncryptedURL1,BlobEncryptedURL2,...etc
+# inside a client
+#
+#BlobEncryptedURL0=<some_dns_name>
+

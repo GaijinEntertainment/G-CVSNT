@@ -1,4 +1,4 @@
-cvsnt (3.5.15.7699) stable; urgency=medium
+cvsnt ({%%VERSION%%}) stable; urgency=medium
 
   * Initial Release.
 

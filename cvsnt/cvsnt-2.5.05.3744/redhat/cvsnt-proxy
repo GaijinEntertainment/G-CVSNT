@@ -1,3 +1,11 @@
+# Master url or ip address
 MASTER_URL=cvs
+# Cache folder location
 CACHE_FOLDER=/var/cache/cafs
+# if use mandatory_encryption, server won't accept older clients.
+# In-office proxies should use "encryption", while public proxies - have to use mandatory_encryption
+ENCRYPTION="mandatory_encryption"
+# Secret of length not less than 32 symbols
+BLOB_OTP=""
+# Cache soft limit size in megabytes
 CACHE_SOFT_LIMIT_SIZE=20480

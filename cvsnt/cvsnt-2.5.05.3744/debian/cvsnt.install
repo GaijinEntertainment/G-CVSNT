@@ -10,9 +10,9 @@ usr/lib/cvsnt/xdiff/*.so
 usr/lib/cvsnt/xdiff/*.la
 usr/lib/libcvsapi.so
 usr/lib/libcvstools.so
-usr/lib/libcvsapi-3.5.15.7699.so
+usr/lib/libcvsapi-{%%VERSION%%}.so
 usr/lib/libcvsapi.la
-usr/lib/libcvstools-3.5.15.7699.so
+usr/lib/libcvstools-{%%VERSION%%}.so
 usr/lib/libcvstools.la
 usr/share/man/man[15]/*
 

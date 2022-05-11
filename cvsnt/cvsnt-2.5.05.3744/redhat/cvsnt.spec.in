@@ -237,6 +237,9 @@ fi
 %attr(755,root,root) %{_libdir}/libcvsapi.la
 %attr(755,root,root) %{_libdir}/libcvstools-%{version}.so
 %attr(755,root,root) %{_libdir}/libcvstools.la
+%attr(755,root,root) %{_libdir}/libblob_sockets_lib-%{version}.so
+%attr(755,root,root) %{_libdir}/libblob_sockets_lib.la
+%attr(755,root,root) %{_libdir}/libblob_sockets_lib.so
 %attr(644,root,root) %{_mandir}/man[15]/*
 %config(noreplace) %{_sysconfdir}/cvsnt/*
 
@@ -316,3 +319,4 @@ fi
 - Fix init Script
 - Workaround add missing libpcreposix.pc for pkg-config in rhel6
 - Update to commit e6b674ca8998c52eb6f795783abf6ffb75203cac
+

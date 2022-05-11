@@ -1,9 +1,12 @@
-usr/lib/libblake3-3.5.15.7699.so
+usr/lib/libblake3-{%%VERSION%%}.so
 usr/lib/libblake3.la
-usr/lib/libca_blobs_fs-3.5.15.7699.so
+usr/lib/libca_blobs_fs-{%%VERSION%%}.so
 usr/lib/libca_blobs_fs.la
-usr/lib/libkv_client_lib-3.5.15.7699.so
+usr/lib/libkv_client_lib-{%%VERSION%%}.so
 usr/lib/libkv_client_lib.la
 usr/lib/libblake3.so
 usr/lib/libca_blobs_fs.so
 usr/lib/libkv_client_lib.so
+usr/lib/libblob_sockets_lib.so
+usr/lib/libblob_sockets_lib-{%%VERSION%%}.so
+usr/lib/libblob_sockets_lib.la

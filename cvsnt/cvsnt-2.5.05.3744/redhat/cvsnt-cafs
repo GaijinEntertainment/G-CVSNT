@@ -1,4 +1,14 @@
+# the path where the files will be stored
 DIR_FOR_ROOTS=/
+# trust clients (if off, we recheck sent hashes. Safer to not trust, if there is enough CPU)
 ALLOW_TRUST=on
-PORT=2403
-MAX_PEND_CONN=1024
+# allow encryption with same shared secret (if use mandatory_encryption, server won't accept older clients)
+ENCRYPTION="encryption"
+# Blobs shared secret
+BLOB_OTP=""
+# [OPTIONAL]With norepack flag server won't attempt to repack norepack received by server with higher compression level.
+# By default, it will try to do that (changing niceness to 20).
+# That's uses CPU of server (with norepack there is almost no CPU usage), but saves bandwidth of clients on average.
+#NOREPACK="norepack"
+# [OPTIONAL]port (2403 should be used)
+#PORT=2403
