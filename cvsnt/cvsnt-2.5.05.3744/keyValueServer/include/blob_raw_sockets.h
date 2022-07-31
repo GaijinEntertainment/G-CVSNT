@@ -3,7 +3,7 @@
 #include <stdio.h>
 #include <stdint.h>
 
-static constexpr size_t default_socket_timeout = 10*60;//10 minutes
+static constexpr size_t default_socket_timeout = 30*60;//30 minutes
 #if _WIN32
   #pragma comment(lib,"Ws2_32.lib")
   #include <winsock2.h>
