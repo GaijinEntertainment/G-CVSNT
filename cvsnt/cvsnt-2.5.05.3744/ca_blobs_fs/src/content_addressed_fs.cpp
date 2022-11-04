@@ -63,11 +63,22 @@ inline bool make_blob_dirs(std::string &fp)
   return true;
 }
 
+inline std::string get_dir_path(const std::string &root_path, const char* hash_hex_string)
+{
+  char buf[74];
+  std::snprintf(buf,sizeof(buf), "%.2s/%.2s", hash_hex_string, hash_hex_string+2);
+  return root_path + buf;
+}
 inline std::string get_file_path(const std::string &root_path, const char* hash_hex_string)
 {
   char buf[74];
   std::snprintf(buf,sizeof(buf), "%.2s/%.2s/%.64s", hash_hex_string, hash_hex_string+2, hash_hex_string);
   return root_path + buf;
+}
+
+std::string get_dir_path(const context *ctx, const char* hash_hex_string)
+{
+  return get_dir_path(ctx->root_path, hash_hex_string);
 }
 
 std::string get_file_path(const context *ctx, const char* hash_hex_string)
@@ -106,8 +117,16 @@ PushData* start_push(const context *ctx, const char* hash_hex_string)
     memcpy(r->provided_hash, hash_hex_string, 64);
     return r;
   }
+  FILE * tmpf = nullptr;
   std::string temp_file_name;
-  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : ctx->root_path.c_str());
+  if (default_tmp_dir.length()>0)
+    tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.c_str());
+  else
+  {
+    std::string temp_file_dir = get_dir_path(ctx->root_path, hash_hex_string);
+    make_blob_dirs(temp_file_dir);
+    tmpf = blob_fileio_get_temp_file(temp_file_name, temp_file_dir.c_str());
+  }
   if (!tmpf)
     return nullptr;
   auto r = new PushData{tmpf, ctx->root_path, std::move(temp_file_name)};
