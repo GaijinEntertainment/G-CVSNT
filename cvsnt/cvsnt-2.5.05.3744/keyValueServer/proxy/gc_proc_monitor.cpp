@@ -67,8 +67,8 @@ bool perform_immediate_gc(int64_t needed_sz)
   if (needed_sz < 0)
   {
     const int64_t space = available_disk_space(cache_folder.c_str());
-    if (space >= 0 && space > -needed_sz)
-      return space;
+    if (space > 0 && space > -needed_sz)
+      return true;
   }
   return free_space(cache_folder.c_str(), -needed_sz) > 0;
 }

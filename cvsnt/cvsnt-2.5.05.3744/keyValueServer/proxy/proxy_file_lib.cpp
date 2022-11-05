@@ -250,6 +250,232 @@ void blob_destroy_push_data(uintptr_t up)
     pd->cc->restart();
 }
 
+#define WRITE_THROUGH_PROXY 1
+
+#if WRITE_THROUGH_PROXY
+
+struct PullThroughTemp
+{
+  char buf[65536];
+  std::string tmpfn;
+  FILE *tmpf = nullptr;
+  const ClientConnection *cc = nullptr;
+  int64_t expectedSize = 0;
+  int64_t pulledSz = 0;
+  bool tempIsOk = true;
+  bool start(const ClientConnection *c, const char* htype, const char* hhex, uint64_t &sz)
+  {
+    cc = c;
+    if (!cc)
+    {
+      fprintf(stderr, "No client connection\n");
+      return false;
+    }
+
+    pulledSz = 0;
+    for (int i = 0; i < 100; ++i)
+    {
+      uint64_t from = 0;
+      sz = 0;
+      KVRet ret = blob_start_pull_from_server(cc->cs, htype, hhex, from, sz);
+      if (ret == KVRet::OK)
+      {
+        expectedSize = sz;
+        break;
+      }
+      if (ret == KVRet::Error)//not an error, blob is probably just missing on server
+        return false;
+      if (ret == KVRet::Fatal)//we have to restart working with server, network error
+      {
+        gc_sleep_msec(i*200);//sleep for longer and longer periods of time, up to 20sec
+        cc->restart();
+      }
+    }
+    //report_to_gc_needed_space(expectedSize);
+    pulledSz = 0;
+    tmpf = blob_fileio_get_temp_file(tmpfn, blobs_folder.c_str());
+    if (!tmpf)
+      fprintf(stderr, "Can't open temp file %s. Will perform net proxying.\n", tmpfn.c_str());
+    else
+      ensure_dir(htype, hhex);
+    tempIsOk = tmpf != nullptr;
+    return true;
+  }
+
+  template <class Cb>
+  bool readChunk(Cb cb)
+  {
+    const int64_t sizeLeft = expectedSize - pulledSz;
+    int l = recv(cc->cs, buf, (int)std::min(sizeLeft, (int64_t)sizeof(buf)));
+    if (l == 0)/*gracefully closed*/ {
+        blob_logmessage(LOG_NOTIFY, "socket returned 0, err=%d", blob_get_last_sock_error());
+        return false;
+    }
+    if (l < 0)
+    {
+        blob_logmessage(LOG_ERROR, "can't read socket, err=%d", blob_get_last_sock_error());
+        return false;
+    }
+    cb(buf, l);
+    return true;
+  }
+  const char *pull(uint64_t from, uint64_t &read)
+  {
+    if (from != pulledSz)
+    {
+      //we have to finish all downloading to temp, and then provide access to temp file. we can't move cursor in downloading file
+      //can be done, but is not used now!
+      //todo: fixme
+      return nullptr;
+    }
+    read = 0;
+    if (readChunk([&](const char *data, int len)
+    {
+      if (tempIsOk)
+      {
+        tempIsOk = (blob_fwrite64(buf, 1, len, tmpf) == len);
+        if (!tempIsOk)
+        {
+          fprintf(stderr, "Couldn't download to temp <%s>, err=%d.\n", tmpfn.c_str(), blob_fileio_get_last_error());
+          perform_immediate_gc(expectedSize*2);//there was not enough space?
+          closeAndUnlink();//no point in keeping sem-written temp file opened
+        }
+      }
+      read = len;
+      pulledSz += len;
+    }))
+      return buf;
+
+    read = 0;
+    return nullptr;
+  }
+  void closeAndUnlink()
+  {
+    if (tmpf)
+      fclose(tmpf);
+    blob_fileio_unlink_file(tmpfn.c_str());
+    tmpf = NULL;
+  }
+  bool finish(const std::string &fn)
+  {
+    if (!tmpf)
+      return false;
+    if (!tempIsOk || expectedSize != pulledSz)
+    {
+      fprintf(stderr, "Couldn't download <%s> from master. pulled = %lld out of %lld\n", fn.c_str(),
+        (long long int)pulledSz, (long long int)expectedSize);
+      closeAndUnlink();
+      return false;
+    } else if (fflush(tmpf) != 0)
+    {
+      fprintf(stderr, "Couldn't flush download <%s> from master, pulled = %lld \n", tmpfn.c_str(), (long long int)pulledSz);
+      closeAndUnlink();
+      return false;
+    }
+    const int64_t fileSz = blob_fileio_get_file_size(tmpfn.c_str());
+    if (fileSz != pulledSz)
+    {
+      fprintf(stderr, "Downloaded file %s for %s is of %lld size, while should be %lld\n", tmpfn.c_str(), fn.c_str(),
+        (long long int)fileSz, (long long int)pulledSz);
+      return false;
+    }
+    #if _MSC_VER
+    fclose(tmpf);
+    //we should close file only after we have started pull. That way GC thread won't delete file
+    //however, windows isn't capable of that
+    tmpf = NULL;
+    #endif
+
+    if (!blob_fileio_rename_file_if_nexist(tmpfn.c_str(), fn.c_str()))//can't rename
+    {
+      const int err = blob_fileio_get_last_error();
+      closeAndUnlink();
+      fprintf(stderr, "Can't rename file %s to %s, because of %d\n", tmpfn.c_str(), fn.c_str(), err);
+      return false;
+    }
+    if (tmpf)
+      fclose(tmpf);//we close file only after we have started pull. That way GC thread won't delete file
+    lazy_report_to_gc(fileSz);
+    return true;
+  }
+};
+
+struct BlobProxyPull
+{
+public:
+  const char *pull(uint64_t from, uint64_t &read)
+  {
+    return isCached() ? pullCached(from, read) : pullWriteThrough(from, read);
+  }
+
+  bool start(const ClientConnection *cc, const char* htype, const char* hhex, uint64_t &sz)
+  {
+    cacheFileName = get_hash_file_name(htype, hhex);
+    if (!cacheFileName.length())
+    {
+      fprintf(stderr, "invalid file name for %s %s\n", htype, hhex);
+    } else
+    {
+      cached = blobe_fileio_start_pull(cacheFileName.c_str(), sz);
+      if (cached)
+        return true;
+    }
+    return writeThrough.start(cc, htype, hhex, sz);
+  }
+
+  ~BlobProxyPull()
+  {
+    const bool wasWriting = !isCached();
+    if (cached)
+    {
+      blobe_fileio_destroy(cached);
+      cached = nullptr;
+    }
+    writeThrough.finish(cacheFileName);
+  }
+
+private:
+  const char *pullWriteThrough(uint64_t from, uint64_t &read)
+  {
+    return writeThrough.pull(from, read);
+  }
+
+  const char *pullCached(uint64_t from, uint64_t &read)
+  {
+    if (!cached){read = 0;return nullptr;}
+    return blobe_fileio_pull(cached, from, read);
+  }
+  bool isCached() const {return cached != nullptr;};
+  std::string cacheFileName;
+  BlobFileIOPullData *cached = nullptr;
+  PullThroughTemp writeThrough;
+};
+
+uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhex, uint64_t &sz)
+{
+  BlobProxyPull *pullData = new BlobProxyPull;
+  if (pullData->start((const ClientConnection *)c, htype, hhex, sz))
+    return uintptr_t(pullData);
+  delete pullData;
+  return 0;
+}
+
+const char *blob_pull_data(uintptr_t up, uint64_t from, uint64_t &read)
+{
+  if (!up){read = 0;return nullptr;}
+  return ((BlobProxyPull*)up)->pull(from, read);
+}
+
+bool blob_end_pull_data(uintptr_t up)
+{
+  if (!up)
+    return false;
+  delete (BlobProxyPull*)up;
+  return true;
+}
+
+#else
+
 static inline FILE* download_blob(BlobSocket &sock, std::string &tmpfn, const char* htype, const char* hhex, int64_t &pulledSz)
 {
   pulledSz = 0;
@@ -284,12 +510,8 @@ static inline FILE* download_blob(BlobSocket &sock, std::string &tmpfn, const ch
   }
   return tmpf;
 }
-
 inline uintptr_t attempt_pull_cache(const char *fn, uint64_t &sz){
-  uint64_t cachedSz;
-  uintptr_t ret = (uintptr_t)blobe_fileio_start_pull(fn, cachedSz);
-  sz = cachedSz;
-  return ret;
+  return (uintptr_t)blobe_fileio_start_pull(fn, sz);
 }
 
 uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhex, uint64_t &sz)
@@ -372,3 +594,4 @@ bool blob_end_pull_data(uintptr_t up){
   return blobe_fileio_destroy((BlobFileIOPullData*)up);
 }
 
+#endif
