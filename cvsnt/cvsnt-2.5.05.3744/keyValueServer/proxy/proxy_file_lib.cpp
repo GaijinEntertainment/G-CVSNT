@@ -101,7 +101,7 @@ struct ClientConnection
   mutable std::vector<char> accessed_files;
   void process_atimes() const
   {
-    for (const char* at = accessed_files.data(), *e = at + accessed_files.size(); at < e; at += strlen(at))
+    for (const char* at = accessed_files.data(), *e = at + accessed_files.size(); at < e; at += strlen(at)+1)
       update_write_time_to_current(at);
     accessed_files.clear();
   }
