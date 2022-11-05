@@ -96,6 +96,17 @@ bool exists(const context *ctx, const char* hash_hex_string)
   return blob_fileio_is_file_readable(get_file_path(ctx->root_path, hash_hex_string).c_str());
 }
 
+static FILE * open_local_temp_file(std::string &temp_file_name, const std::string &root_path, const char * hash_hex_string)
+{
+  if (default_tmp_dir.length()>0)
+    return blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.c_str());
+  else
+  {
+    std::string temp_file_dir = get_dir_path(root_path, hash_hex_string);
+    make_blob_dirs(temp_file_dir);
+    return blob_fileio_get_temp_file(temp_file_name, temp_file_dir.c_str());
+  }
+}
 class PushData
 {
 public:
@@ -117,16 +128,8 @@ PushData* start_push(const context *ctx, const char* hash_hex_string)
     memcpy(r->provided_hash, hash_hex_string, 64);
     return r;
   }
-  FILE * tmpf = nullptr;
   std::string temp_file_name;
-  if (default_tmp_dir.length()>0)
-    tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.c_str());
-  else
-  {
-    std::string temp_file_dir = get_dir_path(ctx->root_path, hash_hex_string);
-    make_blob_dirs(temp_file_dir);
-    tmpf = blob_fileio_get_temp_file(temp_file_name, temp_file_dir.c_str());
-  }
+  FILE * tmpf = open_local_temp_file(temp_file_name, ctx->root_path, hash_hex_string);
   if (!tmpf)
     return nullptr;
   auto r = new PushData{tmpf, ctx->root_path, std::move(temp_file_name)};
@@ -281,7 +284,7 @@ int64_t repack(const context *ctx, const char* hash_hex_string, bool repack_unpa
     return 0;
   BlobHeader hdr = get_header(zstd_magic, wasHdr.uncompressedLen, BlobHeader::BEST_POSSIBLE_COMPRESSION);
   std::string temp_file_name;
-  FILE * tmpf = blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.length()>0 ? default_tmp_dir.c_str() : ctx->root_path.c_str());
+  FILE * tmpf = open_local_temp_file(temp_file_name, ctx->root_path, hash_hex_string);
   if (!tmpf)
     return 0;
   char cctx[CTX_SIZE];
