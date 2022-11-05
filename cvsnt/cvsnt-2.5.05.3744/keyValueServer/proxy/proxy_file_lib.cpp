@@ -13,16 +13,18 @@ static std::string master_url;
 static std::string cache_folder, blobs_folder, encryption_secret;
 static CafsClientAuthentication auth_on_master_as_client = CafsClientAuthentication::AllowNoAuthPrivate;
 static int master_port = 2403;
+static bool should_update_mtimes_on_access = false;
 //--
 void init_gc(const char *folder, uint64_t max_size);
 void close_gc();
 void lazy_report_to_gc(uint64_t sz);
 bool perform_immediate_gc(int64_t needed_sz);
 void gc_sleep_msec(int msec);
+void update_write_time_to_current(const char*name);
 
 //
 void close_proxy(){close_gc();}
-void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *secret, CafsClientAuthentication auth_on_master)
+void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *secret, CafsClientAuthentication auth_on_master, bool update_mtimes)
 {
   if (auth_on_master == CafsClientAuthentication::RequiresAuth && !secret)
   {
@@ -44,7 +46,7 @@ void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const
 
   blobs_folder = cache_folder + "blobs/";
   blob_fileio_ensure_dir(blobs_folder.c_str());
-
+  should_update_mtimes_on_access = update_mtimes;
   init_gc(cache_folder.c_str(), uint64_t(sz)<<uint64_t(20));
 }
 ///
@@ -57,6 +59,8 @@ struct ClientConnection
   std::string root;
   ClientConnection(const char*root_):root(root_)
   {
+    if (should_update_mtimes_on_access)
+      accessed_files.reserve(65536);
   }
   bool start() const
   {
@@ -94,7 +98,27 @@ struct ClientConnection
     if (!start())
       blob_logmessage(LOG_ERROR, "Can't reconnect to %s:%d", master_url.c_str(), master_port);
   }
-  ~ClientConnection(){kill();}
+  mutable std::vector<char> accessed_files;
+  void process_atimes() const
+  {
+    for (const char* at = accessed_files.data(), *e = at + accessed_files.size(); at < e; at += strlen(at))
+      update_write_time_to_current(at);
+    accessed_files.clear();
+  }
+  void add_accessed_file(const std::string &fn) const
+  {
+    if (should_update_mtimes_on_access)//we could just call update_write_time_to_current, but that can increase latency. Instead save till end of session
+    {
+      if (accessed_files.size() > (2<<20))//let's ensure we never consume too much memory. 2mb is fine limit
+        process_atimes();
+      accessed_files.insert(accessed_files.end(), fn.c_str(), fn.c_str() + fn.length()+1);
+    }
+  }
+  ~ClientConnection()
+  {
+    kill();
+    process_atimes();
+  }
 };
 
 extern void blob_sleep_for_msec(unsigned int msec);
@@ -418,7 +442,11 @@ public:
     {
       cached = blobe_fileio_start_pull(cacheFileName.c_str(), sz);
       if (cached)
+      {
+        if (cc)
+          cc->add_accessed_file(cacheFileName.c_str());
         return true;
+      }
     }
     return writeThrough.start(cc, htype, hhex, sz);
   }
@@ -529,7 +557,11 @@ uintptr_t blob_start_pull_data(const void *c, const char* htype, const char* hhe
   for (int i = 0; i < 100; ++i)//100 attempts to restart socket/free space
   {
     if ((ret = attempt_pull_cache(fn.c_str(), sz)) != 0)//already in cache
+    {
+      if (cc)
+        cc->add_accessed_file(fn.c_str());
       return ret;
+    }
     //we have to pull it from server to cache
     int64_t pulledSz;
     while ((tmpf = download_blob(cc->cs, tmpfn, htype, hhex, pulledSz)) == nullptr && pulledSz>0)

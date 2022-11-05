@@ -35,6 +35,12 @@ uint64_t space_occupied(const char *dir)
   return space_occupied_now;
 }
 
+void update_write_time_to_current(const char *fname)
+{
+  std::error_code ec;
+  fs::last_write_time(fs::path(fname), fs::file_time_type::clock::now(), ec);
+}
+
 uint64_t free_space(const char *dir, int64_t max_size, int64_t &space_occupied_now)
 {
   struct file_info
