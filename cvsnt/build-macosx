@@ -1,5 +1,5 @@
 #!/bin/bash
-export BUILD_ARCH="-arch x86_64 -msse4.1 -mmacosx-version-min=10.11"
+export BUILD_ARCH="-arch x86_64 -msse4.1 -mmacosx-version-min=10.15"
 export PKG_BUILD_SUFFIX="-osx10.11-x64"
 #export BUILD_ARCH="-arch arm64 -mmacosx-version-min=11.0"
 #export PKG_BUILD_SUFFIX="-osx11-arm64"
@@ -20,6 +20,8 @@ brew install automake
 brew install pkg-config
 brew install libtool
 brew install pcre
+brew install openssl
+ln -s ../opt/openssl/include/openssl /usr/local/include/openssl
 
 cd cvsnt-2.5.05.3744
 autoreconf -i --force
