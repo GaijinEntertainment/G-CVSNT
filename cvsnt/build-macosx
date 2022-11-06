@@ -20,8 +20,8 @@ brew install automake
 brew install pkg-config
 brew install libtool
 brew install pcre
-brew install openssl
-ln -s ../opt/openssl/include/openssl /usr/local/include/openssl
+brew install openssl@1.1
+ln -s /opt/homebrew/opt/openssl@1.1/include/openssl /usr/local/include/openssl
 
 cd cvsnt-2.5.05.3744
 autoreconf -i --force
