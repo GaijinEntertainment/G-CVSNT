@@ -1,5 +1,6 @@
 #include <string>
 #include <memory>
+#include <vector>
 #include <condition_variable>
 #include "../blob_server_func_deps.h"
 #include "../../ca_blobs_fs/content_addressed_fs.h"
