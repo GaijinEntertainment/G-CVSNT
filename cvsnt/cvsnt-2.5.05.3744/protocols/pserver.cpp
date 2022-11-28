@@ -146,6 +146,7 @@ int pserver_connect(const struct protocol_interface *protocol, int verify_only)
 			/* Using null password - trace something out here */
 			server_error(0,"Empty password used - try 'cvs login' with a real password\n"); 
 			strncpy(crypt_password,scramble.Scramble(""),sizeof(crypt_password));
+			return CVSPROTO_BADPARMS;
 		}
 	}
 
