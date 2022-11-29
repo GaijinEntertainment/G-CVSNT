@@ -1,6 +1,7 @@
 #include <string>
 #include <memory>
 #include <condition_variable>
+#include <string.h>
 #include "../blob_server_func_deps.h"
 #include "../../ca_blobs_fs/content_addressed_fs.h"
 #include "../../ca_blobs_fs/src/fileio.h"
