@@ -39,7 +39,7 @@ namespace caddressed_fs
   bool exists(const context *ctx, const char* hash_hex_string);
 
   //if we provide hash_hex_string, we will trust it. this is for tools, networking server never trusts
-  PushData* start_push(const context *ctx, const char* hash_hex_string = nullptr);
+  PushData* start_push(const context *ctx, const char* hash_hex_string);
   bool stream_push(PushData *pd, const void *data, uint64_t data_size);
   PushResult finish(PushData *pd, char *actual_hash_str);//will destroy it. if actual_hash_str = null, hash won't be returned
   void destroy(PushData *pd);

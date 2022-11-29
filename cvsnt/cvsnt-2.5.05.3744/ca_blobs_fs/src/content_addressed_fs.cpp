@@ -100,6 +100,8 @@ static FILE * open_local_temp_file(std::string &temp_file_name, const std::strin
 {
   if (default_tmp_dir.length()>0)
     return blob_fileio_get_temp_file(temp_file_name, default_tmp_dir.c_str());
+  else if (!hash_hex_string)
+    return blob_fileio_get_temp_file(temp_file_name, root_path.c_str());
   else
   {
     std::string temp_file_dir = get_dir_path(root_path, hash_hex_string);
