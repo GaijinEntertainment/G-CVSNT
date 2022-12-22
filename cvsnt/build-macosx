@@ -21,7 +21,9 @@ brew install pkg-config
 brew install libtool
 brew install pcre
 brew install openssl@1.1
+rm /usr/local/include/openssl
 ln -s /opt/homebrew/opt/openssl@1.1/include/openssl /usr/local/include/openssl
+ln -s /opt/homebrew/opt/openssl@1.1/lib/libcrypto.dylib /usr/local/lib
 
 cd cvsnt-2.5.05.3744
 autoreconf -i --force
@@ -41,3 +43,4 @@ if [ $? != 0 ]; then
   exit 3
 fi
 cd ../..
+echo "build-mac succeeded, don't forget to remove changes added by build via 'git checkout .'"
