@@ -454,13 +454,13 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     }
   }
   std::string fullPath = (task.dirpath+"/")+task.filename;
-  change_utime(temp_filename.c_str(), task.timestamp);
   {
     int status = change_mode (temp_filename.c_str(), task.file_mode.c_str(), 1);
     if (status != 0)
       error (0, status, "cannot change mode of %s", task.filename.c_str());
   }
   rename_file (temp_filename.c_str(), fullPath.c_str());
+  change_utime(temp_filename.c_str(), task.timestamp);
   if (validateHash)
   {
     const size_t fsz = get_file_size(fullPath.c_str());//validate file system again
