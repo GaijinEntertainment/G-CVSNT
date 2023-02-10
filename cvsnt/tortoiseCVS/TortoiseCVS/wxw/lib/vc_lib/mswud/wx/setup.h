@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: setup.h,v 1.1 2012/03/04 01:09:03 aliot Exp $
+// RCS-ID:      $Id: setup0.h 60190 2009-04-16 00:57:35Z KO $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -120,7 +120,7 @@
 // Default is 1
 //
 // Recommended setting: 1 if your compiler supports it.
-#define wxUSE_ON_FATAL_EXCEPTION 0
+#define wxUSE_ON_FATAL_EXCEPTION 1
 
 // Set this to 1 to be able to generate a human-readable (unlike
 // machine-readable minidump created by wxCrashReport::Generate()) stack back
@@ -129,7 +129,7 @@
 // Default is 1 if supported by the compiler.
 //
 // Recommended setting: 1, set to 0 if your programs never crash
-#define wxUSE_STACKWALKER 0
+#define wxUSE_STACKWALKER 1
 
 // Set this to 1 to compile in wxDebugReport class which allows you to create
 // and optionally upload to your web site a debug report consisting of back
@@ -157,7 +157,7 @@
 //
 // Recommended setting: 0 (unless you only plan to use Windows NT/2000/XP)
 #ifndef wxUSE_UNICODE
-    #define wxUSE_UNICODE 1
+    #define wxUSE_UNICODE 0
 #endif
 
 // Setting wxUSE_WCHAR_T to 1 gives you some degree of Unicode support without
@@ -204,7 +204,7 @@
 // Default is 0
 //
 // Recommended setting: YMMV
-#define wxUSE_STL 1
+#define wxUSE_STL 0
 
 // Support for message/error logging. This includes wxLogXXX() functions and
 // wxLog and derived classes. Don't set this to 0 unless you really know what
@@ -269,7 +269,7 @@
 // Recommended setting: 1 if you use the standard streams anyhow and so
 //                      dependency on the standard streams library is not a
 //                      problem
-#define wxUSE_STD_IOSTREAM  1
+#define wxUSE_STD_IOSTREAM  0
 
 // Enable conversion to standard C++ string if 1.
 //
@@ -416,7 +416,7 @@
 // Default is 1.
 //
 // Recommended setting: 1
-#define wxUSE_DIALUP_MANAGER   0
+#define wxUSE_DIALUP_MANAGER   1
 
 // Compile in classes for run-time DLL loading and function calling.
 // Required by wxUSE_DIALUP_MANAGER.
@@ -432,32 +432,32 @@
 #define wxUSE_DYNAMIC_LOADER  1
 
 // Set to 1 to use socket classes
-#define wxUSE_SOCKETS       0
+#define wxUSE_SOCKETS       1
 
 // Set to 1 to enable virtual file systems (required by wxHTML)
-#define wxUSE_FILESYSTEM    0
+#define wxUSE_FILESYSTEM    1
 
 // Set to 1 to enable virtual ZIP filesystem (requires wxUSE_FILESYSTEM)
-#define wxUSE_FS_ZIP        0
+#define wxUSE_FS_ZIP        1
 
 // Set to 1 to enable virtual archive filesystem (requires wxUSE_FILESYSTEM)
-#define wxUSE_FS_ARCHIVE    0
+#define wxUSE_FS_ARCHIVE    1
 
 // Set to 1 to enable virtual Internet filesystem (requires wxUSE_FILESYSTEM)
-#define wxUSE_FS_INET       0
+#define wxUSE_FS_INET       1
 
 // wxArchive classes for accessing archives such as zip and tar
 #define wxUSE_ARCHIVE_STREAMS     1
 
 // Set to 1 to compile wxZipInput/OutputStream classes.
-#define wxUSE_ZIPSTREAM     0
+#define wxUSE_ZIPSTREAM     1
 
 // Set to 1 to compile wxTarInput/OutputStream classes.
-#define wxUSE_TARSTREAM     0
+#define wxUSE_TARSTREAM     1
 
 // Set to 1 to compile wxZlibInput/OutputStream classes. Also required by
 // wxUSE_LIBPNG
-#define wxUSE_ZLIB          0
+#define wxUSE_ZLIB          1
 
 // If enabled, the code written by Apple will be used to write, in a portable
 // way, float on the disk. See extended.c for the license which is different
@@ -483,15 +483,15 @@
 // Default is 1.
 //
 // Recommended setting: 1
-#define wxUSE_PROTOCOL 0
+#define wxUSE_PROTOCOL 1
 
 // The settings for the individual URL schemes
-#define wxUSE_PROTOCOL_FILE 0
-#define wxUSE_PROTOCOL_FTP 0
-#define wxUSE_PROTOCOL_HTTP 0
+#define wxUSE_PROTOCOL_FILE 1
+#define wxUSE_PROTOCOL_FTP 1
+#define wxUSE_PROTOCOL_HTTP 1
 
 // Define this to use wxURL class.
-#define wxUSE_URL 0
+#define wxUSE_URL 1
 
 // Define this to use native platform url and protocol support.
 // Currently valid only for MS-Windows.
@@ -547,7 +547,7 @@
 // Default is 1
 //
 // Recommended setting: 1 (requires wxUSE_XML)
-#define wxUSE_XRC       0
+#define wxUSE_XRC       1
 
 // XML parsing classes. Note that their API will change in the future, so
 // using wxXmlDocument and wxXmlNode in your app is not recommended.
@@ -576,7 +576,19 @@
 //
 // Recommended setting: 1
 #ifndef wxUSE_GRAPHICS_CONTEXT
-#define wxUSE_GRAPHICS_CONTEXT 1
+#define wxUSE_GRAPHICS_CONTEXT 0
+#endif
+
+// Enable the new wxCairoContext classes for an advanced
+// 2D drawing API.  (Still somewhat experimental)
+//
+// Please note that you will need to link with Cairo for this to work.
+//
+// Default is 0
+//
+// Recommended setting: 1
+#ifndef wxUSE_CAIRO
+#define wxUSE_CAIRO 0
 #endif
 
 // ----------------------------------------------------------------------------
@@ -980,7 +992,7 @@
 //
 // Recommended setting: 1 (wxHTML is great!), set to 0 if you want compile a
 // smaller library.
-#define wxUSE_HTML          0
+#define wxUSE_HTML          1
 
 // Setting wxUSE_GLCANVAS to 1 enables OpenGL support. You need to have OpenGL
 // headers and libraries to be able to compile the library with wxUSE_GLCANVAS
@@ -1042,7 +1054,7 @@
 // ----------------------------------------------------------------------------
 
 // wxSingleInstanceChecker class allows to verify at startup if another program
-// instance is running (it is only available under Win32)
+// instance is running.
 //
 // Default is 1
 //
@@ -1064,11 +1076,11 @@
 //
 // Recommended setting: 1, only set to 0 if you have trouble compiling
 // wxCHMHelpController (could be a problem with really ancient compilers)
-#define wxUSE_MS_HTML_HELP 0
+#define wxUSE_MS_HTML_HELP 1
 
 
 // Use wxHTML-based help controller?
-#define wxUSE_WXHTML_HELP 0
+#define wxUSE_WXHTML_HELP 1
 
 #define wxUSE_RESOURCES   0
                                 // 0 for no wxGetResource/wxWriteResource
@@ -1105,7 +1117,7 @@
 // that use the connection) should support forward only scrolling of cursors,
 // or both forward and backward support for backward scrolling cursors is
 // dependent on the data source as well as the ODBC driver being used.
-#define wxODBC_FWD_ONLY_CURSORS  1
+#define wxODBC_FWD_ONLY_CURSORS	 1
 
 // Default is 0.  Set to 1 to use the deprecated classes, enum types, function,
 // member variables.  With a setting of 1, full backward compatibility with the
@@ -1152,25 +1164,25 @@
 #define wxUSE_IMAGE         1
 
 // Set to 1 for PNG format support (requires libpng). Also requires wxUSE_ZLIB.
-#define wxUSE_LIBPNG        0
+#define wxUSE_LIBPNG        1
 
 // Set to 1 for JPEG format support (requires libjpeg)
-#define wxUSE_LIBJPEG       0
+#define wxUSE_LIBJPEG       1
 
 // Set to 1 for TIFF format support (requires libtiff)
-#define wxUSE_LIBTIFF       0
+#define wxUSE_LIBTIFF       1
 
 // Set to 1 for TGA format support (loading only)
-#define wxUSE_TGA           0
+#define wxUSE_TGA           1
 
 // Set to 1 for GIF format support
-#define wxUSE_GIF           0
+#define wxUSE_GIF           1
 
 // Set to 1 for PNM format support
-#define wxUSE_PNM           0
+#define wxUSE_PNM           1
 
 // Set to 1 for PCX format support
-#define wxUSE_PCX           0
+#define wxUSE_PCX           1
 
 // Set to 1 for IFF format support (Amiga format)
 #define wxUSE_IFF           0
@@ -1333,7 +1345,7 @@
 // Default is 1 if supported by the compiler (VC++ and recent BC++ only).
 //
 // Recommended setting: 1, set to 0 if your programs never crash
-#define wxUSE_CRASHREPORT 0
+#define wxUSE_CRASHREPORT 1
 
 // ----------------------------------------------------------------------------
 // obsolete settings
@@ -1346,3 +1358,4 @@
 #define wxUSE_BITMAP_MESSAGE         1
 
 #endif // _WX_SETUP_H_
+

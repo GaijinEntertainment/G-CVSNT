@@ -4,7 +4,7 @@
 // Author:      Ryan Norton <wxprojects@comcast.net>
 // Modified by:
 // Created:     8/18/05
-// RCS-ID:      $Id: activex.h,v 1.1 2012/03/04 01:07:49 aliot Exp $
+// RCS-ID:      $Id: activex.h 41793 2006-10-09 09:32:08Z ABX $
 // Copyright:   (c) Ryan Norton
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

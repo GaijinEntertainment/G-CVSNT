@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:
-// RCS-ID:      $Id: print.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: print.h 41240 2006-09-15 16:45:48Z PC $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////

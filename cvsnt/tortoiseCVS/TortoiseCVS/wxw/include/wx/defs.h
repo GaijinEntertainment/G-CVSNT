@@ -4,7 +4,7 @@
  *  Author:      Julian Smart and others
  *  Modified by: Ryan Norton (Converted to C)
  *  Created:     01/02/97
- *  RCS-ID:      $Id: defs.h,v 1.1 2012/03/04 01:07:24 aliot Exp $
+ *  RCS-ID:      $Id: defs.h 66923 2011-02-16 22:37:48Z JS $
  *  Copyright:   (c) Julian Smart
  *  Licence:     wxWindows licence
  */
@@ -829,9 +829,11 @@ typedef wxUint32 wxDword;
 #if SIZEOF_LONG >= SIZEOF_VOID_P && SIZEOF_LONG >= SIZEOF_SIZE_T
     /* normal case */
     typedef unsigned long wxUIntPtr;
+    typedef long wxIntPtr;
 #elif SIZEOF_SIZE_T >= SIZEOF_VOID_P
     /* Win64 case */
     typedef size_t wxUIntPtr;
+    #define wxIntPtr ssize_t
 #else
     /*
        This should never happen for the current architectures but if you're

@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: region.h,v 1.1 2012/03/04 01:07:43 aliot Exp $
+// RCS-ID:      $Id: region.h 59602 2009-03-18 10:07:58Z VZ $
 // Copyright:   (c) 1997-2002 wxWidgets team
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

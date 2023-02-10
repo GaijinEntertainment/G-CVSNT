@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: scrolwin.h,v 1.1 2012/03/04 01:07:39 aliot Exp $
+// RCS-ID:      $Id: scrolwin.h 35875 2005-10-10 18:24:27Z VZ $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

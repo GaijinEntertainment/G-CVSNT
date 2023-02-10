@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     14.08.00
-// RCS-ID:      $Id: setup0.h,v 1.1 2012/03/04 01:07:51 aliot Exp $
+// RCS-ID:      $Id: setup0.h 49997 2007-11-16 16:14:49Z CE $
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

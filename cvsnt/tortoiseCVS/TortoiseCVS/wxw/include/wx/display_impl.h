@@ -3,7 +3,7 @@
 // Purpose:     wxDisplayImpl class declaration
 // Author:      Vadim Zeitlin
 // Created:     2006-03-15
-// RCS-ID:      $Id: display_impl.h,v 1.1 2012/03/04 01:07:24 aliot Exp $
+// RCS-ID:      $Id: display_impl.h 41548 2006-10-02 05:38:05Z PC $
 // Copyright:   (c) 2002-2006 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

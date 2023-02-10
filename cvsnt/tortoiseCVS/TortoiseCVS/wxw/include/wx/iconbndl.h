@@ -4,7 +4,7 @@
 // Author:      Mattia barbon
 // Modified by:
 // Created:     23.03.02
-// RCS-ID:      $Id: iconbndl.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: iconbndl.h 49563 2007-10-31 20:46:21Z VZ $
 // Copyright:   (c) Mattia Barbon
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

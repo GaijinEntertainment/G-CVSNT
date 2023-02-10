@@ -213,31 +213,15 @@ SET(WX_INCLUDE_PATH
     /cvsbin/inc
 )
 
-SET(WX_SUBDIR_NAME "vc9")
-# 1310 is Microsoft Visual Studio 2003 .NET, Visual C++ 7.x
-# 1400 is Microsoft Visual Studio 2005, Visual C++ 8.0
-# 1500 is Microsoft Visual C++ 2008, Visual C++ 9.0
-IF(MSVC_VERSION EQUAL 1500 OR MSVC_VERSION GREATER 1500)
-  SET(WX_SUBDIR_NAME "vc9")
-ELSE(MSVC_VERSION EQUAL 1500 OR MSVC_VERSION GREATER 1500)
-  IF(MSVC_VERSION EQUAL 1400 OR MSVC_VERSION GREATER 1400)
-    SET(WX_SUBDIR_NAME "vc8")
-  ENDIF(MSVC_VERSION EQUAL 1400 OR MSVC_VERSION GREATER 1400)
-ENDIF(MSVC_VERSION EQUAL 1500 OR MSVC_VERSION GREATER 1500)
+SET(WX_SUBDIR_NAME "vc16")
 
-IF(CMAKE_GENERATOR MATCHES Win64)
-    SET(WX_LIBS
-        debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxbase28ud64.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxbase28u64.lib
-        debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28ud_adv64.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28u_adv64.lib
-        debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28ud_core64.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28u_core64.lib
-    )
-ELSE(CMAKE_GENERATOR MATCHES Win64)
-    SET(WX_LIBS
-        debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxbase28ud.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxbase28u.lib
-        debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28ud_adv.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28u_adv.lib
-        debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28ud_core.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28u_core.lib
-    )
-ENDIF(CMAKE_GENERATOR MATCHES Win64)
+LINK_DIRECTORIES(${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME})
+
+SET(WX_LIBS
+    debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxbase28ud.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxbase28u.lib
+    debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28ud_adv.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28u_adv.lib
+    debug ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28ud_core.lib optimized ${CMAKE_CURRENT_SOURCE_DIR}/../wxw/lib/${WX_SUBDIR_NAME}/wxmsw28u_core.lib
+)
 
 IF(OPT_MARCH_HARE_BUILD)
    SET(CVSAPILIB cvsapi.lib)

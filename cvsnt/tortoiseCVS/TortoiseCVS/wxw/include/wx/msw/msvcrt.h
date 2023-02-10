@@ -5,7 +5,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     31.01.1999
-// RCS-ID:      $Id: msvcrt.h,v 1.1 2012/03/04 01:07:42 aliot Exp $
+// RCS-ID:      $Id: msvcrt.h 42363 2006-10-24 23:19:12Z VZ $
 // Copyright:   (c) Vadim Zeitlin
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

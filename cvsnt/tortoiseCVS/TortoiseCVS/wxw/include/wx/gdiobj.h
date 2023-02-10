@@ -5,7 +5,7 @@
 // Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
-// RCS-ID:      $Id: gdiobj.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: gdiobj.h 42211 2006-10-21 17:19:11Z SN $
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 

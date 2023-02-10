@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     06.08.00
-// RCS-ID:      $Id: renderer.h,v 1.1 2012/03/04 01:07:51 aliot Exp $
+// RCS-ID:      $Id: renderer.h 43726 2006-11-30 23:44:55Z RD $
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

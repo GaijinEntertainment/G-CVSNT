@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     29/01/98
-// RCS-ID:      $Id: filefn.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: filefn.h 63300 2010-01-28 21:36:09Z MW $
 // Copyright:   (c) 1998 Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

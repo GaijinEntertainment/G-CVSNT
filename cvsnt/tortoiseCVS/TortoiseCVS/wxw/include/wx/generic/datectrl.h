@@ -4,7 +4,7 @@
 // Author:      Andreas Pflug
 // Modified by:
 // Created:     2005-01-19
-// RCS-ID:      $Id: datectrl.h,v 1.1 2012/03/04 01:07:39 aliot Exp $
+// RCS-ID:      $Id: datectrl.h 42539 2006-10-27 18:02:21Z RR $
 // Copyright:   (c) 2005 Andreas Pflug <pgadmin@pse-consulting.de>
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

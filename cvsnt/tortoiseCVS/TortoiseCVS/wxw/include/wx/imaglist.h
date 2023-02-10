@@ -5,7 +5,7 @@
 // Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
-// RCS-ID:      $Id: imaglist.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: imaglist.h 41288 2006-09-18 23:06:35Z VZ $
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 

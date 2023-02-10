@@ -3,7 +3,7 @@
 // Purpose:     wxSearchCtrlBase class
 // Author:      Vince Harron
 // Created:     2006-02-18
-// RCS-ID:      $Id: srchctrl.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: srchctrl.h 45828 2007-05-05 14:51:51Z VZ $
 // Copyright:   (c) Vince Harron
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

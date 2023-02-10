@@ -5,7 +5,7 @@
 // Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
-// RCS-ID:      $Id: config.h,v 1.1 2012/03/04 01:07:24 aliot Exp $
+// RCS-ID:      $Id: config.h 60524 2009-05-05 22:51:44Z PC $
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 

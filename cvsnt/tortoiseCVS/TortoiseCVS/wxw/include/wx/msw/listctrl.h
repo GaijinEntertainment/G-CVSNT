@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by: Agron Selimaj
 // Created:     01/02/97
-// RCS-ID:      $Id: listctrl.h,v 1.1 2012/03/04 01:07:42 aliot Exp $
+// RCS-ID:      $Id: listctrl.h 54419 2008-06-29 01:35:24Z VZ $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

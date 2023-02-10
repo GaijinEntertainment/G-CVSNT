@@ -4,7 +4,7 @@
 // Author:      Karsten Ballueder
 // Modified by:
 // Created:     09.05.1999
-// RCS-ID:      $Id: progdlgg.h,v 1.1 2012/03/04 01:07:39 aliot Exp $
+// RCS-ID:      $Id: progdlgg.h 50711 2007-12-15 02:57:58Z VZ $
 // Copyright:   (c) Karsten Ballueder
 // Licence:     wxWindows licence
 ////////////////////////////////////////////////////

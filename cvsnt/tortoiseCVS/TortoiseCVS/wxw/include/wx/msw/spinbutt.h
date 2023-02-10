@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: spinbutt.h,v 1.1 2012/03/04 01:07:43 aliot Exp $
+// RCS-ID:      $Id: spinbutt.h 41316 2006-09-20 14:15:14Z RR $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

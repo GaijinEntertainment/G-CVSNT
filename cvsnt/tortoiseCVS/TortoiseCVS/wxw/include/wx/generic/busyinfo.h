@@ -3,7 +3,7 @@
 // Purpose:     Information window (when app is busy)
 // Author:      Vaclav Slavik
 // Copyright:   (c) 1999 Vaclav Slavik
-// RCS-ID:      $Id: busyinfo.h,v 1.1 2012/03/04 01:07:39 aliot Exp $
+// RCS-ID:      $Id: busyinfo.h 49804 2007-11-10 01:09:42Z VZ $
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 

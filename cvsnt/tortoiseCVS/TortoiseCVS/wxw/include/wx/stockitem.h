@@ -4,7 +4,7 @@
 // Author:      Vaclav Slavik
 // Modified by:
 // Created:     2004-08-15
-// RCS-ID:      $Id: stockitem.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: stockitem.h 42935 2006-11-02 09:51:49Z JS $
 // Copyright:   (c) Vaclav Slavik, 2004
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

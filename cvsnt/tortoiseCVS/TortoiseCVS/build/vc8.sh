@@ -149,18 +149,23 @@ function build_vc80()
 # <arch> is Win32 or x64
 function vc90_get_targetpath()
 {
-  local VCPROJ_FILE=`cat build/vc9$3/TortoiseCVS.sln | sed -n -e "s/^Project.*\"$1\"[^\"]*\"\([^\"]*\)\".*$/\1/p"`
-  concatpaths "./build/vc9$3" "$VCPROJ_FILE"
+  local VCPROJ_FILE=`cat build/vc16$3/TortoiseCVS.sln | sed -n -e "s/^Project.*\"$1\"[^\"]*\"\([^\"]*\)\".*$/\1/p"`
+  concatpaths "./build/vc16$3" "$VCPROJ_FILE"
   VCPROJ_FILE=$retval
-  local BIN_FILE=$(perl - "$1" "$2\\|$3" $VCPROJ_FILE <<"EOP"
-    $VCPROJ=`cat $ARGV[2]`;
-    $Project = $ARGV[0];
-    $Config = $ARGV[1];
-    $VCPROJ =~ m/Name="$Config".*?Name="VCLinkerTool".*?OutputFile="(.*?)"/sm;
-    print $1;
-EOP
-  )
+#  local BIN_FILE=$(perl - "$1" "$2\\|$3" $VCPROJ_FILE <<"EOP"
+#    $VCPROJ=`cat $ARGV[2]`;
+#    $Project = $ARGV[0];
+#    $Config = $ARGV[1];
+#    $VCPROJ =~ m/Name="$Config".*?Name="VCLinkerTool".*?OutputFile="(.*?)"/sm;
+#    print $1;
+#EOP
+#  )
+  local BIN_FILE="$2/$1.exe"
   concatpaths "`dirname "$VCPROJ_FILE"`" "$BIN_FILE"
+  if ! test -f "$retval"; then
+      local BIN_FILE="$2/$1.dll"
+      concatpaths "`dirname "$VCPROJ_FILE"`" "$BIN_FILE"
+  fi
   concatpaths ".." "$retval"
 }
 
@@ -176,25 +181,25 @@ function vc90_get_targetpaths()
         RELEASE_TYPE=Release
     fi
 
-    vc90_get_targetpath TortoiseAct $RELEASE_TYPE Win32
+    vc90_get_targetpath TortoiseAct $RELEASE_TYPE x64
     TORTOISEACT_PATH=$retval
-    vc90_get_targetpath TortoiseShell $RELEASE_TYPE Win32
+    vc90_get_targetpath TortoiseShell $RELEASE_TYPE x64
     TORTOISESHELL_PATH=$retval
     vc90_get_targetpath TortoiseShell $RELEASE_TYPE x64
     TORTOISESHELL64_PATH=$retval
-    vc90_get_targetpath TortoisePlink Release Win32
+    vc90_get_targetpath TortoisePlink Release x64
     TORTOISEPLINK_PATH=$retval
-    vc90_get_targetpath PostInst $RELEASE_TYPE Win32
+    vc90_get_targetpath PostInst $RELEASE_TYPE x64
     POSTINST_PATH=$retval
-    vc90_get_targetpath TortoiseSetupHelper $RELEASE_TYPE Win32
+    vc90_get_targetpath TortoiseSetupHelper $RELEASE_TYPE x64
     TORTOISESETUPHELPER_PATH=$retval
     vc90_get_targetpath TortoiseSetupHelper $RELEASE_TYPE x64
     TORTOISESETUPHELPER64_PATH=$retval
-    vc90_get_targetpath RunTimeInstaller $RELEASE_TYPE Win32
+    vc90_get_targetpath RunTimeInstaller $RELEASE_TYPE x64
     RUNTIMEINSTALLER_PATH=$retval
     vc90_get_targetpath RunTimeInstaller $RELEASE_TYPE x64
     RUNTIMEINSTALLER64_PATH=$retval
-    vc90_get_targetpath TranslateIss Release Win32
+    vc90_get_targetpath TranslateIss Release x64
     TRANSLATEISS_PATH=$retval
 }
 
@@ -207,7 +212,7 @@ function vc90_build()
     echo -n " $3"
   fi
   echo -n ")..."
-  if ! devenv "build/vc9$3/TortoiseCVS.sln" $REBUILD "$2" /project "$1" /OUT msdev.log; then
+  if ! devenv "build/vc16$3/TortoiseCVS.sln" $REBUILD "$2" /project "$1" /OUT msdev.log; then
     echo "failed:"
     cat msdev.log
     die Building $1
@@ -220,7 +225,7 @@ function vc90_build()
 # Build TortoiseCVS using VC 9.0
 function build_vc90()
 {
-    local MSVCDIR=$(regtool get '\machine\Software\Microsoft\VisualStudio\9.0\InstallDir' 2> /dev/null) || True
+    local MSVCDIR=$(regtool get '\machine\Software\Microsoft\VisualStudio\16.0\InstallDir' 2> /dev/null) || True
     local MSDevDir=`cygpath "$MSVCDIR"`
     PATH="$MSDevDir":$PATH
 
@@ -246,28 +251,24 @@ function build_vc90()
     cd ..
 
     # First update the project files
-    vc90_build ZERO_CHECK $RELEASE_TYPE Win32
     vc90_build ZERO_CHECK $RELEASE_TYPE x64
 
     # Then the actual build
-    vc90_build TortoiseAct $RELEASE_TYPE Win32
-    vc90_build TortoiseShell $RELEASE_TYPE Win32
+    vc90_build TortoiseAct $RELEASE_TYPE x64
     vc90_build TortoiseShell $RELEASE_TYPE x64
-    vc90_build TortoisePlink Release Win32
-    vc90_build PostInst $RELEASE_TYPE Win32
-    vc90_build TortoiseSetupHelper $RELEASE_TYPE Win32
+    vc90_build TortoisePlink Release x64
+    vc90_build PostInst $RELEASE_TYPE x64
     vc90_build TortoiseSetupHelper $RELEASE_TYPE x64
-    vc90_build RunTimeInstaller $RELEASE_TYPE Win32
     vc90_build RunTimeInstaller $RELEASE_TYPE x64
-    vc90_build TranslateIss $RELEASE_TYPE Win32
+    vc90_build TranslateIss $RELEASE_TYPE x64
 
     if [ "$SAVEDBGINFO" == "1" ]
     then
         DBGDIR=`echo "./build/$BUILD.bak" | tr [\\:] [_]`
         mkdir "$DBGDIR"
-        cp "./build/vc9/TortoiseAct/$RELEASE_TYPE/TortoiseAct.pdb" "$DBGDIR"
-        cp "./build/vc9/TortoiseShell/$RELEASE_TYPE/TortoiseShell.pdb" "$DBGDIR"
-        cp "./build/vc9/PostInst/$RELEASE_TYPE/PostInst.pdb" "$DBGDIR"
-        cp "./build/vc9/TortoiseSetupHelper/$RELEASE_TYPE/TortoiseSetupHelper.pdb" "$DBGDIR"
+        cp "./build/vc16/TortoiseAct/$RELEASE_TYPE/TortoiseAct.pdb" "$DBGDIR"
+        cp "./build/vc16/TortoiseShell/$RELEASE_TYPE/TortoiseShell.pdb" "$DBGDIR"
+        cp "./build/vc16/PostInst/$RELEASE_TYPE/PostInst.pdb" "$DBGDIR"
+        cp "./build/vc16/TortoiseSetupHelper/$RELEASE_TYPE/TortoiseSetupHelper.pdb" "$DBGDIR"
     fi
 }

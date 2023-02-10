@@ -120,7 +120,7 @@ static bool PrintTranslation(const std::string& line,
               if (!locale.AddCatalog(wxT("Setup")))
               {
                   std::cerr << "Error loading message catalog for locale "
-                            << wxAscii(locale.GetCanonicalName())
+                            << (const char*)locale.GetCanonicalName().ToAscii()
                             << " (Path " << localedir << "). Messages will not be translated." << std::endl;
                   return false;
               }

@@ -4,7 +4,7 @@
 // Author:      Guilhem Lavaux
 // Modified by: Mike Wetherell
 // Created:     11/07/98
-// RCS-ID:      $Id: zstream.h,v 1.1 2012/03/04 01:07:27 aliot Exp $
+// RCS-ID:      $Id: zstream.h 54688 2008-07-18 08:06:44Z MW $
 // Copyright:   (c) Guilhem Lavaux
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

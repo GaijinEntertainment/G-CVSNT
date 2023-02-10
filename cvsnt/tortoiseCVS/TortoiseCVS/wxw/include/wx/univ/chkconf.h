@@ -3,7 +3,7 @@
 // Purpose:     wxUniversal-specific configuration options checks
 // Author:      Vadim Zeitlin
 // Created:     2006-09-28 (extracted from wx/chkconf.h)
-// RCS-ID:      $Id: chkconf.h,v 1.1 2012/03/04 01:07:51 aliot Exp $
+// RCS-ID:      $Id: chkconf.h 41494 2006-09-28 22:55:28Z VZ $
 // Copyright:   (c) 2006 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

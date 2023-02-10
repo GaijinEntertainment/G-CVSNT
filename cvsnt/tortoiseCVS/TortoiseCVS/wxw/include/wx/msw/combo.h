@@ -4,7 +4,7 @@
 // Author:      Jaakko Salli
 // Modified by:
 // Created:     Apr-30-2006
-// RCS-ID:      $Id: combo.h,v 1.1 2012/03/04 01:07:42 aliot Exp $
+// RCS-ID:      $Id: combo.h 43881 2006-12-09 19:48:21Z PC $
 // Copyright:   (c) Jaakko Salli
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

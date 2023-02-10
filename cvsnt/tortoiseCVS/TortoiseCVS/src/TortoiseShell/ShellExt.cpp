@@ -24,7 +24,42 @@
 #include "StdAfx.h"
 
 // This header is not part of the official wxWidgets distribution, but is needed to work around locale problems
-#include <wx/msgcatalog.h>
+//#include <wx/msgcatalog.h>
+class wxPluralFormsCalculator;
+WX_DECLARE_EXPORTED_STRING_HASH_MAP(wxString, wxMessagesHash);
+class wxMsgCatalog
+{
+public:
+#if !wxUSE_UNICODE
+    wxMsgCatalog() { m_conv = NULL; }
+    ~wxMsgCatalog();
+#endif
+
+    // load the catalog from disk (szDirPrefix corresponds to language)
+    bool Load(const wxChar* szDirPrefix, const wxChar* szName,
+        const wxChar* msgIdCharset = NULL, bool bConvertEncoding = false);
+
+    // get name of the catalog
+    wxString GetName() const { return m_name; }
+
+    // get the translated string: returns NULL if not found
+    const wxChar* GetString(const wxChar* sz, size_t n = size_t(-1)) const;
+
+    // public variable pointing to the next element in a linked list (or NULL)
+    wxMsgCatalog* m_pNext;
+
+private:
+    wxMessagesHash  m_messages; // all messages in the catalog
+    wxString        m_name;     // name of the domain
+
+#if !wxUSE_UNICODE
+    // the conversion corresponding to this catalog charset if we installed it
+    // as the global one
+    wxCSConv* m_conv;
+#endif
+
+    wxPluralFormsCalculator *m_pluralFormsCalculator;
+};
 
 #include <Utils/Translate.h>
 #include <Utils/ShellUtils.h>

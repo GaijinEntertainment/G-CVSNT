@@ -4,7 +4,7 @@
 // Author:      Michael Bedward (based on code by Julian Smart, Robin Dunn)
 // Modified by: Santiago Palacios
 // Created:     1/08/1999
-// RCS-ID:      $Id: grid.h,v 1.1 2012/03/04 01:07:39 aliot Exp $
+// RCS-ID:      $Id: grid.h 66942 2011-02-17 12:30:56Z JS $
 // Copyright:   (c) Michael Bedward
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -1776,6 +1776,11 @@ public:
     // overridden wxWindow methods
     virtual void Fit();
 
+#if wxABI_VERSION >= 20812
+    // implementation only
+    void CancelMouseCapture();
+#endif
+
 protected:
     virtual wxSize DoGetBestSize() const;
 
@@ -2091,7 +2096,7 @@ public:
         return ControlDown();
 #endif
     }
-    
+
     virtual wxEvent *Clone() const { return new wxGridSizeEvent(*this); }
 
 protected:
@@ -2148,7 +2153,7 @@ public:
         return ControlDown();
 #endif
     }
-    
+
     virtual wxEvent *Clone() const { return new wxGridRangeSelectEvent(*this); }
 
 protected:
@@ -2183,7 +2188,7 @@ public:
     void SetRow(int row)                { m_row = row; }
     void SetCol(int col)                { m_col = col; }
     void SetControl(wxControl* ctrl)    { m_ctrl = ctrl; }
-    
+
     virtual wxEvent *Clone() const { return new wxGridEditorCreatedEvent(*this); }
 
 private:

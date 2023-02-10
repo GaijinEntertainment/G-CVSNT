@@ -5,7 +5,7 @@
 // Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
-// RCS-ID:      $Id: glcanvas.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: glcanvas.h 61872 2009-09-09 22:37:05Z VZ $
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
 

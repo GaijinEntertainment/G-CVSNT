@@ -4,7 +4,7 @@
 // Author:      Wlodzimierz ABX Skiba
 // Modified by:
 // Created:     29.07.2004
-// RCS-ID:      $Id: choicece.h,v 1.1 2012/03/04 01:07:49 aliot Exp $
+// RCS-ID:      $Id: choicece.h 38319 2006-03-23 22:05:23Z VZ $
 // Copyright:   (c) Wlodzimierz Skiba
 // License:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

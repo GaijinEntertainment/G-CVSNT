@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     19.08.00
-// RCS-ID:      $Id: colschem.h,v 1.1 2012/03/04 01:07:51 aliot Exp $
+// RCS-ID:      $Id: colschem.h 44058 2006-12-24 19:06:39Z VS $
 // Copyright:   (c) 2000 SciTech Software, Inc. (www.scitechsoft.com)
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

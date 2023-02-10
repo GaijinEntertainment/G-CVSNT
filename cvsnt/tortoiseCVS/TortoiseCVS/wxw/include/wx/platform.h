@@ -4,7 +4,7 @@
 * Author:      Vadim Zeitlin
 * Modified by:
 * Created:     29.10.01 (extracted from wx/defs.h)
-* RCS-ID:      $Id: platform.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+* RCS-ID:      $Id: platform.h 63300 2010-01-28 21:36:09Z MW $
 * Copyright:   (c) 1997-2001 Vadim Zeitlin
 * Licence:     wxWindows licence
 */

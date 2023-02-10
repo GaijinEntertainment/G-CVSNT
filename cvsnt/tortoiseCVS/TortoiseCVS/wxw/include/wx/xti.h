@@ -4,7 +4,7 @@
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     27/07/03
-// RCS-ID:      $Id: xti.h,v 1.1 2012/03/04 01:07:27 aliot Exp $
+// RCS-ID:      $Id: xti.h 52488 2008-03-14 14:13:05Z JS $
 // Copyright:   (c) 1997 Julian Smart
 //              (c) 2003 Stefan Csomor
 // Licence:     wxWindows licence

@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:
-// RCS-ID:      $Id: splitter.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: splitter.h 38717 2006-04-14 17:01:16Z ABX $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////

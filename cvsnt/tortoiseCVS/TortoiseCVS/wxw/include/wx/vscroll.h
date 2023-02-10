@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     30.05.03
-// RCS-ID:      $Id: vscroll.h,v 1.1 2012/03/04 01:07:27 aliot Exp $
+// RCS-ID:      $Id: vscroll.h 38917 2006-04-26 00:17:52Z VZ $
 // Copyright:   (c) 2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

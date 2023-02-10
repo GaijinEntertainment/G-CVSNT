@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: colour.h,v 1.1 2012/03/04 01:07:42 aliot Exp $
+// RCS-ID:      $Id: colour.h 51769 2008-02-13 22:36:43Z VZ $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

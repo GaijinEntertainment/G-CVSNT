@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     04/01/98
-// RCS-ID:      $Id: fontenum.h,v 1.1 2012/03/04 01:07:42 aliot Exp $
+// RCS-ID:      $Id: fontenum.h 39461 2006-05-29 21:12:51Z ABX $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

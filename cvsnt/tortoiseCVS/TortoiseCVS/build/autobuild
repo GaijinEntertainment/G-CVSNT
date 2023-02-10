@@ -126,24 +126,24 @@ then
 fi
 
 # Command line parameters
-RELEASE=0
+RELEASE=1
 STABLE=0
 INCREL=1
 INCBUILD=1
-COMMIT=1
+COMMIT=0
 CLEAN=0
 DOISCC=1
 NOCLEAN=0
 DEBUG=0
 CUSTOM=0
 VERBOSE=0
-UPDATE=1
+UPDATE=10
 MINGW=0
 VC80=0
 VC90=1
 MAKECLEAN=0
 SAVEDBGINFO=0
-NOCOMPILE=0
+NOCOMPILE=1
 UNICODE=0
 
 # Handle options and commands. Simple commands get handled entirely by this function.
@@ -273,11 +273,11 @@ EOF
     awk -f awkscript ChangeLog.old | unix2dos > ChangeLog.txt
     rm -f awkscript
     echo "Readied changelog for version $BUILD - please check it looks good"
-    $EDITOR ChangeLog.txt
+    # $EDITOR ChangeLog.txt
     cd ..
 fi
 
-if [ "$COMMIT" == "1" ] || [ "$RELEASE" == "1" ]
+if [ "$COMMIT" == "1" ] && [ "$RELEASE" == "1" ]
 then
     echo "Committing new version number and changelog"
     cvs -Q commit -m "Autobuild updated version to $BUILD" \
@@ -285,7 +285,7 @@ then
         src/TortoiseShell/TortoiseShell.rc src/TortoisePlink/TortoisePlink.rc
 fi
 
-if [ "$RELEASE" == "1" ]
+if [ "$COMMIT" == "1" ] && [ "$RELEASE" == "1" ]
 then
     echo "Tagging the release in CVS as tortoisecvs-$BUILD_TAG:"
     echo "- source"

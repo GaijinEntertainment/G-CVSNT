@@ -282,8 +282,8 @@ bool DoCommitDialog(wxWindow* parent,
 
    if (ret)
    {
-      comment = TrimRight(wxAscii(dlg->myComment->GetValue()));
-      bugnumber = TrimRight(wxAscii(dlg->myBugNumber->GetValue()));
+      comment = TrimRight((const char*)dlg->myComment->GetValue().ToAscii());
+      bugnumber = TrimRight((const char*)dlg->myBugNumber->GetValue().ToAscii());
       usebug = dlg->myUseBugCheckBox->GetValue();
       markbug = dlg->myMarkBugCheckBox->GetValue();
       if (!markbug && !usebug)
@@ -913,7 +913,7 @@ void CommitDialog::UseBugClick(wxCommandEvent&)
        myBugNumber->SetFocus();
    }
    myFiles->DeleteAllItems();
-   AddFiles(enabled ? wxAscii(myBugNumber->GetValue()) : "");
+   AddFiles(enabled ? (const char*)myBugNumber->GetValue().ToAscii() : "");
 }
 
 void CommitDialog::MarkBugClick(wxCommandEvent&)
@@ -1092,7 +1092,7 @@ void CommitDialog::BugNumberTextUpdated(wxCommandEvent&)
     if (!myUseBugCheckBox->GetValue())
         return;
     myFiles->DeleteAllItems();
-    AddFiles(wxAscii(myBugNumber->GetValue()));
+    AddFiles((const char*)myBugNumber->GetValue().ToAscii());
 }
 
 

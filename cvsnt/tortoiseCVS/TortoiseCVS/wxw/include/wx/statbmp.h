@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     25.08.00
-// RCS-ID:      $Id: statbmp.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: statbmp.h 37066 2006-01-23 03:27:34Z MR $
 // Copyright:   (c) 2000 Vadim Zeitlin
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

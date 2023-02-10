@@ -1152,7 +1152,7 @@ void ModuleBasicsPage::UpdateModule(wxWindow* source)
 
 std::string ModuleBasicsPage::GetBugNumber() const
 {
-    return myUseBugCheckBox->GetValue() ? wxAscii(myBugNumber->GetValue()) : "";
+    return myUseBugCheckBox->GetValue() ? (const char*)myBugNumber->GetValue().ToAscii() : "";
 }
 
 

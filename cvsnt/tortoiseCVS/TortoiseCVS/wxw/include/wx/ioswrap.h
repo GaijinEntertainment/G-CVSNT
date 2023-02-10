@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     03.02.99
-// RCS-ID:      $Id: ioswrap.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: ioswrap.h 33555 2005-04-12 21:06:03Z ABX $
 // Copyright:   (c) 1998 Vadim Zeitlin <zeitlin@dptmaths.ens-cachan.fr>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

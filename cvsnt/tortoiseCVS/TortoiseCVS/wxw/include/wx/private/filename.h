@@ -4,7 +4,7 @@
 // Author:      Mike Wetherell
 // Modified by:
 // Created:     2006-10-22
-// RCS-ID:      $Id: filename.h,v 1.1 2012/03/04 01:07:50 aliot Exp $
+// RCS-ID:      $Id: filename.h 42277 2006-10-23 13:10:12Z MW $
 // Copyright:   (c) 2006 Mike Wetherell
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

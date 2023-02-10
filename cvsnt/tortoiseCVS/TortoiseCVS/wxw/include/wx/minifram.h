@@ -5,7 +5,7 @@
 // Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
-// RCS-ID:      $Id: minifram.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: minifram.h 49299 2007-10-21 18:07:29Z PC $
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 

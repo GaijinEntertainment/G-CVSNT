@@ -4,7 +4,7 @@
 // Author:      Hans Van Leemputten
 // Modified by:
 // Created:     29/07/2002
-// RCS-ID:      $Id: mdig.h,v 1.1 2012/03/04 01:07:39 aliot Exp $
+// RCS-ID:      $Id: mdig.h 41223 2006-09-14 17:36:18Z PC $
 // Copyright:   (c) Hans Van Leemputten
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

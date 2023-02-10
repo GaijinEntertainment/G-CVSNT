@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     04.12.99
-// RCS-ID:      $Id: listbase.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: listbase.h 46313 2007-06-03 22:38:28Z VZ $
 // Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

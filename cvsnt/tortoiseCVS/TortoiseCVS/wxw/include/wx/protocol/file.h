@@ -4,7 +4,7 @@
 // Author:      Guilhem Lavaux
 // Modified by:
 // Created:     1997
-// RCS-ID:      $Id: file.h,v 1.1 2012/03/04 01:07:50 aliot Exp $
+// RCS-ID:      $Id: file.h 43836 2006-12-06 19:20:40Z VZ $
 // Copyright:   (c) 1997, 1998 Guilhem Lavaux
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

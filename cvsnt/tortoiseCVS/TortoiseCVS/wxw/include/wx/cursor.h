@@ -5,7 +5,7 @@
 // Modified by:
 // Created:
 // Copyright:   (c) Julian Smart
-// RCS-ID:      $Id: cursor.h,v 1.1 2012/03/04 01:07:24 aliot Exp $
+// RCS-ID:      $Id: cursor.h 40865 2006-08-27 09:42:42Z VS $
 // Licence:     wxWindows Licence
 /////////////////////////////////////////////////////////////////////////////
 

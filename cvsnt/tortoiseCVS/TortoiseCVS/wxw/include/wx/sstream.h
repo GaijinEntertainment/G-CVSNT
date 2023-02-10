@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     2004-09-19
-// RCS-ID:      $Id: sstream.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: sstream.h 45732 2007-05-01 13:52:19Z VZ $
 // Copyright:   (c) 2004 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     21.06.2003 (extracted from common/fontmap.cpp)
-// RCS-ID:      $Id: fmappriv.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: fmappriv.h 27454 2004-05-26 10:49:43Z JS $
 // Copyright:   (c) 1999-2003 Vadim Zeitlin <vadim@wxwidgets.org>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

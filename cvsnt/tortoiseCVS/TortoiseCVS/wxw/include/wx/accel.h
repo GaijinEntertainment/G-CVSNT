@@ -4,7 +4,7 @@
 // Author:      Julian Smart, Robert Roebling, Vadim Zeitlin
 // Modified by:
 // Created:     31.05.01 (extracted from other files)
-// RCS-ID:      $Id: accel.h,v 1.1 2012/03/04 01:07:22 aliot Exp $
+// RCS-ID:      $Id: accel.h 66927 2011-02-16 23:27:30Z JS $
 // Copyright:   (c) wxWidgets team
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////
@@ -106,8 +106,7 @@ public:
 
     bool IsOk() const
     {
-        return m_flags != 0 &&
-               m_keyCode != 0;
+        return m_keyCode != 0;
     }
 
 

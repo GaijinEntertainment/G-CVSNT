@@ -4,7 +4,7 @@
 // Author:      Jaakko Salli
 // Modified by:
 // Created:     Apr-30-2006
-// RCS-ID:      $Id: odcombo.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: odcombo.h 64259 2010-05-09 10:48:37Z JMS $
 // Copyright:   (c) Jaakko Salli
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -173,6 +173,13 @@ protected:
 
     // Stop partial completion (when some other event occurs)
     void StopPartialCompletion();
+
+#ifdef __WXMSW__
+    // Added to work around a SetFocus() log error. Overriding virtual member
+    // function from the primary base class (in this case, wxVListBox) should
+    // be ABI compatible.
+    virtual void SetFocus();
+#endif
 
     wxArrayString           m_strings;
     wxArrayPtrVoid          m_clientDatas;

@@ -4,7 +4,7 @@
 // Author:      Stefan Csomor
 // Modified by:
 // Created:     27/07/03
-// RCS-ID:      $Id: flags.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: flags.h 35650 2005-09-23 12:56:45Z MR $
 // Copyright:   (c) 2003 Stefan Csomor
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

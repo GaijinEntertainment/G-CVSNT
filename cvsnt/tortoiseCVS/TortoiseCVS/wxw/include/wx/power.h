@@ -4,7 +4,7 @@
 // Author:      Vadim Zeitlin
 // Modified by:
 // Created:     2006-05-27
-// RCS-ID:      $Id: power.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: power.h 48811 2007-09-19 23:11:28Z RD $
 // Copyright:   (c) 2006 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

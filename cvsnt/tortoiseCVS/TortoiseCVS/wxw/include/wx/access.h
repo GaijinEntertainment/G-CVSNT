@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     2003-02-12
-// RCS-ID:      $Id: access.h,v 1.1 2012/03/04 01:07:22 aliot Exp $
+// RCS-ID:      $Id: access.h 51246 2008-01-16 12:56:37Z VZ $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

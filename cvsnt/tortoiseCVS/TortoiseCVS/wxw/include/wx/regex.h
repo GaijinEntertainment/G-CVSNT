@@ -4,7 +4,7 @@
 // Author:      Karsten Ballueder
 // Modified by: VZ at 13.07.01 (integrated to wxWin)
 // Created:     05.02.2000
-// RCS-ID:      $Id: regex.h,v 1.1 2012/03/04 01:07:26 aliot Exp $
+// RCS-ID:      $Id: regex.h 57779 2009-01-02 17:35:16Z PC $
 // Copyright:   (c) 2000 Karsten Ballueder <ballueder@gmx.net>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

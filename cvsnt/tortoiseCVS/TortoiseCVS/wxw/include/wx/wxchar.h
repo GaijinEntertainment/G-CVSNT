@@ -1,10 +1,10 @@
 /*
  * Name:        wx/wxchar.h
  * Purpose:     Declarations common to wx char/wchar_t usage (wide chars)
- * Author:      Joel Farley, Ove Kåven
+ * Author:      Joel Farley, Ove Kaaven
  * Modified by: Vadim Zeitlin, Robert Roebling, Ron Lee
  * Created:     1998/06/12
- * RCS-ID:      $Id: wxchar.h,v 1.1 2012/03/04 01:07:27 aliot Exp $
+ * RCS-ID:      $Id: wxchar.h 66970 2011-02-19 13:54:14Z VZ $
  * Copyright:   (c) 1998-2006 wxWidgets dev team
  * Licence:     wxWindows licence
  */
@@ -236,6 +236,14 @@
 #else /* !Unicode */
     #define wxT(x) x
 #endif /* Unicode/!Unicode */
+
+/*
+    This macro is defined for forward compatibility with wxWidgets 3. It should
+    be used in the places where wxWidgets 2 API requires wxT() (in Unicode
+    build) but wxWidgets 3 doesn't accept it, e.g. wxCmdLineEntryDesc struct
+    elements initializers.
+ */
+#define wxT_2(x) wxT(x)
 
 /*
     We define _T() as a synonym of wxT() for backwards compatibility and also

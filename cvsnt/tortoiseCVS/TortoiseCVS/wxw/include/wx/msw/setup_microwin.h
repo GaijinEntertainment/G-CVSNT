@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: setup_microwin.h,v 1.1 2012/03/04 01:07:43 aliot Exp $
+// RCS-ID:      $Id: setup_microwin.h 40766 2006-08-23 09:54:29Z VS $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

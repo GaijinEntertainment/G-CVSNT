@@ -2,7 +2,7 @@
 // Name:        wx/anidecod.h
 // Purpose:     wxANIDecoder, ANI reader for wxImage and wxAnimation
 // Author:      Francesco Montorsi
-// CVS-ID:      $Id: anidecod.h,v 1.1 2012/03/04 01:07:22 aliot Exp $
+// CVS-ID:      $Id: anidecod.h 45563 2007-04-21 18:17:50Z VZ $
 // Copyright:   (c) 2006 Francesco Montorsi
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

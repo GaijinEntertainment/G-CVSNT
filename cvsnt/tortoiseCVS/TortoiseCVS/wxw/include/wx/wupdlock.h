@@ -3,7 +3,7 @@
 // Purpose:     wxWindowUpdateLocker prevents window redrawing
 // Author:      Vadim Zeitlin
 // Created:     2006-03-06
-// RCS-ID:      $Id: wupdlock.h,v 1.1 2012/03/04 01:07:27 aliot Exp $
+// RCS-ID:      $Id: wupdlock.h 37842 2006-03-07 01:50:21Z VZ $
 // Copyright:   (c) 2006 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

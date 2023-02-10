@@ -3,7 +3,7 @@
 // Purpose:     wxStdRenderer class declaration
 // Author:      Vadim Zeitlin
 // Created:     2006-09-18
-// RCS-ID:      $Id: stdrend.h,v 1.1 2012/03/04 01:07:52 aliot Exp $
+// RCS-ID:      $Id: stdrend.h 42716 2006-10-30 12:33:25Z VS $
 // Copyright:   (c) 2006 Vadim Zeitlin <vadim@wxwindows.org>
 // Licence:     wxWindows licence
 ///////////////////////////////////////////////////////////////////////////////

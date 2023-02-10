@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: dcscreen.h,v 1.1 2012/03/04 01:07:42 aliot Exp $
+// RCS-ID:      $Id: dcscreen.h 36565 2005-12-25 12:52:53Z VZ $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

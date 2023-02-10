@@ -5,7 +5,7 @@
 // Author:      Julian Smart et al
 // Modified by:
 // Created:     25/4/2000
-// RCS-ID:      $Id: effects.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: effects.h 39109 2006-05-08 11:31:03Z ABX $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////

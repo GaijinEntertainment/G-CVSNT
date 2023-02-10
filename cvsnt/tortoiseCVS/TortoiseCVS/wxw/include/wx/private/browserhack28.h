@@ -4,7 +4,7 @@
 // Author:      David Elliott
 // Modified by:
 // Created:     2007-08-19
-// RCS-ID:      $Id: browserhack28.h,v 1.1 2012/03/04 01:07:50 aliot Exp $
+// RCS-ID:      $Id: browserhack28.h 48184 2007-08-19 19:22:09Z DE $
 // Copyright:   (c) David Elliott
 // Licence:     wxWidgets licence
 /////////////////////////////////////////////////////////////////////////////

@@ -43,6 +43,7 @@
 #include <Utils/ShellUtils.h>
 #include <Utils/ProcessUtils.h>
 #include <Utils/TortoiseException.h>
+#include <functional>
 
 
 enum

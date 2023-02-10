@@ -3,7 +3,7 @@
  *  Purpose:     Various preprocessor helpers
  *  Author:      Vadim Zeitlin
  *  Created:     2006-09-30
- *  RCS-ID:      $Id: cpp.h,v 1.1 2012/03/04 01:07:24 aliot Exp $
+ *  RCS-ID:      $Id: cpp.h 42993 2006-11-03 21:06:57Z VZ $
  *  Copyright:   (c) 2006 Vadim Zeitlin <vadim@wxwindows.org>
  *  Licence:     wxWindows licence
  */

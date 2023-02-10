@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     01/02/97
-// RCS-ID:      $Id: listbox.h,v 1.1 2012/03/04 01:07:42 aliot Exp $
+// RCS-ID:      $Id: listbox.h 66941 2011-02-17 11:01:22Z JS $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
@@ -13,6 +13,10 @@
 #define _WX_LISTBOX_H_
 
 #if wxUSE_LISTBOX
+
+// Fixing spurious selection events breaks binary compatibility, so this is normally 0.
+// See ticket #12143
+#define wxUSE_LISTBOX_SELECTION_FIX 0
 
 // ----------------------------------------------------------------------------
 // simple types
@@ -133,6 +137,10 @@ public:
         return GetCompositeControlsDefaultAttributes(variant);
     }
 
+#if wxUSE_LISTBOX_SELECTION_FIX
+    virtual WXLRESULT MSWWindowProc(WXUINT nMsg, WXWPARAM wParam, WXLPARAM lParam);
+#endif
+
 protected:
     virtual void DoSetSelection(int n, bool select);
     virtual int DoAppend(const wxString& item);
@@ -156,6 +164,13 @@ protected:
 #if wxUSE_OWNER_DRAWN
     // control items
     wxListBoxItemsArray m_aItems;
+#endif
+
+#if wxUSE_LISTBOX_SELECTION_FIX
+    // flag set to true when we get a keyboard event and reset to false when we
+    // get a mouse one: this is used to find the correct item for the selection
+    // event
+    bool m_selectedByKeyboard;
 #endif
 
 private:

@@ -4,7 +4,7 @@
 // Author:      Julian Smart
 // Modified by:
 // Created:     2003-05-24
-// RCS-ID:      $Id: helphtml.h,v 1.1 2012/03/04 01:07:25 aliot Exp $
+// RCS-ID:      $Id: helphtml.h 27408 2004-05-23 20:53:33Z JS $
 // Copyright:   (c) Julian Smart
 // Licence:     wxWindows licence
 /////////////////////////////////////////////////////////////////////////////
