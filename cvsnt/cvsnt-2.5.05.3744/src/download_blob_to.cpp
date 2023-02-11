@@ -460,7 +460,7 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
       error (0, status, "cannot change mode of %s", task.filename.c_str());
   }
   rename_file (temp_filename.c_str(), fullPath.c_str());
-  change_utime(temp_filename.c_str(), task.timestamp);
+  change_utime(fullPath.c_str(), task.timestamp);
   if (validateHash)
   {
     const size_t fsz = get_file_size(fullPath.c_str());//validate file system again
