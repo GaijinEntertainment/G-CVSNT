@@ -357,7 +357,7 @@ bool CHttpSocket::_request(const char *command, const char *location, const char
 			if(!line.length())
 				continue;
 
-			size_t len;
+			int len;
 			sscanf(line.c_str(),"%x",&len);
 
 			if(!len)

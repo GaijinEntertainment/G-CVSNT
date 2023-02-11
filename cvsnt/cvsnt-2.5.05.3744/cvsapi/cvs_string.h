@@ -431,7 +431,7 @@ namespace cvs
 				else
 				{
 					wstr.resize(c);
-					pIdnToAscii(0,s,lstrlenW(s),(wchar_t *)wstr.data(),wstr.size());
+					pIdnToAscii(0,s,lstrlenW(s),(wchar_t *)wstr.data(),(int)wstr.size());
 					str = cvs::narrow(wstr.c_str());
 				}
 			}
@@ -466,7 +466,7 @@ namespace cvs
 				else
 				{
 					wstr.resize(c);
-					pIdnToUnicode(0,s,lstrlenW(s),(wchar_t *)wstr.data(),wstr.size());
+					pIdnToUnicode(0,s,lstrlenW(s),(wchar_t *)wstr.data(),(int)wstr.size());
 					str = cvs::narrow(wstr.c_str());
 				}
 			}
