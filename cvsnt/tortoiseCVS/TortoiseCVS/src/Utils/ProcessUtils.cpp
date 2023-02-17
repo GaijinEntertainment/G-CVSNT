@@ -62,7 +62,7 @@ std::string Requote(const std::vector<std::string>& args)
 
 void LaunchURL(const std::string& url)
 {
-   DWORD Status = (DWORD) ShellExecuteA(0, "open", url.c_str(), 0, 0, SW_SHOWNORMAL);
+   uintptr_t Status = (uintptr_t) ShellExecuteA(0, "open", url.c_str(), 0, 0, SW_SHOWNORMAL);
    if (Status <= 32)
    {
       wxString message = Printf(_("Failed to launch %s"), MultibyteToWide(url).c_str());

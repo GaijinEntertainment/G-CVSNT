@@ -1408,8 +1408,8 @@ CvsProcess* cvs_process_run(const char* name, int argc, char** argv,
    }
    
    // Build the arguments for CVS
-   sprintf(cvs_process->args[2], "%d", reinterpret_cast<int>(cvs_process->his_read));
-   sprintf(cvs_process->args[3], "%d", reinterpret_cast<int>(cvs_process->his_write));
+   sprintf(cvs_process->args[2], "%lld", reinterpret_cast<int64_t>(cvs_process->his_read));
+   sprintf(cvs_process->args[3], "%lld", reinterpret_cast<int64_t>(cvs_process->his_write));
    
    // If command line is too long then use the global -F option to overcome the limit
    if( startupInfo->commandLineLimit > 0 && 

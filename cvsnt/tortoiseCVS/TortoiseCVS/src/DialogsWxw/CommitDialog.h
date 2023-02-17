@@ -136,7 +136,7 @@ private:
     // Add files to ExtListCtrl
     void AddFiles(const std::string& bugnumber);
 
-    static int wxCALLBACK CompareFunc(long item1, long item2, long data);
+    static int wxCALLBACK CompareFunc(wxUIntPtr item1, wxUIntPtr item2, wxUIntPtr data);
 
     // Get file type
     static wxString GetFileType(const char* filename);

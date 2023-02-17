@@ -106,7 +106,7 @@ INT_PTR CALLBACK PageProc(HWND hwnd, UINT uMessage, WPARAM wParam, LPARAM lParam
    if (uMessage == WM_INITDIALOG)
    {
       sheet = (CVSRevisionsPropSheet*) ((LPPROPSHEETPAGE) lParam)->lParam;
-      SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG>(sheet));
+      SetWindowLongPtr(hwnd, GWLP_USERDATA, reinterpret_cast<LONG_PTR>(sheet));
       sheet->SetHwnd(hwnd);
    }
    else

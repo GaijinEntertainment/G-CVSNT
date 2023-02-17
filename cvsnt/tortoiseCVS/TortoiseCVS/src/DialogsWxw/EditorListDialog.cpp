@@ -209,7 +209,7 @@ void EditorListDialog::ListColumnClick(wxListEvent& e)
 
 
 
-int wxCALLBACK EditorListDialog::CompareFunc(long item1, long item2, long sortData)
+int wxCALLBACK EditorListDialog::CompareFunc(wxUIntPtr item1, wxUIntPtr item2, wxUIntPtr sortData)
 {
    // Check "ascending" flag
    if (!(sortData & 256))

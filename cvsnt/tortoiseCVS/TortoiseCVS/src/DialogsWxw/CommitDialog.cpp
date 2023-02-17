@@ -231,7 +231,7 @@ void CommitDialog::ListCtrlEventHandler::ListColumnClick(wxListEvent& e)
       myParent->mySortData.asc = true;
    }
    myParent->mySortData.column = e.GetColumn();
-   myParent->myFiles->SortItems(CompareFunc, (long) &myParent->mySortData);
+   myParent->myFiles->SortItems(CompareFunc, (wxUIntPtr)&myParent->mySortData);
    myParent->myFiles->SetSortIndicator(myParent->mySortData.column, myParent->mySortData.asc);
 }
 
@@ -665,7 +665,7 @@ void CommitDialog::AddFiles(const std::string& bugnumber)
         {
             myFiles->InsertItem(myFilesIndex, wxText(item->displayedName));
             myFiles->SetChecked(myFilesIndex, true);
-            myFiles->SetItemData(myFilesIndex, (long) item);
+            myFiles->SetItemPtrData(myFilesIndex, (wxUIntPtr)item);
             myFiles->SetItem(myFilesIndex, 1, item->filetype);
             myFiles->SetItem(myFilesIndex, 2, CVSStatus::FileFormatString(item->format));
             myFiles->SetItem(myFilesIndex, 3, CVSStatus::FileStatusString(item->status));
@@ -959,7 +959,7 @@ void CommitDialog::OnOk(wxCommandEvent&)
    wxDialog::EndModal(wxID_OK);
 }
 
-int wxCALLBACK CommitDialog::CompareFunc(long item1, long item2, long data)
+int wxCALLBACK CommitDialog::CompareFunc(wxUIntPtr item1, wxUIntPtr item2, wxUIntPtr data)
 {
    CommitDialog::ItemData* itemdata1 = reinterpret_cast<CommitDialog::ItemData*>(item1);
    CommitDialog::ItemData* itemdata2 = reinterpret_cast<CommitDialog::ItemData*>(item2);

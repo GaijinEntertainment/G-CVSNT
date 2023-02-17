@@ -447,7 +447,7 @@ bool LaunchCommand(const std::string& command, bool waitForEnd, bool minimized)
 bool FileIsViewable(const std::string& filename)
 {
     char buf[MAX_PATH];
-    if (int(FindExecutableA(filename.c_str(), "", buf)) == SE_ERR_NOASSOC)
+    if (uintptr_t(FindExecutableA(filename.c_str(), "", buf)) == SE_ERR_NOASSOC)
         return true; // No application is associated with the file
     // Fail if the file is associated with itself (i.e. executable)
     if (!strcmpi(filename.c_str(), buf))

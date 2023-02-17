@@ -166,7 +166,7 @@ void MakePatchDialog::ListCtrlEventHandler::ListColumnClick(wxListEvent& e)
       myParent->mySortData.asc = true;
    }
    myParent->mySortData.column = e.GetColumn();
-   myParent->myFiles->SortItems(CompareFunc, (long) &myParent->mySortData);
+   myParent->myFiles->SortItems(CompareFunc, (wxUIntPtr) &myParent->mySortData);
    myParent->myFiles->SetSortIndicator(myParent->mySortData.column, myParent->mySortData.asc);
 }
 
@@ -425,7 +425,7 @@ void MakePatchDialog::AddFiles(const std::vector<std::string>& filenames,
    {
       myFiles->InsertItem(i, wxText(*it));
       myFiles->SetChecked(i, true);
-      myFiles->SetItemData(i, (long) itemData[i]);
+      myFiles->SetItemPtrData(i, (wxUIntPtr)itemData[i]);
 
       itemData[i]->m_Status = CVSStatus::GetFileStatus(itemData[i]->m_Filename);
       itemData[i]->m_Filetype = GetFileType(itemData[i]->m_Filename.c_str());
@@ -494,7 +494,7 @@ void MakePatchDialog::OnMenuCopyDirs(wxCommandEvent&)
    CopyFilesToClip(false);
 }
 
-int wxCALLBACK MakePatchDialog::CompareFunc(long item1, long item2, long data)
+int wxCALLBACK MakePatchDialog::CompareFunc(wxUIntPtr item1, wxUIntPtr item2, wxUIntPtr data)
 {
    MakePatchDialog::ItemData* itemdata1 = reinterpret_cast<MakePatchDialog::ItemData*>(item1);
    MakePatchDialog::ItemData* itemdata2 = reinterpret_cast<MakePatchDialog::ItemData*>(item2);
@@ -623,7 +623,7 @@ or are specified in a .cvsignore file."));
                ItemData* itemdata = new ItemData(true);
                itemdata->m_Filename = entry->myAbsoluteFile;
                itemdata->m_Status = CVSStatus::STATUS_ADDED;
-               myFiles->SetItemData(i, (long) itemdata);
+               myFiles->SetItemPtrData(i, (wxUIntPtr)itemdata);
                itemdata->m_Status = CVSStatus::GetFileStatus(itemdata->m_Filename);
                itemdata->m_Filetype = GetFileType(itemdata->m_Filename.c_str());
                myFiles->SetItem(i, 1, itemdata->m_Filetype.c_str());

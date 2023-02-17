@@ -96,7 +96,7 @@ private:
    void AddEditors(const std::vector<std::string>& filenames,
                    const EditedFileList& editors);
    
-   static int wxCALLBACK CompareFunc(long item1, long item2, long sortData);
+   static int wxCALLBACK CompareFunc(wxUIntPtr item1, wxUIntPtr item2, wxUIntPtr sortData);
    
    EditorListListCtrl*          myEditors;
    wxButton*                    myOK;

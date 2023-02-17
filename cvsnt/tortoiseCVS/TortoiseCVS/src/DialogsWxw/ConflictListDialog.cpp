@@ -196,7 +196,7 @@ void ConflictListDialog::AddFiles(const std::vector<std::string>& filenames,
    {
       myFiles->InsertItem(i, wxText(*it));
       myFiles->SetChecked(i, true);
-      myFiles->SetItemData(i, (long) itemData[i]);
+      myFiles->SetItemPtrData(i, (wxUIntPtr)itemData[i]);
       itemData[i]->m_Format = CVSStatus::GetFileFormat(itemData[i]->m_Filename);
       myFiles->SetItem(i, 1, CVSStatus::FileFormatString(itemData[i]->m_Format).c_str());
       myFiles->SetItem(i, 2, CVSStatus::FileStatusString(itemData[i]->m_Status).c_str());
@@ -214,7 +214,7 @@ void ConflictListDialog::RefreshItem(int WXUNUSED(i))
 
 
 
-int wxCALLBACK ConflictListDialog::CompareFunc(long item1, long item2, long sortData)
+int wxCALLBACK ConflictListDialog::CompareFunc(wxUIntPtr item1, wxUIntPtr item2, wxUIntPtr sortData)
 {
    ConflictListDialog::ItemData* itemdata1 = reinterpret_cast<ConflictListDialog::ItemData*>(item1);
    ConflictListDialog::ItemData* itemdata2 = reinterpret_cast<ConflictListDialog::ItemData*>(item2);

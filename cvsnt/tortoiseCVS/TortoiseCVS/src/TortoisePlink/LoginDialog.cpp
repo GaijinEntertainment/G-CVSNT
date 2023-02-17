@@ -125,7 +125,7 @@ LoginDialog::LoginDialog(const std::string& prompt, bool is_pw)
 void LoginDialog::CreateModule(void)
 {
    DialogBoxParam(g_hmodThisDll, MAKEINTRESOURCE(IDD_LOGIN), g_hwndMain,
-                  (DLGPROC)(LoginDialogProc), (long)this);
+                  (DLGPROC)(LoginDialogProc), (uintptr_t)this);
 }
 
 
@@ -180,7 +180,7 @@ HWND GetParentHwnd()
    char buf[256];
    if (GetEnvironmentVariable("TCVS_HWND", buf, sizeof(buf)))
    {
-      HWND hwnd = (HWND) atoi(buf);
+      HWND hwnd = (HWND) atoll(buf);
       if (hwnd)
          return hwnd;
    }

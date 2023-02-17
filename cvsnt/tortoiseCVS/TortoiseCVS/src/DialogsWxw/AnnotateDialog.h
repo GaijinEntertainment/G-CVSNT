@@ -104,7 +104,7 @@ private:
    bool SetNewLineFoundIfMatches(unsigned int index, const std::string& searchString, bool caseSensitive);
 
    int Compare(CAnnotation* annotation1, CAnnotation* annotation2) const;
-   static int wxCALLBACK CompareFunc(long item1, long item2, long sortData);
+   static int wxCALLBACK CompareFunc(wxUIntPtr item1, wxUIntPtr item2, wxUIntPtr sortData);
 
    void UpdateStatusBar();
 

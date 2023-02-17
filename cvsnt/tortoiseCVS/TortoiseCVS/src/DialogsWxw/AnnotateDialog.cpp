@@ -345,7 +345,7 @@ void AnnotateDialog::ListColumnClick(wxListEvent& e)
 }
 
 
-int wxCALLBACK AnnotateDialog::CompareFunc(long annotateIndex1, long annotateIndex2, long sortData)
+int wxCALLBACK AnnotateDialog::CompareFunc(wxUIntPtr annotateIndex1, wxUIntPtr annotateIndex2, wxUIntPtr sortData)
 {
    AnnotateDialog* dlg = reinterpret_cast<AnnotateDialog*>(sortData);
    CAnnotation* annotation1 = (*dlg->myAnnotations)[annotateIndex1];

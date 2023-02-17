@@ -348,8 +348,8 @@ TortoiseAct cvs-verb [-h handle] [-f file-list] [-u URL] [-l files...]"));
    if (myParameters.Exists("-h"))
    {
       std::string s = myParameters.GetValue("-h");
-      long myRemoteHandleLong;
-      int retval = sscanf(s.c_str(), "0x%lx", &myRemoteHandleLong);
+      uint64_t myRemoteHandleLong;
+      int retval = sscanf(s.c_str(), "0x%llx", &myRemoteHandleLong);
       myRemoteHandle = (HWND) myRemoteHandleLong;
       if (retval != 1)
       {

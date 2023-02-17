@@ -19,7 +19,7 @@ struct wnt_stat {
         short st_nlink;
         short st_uid;
         short st_gid;
-        _dev_t st_rdev;
+        uintptr_t st_rdev;
         _off_t st_size;
         time_t st_atime;
         time_t st_mtime;

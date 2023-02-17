@@ -420,7 +420,7 @@ static int _statcore(HANDLE hFile, const char *filename, struct stat *buf)
 				else
 					buf->st_mode = _S_IFIFO;
 
-				buf->st_rdev = buf->st_dev = (_dev_t)hFile;
+				buf->st_rdev = buf->st_dev = (uintptr_t)hFile;
 				buf->st_nlink = 1;
 				buf->st_uid = buf->st_gid = buf->st_ino = 0;
 				buf->st_atime = buf->st_mtime = buf->st_ctime = 0;

@@ -61,7 +61,7 @@ public:
    virtual ~CLogStr() {}
 
    inline bool empty() const { return str.empty(); }
-   inline unsigned int length() const { return str.size(); }
+   inline unsigned int length() const { return (unsigned)str.size(); }
 
    const char* operator=(const char* newstr);
    // set to a new C String (0L is OK)
