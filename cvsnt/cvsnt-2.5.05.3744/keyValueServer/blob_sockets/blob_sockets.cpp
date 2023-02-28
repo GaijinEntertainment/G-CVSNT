@@ -261,7 +261,7 @@ static size_t get_buffer(EVP_PKEY * pkey, unsigned char ** client_pub_key)
   if (!pkey || pkey->type != EVP_PKEY_EC) return 0;
   EC_KEY *tempEcKey = pkey->pkey.ec;
   #else
-  EC_KEY *tempEcKey = EVP_PKEY_get0_EC_KEY(pkey);
+  const EC_KEY *tempEcKey = EVP_PKEY_get0_EC_KEY(pkey);
   #endif
   if (tempEcKey == NULL) return false;
   const EC_GROUP* group = NULL;
