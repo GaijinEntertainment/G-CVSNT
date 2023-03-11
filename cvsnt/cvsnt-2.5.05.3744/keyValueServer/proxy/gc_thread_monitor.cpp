@@ -24,7 +24,7 @@ void init_gc(const char *folder, uint64_t max_size)
   cache_occupied_size = space_occupied(cache_folder.c_str());
   file_cache_size = max_size;
   printf("Current space occupied by cache folder %dmb\n", (int)(cache_occupied_size.load()>>uint64_t(20)));
-  if (cache_occupied_size > file_cache_size)
+  if ((uint64_t)cache_occupied_size > file_cache_size)
     printf("It is more than limit, but GC will be only called on next pull to server\n");
   std::thread gc(gc_thread_proc);
   gc.detach();
@@ -32,7 +32,7 @@ void init_gc(const char *folder, uint64_t max_size)
 void close_gc(){}//no bother, threads die with parent
 
 //--
-static inline bool should_do_gc() { return (cache_occupied_size.load() > file_cache_size); }
+static inline bool should_do_gc() { return (cache_occupied_size.load() > (int64_t)file_cache_size); }
 static void do_gc()
 {
   if (!should_do_gc())

@@ -2859,6 +2859,15 @@ static void handle_updated_blobs_refs (char *args, int len)
     call_in_directory (args, update_blob_ref_entries, (char *)&dat);
 }
 
+static void handle_created_blobs_refs (char *args, int len)
+{
+    struct update_entries_data dat;
+    dat.contents = UPDATE_ENTRIES_UPDATE;
+    dat.existp = UPDATE_ENTRIES_NEW;
+    dat.timestamp = NULL;
+    call_in_directory (args, update_blob_ref_entries, (char *)&dat);
+}
+
 static void handle_updated_meta (char *args, int len)
 {
     struct update_entries_data dat;
@@ -4024,6 +4033,7 @@ struct response responses[] =
     RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
     RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
     RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, GAIJIN_rs_essential),
+    RSP_LINE("Blob-ref-created", handle_created_blobs_refs, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Blob-OTP", handle_blob_otp, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Blob-url", handle_blob_url, proxy_updated, response_type_normal, rs_optional),
     RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
