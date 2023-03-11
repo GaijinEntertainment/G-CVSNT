@@ -99,7 +99,7 @@ private:
 
 #ifndef __WXMICROWIN__
 int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
-                                  DWORD dwStyle, LONG lParam);
+                                  DWORD dwStyle, wxUIntPtr lParam);
 #endif
 
 // ============================================================================
@@ -148,7 +148,7 @@ bool wxFontEnumeratorHelper::SetEncoding(wxFontEncoding encoding)
 }
 
 #if defined(__GNUWIN32__) && !defined(__CYGWIN10__) && !wxCHECK_W32API_VERSION( 1, 1 ) && !wxUSE_NORLANDER_HEADERS
-    #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, LPARAM)
+    #define wxFONTENUMPROC int(*)(ENUMLOGFONTEX *, NEWTEXTMETRICEX*, int, wxUIntPtr)
 #else
     #define wxFONTENUMPROC FONTENUMPROC
 #endif
@@ -162,14 +162,14 @@ void wxFontEnumeratorHelper::DoEnumerate()
     ::EnumFontFamilies(hDC,
                        m_facename.empty() ? NULL : m_facename.c_str(),
                        (wxFONTENUMPROC)wxFontEnumeratorProc,
-                       (LPARAM)this) ;
+                       (wxUIntPtr)this) ;
 #else // __WIN32__
     LOGFONT lf;
     lf.lfCharSet = (BYTE)m_charset;
     wxStrncpy(lf.lfFaceName, m_facename, WXSIZEOF(lf.lfFaceName));
     lf.lfPitchAndFamily = 0;
     ::EnumFontFamiliesEx(hDC, &lf, (wxFONTENUMPROC)wxFontEnumeratorProc,
-                         (LPARAM)this, 0 /* reserved */) ;
+                         (wxUIntPtr)this, 0 /* reserved */) ;
 #endif // Win32/CE
 
     ::ReleaseDC(NULL, hDC);
@@ -269,7 +269,7 @@ bool wxFontEnumerator::EnumerateEncodings(const wxString& family)
 
 #ifndef __WXMICROWIN__
 int CALLBACK wxFontEnumeratorProc(LPLOGFONT lplf, LPTEXTMETRIC lptm,
-                                  DWORD WXUNUSED(dwStyle), LONG lParam)
+                                  DWORD WXUNUSED(dwStyle), wxUIntPtr lParam)
 {
 
     // we used to process TrueType fonts only, but there doesn't seem to be any

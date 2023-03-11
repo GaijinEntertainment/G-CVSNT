@@ -17,10 +17,10 @@ CC = cl
 CXX = cl
 
 # Standard flags for CC 
-CFLAGS = -ID:\devtools\win.sdk.100\include\10.0.10586.0\ucrt -ID:\devtools\vc2019_16.10.3\include -ID:\devtools\win.sdk.100\include\10.0.10586.0\um -ID:\devtools\win.sdk.100\include\10.0.10586.0\shared
+CFLAGS = -MP -ID:\devtools\win.sdk.100\include\10.0.10586.0\ucrt -ID:\devtools\vc2019_16.10.3\include -ID:\devtools\win.sdk.100\include\10.0.10586.0\um -ID:\devtools\win.sdk.100\include\10.0.10586.0\shared
 
 # Standard flags for C++ 
-CXXFLAGS = -ID:\devtools\win.sdk.100\include\10.0.10586.0\ucrt -ID:\devtools\vc2019_16.10.3\include -ID:\devtools\win.sdk.100\include\10.0.10586.0\um -ID:\devtools\win.sdk.100\include\10.0.10586.0\shared
+CXXFLAGS = -MP -ID:\devtools\win.sdk.100\include\10.0.10586.0\ucrt -ID:\devtools\vc2019_16.10.3\include -ID:\devtools\win.sdk.100\include\10.0.10586.0\um -ID:\devtools\win.sdk.100\include\10.0.10586.0\shared
 
 # Standard preprocessor flags (common for CC and CXX) 
 CPPFLAGS = /DNEED_PBT_H=1
