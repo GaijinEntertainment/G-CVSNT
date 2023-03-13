@@ -118,12 +118,12 @@ void RemoteLists::GetModuleList(wxWindow *parent, std::vector<std::string>& modu
            std::string out = webLog.GetReturnedHTML();
       
            // search for text like HREF="modulename/"
-           unsigned int lastpos = 0;
+           size_t lastpos = 0;
            while (true)
            {
-               unsigned int pos = static_cast<unsigned int>(out.find("HREF=\"", lastpos));
+               auto pos = out.find("HREF=\"", lastpos);
                if (pos == std::string::npos)
-                   pos = static_cast<unsigned int>(out.find("href=\"", lastpos));
+                   pos = out.find("href=\"", lastpos);
                if (pos == std::string::npos)
                    break;
 

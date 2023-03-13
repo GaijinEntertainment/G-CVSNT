@@ -79,7 +79,8 @@ int agent_query(void *in, int inlen, void **out, int *outlen,
     char *mapname;
     HANDLE filemap;
     unsigned char *p, *ret;
-    int id, retlen;
+    int retlen;
+    LRESULT id;
     COPYDATASTRUCT cds;
 
     *out = NULL;
