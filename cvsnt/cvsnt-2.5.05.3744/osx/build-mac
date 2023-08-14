@@ -50,7 +50,11 @@ rm -rf $InstallerRoot/*
 mkdir -p $InstallerRoot/usr/local/lib
 mkdir -p $InstallerRoot/usr/local/bin
 cp -r /usr/local/lib/libzstd*.dylib $InstallerRoot/usr/local/lib
+if [[ "$BUILD_ARCH" == *"arm64"* ]]; then
 cp -R /opt/homebrew/opt/openssl@1.1/lib/*.dylib $InstallerRoot/usr/local/lib
+else
+cp -R /usr/local/opt/openssl@1.1/lib/*.dylib $InstallerRoot/usr/local/lib
+fi
 make -j8 install DESTDIR=$InstallerRoot
 if [ $? != 0 ]; then
   echo "ERROR: make failed!"
