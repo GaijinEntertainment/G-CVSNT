@@ -21,6 +21,7 @@
 #include <sys/types.h>
 #include <stdlib.h>
 #include <ctype.h>
+#include <ctime>
 #include "lib/getdate.h"
 #include "TagDate.h"
 

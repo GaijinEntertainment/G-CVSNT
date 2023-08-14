@@ -36,6 +36,7 @@
 #define MODULE audit
 #define MHMANGLE 
 
+#include <ctime>
 #include <ctype.h>
 #include <cvstools.h>
 #include "../version.h"
