@@ -15,7 +15,7 @@ static std::string master_url;
 static std::string cache_folder, blobs_folder, encryption_secret;
 static CafsClientAuthentication auth_on_master_as_client = CafsClientAuthentication::AllowNoAuthPrivate;
 static int master_port = 2403;
-static bool should_update_mtimes_on_access = false;
+static bool should_update_mtimes_on_access = false, should_validate_blobs = false;
 //--
 void init_gc(const char *folder, uint64_t max_size);
 void close_gc();
@@ -26,7 +26,7 @@ void update_write_time_to_current(const char*name);
 
 //
 void close_proxy(){close_gc();}
-void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *secret, CafsClientAuthentication auth_on_master, bool update_mtimes)
+void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *secret, CafsClientAuthentication auth_on_master, bool update_mtimes, bool validate_blobs)
 {
   if (auth_on_master == CafsClientAuthentication::RequiresAuth && !secret)
   {
@@ -49,6 +49,7 @@ void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const
   blobs_folder = cache_folder + "blobs/";
   blob_fileio_ensure_dir(blobs_folder.c_str());
   should_update_mtimes_on_access = update_mtimes;
+  should_validate_blobs = validate_blobs;
   init_gc(cache_folder.c_str(), uint64_t(sz)<<uint64_t(20));
 }
 ///
@@ -279,16 +280,23 @@ void blob_destroy_push_data(uintptr_t up)
 #define WRITE_THROUGH_PROXY 1
 
 #if WRITE_THROUGH_PROXY
-
+#include "../include/blob_hash_util.h"
+#include "../../ca_blobs_fs/calc_hash.h"
+#include "../../ca_blobs_fs/streaming_blobs.h"
 struct PullThroughTemp
 {
+  char hashCtx[HASH_CONTEXT_SIZE];
+  caddressed_fs::DownloadBlobInfo info;
   char buf[65536];
+  unsigned char requestedBinHash[32];
   std::string tmpfn;
   FILE *tmpf = nullptr;
   const ClientConnection *cc = nullptr;
   int64_t expectedSize = 0;
   int64_t pulledSz = 0;
   bool tempIsOk = true;
+  enum {NOT_VALIDATING, VALIDATING, INVALID, VALID} validateDownloadedHash = NOT_VALIDATING;
+
   bool start(const ClientConnection *c, const char* htype, const char* hhex, uint64_t &sz)
   {
     cc = c;
@@ -325,6 +333,15 @@ struct PullThroughTemp
     else
       ensure_dir(htype, hhex);
     tempIsOk = tmpf != nullptr;
+
+    if (should_validate_blobs)
+    {
+      hex_string_to_bin_hash(hhex, strlen(hhex), requestedBinHash, sizeof(requestedBinHash));
+      init_blob_hash_context(hashCtx, sizeof(hashCtx));
+      info = caddressed_fs::DownloadBlobInfo{};
+      validateDownloadedHash = VALIDATING;
+    } else
+      validateDownloadedHash = NOT_VALIDATING;
     return true;
   }
 
@@ -357,6 +374,12 @@ struct PullThroughTemp
     read = 0;
     if (readChunk([&](const char *data, int len)
     {
+      if (validateDownloadedHash == VALIDATING)
+      {
+        if (!caddressed_fs::decode_stream_blob_data(info, data, len,
+            [&](const void *decoded_data, size_t sz) { update_blob_hash(hashCtx, (const char *)decoded_data, sz); return true;}))
+          validateDownloadedHash = INVALID;
+      }
       if (tempIsOk)
       {
         tempIsOk = (blob_fwrite64(buf, 1, len, tmpf) == len);
@@ -403,6 +426,33 @@ struct PullThroughTemp
     {
       fprintf(stderr, "Downloaded file %s for %s is of %lld size, while should be %lld\n", tmpfn.c_str(), fn.c_str(),
         (long long int)fileSz, (long long int)pulledSz);
+      closeAndUnlink();
+      return false;
+    }
+
+    if (validateDownloadedHash == VALIDATING)
+    {
+      unsigned char digest[32];
+      finalize_blob_hash(hashCtx, digest, sizeof(digest));
+      if (memcmp(requestedBinHash, digest, sizeof(requestedBinHash)) != 0)
+      {
+        char requestedBinHexHash[65], receivedBinHexHash[65];
+        bin_hash_to_hex_string_s(requestedBinHash, requestedBinHexHash, sizeof(requestedBinHexHash));
+        bin_hash_to_hex_string_s(digest, receivedBinHexHash, sizeof(receivedBinHexHash));
+        fprintf(stderr, "Downloaded hash is %s (%lld bytes), while requested was %s\n", receivedBinHexHash, (long long int)fileSz, requestedBinHexHash);
+        validateDownloadedHash = INVALID;
+      } else
+        validateDownloadedHash = VALID;
+    } else if (validateDownloadedHash == INVALID)
+    {
+      char requestedBinHexHash[65];
+      bin_hash_to_hex_string_s(requestedBinHash, requestedBinHexHash, sizeof(requestedBinHexHash));
+      fprintf(stderr, "Could not decode blob %s (%lld bytes) from server\n", requestedBinHexHash, (long long int)fileSz);
+      return false;
+    }
+    if (validateDownloadedHash == INVALID)
+    {
+      closeAndUnlink();
       return false;
     }
     #if _MSC_VER

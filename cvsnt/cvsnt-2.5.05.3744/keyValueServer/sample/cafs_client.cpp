@@ -56,7 +56,9 @@ int main(int argc, const char **argv)
     return 1;
   }
 
-  BlobSocket client = start_blob_push_client(argv[1], atoi(argv[2]), argv[3], 2, nullptr, false);
+  uint64_t otpPage = 0;
+  int timeout_sec = 2;
+  BlobSocket client = start_blob_push_client(argv[1], atoi(argv[2]), argv[3], timeout_sec, nullptr, otpPage, CafsClientAuthentication::AllowNoAuthPrivate);
   if (!is_valid(client))
   {
     blob_logmessage(LOG_ERROR, "Can't connect client %d", blob_get_last_sock_error());

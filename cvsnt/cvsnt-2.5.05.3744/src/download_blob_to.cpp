@@ -381,10 +381,6 @@ static bool download_blob_ref_file(BlobNetworkProcessor *processor, const BlobTa
     }
     std::string err;
     char buf[512];
-    if (memcmp(task.encoded_hash.data(), "de4c8375f402fb25162f207d6203519314bd8183f12e3969751b6394908aee81", 64) == 0)
-    {
-        std::snprintf(buf, sizeof(buf), "check it!");
-    }
     caddressed_fs::DownloadBlobInfo info;
     char hashCtx[HASH_CONTEXT_SIZE];
     if (validate_downloaded_blobs)

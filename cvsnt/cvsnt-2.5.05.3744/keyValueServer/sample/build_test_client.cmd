@@ -1,1 +1,1 @@
-clang-cl -Zi /MD test_client.cpp ../../x64/Release/clientLib.lib
+d:/devtools/LLVM-15.0.7/bin/clang-cl.exe -Zi /MD /std:c++17  -imsvc d:/devtools/LLVM-15.0.7/lib/clang/15.0.7/include -imsvc d:/devtools/vc2019_16.10.3/include -imsvc "D:\devtools\win.sdk.100\include\10.0.10150.0\ucrt" test_client.cpp ../../x64/Release/clientLib.lib ../../Releasex64/blob_sockets.lib ../../external_libs/x64/libcrypto.lib 
