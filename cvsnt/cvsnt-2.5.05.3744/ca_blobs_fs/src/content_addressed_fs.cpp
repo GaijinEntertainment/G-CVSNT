@@ -105,7 +105,8 @@ static FILE * open_local_temp_file(std::string &temp_file_name, const std::strin
   else
   {
     std::string temp_file_dir = get_dir_path(root_path, hash_hex_string);
-    make_blob_dirs(temp_file_dir);
+    std::string temp_file_path = get_file_path(root_path, hash_hex_string);
+    make_blob_dirs(temp_file_path);
     return blob_fileio_get_temp_file(temp_file_name, temp_file_dir.c_str());
   }
 }
