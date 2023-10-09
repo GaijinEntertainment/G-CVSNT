@@ -25,7 +25,7 @@ IpType blob_classify_ip(uint32_t ip)
     return IpType::PRIVATE;
   if ( (ip&0xFFFF) == 0xa8c0)//192.168.x.x
     return IpType::PRIVATE;
-  if ( (ip&0xFFF) >= 0x10ac && (ip&0xFFF) <= 0x1fac)//172.16.x.x -- 172.31.x.x
+  if ( (ip&0xFF) == 172 && ((ip>>8)&0xFF) >= 16 && ((ip>>8)&0xFF) <= 31)//172.16.x.x -- 172.31.x.x
     return IpType::PRIVATE;
   return IpType::PUBLIC;
 }
