@@ -20,6 +20,5 @@ OSX 10.9+ notes:
     ./install_copy_cvsnt.sh
   (this will copy relevant files to /usr/local/bin, /usr/local/lib, etc.)
 
-* prebuilt package archives are placed to root:
-    cvsnt-2.5.05.4452-osx10.13-x64.tar.gz  - built for x86_64, requires OSX 10.13+
-    cvsnt-3.5.16.7699-osx10.11-x64.tar.gz  - built for x86_64, requires OSX 10.11+
+* prebuilt package archives are available in Releases (for x64 and arm64 arch):
+  https://github.com/GaijinEntertainment/G-CVSNT/releases
