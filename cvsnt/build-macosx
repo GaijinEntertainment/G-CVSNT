@@ -1,6 +1,8 @@
 #!/bin/bash
-export BUILD_ARCH="-arch x86_64 -msse4.1 -mmacosx-version-min=10.15"
+export BUILD_ARCH="-arch x86_64 -msse4.1 -mmacosx-version-min=10.11"
 export PKG_BUILD_SUFFIX="-osx10.11-x64"
+#export BUILD_ARCH="-arch x86_64 -msse4.1 -mavx -mavx2 -mavx512f -mmacosx-version-min=10.15"
+#export PKG_BUILD_SUFFIX="-osx10.15-x64"
 #export BUILD_ARCH="-arch arm64 -mmacosx-version-min=11.0"
 #export PKG_BUILD_SUFFIX="-osx11-arm64"
 #export BUILD_ARCH="-arch arm64 -mmacosx-version-min=13.0"
@@ -24,8 +26,15 @@ brew install libtool
 brew install pcre
 brew install openssl@1.1
 rm /usr/local/include/openssl
-ln -s /opt/homebrew/opt/openssl@1.1/include/openssl /usr/local/include/openssl
-ln -s /opt/homebrew/opt/openssl@1.1/lib/libcrypto.dylib /usr/local/lib
+if [ -d "/usr/local/opt/openssl@1.1" ]; then
+  ln -s //usr/local/opt/openssl@1.1/include/openssl /usr/local/include/openssl
+  ln -s //usr/local/opt/openssl@1.1/lib/libcrypto.dylib /usr/local/lib
+elif [ -d "/opt/homebrew/opt/openssl@1.1" ]; then
+  ln -s /opt/homebrew/opt/openssl@1.1/include/openssl /usr/local/include/openssl
+  ln -s /opt/homebrew/opt/openssl@1.1/lib/libcrypto.dylib /usr/local/lib
+else
+  echo "ERROR: could not detect openssl@1.1 location!"
+fi
 
 cd cvsnt-2.5.05.3744
 autoreconf -i --force

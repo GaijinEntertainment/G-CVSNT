@@ -12,7 +12,11 @@ AM_CPPFLAGS += -DBLAKE3_USE_NEON
 libblake3_la_SOURCES += blake3_neon.c
 else
 AM_CPPFLAGS += -msse4.1
-libblake3_la_SOURCES += blake3_avx2_x86-64_unix.S blake3_avx512_x86-64_unix.S blake3_sse2_x86-64_unix.S blake3_sse41_x86-64_unix.S
+libblake3_la_SOURCES += blake3_avx2_x86-64_unix.S blake3_sse2_x86-64_unix.S blake3_sse41_x86-64_unix.S
+if BUILD_AVX512
+AM_CPPFLAGS += -mavx -mavx2 -mavx512f
+libblake3_la_SOURCES += blake3_avx512_x86-64_unix.S
+endif
 endif
 
 libblake3_la_LDFLAGS = -release $(VERSION) -L$(DESTDIR)/$(libdir) 

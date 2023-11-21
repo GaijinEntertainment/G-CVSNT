@@ -731,11 +731,15 @@ fi
 AM_CONDITIONAL(WITH_MAC_HFS_SUPPORT, test "x$acx_mac_hfs_support" = "xyes" )
 AC_MSG_RESULT($acx_mac_hfs_support)
 
+acx_build_avx512=yes
 case "${target_os}" in
   darwin*)
     acx_mac_build=yes
     if [[[ "$CC" == *"-arch arm64"* ]]]; then
       acx_mac_build_arm64=yes
+    fi
+    if [[[ "$CC" != *"-mavx512f"* ]]]; then
+      acx_build_avx512=no
     fi
     ;;
   *)
@@ -748,6 +752,7 @@ AM_CONDITIONAL(ALLOW_OPENMP, test "x$acx_mac_build" != "xyes" )
 AM_CONDITIONAL(ALLOW_LIBSTDC_FS, test "x$acx_mac_build" != "xyes" )
 AM_CONDITIONAL(WITH_SERVER_AND_TOOLS, test "x$acx_mac_build" != "xyes" )
 AM_CONDITIONAL(BUILD_ARM64, test "x$acx_mac_build_arm64" = "xyes" )
+AM_CONDITIONAL(BUILD_AVX512, test "x$acx_build_avx512" = "xyes" )
 
 saved_libs="$LIBS"
 LIBS=""
