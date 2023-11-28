@@ -7,7 +7,7 @@ void blob_destroy_ctx(void *ctx);
 
 //return ~0 if mising
 extern uint64_t blob_get_hash_blob_size(const void *ctx, const char* hash_type, const char* hash_hex_string);//hash_type = "blake3" hash_hex_string = "fe12bc56...."
-extern bool blob_is_under_attack(bool failed_attempt, void *ctx);
+extern bool blob_is_under_attack(bool successful_attempt, void *ctx);
 extern bool blob_does_hash_blob_exist(const void *ctx, const char* hash_type, const char* hash_hex_string);//hash_type = "blake3" hash_hex_string = "fe12bc56...."
 extern uintptr_t blob_start_push_data(const void *ctx, const char* hash_type, const char* hash_hex_string, uint64_t guessed_size);//hash_type = "blake3" hash_hex_string = "fe12bc56...."
 extern bool blob_push_data(const void *data, uint64_t data_size, uintptr_t up);

@@ -125,10 +125,10 @@ struct ClientConnection
 };
 
 extern void blob_sleep_for_msec(unsigned int msec);
-bool blob_is_under_attack(bool failed_attempt, void *c) {
+bool blob_is_under_attack(bool successful_attempt, void *c) {
   if (!c)
     return false;
-  if (failed_attempt)
+  if (!successful_attempt)
   {
     ClientConnection *cc = (ClientConnection *)c;
     cc->failedAttempts++;
