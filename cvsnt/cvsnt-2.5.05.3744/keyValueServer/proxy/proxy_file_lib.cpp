@@ -125,10 +125,14 @@ struct ClientConnection
 };
 
 extern void blob_sleep_for_msec(unsigned int msec);
-bool blob_is_under_attack(bool failed_attempt, void *c) {
+bool blob_is_under_attack(bool , void *){return false;}
+// example implementation
+// replaced with a stub function since it can't be used when we need to check if a new blob exists on the server before push
+/*
+bool blob_is_under_attack(bool successful_attempt, void *c) {
   if (!c)
     return false;
-  if (failed_attempt)
+  if (!successful_attempt)
   {
     ClientConnection *cc = (ClientConnection *)c;
     cc->failedAttempts++;
@@ -150,6 +154,7 @@ bool blob_is_under_attack(bool failed_attempt, void *c) {
   }
   return false;
 }
+*/
 
 void *blob_create_ctx(const char *root) {
   ClientConnection *cc = new ClientConnection(root);
