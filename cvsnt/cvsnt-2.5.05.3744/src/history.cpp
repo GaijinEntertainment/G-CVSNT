@@ -216,7 +216,7 @@ static void save_module (const char *module);
 static void save_user(const char *name);
 static void save_bugid(const char *name);
 
-#define ALL_REC_TYPES "TOEFWUCGMAReu"
+#define ALL_REC_TYPES "TOEFWUCGMAReuP"
 
 char *logHistory = ALL_REC_TYPES;
 
