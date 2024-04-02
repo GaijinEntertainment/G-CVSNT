@@ -1761,13 +1761,10 @@ VERS: ", 0);
 			vers_ts->vn_rcs = xstrdup (xvers_ts->vn_rcs);
 		}
 
-		/* If this is really Update and not Checkout, recode history */
-		if (strcmp (command_name, "update") == 0)
-		{
-			TRACE(3,"If this is really Update and not Checkout, recode history.");
-			history_write ('U', finfo->update_dir, xvers_ts->vn_rcs, xfile,
-				finfo->repository, xvers_ts->edit_bugid, NULL);
-		}
+		/* Recode history */
+        TRACE(3,"Recode history.");
+        history_write ('U', finfo->update_dir, xvers_ts->vn_rcs, xfile,
+            finfo->repository, xvers_ts->edit_bugid, NULL);
 		TRACE(3,"free xvers_ts");
 		freevers_ts (&xvers_ts);
 		TRACE(3,"free xvers_ts OK");
@@ -2134,10 +2131,9 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 	if (CVS_STAT (finfo->file, &file_info) < 0)
 	    error (1, errno, "could not stat %s", finfo->file);
 
-	/* If this is really Update and not Checkout, recode history */
-	if (strcmp (command_name, "update") == 0)
-	    history_write ('P', finfo->update_dir, xvers_ts->vn_rcs, finfo->file,
-			   finfo->repository, xvers_ts->edit_bugid, NULL);
+	/* Recode history */
+    history_write ('P', finfo->update_dir, xvers_ts->vn_rcs, finfo->file,
+           finfo->repository, xvers_ts->edit_bugid, NULL);
 
 	freevers_ts (&xvers_ts);
 
