@@ -268,6 +268,7 @@ struct historyproc_param_t
 	const char *name;
 	const char *bugid;
 	const char *message;
+    const char *directory;
 };
 
 /* This is pretty unclear.  First of all, separating "flags" vs.
@@ -313,7 +314,7 @@ static int historyinfo_proc (void *params, const trigger_interface *cb)
 	int ret = 0;
 	if(cb->history)
 	{
-		ret = cb->history(cb,args->type,args->workdir,args->revs,args->name, args->bugid, args->message);
+		ret = cb->history(cb,args->type,args->workdir,args->revs,args->name, args->bugid, args->message, args->directory);
 	}
 	return ret;
 }
@@ -831,6 +832,7 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 	args.message = message;
 	args.revs=revs;
 	args.name=name;
+    args.directory=repos;
 
 	TRACE(3,"run history trigger");
 	if (run_trigger (&args, historyinfo_proc) > 0)

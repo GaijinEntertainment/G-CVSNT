@@ -154,7 +154,7 @@ namespace
 		return ret;
 	}
 
-	int COM_history(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message)
+	int COM_history(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message, const char *directory)
 	{
 		CTriggerLibrary::trigger_info_t *inf = (CTriggerLibrary::trigger_info_t*)cb->plugin.__cvsnt_reserved;
 		CTriggerLibrary::InfoStruct *i = &inf->is;

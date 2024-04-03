@@ -328,7 +328,7 @@ int loginfoaudit(const struct trigger_interface_t* cb, const char *message, cons
 	return 0;
 }
 
-int historyaudit(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message)
+int historyaudit(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message, const char *directory)
 {
 	if(g_AuditLogHistory)
 	{
