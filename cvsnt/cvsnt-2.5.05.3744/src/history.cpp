@@ -28,6 +28,7 @@
  *		R	"Commit" cmd - "Removed" file.
  *		e	"edit" cmd - file edited
  *		u	"unedit" cmd - file unedited
+ *		D	"diff" cmd - Diff was sent (2 records - one for each revision).
  *
  *  date  is a minimum 8-char hex representation of a Unix time_t.
  *		[Starting here, variable fields are delimited by '|' chars.]
@@ -216,7 +217,7 @@ static void save_module (const char *module);
 static void save_user(const char *name);
 static void save_bugid(const char *name);
 
-#define ALL_REC_TYPES "TOEFWUCGMAReuP"
+#define ALL_REC_TYPES "TOEFWUCGMAReuPD"
 
 char *logHistory = ALL_REC_TYPES;
 

@@ -560,6 +560,10 @@ static int diff_fileproc (void *callerdat, struct file_info *finfo)
 	}
     }
     empty_file = diff_file_nodiff (finfo, vers, empty_file, default_branch);
+	if (use_rev1 != NULL)
+		history_write ('D', finfo->update_dir, use_rev1, finfo->file, finfo->repository,NULL,NULL);
+	if (use_rev2 != NULL)
+		history_write ('D', finfo->update_dir, use_rev2, finfo->file, finfo->repository,NULL,NULL);
     if (empty_file == DIFF_SAME || empty_file == DIFF_ERROR)
     {
 	freevers_ts (&vers);
