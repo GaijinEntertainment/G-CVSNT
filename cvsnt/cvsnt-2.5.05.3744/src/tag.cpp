@@ -1193,6 +1193,7 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 	else
 		tag_set_ok = 1;
 	TRACE(3,"tag_fileproc - finally RCS_settag ok");
+	history_write ('T', finfo->update_dir, rev, finfo->file, finfo->repository, NULL, NULL);
     if (branch_mode)
 	xfree (rev);
 	TRACE(3,"tag_fileproc(2) rewrite rcsfile=\"%s\" symtag=\"%s\", rev=\"%s\", date=\"%s\"",

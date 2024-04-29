@@ -745,12 +745,7 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 		}
     }
 
-    if (type == 'T')
-    {
-		repos = update_dir;
-		update_dir = "";
-    }
-    else if (update_dir && *update_dir)
+    if (update_dir && *update_dir)
 		slash = "/";
     else
 		update_dir = "";
