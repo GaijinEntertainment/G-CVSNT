@@ -14679,6 +14679,14 @@ Release Tags: release_tag</screen> Next, separated by an empty line, is the
               <para>Name of affected file</para>
             </listitem>
           </varlistentry>
+
+          <varlistentry>
+            <term>%p</term>
+
+            <listitem>
+              <para>Directory path relative to repository root</para>
+            </listitem>
+          </varlistentry>
         </variablelist></para>
 
       <para>By default the string <command>%t|%d|%u|%w|%s|%v</command> is

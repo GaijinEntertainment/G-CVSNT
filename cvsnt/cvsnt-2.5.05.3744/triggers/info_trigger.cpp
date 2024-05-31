@@ -404,6 +404,7 @@ struct history_information
 	const char *name; // %s - name
 	const char *bugid; // %b - bugid
 	const char *message; // %m - message
+    const char *directory; // %p - directory
 };
 
 history_information hist_info;
@@ -416,6 +417,7 @@ options history_options[] =
 	{ 's', &hist_info.name },
 	{ 'b', &hist_info.bugid },
 	{ 'm', &hist_info.message },
+	{ 'p', &hist_info.directory },
 	{ 0 }
 };
 
@@ -726,7 +728,7 @@ int loginfo(const struct trigger_interface_t* cb, const char *message, const cha
 	return parse_info(CVSROOT_LOGINFO,"",msg.c_str(),directory,generic_options,loginfo_options);
 }
 
-int history(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message)
+int history(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message, const char *directory)
 {
 	hist_info.type=type;
 	hist_info.revs=revs;
@@ -734,6 +736,7 @@ int history(const struct trigger_interface_t* cb, char type, const char *workdir
 	hist_info.name=name;
 	hist_info.bugid=bugid;
 	hist_info.message=message;
+    hist_info.directory=directory;
 
 	return parse_info(CVSROOT_HISTORYINFO,"%t|%d|%u|%w|%s|%v","",NULL,generic_options,history_options);
 }

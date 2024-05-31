@@ -446,7 +446,7 @@ int loginfo(const struct trigger_interface_t* cb, const char *message, const cha
 	return CallDispatch(L"loginfo",args,sizeof(args)/sizeof(args[0]));
 }
 
-int history(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message)
+int history(const struct trigger_interface_t* cb, char type, const char *workdir, const char *revs, const char *name, const char *bugid, const char *message, const char *directory)
 {
 	if(!g_pEngine)
 		return 0;

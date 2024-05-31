@@ -28,6 +28,7 @@
  *		R	"Commit" cmd - "Removed" file.
  *		e	"edit" cmd - file edited
  *		u	"unedit" cmd - file unedited
+ *		D	"diff" cmd - Diff was sent (2 records - one for each revision).
  *
  *  date  is a minimum 8-char hex representation of a Unix time_t.
  *		[Starting here, variable fields are delimited by '|' chars.]
@@ -216,7 +217,7 @@ static void save_module (const char *module);
 static void save_user(const char *name);
 static void save_bugid(const char *name);
 
-#define ALL_REC_TYPES "TOEFWUCGMAReu"
+#define ALL_REC_TYPES "TOEFWUCGMAReuPD"
 
 char *logHistory = ALL_REC_TYPES;
 
@@ -268,6 +269,7 @@ struct historyproc_param_t
 	const char *name;
 	const char *bugid;
 	const char *message;
+    const char *directory;
 };
 
 /* This is pretty unclear.  First of all, separating "flags" vs.
@@ -313,7 +315,7 @@ static int historyinfo_proc (void *params, const trigger_interface *cb)
 	int ret = 0;
 	if(cb->history)
 	{
-		ret = cb->history(cb,args->type,args->workdir,args->revs,args->name, args->bugid, args->message);
+		ret = cb->history(cb,args->type,args->workdir,args->revs,args->name, args->bugid, args->message, args->directory);
 	}
 	return ret;
 }
@@ -743,12 +745,7 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 		}
     }
 
-    if (type == 'T')
-    {
-		repos = update_dir;
-		update_dir = "";
-    }
-    else if (update_dir && *update_dir)
+    if (update_dir && *update_dir)
 		slash = "/";
     else
 		update_dir = "";
@@ -831,6 +828,7 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 	args.message = message;
 	args.revs=revs;
 	args.name=name;
+    args.directory=repos;
 
 	TRACE(3,"run history trigger");
 	if (run_trigger (&args, historyinfo_proc) > 0)
