@@ -75,7 +75,9 @@ protected:
 	typedef std::map<unsigned, cache_t> cacheMap_t;
 	cacheMap_t m_Cache;
 
-	static void errorFunc(void *userData, xmlErrorPtr error);
+	static void errorFunc(void *userData, const xmlError* error);
+  // left for compatibility with libxml2 prior v2.12
+	static void errorFunc(void *userData, xmlError* error);
 
         static int WriteToString(void *context, const char *buffer, int len);
         static int CloseWriteToString(void *context);
