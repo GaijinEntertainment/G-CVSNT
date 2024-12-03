@@ -2,6 +2,7 @@
 #include <stddef.h>
 #include <functional>
 #include <string>
+#include <cstdint>
 
 struct BlobNetworkProcessor
 {
