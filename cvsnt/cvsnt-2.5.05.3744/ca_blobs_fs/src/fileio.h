@@ -1,6 +1,7 @@
 #pragma once
 #include <stdio.h>
 #include <string>
+#include <cstdint>
 //this is link time dependencies, some implementation is in fileio.cpp
 //if you use static library, you can override all of it in your app, or replace with your own fileio.cpp
 static constexpr uint64_t invalid_blob_file_size = uint64_t(~uint64_t(0));
