@@ -731,7 +731,19 @@ fi
 AM_CONDITIONAL(WITH_MAC_HFS_SUPPORT, test "x$acx_mac_hfs_support" = "xyes" )
 AC_MSG_RESULT($acx_mac_hfs_support)
 
-acx_build_avx512=yes
+AC_MSG_CHECKING(AVX512 instruction set)
+AC_ARG_ENABLE(avx512,
+[  --enable-avx512            enable avx512 instruction set (default))
+   --disable-avx512           disable avx512])
+
+
+if test "x$enable_avx512" != "xno"; then
+  acx_build_avx512="yes"
+else
+  acx_build_avx512="no"
+fi
+
+acx_mac_build="no"
 case "${target_os}" in
   darwin*)
     acx_mac_build=yes
@@ -745,7 +757,9 @@ case "${target_os}" in
   *)
     ;;
 esac
+AC_MSG_RESULT($acx_build_avx512)
 
+AC_MSG_CHECKING(mac build)
 AC_MSG_RESULT($acx_mac_build)
 AM_CONDITIONAL(WITH_LIBLTDL, test "x$acx_mac_build" != "xyes" )
 AM_CONDITIONAL(ALLOW_OPENMP, test "x$acx_mac_build" != "xyes" )
