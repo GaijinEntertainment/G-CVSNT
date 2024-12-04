@@ -43,7 +43,7 @@ CXmlTree::~CXmlTree()
 	Close();
 }
 
-void CXmlTree::errorFunc(void *userData, xmlErrorPtr error)
+void CXmlTree::errorFunc(void *userData, const xmlError* error)
 {
 	CXmlTree* pthis = (CXmlTree*)userData;
 	cvs::string err;
@@ -52,6 +52,11 @@ void CXmlTree::errorFunc(void *userData, xmlErrorPtr error)
 		CServerIo::error("XML error at line %d: %s\n",error->line,error->message);
 	else
 		CServerIo::trace(3,"XML warning at line %d: %s\n",error->line,error->message);
+}
+
+void CXmlTree::errorFunc(void *userData, xmlError* error)
+{
+  CXmlTree::errorFunc(userData, (const xmlError*)error);
 }
 
 bool CXmlTree::ReadXmlFile(const char *name)

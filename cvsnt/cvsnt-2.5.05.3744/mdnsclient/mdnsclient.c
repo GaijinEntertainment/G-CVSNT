@@ -868,6 +868,11 @@ static int process_response(sock_t fd, const char *prefix, uint64_t timeout, str
     return 0;
 }
 
+static int cmpstring_forqsort(const void *p1, const void *p2)
+{
+  return strcmp(*(const char **) p1, *(const char **) p2);
+}
+
 static int process_server(sock_t fd)
 {
     struct dns_packet *p = NULL;
@@ -936,7 +941,7 @@ static int process_server(sock_t fd)
 					}
 					if(count)
 					{
-						qsort(service_list,count,sizeof(service_list[0]),strcmp);
+						qsort(service_list,count,sizeof(service_list[0]),cmpstring_forqsort);
 						last = NULL;
 						outp = begin_response();
 						ancount=0;
