@@ -42,6 +42,13 @@
 #include "buffer.h"
 #include "hardlink.h"
 
+/* Forward declarations from modules.cpp */
+struct modproc_args_t
+{
+    const char *module_name;
+};
+extern int premodule_proc(void *param, const trigger_interface *cb);
+
 int checkout_file(struct file_info *finfo, Vers_TS *vers_ts,
 				 int adding, int merging, int update_server, int resurrect, int is_rcs, const char *merge_rev1, const char *merge_rev2);
 #ifdef SERVER_SUPPORT
@@ -497,6 +504,58 @@ int update (int argc, char **argv)
 
     /* look for files/dirs locally and in the repository */
     which = W_LOCAL | W_REPOS;
+
+    /* Run premodule triggers before update operation */
+    if(!noexec)
+    {
+        DBM *db = open_module ();
+        int i;
+        if(argc)
+        {
+            for (i = 0; i < argc; i++)
+            {
+                const char *repos;
+                char *dir = xstrdup(argv[i]);
+
+                if(!isdir(dir))
+                {
+                    char *p = (char*)last_component(dir);
+                    if(p && p>dir) p[-1]='\0';
+                    else xfree(dir);
+                }
+                if(dir && isdir(dir))
+                {
+                    repos = Name_Repository (dir, dir?dir:".");
+
+                    /* Run premodule trigger */
+                    modproc_args_t args;
+                    args.module_name = argv[i];  /* Pass the module name from command line */
+
+                    if(run_trigger(&args,premodule_proc))
+                    {
+                        error(1, 0, "premodule trigger failed for %s", argv[i]);
+                    }
+                    xfree(repos);
+                }
+                xfree(dir);
+            }
+        }
+        else
+        {
+            const char *repos = Name_Repository (NULL, NULL);
+
+            /* Run premodule trigger */
+            modproc_args_t args;
+            args.module_name = ".";
+
+            if(run_trigger(&args,premodule_proc))
+            {
+                error(1, 0, "premodule trigger failed");
+            }
+            xfree(repos);
+        }
+        close_module (db);
+    }
 
     /* call the command line interface */
     err = do_update (argc, argv, options, tag, date, force_tag_match,

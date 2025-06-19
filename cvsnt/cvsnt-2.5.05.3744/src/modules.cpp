@@ -56,7 +56,7 @@ struct modproc_args_t
 
 static int sort_order(const PTR l, const PTR r);
 static void save_d(char *k, int ks, char *d, int ds);
-static int premodule_proc(void *param, const trigger_interface *cb);
+int premodule_proc(void *param, const trigger_interface *cb);
 static int postmodule_proc(void *param, const trigger_interface *cb);
 
 
