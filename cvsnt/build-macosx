@@ -24,16 +24,21 @@ brew install automake
 brew install pkg-config
 brew install libtool
 brew install pcre
-brew install openssl@1.1
+brew install openssl@3
 rm /usr/local/include/openssl
-if [ -d "/usr/local/opt/openssl@1.1" ]; then
-  ln -s //usr/local/opt/openssl@1.1/include/openssl /usr/local/include/openssl
-  ln -s //usr/local/opt/openssl@1.1/lib/libcrypto.dylib /usr/local/lib
-elif [ -d "/opt/homebrew/opt/openssl@1.1" ]; then
-  ln -s /opt/homebrew/opt/openssl@1.1/include/openssl /usr/local/include/openssl
-  ln -s /opt/homebrew/opt/openssl@1.1/lib/libcrypto.dylib /usr/local/lib
+if [ -d "/usr/local/opt/openssl@3" ]; then
+  ln -fs /usr/local/opt/openssl@3/include/openssl /usr/local/include/openssl
+  ln -fs /usr/local/opt/openssl@3/lib/libcrypto.dylib /usr/local/lib
+  ln -fs /usr/local/opt/openssl@3/lib/libopenssl.a /usr/local/lib
+  ln -fs /usr/local/opt/openssl@3/lib/libopenssl.dylib /usr/local/lib
+  ln -fs /usr/local/opt/openssl@3/lib/libopenssl.a /usr/local/lib
+elif [ -d "/opt/homebrew/opt/openssl@3" ]; then
+  ln -fs /opt/homebrew/opt/openssl@3/include/openssl /usr/local/include/openssl
+  ln -fs /opt/homebrew/opt/openssl@3/lib/libcrypto.dylib /usr/local/lib
+  ln -fs /opt/homebrew/opt/openssl@3/lib/libcrypto.a /usr/local/lib
+  ln -fs /opt/homebrew/opt/openssl@3/lib/libopenssl.a /usr/local/lib
 else
-  echo "ERROR: could not detect openssl@1.1 location!"
+  echo "ERROR: could not detect openssl@3 location!"
 fi
 
 cd cvsnt-2.5.05.3744

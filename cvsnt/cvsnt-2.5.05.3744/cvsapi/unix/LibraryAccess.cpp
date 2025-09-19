@@ -23,10 +23,7 @@
 #include <sys/stat.h>
 #include <sys/types.h>
 
-#ifdef HAVE_LTDL
-#include <ltdl.h>
-
-#elif defined(__APPLE__)
+#if defined(__APPLE__)
 #include <dlfcn.h>
 #include <string.h>
 
@@ -38,6 +35,9 @@ typedef void *lt_dlhandle;
 #define lt_dlerror dlerror
 #define lt_dlsym   dlsym
 #define lt_dlopenext(P) dlopen(P, RTLD_LAZY)
+
+#elif defined(HAVE_LTDL)
+#include <ltdl.h>
 
 #endif
 
