@@ -20,6 +20,7 @@ rm -rf $Distribution_Dir
 SAVEDIR=`pwd`
 cd $SourceRoot/cvsnt
 make distclean
+autoreconf -i
 ./configure --prefix=/usr --with-config-dir=/private/etc/cvsnt CC="gcc -arch ppc -arch i386" CXX="g++ -arch ppc -arch i386" CPP="gcc -E" CXXCPP="g++ -E" CXXFLAGS="-isysroot /Developer/SDKs/MacOSX10.4u.sdk" CFLAGS="-isysroot /Developer/SDKs/MacOSX10.4u.sdk" LDFLAGS="-Wl,-syslibroot,/Developer/SDKs/MacOSX10.4u.sdk"
 rm -rf $InstallerRoot/* 
 make DESTDIR=$InstallerRoot
