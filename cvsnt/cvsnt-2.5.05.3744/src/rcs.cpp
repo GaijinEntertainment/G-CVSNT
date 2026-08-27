@@ -7149,9 +7149,15 @@ static char *rcs_lockfilename (const char *rcsfile)
 
 /* Rewrite an RCS file.  The basic idea here is that the caller should
    first call RCS_reparsercsfile, then munge the data structures as
-   desired (via RCS_delete_revs, RCS_settag, &c), then call RCS_rewrite.  */
+   desired (via RCS_delete_revs, RCS_settag, &c), then call RCS_rewrite.
 
-void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta)
+   REPARSE selects whether the node is re-parsed from the newly written
+   file before returning.  Pass 0 only when the caller makes no further
+   use of the node before it is freed: the rewrite closes the rcs buffer,
+   which leaves every buffer-backed string field of the node dangling
+   until the re-parse (or the teardown in freercsnode) replaces it.  */
+
+void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, int reparse)
 {
     FILE *fout;
 	size_t lockId_temp;
@@ -7196,8 +7202,11 @@ void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compres
     rcsbuf_close (&rcs->rcsbuf);
     rcs_internal_unlockfile (fout, rcs->path, lockId_temp);
 
-	free_rcsnode_contents(rcs);
-	RCS_reparsercsfile(rcs);
+	if (reparse)
+	{
+		free_rcsnode_contents(rcs);
+		RCS_reparsercsfile(rcs);
+	}
 }
 
 /*

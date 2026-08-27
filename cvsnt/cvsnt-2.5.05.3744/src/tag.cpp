@@ -745,7 +745,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(numtag),
 					PATCH_NULL(current_date) );
-			RCS_rewrite (rcsfile, NULL, NULL, 0);
+			RCS_rewrite (rcsfile, NULL, NULL, 0, 0);
 			tag_set_ok = 1;
 		}
     }
@@ -808,7 +808,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(rev),
 					PATCH_NULL(current_date) );
-	    RCS_rewrite (rcsfile, NULL, NULL, 0);
+	    RCS_rewrite (rcsfile, NULL, NULL, 0, 0);
 		tag_set_ok = 1;
 	}
     }
@@ -890,7 +890,7 @@ static int rtag_delete (RCSNode *rcsfile)
 	return (1);
     }
 	TRACE(3,"rtag_delete(2) rewrite rcsfile");
-    RCS_rewrite (rcsfile, NULL, NULL, 0);
+    RCS_rewrite (rcsfile, NULL, NULL, 0, 0);
     return (0);
 }
 
@@ -1045,7 +1045,7 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 	TRACE(3,"tag_fileproc(1) rewrite rcsfile=\"%s\" symtag=\"%s\"",
 					PATCH_NULL(vers->srcfile->path),
 					PATCH_NULL(symtag) );
-	RCS_rewrite (vers->srcfile, NULL, NULL, 0);
+	RCS_rewrite (vers->srcfile, NULL, NULL, 0, 0);
 
 	/* warm fuzzies */
 	if (!really_quiet)
@@ -1201,7 +1201,7 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(rev),
 					PATCH_NULL(current_date) );
-    RCS_rewrite (vers->srcfile, NULL, NULL, 0);
+    RCS_rewrite (vers->srcfile, NULL, NULL, 0, 0);
 
     /* more warm fuzzies */
     if (!really_quiet)
