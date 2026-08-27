@@ -210,12 +210,14 @@ static void write_entries (List *list)
 	error (1, errno, "error closing %s", entfilename);
 
     /* now, atomically (on systems that support it) rename it */
-	/* First make a copy in the .Old files (note we don't rename so that the
-	   entries files always exist) */
+	/* This used to first byte-copy (and, on POSIX, fsync) the current
+	   files to CVS/Entries.Old and CVS/Entries.Extra.Old - two full file
+	   copies plus two fsyncs for every directory a command touched.
+	   Nothing in cvsnt reads the .Old files; they were only ever a
+	   convention for third-party frontends, and the rename below already
+	   replaces the live files atomically.  */
 	TRACE(3,"write_entries() now, atomically (on systems that support it) rename it ");
-	copy_file (CVSADM_ENT, CVSADM_ENTOLD, 1, 0);
     rename_file (entfilename, CVSADM_ENT);
-	copy_file (CVSADM_ENTEXT, CVSADM_ENTEXTOLD, 1, 0);
     rename_file (entexfilename, CVSADM_ENTEXT);
 
     /* now, remove the log file */
