@@ -34,8 +34,11 @@ headers, and binary payload moves over a channel that can be cached, parallelise
 * The CVS command surface (`checkout`, `update`, `commit`, `tag`, `rtag`, `diff`, `log`, …).
 * The RCS `,v` on-disk format itself — a G-CVSNT repository is still a CVS repository. Text files
   (`-kkv`, `-kb`, …) are stored exactly as before, as RCS deltas.
-* The CVS client/server wire protocol — G-CVSNT only *adds* requests and responses, so an old client
-  can still talk to a new server for text-only work.
+* The CVS client/server wire protocol — G-CVSNT only *adds* requests and responses. As shipped,
+  however, the new `Blob-transfer` request and `Blob-ref` response are marked *essential*, so this
+  build does **not** interoperate with a pre-blob client or server; a peer that omits them is
+  rejected outright (`src/server.cpp:1010`, `src/client.cpp:789`). See
+  [04-protocols.md](04-protocols.md).
 * ACLs, triggers, `CVSROOT/` administrative files, the lock server, and the Windows service /
   control-panel integration inherited from CVSNT.
 

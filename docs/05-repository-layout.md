@@ -39,16 +39,19 @@
 │
 └── mymodule/                          <- an actual module
     ├── CVS/                           <- per-directory repository metadata
-    │   └── fileattr                   watchers, ACLs, edit state
+    │   └── fileattr.xml               watchers, ACLs, edit state (legacy name: fileattr)
     ├── src/
     │   ├── main.cpp,v                 RCS file (text, normal deltas)
-    │   └── Attic/                     ,v files for deleted-on-this-branch files
+    │   └── Attic/                     ,v files whose head trunk revision is dead
     └── assets/
         └── tex.dds,v                  RCS file whose revisions are blob references
 ```
 
-The names above are the `CVSROOTADM_*` and `CVSREP` constants in `src/cvs.h:179` and
-`src/cvs.h:171`.
+The `CVSROOT/` names are the `CVSROOTADM_*` constants at `src/cvs.h:179`, and the per-directory
+`CVS/` name is `CVSREP` at `src/cvs.h:170`. The others come from elsewhere: `Attic` is `CVSATTIC`
+(`src/cvs.h:217`), `blobs` is `BLOBS_SUB_FOLDER`
+(`ca_blobs_fs/src/content_addressed_fs.cpp:16`), and `fileattr.xml` is `CVSREP_FILEATTR`
+(`src/fileattr.h:41`).
 
 ### A `,v` file for a `-kB` file
 
@@ -88,14 +91,16 @@ carries a `deltatype` (`src/rcs.cpp:6678`). The admin block CVSNT writes is `hea
 
 Consequences:
 
-* The `,v` file grows by roughly 100 bytes per revision no matter how large the asset is.
+* The `,v` file grows by roughly 250 bytes per revision plus the log message, no matter how large
+  the asset is. (The delta node alone is ~150-200 bytes: `putdelta`, `src/rcs.cpp:6643`, plus the
+  `other_delta` fields added at `src/rcs_checkin.cpp:627`.)
 * `cvs log`, `cvs status` and tag operations never touch the payload.
 * The payload itself is at `/cvs/blobs/3f/a9/3fa91c2e6d4b...`.
 * Nothing in the `,v` file records the blob's *size*; that comes from the blob header or from a
   `SIZE` query.
 
-`src/rcs.cpp:4288` (`get_binary_blob_ver_file_path`) is where the reference is turned back into a
-path on the server.
+`ca_blobs_fs/src/content_addressed_fs.cpp:71` (`get_file_path`, with the root set by `set_root` at
+`:39`) is where a hash is turned into `<root>/blobs/xx/yy/<64-hex>` on the server.
 
 ## Client side
 
@@ -133,12 +138,15 @@ D/<dirname>////
 * `<timestamp>` is the mtime the file had when CVS last wrote it. A file whose mtime differs is a
   candidate for "modified" and gets content-compared.
 * `<options>` is the `-k` string, e.g. `-kB`.
-* A leading `D` marks a subdirectory. A bare `D` on its own line means "this directory has
-  subdirectories recorded".
+* A leading `D` marks a subdirectory. A bare `D` on its own line signals that this `Entries` file
+  lists **all** known subdirectories — it is written precisely when subdirectory tracking is in
+  effect, typically with no subdirectories at all (`src/entries.cpp:489`, written at
+  `src/entries.cpp:194`).
 
-`cvs.py`-style tooling exploits the `D/<dirname>////` form: writing such a stub into `CVS/Entries`
-before an update makes CVS descend into a subdirectory that is not yet present locally, which is how
-partial checkouts are bootstrapped.
+External tooling sometimes exploits the `D/<dirname>////` form by writing such a stub into
+`CVS/Entries` before an update, to bootstrap a partial checkout. Nothing in this source tree
+documents or implements that behaviour — treat it as an external convention, not a supported
+interface.
 
 ### Files CVS creates in the working copy
 
@@ -146,7 +154,7 @@ partial checkouts are bootstrapped.
 | --- | --- | --- |
 | `.#<file>.<rev>` | `update` merge (`src/update.cpp:2329`) | Your version before a merge overwrote it; `<rev>` is the revision you were on |
 | `.#<file>.<rev>` | `update -C` (`src/update.cpp:801`) | Your locally modified version before it was reverted |
-| `.#<file>.<rev>` | `commit`/`send_files` with backup (`src/client.cpp:5436`) | Same, on the send path |
+| `.#<file>.<rev>` | `update -C` over client/server (`src/client.cpp:5436`; the flag is set at `src/update.cpp:400`) | Same, on the send path |
 | `#cvs.lock`, `#cvs.rfl.*`, `#cvs.wfl.*` | server locking (`src/lock.cpp:684`) | Present in the *repository*, not the working copy |
 
 The prefix is `BAKPREFIX`, defined as `".#"` at `src/cvs.h:269`. CVS never removes these files; the
@@ -154,16 +162,20 @@ upstream comment says they are expected to "stay around for a few days before be
 removed by some cron daemon" (`src/update.cpp:2319`), which on a developer workstation means they
 accumulate forever.
 
-`update -n` sets `backup_local_files = 0` (`src/update.cpp:205`) and suppresses every one of those
-backups, deleting the local version outright. This is irreversible; the option help says so.
+`update -n` sets `backup_local_files = 0` (`src/update.cpp:205`), which suppresses the **`-C`**
+backups only — the flag is tested in exactly two places, `src/update.cpp:801` and
+`src/client.cpp:5436`. The merge backups at `src/update.cpp:2329` and `src/update.cpp:3105` are
+written regardless. Where `-n` does apply, the local version is deleted outright and irreversibly.
 
 ## Locking
 
 Two mechanisms coexist:
 
-1. **Filesystem locks** in the repository directory: `#cvs.lock` (master), `#cvs.rfl.<pid>` (read),
-   `#cvs.wfl` (write). Implemented in `src/lock.cpp`. `LockDir` in `CVSROOT/config` can redirect
-   them to a scratch filesystem.
+1. **Filesystem locks** in the repository directory: `#cvs.lock` (the master lock — a *directory*,
+   created with `CVS_MKDIR` at `src/lock.cpp:1088`), `#cvs.rfl.<host>(<user>).<pid>` (read) and
+   `#cvs.wfl.<host>(<user>).<pid>` (write). Names at `src/cvs.h:222`; construction at
+   `src/lock.cpp:722` and `src/lock.cpp:878`. `LockDir` in `CVSROOT/config` can redirect them to a
+   scratch filesystem.
 2. **The lock server** `cvslockd` on port 2402, selected with `LockServer` in `CVSROOT/config`
    (`src/lock.cpp:152`, connection at `src/lock.cpp:190`). Locks become in-memory state in a single
    daemon rather than files, which removes a large amount of directory churn.

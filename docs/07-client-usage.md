@@ -30,8 +30,8 @@ Run `cvs --help-options` for the full list. The ones specific to, or important f
 
 | Option | Effect |
 | --- | --- |
-| `-j N` | Number of blob download worker threads. `0` downloads on the main thread. When not given, the default is `min(8, max(1, cpu_count - 1))` (`src/download_blob_to.cpp:241`). This is the single biggest client-side knob for update speed on binary-heavy trees (`src/main.cpp:1013`) |
-| `--blob_url <spec>` | Override the blob server(s) the server advertised. `\|`-separated; each entry `host[/path][@port]`; `def` means the master (`src/main.cpp:1017`) |
+| `-j N` | Number of blob download worker threads. When not given, the default is `min(8, max(1, cpu_count - 1))` (`src/download_blob_to.cpp:241`). The single biggest client-side knob for update speed on binary-heavy trees (`src/main.cpp:1013`). `-j 0` is documented as "download in the main thread" but is currently a no-op — `src/client.cpp:2210` treats 0 as "unset", so the default applies |
+| `--blob_url <spec>` | Override the blob server the CVS server advertised. Takes a **single** URL `host[/path][@port]`, and disables round-robin (`src/download_blob_to.cpp:258`). The `\|`-separated list and `def` shown in `cvs --help-options` are not implemented — only the first `@` is parsed (`src/client.cpp:2123`) |
 | `-z <0-9>` | Stream compression level for the CVS connection (gzip or zstd, negotiated) |
 | `-x` / `-y` | Require / request encryption of the CVS connection |
 | `-a` | Authenticate (sign) all traffic |
@@ -40,8 +40,8 @@ Run `cvs --help-options` for the full list. The ones specific to, or important f
 | `-t` | Trace execution; `-t -t` and more increase the trace level. Invaluable for diagnosing blob-fetch problems |
 
 Note the collision hazard: **`-j` is a global option here** (blob concurrency) but **`-j rev` is a
-per-command option** for `update`, `checkout` and `diff` (merge from revision). Position decides
-which one you get:
+per-command option** for `update` and `checkout` (merge from revision; `diff` has no `-j`). Position
+decides which one you get:
 
 ```
 cvs -j 8 update -d          # 8 blob download threads
@@ -62,7 +62,7 @@ cvs add -kBz compressible_binary.bin
 | `-kB` | `KFLAG_BINARY \| KFLAG_BINARY_DELTA` | Content goes to the blob store; the `,v` holds a 71-byte reference |
 | `-kBz` | as `-kB` plus `KFLAG_COMPRESS_DELTA` | Same, and the blob is stored compressed |
 
-(`src/rcs.cpp:42`, `src/rcs.cpp:3501`)
+(`src/rcs.cpp:38` and `src/rcs.cpp:55` for the two flag tables; `src/rcs.cpp:3502` for serialisation)
 
 Use `-kB`/`-kBz` for **every** large binary asset. A binary added with plain `-kb` will bloat its
 `,v` file and slow down every tag, branch and `rlog` that touches its directory.
@@ -93,7 +93,8 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
            [-B bugid] [-I ign] [-W spec] [--blob_zero] [files...]
 ```
 
-(`src/update.cpp:130`)
+(`update_usage`, `src/update.cpp:131`. The synopsis above is expanded to include `-3`, `-n` and
+`--blob_zero`, which the getopt string at `src/update.cpp:184` accepts but the usage text omits.)
 
 | Option | Meaning |
 | --- | --- |
@@ -154,7 +155,7 @@ cvs rtag [-abdFflnR] [-r rev|-D date] tag modules...
 | --- | --- |
 | `-b` | Make it a branch tag |
 | `-A` | Make an alias of an existing branch (needs `-r`) |
-| `-M` | Create a floating branch |
+| `-M` | (`tag` only) Create a floating branch. `rtag`'s usage text advertises it, but `rtag_opts` (`src/tag.cpp:86`) does not accept it |
 | `-d` | Delete the tag |
 | `-F` | Move the tag if it already exists |
 | `-B` | Permit moving/deleting a *branch* tag. Not recommended |
@@ -186,8 +187,9 @@ repository, costs almost nothing.
 
 ## `.cvsrc`
 
-Per-user default options live in `~/.cvsrc` (`%USERPROFILE%\.cvsrc` on Windows), one line per
-command:
+Per-user default options live in `~/.cvsrc`, one line per command. On Windows the home directory
+comes from `%HOME%`, falling back to `%HOMEDRIVE%%HOMEPATH%` — `%USERPROFILE%` is never consulted
+(`windows-NT/filesubr.cpp:1137`):
 
 ```
 cvs -q -j 8
@@ -211,11 +213,11 @@ cvs -t -t -t update -d 2> trace.log
 ```
 
 Trace level 3 logs blob URL selection, blob-reference detection and per-file decisions
-(`src/server.cpp:3355`, `src/server.cpp:4431`). This is the first thing to collect when blobs fail
+(`src/server.cpp:3354`, `src/server.cpp:4431`). This is the first thing to collect when blobs fail
 to download.
 
 ```
 cvs version          # client and server versions
 cvs status -v file   # revision, sticky tag, and all tags on the file
-cvs ls -e            # server-side directory listing without a working copy
+cvs ls -e            # server-side listing, printed in CVS/Entries format
 ```

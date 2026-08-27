@@ -9,11 +9,11 @@ Source: `ca_blobs_fs/` (on-disk store) and `keyValueServer/` (network layer).
 ## The key: BLAKE3
 
 The key of a blob is the **BLAKE3-256 hash of its uncompressed content**, lower-case hex, 64
-characters (`src/sha_blob_reference.h:9`).
+characters (`src/sha_blob_reference.h:10`).
 
-BLAKE3 was chosen over SHA-256 for two stated reasons (`src/sha_blob_reference.h:6`): it is not
-vulnerable to length extension, and it is several times faster — 4× in plain C, 8× with SSE2, more
-with AVX-512. Hashing throughput matters because every commit and every integrity check re-hashes
+BLAKE3 was chosen over SHA-256 for two stated reasons (`src/sha_blob_reference.h:7`): it is not
+vulnerable to length extension, and it is several times faster — the comment claims 4× in plain C
+and 8× with SSE2 alone, with more available from AVX. Hashing throughput matters because every commit and every integrity check re-hashes
 whole files. The implementation is vendored in `blake3/` with SSE2/SSE4.1/AVX2/AVX-512 kernels
 selected at run time.
 
@@ -50,9 +50,15 @@ The payload follows, compressed according to `magic`. The *hash is always of the
 content*, so re-compressing a blob with a different algorithm does not change its key — which is
 exactly what makes `repack-blobs` safe.
 
-`BEST_POSSIBLE_COMPRESSION` is set only by the offline `repack-blobs` maintenance tool. Clients and
-the server compress on the fly, favouring speed; the flag records "this one has already been
-squeezed as hard as we can, don't bother again".
+`BEST_POSSIBLE_COMPRESSION` is set by `repack()` (`ca_blobs_fs/src/content_addressed_fs.cpp:288`).
+That is called both by the offline `repack-blobs` tool *and* by `cafs_server` itself for every newly
+stored blob, at lowered priority, unless the server was started with `norepack`
+(`keyValueServer/server/blob_file_lib.cpp:70`, `cafs_server.cpp:9`). Clients compress on the fly,
+favouring speed; the flag records "this one has already been squeezed as hard as we can, don't
+bother again".
+
+(The comment at `ca_blob_format.h:11` still says only a maintenance utility sets it. That comment is
+stale relative to the code.)
 
 Compression is abstracted over zlib and zstd by `ca_blobs_fs/streaming_compressors.h`
 (`StreamType::{Unpacked, ZLIB, ZSTD}`), so a store can hold a mixture and readers cope.
@@ -98,7 +104,10 @@ start_push(ctx, hash)  →  stream_push(pd, data, len)*  →  finish(pd, &actual
 
 1. **Early dedup.** If `hash` is supplied and that file already exists, `start_push` returns a
    sentinel handle and all subsequent writes are no-ops; `finish` reports `DEDUPLICATED`. This costs
-   one `stat` and no data transfer at all.
+   one `stat` and no disk I/O — but note the server still reads the whole blob off the socket first
+   (`keyValueServer/serverLib/blob_push_proc.cpp:116`). Avoiding the *network* transfer is a
+   separate, client-side optimisation: the client issues a `SIZE` query and skips the push
+   altogether (`src/blob_kv_processor.cpp`, `upload()`).
 2. Otherwise a temp file is opened, ideally in the destination directory.
 3. Each `stream_push` writes the *already-compressed* bytes straight through, and — unless the
    client's hash is trusted — simultaneously decompresses them into a BLAKE3 hasher so the true hash
@@ -117,8 +126,14 @@ defaults to **on**, and the reasoning is written out at `ca_blobs_fs/content_add
 an existing blob is never overwritten, so a lying client cannot corrupt content that is already
 stored — the worst outcome is an unreferenced junk blob that garbage collection later removes.
 Trust is switched off automatically when the server runs with encryption enabled
-(`keyValueServer/server/cafs_server.cpp:44`), and the network server never trusts clients on the
-verification path.
+(`keyValueServer/server/cafs_server.cpp:46`).
+
+The header comment at `ca_blobs_fs/content_addressed_fs.h:41` claims the networking server never
+trusts client hashes. **The code does not implement that.**
+`keyValueServer/server/blob_file_lib.cpp:18` passes the client-supplied hash straight into
+`start_push`, so with the default `allow_trust` an unencrypted `cafs_server` does accept it
+unverified. Worse, `cafs_server`'s own `allow_trust(on|off)` argument is parsed but never applied —
+see `_reports/BUG-blob-07-cafs-server-allow-trust-off-ignored.md`.
 
 ## Read path (`pull`)
 
@@ -126,17 +141,26 @@ verification path.
 start_pull(ctx, hash, &blob_sz)  →  pull(pd, from, &data_pulled)*  →  destroy(pd)
 ```
 
-Reads are memory-mapped and support random access from an arbitrary offset, which is what lets the
-network layer serve a blob in 1 MB chunks (`blob_push_proto::pull_chunk_size`) and lets a client
-resume.
+Reads are memory-mapped and support random access from an arbitrary offset, which is what lets a
+client resume a `PULL` from any megabyte boundary (`blob_push_proto::pull_chunk_size` quantises the
+start offset). The body of a `PULL` is streamed in one run, not in chunks.
 
 ## Immutability and its consequences
 
-Blobs are never modified in place and never overwritten. That gives:
+A blob's *uncompressed content* under a given hash never changes, and the push path never
+overwrites an existing file (`blob_fileio_rename_file_if_nexist`,
+`ca_blobs_fs/src/content_addressed_fs.cpp:219`). The stored *bytes* can still be replaced by a
+repack, which rewrites the same path with a better-compressed payload using the unconditional
+rename (`ca_blobs_fs/src/content_addressed_fs.cpp:354`); the proxy accounts for this
+(`keyValueServer/proxy/proxy_file_lib.cpp:198`).
+
+Content stability gives:
 
 * **Free dedup** — the same asset committed on ten branches is one file.
 * **Trivial caching** — a proxy can cache a blob forever; content can never change under a hash.
-* **Cheap integrity checking** — re-hash the file, compare to the filename.
+* **Integrity checking** — decompress the payload, re-hash it, compare to the filename
+  (`ca_blobs_fs/src/content_addressed_fs.cpp:161`). Note that you cannot hash the blob file's raw
+  bytes: the hash is of the *uncompressed* content, and the file is header-plus-compressed-payload.
 * **No reference counting** — nothing tracks how many `,v` files point at a blob. Reclaiming space
   therefore requires a *mark-and-sweep* pass, which is what `gc-blobs` does: scan every `,v` file
   in the repository for references, then delete unreferenced blobs. See
@@ -151,5 +175,7 @@ Blobs are never modified in place and never overwritten. That gives:
 | `repack-blobs` | `tools/repack-blobs.cpp` | Recompresses blobs to the best available ratio and sets `BEST_POSSIBLE_COMPRESSION` |
 | `blake3-calc` | `tools/blake3-calc.cpp` | Prints a file's blob key |
 
-All four take the repository root and operate directly on the filesystem; they coordinate with the
-running server through `tools/simpleLock.cpp.inc`.
+`cvtblob` and `gc-blobs` take the repository root and coordinate with a running server through the
+lock server (`tools/simpleLock.cpp.inc`). `repack-blobs` takes the root but takes **no** lock.
+`blake3-calc` takes a single filename — not a repository — and touches neither the repository nor
+the lock server.

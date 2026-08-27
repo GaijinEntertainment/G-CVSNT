@@ -21,25 +21,30 @@ used, which is how new features stay backward compatible.
 ### Typical `update` exchange
 
 ```
-C: Root /cvs
 C: Valid-responses ok error Updated Blob-ref Blob-ref-created ...
 C: valid-requests
 S: Valid-requests Root Directory Entry Modified Blob-transfer ...
 S: ok
+C: Root /cvs
 C: UseUnchanged
 C: Argument -d
 C: Directory develop/assets
 C: /cvs/game/develop/assets
-C: Entry /tex.dds/1.14/Wed Jun 4 10:00:00 2025//
+C: Entry /tex.dds/1.14/Wed Jun  4 10:00:00 2025/-kB/
 C: Unchanged tex.dds
 C: update
 S: Blob-ref develop/assets/
 S: /cvs/game/develop/assets/tex.dds
-S: /tex.dds/1.15///
+S: /tex.dds/1.15//-kB/
 S: u=rw,g=rw,o=r
+S: 71
 S: blake3:3fa91c2e...
 S: ok
 ```
+
+Note the ordering: the client sends `Valid-responses` and `valid-requests` and reads the server's
+capability list *before* it sends `Root` (`src/client.cpp:4646`, `:4659`, `:4682`). `Root` is never
+the first request.
 
 The client then fetches `3fa91c2e...` over the blob connection and writes `tex.dds`.
 
@@ -47,7 +52,7 @@ The client then fetches `3fa91c2e...` over the blob connection and writes `tex.d
 
 | Request | Handler | Purpose |
 | --- | --- | --- |
-| `Blob-transfer` | `serve_blob` | Client uploads file content that the server should turn into a blob |
+| `Blob-transfer` | `serve_blob` | Client uploads a *prepared blob* — header plus framed payload — keyed by its content hash; the server streams it into the CAFS as-is (`src/client.cpp:5775`, `src/server.cpp:1836`) |
 | `Blob-ref-transfer` | `serve_blob_ref` | Client has already pushed the blob itself and sends only the reference |
 | `Binary-transfer` | `serve_binary_transfer` | Binary file transfer that bypasses text/codepage translation |
 | `Zstd-stream` | `serve_zstd_stream` | Switch the whole connection to zstd framing instead of gzip |
@@ -59,8 +64,10 @@ them to `0`/`rs_optional` if you need to interoperate with a pre-blob peer
 an old client or an old server** — the blob extensions are mandatory.
 
 `Blob-ref-transfer` is the fast path: the client pushes the blob directly to the CAFS server, then
-tells the CVS server only the 71-byte reference, so the payload never crosses the CVS connection at
-all.
+tells the CVS server only the 71-byte reference — so the payload does not cross the CVS connection,
+*provided* the background pre-upload already placed it in the store. If it did not, the client falls
+back to `Blob-transfer` with the full payload (`src/client.cpp:5864`). `update` always takes the
+reference path (`src/update.cpp:410`); `commit` can fall back (`src/commit.cpp:662`).
 
 ### Responses added by this fork
 
@@ -71,13 +78,17 @@ all.
 | `Blob-url` | `handle_blob_url` | Where to fetch blobs from; may be repeated to give several proxies |
 | `Blob-OTP` | `handle_blob_otp` | Time-based one-time secret plus page number, for authenticating to an encrypted blob server |
 
-`Blob-ref` carries the same envelope as `Updated` (directory, repository path, entry line, mode) but
-its "content" is the 71-byte reference rather than the file (`src/server.cpp:4509`).
+`Blob-ref` carries the same envelope as `Updated` — directory, repository path, entry line, mode,
+then a decimal byte count — but its "content" is the 71-byte reference rather than the file
+(`src/server.cpp:4509`, byte count at `src/server.cpp:4565`).
 
 `Blob-url` values come from the server's own configuration: `cvsnt/PServer/BlobURL` and
 `BlobURL0`...`BlobURL31` (`src/server.cpp:3346`). Later values *override* earlier ones, and the
-client can round-robin between them. When an OTP is configured,
-`BlobEncryptedURL0`...`BlobEncryptedURL31` are sent instead (`src/server.cpp:3379`).
+client round-robins between them: every value is appended to a list, none is discarded
+(`add_blobs_url`, `src/client.cpp:2138`; `get_round_robin_blob_url`, `src/client.cpp:2183`). The
+"overwrite" wording in the server-side comments is stale. When an OTP is configured,
+`BlobEncryptedURL0`...`BlobEncryptedURL31` are sent *as well*, after the `Blob-OTP` line
+(`src/server.cpp:3406`); the client files those separately as encrypting URLs.
 
 `Blob-OTP` sends a TOTP secret derived from the server-side shared secret `cvsnt/PServer/BlobOTP`
 plus the current page number, both hex-encoded (`src/server.cpp:3380`). The client uses it to
@@ -85,19 +96,25 @@ authenticate to the CAFS server without ever seeing the shared secret.
 
 ### Client-side override
 
-`cvs --blob_url <url>` (`src/main.cpp:761`) overrides whatever the server advertises. The value is a
-`|`-separated list, each entry `host[/path][@port]`, with `def` meaning "the master". Examples:
+`cvs --blob_url <url>` (`src/main.cpp:761`) overrides whatever the server advertises:
 
 ```
-cvs --blob_url http://cvs-proxy.lan@8080 up
-cvs --blob_url "localhost@2403|cvs-master.lan@2403" up
+cvs --blob_url cvs-proxy.lan@2403 up
 ```
+
+The help text at `src/main.cpp:349` advertises a `|`-separated list with `def` meaning "the master".
+**Neither is implemented.** `parse_url_port` (`src/client.cpp:2123`) truncates at the first `@` and
+`atoi()`s the rest, so everything after the first entry is silently discarded, and
+`src/download_blob_to.cpp:258` then forces a single URL with no round-robin. No code anywhere
+compares against `def`.
 
 Two transport back-ends implement `BlobNetworkProcessor` (`src/blob_network_processor.h`):
 
 * `src/blob_kv_processor.cpp` — the native `blob_push` TCP protocol (`host@port`)
-* `src/blob_http_processor.cpp` — plain HTTP GET/PUT (`http://...`), using the vendored
-  `src/httplib.h`; useful when a CDN or ordinary web cache sits in front of the store
+* `src/blob_http_processor.cpp` — HTTP GET only, using the vendored `src/httplib.h`. Uploading is a
+  stub (`canUpload()` returns `false`, `src/blob_http_processor.cpp:8`) and the back-end is never
+  selected: `BackgroundProcessor::init()` constructs only `get_kv_processor`
+  (`src/download_blob_to.cpp:292`). The file compiles but is currently unreachable.
 
 ## 2. The `blob_push` protocol
 
@@ -113,21 +130,28 @@ client replies `VERS` plus its own three-character version, then one of two nego
   Diffie-Hellman parameters, all encrypted with the OTP. The server answers with its own 8 random
   bytes and DH parameters. Both derive the same session keys from the two nonces, the OTP page and
   the DH exchange. The client then sends its 64-bit timestamp plus 64 padding bits, encrypted with
-  the session keys ("Client Ready"); the server answers `HAVE` (encryption stays on), `NONE`
-  (continue in clear), `ERIO` (bad timestamp) or `EBRD` (bad version). The root is always sent
-  encrypted.
-* **Prototype (legacy)** — the root is sent immediately; the server answers `NONE` or `EBRD`.
+  the session keys ("Client Ready"). The server echoes 64 bits of ones, which the client verifies —
+  an explicit server-authentication / MITM check (`keyValueServer/clientLib/blob_push_pull_client.cpp:192`,
+  server side `keyValueServer/serverLib/blob_push_proc.cpp:313`). The client then sends the root, and
+  only afterwards reads the 4-byte verdict: `HAVE` (encryption stays on), `NONE` (continue in clear),
+  `ERIO` (bad timestamp) or `ERBD` (bad version). The two are pipelined — the server writes its
+  verdict before reading the root (`blob_push_proc.cpp:361`). The root is always sent encrypted.
+* **Prototype (legacy)** — the root is sent immediately; the server answers `NONE` or `ERBD`.
+
+(The header comment spells the bad-version code `EBRD`; the wire constant is `ERBD`,
+`keyValueServer/include/blob_push_protocol.h:73`.)
 
 Encryption is all-or-nothing for the rest of the connection.
 
 ### Commands
 
-All commands are 4 ASCII bytes. Hashes travel as 32 raw bytes (`bin_hash_len`), prefixed by the
-`blake3:` tag, for `hash_len = 38` bytes total.
+All commands are 4 ASCII bytes. Hashes travel as a **6-byte** type tag — `blake3`, with the trailing
+`:` of `HASH_TYPE_REV_STRING` dropped on the wire (`keyValueServer/include/blob_hash_util.h:87`) —
+followed by 32 raw bytes (`bin_hash_len`), for `hash_len = 38` bytes total.
 
 | Command | Payload | Responses |
 | --- | --- | --- |
-| `VERS` | 3-byte version, then the handshake above | `HAVE` / `NONE` / `ERIO` / `EBRD` |
+| `VERS` | 3-byte version, then the handshake above | `HAVE` / `NONE` / `ERIO` / `ERBD` |
 | `SIZE` | hash | `SIZE` plus 8-byte size, `NONE`, `ERxx` |
 | `CHCK` | hash | `HAVE`, `NONE`, `ERxx` |
 | `PUSH` | hash plus 8-byte size, then that many bytes of prepared blob | `HAVE`, `ERxx` |
@@ -136,11 +160,14 @@ All commands are 4 ASCII bytes. Hashes travel as 32 raw bytes (`bin_hash_len`), 
 
 Notes:
 
-* `PULL` with size 0 and offset 0 means "the whole blob". The offset is counted in units of
-  `1 << 20`, so transfers are naturally chunked at 1 MB (`pull_chunk_size`) and a client can resume
-  from an arbitrary megabyte boundary.
-* `STRM` chunks are `uint16_t` length plus that many bytes; a zero length ends the stream. This is
-  the path used when the client does not know the final compressed size in advance.
+* `PULL` with size 0 and offset 0 means "the whole blob". The *start offset* is counted in units of
+  `1 << 20` (`pull_chunk_size`), so a client can resume from any megabyte boundary. The body itself
+  is not chunked — after the `TAKE` header the server streams the whole remaining length in one run
+  (`keyValueServer/serverLib/blob_push_proc.cpp:214`).
+* `STRM` chunks are `uint16_t` length plus that many bytes; a zero length ends the stream, and
+  `0xFFFF` aborts it (the server replies `ERIO`,
+  `keyValueServer/serverLib/blob_push_proc.cpp:151`), so the largest data chunk is 65534 bytes. This
+  is the path used when the client does not know the final compressed size in advance.
 * What travels for `PUSH`/`STRM` is the *prepared blob* — header plus compressed payload, exactly as
   it will land on disk — not the raw file. The hash, however, is of the uncompressed content.
 * Any response beginning with `ER` is an error (`is_error_response`).
@@ -151,7 +178,10 @@ Notes:
 * Content addressing makes the service cacheable by a proxy that understands nothing about CVS
   (`keyValueServer/proxy/`).
 * Downloads can be parallelised across worker threads (`cvs -j N`) and across several URLs.
-* `CHCK` before `PUSH` turns a re-commit of unchanged content into two small round trips.
+* `SIZE` before `STRM` turns a re-commit of unchanged content into two small round trips
+  (`src/blob_kv_processor.cpp:144`). Note that the CVS client uses `SIZE`/`STRM`, not `CHCK`/`PUSH`:
+  `CHCK` is used by the proxy (`keyValueServer/proxy/proxy_file_lib.cpp:216`) and `PUSH` only by the
+  sample clients.
 
 ## 3. Stream compression
 

@@ -34,7 +34,7 @@ sending requests) and the server half (executing against the repository), separa
 | `rcs_checkin.cpp` | 2236 | Writing a new revision into a `,v` file |
 | `import.cpp` | 1960 | `import` |
 | `log.cpp` | 1884 | `log` / `rlog` |
-| `main.cpp` | 1873 | Entry point, global options (`:745`), command table (`:159`) |
+| `main.cpp` | 1873 | Entry point, global options (`:736`), command table (`:159`) |
 | `buffer.cpp` | 1790 | The buffered-I/O abstraction the whole protocol sits on |
 | `mapping.cpp` | 1636 | Path/name mapping and virtual repositories |
 | `tag.cpp` | 1611 | `tag` / `rtag`, including branch creation |
@@ -48,7 +48,7 @@ sending requests) and the server half (executing against the repository), separa
 | `filesubr.cpp` | 1320 | POSIX filesystem helpers (Windows equivalents are in `windows-NT/`) |
 | `lock.cpp` | 1316 | Repository locking, both file-based and lock-server |
 | `root.cpp` | 1176 | `CVSROOT` string parsing, protocol plugin selection |
-| `modules.cpp`, `Modules1.cpp`, `Modules2.cpp` | | Module database |
+| `modules.cpp` | | Module database |
 | `classify.cpp`, `vers_ts.cpp` | | Deciding a file's state (up-to-date / modified / needs merge / …) |
 | `hash.cpp` | 521 | The `List`/`Node` container used pervasively for entries, files, directories |
 | `httplib.h` | 6707 | Vendored single-header HTTP client, used by the HTTP blob back-end |
@@ -77,7 +77,7 @@ Small and self-contained. Read it in full before touching anything blob-related.
 | `content_addressed_fs.h` | Public API: `start_push`/`stream_push`/`finish`, `start_pull`/`pull`, `exists`, `get_size` |
 | `src/content_addressed_fs.cpp` | Implementation: path layout, temp-file-then-rename, dedup |
 | `ca_blob_format.h` | The 16-byte blob header and magic values |
-| `src/fileio.cpp`, `fileio.h` | Filesystem primitives, memory-mapped pull |
+| `src/fileio.cpp`, `src/fileio.h` | Filesystem primitives, memory-mapped pull |
 | `streaming_compressors.h`, `src/streaming_compressors.cpp` | zlib/zstd abstraction |
 | `calc_hash.h`, `src/calc_hash.cpp` | Hex/binary hash conversion |
 | `streaming_blobs.h`, `push_whole_blob.h` | Higher-level streaming helpers |
@@ -100,9 +100,9 @@ Small and self-contained. Read it in full before touching anything blob-related.
 
 | Path | Role |
 | --- | --- |
-| `cvsapi/` (~26 kLoC) | C++ support library: sockets, HTTP, TLS, compression, `db/` back-ends (MySQL, PostgreSQL, SQLite, ODBC, Oracle, MSSQL, DB2), `mdns/`, `unix/` and `win32/` platform layers |
-| `cvstools/` (~6 kLoC) | `CGlobalSettings`, `CLibraryAccess`, `EntriesParser`, `RootSplitter`, `Scramble`, plugin interfaces |
-| `lib/` (~11 kLoC) | GNU portability layer: `getline`, `fnmatch`, `getopt`, `xmalloc`, `regex`, `md5`, `savecwd` |
+| `cvsapi/` (~26 kLoC) | C++ support library: sockets, HTTP, TLS, `CLibraryAccess` (dynamic loading), XML, codepage conversion, `db/` back-ends (MySQL, PostgreSQL, SQLite, ODBC, Oracle, MSSQL, DB2), `mdns/`, `unix/` and `win32/` platform layers |
+| `cvstools/` (~6 kLoC) | `CGlobalSettings`, `CProtocolLibrary`, `CTriggerLibrary`, `EntriesParser`, `RootSplitter`, `Scramble`, `ServerConnection`, `ServerInfo`, plugin-interface headers |
+| `lib/` (~11 kLoC) | GNU portability layer: `getline`, `getdelim`, `fnmatch`, `getopt_long`, `regcomp`, `getaddrinfo`/`getnameinfo`, `timegm`, `waitpid`. (`xmalloc` is `src/subr.cpp:67`, `savecwd` is `src/savecwd.cpp`, MD5 is `cvsapi/lib/md5.c`) |
 | `diff/` (~8.5 kLoC) | GNU diff |
 | `xdiff/` | Pluggable external and XML diff back-ends |
 | `windows-NT/` | Windows implementations of `filesubr`, `mkdir`, `pwd`, `setuid`, `waitpid`, plus `cvsdiag`, `gss-ad`, `setuid` helpers |
@@ -133,7 +133,7 @@ Small and self-contained. Read it in full before touching anything blob-related.
 | `cvsgui/` | GUI integration protocol (used by WinCVS/TortoiseCVS) |
 | `cvsdelta/`, `rcs/`, `rcs_convert.vcxproj` | Auxiliary RCS tools (`co`, `rlog`, `rcsdiff`) |
 | `mdnsclient/`, `extnt/`, `su/`, `genkey/`, `genbuild/`, `postinst/`, `uninsthlp/` | Small helper executables |
-| `tools/` | `cvtblob`, `gc-blobs`, `repack-blobs`, `blake3-calc`, `simplelock`, `unlock` |
+| `tools/` | `cvtblob`, `gc-blobs`, `repack-blobs`, `blake3-calc`. (`simplelock.cpp`, `unlock.cpp` and `sha256_calc.cpp` are present but appear in no build file) |
 
 ### Build system
 
@@ -151,8 +151,20 @@ Small and self-contained. Read it in full before touching anything blob-related.
 3. `src/update.cpp` — the most-used command, and the clearest example of the client/server split.
 4. `src/server.cpp:4908` and `src/client.cpp:4022` — the two protocol tables side by side.
 5. `keyValueServer/include/blob_push_protocol.h` — the blob protocol, in one file.
-6. `ca_blobs_fs/content_addressed_fs.h` and `src/content_addressed_fs.cpp` — the store.
+6. `ca_blobs_fs/content_addressed_fs.h` and `ca_blobs_fs/src/content_addressed_fs.cpp` — the store.
 7. `src/rcs.cpp` — last, and carefully. Everything about repository integrity lives here.
+
+## Dead code
+
+Three files are present in the tree but are in **no build file** and are included by nothing except
+each other:
+
+* `src/Modules1.cpp` / `Modules1.h`
+* `src/Modules2.cpp` / `Modules2.h`
+* `src/RecurseRepository.cpp` / `RecurseRepository.h`
+
+They appear in neither `src/Makefile.am` nor `cvsnt.vcxproj`. Do not use them as a reference for how
+anything currently works, and do not "fix" bugs in them expecting an effect.
 
 ## Conventions to expect
 

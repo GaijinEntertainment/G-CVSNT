@@ -49,8 +49,8 @@ the `SERVER_SUPPORT` / `CLIENT_SUPPORT` compile-time macros — most command fil
 ## Connection methods (protocol plugins)
 
 The transport is a **loadable shared library**, resolved from the `:method:` part of `CVSROOT` by
-`CLibraryAccess::LoadProtocol` (`src/root.cpp:388`). Each plugin lives in `protocols/` and exports a
-`protocol_interface`:
+`CProtocolLibrary::LoadProtocol` (`cvstools/ProtocolLibrary.cpp:168`), called from `parse_cvsroot`
+(`src/root.cpp:618`). Each plugin lives in `protocols/` and exports a `protocol_interface`:
 
 | Method | Source | Notes |
 | --- | --- | --- |
@@ -62,10 +62,12 @@ The transport is a **loadable shared library**, resolved from the `:method:` par
 | `ext` | `protocols/ext.cpp` | External `rsh`/`ssh` command |
 | `server` | `protocols/server.cpp` | `:server:` — spawn via rsh |
 | `fork` | `protocols/fork.cpp` | Local child process, used for testing |
-| `enum` | `protocols/enum.cpp` | mDNS/Bonjour server discovery |
+| `enum` | `protocols/enum.cpp` | Answers the `BEGIN ENUM` query with the server name, its supported protocols and its repository list (client side: `cvstools/ServerInfo.cpp:41`) |
 
-Protocol plugins are discovered in the protocol directory configured at build time
-(`--with-protocol_dir`) or overridden with the global `-C` option.
+Protocol plugins are discovered in the **library** directory, configured at build time with
+`--with-protocol-dir` (`configure.in:812`, which sets `cvs_library_dir`) and overridden at run time
+with the global `-L` option (`src/main.cpp:1022`). The global `-C` option overrides the *config*
+directory, which is a different thing.
 
 ## Layered libraries
 
@@ -84,12 +86,15 @@ Protocol plugins are discovered in the protocol directory configured at build ti
 ```
 
 * **`cvsapi/`** — the C++ support layer: `CSocketIO`, `CHttpSocket`, `CSqlConnection` and the
-  database back-ends under `cvsapi/db/`, `CCrypt`, compression wrappers, mDNS
-  (`cvsapi/mdns/`), and the platform split under `cvsapi/unix/` and `cvsapi/win32/`.
-* **`cvstools/`** — `CGlobalSettings` (registry / config-file settings), `CLibraryAccess`
-  (dynamic loading of protocol and trigger plugins), path and codepage helpers.
-* **`lib/`** — the GNU portability layer inherited from CVS: `getline`, `fnmatch`, `getopt`,
-  `xmalloc`, `regex`, `md5`, `savecwd`.
+  database back-ends under `cvsapi/db/`, `CCrypt`, `CLibraryAccess` (the `dlopen`/`LoadLibrary`
+  wrapper), XML (`XmlTree`/`XmlNode`), codepage conversion (`Codepage`), mDNS (`cvsapi/mdns/`), and
+  the platform split under `cvsapi/unix/` and `cvsapi/win32/`.
+* **`cvstools/`** — `CGlobalSettings` (registry / config-file settings), `CProtocolLibrary` and
+  `CTriggerLibrary` (plugin loading, built on `CLibraryAccess`), `EntriesParser`, `RootSplitter`,
+  `Scramble`, and the `protocol_interface` / `trigger_interface` headers.
+* **`lib/`** — the GNU portability layer inherited from CVS: `getline`, `getdelim`, `fnmatch`,
+  `getopt_long`, `regcomp`, `getaddrinfo`/`getnameinfo`, `timegm`, `waitpid`. Note that `xmalloc`
+  lives in `src/subr.cpp:67`, `savecwd` in `src/savecwd.cpp`, and MD5 in `cvsapi/lib/md5.c`.
 * **`diff/`, `xdiff/`** — GNU diff, plus the pluggable external/XML diff back-ends.
 * **`ca_blobs_fs/`** — the on-disk content-addressed store (see
   [03-content-addressed-storage.md](03-content-addressed-storage.md)).
@@ -98,7 +103,7 @@ Protocol plugins are discovered in the protocol directory configured at build ti
 
 ## Request flow — `cvs update` in client/server mode
 
-1. **Client** (`src/update.cpp:164` → `src/client.cpp`) parses options, walks the working copy with
+1. **Client** (`src/update.cpp:165` → `src/client.cpp`) parses options, walks the working copy with
    `start_recursion` (`src/recurse.cpp`), and for each directory sends `Directory`, `Entry`,
    and `Modified`/`Unchanged`/`Is-modified` requests, then `update`.
 2. **Server** (`src/server.cpp`, request table at `src/server.cpp:4908`) reconstructs a temporary
@@ -121,8 +126,9 @@ responsive and its cost is proportional to the *number* of files, not their size
    (`src/blob_kv_processor.cpp` / `src/blob_http_processor.cpp`). If the store already has that hash,
    the push is deduplicated server-side and costs one round trip.
 2. Client sends `Blob-ref-transfer` with the reference in place of file content.
-3. Server checks in a new revision whose *text* is the 71-byte reference
-   (`src/rcs_checkin.cpp`, `src/rcs.cpp:4288` `get_binary_blob_ver_file_path`).
+3. Server checks in a new revision whose *text* is the 71-byte reference. The shrink from the
+   79-byte server-side session marker down to the 71-byte reference happens in
+   `RCS_write_binary_rev_data` (`src/rcs_cvt_kB.cpp:91`).
 
 Because the `,v` file grows by ~100 bytes per revision regardless of file size, tag, branch and
 `rlog` costs stop tracking payload size.
@@ -130,7 +136,8 @@ Because the `,v` file grows by ~100 bytes per revision regardless of file size, 
 ## Triggers
 
 Server-side extension points are shared libraries implementing `trigger_interface`
-(`triggers/server.h`), loaded through `CLibraryAccess`. Shipped triggers: `info_trigger`
+(`cvstools/trigger_interface.h`), loaded through `CTriggerLibrary::LoadTrigger`
+(`cvstools/TriggerLibrary.cpp:419`). Shipped triggers: `info_trigger`
 (the classic `loginfo`/`commitinfo`/`taginfo`/`historyinfo` files), `script_trigger`,
 `audit_trigger` (SQL audit log), `email_trigger`, `checkout_trigger`. See
 [06-server-operations.md](06-server-operations.md).
