@@ -102,7 +102,7 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
 | `-P` | Prune directories that became empty |
 | `-A` | Reset sticky tag/date/kopt back to HEAD |
 | `-C` | Overwrite locally modified files with clean repository copies, keeping a `.#file.rev` backup |
-| `-n` | Do *not* keep those backups — silently discard local modifications. Irreversible |
+| `-n` / `--no-backups` | Do *not* keep `.#file.rev` backups — neither the `-C` copies nor the pre-merge copies that merges and `-j` joins leave behind. Silently discards the only remaining copy of local modifications. Irreversible |
 | `-r rev` | Update to a tag/branch/revision (sticky) |
 | `-D date` | Update as of a date (sticky) |
 | `-f` | Fall back to the head revision when the tag/date does not match a file |
@@ -113,7 +113,11 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
 
 Note the asymmetry between `-C` and `-n`: `-C` is what you want for a clean rebuild of a working
 copy, but by default it leaves a `.#name.rev` backup for every modified file, and those are never
-cleaned up. `cvs update -C -n` discards instead of backing up.
+cleaned up. `cvs update -C -n` discards instead of backing up. The same applies to merges: every
+merge or `-j` join first copies the working file to `.#name.rev`, and `-n` (spelled readably:
+`--no-backups`) suppresses that too — including the copies a server instructs the client to make
+before a merge. With backups off, a merge that fails outright leaves the half-merged file in place
+(there is no backup to restore from) and says so.
 
 **`-n` means two different things depending on position.** As a *global* option it is the classic
 CVS dry run (`noexec`, `src/main.cpp:938`); as an *update* option it means "do not keep backups"

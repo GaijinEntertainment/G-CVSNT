@@ -1190,6 +1190,7 @@ warning: server is not creating directories one at a time");
 static void copy_a_file (char *data, List *ent_list, char *short_pathname, char *filename)
 {
     char *newname;
+    extern int backup_local_files;
 
     read_line (&newname);
 
@@ -1199,7 +1200,11 @@ static void copy_a_file (char *data, List *ent_list, char *short_pathname, char 
     if (last_component (newname) != newname)
 	error (1, 0, "protocol error: Copy-file tried to specify directory");
 
-    copy_file (filename, newname, 1, 1);
+    /* The server cannot know that backups are disabled on this side, so it
+       still sends Copy-file before a merge; accept the response but write
+       nothing when update -n / --no-backups was given.  */
+    if (backup_local_files)
+	copy_file (filename, newname, 1, 1);
     xfree (newname);
 }
 

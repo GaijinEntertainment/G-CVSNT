@@ -254,6 +254,75 @@ def t_update_C_nobackup(r):
     check(not backups, "update -C -n left a backup: %r" % backups)
 
 
+def _merge_setup(r):
+    """Set up a repository where both merge producers can fire: rev 1.2 on
+    the trunk, a branch JBR with one commit on it (for -j joins), and the
+    first working copy left at its original revision with a non-conflicting
+    local edit, so that an update there has to merge.  Returns that copy."""
+    r.import_tree("m", {"a.txt": "line one\nline two\nline three\n"})
+    wc = r.checkout("m")
+    wc2root = os.path.join(r.root, "wc2")
+    os.makedirs(wc2root)
+    r.cvs(["checkout", "m"], cwd=wc2root)
+    wc2 = os.path.join(wc2root, "m")
+    write(os.path.join(wc2, "a.txt"), "line one\nline two\nthree changed\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc2)           # -> 1.2
+    r.cvs(["tag", "-b", "JBR"], cwd=wc2)
+    r.cvs(["update", "-r", "JBR"], cwd=wc2)
+    write(os.path.join(wc2, "a.txt"), "one branch\nline two\nthree changed\n")
+    r.cvs(["commit", "-m", "on branch"], cwd=wc2)        # -> 1.2.2.1
+    write(os.path.join(wc, "a.txt"), "one local\nline two\nline three\n")
+    return wc
+
+
+MERGED = "one local\nline two\nthree changed\n"
+JOINED = "one branch\nline two\nthree changed\n"
+
+
+def _join_wc(r, sub):
+    """A fresh trunk working copy for a -j join."""
+    root = os.path.join(r.root, sub)
+    os.makedirs(root)
+    r.cvs(["checkout", "m"], cwd=root)
+    return os.path.join(root, "m")
+
+
+@test("merging updates leave .# backups of the pre-merge files")
+def t_merge_backup_default(r):
+    wc = _merge_setup(r)
+    r.cvs(["update"], cwd=wc)
+    check_eq(read(os.path.join(wc, "a.txt")), MERGED, "merged content")
+    backups = [f for f in os.listdir(wc) if f.startswith(".#a.txt")]
+    check(backups, "merge left no .#a.txt backup")
+    if backups:
+        check_eq(read(os.path.join(wc, backups[0])),
+                 "one local\nline two\nline three\n", "backup content")
+
+    # A -j join backs up the pre-join file the same way.
+    wc3 = _join_wc(r, "wc3")
+    r.cvs(["update", "-j", "JBR", "a.txt"], cwd=wc3)
+    check_eq(read(os.path.join(wc3, "a.txt")), JOINED, "joined content")
+    backups = [f for f in os.listdir(wc3) if f.startswith(".#a.txt")]
+    check(backups, "join left no .#a.txt backup")
+
+
+@test("update -n / --no-backups merges without leaving .# backups")
+def t_merge_no_backup(r):
+    wc = _merge_setup(r)
+    r.cvs(["update", "-n"], cwd=wc)
+    check_eq(read(os.path.join(wc, "a.txt")), MERGED,
+             "merged content with -n")
+    backups = [f for f in os.listdir(wc) if f.startswith(".#")]
+    check(not backups, "update -n left backups: %r" % backups)
+
+    wc3 = _join_wc(r, "wc3")
+    r.cvs(["update", "--no-backups", "-j", "JBR", "a.txt"], cwd=wc3)
+    check_eq(read(os.path.join(wc3, "a.txt")), JOINED,
+             "joined content with --no-backups")
+    backups = [f for f in os.listdir(wc3) if f.startswith(".#")]
+    check(not backups, "update --no-backups left backups: %r" % backups)
+
+
 @test("update -d picks up a directory added after checkout")
 def t_update_d(r):
     r.import_tree("m", {"a.txt": "one\n"})

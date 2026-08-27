@@ -153,6 +153,7 @@ static const char *const update_usage[] =
 	"\t-S\tSelect between conflicting case sensitive names.\n",
 	"\t-t\tUpdate using last checkin time.\n",
     "\t-n\tDo not backup local files(silently remove). Irreversibly deletes locally modified files.\n",
+    "\t--no-backups\tSame as -n; also suppresses the .# copies merges leave behind.\n",
     "\t-W spec\tWrappers specification line (! to reset).\n",
     "\t--blob_zero\tDownloaded blobs would be written as zero length file. That is for 'hot-proxy' scenario (to save space and optimize performance of update).\n",
     "(Specify the --help global option for a list of other help options)\n",
@@ -175,6 +176,7 @@ int update (int argc, char **argv)
     static struct option long_update_options[] =
     {
     	{"blob_zero", 0, NULL, 1},
+    	{"no-backups", 0, NULL, 2},
     	{0, 0, NULL, 0},
     };
 
@@ -202,6 +204,7 @@ int update (int argc, char **argv)
 		toss_local_changes = 1;
 		break;
         case 'n':
+        case 2:			/* --no-backups */
 		backup_local_files = 0;
 		break;
 		case 'c':
@@ -2319,7 +2322,8 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 		      + 10);
     (void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
 
-    copy_file (finfo->file, backup, 1, 1);
+    if (backup_local_files)
+	copy_file (finfo->file, backup, 1, 1);
     xchmod (finfo->file, 1);
 
 	RCS_get_kflags(vers->options, false, kf);
@@ -2357,7 +2361,8 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 	error (0, 0, "nonmergeable file needs merge");
 	error (0, 0, "revision %s from repository is now in %s",
 	       vers->vn_rcs, fn_root(finfo->fullname));
-	error (0, 0, "file from working directory is now in %s", backup);
+	if (backup_local_files)
+	    error (0, 0, "file from working directory is now in %s", backup);
 	write_letter (finfo, 'C');
 
 	history_write ('C', finfo->update_dir, vers->vn_rcs, finfo->file,
@@ -2399,9 +2404,15 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     {
 		error (0, status == -1 ? errno : 0,
 			"could not merge revision %s of %s", vers->vn_user, fn_root(finfo->fullname));
-		error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
-			fn_root(finfo->fullname), backup);
-		rename_file (backup, finfo->file);
+		if (backup_local_files)
+		{
+			error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
+				fn_root(finfo->fullname), backup);
+			rename_file (backup, finfo->file);
+		}
+		else
+			error (status == -1 ? 1 : 0, 0, "no backup of %s to restore (backups disabled by -n)",
+				fn_root(finfo->fullname));
 		retval = 1;
 		goto out;
     }
@@ -2447,7 +2458,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 
     /* FIXME: the noexec case is broken.  RCS_merge could be doing the
        xcmp on the temporary files without much hassle, I think.  */
-    if (!noexec && !xcmp (backup, finfo->file))
+    if (!noexec && backup_local_files && !xcmp (backup, finfo->file))
     {
 	cvs_output (fn_root(finfo->fullname), 0);
 	cvs_output (" already contains the differences between ", 0);
@@ -3092,7 +3103,8 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 		      + 10);
     (void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
 
-    copy_file (finfo->file, backup, 1, 1);
+    if (backup_local_files)
+	copy_file (finfo->file, backup, 1, 1);
     xchmod (finfo->file, 1);
 
     /* If the source of the merge is the same as the working file
@@ -3172,7 +3184,8 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	error (0, 0, "nonmergeable file needs merge");
 	error (0, 0, "revision %s from repository is now in %s",
 	       rev2, fn_root(finfo->fullname));
-	error (0, 0, "file from working directory is now in %s", backup);
+	if (backup_local_files)
+	    error (0, 0, "file from working directory is now in %s", backup);
 	write_letter (finfo, 'C');
     }
     else
@@ -3214,9 +3227,15 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
     {
 	error (0, status == -1 ? errno : 0,
 	       "could not merge revision %s of %s", rev2, fn_root(finfo->fullname));
-	error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
-	       fn_root(finfo->fullname), backup);
-	rename_file (backup, finfo->file);
+	if (backup_local_files)
+	{
+	    error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
+		   fn_root(finfo->fullname), backup);
+	    rename_file (backup, finfo->file);
+	}
+	else
+	    error (status == -1 ? 1 : 0, 0, "no backup of %s to restore (backups disabled by -n)",
+		   fn_root(finfo->fullname));
     }
 	else if(status == 1)
 	{
