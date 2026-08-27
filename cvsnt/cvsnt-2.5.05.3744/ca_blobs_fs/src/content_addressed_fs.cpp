@@ -198,7 +198,10 @@ PushResult finish(PushData *fp, char *actual_hash_str)
   fp->fp = nullptr;
 
   if (fcloseRet != 0)
+  {
+    blob_fileio_unlink_file(fp->temp_file_name.c_str());
     return PushResult::IO_ERROR;
+  }
 
   char final_hash[64];
   char *final_hash_p = actual_hash_str ? actual_hash_str : final_hash;
@@ -208,7 +211,10 @@ PushResult finish(PushData *fp, char *actual_hash_str)
     blake3_hasher_finalize(&fp->hasher, digest, sizeof(digest));
     bin_hash_to_hex_string_64(digest, final_hash_p);
     if (fp->provided_hash[0] && memcmp(fp->provided_hash, final_hash_p, 64) != 0)
+    {
+      blob_fileio_unlink_file(fp->temp_file_name.c_str());
       return PushResult::WRONG_HASH;
+    }
   } else
     memcpy(final_hash_p, fp->provided_hash, 64);
   std::string filepath = get_file_path(fp->root, final_hash_p);
@@ -218,7 +224,10 @@ PushResult finish(PushData *fp, char *actual_hash_str)
     return PushResult::DEDUPLICATED;
   }
   make_blob_dirs(filepath);
-  return blob_fileio_rename_file_if_nexist(fp->temp_file_name.c_str(), filepath.c_str()) ? PushResult::OK : PushResult::IO_ERROR;
+  if (blob_fileio_rename_file_if_nexist(fp->temp_file_name.c_str(), filepath.c_str()))
+    return PushResult::OK;
+  blob_fileio_unlink_file(fp->temp_file_name.c_str());
+  return PushResult::IO_ERROR;
 }
 
 PullData* start_pull(const context *ctx, const char* hash_hex_string, uint64_t &blob_sz)
