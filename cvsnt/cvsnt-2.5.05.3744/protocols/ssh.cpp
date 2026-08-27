@@ -198,12 +198,12 @@ int ssh_connect(const struct protocol_interface *protocol, int verify_only)
 				}
 				*key++ = '\0';
 				key=strchr(key,';');
-				*key++ = '\0';
 				if(!key || !*key)
 				{
 					/* Something wrong - ignore password */
 					server_error(1,"No password or key set.  Try 'cvs login'\n");
 				}
+				*key++ = '\0';
 				version = crypt_password+4;
 			}
 			else
