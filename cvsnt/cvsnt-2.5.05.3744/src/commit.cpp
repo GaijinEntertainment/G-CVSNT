@@ -2052,12 +2052,10 @@ void fixaddfile (const char *file, const char *repository)
 				error (0, errno, "cannot remove %s", rcs);
 		}
 		else
-		{
 			freercsnode (&rcsfile);
-			really_quiet = save_really_quiet;
-			xfree (rcs);
-		}
+		really_quiet = save_really_quiet;
 	}
+	xfree (rcs);
 }
 
 /*
