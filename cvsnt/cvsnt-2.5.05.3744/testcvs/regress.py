@@ -457,6 +457,297 @@ def t_attic_duplicate(r):
     check_eq(sorted(ents), ["a.txt", "b.txt"], "entries after update")
 
 
+def branch_num(r, wc, fname, tag):
+    """Return the magic branch revision the symbol TAG carries for FNAME."""
+    _, out = r.cvs(["log", fname], cwd=wc)
+    m = re.search(r"^\t%s:\s*(\S+)$" % re.escape(tag), out, re.M)
+    if not check(m is not None, "%s missing from symbolic names:\n%s" % (tag, out)):
+        return None
+    return m.group(1)
+
+
+@test("branch numbers are assigned in order and nest correctly")
+def t_branch_numbers_multi(r):
+    # Sequential branches must get the even magic numbers 2, 4, 6: with no
+    # deletions both the scan-from-2 loop and a highest-plus-2 assignment
+    # agree, so these are exact.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    write(os.path.join(wc, "a.txt"), "one\ntwo\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)          # -> 1.2
+    for tag, num in (("BR1", 2), ("BR2", 4), ("BR3", 6)):
+        r.cvs(["tag", "-b", tag], cwd=wc)
+        check_eq(branch_num(r, wc, "a.txt", tag), "1.2.0.%d" % num,
+                 "%s branch number" % tag)
+
+    # A commit on BR1 turns the magic branch into the physical branch 1.2.2.
+    r.cvs(["update", "-r", "BR1"], cwd=wc)
+    write(os.path.join(wc, "a.txt"), "one\ntwo\nbr1\n")
+    _, out = r.cvs(["commit", "-m", "on br1"], cwd=wc)
+    check("1.2.2.1" in out, "commit on BR1 did not create 1.2.2.1:\n" + out)
+
+    # A branch off that branch revision starts its own magic numbering at 2.
+    r.cvs(["tag", "-b", "SUB1"], cwd=wc)
+    check_eq(branch_num(r, wc, "a.txt", "SUB1"), "1.2.2.1.0.2",
+             "SUB1 branch-off-branch number")
+
+    # Everything must still be usable afterwards.
+    r.cvs(["update", "-A"], cwd=wc)
+    check_eq(read(os.path.join(wc, "a.txt")), "one\ntwo\n", "content at head")
+    r.cvs(["update", "-r", "BR1"], cwd=wc)
+    check_eq(read(os.path.join(wc, "a.txt")), "one\ntwo\nbr1\n", "content on BR1")
+    r.cvs(["update", "-A"], cwd=wc)
+
+
+@test("a branch created after deleting an unused branch stays unique")
+def t_branch_after_delete_uncommitted(r):
+    # Deleting BR2 (never committed on) frees magic number 4.  Whether a new
+    # branch reuses the freed number or takes a fresh one is an implementation
+    # choice; what must hold is that the new number is even, well-formed and
+    # different from every live branch, and that the branch works.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    write(os.path.join(wc, "a.txt"), "one\ntwo\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)          # -> 1.2
+    for tag in ("BR1", "BR2", "BR3"):
+        r.cvs(["tag", "-b", tag], cwd=wc)
+    r.cvs(["tag", "-d", "-B", "BR2"], cwd=wc)
+
+    r.cvs(["tag", "-b", "BR4"], cwd=wc)
+    num = branch_num(r, wc, "a.txt", "BR4")
+    if num:
+        m = re.match(r"^1\.2\.0\.(\d+)$", num)
+        check(m is not None, "BR4 is not a magic branch off 1.2: %r" % num)
+        if m:
+            n = int(m.group(1))
+            check(n % 2 == 0, "BR4 branch number %d is odd" % n)
+            check(n not in (2, 6), "BR4 number %d collides with BR1/BR3" % n)
+
+    # The branch must accept a commit that lands on its own branch number.
+    r.cvs(["update", "-r", "BR4"], cwd=wc)
+    write(os.path.join(wc, "a.txt"), "one\ntwo\nbr4\n")
+    _, out = r.cvs(["commit", "-m", "on br4"], cwd=wc)
+    if num:
+        branchrev = num.replace(".0.", ".", 1) + ".1"
+        check(branchrev in out,
+              "commit on BR4 did not create %s:\n%s" % (branchrev, out))
+    r.cvs(["update", "-A"], cwd=wc)
+    check_eq(read(os.path.join(wc, "a.txt")), "one\ntwo\n", "content at head")
+
+
+@test("a deleted branch with commits still blocks its branch number")
+def t_branch_after_delete_committed(r):
+    # BR1 gets 1.2.0.2 and a commit creates the physical branch 1.2.2.
+    # Deleting the tag afterwards removes the symbol but not the branch, so
+    # the next branch must skip number 2 and take 1.2.0.4: candidates are
+    # validated against the delta tree, not just the symbol table.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    write(os.path.join(wc, "a.txt"), "one\ntwo\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)          # -> 1.2
+    r.cvs(["tag", "-b", "BR1"], cwd=wc)
+    check_eq(branch_num(r, wc, "a.txt", "BR1"), "1.2.0.2", "BR1 branch number")
+    r.cvs(["update", "-r", "BR1"], cwd=wc)
+    write(os.path.join(wc, "a.txt"), "one\ntwo\nbr1\n")
+    r.cvs(["commit", "-m", "on br1"], cwd=wc)          # -> 1.2.2.1
+    r.cvs(["update", "-A"], cwd=wc)
+    r.cvs(["tag", "-d", "-B", "BR1"], cwd=wc)
+
+    r.cvs(["tag", "-b", "BRX"], cwd=wc)
+    check_eq(branch_num(r, wc, "a.txt", "BRX"), "1.2.0.4",
+             "BRX must skip the committed branch 1.2.2")
+
+
+@test("adding a new file writes a fully usable ,v")
+def t_new_file_add_commit(r):
+    # cvs add + commit of a brand-new file takes the write-a-fresh-,v path in
+    # RCS_checkin (not RCS_rewrite).  The file must then survive the normal
+    # rewrite paths: a second commit, a branch tag, and a branch commit.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    payload = "".join("new file line %04d @@ at@\n" % i for i in range(200))
+    write(os.path.join(wc, "n.txt"), payload)
+    r.cvs(["add", "n.txt"], cwd=wc)
+    _, out = r.cvs(["commit", "-m", "add n"], cwd=wc)
+
+    wc2root = os.path.join(r.root, "wc2")
+    os.makedirs(wc2root)
+    r.cvs(["checkout", "m"], cwd=wc2root)
+    check_eq(read(os.path.join(wc2root, "m", "n.txt")), payload,
+             "new file content after fresh checkout")
+
+    write(os.path.join(wc, "n.txt"), payload + "second\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)
+    r.cvs(["tag", "-b", "NBR"], cwd=wc)
+    r.cvs(["update", "-r", "NBR", "n.txt"], cwd=wc)
+    write(os.path.join(wc, "n.txt"), payload + "second\nbranch\n")
+    r.cvs(["commit", "-m", "on branch"], cwd=wc)
+    r.cvs(["update", "-A", "n.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "n.txt")), payload + "second\n",
+             "new file content at head after branch commit")
+    r.cvs(["update", "-r", "1.1", "n.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "n.txt")), payload, "new file revision 1.1")
+    r.cvs(["update", "-A", "n.txt"], cwd=wc)
+
+
+@test("a piped server session completes several commands without stalling")
+def t_server_session(r):
+    # Drive `cvs server` through its stdin/stdout protocol the way a network
+    # client would: one session issuing valid-requests, a checkout, a noop and
+    # an rlog.  Pins (a) request dispatch, (b) that every command's output is
+    # flushed to the client by the time its terminating "ok" arrives, and
+    # (c) that the session never deadlocks waiting for a flush.
+    r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "sub content\n"})
+    root = r.repo.replace(os.sep, "/")
+
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    reqs = "".join(s + "\n" for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "valid-requests",
+        "UseUnchanged",
+        "Argument m",
+        "Directory .",
+        root,
+        "co",
+        "noop",
+        "Argument m",
+        "rlog",
+    ])
+
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvwc")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        fail("server session did not complete within 120s (stalled flush?)")
+        return
+    out = out_b.decode("utf-8", "replace")
+
+    check_eq(p.returncode, 0, "server exit status (output:\n%s)" % out)
+    lines = out.split("\n")
+    check_eq(len([l for l in lines if l == "ok"]), 4,
+             "one ok per command (valid-requests, co, noop, rlog):\n" + out)
+    check(not any(l.startswith("error") for l in lines),
+          "server reported an error:\n" + out)
+    vr = [l for l in lines if l.startswith("Valid-requests ")]
+    check(vr and " co " in vr[0] and " noop " in vr[0],
+          "Valid-requests line missing or incomplete:\n" + out)
+    check("one\n" in out, "checked-out content of a.txt missing:\n" + out)
+    check("sub content\n" in out, "checked-out content of sub/b.txt missing:\n" + out)
+    # rlog output is M text; its internal line order must be preserved.
+    i_rcs = out.find("M RCS file:")
+    i_rev = out.find("M revision 1.1")
+    i_msg = out.find("M Initial revision")
+    check(0 <= i_rcs < i_rev < i_msg,
+          "rlog output incomplete or reordered (%d,%d,%d):\n%s"
+          % (i_rcs, i_rev, i_msg, out))
+    # The checkout must have been complete by the time its ok (the second of
+    # the four) arrived: nothing of the checkout may trail its terminator.
+    ok_at = [i for i, l in enumerate(lines) if l == "ok"]
+    content_at = [i for i, l in enumerate(lines) if l == "one" or l == "sub content"]
+    if len(ok_at) >= 2 and content_at:
+        check(max(content_at) < ok_at[1],
+              "checkout content arrived after the co terminator:\n" + out)
+
+
+@test("a watched file checks out read-only, an unwatched one writable")
+def t_watched_readonly(r):
+    # "Is this file watched?" is answered per checked-out file from the
+    # repository's CVS/fileattr.xml.  The lookup must be per file (w.txt
+    # watched, n.txt not) and must use fncmp semantics: on Windows a
+    # case-variant name attribute still matches.
+    r.import_tree("m", {"w.txt": "watched\n", "n.txt": "not watched\n"})
+    attrdir = os.path.join(r.repo, "m", "CVS")
+    attr = os.path.join(attrdir, "fileattr.xml")
+
+    def fresh_checkout(sub):
+        wcroot = os.path.join(r.root, sub)
+        os.makedirs(wcroot)
+        r.cvs(["checkout", "m"], cwd=wcroot)
+        return os.path.join(wcroot, "m")
+
+    write(attr, '<?xml version="1.0"?>\n<fileattr>\n'
+                '  <file name="w.txt">\n    <watched/>\n  </file>\n'
+                '</fileattr>\n')
+    wc = fresh_checkout("wcA")
+    check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
+          "watched w.txt checked out writable")
+    check(os.access(os.path.join(wc, "n.txt"), os.W_OK),
+          "unwatched n.txt checked out read-only")
+
+    # The update path answers the same question when re-creating a file.
+    os.chmod(os.path.join(wc, "w.txt"), 0o644)
+    os.remove(os.path.join(wc, "w.txt"))
+    r.cvs(["update"], cwd=wc)
+    check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
+          "watched w.txt restored writable by update")
+
+    if sys.platform == "win32":
+        write(attr, '<?xml version="1.0"?>\n<fileattr>\n'
+                    '  <file name="W.TXT">\n    <watched/>\n  </file>\n'
+                    '</fileattr>\n')
+        wc = fresh_checkout("wcB")
+        check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
+              "case-variant watched name not honoured on Windows")
+
+    os.remove(attr)
+    wc = fresh_checkout("wcC")
+    check(os.access(os.path.join(wc, "w.txt"), os.W_OK),
+          "w.txt still read-only after the watch attribute was removed")
+
+
+@test("repository operations append well-formed history records")
+def t_history_records(r):
+    # History logging is enabled by the presence of CVSROOT/history (a full
+    # cvs init creates it; init -n does not, so create it the way an admin
+    # enabling logging would).  checkout, commit and tag must each append
+    # records, and every record must parse.
+    hist = os.path.join(r.repo, "CVSROOT", "history")
+    write(hist, "")
+    files = dict(("f%02d.txt" % i, "content %d\n" % i) for i in range(12))
+    r.import_tree("m", files)
+    n0 = len(read(hist).splitlines())
+
+    wc = r.checkout("m")
+    n1 = len(read(hist).splitlines())
+    check(n1 > n0, "checkout appended no history record (%d -> %d)" % (n0, n1))
+
+    write(os.path.join(wc, "f00.txt"), "changed\n")
+    r.cvs(["commit", "-m", "change"], cwd=wc)
+    n2 = len(read(hist).splitlines())
+    check(n2 > n1, "commit appended no history record (%d -> %d)" % (n1, n2))
+
+    r.cvs(["tag", "HT1"], cwd=wc)
+    n3 = len(read(hist).splitlines())
+    check(n3 > n2, "tag appended no history record (%d -> %d)" % (n2, n3))
+
+    for line in read(hist).splitlines():
+        if not line.strip():
+            continue
+        check(re.match(r"^[A-Za-z][0-9a-f]{8,16}\|[^|]*\|", line) is not None,
+              "malformed history record: %r" % line)
+
+    _, out = r.cvs(["history", "-e", "-a"], cwd=wc)
+    check("f00.txt" in out or "m" in out,
+          "cvs history reports nothing for the recorded operations:\n" + out)
+
+
 @test("a second checkout of the same module matches the first")
 def t_second_checkout(r):
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "two\n"})
