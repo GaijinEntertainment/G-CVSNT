@@ -226,6 +226,8 @@ const void* blob_fileio_os_mmap(const char *filepath, std::uintmax_t flen)
     return nullptr;
   void *ret = mmap(NULL, flen, PROT_READ, MMAP_FLAGS, fd, 0);
   close(fd);
+  if (ret == MAP_FAILED)
+    return nullptr;
   return ret;
 }
 
