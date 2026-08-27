@@ -480,11 +480,11 @@ static int lookup_module2(const char *file, char *left, char *right, modules2_st
 		}
 		else 
 		{
-		TRACE(3,"lookup_module2() check between virtual_repos length and file[%d]",strlen(current_directory->virtual_repos));
 		size_t vrlen = strlen(current_directory->virtual_repos);
+		TRACE(3,"lookup_module2() check between virtual_repos length and file[%u]",(unsigned)vrlen);
 		if(!fnncmp(file,current_directory->virtual_repos,vrlen) && file[vrlen]=='/')
 		{
-			sprintf(tmp,"%s%s",current_directory->real_repos,file+strlen(current_directory->virtual_repos));
+			sprintf(tmp,"%s%s",current_directory->real_repos,file+vrlen);
 			file = tmp;
 			renamed = 1;
 		}
