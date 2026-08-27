@@ -14,6 +14,11 @@ inline KVRet send_blob_file_data_net(BlobSocket &client, const char *file, const
   using namespace caddressed_fs;
   using namespace streaming_compression;
   FILE* rf = fopen(file, "rb");
+  if (!rf)
+  {
+    output << "Can't open binary blob file " << file; err = output.str();
+    return KVRet::Error;
+  }
   fseek(rf, 0, SEEK_END);
   const size_t fsz = ftell(rf);
   fseek(rf, 0, SEEK_SET);
