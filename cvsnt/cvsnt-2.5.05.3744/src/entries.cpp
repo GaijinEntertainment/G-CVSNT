@@ -26,6 +26,27 @@ static Entnode *subdir_record (int, const char *, const char *);
 static FILE *entfile, *entexfile;
 static char *entfilename, *entexfilename;		/* for error messages */
 
+/* Register is called once per updated/checked-out file; opening and closing
+   both log files for every call costs 6 filesystem operations per file.
+   Instead, keep the two append handles open across consecutive Register
+   calls for the same working directory (keyed by the directory itself,
+   since the log paths are relative), flushing after every append so the
+   on-disk state after each call is exactly what the open/close-per-call
+   code produced.  The handles are closed whenever the current directory
+   changes, and before write_entries rewrites and unlinks the logs.  */
+static FILE *entlog_cache_fp, *entexlog_cache_fp;
+static char *entlog_cache_wd;		/* working directory the handles belong to */
+
+void Entries_Log_Close_Cached ()
+{
+    if (entlog_cache_fp && fclose (entlog_cache_fp) == EOF)
+		error (0, errno, "error closing %s", CVSADM_ENTLOG);
+    if (entexlog_cache_fp && fclose (entexlog_cache_fp) == EOF)
+		error (0, errno, "error closing %s", CVSADM_ENTEXTLOG);
+    entlog_cache_fp = entexlog_cache_fp = NULL;
+    xfree (entlog_cache_wd);
+}
+
 /*
  * Construct an Entnode
  */
@@ -141,6 +162,10 @@ static int write_ent_ex_proc (Node *node, void *closure)
 static void write_entries (List *list)
 {
     int sawdir;
+
+    /* The log files are unlinked below; any cached append handles must be
+       closed first (everything they wrote is already flushed).  */
+    Entries_Log_Close_Cached ();
 
     sawdir = 0;
 
@@ -396,23 +421,43 @@ void Register (List *list, const char *fname, const char *vn, const char *ts, co
 		TRACE(3,"Register(): !noexec");
 		entfilename = CVSADM_ENTLOG;
 		entexfilename = CVSADM_ENTEXTLOG;
-		entfile = CVS_FOPEN (entfilename, "a");
-		entexfile = CVS_FOPEN (entexfilename, "a");
 
-		if (entfile == NULL)
+		/* Reuse the append handles left open by the previous Register call
+		   if we are still in the same working directory (the log paths are
+		   relative); otherwise close them and open this directory's logs.  */
+		const char *wd = xgetwd ();
+		if (wd == NULL)
+			error (1, errno, "cannot get working directory");
+		if (entlog_cache_fp != NULL && fncmp (entlog_cache_wd, wd))
+			Entries_Log_Close_Cached ();
+		if (entlog_cache_fp == NULL)
 		{
-			/* Warning, not error, as in write_entries.  */
-			/* FIXME-update-dir: should be including update_dir in message.  */
-			error (0, errno, "cannot open %s", entfilename);
-			return;
+			entlog_cache_fp = CVS_FOPEN (entfilename, "a");
+			if (entlog_cache_fp == NULL)
+			{
+				/* Warning, not error, as in write_entries.  */
+				/* FIXME-update-dir: should be including update_dir in message.  */
+				error (0, errno, "cannot open %s", entfilename);
+				xfree (wd);
+				return;
+			}
+			entexlog_cache_fp = CVS_FOPEN (entexfilename, "a");
+			if (entexlog_cache_fp == NULL)
+			{
+				/* Warning, not error, as in write_entries.  */
+				/* FIXME-update-dir: should be including update_dir in message.  */
+				error (0, errno, "cannot open %s", entexfilename);
+				Entries_Log_Close_Cached ();
+				xfree (wd);
+				return;
+			}
+			entlog_cache_wd = (char *) wd;	/* takes ownership */
 		}
-		if (entexfile == NULL)
-		{
-			/* Warning, not error, as in write_entries.  */
-			/* FIXME-update-dir: should be including update_dir in message.  */
-			error (0, errno, "cannot open %s", entexfilename);
-			return;
-		}
+		else
+			xfree (wd);
+
+		entfile = entlog_cache_fp;
+		entexfile = entexlog_cache_fp;
 
 		if (fprintf (entfile, "A ") < 0)
 			error (1, errno, "cannot write %s", entfilename);
@@ -422,10 +467,15 @@ void Register (List *list, const char *fname, const char *vn, const char *ts, co
 		write_ent_proc (node, NULL);
 		write_ent_ex_proc (node, NULL);
 
-		if (fclose (entfile) == EOF)
-			error (1, errno, "error closing %s", entfilename);
-		if (fclose (entexfile) == EOF)
-			error (1, errno, "error closing %s", entexfilename);
+		/* Flush instead of closing: the on-disk log after every Register
+		   is identical to what the close-per-call code produced, while the
+		   open handles are reused by the next call.  */
+		if (fflush (entfile) == EOF)
+			error (1, errno, "cannot write %s", entfilename);
+		if (fflush (entexfile) == EOF)
+			error (1, errno, "cannot write %s", entexfilename);
+		entfile = NULL;
+		entexfile = NULL;
     }
 	TRACE(3,"Register(): finished");
 }
@@ -964,6 +1014,10 @@ void Entries_Close_Dir (List *list, const char *dir)
 
 void Entries_Close(List *list)
 {
+    /* Release any cached Entries.Log append handles; the isfile probe and
+       write_entries below expect no open handle on the log files.  */
+    Entries_Log_Close_Cached ();
+
     if (list)
     {
 		if (!noexec) 

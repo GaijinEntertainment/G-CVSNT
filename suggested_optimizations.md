@@ -71,7 +71,8 @@ Each item lists what/where, expected impact, risk, and a status.
 - **Risk**: low-medium. The log write path is crash-recovery data for the
   Entries rewrite; per-append flushing keeps durability identical, and the
   close hooks preserve the open/unlink discipline on Windows.
-- **Status**: proposed
+- **Status**: implemented (commit "entries: keep the Entries.Log append
+  handles open across Register calls")
 
 ## 4. Batch or lease lockserver locks instead of two round-trips per file
 

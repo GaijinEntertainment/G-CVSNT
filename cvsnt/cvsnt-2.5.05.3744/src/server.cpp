@@ -5109,6 +5109,11 @@ void server_cleanup (int sig)
 		buf_to_net = NULL;
 	}
 
+    /* A fatal error can get us here with Register's cached Entries.Log
+       append handles still open inside the temp tree; close them so the
+       deletion below cannot be blocked by an open file.  */
+    Entries_Log_Close_Cached ();
+
     CVS_CHDIR (Tmpdir);
     /* Temporarily clear noexec, so that we clean up our temp directory
        regardless of it (this could more cleanly be handled by moving

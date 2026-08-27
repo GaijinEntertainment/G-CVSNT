@@ -479,6 +479,7 @@ FILE *open_file(const char *, const char *);
 List *Find_Directories(char *repository, int which, List *entries, const char *virtual_repository);
 void Entries_Close(List *entries);
 void Entries_Close_Dir(List *entries, const char *dir);
+void Entries_Log_Close_Cached();
 List *Entries_Open(int aflag, const char *update_dir);
 List *Entries_Open_Dir(int aflag, const char *dir, const char *update_dir);
 void Subdirs_Known(List *entries);
