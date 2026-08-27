@@ -416,9 +416,12 @@ static bool exchange_session_keys(intptr_t raw_socket, const uint8_t otp_page[ot
           }
           EVP_CIPHER_CTX *dec = init_cipher_from_otp(otp_page, false);
           if (1 != EVP_DecryptUpdate(dec, otherDhAuthData, &outLen, encrypted, sizeof(ourDhAuthData)) || outLen != sizeof(encrypted))
+          {
+            EVP_CIPHER_CTX_free(dec);
             return nullptr;
+          }
           memset(encrypted, 0, sizeof(encrypted));
-          EVP_CIPHER_CTX_free(enc); enc = NULL;
+          EVP_CIPHER_CTX_free(dec); dec = NULL;
           return otherDhAuthData;
       }
       ))
