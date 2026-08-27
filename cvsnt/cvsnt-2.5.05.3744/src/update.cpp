@@ -3367,7 +3367,7 @@ int special_file_mismatch (struct file_info *finfo, const char *rev1, const char
 		   fn_root(finfo->file),
 		   (rev1 == NULL ? "working file" : rev1),
 		   (rev2 == NULL ? "working file" : rev2));
-	    result = 1;
+	    result = 0;
 	}
 #endif
 
