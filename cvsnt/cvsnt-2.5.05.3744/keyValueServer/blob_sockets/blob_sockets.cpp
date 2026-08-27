@@ -398,7 +398,10 @@ static bool exchange_session_keys(intptr_t raw_socket, const uint8_t otp_page[ot
           uint8_t encrypted[sizeof(ourDhAuthData)];
           int outLen = 0;
           if (1 != EVP_EncryptUpdate(enc, encrypted, &outLen, ourDhAuthData, sizeof(ourDhAuthData)) || outLen != sizeof(encrypted))
+          {
+            EVP_CIPHER_CTX_free(enc);
             return nullptr;
+          }
           EVP_CIPHER_CTX_free(enc); enc = NULL;
 
           if (raw_send_exact(raw_socket, encrypted, sizeof(encrypted)) <= 0)
