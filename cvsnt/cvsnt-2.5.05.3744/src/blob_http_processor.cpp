@@ -22,8 +22,8 @@ struct HttpNetworkProcessor:public BlobNetworkProcessor
     if (!res || res->status != 200)
     {
       err = res ? httplib::detail::status_message(res->status) : "unknown";
-      err += " err code";
-      err += res ? res->status : -1;
+      err += " err code ";
+      err += std::to_string(res ? res->status : -1);
       return false;
     }
     return true;
