@@ -59,7 +59,7 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 | 10 | PERF-02 F6 | `RCS_magicrev()` has two stacked `for` headers; the inner one resets `rev_num = 2` and discards the `findnextmagicrev` result computed just above, forcing a linear rescan with a full symbol-list walk per candidate. The outer loop is dead code. Needs branch-numbering tests first — the optimised path has never actually run. | 2 | medium | implemented |
 | 11 | PERF-01 F11 | A batch of per-file micro-costs: `strlen` in the dispatch table, the Entry line built twice, an unhoisted `getline` buffer, the history file handle reopened, `xgetwd` uncached. Individually small, together perhaps 10–20% of a large update. | ~165 | low | partial: dispatch scan, Entries `getline` buffer and history handle implemented; Entry-line assembly, mapping/modules2 lookups and `xgetwd` left `not started` — the first needs byte-exact codepage handling on the client send path, which the local suites cannot exercise, and the others sit on paths (directory mappings, modules2, blob download cwd) with no local test coverage and, for `xgetwd`, no invalidation point that does not itself cost a syscall |
 | 12 | PERF-01 F7 | The server flushes on every newline-terminated string, so a 300 k-file checkout does ~300 k tiny `write()` calls. Switch to a byte-threshold flush. **Requires a flush-before-read audit** or the session deadlocks. | ~30 | medium | implemented — the flush-before-read audit is in the commit message |
-| 13 | PERF-01 F9 | `open_directory()` fully parses and checks out `.directory_history,v` per directory, and `CVS/Tag` is opened up to three times. Memoise per directory. | ~90 | low-medium | not started |
+| 13 | PERF-01 F9 | `open_directory()` fully parses and checks out `.directory_history,v` per directory, and `CVS/Tag` is opened up to three times. Memoise per directory. | ~90 | low-medium | skipped — premise partly refuted and no clean memo key, see below |
 | 14 | PERF-01 F8 | A libxml2 XPath is compiled and evaluated **per checked-out file** to answer "is this file watched?" — a fresh context, namespace and variable registration, and a re-parse of the expression each time. Hoist to one query per directory. Must preserve `fncmp` case-folding. | ~70 | low-medium | implemented |
 
 ### Tier 3 — structural, needs design and a soak test
@@ -125,3 +125,16 @@ Recorded so they are not re-investigated:
 * Because CAFS keeps `-kB` `,v` files small (a 71-byte reference per revision), the
   rewrite-the-whole-file cost of tagging is **not** catastrophic for binaries. It is for text files,
   which keep their full inline delta history.
+* **Tier 2 item 13 (PERF-01 F9) was skipped: "CVS/Tag is opened up to three times" counts two
+  different files.** The `ParseTag` in `do_dir_proc` at `src/recurse.cpp:1211` runs before the
+  chdir into `dir` — every neighbouring path in that block is `dir/CVS/...` — so it reads the
+  *parent's* `CVS/Tag` for the permission check, while `ParseTag_Dir(dir, ...)` at `:1264` reads
+  the child's. The only true duplicate pair is `:1264` versus the `ParseTag` inside
+  `Entries_Open` (`src/entries.cpp:826`), which runs after the chdir; deduplicating that pair
+  needs either a cwd-keyed memo (a `getcwd` per lookup — the syscall it would save) or threading
+  the values through `Entries_Open`'s many callers, and the memo would have to be invalidated by
+  `WriteTag` mid-recursion to keep sticky tags correct. The `.directory_history` half is two
+  failed `fopen`s per directory in repositories that do not use directory versioning; a correct
+  cache needs a per-repository flag that survives concurrent creation, which the local suites
+  cannot exercise. Neither half fits in 100 lines with test coverage, and the syscalls saved are
+  single-digit per directory.
