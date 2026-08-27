@@ -29,4 +29,10 @@ Documentation
 * [docs/](docs/) — architecture, blob storage, protocols, repository layout, server operations,
   client usage and a source map
 * [HOWTOBUILD.md](HOWTOBUILD.md) — building on Windows, Linux and macOS
-* [_reports/](_reports/) — code-analysis findings and performance analyses
+* [known_issues.md](known_issues.md) — open defects, with the reasoning behind the ones that are
+  deliberately not fixed
+* [suggested_optimizations.md](suggested_optimizations.md) — why update and tag scale with file
+  count, and the ranked plan to fix it
+* [cvsnt/cvsnt-2.5.05.3744/testcvs/](cvsnt/cvsnt-2.5.05.3744/testcvs/) — unit, regression and
+  acceptance test suites
+* [_reports/](_reports/) — the individual analysis findings behind all of the above

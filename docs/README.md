@@ -24,9 +24,19 @@ file's content is stored once, keyed by its BLAKE3 hash, in a separate content-a
 own TCP protocol that can be served by a dumb caching proxy near the client. Everything else — the
 command set, the RCS format, ACLs, triggers — is unchanged.
 
+## Beyond the reference documentation
+
+| Document | What it covers |
+| --- | --- |
+| [../known_issues.md](../known_issues.md) | The defects still open, ordered by severity, and — more usefully — the ones where the obvious fix is wrong and why |
+| [../suggested_optimizations.md](../suggested_optimizations.md) | Why `update` and `tag` scale with file count rather than data volume, and a ranked plan |
+| [../cvsnt/cvsnt-2.5.05.3744/testcvs/README.md](../cvsnt/cvsnt-2.5.05.3744/testcvs/README.md) | The three test suites and what each needs to run |
+
 ## Analysis reports
 
-The `_reports/` directory at the repository root holds code-analysis output: individual bug findings
-(`BUG-*.md`), performance analyses of the update and tag paths (`PERF-*.md`), and build notes
-(`BUILD-*.md`). Each bug file is self-contained, with the offending code, a concrete failure
-scenario, and a suggested fix.
+The `_reports/` directory at the repository root holds the individual analysis findings behind the
+documents above: 87 bug findings (`BUG-*.md`), the performance analyses of the update and tag paths
+(`PERF-*.md`), the Windows build write-up (`BUILD-*.md`), and two design plans (`PLAN-*.md`).
+
+Each bug file is self-contained: the offending code, why it is wrong, a concrete failure scenario, a
+suggested fix, and a record of what was checked that could have made it a false positive.
