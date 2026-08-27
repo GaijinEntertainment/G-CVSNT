@@ -48,7 +48,8 @@ Each item lists what/where, expected impact, risk, and a status.
   latency of every remote command; most visible on updates of wide trees.
 - **Risk**: low. Pure reorder of two independent blocks in the same function;
   behaviour on the `dont_delete_temp` path is unchanged.
-- **Status**: proposed
+- **Status**: implemented (commit "server: send the shutdown trailer before
+  deleting the temp sandbox")
 
 ## 3. Keep the per-directory Entries.Log append handles open across files
 

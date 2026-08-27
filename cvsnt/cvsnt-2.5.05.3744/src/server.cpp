@@ -5097,6 +5097,18 @@ void server_cleanup (int sig)
 	return;
     }
 
+    /* Shut down the network buffer before deleting the temp directory:
+       with stream compression the shutdown emits the trailer the client
+       is waiting for, while removing a large temp tree can take a long
+       time.  Nothing in the deletion path below writes to the protocol
+       buffers (its errors are deliberately ignored and tracing is
+       disabled), so it does not need the connection.  */
+    if (buf_to_net != NULL)
+	{
+		buf_shutdown (buf_to_net);
+		buf_to_net = NULL;
+	}
+
     CVS_CHDIR (Tmpdir);
     /* Temporarily clear noexec, so that we clean up our temp directory
        regardless of it (this could more cleanly be handled by moving
@@ -5105,20 +5117,13 @@ void server_cleanup (int sig)
     save_noexec = noexec;
     noexec = 0;
     /* FIXME?  Would be nice to not ignore errors.  But what should we do?
-       We could try to do this before we shut down the network connection,
-       and try to notify the client (but the client might not be waiting
-       for responses).  We could try something like syslog() or our own
+       The network connection is already shut down, so we cannot notify
+       the client.  We could try something like syslog() or our own
        log file.  */
 	trace = 0;
 	if(orig_server_temp_dir)
 		unlink_file_dir (orig_server_temp_dir);
     noexec = save_noexec;
-
-    if (buf_to_net != NULL)
-	{
-		buf_shutdown (buf_to_net);
-		buf_to_net = NULL;
-	}
 
 	CProtocolLibrary lib;
 	lib.UnloadProtocol(server_protocol);
