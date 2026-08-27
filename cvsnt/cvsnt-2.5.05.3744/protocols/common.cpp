@@ -247,7 +247,7 @@ static int tcp_connect_http(const cvsroot *cvsroot)
 				server_error(1,"Proxy server requires authentication");
 		}
 		else
-			server_error(1,"Proxy server connect failed: ",p?p:"No response");
+			server_error(1,"Proxy server connect failed: %s",p?p:"No response");
 	}
 
 	while(strlen(line)>1)
