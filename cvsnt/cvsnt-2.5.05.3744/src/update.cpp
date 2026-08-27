@@ -108,6 +108,10 @@ int backup_local_files = 1;
    failing.  Option state only; the per-file decision is made at the point
    where each individual in-the-way file is discovered.  */
 int update_inway_rename_aside = 0;
+/* See cvs.h: "update --no-sharp-files" suppresses the ".#<file>.<rev>"
+   backup copies.  Client-consumed only: never forwarded to the server
+   (an unknown update option is fatal to an old server).  */
+int update_no_sharp_files = 0;
 static int toss_local_changes;
 static int force_tag_match = 1;
 static int update_build_dirs;
@@ -160,6 +164,8 @@ static const char *const update_usage[] =
     "\t-n\tDo not backup local files(silently remove). Irreversibly deletes locally modified files.\n",
     "\t-W spec\tWrappers specification line (! to reset).\n",
     "\t--blob_zero\tDownloaded blobs would be written as zero length file. That is for 'hot-proxy' scenario (to save space and optimize performance of update).\n",
+    "\t--no-sharp-files\tDo not create .#<file>.<rev> backup copies of modified\n",
+    "\t\tfiles (in-the-way files are still moved aside under -C).\n",
     "(Specify the --help global option for a list of other help options)\n",
     NULL
 };
@@ -180,6 +186,8 @@ int update (int argc, char **argv)
     static struct option long_update_options[] =
     {
     	{"blob_zero", 0, NULL, 1},
+    	/* Client-consumed only; never forwarded to the server.  */
+    	{"no-sharp-files", 0, NULL, 2},
     	{0, 0, NULL, 0},
     };
 
@@ -192,6 +200,10 @@ int update (int argc, char **argv)
         case 1:
         extern bool blob_downloaded_no_write;
         blob_downloaded_no_write = true;
+		break;
+        case 2:
+        /* --no-sharp-files */
+        update_no_sharp_files = 1;
 		break;
 	    case 'A':
 		aflag = 1;
@@ -808,7 +820,7 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 			retval = 0;
             if (toss_local_changes)
             {
-                if (backup_local_files)
+                if (backup_local_files && !update_no_sharp_files)
                 {
                     char *bakname;
                     bakname = backup_file (finfo->file, vers->vn_user);
@@ -2311,6 +2323,20 @@ static void write_letter (struct file_info *finfo, int letter)
     return;
 }
 
+/* Under --no-sharp-files, remove the ".#" copy that the merge machinery
+   made for its own use (restore-on-failure, no-op detection) once it is
+   no longer needed.  The caller must NOT discard a backup that holds the
+   only remaining copy of the user's version (the nonmergeable-conflict
+   case) -- there, safety wins over the option.  */
+static void discard_sharp_backup (const char *backup)
+{
+    if (update_no_sharp_files && isfile (backup))
+    {
+	if (unlink_file (backup) < 0)
+	    error (0, errno, "cannot remove backup %s", backup);
+    }
+}
+
 /*
  * Do all the magic associated with a file which needs to be merged
  */
@@ -2320,6 +2346,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     int status;
     int retcode = 0;
     int retval;
+    int keep_backup = 0;
 	kflag kf;
 	kflag kftmp;
 	mode_t mode = 0644; /* stupid default! */
@@ -2368,6 +2395,10 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 #endif
 
 	status = checkout_file (finfo, vers, 0, 1, 1, 0, is_rcs, NULL, NULL);
+
+	/* The backup now holds the only copy of the user's version;
+	   keep it even under --no-sharp-files.  */
+	keep_backup = 1;
 
 	/* Is there a better term than "nonmergeable file"?  What we
 	   really mean is, not something that CVS cannot or does not
@@ -2506,6 +2537,8 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     }
     retval = 0;
  out:
+    if (!keep_backup)
+	discard_sharp_backup (backup);
     xfree (backup);
     return retval;
 }
@@ -2711,6 +2744,7 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
     char *t_options;
 	kflag kf;
     int status;
+    int keep_backup = 0;
 
     const char *rev1;
     const char *rev2;
@@ -3183,6 +3217,10 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	   be checked out (writable) after a merge.  */
 	xchmod (finfo->file, 1);
 
+	/* The backup now holds the only copy of the user's version;
+	   keep it even under --no-sharp-files.  */
+	keep_backup = 1;
+
 	/* Hmm.  We don't give them REV1 anywhere.  I guess most people
 	   probably don't have a 3-way merge tool for the file type in
 	   question, and might just get confused if we tried to either
@@ -3211,6 +3249,7 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 		//cvs_output (finfo->file, 0);
 		//cvs_output ("\n", 1);
 
+		discard_sharp_backup (backup);
 		xfree(rev1);
 		xfree(rev2);
 		xfree(backup);
@@ -3287,6 +3326,8 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 				(struct buffer *) NULL);
     }
 #endif
+    if (!keep_backup)
+	discard_sharp_backup (backup);
     xfree (backup);
 	xfree (t_options);
 	baserev_update(finfo, vers, T_NEEDS_MERGE);

@@ -752,6 +752,11 @@ char *rename_file_aside (const char *filename);
    "move away <file>; it is in the way".  Set once from the parsed options;
    the actual decision and rename happen per file.  */
 extern int update_inway_rename_aside;
+/* Nonzero when "update --no-sharp-files" is in effect: no ".#<file>.<rev>"
+   backup copies of the user's own modified files are created (and the
+   server's Copy-file backup instruction is ignored).  The in-the-way
+   rename-aside of -C is NOT suppressed by this -- safety wins.  */
+extern int update_no_sharp_files;
 void resolve_symlink (char **filename);
 void sleep_past (time_t desttime);
 

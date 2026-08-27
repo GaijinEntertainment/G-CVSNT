@@ -1199,6 +1199,15 @@ static void copy_a_file (char *data, List *ent_list, char *short_pathname, char 
     if (last_component (newname) != newname)
 	error (1, 0, "protocol error: Copy-file tried to specify directory");
 
+    /* Under --no-sharp-files the server's instruction to make a ".#"
+       backup copy is consumed but not acted upon.  */
+    if (update_no_sharp_files
+	&& strncmp (newname, BAKPREFIX, sizeof (BAKPREFIX) - 1) == 0)
+    {
+	xfree (newname);
+	return;
+    }
+
     copy_file (filename, newname, 1, 1);
     xfree (newname);
 }
@@ -5517,7 +5526,7 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 
 			if (args->backup_modified)
 			{
-                if (backup_local_files)
+                if (backup_local_files && !update_no_sharp_files)
                 {
     				char *bakname;
     				bakname = backup_file (filename, vers->vn_user);
