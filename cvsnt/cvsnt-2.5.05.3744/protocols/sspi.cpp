@@ -659,7 +659,7 @@ int ClientAuthenticate(const char *protocol, const char *name, const char *pwd, 
 	int rc, rcISC;
 	SEC_WINNT_AUTH_IDENTITY nameAndPwd = {0};
 	int bytesReceived = 0, bytesSent = 0;
-	char myTokenSource[DNLEN*4];
+	char myTokenSource[MAX_PATH];
 	TimeStamp useBefore;
 	DWORD ctxReq, ctxAttr;
 	int dwRead,dwWritten;
@@ -690,7 +690,7 @@ int ClientAuthenticate(const char *protocol, const char *name, const char *pwd, 
 		rc = AcquireCredentialsHandle( NULL, (char*)protocol, SECPKG_CRED_OUTBOUND, NULL, name?&nameAndPwd:NULL, NULL, NULL, &credHandle, &useBefore );
 
 		ctxReq = /*ISC_REQ_ALLOCATE_MEMORY |*/ ISC_REQ_REPLAY_DETECT | ISC_REQ_SEQUENCE_DETECT | ISC_REQ_CONFIDENTIALITY | ISC_REQ_EXTENDED_ERROR;
-	    sprintf (myTokenSource, "cvs/%s", hostname);
+	    snprintf (myTokenSource, sizeof(myTokenSource), "cvs/%s", hostname);
 	}
 	else
 	{
@@ -725,7 +725,8 @@ int ClientAuthenticate(const char *protocol, const char *name, const char *pwd, 
 		rc = AcquireCredentialsHandle( NULL, (char*)protocol, SECPKG_CRED_OUTBOUND, NULL, &cred, NULL, NULL, &credHandle, &useBefore );
 
 		ctxReq = /*ISC_REQ_ALLOCATE_MEMORY |*/ ISC_REQ_REPLAY_DETECT | ISC_REQ_SEQUENCE_DETECT | ISC_REQ_CONFIDENTIALITY | ISC_REQ_EXTENDED_ERROR | ISC_REQ_MUTUAL_AUTH | ISC_REQ_STREAM;
-		strncpy(myTokenSource,hostname,sizeof(myTokenSource));
+		strncpy(myTokenSource,hostname,sizeof(myTokenSource)-1);
+		myTokenSource[sizeof(myTokenSource)-1]=0;
 
 		CertCloseStore(hMy,0);
 	}
