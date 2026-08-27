@@ -104,6 +104,10 @@ static const char *join_rev1, *date_rev1;
 static const char *join_rev2, *date_rev2;
 static int aflag = 0;
 int backup_local_files = 1;
+/* See cvs.h: "update -C" moves untracked in-the-way files aside instead of
+   failing.  Option state only; the per-file decision is made at the point
+   where each individual in-the-way file is discovered.  */
+int update_inway_rename_aside = 0;
 static int toss_local_changes;
 static int force_tag_match = 1;
 static int update_build_dirs;
@@ -134,7 +138,8 @@ static const char *const update_usage[] =
     "\t-A\tReset any sticky tags/date/kopts.\n",
 	"\t-B bugid\tPerform -j Merge bounded by bug.\n",
 	"\t-b\tPerform -j merge from branch point.\n",
-    "\t-C\tOverwrite locally modified files with clean repository copies.\n",
+    "\t-C\tOverwrite locally modified files with clean repository copies\n",
+    "\t\t(in-the-way files not under CVS are moved aside to .#_notversioned.*).\n",
 	"\t-c\tUpdate base revision copies.\n",
     "\t-D date\tSet date to update from (is sticky).\n",
     "\t-d\tBuild directories, like checkout does.\n",
@@ -312,7 +317,12 @@ int update (int argc, char **argv)
 		tag = NULL;
 	}
 
-    if (current_parsed_root->isremote) 
+    /* With -C an untracked file sitting where a repository file must be
+       created is moved aside (per file, when it is encountered) rather
+       than failing the update.  */
+    update_inway_rename_aside = toss_local_changes;
+
+    if (current_parsed_root->isremote)
     {
 	int pass;
 

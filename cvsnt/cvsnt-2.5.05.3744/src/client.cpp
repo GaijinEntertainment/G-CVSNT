@@ -1432,6 +1432,88 @@ time_t get_file_mtime(const char *filename)
 }
 static char *time_stamp (time_t mtime, int local);
 
+/* The files (full pathnames, as in finfo->fullname) whose local
+   modifications "update -C" tossed during the send phase.  Because -C
+   sends no contents, the server answers with "Created" for them, and the
+   receive phase must let exactly these files be replaced instead of
+   treating them as untracked in-the-way files.  This is the per-file
+   replacement for the old process-wide client_overwrite_existing latch,
+   which used to disable the in-the-way protection for every file in the
+   rest of the run once a single modified file had been backed up.  */
+static List *client_reverted_files;
+
+/* Record that the send phase reverted FULLNAME under "update -C".  */
+static void remember_reverted_file (const char *fullname)
+{
+    Node *p;
+
+    if (client_reverted_files == NULL)
+	client_reverted_files = getlist ();
+    p = getnode ();
+    p->type = FILES;
+    p->key = xstrdup (fullname);
+    if (addnode (client_reverted_files, p) != 0)
+	freenode (p);
+}
+
+/* Strip any leading "./" components so that receive-phase pathnames
+   ("./a.txt") compare equal to send-phase fullnames ("a.txt").  */
+static const char *strip_dotslash (const char *path)
+{
+    while (path[0] == '.' && ISDIRSEP (path[1]))
+	path += 2;
+    return path;
+}
+
+/* Under "update -C", try to move an untracked in-the-way file aside (to
+   ".#_notversioned.<file>.<timestamp>") so that the incoming repository
+   copy can be checked out in its place in the same pass.
+
+   The decision is made here, for this one file, at the moment its own
+   response is processed -- deliberately not via a flag latched while some
+   other file was being sent, which used to silently overwrite in-the-way
+   files once any modified file had been backed up.
+
+   Returns 1 if the path is now clear and the checkout can proceed, 0 to
+   keep the historical "move away <file>; it is in the way" failure.  The
+   case-insensitive clash handling is left to the caller.  */
+static int inway_rename_aside (const char *filename, const char *short_pathname)
+{
+    char *realfilename = NULL;
+    char *aside_name;
+
+    /* A file whose local modifications were tossed by this run's own
+       "update -C" send phase is not in the way: replace it (the backup,
+       if wanted, was already made when it was sent).  */
+    if (client_reverted_files != NULL
+	&& findnode_fn (client_reverted_files,
+			strip_dotslash (short_pathname)) != NULL)
+	return 1;
+
+    if (!update_inway_rename_aside)
+	return 0;
+
+    /* A name that differs only in case is handled by the existing
+       case-ambiguity path in our caller, not here.  */
+    if (filenames_case_insensitive && !case_isfile (filename, &realfilename))
+    {
+	xfree (realfilename);
+	return 0;
+    }
+
+    aside_name = rename_file_aside (filename);
+    if (aside_name == NULL)
+    {
+	error (0, 0, "cannot move %s aside; it is in the way", short_pathname);
+	return 0;
+    }
+
+    if (!really_quiet)
+	error (0, 0, "in-the-way file %s moved to %s", short_pathname, aside_name);
+    xfree (aside_name);
+    return 1;
+}
+
 /* Update the Entries line for this file.  */
 static void update_entries (char *data_arg, List *ent_list, char *short_pathname, char *filename)
 {
@@ -1541,7 +1623,8 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 		xfree(realfilename);
 	}
 	else
-	if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename))
+	if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename)
+	    && !inway_rename_aside (filename, short_pathname))
 	{
 	    /* Emit a warning and refuse to update the file; we don't want
 	       to clobber a user's file.  */
@@ -2403,7 +2486,8 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
     {
     	xfree(realfilename);
     }
-    else if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename))
+    else if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename)
+             && !inway_rename_aside (filename, short_pathname))
     {
       if (filenames_case_insensitive && !case_isfile(filename,&realfilename))
       {
@@ -5444,7 +5528,13 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
     							filename, bakname);
     				xfree (bakname);
                 }
-				client_overwrite_existing = 1;
+				/* This used to latch the process-wide
+				   client_overwrite_existing flag on, which from that
+				   point on silently overwrote every untracked
+				   in-the-way file in the rest of the run.  Instead,
+				   remember this one file so that only its own
+				   "Created" response may replace it.  */
+				remember_reverted_file (finfo->fullname);
 			}
 		}
 		else
@@ -5958,6 +6048,9 @@ void send_files (int argc, char **argv, int local, int aflag, unsigned int flags
     args.no_contents = flags & SEND_NO_CONTENTS;
     args.blob_contents = !(flags & SEND_NO_BLOBS_CONTENT);
     args.backup_modified = flags & BACKUP_MODIFIED_FILES;
+    /* Start each send phase with a clean per-file revert list.  */
+    if (client_reverted_files != NULL)
+	dellist (&client_reverted_files);
     err = start_recursion
 	(send_fileproc, send_filesdoneproc, (PREDIRENTPROC) NULL,
 	 send_dirent_proc, send_dirleave_proc, (void *) &args,

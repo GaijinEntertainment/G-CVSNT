@@ -937,7 +937,44 @@ char *backup_file (const char *filename, const char *suffix)
 }
 
 /*
- * Copy a string into a buffer escaping any shell metacharacters. 
+ * Move an in-the-way (not version controlled) file aside so that a fresh
+ * repository copy can be checked out in its place.  The file is renamed
+ * (not copied) to ".#_notversioned.<file>.<unix-timestamp>", which keeps
+ * it recoverable and covered by the default ".#*" ignore pattern.
+ *
+ * Returns the new name (caller may xfree() it), or NULL if the rename
+ * failed (a non-fatal error is printed in that case).
+ */
+char *rename_file_aside (const char *filename)
+{
+    char *aside_name;
+    unsigned long stamp = (unsigned long) time (NULL);
+    int attempt;
+
+    aside_name = (char*)xmalloc (sizeof (BAKPREFIX) + sizeof ("_notversioned.")
+                                 + strlen (filename) + 32);
+    /* Avoid silently replacing an aside file from a previous run made
+       within the same second.  */
+    for (attempt = 0; attempt < 100; ++attempt)
+    {
+        sprintf (aside_name, "%s_notversioned.%s.%lu", BAKPREFIX, filename,
+                 stamp + attempt);
+        if (!isfile (aside_name))
+            break;
+    }
+
+    if (CVS_RENAME (filename, aside_name) < 0)
+    {
+        error (0, errno, "cannot rename %s to %s", filename, aside_name);
+        xfree (aside_name);
+        return NULL;
+    }
+
+    return aside_name;
+}
+
+/*
+ * Copy a string into a buffer escaping any shell metacharacters.
  *
  * Returns a pointer to the allocated buffer
  */

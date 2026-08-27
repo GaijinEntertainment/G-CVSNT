@@ -746,6 +746,12 @@ extern void get_file (const char *, const char *, const char *,
 char *shell_escape(char **buf, const char *str);
 char *shell_escape_backslash(char **buf, const char *str);
 char *backup_file (const char *filename, const char *suffix);
+char *rename_file_aside (const char *filename);
+/* Nonzero when "update -C" should move an untracked in-the-way file aside
+   (to ".#_notversioned.<file>.<timestamp>") instead of failing with
+   "move away <file>; it is in the way".  Set once from the parsed options;
+   the actual decision and rename happen per file.  */
+extern int update_inway_rename_aside;
 void resolve_symlink (char **filename);
 void sleep_past (time_t desttime);
 
