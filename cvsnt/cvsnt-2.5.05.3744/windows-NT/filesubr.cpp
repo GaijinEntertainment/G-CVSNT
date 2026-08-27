@@ -665,6 +665,44 @@ int readlink (char *path, char *buf, int buf_size)
 // From win32.cpp
 bool validate_filename(const char *path, bool warn);
 
+/* Nonzero when the CVS_RENAME_LOCKED_ASIDE environment variable enables
+   the last-resort handling of rename targets that stay locked: instead
+   of fatally giving up after the 10 second retry, the locked target is
+   itself renamed to a recoverable ".#_notversioned.<name>.<timestamp>"
+   and the rename is retried once.  Default (unset/empty/"0"): off,
+   historical behavior.  */
+static int rename_locked_aside_enabled ()
+{
+	const char *env = getenv ("CVS_RENAME_LOCKED_ASIDE");
+	return env != NULL && *env != '\0' && strcmp (env, "0") != 0;
+}
+
+/* Build "<dir>/.#_notversioned.<name>.<timestamp>" next to TO, avoiding
+   names that already exist.  Caller xfree()s the result.  */
+static char *locked_aside_name (const char *to)
+{
+	const char *base = to;
+	const char *p;
+	char *aside;
+	unsigned long stamp = (unsigned long) time (NULL);
+	int attempt;
+
+	for (p = to; *p; ++p)
+		if (ISDIRSEP (*p))
+			base = p + 1;
+
+	aside = (char*) xmalloc (strlen (to) + sizeof (BAKPREFIX "_notversioned.") + 32);
+	for (attempt = 0; attempt < 100; ++attempt)
+	{
+		sprintf (aside, "%.*s" BAKPREFIX "_notversioned.%s.%lu",
+			 (int) (base - to), to, base, stamp + attempt);
+		uc_name fn_aside = aside;
+		if (GetFileAttributes (fn_aside) == 0xFFFFFFFF)
+			break;
+	}
+	return aside;
+}
+
 /* Rename for NT which works for read only files.  */
 int wnt_rename (const char *from, const char *to)
 {
@@ -719,7 +757,7 @@ int wnt_rename (const char *from, const char *to)
 		count++;
 		if(count==100)
 		{
-			printf("Unable to rename file %s to %s for 10 seconds, giving up...\n",fn_root(from),fn_root(to),count/10,count>10?"s":"");
+			printf("Unable to rename file %s to %s for 10 seconds, giving up...\n",fn_root(from),fn_root(to));
 			break;
 		}
 		if(!(count%10))
@@ -738,7 +776,32 @@ int wnt_rename (const char *from, const char *to)
 		count++;
 		if(count==100)
 		{
-			printf("Unable to rename file %s to %s for 10 seconds, giving up...\n",fn_root(from),fn_root(to),count/10,count>10?"s":"");
+			/* Last resort, opt-in: the target would not let itself be
+			   replaced for 10 seconds -- commonly a running executable,
+			   whose image is locked against delete/replace but not
+			   against a plain rename.  Move the locked target aside to
+			   a recoverable name and retry the rename once.  */
+			if (rename_locked_aside_enabled () && GetFileAttributes (fn_to) != 0xFFFFFFFF)
+			{
+				char *aside = locked_aside_name (to);
+				uc_name fn_aside = aside;
+
+				if (MoveFile (fn_to, fn_aside))
+				{
+					printf("Renamed locked file %s to %s\n", fn_root(to), fn_root(aside));
+					xfree (aside);
+					if ((result = MoveFileEx(fn_from,fn_to,MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING)))
+						break;
+					save_errno = GetLastError();
+					TRACE(3,"MoveFile after rename-aside returned error %08x",save_errno);
+				}
+				else
+				{
+					TRACE(3,"Rename-aside of locked target failed, error %08x",GetLastError());
+					xfree (aside);
+				}
+			}
+			printf("Unable to rename file %s to %s for 10 seconds, giving up...\n",fn_root(from),fn_root(to));
 			break;
 		}
 		if(!(count%10))
