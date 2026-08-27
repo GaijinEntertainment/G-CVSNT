@@ -54,7 +54,7 @@ bool CRootSplitter::Split(const char *root)
 				InQuote=0;
 				continue;
 			}
-			if(*p=='"' || *p=='\'')
+			if(!InQuote && (*p=='"' || *p=='\''))
 			{
 				InQuote=*p;
 				continue;
