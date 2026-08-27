@@ -30,7 +30,8 @@ Each item lists what/where, expected impact, risk, and a status.
   `freercsnode` clears them again) instead of being rebuilt; any accidental
   later use would hit NULL fields rather than stale data. Commit paths keep
   the re-parse.
-- **Status**: proposed
+- **Status**: implemented (commit "tag: skip the discarded re-parse after
+  RCS_rewrite")
 
 ## 2. Send the network shutdown trailer before deleting the server temp sandbox
 

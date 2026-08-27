@@ -31,7 +31,7 @@ static Dtype tag_dirproc(void *callerdat, char *dir,
 				 char *repos, char *update_dir,
 				 List *entries, const char *virtual_repository, Dtype hint);
 static int rtag_fileproc(void *callerdat, struct file_info *finfo);
-static int rtag_delete(RCSNode *rcsfile);
+static int rtag_delete(RCSNode *rcsfile, int reparse);
 static int tag_fileproc(void *callerdat, struct file_info *finfo);
 static int add_to_valtags(char *name);
 
@@ -675,6 +675,13 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
     if ((rcsfile = finfo->rcs) == NULL)
 		return 1;
 
+    /* After a rewrite, a regular file's node is freed as soon as this proc
+       returns, so re-parsing the file just written is wasted work.  The
+       .directory_history pseudo-file (tagged via tag_dirproc) is the
+       exception: its node belongs to the directory-mapping stack and
+       outlives us, so it must stay fully parsed.  */
+    int reparse = !strcmp (finfo->file, RCSREPOVERSION);
+
     /*
      * For tagging an RCS file which is a symbolic link, you'd best be
      * running with RCS 5.6, since it knows how to handle symbolic links
@@ -682,7 +689,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
      */
 
     if (delete_flag)
-		return rtag_delete (rcsfile);
+		return rtag_delete (rcsfile, reparse);
 
 	if(numtag && !date && alias_branch)
 	{
@@ -714,7 +721,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 	if (version == NULL)
 	{
 		/* Clean up any old tags */
-		rtag_delete (rcsfile);
+		rtag_delete (rcsfile, reparse);
 
 		if (!quiet && !force_tag_match)
 		{
@@ -745,7 +752,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(numtag),
 					PATCH_NULL(current_date) );
-			RCS_rewrite (rcsfile, NULL, NULL, 0);
+			RCS_rewrite (rcsfile, NULL, NULL, 0, reparse);
 			tag_set_ok = 1;
 		}
     }
@@ -808,7 +815,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(rev),
 					PATCH_NULL(current_date) );
-	    RCS_rewrite (rcsfile, NULL, NULL, 0);
+	    RCS_rewrite (rcsfile, NULL, NULL, 0, reparse);
 		tag_set_ok = 1;
 	}
     }
@@ -843,7 +850,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
  * This is done here because it's MUCH faster than just blindly calling
  * "rcs" to remove the tag... trust me.
  */
-static int rtag_delete (RCSNode *rcsfile)
+static int rtag_delete (RCSNode *rcsfile, int reparse)
 {
     char *version;
     int retcode;
@@ -890,7 +897,7 @@ static int rtag_delete (RCSNode *rcsfile)
 	return (1);
     }
 	TRACE(3,"rtag_delete(2) rewrite rcsfile");
-    RCS_rewrite (rcsfile, NULL, NULL, 0);
+    RCS_rewrite (rcsfile, NULL, NULL, 0, reparse);
     return (0);
 }
 
@@ -910,6 +917,11 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 
     TRACE(3,"tag_fileproc");
     vers = Version_TS (finfo, NULL, NULL, NULL, 0, 0, 0);
+
+    /* See rtag_fileproc: skip the post-rewrite re-parse for nodes that are
+       discarded right after this proc; the .directory_history pseudo-file
+       node outlives us and keeps it.  */
+    int reparse = !strcmp (finfo->file, RCSREPOVERSION);
 
     TRACE(3,"tag_fileproc - Version_TS complete");
     if ((numtag != NULL) || (date != NULL))
@@ -1045,7 +1057,7 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 	TRACE(3,"tag_fileproc(1) rewrite rcsfile=\"%s\" symtag=\"%s\"",
 					PATCH_NULL(vers->srcfile->path),
 					PATCH_NULL(symtag) );
-	RCS_rewrite (vers->srcfile, NULL, NULL, 0);
+	RCS_rewrite (vers->srcfile, NULL, NULL, 0, reparse);
 
 	/* warm fuzzies */
 	if (!really_quiet)
@@ -1201,7 +1213,7 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(rev),
 					PATCH_NULL(current_date) );
-    RCS_rewrite (vers->srcfile, NULL, NULL, 0);
+    RCS_rewrite (vers->srcfile, NULL, NULL, 0, reparse);
 
     /* more warm fuzzies */
     if (!really_quiet)

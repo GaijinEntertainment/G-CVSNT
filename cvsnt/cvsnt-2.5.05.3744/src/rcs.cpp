@@ -7151,7 +7151,7 @@ static char *rcs_lockfilename (const char *rcsfile)
    first call RCS_reparsercsfile, then munge the data structures as
    desired (via RCS_delete_revs, RCS_settag, &c), then call RCS_rewrite.  */
 
-void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta)
+void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, int reparse)
 {
     FILE *fout;
 	size_t lockId_temp;
@@ -7196,8 +7196,16 @@ void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compres
     rcsbuf_close (&rcs->rcsbuf);
     rcs_internal_unlockfile (fout, rcs->path, lockId_temp);
 
+	/* The in-memory contents point into the buffer freed by rcsbuf_close,
+	   so they are always cleared here.  Re-reading and re-parsing the file
+	   we just wrote is only useful to callers that keep using the node
+	   (checkin/commit paths); callers that free the node right after the
+	   rewrite pass reparse=0 and skip that cost.  Clearing is idempotent,
+	   so the eventual freercsnode remains safe, and any unexpected later
+	   access hits NULL fields instead of stale data.  */
 	free_rcsnode_contents(rcs);
-	RCS_reparsercsfile(rcs);
+	if (reparse)
+		RCS_reparsercsfile(rcs);
 }
 
 /*
