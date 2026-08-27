@@ -384,6 +384,39 @@ def t_in_the_way_moved(r):
     check_eq(len(aside), 1, "checkout aside backups: %r" % aside)
 
 
+@test("a missing CVS/Entries aborts the whole update")
+def t_missing_entries_default(r):
+    r.import_tree("m", {"a.txt": "aaa\n", "sub/b.txt": "bbb\n",
+                        "sub/nested/d.txt": "ddd\n"})
+    wc = r.checkout("m")
+    os.remove(os.path.join(wc, "sub", "CVS", "Entries"))
+    rc, out = r.cvs(["update"], cwd=wc, expect_ok=False)
+    check(rc != 0, "update with a missing Entries exited 0")
+    check("CVS/Entries is missing" in out,
+          "missing-Entries message absent:\n" + out)
+    check(not os.path.exists(os.path.join(wc, "sub", "CVS", "Entries")),
+          "update recreated Entries without being asked to")
+
+
+@test("update --recreate-entries repairs a missing CVS/Entries")
+def t_missing_entries_recreated(r):
+    r.import_tree("m", {"a.txt": "aaa\n", "sub/b.txt": "bbb\n",
+                        "sub/nested/d.txt": "ddd\n"})
+    wc = r.checkout("m")
+    os.remove(os.path.join(wc, "sub", "CVS", "Entries"))
+    rc, out = r.cvs(["update", "--recreate-entries"], cwd=wc, expect_ok=False)
+    check_eq(rc, 0, "update --recreate-entries exit status:\n" + out)
+    check("recreated missing" in out, "no recreation notice:\n" + out)
+    ents = entries_of(os.path.join(wc, "sub"))
+    check("b.txt" in ents, "b.txt not re-registered: %r" % ents)
+    check("nested" in ents, "nested/ lost from the recreated Entries: %r" % ents)
+    check_eq(read(os.path.join(wc, "sub", "b.txt")), "bbb\n", "b.txt content")
+    check_eq(read(os.path.join(wc, "sub", "nested", "d.txt")), "ddd\n",
+             "nested/d.txt content")
+    rc, out = r.cvs(["update"], cwd=wc, expect_ok=False)
+    check_eq(rc, 0, "plain update after the repair is not clean:\n" + out)
+
+
 @test("update -d picks up a directory added after checkout")
 def t_update_d(r):
     r.import_tree("m", {"a.txt": "one\n"})
