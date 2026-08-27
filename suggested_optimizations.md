@@ -43,7 +43,7 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 | # | ID | What | LoC | Risk | Status |
 | --- | --- | --- | ---: | --- | --- |
 | 1 | PERF-01 F5 | `rcsbuf_valfree()` is a linear scan of the relocation array, called ~4× per revision from `free_rcsvers_contents()` — O(revisions²) just to free one file. Set a teardown flag in `freercsnode()`; nothing can call `rcsbuf_fill()` during teardown, so the scan is unnecessary there. | ~15 | low | not started |
-| 2 | PERF-01 F6 | `rcsbuf_fill()` grows the parse buffer by a constant `MAX_INCR` (2 MiB), so a large `,v` is memcpy'd O(size²/2 MiB) times. Pre-size the buffer from `fstat`. | ~15 | low | not started |
+| 2 | PERF-01 F6 | `rcsbuf_fill()` grows the parse buffer by a constant `MAX_INCR` (2 MiB), so a large `,v` is memcpy'd O(size²/2 MiB) times. Pre-size the buffer from `fstat`. | ~15 | low | implemented |
 | 3 | PERF-02 F2.1 | `RCS_rewrite()` re-parses the file it has just written and throws the result away. Gate that behind a parameter and pass "don't re-parse" from the tag path — removes ~⅓ of all parse work in a tag. | ~8 | low | implemented |
 | 4 | PERF-01 F3 | `Register()` writes each `Entries.Log` record **twice**: `write_ent_ex_proc` already writes the `Entries` line, so calling both it and `write_ent_proc` duplicates it. Delete the duplicate call. | 1 | low | implemented |
 | 5 | PERF-01 F10a | `find_rcs()` looks a name up with `findnode_fn` and then calls `addnode` anyway, which looks it up again — and leaks the `Node` plus its key when the name is already present. Use `addnode`'s return value. | ~10 | low | implemented |

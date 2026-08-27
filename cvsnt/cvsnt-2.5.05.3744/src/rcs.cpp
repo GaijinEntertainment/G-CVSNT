@@ -935,6 +935,27 @@ static int rcsbuf_open(struct rcsbuffer *rcsbuf, const char *filename)
 #endif
 	}
 
+	/* Pre-size the buffer from the file size so rcsbuf_fill never has to
+	   grow it while this file is parsed: above MAX_INCR, expand_string
+	   grows linearly, making a large ,v cost O(size^2/MAX_INCR) in
+	   realloc-memcpy, and every move also runs the pointer-relocation
+	   loop.  The extra RCSBUF_BUFSIZE gives the final, EOF-detecting
+	   fill room so it does not trigger one more expansion.  Very large
+	   files (or an fstat failure) simply keep the incremental-growth
+	   behaviour.  No values point into the buffer yet, so a move here
+	   relocates nothing.  */
+	{
+		struct stat sb;
+		if (fstat (fileno (rcsbuf->fp), &sb) == 0
+		    && sb.st_size > 0 && sb.st_size <= 64*1024*1024)
+		{
+			expand_string (&rcsbuf->buffer, &rcsbuf->buffer_size,
+				       (size_t) sb.st_size + RCSBUF_BUFSIZE + 1);
+			rcsbuf->ptr = rcsbuf->buffer;
+			rcsbuf->ptrend = rcsbuf->buffer;
+		}
+	}
+
 	return 1;
 }
 
