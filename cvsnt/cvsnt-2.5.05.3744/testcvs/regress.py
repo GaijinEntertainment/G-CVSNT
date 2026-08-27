@@ -666,6 +666,78 @@ def t_server_session(r):
               "checkout content arrived after the co terminator:\n" + out)
 
 
+@test("checkout -p sends the file body before its trailing partial line")
+def t_server_pipeout_order(r):
+    # `co -p` on a file that does not end in a newline emits, in order:
+    #   NoTranslateBegin / M <body> / MT text <tail> / NoTranslateEnd
+    # The body goes through cvs_output (staged); the tail and the
+    # NoTranslate brackets are written straight to the network buffer.  If
+    # staged text is not drained before those direct writes, the client
+    # prints the tail before the body, and - worse - NoTranslateEnd arrives
+    # first, so the client re-enables codepage translation before the body
+    # and silently mistranslates it.
+    body = "alpha\nbeta\ngamma no trailing newline"
+    r.import_tree("m", {"p.txt": body})
+    root = r.repo.replace(os.sep, "/")
+
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT NoTranslateBegin NoTranslateEnd")
+    reqs = "".join(s + "\n" for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "valid-requests",
+        "UseUnchanged",
+        "Argument -p",
+        "Argument m/p.txt",
+        "co",
+    ])
+
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "psrvwc")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, _ = p.communicate(reqs.encode("utf-8"), timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        fail("server session did not complete within 120s")
+        return
+    out = out_b.decode("utf-8", "replace")
+
+    i_begin = out.find("NoTranslateBegin")
+    i_body = out.find("M alpha")
+    i_tail = out.find("MT text")
+    i_end = out.find("NoTranslateEnd")
+
+    if i_begin < 0 or i_end < 0:
+        # The server only emits the brackets when the client advertises them;
+        # if this build does not, there is nothing to order.
+        check(i_body >= 0, "file body missing entirely:\n" + out)
+        return
+
+    check(0 <= i_begin < i_body,
+          "body arrived before NoTranslateBegin (%d,%d):\n%s" % (i_begin, i_body, out))
+    check(0 <= i_body < i_end,
+          "NoTranslateEnd arrived before the file body (%d,%d) - the client "
+          "would re-enable codepage translation before receiving it:\n%s"
+          % (i_body, i_end, out))
+    if i_tail >= 0:
+        check(i_body < i_tail,
+              "trailing partial line arrived before the body (%d,%d):\n%s"
+              % (i_body, i_tail, out))
+
+
 @test("a watched file checks out read-only, an unwatched one writable")
 def t_watched_readonly(r):
     # "Is this file watched?" is answered per checked-out file from the

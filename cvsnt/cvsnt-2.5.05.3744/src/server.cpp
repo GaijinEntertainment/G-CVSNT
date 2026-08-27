@@ -6538,7 +6538,13 @@ int cvs_no_translate_begin()
 	if(!server_active)
 		return 0;
 	if(supported_response("NoTranslateBegin"))
+	{
+		/* Staged M text has to reach the wire before anything written
+		   directly to buf_to_net, or the bracket overtakes the body it is
+		   meant to enclose.  */
+		cvs_flushout ();
 		buf_output0 (buf_to_net, "NoTranslateBegin\n");
+	}
 	return 0;
 }
 
@@ -6547,7 +6553,10 @@ int cvs_no_translate_end()
 	if(!server_active)
 		return 0;
 	if(supported_response("NoTranslateEnd"))
+	{
+		cvs_flushout ();
 		buf_output0 (buf_to_net, "NoTranslateEnd\n");
+	}
 	return 0;
 }
 #endif
@@ -6558,6 +6567,9 @@ int cvs_no_translate_end()
 int cvs_output_binary (char *str, size_t len)
 {
 	cvs_flusherr();
+	/* Mbinary is written straight to buf_to_net below, so staged M text has
+	   to be pushed out first or the binary body overtakes it.  */
+	cvs_flushout();
 #ifdef SERVER_SUPPORT
     if (server_active)
     {
@@ -6834,6 +6846,9 @@ void cvs_output_tagged (const char *tag, const char *text)
 #ifdef SERVER_SUPPORT
     if (server_active && supported_response ("MT"))
     {
+		/* Drain staged M text first: MT goes straight to buf_to_net, so
+		   without this it overtakes text cvs_output has not pushed yet.  */
+		cvs_flushout ();
 		buf_output0 (buf_to_net, "MT ");
 		buf_output0 (buf_to_net, tag);
 		if (text != NULL)
