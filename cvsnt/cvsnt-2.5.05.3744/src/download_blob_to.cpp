@@ -247,7 +247,7 @@ void BackgroundProcessor::init()
   base_repo = repo;
   if (base_repo[0] != '/')
     base_repo = "/" + base_repo;
-  if (base_repo[base_repo.length()] != '/')
+  if (base_repo[base_repo.length()-1] != '/')
     base_repo += "/";
 
   uint32_t publicUrlsCnt = 0, privateUrlsCnt = 0;
