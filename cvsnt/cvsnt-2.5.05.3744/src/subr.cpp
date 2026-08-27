@@ -939,6 +939,47 @@ char *backup_file (const char *filename, const char *suffix)
 }
 
 /*
+ * Move FILE, an unversioned file standing where a versioned file must be
+ * created, aside to .#FILE.notversioned.<timestamp> in the same directory
+ * (adding .1, .2, ... on collision).  FULLNAME is FILE with its path, for
+ * messages.  A rename, never a delete: the user's bytes survive, under a
+ * name the default ignore list already covers.  Prints one line and
+ * returns 1 on success; returns 0 on failure or in noexec mode.
+ */
+int rename_notversioned_aside (const char *file, const char *fullname)
+{
+    char *bak;
+    int n = 0;
+
+    if (noexec)
+	return 0;
+    bak = (char*)xmalloc (sizeof (BAKPREFIX) + strlen (file) + 64);
+    sprintf (bak, "%s%s.notversioned.%lu", BAKPREFIX, file,
+	     (unsigned long) time (NULL));
+    while (isfile (bak))
+    {
+	if (++n > 999)
+	{
+	    error (0, 0, "too many %s%s.notversioned.* files already",
+		   BAKPREFIX, file);
+	    xfree (bak);
+	    return 0;
+	}
+	sprintf (bak, "%s%s.notversioned.%lu.%d", BAKPREFIX, file,
+		 (unsigned long) time (NULL), n);
+    }
+    if (CVS_RENAME (file, bak) < 0)
+    {
+	error (0, errno, "cannot move %s aside to %s", fullname, bak);
+	xfree (bak);
+	return 0;
+    }
+    error (0, 0, "moved %s aside to %s (it was in the way)", fullname, bak);
+    xfree (bak);
+    return 1;
+}
+
+/*
  * Copy a string into a buffer escaping any shell metacharacters. 
  *
  * Returns a pointer to the allocated buffer

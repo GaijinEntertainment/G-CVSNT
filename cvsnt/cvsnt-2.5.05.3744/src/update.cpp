@@ -104,6 +104,7 @@ static const char *join_rev1, *date_rev1;
 static const char *join_rev2, *date_rev2;
 static int aflag = 0;
 int backup_local_files = 1;
+int move_in_the_way = 0;
 static int toss_local_changes;
 static int force_tag_match = 1;
 static int update_build_dirs;
@@ -154,6 +155,7 @@ static const char *const update_usage[] =
 	"\t-t\tUpdate using last checkin time.\n",
     "\t-n\tDo not backup local files(silently remove). Irreversibly deletes locally modified files.\n",
     "\t--no-backups\tSame as -n; also suppresses the .# copies merges leave behind.\n",
+    "\t--move-in-the-way\tRename an unversioned file that blocks an incoming file to .#name.notversioned.* and continue.\n",
     "\t-W spec\tWrappers specification line (! to reset).\n",
     "\t--blob_zero\tDownloaded blobs would be written as zero length file. That is for 'hot-proxy' scenario (to save space and optimize performance of update).\n",
     "(Specify the --help global option for a list of other help options)\n",
@@ -177,6 +179,7 @@ int update (int argc, char **argv)
     {
     	{"blob_zero", 0, NULL, 1},
     	{"no-backups", 0, NULL, 2},
+    	{"move-in-the-way", 0, NULL, 3},
     	{0, 0, NULL, 0},
     };
 
@@ -206,6 +209,9 @@ int update (int argc, char **argv)
         case 'n':
         case 2:			/* --no-backups */
 		backup_local_files = 0;
+		break;
+        case 3:			/* --move-in-the-way */
+		move_in_the_way = 1;
 		break;
 		case 'c':
 		update_baserev = 1;

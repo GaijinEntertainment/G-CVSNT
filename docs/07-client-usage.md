@@ -110,6 +110,7 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
 | `-l` / `-R` | Local only / recursive (recursive is the default) |
 | `-I ign` | Extra ignore pattern; `-I !` resets the ignore list |
 | `--blob_zero` | Write downloaded blobs as zero-length files. For "hot proxy" machines that only need to warm a cache |
+| `--move-in-the-way` | When an unversioned file occupies the path of a file the repository wants to create — the `move away <file>; it is in the way` situation, which otherwise blocks that file on every run until someone deletes it by hand — rename the obstruction to `.#name.notversioned.<timestamp>` in the same directory and install the incoming file. A rename, never a delete; the `.#` name is already on the default ignore list. Off by default. Also accepted by `checkout` |
 
 Note the asymmetry between `-C` and `-n`: `-C` is what you want for a clean rebuild of a working
 copy, but by default it leaves a `.#name.rev` backup for every modified file, and those are never
@@ -146,7 +147,8 @@ cvs checkout [-ANPRcflnps] [-r rev] [-D date] [-d dir] [-j rev1] [-j rev2] [-k k
 ```
 
 `-r` and `-D` imply `-P`. `-d dir` checks out into `dir` instead of the module name; add `-N` to
-keep the full module path underneath it.
+keep the full module path underneath it. `--move-in-the-way` works as in `update` — useful when
+checking out over a directory that already contains stray files.
 
 ## `tag`, `rtag` and branches
 

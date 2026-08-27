@@ -106,11 +106,22 @@ Ctype Classify_File (struct file_info *finfo, const char *tag, const char *date,
 	}
 	else if (!pipeout && vers->ts_user && No_Difference(finfo, vers, (kf.flags&KFLAG_STATIC || kf_ent.flags&KFLAG_STATIC), ignore_keywords))
 	{
-	    /* the files were different so it is a conflict */
-	    if (!really_quiet)
-		error (0, 0, "move away %s; it is in the way",
-		       fn_root(finfo->fullname));
-	    ret = T_CONFLICT;
+	    extern int move_in_the_way;
+
+	    if (move_in_the_way && !server_active
+		&& rename_notversioned_aside (finfo->file, fn_root(finfo->fullname)))
+	    {
+		/* the obstruction is gone; just check the file out */
+		ret = T_CHECKOUT;
+	    }
+	    else
+	    {
+		/* the files were different so it is a conflict */
+		if (!really_quiet)
+		    error (0, 0, "move away %s; it is in the way",
+			   fn_root(finfo->fullname));
+		ret = T_CONFLICT;
+	    }
 	}
 	else
 	{

@@ -323,6 +323,67 @@ def t_merge_no_backup(r):
     check(not backups, "update --no-backups left backups: %r" % backups)
 
 
+def _in_the_way_setup(r):
+    """Commit a new file b.txt from a second working copy and obstruct its
+    path in the first working copy with an unversioned file.  Returns the
+    first working copy."""
+    r.import_tree("m", {"a.txt": "aaa\n"})
+    wc = r.checkout("m")
+    wc2root = os.path.join(r.root, "wc2")
+    os.makedirs(wc2root)
+    r.cvs(["checkout", "m"], cwd=wc2root)
+    wc2 = os.path.join(wc2root, "m")
+    write(os.path.join(wc2, "b.txt"), "repo version\n")
+    r.cvs(["add", "b.txt"], cwd=wc2)
+    r.cvs(["commit", "-m", "add b"], cwd=wc2)
+    write(os.path.join(wc, "b.txt"), "local stuff\n")
+    return wc
+
+
+@test("an unversioned file in the way blocks the update, run after run")
+def t_in_the_way_default(r):
+    wc = _in_the_way_setup(r)
+    for attempt in ("first", "second"):
+        rc, out = r.cvs(["update"], cwd=wc, expect_ok=False)
+        check(rc != 0, "%s update with an obstruction exited 0" % attempt)
+        check("move away b.txt; it is in the way" in out,
+              "%s update lacks the move-away message:\n%s" % (attempt, out))
+        check_eq(read(os.path.join(wc, "b.txt")), "local stuff\n",
+                 "obstructing file content after %s update" % attempt)
+        check(not [f for f in os.listdir(wc) if f.startswith(".#")],
+              "update without the option created .# files")
+
+
+@test("update --move-in-the-way renames the obstruction and converges")
+def t_in_the_way_moved(r):
+    wc = _in_the_way_setup(r)
+    rc, out = r.cvs(["update", "--move-in-the-way"], cwd=wc, expect_ok=False)
+    check_eq(rc, 0, "update --move-in-the-way exit status:\n" + out)
+    check("move away" not in out, "still asks to move away:\n" + out)
+    check_eq(read(os.path.join(wc, "b.txt")), "repo version\n",
+             "b.txt content after recovery")
+    aside = [f for f in os.listdir(wc) if f.startswith(".#b.txt.notversioned.")]
+    check_eq(len(aside), 1, "aside backups: %r" % aside)
+    if aside:
+        check_eq(read(os.path.join(wc, aside[0])), "local stuff\n",
+                 "aside backup content")
+    rc, out = r.cvs(["update"], cwd=wc, expect_ok=False)
+    check_eq(rc, 0, "plain update after recovery is not clean:\n" + out)
+
+    # checkout into a pre-populated directory shares the option.
+    wc3root = os.path.join(r.root, "wc3")
+    os.makedirs(os.path.join(wc3root, "m"))
+    write(os.path.join(wc3root, "m", "b.txt"), "other local\n")
+    rc, out = r.cvs(["checkout", "--move-in-the-way", "m"], cwd=wc3root,
+                    expect_ok=False)
+    check_eq(rc, 0, "checkout --move-in-the-way exit status:\n" + out)
+    check_eq(read(os.path.join(wc3root, "m", "b.txt")), "repo version\n",
+             "b.txt content after checkout recovery")
+    aside = [f for f in os.listdir(os.path.join(wc3root, "m"))
+             if f.startswith(".#b.txt.notversioned.")]
+    check_eq(len(aside), 1, "checkout aside backups: %r" % aside)
+
+
 @test("update -d picks up a directory added after checkout")
 def t_update_d(r):
     r.import_tree("m", {"a.txt": "one\n"})
