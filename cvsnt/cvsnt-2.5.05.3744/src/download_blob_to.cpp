@@ -45,7 +45,7 @@ struct atomic_wrapper
   atomic_wrapper():_a(){}
   atomic_wrapper(const std::atomic<T> &a):_a(a.load()){}
   atomic_wrapper(const atomic_wrapper &other):_a(other._a.load()){}
-  atomic_wrapper &operator=(const atomic_wrapper &other) {_a.store(other._a.load());}
+  atomic_wrapper &operator=(const atomic_wrapper &other) {_a.store(other._a.load()); return *this;}
   operator T() {return T(_a);}
   atomic_wrapper(const T& other) { _a = other; }
   atomic_wrapper& operator=(const T& other) { _a = other; return *this; }
