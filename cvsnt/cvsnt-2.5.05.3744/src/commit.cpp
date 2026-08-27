@@ -572,7 +572,7 @@ int commit (int argc, char **argv)
 		send_arg("-T");
 
 	if(ignore_keywords)
-		send_arg("i");
+		send_arg("-i");
 
 	if(bugid.size())
 	{
