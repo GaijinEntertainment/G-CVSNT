@@ -54,7 +54,7 @@ bool start_push_server(int portno, int max_connections, volatile bool* should_st
 
   listen(sockfd, max_connections);
   struct sockaddr_in client; socklen_t clientSz = sizeof(client);
-  while (!should_stop)
+  while (!(should_stop && *should_stop))
   {
     intptr_t client_raw_sock = (client_raw_sock = accept(sockfd, (struct sockaddr *)&client, (socklen_t*)&clientSz));
     if (client_raw_sock >= 0)
