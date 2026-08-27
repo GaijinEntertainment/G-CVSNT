@@ -30,6 +30,7 @@ implementing an item should flip its status in the same commit.
 | --- | --- | --- |
 | `update` | 2 blocking lock-server round trips + a full RCS parse | file count |
 | `tag` / `tag -b` | a complete rewrite of the `,v`, plus 6 lock round trips | file count **× tag count** |
+| `tag` **during** a concurrent `update` | waits on the update's per-file read locks, 1 s per collision, fatal after 20 | duration of the concurrent update |
 
 The tag figure is the one worth internalising: because adding a symbol re-serialises the whole
 symbol table and copies every deltatext, **each tag makes the next tag slower, permanently.**
@@ -78,6 +79,31 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 
 ---
 
+### Tier 4 — cross-command lock contention
+
+Why a `cvs tag` cannot run while a slow client is updating, from
+[`_reports/PERF-03-tag-update-lock-contention.md`](_reports/PERF-03-tag-update-lock-contention.md).
+This is a different problem from the two above: not "the command is slow" but "the command dies
+because someone else is running one".
+
+The short version: `update` takes a **read** lock on every `,v` it opens (`src/rcs.cpp:908`), `tag`
+takes a **write** lock on every `,v` it opens, and the loser does not queue — it gets an immediate
+`002 busy` and polls on a hardcoded schedule with a **1 second floor** and a **hard 20-retry fatal**
+(`src/lock.cpp:339`). Roughly 39 seconds of collision kills the tag outright.
+
+| # | ID | What | LoC | Risk | Status |
+| --- | --- | --- | ---: | --- | --- |
+| 24 | PERF-03 F2 | Tag pass 1 validates — it only reads — but took **write** locks, because `lock_for_write` is a global raised across the whole command (`src/tag.cpp:282`). Take read locks in pass 1. Halves the tag's exclusive footprint and lets validation run alongside any number of updates. | ~25 | low | **implemented** (Tier 2 item 9) |
+| 25 | PERF-03 F3 | The busy path is a fixed-schedule poll: ≥1 s per retry, 20 retries, then a fatal `Failed to obtain lock`. A 5 ms conflict costs a full second; a busy repository kills the command. Exponential backoff from ~50 ms, and make the cap a configurable timeout. **Removes the fatal**, which is the actual operational failure. | ~20 | low | not started |
+| 26 | PERF-03 F5 | `open_directory` parses `.directory_history,v` (`src/mapping.cpp:1057`) and holds its lock until `close_directory` (`:1391`) — spanning the entire directory, including every blocking write to the client. **This is the only lock genuinely held across client network I/O**, and it is the object a tag must write-lock to enter the directory at all. Release it once the version and mappings are read. Also collapses the double `open_directory` at `src/update.cpp:1145`. | ~35 | medium | not started |
+| 27 | PERF-03 F9 | `tag_fileproc` emits progress with a bare `cvs_output(..., 1)` (`src/tag.cpp:1160`), which flushed synchronously to the client while holding both the file's write lock and the directory lock. Largely addressed by the Tier 2 output batching (item 12); confirm the tag path no longer flushes inside the lock window. | ~15 | low | partly covered by item 12 |
+| 28 | PERF-03 F4 | No fairness: a stream of read lock acquisitions can starve a waiting writer indefinitely, and the 20-retry cap converts starvation into a fatal rather than a delay. Fixed properly only by item 29. | — | — | see 29 |
+| 29 | PERF-03 F7 | Give the lock server a real wait queue with writer preference, replacing `002 busy` plus client polling. Kills both the 1 s granularity and the starvation. **Note the constraint:** the service is thread-per-connection under **one global mutex**, and `DoLock` writes its reply with `s->printf` *while holding it* — a blocking wait must not be held under that mutex or the whole service stalls. | ~200 | high | not started |
+| 30 | PERF-03 F10 | Lock keys are raw path strings, so an Attic move or two callers spelling the same file differently lock different keys. Normalise to a canonical attic-independent path. Correctness, not performance — and it may *introduce* contention that today silently does not exist. | ~30 | medium | not started |
+
+**If only two of these land:** 25 and 26. Item 25 is ~20 LoC and turns "the branch operation dies"
+into "it is slower"; item 26 removes the one lock that a slow client genuinely extends.
+
 ## Operational advice that needs no code
 
 * **`cvs rtag` is already substantially cheaper than `cvs tag`** for tagging a whole module: one
@@ -89,6 +115,24 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
   the default is `min(8, cpu_count - 1)`.
 * **Deploy a `cafs_proxy_server` per site.** Blobs are immutable, so the cache is correct by
   construction and never needs invalidating.
+
+For the tag-blocked-by-update problem specifically:
+
+* **Convert large binaries to `-kB` and use blob-capable clients.** Highest leverage by far. The
+  server then sends a ~71-byte reference and the client pulls the content out-of-band from CAFS, so
+  the server's walk stops being paced by the client's link — which collapses the window in which the
+  two commands can collide.
+* **Check whether `<repos>/<dir>/.directory_history,v` exists.** If it does, a tag cannot enter a
+  directory an update is inside, for the whole time that update is in the directory. If it does not,
+  `RCS_parse` returns NULL and that entire blocking class disappears.
+* **Do not tag the subtree a slow client is updating.** Contention is per exact `,v` path; disjoint
+  modules never collide. Narrow the operation with `-l`, or schedule it.
+* **`LockServer=none` in `CVSROOT/config`, with eyes open.** It converts the 39-second fatal into an
+  unbounded wait at directory granularity — but it also **silently disables `AtomicCheckouts`**
+  (`src/rcs.cpp:2573`, `:2848`). Check that setting first. Note that `LockServer` is otherwise
+  always on: `src/main.cpp:587` force-defaults it to `127.0.0.1:2402` when unset, so the per-file
+  locks are not opt-in.
+* **The retry budget is not tunable.** The 20 retries and the 1 s / 5 s sleeps are compiled in.
 
 ## Housekeeping found along the way
 
