@@ -27,7 +27,7 @@ int connect_with_timeout(intptr_t raw_sock, const struct sockaddr *addr, size_t 
 
   //set the socket in non-blocking
   if (!raw_set_non_blocking(raw_sock, true))
-    blob_logmessage(LOG_ERROR, "ioctlsocket failed with error: %d (%d)\n", blob_get_last_sock_error());
+    blob_logmessage(LOG_ERROR, "ioctlsocket failed with error: %d\n", blob_get_last_sock_error());
   auto connectRet = connect(raw_sock, addr, (int)addr_len);
   if (connectRet == -1 && !raw_socket_would_block(raw_get_last_sock_error()))
   {
@@ -51,7 +51,7 @@ int connect_with_timeout(intptr_t raw_sock, const struct sockaddr *addr, size_t 
   if (FD_ISSET(raw_sock, &Write))
   {
     if (!raw_set_non_blocking(raw_sock, false))
-      blob_logmessage(LOG_ERROR, "ioctlsocket failed with error: %d (%d)\n", raw_get_last_sock_error());
+      blob_logmessage(LOG_ERROR, "ioctlsocket failed with error: %d\n", raw_get_last_sock_error());
     return 0;
   }
   return -1;
