@@ -125,12 +125,22 @@ int fileattr_iswatched(const char *filename)
 						freenode(p);
 				}
 				/* GetAttrValue returns an xmlGetProp allocation.
-				   xmlFree is plain free in this tree
-				   (DEBUG_MEMORY_LOCATION is compiled out, see
-				   libxml/include/libxml/xmlversion.h:293), and both
-				   modules share the /MD CRT heap, so free() is the
-				   correct release.  The xmlFree symbol itself lives
-				   only in cvsapi.dll and cannot be named here.  */
+				   xmlFree defaults to plain free (libxml2 sets it from
+				   free unless DEBUG_MEMORY_LOCATION is defined, and
+				   nothing here calls xmlMemSetup/xmlGcMemSetup), so
+				   free() is the correct release.
+
+				   Two caveats worth knowing.  On Windows this relies on
+				   both modules sharing the /MD CRT heap, and xmlFree
+				   itself is not exported past cvsapi.dll, which is why
+				   it is not named here.  On Unix the build links a
+				   *system* libxml2 (configure.in:354; the bundled
+				   libxml/ tree is not in SUBDIRS), so a distribution
+				   that configured it --with-mem-debug would make
+				   xmlFree = xmlMemFree, whose allocations carry a
+				   header before the returned pointer.  That option is
+				   off by default everywhere; if it is ever encountered,
+				   this must become myxmlFree (cvsapi/XmlNode.h:28).  */
 				free((void*)name);
 			} while(node->GetSibling("file"));
 		}

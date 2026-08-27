@@ -6797,13 +6797,17 @@ cvs_flushout ()
 
 /* The per-file progress flush in the recursion processor.  Local mode
    flushes unconditionally, as it always did.  In server mode, skip the
-   flush while there is no staged M/E text and at most one partially
-   filled chunk queued for the network - flushing a few hundred bytes
-   per file is what turned a big checkout into per-file write()s.  As
-   soon as a whole chunk (BUFFER_DATA_SIZE) or any wrapped text is
-   pending, flush as before, so file data never accumulates beyond
-   roughly one file plus a chunk and per-file progress still streams
-   whenever there is text to show.  */
+   flush while there is no staged M/E text and the network queue is still
+   a single chunk - flushing a few hundred bytes per file is what turned a
+   big checkout into per-file write()s.  Once any wrapped text is pending,
+   or a *second* chunk has been allocated, flush as before.
+
+   Note the bound: the test below is on the chunk *list*, not on bytes, so
+   a single completely full chunk does not trigger it and the real ceiling
+   is roughly two chunks, not one.  BUFFER_DATA_SIZE is BUFSIZ*10, which
+   makes that about 160 KiB with glibc and about 10 KiB with the MSVC CRT -
+   a 16x spread across platforms.  Either way it is bounded, and per-file
+   progress still streams whenever there is text to show.  */
 void cvs_flushout_perfile ()
 {
 #ifdef SERVER_SUPPORT
