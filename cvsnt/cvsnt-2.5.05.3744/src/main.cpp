@@ -354,6 +354,7 @@ static const char *const opt_usage[] =
     "    --cr            Use Mac (cr) line endings by default.\n",
     "    --lf            Use Unix (lf) line endings by default.\n",
     "    --crlf          Use Windows (crlf) line endings by default.\n",
+    "    --rename-in-use When a file to be written is open/mapped by another process and cannot be replaced, move it aside (.#name.inuse.*) so the write completes instead of aborting.\n",
 #ifdef _WIN32
     "    --nostats       Override sending statistics via client when server statistics are not up to date.\n",
 #endif
@@ -759,6 +760,7 @@ int main (int argc, char **argv)
 		{"debug", 0, NULL, 9},
 #endif
     	{"blob_url", required_argument, NULL, 11},
+    	{"rename-in-use", 0, NULL, 12},
         {0, 0, 0, 0}
     };
     /* `getopt_long' stores the option index here, but right now we
@@ -885,6 +887,13 @@ int main (int argc, char **argv)
 	    case 10:
 		/* --cr */
 		crlf_mode=ltCr;
+		break;
+	    case 12:
+		/* --rename-in-use */
+		{
+		    extern int rename_in_use;
+		    rename_in_use = 1;
+		}
 		break;
 #if defined(SERVER_SUPPORT)
 			case 7:

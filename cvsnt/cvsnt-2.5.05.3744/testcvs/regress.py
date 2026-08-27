@@ -417,6 +417,28 @@ def t_missing_entries_recreated(r):
     check_eq(rc, 0, "plain update after the repair is not clean:\n" + out)
 
 
+@test("--rename-in-use is accepted globally and inert when nothing is locked")
+def t_rename_in_use_inert(r):
+    # The full recovery (renaming an open, memory-mapped file aside so the
+    # rename over it can complete) is Windows-only and needs a file another
+    # process holds mapped; it is exercised outside this suite.  Here we pin
+    # that the global switch parses and, crucially, is a no-op on the ordinary
+    # path: an update with the switch present but nothing locked behaves
+    # exactly as without it.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    write(os.path.join(wc, "a.txt"), "one\ntwo\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)
+    write(os.path.join(wc, "a.txt"), "local\n")
+    rc, out = run(["--rename-in-use", "-d", r.repo, "update", "-C"], cwd=wc,
+                  expect_ok=False)
+    check_eq(rc, 0, "update -C with --rename-in-use exit status:\n" + out)
+    check_eq(read(os.path.join(wc, "a.txt")), "one\ntwo\n",
+             "content after update -C with the switch")
+    check(not [f for f in os.listdir(wc) if ".inuse." in f],
+          "the switch created an inuse aside with nothing locked")
+
+
 @test("update -d picks up a directory added after checkout")
 def t_update_d(r):
     r.import_tree("m", {"a.txt": "one\n"})
