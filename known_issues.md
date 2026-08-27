@@ -91,6 +91,39 @@ full-tree stat storm that did not exist before.
 **The right change:** give `available_disk_space` an `int64_t` return so the sentinel is honest, or
 have `init_gc` test for the sentinel explicitly instead of relying on `-1` arithmetic.
 
+## Corrections to commit messages on this branch
+
+A review pass over the fix commits found four factual slips in commit-message *rationale*. The code
+in every case is correct; only the explanation is off, and since commit messages are the permanent
+record the corrections are kept here.
+
+* **`9fcd6de`** (10.0.0.0/8 mask) — the illustrative list of affected first octets wrongly includes
+  `10`, which is genuinely private, and omits `234`. The count, "fifteen public /8 networks", is
+  right; `(ip & 0xF) == 10` matches sixteen values, fifteen of them public.
+* **`0aa8fed`** (`fnncmp` parenthesis) — the message describes only the case where
+  `file[vrlen] == '/'`. When it is not `'/'`, the mis-parenthesised third argument evaluates to
+  **0**, and `fnncmp(a, b, 0)` returns 0 — so the condition was true for *every* path, not merely
+  those sharing a first character. The message also credits the out-of-bounds read to the `sprintf`
+  tail alone; `file[strlen(virtual_repos)]` was itself an unconditional overread whenever `file` was
+  shorter than the prefix.
+* **`980d2f9`** (write-lock prefix) — two claims are wrong. The defective line is in the `#else`
+  half of `#ifdef _WIN32`, so it was never compiled on Windows and cannot have affected
+  `set_lockers_name` there. And a second writer never reaches `readers_exist`, because `write_lock`
+  holds the master `#cvs.lck` directory across the success path, so writer B is stopped earlier by
+  `set_lock` returning `L_LOCKED`. The real consequence is narrower and worse: a mis-named file left
+  by a *crashed* writer is invisible to every scan, since `src/cvs.h` defines `CVSRFLPAT` but no
+  `CVSWFLPAT`. Also unmentioned: `config.h:282` and `windows-NT/config.h:39` both define
+  `HAVE_LONG_FILE_NAMES`, so the branch is dead in every configuration in the tree.
+* **`e140973`** (zlib `deflate`) — "both `compress_lambda()` call sites" undercounts; there are
+  three. `ca_blobs_fs/push_whole_blob.h:40` is live code, included by `src/rcs_cvt_kB.cpp:2`. It
+  passes `pack ? ZSTD : Unpacked`, so the conclusion that nothing selects ZLIB for compression
+  still holds — but the enumeration was presented as exhaustive and was not.
+* **`e56e5c0`** (missing vararg) — "every other `error()` call in the function passes
+  `fn_root(finfo->file)`" is false: the others pass `fn_root(finfo->fullname)`
+  (`src/checkin.cpp:101`, `:155`, `:164`) and one passes no argument. The added argument is
+  `finfo->file`, which is what `CVS_FOPEN` was handed and is defensible, but it is less specific
+  than its neighbours during a recursive commit.
+
 ## Investigated and rejected
 
 Recorded so they are not raised again.
@@ -137,8 +170,15 @@ never being compiled.
 
 `cvstools/RootSplitter.cpp` and `src/root.cpp:569` parse the same `CVSROOT` keyword grammar with two
 separate implementations. After the fixes on this branch they agree on quoting, but `RootSplitter`
-still lacks the backslash-escape handling that `root.cpp:581` has, so they disagree on
-`:pserver;a="x\"y":host:/repo`. One of them should be deleted in favour of the other.
+still lacks the backslash-escape handling that `root.cpp:581` has.
+
+The divergence needs a backslash **outside** a quote — for example
+`:pserver;a=\"b:c:host:/repo`, where `root.cpp`'s `escape` swallows the `"` and the root is
+accepted, while `RootSplitter` opens a quote and rejects it. A backslash *inside* a quote does not
+diverge: `root.cpp:581` only sets `escape` when `!in_quote`, so both parsers reject
+`:pserver;a="x\"y":host:/repo` alike.
+
+One implementation should be deleted in favour of the other.
 
 ## Open findings
 
