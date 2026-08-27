@@ -837,6 +837,11 @@ static int do_recursion (struct recursion_frame *frame, int top_level)
     /* call-back files done proc (if any) */
     if (process_this_directory && dodoneproc && frame->filesdoneproc != NULL)
 	{
+		/* Release Register's cached CVS/Entries.Log append handles first.
+		   A filesdoneproc may remove the whole admin directory (export
+		   does), and on Windows an open file cannot be deleted.  The
+		   handles are per-directory anyway and are reopened on demand.  */
+		Entries_Log_Close_Cached ();
 		err = frame->filesdoneproc (frame->callerdat, err, (char*)mapped_repository,
 				    (char*)(update_dir[0] ? update_dir : "."),
 				    entries);

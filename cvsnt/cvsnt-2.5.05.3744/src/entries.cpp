@@ -433,7 +433,12 @@ void Register (List *list, const char *fname, const char *vn, const char *ts, co
 		   relative); otherwise close them and open this directory's logs.  */
 		const char *wd = xgetwd ();
 		if (wd == NULL)
-			error (1, errno, "cannot get working directory");
+		{
+			/* Warning, not error: a Register that cannot journal used to
+			   degrade rather than abort the whole command.  */
+			error (0, errno, "cannot get working directory");
+			return;
+		}
 		if (entlog_cache_fp != NULL && fncmp (entlog_cache_wd, wd))
 			Entries_Log_Close_Cached ();
 		if (entlog_cache_fp == NULL)
