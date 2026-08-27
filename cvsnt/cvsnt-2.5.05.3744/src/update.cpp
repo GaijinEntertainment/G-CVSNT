@@ -186,12 +186,20 @@ int update (int argc, char **argv)
     if (argc == -1)
 		usage (update_usage);
 
-    /* These are per-command state.  A server process that serves more than
-       one command in its lifetime must not carry one update's exclusions or
-       switches into the next one, where they would silently skip files.  */
-    exclude_clear ();
+    /* These are per-command state: a process that runs more than one command
+       in its lifetime must not carry one update's switches into the next,
+       where they would silently skip files.  Both are set from the options
+       parsed below, so clearing them here is always right.  */
     update_no_sharp_files = 0;
     update_inway_rename_aside = 0;
+
+    /* The exclusion list is different: when we are the server it was filled
+       by the Exclude requests that arrive *before* this command, so clearing
+       it here would discard them and make the server-side pruning a no-op.
+       The client fills it from its own command line just below, so it clears
+       it here; the server clears it once the command completes.  */
+    if (!server_active)
+	exclude_clear ();
 
     /* parse the args */
     static struct option long_update_options[] =

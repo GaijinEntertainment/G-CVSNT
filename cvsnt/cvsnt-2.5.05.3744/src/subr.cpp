@@ -962,6 +962,14 @@ char *rename_file_aside (const char *filename)
         if (!isfile (aside_name))
             break;
     }
+    if (attempt == 100)
+    {
+        /* Every candidate name is taken: give up rather than rename over an
+           aside file that may itself be the only copy of something.  */
+        error (0, 0, "cannot find a free name to move %s aside", filename);
+        xfree (aside_name);
+        return NULL;
+    }
 
     if (CVS_RENAME (filename, aside_name) < 0)
     {

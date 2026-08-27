@@ -3314,6 +3314,11 @@ free_args_and_return:
 	argument_count = 1;
     }
 
+    /* The Exclude requests that preceded this command applied only to it;
+       drop them so a later command on the same connection does not silently
+       skip files.  */
+    exclude_clear ();
+
     /* Flush out any data not yet sent.  */
     set_block (buf_to_net);
     buf_flush (buf_to_net, 1);

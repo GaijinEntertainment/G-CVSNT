@@ -1517,6 +1517,15 @@ static char *time_stamp (time_t mtime, int local);
    rest of the run once a single modified file had been backed up.  */
 static List *client_reverted_files;
 
+/* Strip any leading "./" components so that receive-phase pathnames
+   ("./a.txt") compare equal to send-phase fullnames ("a.txt").  */
+static const char *strip_dotslash (const char *path)
+{
+    while (path[0] == '.' && ISDIRSEP (path[1]))
+	path += 2;
+    return path;
+}
+
 /* Record that the send phase reverted FULLNAME under "update -C".  */
 static void remember_reverted_file (const char *fullname)
 {
@@ -1526,18 +1535,11 @@ static void remember_reverted_file (const char *fullname)
 	client_reverted_files = getlist ();
     p = getnode ();
     p->type = FILES;
-    p->key = xstrdup (fullname);
+    /* Normalize exactly as the lookup does, so a leading "./" on either side
+       cannot make a reverted file miss the list.  */
+    p->key = xstrdup (strip_dotslash (fullname));
     if (addnode (client_reverted_files, p) != 0)
 	freenode (p);
-}
-
-/* Strip any leading "./" components so that receive-phase pathnames
-   ("./a.txt") compare equal to send-phase fullnames ("a.txt").  */
-static const char *strip_dotslash (const char *path)
-{
-    while (path[0] == '.' && ISDIRSEP (path[1]))
-	path += 2;
-    return path;
 }
 
 /* Under "update -C", try to move an untracked in-the-way file aside (to
@@ -1653,6 +1655,11 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	    xfree (updated_fname);
 	    updated_fname = NULL;
 	}
+	/* The pending EntriesExtra belongs to this excluded file and is
+	   matched by bare filename, so it must not be left for a later
+	   same-named file in another directory.  */
+	xfree (extra_entry);
+	extra_entry = NULL;
 	return;
     }
 
@@ -2543,6 +2550,10 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
 	  xfree (updated_fname);
 	  updated_fname = NULL;
       }
+      /* See update_entries: the pending EntriesExtra is matched by bare
+	 filename, so drop this excluded file's copy.  */
+      xfree (extra_entry);
+      extra_entry = NULL;
       return;
   }
 
@@ -2873,6 +2884,10 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
 	  xfree (updated_fname);
 	  updated_fname = NULL;
       }
+      /* See update_entries: the pending EntriesExtra is matched by bare
+	 filename, so drop this excluded file's copy.  */
+      xfree (extra_entry);
+      extra_entry = NULL;
       return;
   }
 
@@ -6412,8 +6427,10 @@ static void notified_a_file (char *data, List *ent_list, char *short_pathname, c
     int nwritten;
     char *p;
 
-    if (client_excluded_response)
-	return;
+    /* No exclusion check here on purpose: this only removes the acknowledged
+       entry from CVS/Notify and never touches a working file.  Skipping it
+       would leave the entry behind for ever and re-send the notification on
+       every later command.  */
 
     line = (char*)xmalloc (line_len);
     fp = open_file (CVSADM_NOTIFY, "r");

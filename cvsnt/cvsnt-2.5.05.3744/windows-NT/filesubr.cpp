@@ -789,11 +789,20 @@ int wnt_rename (const char *from, const char *to)
 				if (MoveFile (fn_to, fn_aside))
 				{
 					printf("Renamed locked file %s to %s\n", fn_root(to), fn_root(aside));
-					xfree (aside);
 					if ((result = MoveFileEx(fn_from,fn_to,MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING)))
+					{
+						xfree (aside);
 						break;
+					}
 					save_errno = GetLastError();
 					TRACE(3,"MoveFile after rename-aside returned error %08x",save_errno);
+					/* The retry failed too: put the target back rather than
+					   leaving its path empty.  */
+					if (MoveFile (fn_aside, fn_to))
+						printf("Restored %s from %s\n", fn_root(to), fn_root(aside));
+					else
+						printf("Left %s in %s\n", fn_root(to), fn_root(aside));
+					xfree (aside);
 				}
 				else
 				{
