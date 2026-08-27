@@ -106,11 +106,30 @@ Ctype Classify_File (struct file_info *finfo, const char *tag, const char *date,
 	}
 	else if (!pipeout && vers->ts_user && No_Difference(finfo, vers, (kf.flags&KFLAG_STATIC || kf_ent.flags&KFLAG_STATIC), ignore_keywords))
 	{
-	    /* the files were different so it is a conflict */
-	    if (!really_quiet)
-		error (0, 0, "move away %s; it is in the way",
-		       fn_root(finfo->fullname));
-	    ret = T_CONFLICT;
+	    /* The files were different, so the untracked user file is in
+	       the way.  Under "update -C" move it aside (recoverably) and
+	       check the repository copy out in its place; otherwise this
+	       is the historical conflict.  */
+	    char *aside_name = NULL;
+
+	    if (update_inway_rename_aside && !noexec)
+		aside_name = rename_file_aside (finfo->file);
+
+	    if (aside_name != NULL)
+	    {
+		if (!really_quiet)
+		    error (0, 0, "in-the-way file %s moved to %s",
+			   fn_root(finfo->fullname), aside_name);
+		xfree (aside_name);
+		ret = T_CHECKOUT;
+	    }
+	    else
+	    {
+		if (!really_quiet)
+		    error (0, 0, "move away %s; it is in the way",
+			   fn_root(finfo->fullname));
+		ret = T_CONFLICT;
+	    }
 	}
 	else
 	{
