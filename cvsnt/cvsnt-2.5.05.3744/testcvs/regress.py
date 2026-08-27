@@ -373,8 +373,9 @@ def t_tag_move_delete(r):
 
 @test("text file bigger than the RCS parse buffer round trips")
 def t_large_text(r):
-    # ~240 KiB crosses several RCSBUF_BUFSIZE boundaries in rcsbuf_fill and
-    # exercises the buffered delta walk; the @s exercise RCS @-escaping.
+    # ~205 KiB, which crosses several 64 KiB RCSBUF_BUFSIZE boundaries in
+    # rcsbuf_fill and exercises the buffered delta walk; the @s exercise RCS
+    # @-escaping.  See t_huge_text for the regime past MAX_INCR.
     payload = "".join("line %05d %s @@ at@sign\n" % (i, "x" * (i % 60))
                       for i in range(4000))
     r.import_tree("m", {"big.txt": payload})
@@ -394,6 +395,48 @@ def t_large_text(r):
     r.cvs(["checkout", "m"], cwd=wc2root)
     check_eq(read(os.path.join(wc2root, "m", "big.txt")), payload + "tail\n",
              "content after second checkout")
+
+
+@test("empty file round trips")
+def t_empty_file(r):
+    # Exercises the st_size == 0 branch of the RCS parse-buffer pre-size,
+    # which is skipped and must fall back to incremental growth.
+    r.import_tree("m", {"empty.txt": "", "a.txt": "one\n"})
+    wc = r.checkout("m")
+    check(os.path.isfile(os.path.join(wc, "empty.txt")), "empty.txt not checked out")
+    check_eq(read(os.path.join(wc, "empty.txt")), "", "empty file content")
+    write(os.path.join(wc, "empty.txt"), "now has content\n")
+    r.cvs(["commit", "-m", "fill it"], cwd=wc)
+    r.cvs(["update", "-r", "1.1", "empty.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "empty.txt")), "", "empty file at revision 1.1")
+
+
+@test("text file past the RCS buffer growth threshold round trips")
+def t_huge_text(r):
+    # The parse-buffer pre-size exists for ,v files past MAX_INCR (2 MiB),
+    # where expand_string stops doubling and grows by a constant instead.  The
+    # 205 KiB case above never leaves the geometric regime, so it cannot show a
+    # regression in the path the optimization actually targets.  ~3 MiB puts
+    # the ,v above MAX_INCR and below the 8 MiB pre-size cap.
+    line = "the quick brown fox jumps over the lazy dog 0123456789 @@\n"
+    payload = line * (3 * 1024 * 1024 // len(line))
+    r.import_tree("m", {"huge.txt": payload})
+    wc = r.checkout("m")
+    check_eq(len(read(os.path.join(wc, "huge.txt"))), len(payload), "huge file size")
+    check_eq(read(os.path.join(wc, "huge.txt")), payload, "huge file content")
+
+    write(os.path.join(wc, "huge.txt"), payload + "tail\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)
+    r.cvs(["update", "-r", "1.1", "huge.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "huge.txt")), payload, "huge file at revision 1.1")
+    r.cvs(["update", "-A", "huge.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "huge.txt")), payload + "tail\n", "huge file at head")
+
+    # Tagging rewrites the whole ,v, which is the RCS_copydeltas path.
+    r.cvs(["tag", "REL1"], cwd=wc)
+    r.cvs(["update", "-r", "REL1", "huge.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "huge.txt")), payload + "tail\n",
+             "huge file content at REL1 after the ,v was rewritten")
 
 
 @test("a ,v present in both the repository and the Attic is listed once")
