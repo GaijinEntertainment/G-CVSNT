@@ -47,7 +47,7 @@ bool CRootSplitter::Split(const char *root)
 	{
 		char InQuote = 0;
 		q=++p;
-		for(; *p && (!InQuote && *p!=':'); p++)
+		for(; *p && (InQuote || *p!=':'); p++)
 		{
 			if(InQuote && *p==InQuote)
 			{
