@@ -50,6 +50,10 @@ CXmlNodePtr fileattr_find(CXmlNodePtr root, const char *exp, ...);
 
 CXmlNodePtr fileattr_getroot();
 
+/* Nonzero if FILENAME has a <watched/> node; matches with fncmp
+   semantics like the cvs:filename XPath function.  */
+int fileattr_iswatched(const char *filename);
+
 /* Return the next node on this level with this name, for walking lists */
 CXmlNodePtr fileattr_next(CXmlNodePtr node);
 
