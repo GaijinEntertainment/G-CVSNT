@@ -5097,6 +5097,13 @@ void server_cleanup (int sig)
 	return;
     }
 
+    /* A fatal error can get us here with Register's cached Entries.Log
+       append handles still open inside the temp tree; close them so the
+       deletion below cannot be blocked by an open file.  Do this before the
+       network buffer is torn down so that a rare close error can still be
+       reported through a live connection.  */
+    Entries_Log_Close_Cached ();
+
     /* Shut down the network buffer before deleting the temp directory:
        with stream compression the shutdown emits the trailer the client
        is waiting for, while removing a large temp tree can take a long
@@ -5108,11 +5115,6 @@ void server_cleanup (int sig)
 		buf_shutdown (buf_to_net);
 		buf_to_net = NULL;
 	}
-
-    /* A fatal error can get us here with Register's cached Entries.Log
-       append handles still open inside the temp tree; close them so the
-       deletion below cannot be blocked by an open file.  */
-    Entries_Log_Close_Cached ();
 
     CVS_CHDIR (Tmpdir);
     /* Temporarily clear noexec, so that we clean up our temp directory

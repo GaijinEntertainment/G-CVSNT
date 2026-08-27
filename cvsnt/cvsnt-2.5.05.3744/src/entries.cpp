@@ -269,6 +269,9 @@ void Scratch_Entry (List *list, const char *fname)
     {
 		if (!noexec)
 		{
+			/* Never hold two concurrent handles on Entries.Log: drop
+			   Register's cached append handle before opening our own.  */
+			Entries_Log_Close_Cached ();
 			entfilename = CVSADM_ENTLOG;
 			entexfilename = CVSADM_ENTEXTLOG;
 			entfile = CVS_FOPEN (entfilename, "a");
@@ -309,6 +312,9 @@ void Rename_Entry (List *list, const char *from, const char *to)
     {
 		if (!noexec)
 		{
+			/* Never hold two concurrent handles on Entries.Log: drop
+			   Register's cached append handle before opening our own.  */
+			Entries_Log_Close_Cached ();
 			entfilename = CVSADM_ENTLOG;
 			entexfilename = CVSADM_ENTEXTLOG;
 			entfile = CVS_FOPEN (entfilename, "a");
@@ -1379,6 +1385,9 @@ static Entnode *subdir_record (int cmd, const char *parent, const char *dir)
 
     if (!noexec)
     {
+	/* Never hold two concurrent handles on Entries.Log: drop Register's
+	   cached append handle before opening our own.  */
+	Entries_Log_Close_Cached ();
 	if (parent == NULL)
 	    entfilename = CVSADM_ENTLOG;
 	else
