@@ -3,6 +3,8 @@ G-CVSNT
 
 G-CVSNT Gaijin (and Gamedev) CVSNT version - modified for large amounts of binary data (typically for gamedev)
 
+Documentation: [docs/](docs/README.md) (architecture, Gaijin modifications, blob storage, performance notes) and [HOWTOBUILD.md](HOWTOBUILD.md) (Windows/Linux/macOS build instructions).
+
 
 OSX 10.9+ notes:
 

@@ -28,3 +28,16 @@ tmp/*.*
 CVS
 log1
 log2
+
+# Build-generated sources (produced by mc.exe / midl.exe during the Windows build)
+cvsnt/cvsnt-2.5.05.3744/cvsapi/win32/MSG00001.bin
+cvsnt/cvsnt-2.5.05.3744/cvsapi/win32/ServiceMsg.h
+cvsnt/cvsnt-2.5.05.3744/cvsapi/win32/ServiceMsg.rc
+cvsnt/cvsnt-2.5.05.3744/cvsservice/ServiceMsg.h
+cvsnt/cvsnt-2.5.05.3744/cvsservice/ServiceMsg.rc
+cvsnt/cvsnt-2.5.05.3744/cvstools/trigger_h.h
+cvsnt/cvsnt-2.5.05.3744/cvstools/trigger_i.c
+cvsnt/cvsnt-2.5.05.3744/cvstools/win32/trigger.tlb
+cvsnt/cvsnt-2.5.05.3744/triggers/Server_h.h
+cvsnt/cvsnt-2.5.05.3744/triggers/Server_i.c
+cvsnt/cvsnt-2.5.05.3744/triggers/script_trigger.tlb
