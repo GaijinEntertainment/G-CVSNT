@@ -872,7 +872,7 @@ static void rcsvers_delproc (Node *p)
 static int rcsbuf_open(struct rcsbuffer *rcsbuf, const char *filename)
 {
 	FILE *fp;
-	int orig_lockId = rcsbuf->lockId;
+	size_t orig_lockId = rcsbuf->lockId;
 
 	if(!filename)
 		filename = rcsbuf->filename;
