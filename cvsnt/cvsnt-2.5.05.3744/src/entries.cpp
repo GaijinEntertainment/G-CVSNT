@@ -419,7 +419,10 @@ void Register (List *list, const char *fname, const char *vn, const char *ts, co
 		if (fprintf (entexfile, "A ") < 0)
 			error (1, errno, "cannot write %s", entexfilename);
 
-		write_ent_proc (node, NULL);
+		/* write_ent_ex_proc writes both the Entries line and the
+		   Entries.Extra line (exactly as write_entries relies on when it
+		   walks the list with it), so a separate write_ent_proc call here
+		   would write the Entries record a second time.  */
 		write_ent_ex_proc (node, NULL);
 
 		if (fclose (entfile) == EOF)
