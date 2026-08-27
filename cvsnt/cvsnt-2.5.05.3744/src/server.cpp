@@ -2935,6 +2935,21 @@ static void serve_set (char *arg)
     variable_set (arg);
 }
 
+/* "Exclude <path>" -- negotiated support for "update -exc": feed the
+   update exclusion filter, so the same path_excluded() hooks that filter
+   a local update also prune this server's recursion (the excluded
+   subtrees are then neither walked nor streamed).  Advertised in
+   Valid-requests; a client must only send this when it saw the
+   advertisement, and falls back to its own client-side filtering
+   against servers that lack it.  Invalid paths are ignored -- the
+   client-side filtering still applies.  */
+static void serve_exclude (char *arg)
+{
+    if (arg == NULL || *arg == '\0' || isabsolute (arg))
+	return;
+    exclude_path_add (arg);
+}
+
 static void serve_questionable (char *arg)
 {
     if (dir_name == NULL)
@@ -4936,6 +4951,7 @@ struct request requests[] =
   REQ_LINE("Notify", serve_notify, 0),
   REQ_LINE("NotifyUser", serve_notify_user, 0),
   REQ_LINE("Questionable", serve_questionable, 0),
+  REQ_LINE("Exclude", serve_exclude, 0),
   REQ_LINE("Utf8", serve_utf8, RQ_ROOTLESS), /* Depreciated, but checked for option support by server */
   REQ_LINE("Case", NULL, 0), /* Deprecated but we send it for older clients */
   REQ_LINE("Argument", serve_argument, RQ_ESSENTIAL),

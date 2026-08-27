@@ -412,6 +412,16 @@ void exclude_path_add (const char *path)
     exc_list[exc_current++] = copy;
 }
 
+/* Return the I'th exclusion entry (normalized), or NULL when I is past
+   the end of the list.  Lets the client relay the exclusion set to a
+   server that advertises the "Exclude" request.  */
+const char *exclude_path_get (int i)
+{
+    if (i < 0 || i >= exc_current)
+	return NULL;
+    return exc_list[i];
+}
+
 /* Return nonzero if PATH (relative to the directory the command was
    started in; either a file or a directory) is excluded: equal to an
    exclusion entry, or lying below one.  */

@@ -432,6 +432,26 @@ int update (int argc, char **argv)
 		if (merge_bugid)
 			option_with_arg("-B", merge_bugid);
 
+		/* Relay the -exc exclusion set to a server that advertises the
+		   "Exclude" request, so it prunes the excluded subtrees from
+		   its own recursion instead of walking and streaming them.
+		   Never sent otherwise (per Valid-requests negotiation); with
+		   an older server the client-side filtering alone provides
+		   the exclusion.  This is a request, not an update option:
+		   an unknown update option would abort the old server.  */
+		if (exclude_path_get (0) != NULL && supported_request ("Exclude"))
+		{
+			int exci;
+			const char *excpath;
+
+			for (exci = 0; (excpath = exclude_path_get (exci)) != NULL; ++exci)
+			{
+				send_to_server ("Exclude ", 0);
+				send_to_server (excpath, 0);
+				send_to_server ("\n", 1);
+			}
+		}
+
 		client_overwrite_existing = case_sensitive;
 
 	    if (failed_patches_count == 0)
