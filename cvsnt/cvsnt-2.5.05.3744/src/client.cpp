@@ -5782,6 +5782,8 @@ bool send_blob_file_direct(const char *file, char *hash_encoded, bool blob_binar
   init_blob_hash_context(hctx, sizeof(hctx));
   char bufIn[128<<10];
   FILE* rf = fopen(file, "rb");
+  if (!rf)
+    error(1,0, "Can't open binary blob for %s", file);
   std::vector<char> blob;blob.resize(fsz); size_t dataWritten = 0;
   StreamStatus st = compress_lambda(
     [&](const char *&src, size_t &src_pos, size_t &src_size)
