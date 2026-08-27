@@ -630,6 +630,8 @@ void ign_setup();
 int ign_close();
 void ign_dir_add (const char *name);
 int ignore_directory (const char *name);
+void exclude_path_add (const char *name);
+int path_excluded (const char *name);
 void ign_send ();
 void ign_display();
 

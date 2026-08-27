@@ -166,6 +166,9 @@ static const char *const update_usage[] =
     "\t--blob_zero\tDownloaded blobs would be written as zero length file. That is for 'hot-proxy' scenario (to save space and optimize performance of update).\n",
     "\t--no-sharp-files\tDo not create .#<file>.<rev> backup copies of modified\n",
     "\t\tfiles (in-the-way files are still moved aside under -C).\n",
+    "\t-exc paths\tExclude comma-separated paths (files or directories, relative\n",
+    "\t\tto the update root) from the update, including -d directory creation.\n",
+    "\t\tOne-shot and client-side; nothing is recorded in the working copy.\n",
     "(Specify the --help global option for a list of other help options)\n",
     NULL
 };
@@ -190,6 +193,40 @@ int update (int argc, char **argv)
     	{"no-sharp-files", 0, NULL, 2},
     	{0, 0, NULL, 0},
     };
+
+    /* "-exc <path>[,<path>...]" is extracted before getopt runs: it is a
+       multi-character switch that getopt would misparse as "-e xc", and
+       it must never reach the server (an unknown update option makes an
+       old server print usage and abort the whole session), so it is
+       consumed here and acted upon client-side only.  May be repeated.  */
+    {
+	int i, j;
+
+	for (i = 1; i < argc; ++i)
+	{
+	    if (strcmp (argv[i], "--") == 0)
+		break;
+	    if (strcmp (argv[i], "-exc") == 0)
+	    {
+		char *p, *q;
+
+		if (i + 1 >= argc)
+		    error (1, 0, "-exc requires an argument");
+		for (p = argv[i + 1]; p != NULL; p = q)
+		{
+		    q = strchr (p, ',');
+		    if (q != NULL)
+			*q++ = '\0';
+		    if (*p != '\0')
+			exclude_path_add (p);
+		}
+		for (j = i + 2; j < argc; ++j)
+		    argv[j - 2] = argv[j];
+		argc -= 2;
+		--i;
+	    }
+	}
+    }
 
     optind = 0;
     int options_index = 0;//not used
@@ -738,6 +775,24 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 
 	file_is_edited = 0;
 
+    /* "update -exc": excluded files are neither created nor updated.
+       Still record the file in this directory's ignore list so that it
+       is not reported as unknown ("? file").  */
+    if (path_excluded (finfo->fullname))
+    {
+	if (ignlist)
+	{
+	    Node *p;
+
+	    p = getnode ();
+	    p->type = FILES;
+	    p->key = xstrdup (finfo->file);
+	    if (addnode (ignlist, p) != 0)
+		freenode (p);
+	}
+	return 0;
+    }
+
     status = Classify_File (finfo, tag, date, options, force_tag_match,
 			    aflag, &vers, pipeout, 0, 0);
 
@@ -1100,6 +1155,10 @@ static int update_predirent_proc (void *callerdat, char *dir, char *repository, 
 
 	if(ignore_directory(update_dir))
 		return R_SKIP_ALL;
+	/* "update -exc": prune excluded directories from the recursion, so
+	   they are neither created (under -d) nor descended into.  */
+	if(path_excluded(update_dir))
+		return R_SKIP_ALL;
 	if(!isdir(dir))
 	{
 		if(!update_build_dirs || (!server_active && !isdir (repository)))
@@ -1215,6 +1274,10 @@ static Dtype update_dirent_proc (void *callerdat, char *dir, char *repository, c
 	  error (0, 0, "Ignoring %s", update_dir);
         return R_SKIP_ALL;
     }
+
+    /* "update -exc": skip excluded directories, quietly.  */
+    if (path_excluded (update_dir))
+        return R_SKIP_ALL;
 
 	if(join_rev1 || join_rev2)
 	{

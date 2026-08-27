@@ -809,6 +809,12 @@ static List *last_entries;
 
 static char *last_dir_name;
 
+/* Nonzero while a response for a path excluded with "update -exc" is
+   being processed: the response handler must consume the response's
+   payload from the wire and do nothing else (no directory creation, no
+   file writes, no Entries changes).  */
+static int client_excluded_response;
+
 static void call_in_directory (char *pathname, void (*func)(char *data, List *ent_list, char *short_pathname, char *filename), char *data)
 {
     char *dir_name;
@@ -893,8 +899,6 @@ static void call_in_directory (char *pathname, void (*func)(char *data, List *en
     }
     else
 	*p = '\0';
-    if (client_prune_dirs)
-		add_prune_candidate (dir_name);
 
     filename = strrchr (short_repos, '/');
     if (filename == NULL)
@@ -905,6 +909,26 @@ static void call_in_directory (char *pathname, void (*func)(char *data, List *en
     short_pathname = (char*)xmalloc (strlen (pathname) + strlen (filename) + 5);
     strcpy (short_pathname, pathname);
     strcat (short_pathname, filename);
+
+    /* "update -exc": a response for an excluded path is consumed (its
+       payload is read off the wire by the handler) but acted upon in no
+       way, so excluded files and directories are neither created nor
+       updated.  Note that no directories are created and no prune
+       candidate is recorded for it.  */
+    if (path_excluded (dir_name) || path_excluded (short_pathname))
+    {
+	client_excluded_response = 1;
+	(*func) (data, (List *) NULL, short_pathname, filename);
+	client_excluded_response = 0;
+	xfree (dir_name);
+	xfree (reposdirname);
+	xfree (short_pathname);
+	xfree (reposname);
+	return;
+    }
+
+    if (client_prune_dirs)
+		add_prune_candidate (dir_name);
 
     if (last_dir_name == NULL
 	|| strcmp (last_dir_name, dir_name) != 0)
@@ -1187,11 +1211,55 @@ warning: server is not creating directories one at a time");
     xfree (reposname);
 }
 
+/* Read SIZE bytes of response payload from the server and discard them.
+   Used when a response for a path excluded with "update -exc" must be
+   consumed without being acted upon.  */
+static void discard_from_server (int size)
+{
+    char buf[8192];
+    size_t usize;
+    size_t nread;
+    size_t toread;
+
+    if (size <= 0)
+	return;
+    usize = (size_t) size;
+    nread = 0;
+    while (nread < usize)
+    {
+	toread = usize - nread;
+	if (toread > sizeof buf)
+	    toread = sizeof buf;
+	nread += try_read_from_server (buf, toread);
+    }
+}
+
+/* Read a counted file (as in read_counted_file) and discard it.  */
+static void discard_counted_file (void)
+{
+    char *size_string;
+    int size;
+
+    read_line (&size_string);
+    if (size_string[0] == 'z')
+	error (1, 0,
+	       "protocol error: compressed files not supported for that operation");
+    size = atoi (size_string);
+    xfree (size_string);
+    discard_from_server (size);
+}
+
 static void copy_a_file (char *data, List *ent_list, char *short_pathname, char *filename)
 {
     char *newname;
 
     read_line (&newname);
+
+    if (client_excluded_response)
+    {
+	xfree (newname);
+	return;
+    }
 
     /* cvsclient.texi has said for a long time that newname must be in the
        same directory.  Wouldn't want a malicious or buggy server overwriting
@@ -1555,6 +1623,38 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 #endif
     time_t file_mtime = 0;
     read_line (&entries_line);
+
+    if (client_excluded_response)
+    {
+	/* "update -exc": consume the payload, act on nothing.  */
+	if (data->contents == UPDATE_ENTRIES_UPDATE
+	    || data->contents == UPDATE_ENTRIES_PATCH
+	    || data->contents == UPDATE_ENTRIES_RCS_DIFF)
+	{
+	    char *mode_string;
+	    char *size_string;
+
+	    read_line (&mode_string);
+	    xfree (mode_string);
+	    read_line (&size_string);
+	    discard_from_server (atoi (size_string));
+	    xfree (size_string);
+	}
+	xfree (entries_line);
+	if (stored_mode != NULL)
+	{
+	    xfree (stored_mode);
+	    stored_mode = NULL;
+	}
+	stored_modtime_valid = 0;
+	stored_checksum_valid = 0;
+	if (updated_fname != NULL)
+	{
+	    xfree (updated_fname);
+	    updated_fname = NULL;
+	}
+	return;
+    }
 
     /*
      * Parse the entries line.
@@ -2419,6 +2519,33 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
 
   read_line (&entries_line);
 
+  if (client_excluded_response)
+  {
+      /* "update -exc": consume the payload, act on nothing.  */
+      char *mode_string;
+      char *size_string;
+
+      read_line (&mode_string);
+      xfree (mode_string);
+      read_line (&size_string);
+      discard_from_server (atoi (size_string));
+      xfree (size_string);
+      xfree (entries_line);
+      if (stored_mode != NULL)
+      {
+	  xfree (stored_mode);
+	  stored_mode = NULL;
+      }
+      stored_modtime_valid = 0;
+      stored_checksum_valid = 0;
+      if (updated_fname != NULL)
+      {
+	  xfree (updated_fname);
+	  updated_fname = NULL;
+      }
+      return;
+  }
+
   /*
    * Parse the entries line.
    */
@@ -2434,7 +2561,7 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
   if ((cp = strchr (vn, '/')) == NULL)
       error (1, 0, "bad entries line `%s' from server", entries_line);
   *cp++ = '\0';
-  
+
   ts = cp;
   if ((cp = strchr (ts, '/')) == NULL)
       error (1, 0, "bad entries line `%s' from server", entries_line);
@@ -2446,7 +2573,7 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
       error (1, 0, "bad entries line `%s' from server", entries_line);
   *cp++ = '\0';
   tag_or_date = cp;
-  
+
   /* If a slash ends the tag_or_date, ignore everything after it.  */
   cp = strchr (tag_or_date, '/');
   if (cp != NULL)
@@ -2726,6 +2853,28 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
 #endif
 
   read_line (&entries_line);
+
+  if (client_excluded_response)
+  {
+      /* "update -exc": consume the payload, act on nothing.  */
+      char *mode_string;
+
+      read_line (&mode_string);
+      xfree (mode_string);
+      xfree (entries_line);
+      if (stored_mode != NULL)
+      {
+	  xfree (stored_mode);
+	  stored_mode = NULL;
+      }
+      stored_modtime_valid = 0;
+      if (updated_fname != NULL)
+      {
+	  xfree (updated_fname);
+	  updated_fname = NULL;
+      }
+      return;
+  }
 
   /*
    * Parse the entries line.
@@ -3048,6 +3197,17 @@ static void update_baserev(char *data, List *ent_list, char *short_pathname, cha
 
 	read_line(&type);
 
+	if (client_excluded_response)
+	{
+		/* "update -exc": consume the payload, act on nothing.  */
+		if (type[0] == 'U')
+			discard_counted_file ();
+		xfree (type);
+		xfree (basepathgz);
+		xfree (basepath);
+		return;
+	}
+
 	TRACE(3,"Updating base revision %s [%c]",basepath,type[0]);
 	switch(type[0])
 	{
@@ -3085,6 +3245,9 @@ static void handle_update_baserev(char *args, int len)
 
 static void remove_entry (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (client_excluded_response)
+	return;
+
     Scratch_Entry (ent_list, filename);
 }
 
@@ -3095,6 +3258,9 @@ static void handle_remove_entry (char *args, int len)
 
 static void remove_entry_and_file (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (client_excluded_response)
+	return;
+
     Scratch_Entry (ent_list, filename);
     /* Note that we don't ignore existence_error's here.  The server
        should be sending Remove-entry rather than Removed in cases
@@ -3110,6 +3276,12 @@ static void rename_entry_and_file (char *data, List *ent_list, char *short_pathn
 	char *renamed_to;
 
     read_line (&renamed_to);
+
+    if (client_excluded_response)
+    {
+	xfree (renamed_to);
+	return;
+    }
 
     Rename_Entry (ent_list, filename, renamed_to);
 
@@ -3153,6 +3325,10 @@ static void handle_module_expansion(char *args, int len)
 static void set_static (char *data, List *ent_list, char *short_pathname, char *filename)
 {
     FILE *fp;
+
+    if (client_excluded_response)
+	return;
+
     fp = open_file (CVSADM_ENTSTAT, "w+");
     if (fclose (fp) == EOF)
         error (1, errno, "cannot close %s", CVSADM_ENTSTAT);
@@ -3171,12 +3347,18 @@ static void handle_set_static_directory (char *args, int len)
 
 static void clear_static (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (client_excluded_response)
+	return;
+
     if (unlink_file (CVSADM_ENTSTAT) < 0 && ! existence_error (errno))
         error (1, errno, "cannot remove file %s", CVSADM_ENTSTAT);
 }
 
 static void clear_rename (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+	if (client_excluded_response)
+		return;
+
 	if (unlink_file (CVSADM_RENAME) < 0 && ! existence_error(errno))
         error (1, errno, "cannot remove file %s", CVSADM_RENAME);
 }
@@ -3228,6 +3410,12 @@ static void set_sticky (char *data, List *ent_list, char *short_pathname, char *
 
     read_line (&tagspec);
 
+    if (client_excluded_response)
+    {
+	xfree (tagspec);
+	return;
+    }
+
     /* FIXME-update-dir: error messages should include the directory.  */
     f = CVS_FOPEN (CVSADM_TAG, "w+");
     if (f == NULL)
@@ -3277,6 +3465,9 @@ static void handle_set_sticky (char *pathname, int len)
 
 static void clear_sticky (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (client_excluded_response)
+	return;
+
     if (unlink_file (CVSADM_TAG) < 0 && ! existence_error (errno))
 		error (1, errno, "cannot remove %s", CVSADM_TAG);
 }
@@ -3305,6 +3496,12 @@ static void handle_clear_sticky (char *pathname, int len)
 
 static void templat (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (client_excluded_response)
+    {
+	discard_counted_file ();
+	return;
+    }
+
     /* FIXME: should be computing second argument from CVSADM_TEMPLATE
        and short_pathname.  */
     read_counted_file (CVSADM_TEMPLATE, "<CVS/Template file>");
@@ -5397,6 +5594,25 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
     const char *filename;
 
     TRACE(3,"send_fileproc (1)");
+
+    /* "update -exc": excluded files are not mentioned to the server at
+       all; any response the server sends for them regardless is dropped
+       by the receive phase.  Still record the file in this directory's
+       ignore list so that it is not reported as unknown ("? file").  */
+    if (path_excluded (finfo->fullname))
+    {
+	if (ignlist)
+	{
+	    Node *p;
+
+	    p = getnode ();
+	    p->type = FILES;
+	    p->key = xstrdup (finfo->file);
+	    (void) addnode (ignlist, p);
+	}
+	return 0;
+    }
+
     send_a_repository ("", finfo->repository, finfo->update_dir);
 
     xfinfo = *finfo;
@@ -5626,6 +5842,12 @@ static Dtype send_dirent_proc (void *callerdat, char *dir, char *repository, cha
 	    error (0, 0, "Ignoring %s", update_dir);
         return (R_SKIP_ALL);
     }
+
+    /* "update -exc": do not send excluded directories at all, so the
+       server neither updates nor recreates them.  Whatever it streams
+       for them anyway (e.g. under -d) is dropped by the receive phase.  */
+    if (path_excluded (update_dir))
+        return (R_SKIP_ALL);
 
     /*
      * If the directory does not exist yet (e.g. "cvs update -d foo"),
@@ -6184,12 +6406,16 @@ static void notified_a_file (char *data, List *ent_list, char *short_pathname, c
     FILE *fp;
     FILE *newf;
     size_t line_len = 8192;
-    char *line = (char*)xmalloc (line_len);
+    char *line;
     char *cp;
     int nread;
     int nwritten;
     char *p;
 
+    if (client_excluded_response)
+	return;
+
+    line = (char*)xmalloc (line_len);
     fp = open_file (CVSADM_NOTIFY, "r");
 	if(!fp)
 	{

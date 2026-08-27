@@ -365,6 +365,77 @@ int ignore_directory (const char *name)
 
     return 0;
 }
+
+/* "update -exc" support: a one-shot list of paths (files or directories,
+   relative to the directory the update was started in) to exclude from
+   the update.  Matching is path-prefix based on whole components: an
+   entry "sub/dir" excludes "sub/dir" and everything below it, but not
+   "sub/dir2".  Unlike dir_ign_list this list is never persisted and is
+   only ever populated from the update command line.  */
+
+static char **exc_list = NULL;
+static int exc_max = 0;
+static int exc_current = 0;
+
+/* Add one path to the exclusion list.  Directory separators are
+   normalized to "/", leading "./" and trailing "/" are stripped.  */
+void exclude_path_add (const char *path)
+{
+    char *copy, *p;
+    size_t len;
+
+    copy = xstrdup (path);
+    for (p = copy; *p; ++p)
+	if (*p == '\\')
+	    *p = '/';
+    p = copy;
+    while (p[0] == '.' && p[1] == '/')
+	p += 2;
+    memmove (copy, p, strlen (p) + 1);
+    len = strlen (copy);
+    while (len > 0 && copy[len - 1] == '/')
+	copy[--len] = '\0';
+
+    if (len == 0)
+    {
+	xfree (copy);
+	return;
+    }
+    if (isabsolute (copy))
+	error (1, 0, "-exc path `%s' must be relative to the update root", copy);
+
+    if (exc_current <= exc_max)
+    {
+	exc_max += IGN_GROW;
+	exc_list = (char **) xrealloc (exc_list, (exc_max + 1) * sizeof (char *));
+    }
+    exc_list[exc_current++] = copy;
+}
+
+/* Return nonzero if PATH (relative to the directory the command was
+   started in; either a file or a directory) is excluded: equal to an
+   exclusion entry, or lying below one.  */
+int path_excluded (const char *path)
+{
+    int i;
+    size_t len;
+
+    if (!exc_list)
+	return 0;
+
+    while (path[0] == '.' && (path[1] == '/' || path[1] == '\\'))
+	path += 2;
+
+    for (i = 0; i < exc_current; ++i)
+    {
+	len = strlen (exc_list[i]);
+	if (fnncmp (path, exc_list[i], len) == 0
+	    && (path[len] == '\0' || path[len] == '/' || path[len] == '\\'))
+	    return 1;
+    }
+
+    return 0;
+}
 
 /*
  * Process the current directory, looking for files not in ILIST and
