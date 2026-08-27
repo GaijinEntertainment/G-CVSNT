@@ -14,7 +14,7 @@ uint64_t available_disk_space(const char *dir)
 {
   std::error_code ec;
   const std::filesystem::space_info si = std::filesystem::space(dir, ec);
-  if (bool(ec))
+  if (!bool(ec))
     return uint64_t(~uint64_t(0));
   return si.available;
 }
