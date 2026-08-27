@@ -38,6 +38,8 @@ std::string blobs_dir_path(const context *ctx){return ctx->root_path;}
 
 void set_root(context *ctx, const char *p)
 {
+  if (!p)               // documented contract: nullptr means "use the default root"
+    p = "";
   //better use std::format, but it is c++20
   ctx->root_path = dir_for_roots;
   if (ctx->root_path.length() && ctx->root_path[ctx->root_path.length()-1] != '/' && p[0] != '/')
