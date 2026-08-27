@@ -604,7 +604,7 @@ static int check_filesdoneproc (void *callerdat, int err, char *repos, char *upd
 static int pretag_proc(void *params, const trigger_interface *cb)
 {
 	pretag_params_t *args = (pretag_params_t *)params;
-	int ret;
+	int ret = 0;
 
 	TRACE(1,"pretag_proc(%s,%s,%s,%c)",PATCH_NULL(args->directory),PATCH_NULL(args->action),PATCH_NULL(args->tag),args->tag_type);
 
