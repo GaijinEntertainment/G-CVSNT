@@ -21,7 +21,7 @@ IpType blob_classify_ip(uint32_t ip)
   if (ip == 0x100007f)//127.0.0.1
     return IpType::LOCAL;
   //https://en.wikipedia.org/wiki/Private_network
-  if ( (ip&0xF) == 10)//10.x.x.x
+  if ( (ip&0xFF) == 10)//10.x.x.x
     return IpType::PRIVATE;
   if ( (ip&0xFFFF) == 0xa8c0)//192.168.x.x
     return IpType::PRIVATE;
