@@ -46,7 +46,7 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 | 2 | PERF-01 F6 | `rcsbuf_fill()` grows the parse buffer by a constant `MAX_INCR` (2 MiB), so a large `,v` is memcpy'd O(size²/2 MiB) times. Pre-size the buffer from `fstat`. | ~15 | low | not started |
 | 3 | PERF-02 F2.1 | `RCS_rewrite()` re-parses the file it has just written and throws the result away. Gate that behind a parameter and pass "don't re-parse" from the tag path — removes ~⅓ of all parse work in a tag. | ~8 | low | not started |
 | 4 | PERF-01 F3 | `Register()` writes each `Entries.Log` record **twice**: `write_ent_ex_proc` already writes the `Entries` line, so calling both it and `write_ent_proc` duplicates it. Delete the duplicate call. | 1 | low | implemented |
-| 5 | PERF-01 F10a | `find_rcs()` looks a name up with `findnode_fn` and then calls `addnode` anyway, which looks it up again — and leaks the `Node` plus its key when the name is already present. Use `addnode`'s return value. | ~10 | low | not started |
+| 5 | PERF-01 F10a | `find_rcs()` looks a name up with `findnode_fn` and then calls `addnode` anyway, which looks it up again — and leaks the `Node` plus its key when the name is already present. Use `addnode`'s return value. | ~10 | low | implemented |
 | 6 | PERF-01 F4 | `write_entries()` byte-copies and `fsync`s both Entries files to `.Old` backups on every directory. Drop the `.Old` copies. | ~25 | low | not started |
 | 7 | PERF-02 F1a + F7 | I/O is done in tiny chunks: `RCSBUF_BUFSIZE` is `BUFSIZ*10` (5120 bytes on MSVC) and the deltatext copy uses an 8 KiB stack buffer, with no `setvbuf` anywhere. Fixed 64 KiB parse buffer, 1 MiB copy buffer, `setvbuf` both streams in `RCS_rewrite`. | ~25 | low | not started |
 
