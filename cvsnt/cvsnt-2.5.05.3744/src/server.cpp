@@ -5339,9 +5339,16 @@ error ENOMEM Virtual memory exhausted.\n");
     
 	orig_cmd = cmd;
 	for (rq = requests; rq->name != NULL; ++rq)
-	    if (strncmp (cmd, rq->name, strlen (rq->name)) == 0)
+	{
+	    int len;
+	    /* Nearly every row fails on the first character; rejecting on it
+	       here spares a strlen and a strncmp call per non-matching row
+	       on a loop that runs for every protocol request.  */
+	    if (rq->name[0] != *cmd)
+		continue;
+	    len = strlen (rq->name);
+	    if (strncmp (cmd, rq->name, len) == 0)
 	    {
-            int len = strlen (rq->name);
             if (cmd[len] == '\0')
 	            cmd += len;
             else if (cmd[len] == ' ')
@@ -5405,6 +5412,7 @@ error ENOMEM Virtual memory exhausted.\n");
 			buf_send_output(stdout_buf);
 		break;
 	    }
+	}
 	if (rq->name == NULL)
 	{	
         buf_output0 (buf_to_net, "error  unrecognized request `");
