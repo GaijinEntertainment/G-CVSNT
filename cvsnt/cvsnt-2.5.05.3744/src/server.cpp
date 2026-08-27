@@ -6420,6 +6420,11 @@ int cvs_output_raw(const char *str, size_t len, bool flush)
    the first '\0' byte.  */
 #include <mutex>
 static std::mutex output_mutex;
+/* Bytes cvs_output has staged for the client since the last flush it
+   issued itself; when it exceeds this threshold, the next completed
+   line is pushed to the network.  */
+#define SERVER_FLUSH_THRESHOLD 8192
+static size_t pending_output;
 int cvs_output (const char *str, size_t len)
 {
 	cvs_flusherr();
@@ -6464,8 +6469,21 @@ int cvs_output (const char *str, size_t len)
 			len=olen;
 		}
  		buf_output (stdout_buf?stdout_buf:buf_to_net, str, len);
- 		if(str[len-1]=='\n')
+		/* Push to the network on a byte threshold, not on every
+		   newline: flushing per line made a line of M output cost one
+		   write() each, which dominates commands like log and annotate.
+		   Correctness does not rest on this flush - every blocking read
+		   of buf_from_net happens in the request loop, which drains both
+		   wrap buffers after each request (see server_serve), and
+		   do_cvs_command flushes both blocking before it sends ok/error.
+		   The counter is a heuristic: flushes done elsewhere leave it
+		   high, which only makes the next flush here come sooner.  */
+		pending_output += len;
+ 		if(str[len-1]=='\n' && pending_output >= SERVER_FLUSH_THRESHOLD)
+		{
+			pending_output = 0;
  			buf_send_output(stdout_buf?stdout_buf:buf_to_net);
+		}
 		if(ostr) xfree(ostr);
     }
 	else
@@ -6763,6 +6781,30 @@ cvs_flushout ()
         std::unique_lock<std::mutex> lock(output_mutex);
 		fflush (stdout);
     }
+}
+
+/* The per-file progress flush in the recursion processor.  Local mode
+   flushes unconditionally, as it always did.  In server mode, skip the
+   flush while there is no staged M/E text and at most one partially
+   filled chunk queued for the network - flushing a few hundred bytes
+   per file is what turned a big checkout into per-file write()s.  As
+   soon as a whole chunk (BUFFER_DATA_SIZE) or any wrapped text is
+   pending, flush as before, so file data never accumulates beyond
+   roughly one file plus a chunk and per-file progress still streams
+   whenever there is text to show.  */
+void cvs_flushout_perfile ()
+{
+#ifdef SERVER_SUPPORT
+	if (server_active && !(temp_protocol && temp_protocol->server_flush_data))
+	{
+		if ((!stdout_buf || stdout_buf->data == NULL)
+		    && (!stderr_buf || stderr_buf->data == NULL)
+		    && (!buf_to_net || buf_to_net->data == NULL
+			|| buf_to_net->data->next == NULL))
+			return;
+	}
+#endif
+	cvs_flushout ();
 }
 
 /* Output TEXT, tagging it according to TAG.  There are lots more
