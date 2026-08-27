@@ -707,6 +707,16 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 		{
 			TRACE(1,"fopen(%s,a)",fname.c_str());
 			hist_fp = CVS_FOPEN(fname.c_str(),"a");
+			/* The handle is now held for the life of the process, which
+			   spans the historyinfo trigger's fork+exec and every other
+			   subprocess.  Nothing in the child needs it, and an inherited
+			   append handle pins the inode against log rotation - so mark
+			   it close-on-exec.  Windows handles from the CRT are not
+			   inheritable by default.  */
+#if defined(FD_CLOEXEC) && !defined(_WIN32)
+			if(hist_fp)
+				fcntl(fileno(hist_fp), F_SETFD, FD_CLOEXEC);
+#endif
 			if(!hist_fp)
 			{
 				hist_fail = 1;
@@ -840,10 +850,16 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 	{
 		cvs::sprintf(line,80,"%c%08" TIME_T_SPRINTF "x|%s|%s|%s|%s|%s|%s\n",
 	     		type, global_session_time_t, username, workdir.c_str(), repos, revs, name, bugid?bugid:"");
+		/* The history log is advisory: a failure here must not abort the
+		   user's command.  That was the pre-existing behaviour - the old
+		   code tested CFileAccess::close(), which ignores fclose's result
+		   and always returns true - so warn instead of exiting, or a full
+		   CVSROOT partition starts killing checkouts that used to
+		   complete.  */
 		if(fwrite(line.c_str(),1,line.length(),hist_fp)!=line.length())
-			error (1, errno, "cannot write to history file: %s", fn_root(fname.c_str()));
-		if(fflush(hist_fp))
-			error (1, errno, "cannot flush history file: %s", fn_root(fname.c_str()));
+			error (0, errno, "warning: cannot write to history file: %s", fn_root(fname.c_str()));
+		else if(fflush(hist_fp))
+			error (0, errno, "warning: cannot flush history file: %s", fn_root(fname.c_str()));
 	}
 
 	historyproc_param_t args;
