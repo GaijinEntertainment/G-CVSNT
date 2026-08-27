@@ -1267,15 +1267,13 @@ static void copy_a_file (char *data, List *ent_list, char *short_pathname, char 
     if (last_component (newname) != newname)
 	error (1, 0, "protocol error: Copy-file tried to specify directory");
 
-    /* Under --no-sharp-files the server's instruction to make a ".#"
-       backup copy is consumed but not acted upon.  */
-    if (update_no_sharp_files
-	&& strncmp (newname, BAKPREFIX, sizeof (BAKPREFIX) - 1) == 0)
-    {
-	xfree (newname);
-	return;
-    }
-
+    /* The server's Copy-file instruction is always honoured, even under
+       --no-sharp-files.  It arrives *before* the content that replaces the
+       working file, so the client cannot tell whether the imminent overwrite
+       preserves the user's work (a text merge, whose result carries conflict
+       markers) or destroys it (a nonmergeable/binary conflict, where this
+       copy becomes the only remaining copy of the user's version).  Skipping
+       it would silently discard uncommitted changes in the latter case.  */
     copy_file (filename, newname, 1, 1);
     xfree (newname);
 }
@@ -1567,7 +1565,9 @@ static int inway_rename_aside (const char *filename, const char *short_pathname)
 			strip_dotslash (short_pathname)) != NULL)
 	return 1;
 
-    if (!update_inway_rename_aside)
+    /* "cvs -n update" must not touch the working directory.  (The server
+       sends no content under -n, so this is belt-and-braces.)  */
+    if (!update_inway_rename_aside || noexec)
 	return 0;
 
     /* A name that differs only in case is handled by the existing

@@ -631,6 +631,7 @@ int ign_close();
 void ign_dir_add (const char *name);
 int ignore_directory (const char *name);
 void exclude_path_add (const char *name);
+void exclude_clear (void);
 const char *exclude_path_get (int i);
 int path_excluded (const char *name);
 void ign_send ();
@@ -756,9 +757,11 @@ char *rename_file_aside (const char *filename);
    the actual decision and rename happen per file.  */
 extern int update_inway_rename_aside;
 /* Nonzero when "update --no-sharp-files" is in effect: no ".#<file>.<rev>"
-   backup copies of the user's own modified files are created (and the
-   server's Copy-file backup instruction is ignored).  The in-the-way
-   rename-aside of -C is NOT suppressed by this -- safety wins.  */
+   backup copies of the user's own modified files are created.  Two things
+   are NOT suppressed by this, because they hold the only remaining copy of
+   the user's work -- safety wins: the in-the-way rename-aside of -C, and a
+   backup the server asks for via Copy-file (a nonmergeable/binary conflict
+   is indistinguishable from a text merge at the time that arrives).  */
 extern int update_no_sharp_files;
 void resolve_symlink (char **filename);
 void sleep_past (time_t desttime);

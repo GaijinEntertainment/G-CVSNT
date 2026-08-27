@@ -404,12 +404,24 @@ void exclude_path_add (const char *path)
     if (isabsolute (copy))
 	error (1, 0, "-exc path `%s' must be relative to the update root", copy);
 
-    if (exc_current <= exc_max)
+    if (exc_current >= exc_max)
     {
 	exc_max += IGN_GROW;
 	exc_list = (char **) xrealloc (exc_list, (exc_max + 1) * sizeof (char *));
     }
     exc_list[exc_current++] = copy;
+}
+
+/* Drop every exclusion entry.  The list is per-command state: a server
+   process that serves more than one command in its lifetime must not let
+   one command's -exc paths silently skip files in the next one.  */
+void exclude_clear (void)
+{
+    int i;
+
+    for (i = 0; i < exc_current; ++i)
+	xfree (exc_list[i]);
+    exc_current = 0;
 }
 
 /* Return the I'th exclusion entry (normalized), or NULL when I is past

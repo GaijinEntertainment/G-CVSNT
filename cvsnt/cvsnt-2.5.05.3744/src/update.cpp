@@ -165,7 +165,8 @@ static const char *const update_usage[] =
     "\t-W spec\tWrappers specification line (! to reset).\n",
     "\t--blob_zero\tDownloaded blobs would be written as zero length file. That is for 'hot-proxy' scenario (to save space and optimize performance of update).\n",
     "\t--no-sharp-files\tDo not create .#<file>.<rev> backup copies of modified\n",
-    "\t\tfiles (in-the-way files are still moved aside under -C).\n",
+    "\t\tfiles (in-the-way files are still moved aside under -C, and a\n",
+    "\t\tconflict backup that holds your only copy is still kept).\n",
     "\t-exc paths\tExclude comma-separated paths (files or directories, relative\n",
     "\t\tto the update root) from the update, including -d directory creation.\n",
     "\t\tOne-shot and client-side; nothing is recorded in the working copy.\n",
@@ -184,6 +185,13 @@ int update (int argc, char **argv)
 
     if (argc == -1)
 		usage (update_usage);
+
+    /* These are per-command state.  A server process that serves more than
+       one command in its lifetime must not carry one update's exclusions or
+       switches into the next one, where they would silently skip files.  */
+    exclude_clear ();
+    update_no_sharp_files = 0;
+    update_inway_rename_aside = 0;
 
     /* parse the args */
     static struct option long_update_options[] =
