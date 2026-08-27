@@ -91,6 +91,37 @@ full-tree stat storm that did not exist before.
 **The right change:** give `available_disk_space` an `int64_t` return so the sentinel is honest, or
 have `init_gc` test for the sentinel explicitly instead of relying on `-1` arithmetic.
 
+## The most serious thing found
+
+**[`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) — a local-mode binary
+commit silently destroys the content.** Not fixed on this branch: the fix is a behaviour change in
+the blob layer and needs a maintainer decision, but it should be the next thing anyone looks at.
+
+Three behaviours combine:
+
+1. `src/rcs_checkin.cpp:512` rewrites every `b` in the keyword options to `B` before parsing them,
+   so **every** commit of a `-kb` file is forced onto the blob path regardless of how the file was
+   registered. This is deliberate — the comment says "on checkin do not allow old binary files" —
+   but it is unconditional.
+2. `caddressed_fs::set_root()` is called from exactly one place in the tree, `src/server.cpp:5375`,
+   inside the server path. In local mode the blob root is never configured and keeps its default
+   `"./blobs/"`, which resolves against the **current working directory**.
+3. `RCS_read_binary_rev_data` cannot report failure ([`BUG-server-12`](_reports/BUG-server-12-blob-pull-failure-ignored.md)),
+   so a checkout that cannot find the blob reports success and writes a zero-length file.
+
+The result, verified end to end on a plain `cvs -d /path/to/repo` repository: the second commit of a
+binary file either aborts with `Couldn't write blob ... No such file or directory`, or — if the
+working directory happens to contain a `blobs/` subdirectory — reports `new revision: 1.2; done`
+while writing the repository's content **into the user's working copy**. A later checkout elsewhere
+prints `U file` and produces an **empty file**. Deleting that working copy destroys the revision
+permanently.
+
+An abort is recoverable. A commit that reports success and loses the data is not.
+
+The existing regression case "binary file survives a commit/checkout round trip byte for byte" does
+not catch this because it only *imports*, and `import` does not go through `RCS_checkin`, so the
+`b`→`B` rewrite never fires.
+
 ## Corrections to commit messages on this branch
 
 A review pass over the fix commits found four factual slips in commit-message *rationale*. The code
