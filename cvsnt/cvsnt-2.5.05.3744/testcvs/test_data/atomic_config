@@ -12,9 +12,10 @@
 # command.
 #TopLevelAdmin=no
 
-# Set `LogHistory' to `all' or `TOFEWGCMAR' to log all transactions to the
-# history file, or a subset as needed (ie `TMAR' logs all write operations)
-#LogHistory=TOFEWGCMAR
+# Set `LogHistory' to `all' or `TOEFWUCGMAReuPD' to log all transactions to
+# the history file and the historyinfo trigger, or a subset as needed
+# (ie `TMAR' logs all write operations).  Record letters are case sensitive.
+#LogHistory=TOEFWUCGMAReuPD
 
 # Set `AtomicCommits' to `yes' to do atomic commits on systems that support this.
 AtomicCommits=yes
