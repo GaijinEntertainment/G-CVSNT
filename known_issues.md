@@ -94,8 +94,16 @@ have `init_gc` test for the sentinel explicitly instead of relying on `-1` arith
 ## The most serious thing found
 
 **[`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) — a local-mode binary
-commit silently destroys the content.** Not fixed on this branch: the fix is a behaviour change in
-the blob layer and needs a maintainer decision, but it should be the next thing anyone looks at.
+commit silently destroys the content.** The data-loss core is **fixed on this branch**: local mode
+now points the blob store at the repository (mirroring the server's per-request call), and the
+`blobs/` directory is created on first write, so a fresh `cvs init` repository works. Pinned by a
+regression case that commits a second binary revision and checks the bytes out again exactly.
+
+Two parts remain open: the compiled-in default root of `"./blobs/"` should fail loudly instead of
+silently resolving against the process working directory, and the read path still cannot report a
+missing blob (`BUG-server-12`) — so a repository already poisoned by the old behaviour still checks
+out empty files without an error. The unconditional `b`→`B` rewrite at `rcs_checkin.cpp:512` also
+stays as-is pending a maintainer decision.
 
 Three behaviours combine:
 

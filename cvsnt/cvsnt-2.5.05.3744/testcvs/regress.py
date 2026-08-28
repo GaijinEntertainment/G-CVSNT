@@ -484,6 +484,46 @@ def t_binary(r):
     check_eq(got, payload, "binary round trip")
 
 
+@test("second commit of a binary file round trips byte for byte")
+def t_binary_second_commit(r):
+    # Import only exercises the inline-storage path; a *commit* goes through
+    # RCS_checkin, which routes binary content into the content-addressed
+    # blob store.  In local mode that store's root must resolve to the
+    # repository - not the process working directory - and must work in a
+    # repository that has no blobs/ directory yet, or the second revision of
+    # every binary file either aborts or is silently lost.
+    payload1 = bytes(range(256)) * 4
+    payload2 = bytes(reversed(range(256))) * 6 + b"\x00tail"
+    imp = os.path.join(r.root, "impbin")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "b.dat"), "wb") as f:
+        f.write(payload1)
+    r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
+    wc = r.checkout("mb")
+
+    with open(os.path.join(wc, "b.dat"), "wb") as f:
+        f.write(payload2)
+    _, out = r.cvs(["commit", "-m", "second"], cwd=wc)
+    check("new revision" in out, "second binary commit did not succeed:\n" + out)
+
+    # The blob must not have been sprayed into the working copy.
+    check(not os.path.isdir(os.path.join(wc, "blobs")),
+          "commit created a blobs/ directory inside the working copy")
+
+    # A fresh checkout elsewhere must reproduce the committed bytes exactly.
+    wc2root = os.path.join(r.root, "wc2")
+    os.makedirs(wc2root)
+    r.cvs(["checkout", "mb"], cwd=wc2root)
+    got = open(os.path.join(wc2root, "mb", "b.dat"), "rb").read()
+    check_eq(len(got), len(payload2), "second-revision size after fresh checkout")
+    check_eq(got, payload2, "second-revision content after fresh checkout")
+
+    # And the first revision must still be reachable.
+    r.cvs(["update", "-r", "1.1.1.1", "b.dat"], cwd=os.path.join(wc2root, "mb"))
+    got = open(os.path.join(wc2root, "mb", "b.dat"), "rb").read()
+    check_eq(got, payload1, "first-revision content via update -r")
+
+
 @test("interrupted checkout leaves well-formed Entries logs")
 def t_entries_log_format(r):
     # A checkout that dies mid-directory (here: on a corrupt ,v) leaves

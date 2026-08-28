@@ -14,6 +14,7 @@
 
 #include "../version.h"
 #include "cvs.h"
+#include "../ca_blobs_fs/content_addressed_fs.h"
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
@@ -1573,7 +1574,18 @@ int main (int argc, char **argv)
 		   if we didn't, then there would be no way to check in a new
 		   CVSROOT/config file to fix the broken one!  */
 		if(current_parsed_root)
+		{
 			parse_config (current_parsed_root->directory);
+			/* Point the content-addressed blob store at this repository.
+			   The server does the same per request (server.cpp, before
+			   dispatch); without this, local-mode commands leave the
+			   store at its compiled-in default of "./blobs/" - relative
+			   to whatever directory the user happens to be in - so a
+			   local commit of a -kB file either aborts or writes the
+			   repository's content into the working copy.  */
+			caddressed_fs::set_root(caddressed_fs::get_default_ctx(),
+						current_parsed_root->directory);
+		}
 #ifdef _WIN32
 		if(current_parsed_root && w32_is_network_share(current_parsed_root->directory))
 		{

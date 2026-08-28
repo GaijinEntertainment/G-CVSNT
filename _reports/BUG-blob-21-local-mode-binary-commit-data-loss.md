@@ -8,6 +8,7 @@ category: correctness
 verdict: CONFIRMED
 fix_size_loc: 20
 behavior_change: yes
+status: partially fixed - parts 1 and the missing-blobs-dir case; parts 2 and 3 remain open
 ---
 
 # In local mode, committing a second revision of a binary file either aborts or silently destroys the content
@@ -148,6 +149,24 @@ file with no error, so the loss is not noticed until the file is opened.
 The `testcvs/regress.py` case "binary file survives a commit/checkout round trip byte for byte"
 does not catch it because it only *imports* — `import` does not go through `RCS_checkin`, so the
 `b`→`B` rewrite never fires.
+
+## Status
+
+Parts of this are fixed on this branch:
+
+* the blob root is now set for local mode in `main.cpp`, next to `parse_config`, mirroring the
+  server's per-request call — so local commits write into `<repos>/blobs/`;
+* `RCS_write_binary_rev_data_blob` now creates the `blobs/` directory before pushing, so a
+  repository that has never held a blob works instead of aborting (this also covers the server's
+  old-client checkin path, where a fresh `cvs init` repository had the same gap).
+
+Verified by the regression case "second commit of a binary file round trips byte for byte", which
+fails against the previous build (commit aborted) and passes now, including a byte-exact fresh
+checkout and `update -r` back to the first revision.
+
+Still open: the default root should fail loudly rather than silently resolving to a relative path
+(part 2 below), and the read path still cannot report a missing blob (`BUG-server-12`, part 3) — a
+repository already poisoned by the old behaviour still checks out empty files without an error.
 
 ## Suggested fix
 Three parts, smallest first:
