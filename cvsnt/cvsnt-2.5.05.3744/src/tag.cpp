@@ -130,6 +130,7 @@ int cvstag (int argc, char **argv)
     int c;
     int err = 0;
     int run_module_prog = 1;
+    const char *tag_type;
 
     is_rtag = (strcmp (command_name, "rtag") == 0);
     
@@ -280,6 +281,7 @@ int cvstag (int argc, char **argv)
     }
 
 	lock_for_write = 1;
+    tag_type = delete_flag ? "D" : (numtag ? numtag : (date ? date : "A"));
     if (is_rtag)
     {
 	DBM *db;
@@ -288,8 +290,7 @@ int cvstag (int argc, char **argv)
 	for (i = 0; i < argc; i++)
 	{
 	    /* XXX last arg should be repository, but doesn't make sense here */
-	    history_write ('T', (delete_flag ? "D" : (numtag ? numtag : 
-			   (date ? date : "A"))), symtag, argv[i], "", NULL, NULL);
+	    history_write ('T', tag_type, symtag, argv[i], "", NULL, NULL);
 	    err += do_module (db, argv[i], TAG,
 			      delete_flag ? "Untagging" : "Tagging",
 			      rtag_proc, (char *) NULL, 0, 0, run_module_prog,
@@ -299,6 +300,11 @@ int cvstag (int argc, char **argv)
     }
     else
     {
+	int i;
+	for (i = 0; i < argc; i++)
+	    history_write ('T', tag_type, symtag, argv[i], "", NULL, NULL);
+	if (!argc)
+	    history_write ('T', tag_type, symtag, ".", "", NULL, NULL);
 	err = rtag_proc (argc + 1, argv - 1, NULL, NULL, NULL, 0, 0, NULL,
 			 NULL);
     }
