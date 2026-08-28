@@ -18,6 +18,10 @@ static const char *stored_repos; /* Current directory */
 static CXmlTree g_tree; /* Global xml context */
 static CXmlNodePtr stored_root; /* Node tree of current directory */
 static int modified; /* Set when tree changed */
+static List *watched_files; /* Memo for fileattr_iswatched: names of files
+			       with a <watched/> child.  Rebuilt on demand;
+			       dropped whenever the tree is modified or the
+			       directory changes.  */
 
 static void fileattr_read();
 
@@ -86,6 +90,64 @@ CXmlNodePtr fileattr_getroot()
 	return stored_root->Clone();
 }
 
+/* Is FILENAME watched?  Equivalent to evaluating the XPath
+   file[cvs:filename(@name,$name)]/watched against the directory's
+   fileattr root, but the answer set is materialised once per directory
+   with a plain child walk and then looked up with findnode_fn, whose
+   hashing and comparison use the same fncmp folding as cvs:filename.
+   Compiling and evaluating that XPath per checked-out file - a fresh
+   context, namespace, function and variable registration each time -
+   was O(files x fileattr entries) per directory.  */
+int fileattr_iswatched(const char *filename)
+{
+	TRACE(3,"fileattr_iswatched(%s)",filename);
+	if(!stored_root)
+		fileattr_read();
+
+	if(!watched_files)
+	{
+		watched_files = getlist();
+		CXmlNodePtr node = stored_root->Clone();
+		if(node->GetChild("file"))
+		{
+			do
+			{
+				const char *name = node->GetAttrValue("name");
+				if(!name)
+					continue;
+				CXmlNodePtr f = node->Clone();
+				if(f->GetChild("watched"))
+				{
+					Node *p = getnode();
+					p->type = FILES;
+					p->key = xstrdup(name);
+					if(addnode(watched_files,p))
+						freenode(p);
+				}
+				/* GetAttrValue returns an xmlGetProp allocation.
+				   xmlFree defaults to plain free (libxml2 sets it from
+				   free unless DEBUG_MEMORY_LOCATION is defined, and
+				   nothing here calls xmlMemSetup/xmlGcMemSetup), so
+				   free() is the correct release.
+
+				   Two caveats worth knowing.  On Windows this relies on
+				   both modules sharing the /MD CRT heap, and xmlFree
+				   itself is not exported past cvsapi.dll, which is why
+				   it is not named here.  On Unix the build links a
+				   *system* libxml2 (configure.in:354; the bundled
+				   libxml/ tree is not in SUBDIRS), so a distribution
+				   that configured it --with-mem-debug would make
+				   xmlFree = xmlMemFree, whose allocations carry a
+				   header before the returned pointer.  That option is
+				   off by default everywhere; if it is ever encountered,
+				   this must become myxmlFree (cvsapi/XmlNode.h:28).  */
+				free((void*)name);
+			} while(node->GetSibling("file"));
+		}
+	}
+	return findnode_fn(watched_files,filename) != NULL;
+}
+
 /* Return the next node on this level with this name, for walking lists */
 CXmlNodePtr fileattr_next(CXmlNodePtr root)
 {
@@ -120,7 +182,7 @@ void fileattr_delete(CXmlNodePtr root, const char *exp, ...)
 	while(n->XPathResultNext())
 	{
 		n->Delete();
-		modified = 1;
+		fileattr_modified();
 	}
 }
 
@@ -135,7 +197,7 @@ void fileattr_delete_child(CXmlNodePtr parent, CXmlNodePtr child)
 	if(child)
 	{
 		child->Delete();
-		modified = 1;
+		fileattr_modified();
 	}
 }
 
@@ -150,7 +212,7 @@ void fileattr_batch_delete(CXmlNodePtr root)
 	if(!node) node = stored_root;
 
 	node->Delete();
-	modified = 1;
+	fileattr_modified();
 }
 
 /* Get a single value from a node.  Pass null to get value of this node. */
@@ -189,7 +251,7 @@ void fileattr_setvalue(CXmlNodePtr root, const char *name, const char *value)
 	CXmlNodePtr val;
 	if(!node) node = stored_root;
 
-	modified = 1;
+	fileattr_modified();
 
 	if(name)
 	{
@@ -226,7 +288,7 @@ void fileattr_newfile (const char *filename)
 	CXmlNodePtr file = stored_root->Clone();
 	file->NewNode("file");
 	file->NewAttribute("name",filename);
-	modified = 1;
+	fileattr_modified();
 
 	if(dir_default)
 		file->CopySubtree(dir_default);
@@ -264,6 +326,7 @@ void fileattr_free ()
 	TRACE(3,"fileattr_free()");
 	xfree(stored_repos);
 	stored_root = NULL;
+	dellist(&watched_files);
 	g_tree.Close();
 }
 
@@ -699,7 +762,7 @@ void fileattr_paste(CXmlNodePtr root, CXmlNodePtr source)
 	if(!node) node = stored_root;
 
 	node->CopySubtree(source);
-	modified = 1;
+	fileattr_modified();
 }
 
 
@@ -711,4 +774,6 @@ void fileattr_free_subtree(CXmlNodePtr& root)
 void fileattr_modified()
 {
 	modified = 1;
+	/* Any mutation may add or remove a watched node; drop the memo. */
+	dellist(&watched_files);
 }

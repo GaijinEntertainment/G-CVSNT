@@ -950,6 +950,11 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 		RCS_putadmin (rcs, fout);
 		RCS_putdtree (rcs, rcs->head, fout);
 		RCS_putdesc (rcs, fout);
+		/* Flush before CVS_FTELL, exactly as RCS_rewrite does before its
+		   own delta_pos computation.  RCS_putdtree used to end with an
+		   fflush of its own; do not rely on stdio position bookkeeping
+		   over an unflushed tail here.  */
+		fflush (fout);
 		rcs->delta_pos = CVS_FTELL (fout);
 		if (rcs->delta_pos == -1)
 			error (1, errno, "cannot ftell for %s", fn_root(rcs->path));

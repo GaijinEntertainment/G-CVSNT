@@ -1721,13 +1721,11 @@ VERS: ", 0);
 		kflag kftmp;
 
 		RCS_get_kflags(vers_ts->options,false,kftmp);
-		CXmlNodePtr node = fileattr_getroot();
-		node->xpathVariable("name",xfile);
 
 		if (!is_rcs
 		&& cvswrite
 		&& !file_is_dead
-		&& (!node->Lookup("file[cvs:filename(@name,$name)]/watched") || !node->XPathResultNext())
+		&& !fileattr_iswatched(xfile)
 		&& !(kftmp.flags&KFLAG_RESERVED_EDIT))
 		{
 			if (newrevbuf == NULL)
@@ -2082,14 +2080,11 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 		md5->Final();
     }	  
 
-    CXmlNodePtr node = fileattr_getroot();
-    node->xpathVariable("name",finfo->file);
-
     if (cvswrite
-	&& (!node->Lookup("file[cvs:filename(@name,$name)]/watched") || !node->XPathResultNext())
+	&& !fileattr_iswatched(finfo->file)
 	&& !(kf.flags&KFLAG_RESERVED_EDIT))
 	{
-		mode = modify_mode(mode, 
+		mode = modify_mode(mode,
 				  ((mode & S_IRUSR) ? S_IWUSR : 0)
 				| ((mode & S_IRGRP) ? S_IWGRP : 0)
 				| ((mode & S_IROTH) ? S_IWOTH : 0),0);
@@ -2144,11 +2139,8 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 	    char buf[sizeof BINARY];
 	    unsigned int c;
 
-	   CXmlNodePtr node = fileattr_getroot();
-	   node->xpathVariable("name",finfo->file);
-
    	    if (cvswrite
-			&& (!node->Lookup("file[cvs:filename(@name,$name)]/watched") || !node->XPathResultNext())
+			&& !fileattr_iswatched(finfo->file)
 			&& !(kf.flags&KFLAG_RESERVED_EDIT))
 		{
 			xchmod (finfo->file, 1);
@@ -2313,7 +2305,6 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 	kflag kf;
 	kflag kftmp;
 	mode_t mode = 0644; /* stupid default! */
-	CXmlNodePtr node;
 
     /*
      * The users currently modified file is moved to a backup file name
@@ -2393,15 +2384,12 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 
 	RCS_get_kflags(vers->options,false,kftmp);
 
-	node=fileattr_getroot();
-	node->xpathVariable("name",finfo->file);
-
 	if (!is_rcs
 		&& cvswrite
-		&& (!node->Lookup("file[cvs:filename(@name,$name)]/watched") || !node->XPathResultNext())
+		&& !fileattr_iswatched(finfo->file)
 		&& !(kftmp.flags&KFLAG_RESERVED_EDIT))
 	{
-		mode = modify_mode(mode, 
+		mode = modify_mode(mode,
 				  ((mode & S_IRUSR) ? S_IWUSR : 0)
 				| ((mode & S_IRGRP) ? S_IWGRP : 0)
 				| ((mode & S_IROTH) ? S_IWOTH : 0),0);
@@ -3211,15 +3199,12 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	kflag kftmp;
 	RCS_get_kflags(vers->options,false,kftmp);
 
-	CXmlNodePtr node=fileattr_getroot();
-	node->xpathVariable("name",finfo->file);
-
 	if (!is_rcs
 		&& cvswrite
-		&& (!node->Lookup("file[cvs:filename(@name,$name)]/watched") || !node->XPathResultNext())
+		&& !fileattr_iswatched(finfo->file)
 		&& !(kftmp.flags&KFLAG_RESERVED_EDIT))
 	{
-		mode = modify_mode(mode, 
+		mode = modify_mode(mode,
 				  ((mode & S_IRUSR) ? S_IWUSR : 0)
 				| ((mode & S_IRGRP) ? S_IWGRP : 0)
 				| ((mode & S_IROTH) ? S_IWOTH : 0),0);

@@ -5339,9 +5339,16 @@ error ENOMEM Virtual memory exhausted.\n");
     
 	orig_cmd = cmd;
 	for (rq = requests; rq->name != NULL; ++rq)
-	    if (strncmp (cmd, rq->name, strlen (rq->name)) == 0)
+	{
+	    int len;
+	    /* Nearly every row fails on the first character; rejecting on it
+	       here spares a strlen and a strncmp call per non-matching row
+	       on a loop that runs for every protocol request.  */
+	    if (rq->name[0] != *cmd)
+		continue;
+	    len = strlen (rq->name);
+	    if (strncmp (cmd, rq->name, len) == 0)
 	    {
-            int len = strlen (rq->name);
             if (cmd[len] == '\0')
 	            cmd += len;
             else if (cmd[len] == ' ')
@@ -5405,6 +5412,7 @@ error ENOMEM Virtual memory exhausted.\n");
 			buf_send_output(stdout_buf);
 		break;
 	    }
+	}
 	if (rq->name == NULL)
 	{	
         buf_output0 (buf_to_net, "error  unrecognized request `");
@@ -6412,6 +6420,11 @@ int cvs_output_raw(const char *str, size_t len, bool flush)
    the first '\0' byte.  */
 #include <mutex>
 static std::mutex output_mutex;
+/* Bytes cvs_output has staged for the client since the last flush it
+   issued itself; when it exceeds this threshold, the next completed
+   line is pushed to the network.  */
+#define SERVER_FLUSH_THRESHOLD 8192
+static size_t pending_output;
 int cvs_output (const char *str, size_t len)
 {
 	cvs_flusherr();
@@ -6456,8 +6469,21 @@ int cvs_output (const char *str, size_t len)
 			len=olen;
 		}
  		buf_output (stdout_buf?stdout_buf:buf_to_net, str, len);
- 		if(str[len-1]=='\n')
+		/* Push to the network on a byte threshold, not on every
+		   newline: flushing per line made a line of M output cost one
+		   write() each, which dominates commands like log and annotate.
+		   Correctness does not rest on this flush - every blocking read
+		   of buf_from_net happens in the request loop, which drains both
+		   wrap buffers after each request (see server_serve), and
+		   do_cvs_command flushes both blocking before it sends ok/error.
+		   The counter is a heuristic: flushes done elsewhere leave it
+		   high, which only makes the next flush here come sooner.  */
+		pending_output += len;
+ 		if(str[len-1]=='\n' && pending_output >= SERVER_FLUSH_THRESHOLD)
+		{
+			pending_output = 0;
  			buf_send_output(stdout_buf?stdout_buf:buf_to_net);
+		}
 		if(ostr) xfree(ostr);
     }
 	else
@@ -6512,7 +6538,13 @@ int cvs_no_translate_begin()
 	if(!server_active)
 		return 0;
 	if(supported_response("NoTranslateBegin"))
+	{
+		/* Staged M text has to reach the wire before anything written
+		   directly to buf_to_net, or the bracket overtakes the body it is
+		   meant to enclose.  */
+		cvs_flushout ();
 		buf_output0 (buf_to_net, "NoTranslateBegin\n");
+	}
 	return 0;
 }
 
@@ -6521,7 +6553,10 @@ int cvs_no_translate_end()
 	if(!server_active)
 		return 0;
 	if(supported_response("NoTranslateEnd"))
+	{
+		cvs_flushout ();
 		buf_output0 (buf_to_net, "NoTranslateEnd\n");
+	}
 	return 0;
 }
 #endif
@@ -6532,6 +6567,9 @@ int cvs_no_translate_end()
 int cvs_output_binary (char *str, size_t len)
 {
 	cvs_flusherr();
+	/* Mbinary is written straight to buf_to_net below, so staged M text has
+	   to be pushed out first or the binary body overtakes it.  */
+	cvs_flushout();
 #ifdef SERVER_SUPPORT
     if (server_active)
     {
@@ -6757,6 +6795,34 @@ cvs_flushout ()
     }
 }
 
+/* The per-file progress flush in the recursion processor.  Local mode
+   flushes unconditionally, as it always did.  In server mode, skip the
+   flush while there is no staged M/E text and the network queue is still
+   a single chunk - flushing a few hundred bytes per file is what turned a
+   big checkout into per-file write()s.  Once any wrapped text is pending,
+   or a *second* chunk has been allocated, flush as before.
+
+   Note the bound: the test below is on the chunk *list*, not on bytes, so
+   a single completely full chunk does not trigger it and the real ceiling
+   is roughly two chunks, not one.  BUFFER_DATA_SIZE is BUFSIZ*10, which
+   makes that about 160 KiB with glibc and about 10 KiB with the MSVC CRT -
+   a 16x spread across platforms.  Either way it is bounded, and per-file
+   progress still streams whenever there is text to show.  */
+void cvs_flushout_perfile ()
+{
+#ifdef SERVER_SUPPORT
+	if (server_active && !(temp_protocol && temp_protocol->server_flush_data))
+	{
+		if ((!stdout_buf || stdout_buf->data == NULL)
+		    && (!stderr_buf || stderr_buf->data == NULL)
+		    && (!buf_to_net || buf_to_net->data == NULL
+			|| buf_to_net->data->next == NULL))
+			return;
+	}
+#endif
+	cvs_flushout ();
+}
+
 /* Output TEXT, tagging it according to TAG.  There are lots more
    details about what TAG means in cvsclient.texi but for the simple
    case (e.g. non-client/server), TAG is just "newline" to output a
@@ -6784,6 +6850,9 @@ void cvs_output_tagged (const char *tag, const char *text)
 #ifdef SERVER_SUPPORT
     if (server_active && supported_response ("MT"))
     {
+		/* Drain staged M text first: MT goes straight to buf_to_net, so
+		   without this it overtakes text cvs_output has not pushed yet.  */
+		cvs_flushout ();
 		buf_output0 (buf_to_net, "MT ");
 		buf_output0 (buf_to_net, tag);
 		if (text != NULL)

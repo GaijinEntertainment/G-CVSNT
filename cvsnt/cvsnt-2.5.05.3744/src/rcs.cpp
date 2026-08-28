@@ -2283,11 +2283,9 @@ char *RCS_magicrev (RCSNode *rcs, const char *rev)
      * if none are found, it should return 2.
      */
     rev_num = findnextmagicrev (rcs, rev, 2);
-    
+
      /* only look at even numbered branches */
     for (; ; rev_num += 2)
-    /* only look at even numbered branches */
-    for (rev_num = 2; ; rev_num += 2)
     {
 	/* see if the physical branch exists */
 	(void) sprintf (xrev, "%s.%d", rev, rev_num);
@@ -6762,7 +6760,12 @@ static void RCS_putdtree (RCSNode *rcs, char *rev, FILE *fp)
 			RCS_putdtree (rcs, q->key, fp);
 	}
 	dellist(&revs);
-	fflush(fp);
+	/* No fflush here: this function recurses once per branch, so a flush
+	   at the end of every invocation forced one short write() per branch
+	   node.  The one place a flushed stream matters - computing delta_pos
+	   with CVS_FTELL - flushes explicitly at the call site (RCS_rewrite
+	   and RCS_checkin's fresh-file path), and closing the stream flushes
+	   everything before the file is renamed into place.  */
 }
 
 static void RCS_putdesc (RCSNode *rcs, FILE *fp)
