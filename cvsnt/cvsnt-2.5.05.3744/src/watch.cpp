@@ -77,6 +77,11 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 		// We already know that these don't exist, from the search above
 		filehandle->NewNode("watcher");
 		filehandle->NewAttribute("name",who);
+		/* The nodes above are built by hand rather than through
+		   fileattr_setvalue, so the modified flag has to be raised here or
+		   fileattr_write() discards the whole thing.  The removal path below
+		   goes through fileattr_delete, which raises it itself.  */
+		fileattr_modified();
 	}
 	if(!filehandle)
 		error(0,0,"Couldn't create node in modify_watchers");
@@ -111,6 +116,7 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 			filehandle->NewNode("temp_commit",NULL,false);
 		if(what->add_tunedit)
 			filehandle->NewNode("temp_unedit",NULL,false);
+		fileattr_modified();
 	}
 }
 

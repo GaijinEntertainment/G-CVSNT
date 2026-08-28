@@ -1009,6 +1009,59 @@ def t_watched_readonly(r):
           "w.txt still read-only after the watch attribute was removed")
 
 
+@test("watch on persists to the repository and watch off reverts it")
+def t_watch_on_off_persist(r):
+    # The companion to the test above, which writes fileattr.xml by hand.
+    # "watch on"/"watch off" mutate the fileattr tree directly with
+    # NewNode/Delete rather than through fileattr_setvalue, so they have to
+    # raise fileattr's modified flag themselves; without it fileattr_write()
+    # early-returns and the command is a silent no-op.  The observable
+    # effect is on a *fresh* checkout: watch on makes it read-only, watch
+    # off makes it writable again.
+    r.import_tree("m", {"w.txt": "watched\n"})
+    wc = r.checkout("m")
+    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
+
+    def fresh_checkout(sub):
+        wcroot = os.path.join(r.root, sub)
+        os.makedirs(wcroot)
+        r.cvs(["checkout", "m"], cwd=wcroot)
+        return os.path.join(wcroot, "m")
+
+    r.cvs(["watch", "on"], cwd=wc)
+    if check(os.path.isfile(attr), "watch on wrote no " + attr):
+        check("<watched" in read(attr),
+              "watch on wrote no <watched/> node:\n" + read(attr))
+    check(not os.access(os.path.join(fresh_checkout("wcOn"), "w.txt"), os.W_OK),
+          "w.txt checked out writable after watch on")
+
+    r.cvs(["watch", "off"], cwd=wc)
+    if os.path.isfile(attr):
+        check("<watched" not in read(attr),
+              "watch off left the <watched/> node behind:\n" + read(attr))
+    check(os.access(os.path.join(fresh_checkout("wcOff"), "w.txt"), os.W_OK),
+          "w.txt still checked out read-only after watch off")
+
+
+@test("watch add persists a watcher that cvs watchers reports")
+def t_watch_add_persist(r):
+    # watch_modify_watchers builds the <watcher> node with NewNode/
+    # NewAttribute, which likewise has to mark the tree modified for
+    # fileattr_write() to write anything out.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
+
+    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
+    if check(os.path.isfile(attr), "watch add wrote no " + attr):
+        check("<watcher" in read(attr),
+              "watch add wrote no <watcher> node:\n" + read(attr))
+
+    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
+    check([l for l in out.splitlines() if "a.txt" in l and "edit" in l],
+          "cvs watchers does not report the edit watcher just added:\n" + out)
+
+
 @test("repository operations append well-formed history records")
 def t_history_records(r):
     # History logging is enabled by the presence of CVSROOT/history (a full

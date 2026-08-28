@@ -51,6 +51,10 @@ static int unedit_fileproc (void *callerdat, struct file_info *finfo);
 
 static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 {
+	/* This walks the fileattr tree itself instead of going through
+	   fileattr_setvalue, so every mutation below has to raise the modified
+	   flag on its own; without it fileattr_write() early-returns and
+	   "watch on"/"watch off" are silent no-ops.  */
 	CXmlNodePtr handle = fileattr_getroot();
 	handle->xpathVariable("name",finfo->file);
 	if(!handle->Lookup("file[cvs:filename(@name,$name)]") || !handle->XPathResultNext())
@@ -58,15 +62,16 @@ static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 		handle = fileattr_getroot();
 		handle->NewNode("file");
 		handle->NewAttribute("name",finfo->file);
+		fileattr_modified();
 	}
 
 	if(turning_on)
 	{
-		if(!handle->GetChild("watched")) handle->NewNode("watched");
+		if(!handle->GetChild("watched")) { handle->NewNode("watched"); fileattr_modified(); }
 	}
 	else
 	{
-		if(handle->GetChild("watched")) handle->Delete();
+		if(handle->GetChild("watched")) { handle->Delete(); fileattr_modified(); }
 	}
     return 0;
 }
@@ -75,22 +80,28 @@ static int onoff_filesdoneproc (void *callerdat, int err, char *repository, char
 {
     if (setting_default)
 	{
-		CXmlNodePtr handle = fileattr_find(NULL,"/directory/default");
+		/* Relative to the <fileattr> document element, as everywhere else
+		   (add.cpp:816 looks up this very node).  With the leading slash it
+		   was an absolute path to a nonexistent /directory, so the lookup
+		   never matched and every run appended a fresh <directory><default>
+		   instead of reusing the one it had to clear.  */
+		CXmlNodePtr handle = fileattr_find(NULL,"directory/default");
 
 		if(!handle)
 		{
 			handle = fileattr_getroot();
 			handle->NewNode("directory");
 			handle->NewNode("default");
+			fileattr_modified();
 		}
 
 		if(turning_on)
 		{
-			if(!handle->GetChild("watched")) handle->NewNode("watched");
+			if(!handle->GetChild("watched")) { handle->NewNode("watched"); fileattr_modified(); }
 		}
 		else
 		{
-			if(handle->GetChild("watched")) handle->Delete();
+			if(handle->GetChild("watched")) { handle->Delete(); fileattr_modified(); }
 		}
 	}
     return err;
