@@ -681,6 +681,9 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
     if ( strchr(ALL_REC_TYPES, type) == NULL )	
 		return;
 
+    if ( strchr(logHistory, type) == NULL )
+		return;
+
 	if (noexec)
 		return;
 
