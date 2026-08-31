@@ -38,17 +38,30 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 	filehandle = fileattr_getroot();
 	filehandle->xpathVariable("name",file?file:"");
 	filehandle->xpathVariable("user",who?who:"");
+	/* Braces matter here: without them the else binds to the inner if, so a
+	   per-file lookup that succeeded was immediately overwritten by a
+	   directory/default one that cannot match, and the search below could
+	   never find an existing watcher.  A file means look up that file's
+	   node; no file means look up the directory default.  */
 	if(file)
+	{
 		if(!filehandle->Lookup("file[cvs:filename(@name,$name)]")) filehandle=NULL;
+	}
 	else
+	{
 		if(!filehandle->Lookup("directory/default")) filehandle=NULL;
+	}
 
 	if(filehandle && !filehandle->XPathResultNext()) filehandle = NULL;
 	
 	if(filehandle && (!filehandle->Lookup("watcher[cvs:username(@name,$user)]") || !filehandle->XPathResultNext()))
 	  filehandle=NULL;
 
-	if(filehandle && !what->adding)
+	/* Nothing recorded for this user, so a removal has nothing to do.
+	   Testing filehandle instead of its absence had this bail out of
+	   exactly the case it was meant to handle, and fall through to the
+	   create-a-watcher branch below in the case it was meant to skip.  */
+	if(!filehandle && !what->adding)
 		return;
 	if(!filehandle)
 	{
@@ -100,21 +113,37 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 			fileattr_delete(filehandle,"temp_commit");
 			fileattr_delete(filehandle,"temp_unedit");
 		}
-		fileattr_prune(filehandle);
+		/* A watcher with no actions left is not a watcher.  Drop the node,
+		   or cvs watchers keeps reporting the user (it prints a line per
+		   <watcher>, whether or not any action survived) and the next add
+		   finds the husk.  fileattr_prune() cannot do this: its body is
+		   commented out, and the CXmlNode::Prune() it would call does not
+		   exist.  Blanks are stripped at parse time, so a watcher with no
+		   remaining action elements has no children at all.  */
+		if(!filehandle->GetChild(NULL,false))
+		{
+			filehandle->Delete();
+			fileattr_modified();
+		}
 	}
 	else
 	{
-		if(what->edit)
+		/* Now that the search above finds an existing watcher, a repeated
+		   "watch add" reuses its node instead of appending a second one,
+		   so the action nodes have to be guarded too, or they accumulate
+		   inside it and the file grows on every run.  fileattr_find is the
+		   same existence test watchers_fileproc reports from.  */
+		if(what->edit && !fileattr_find(filehandle,"edit"))
 			filehandle->NewNode("edit",NULL,false);
-		if(what->commit)
+		if(what->commit && !fileattr_find(filehandle,"commit"))
 			filehandle->NewNode("commit",NULL,false);
-		if(what->unedit)
+		if(what->unedit && !fileattr_find(filehandle,"unedit"))
 			filehandle->NewNode("unedit",NULL,false);
-		if(what->add_tedit)
+		if(what->add_tedit && !fileattr_find(filehandle,"temp_edit"))
 			filehandle->NewNode("temp_edit",NULL,false);
-		if(what->add_tcommit)
+		if(what->add_tcommit && !fileattr_find(filehandle,"temp_commit"))
 			filehandle->NewNode("temp_commit",NULL,false);
-		if(what->add_tunedit)
+		if(what->add_tunedit && !fileattr_find(filehandle,"temp_unedit"))
 			filehandle->NewNode("temp_unedit",NULL,false);
 		fileattr_modified();
 	}

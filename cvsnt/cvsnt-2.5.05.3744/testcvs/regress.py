@@ -1062,6 +1062,71 @@ def t_watch_add_persist(r):
           "cvs watchers does not report the edit watcher just added:\n" + out)
 
 
+@test("watch remove takes the watcher back out again")
+def t_watch_remove(r):
+    # watch_modify_watchers looks for an existing <watcher> for this user
+    # before deciding whether to create one.  Two control-flow bugs broke
+    # that search: a dangling else overwrote a successful per-file lookup
+    # with a directory/default one that cannot match, and the "nothing
+    # here to remove" guard tested the handle instead of its absence.
+    # Together they sent "watch remove" down the create-a-watcher branch,
+    # where it appended a fresh empty <watcher> and deleted nothing, so
+    # the watcher it was asked to drop survived.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
+
+    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
+    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
+    # Fields are tab separated: name, user, then one per watched action.
+    # Match on whole fields so a repository path that happens to contain
+    # the word cannot stand in for a watcher line.
+    added = [l for l in out.splitlines() if "edit" in l.split("\t")]
+    if not check(added, "precondition: watch add registered no watcher:\n" + out):
+        return
+    # Take the user from the output rather than assuming what CVS_Username
+    # resolved to on this machine.
+    user = added[0].split("\t")[1]
+
+    r.cvs(["watch", "remove", "-a", "edit", "a.txt"], cwd=wc)
+
+    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
+    check(not [l for l in out.splitlines() if user in l.split("\t")],
+          "cvs watchers still reports %s after watch remove:\n%s" % (user, out))
+    # A watcher with no actions left is not a watcher; it must not survive
+    # in the file either, or the next watchers/notify pass finds it again.
+    if os.path.isfile(attr):
+        check("<watcher" not in read(attr),
+              "watch remove left a <watcher> node behind:\n" + read(attr))
+
+
+@test("watch add twice leaves a single watcher node")
+def t_watch_add_twice(r):
+    # The same existence search on the adding path: with it broken the
+    # check never matched, so every "watch add" appended another <watcher>
+    # for the same user instead of reusing the one already there.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
+
+    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
+    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
+
+    if check(os.path.isfile(attr), "watch add wrote no " + attr):
+        check_eq(read(attr).count("<watcher"), 1,
+                 "watcher nodes after adding the same watcher twice:\n"
+                 + read(attr))
+        # ...and the action inside it must not pile up either, now that
+        # the second add reuses the node the first one made.
+        check_eq(read(attr).count("<edit/>"), 1,
+                 "edit nodes after adding the same action twice:\n"
+                 + read(attr))
+
+    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
+    check_eq(len([l for l in out.splitlines() if "edit" in l.split("\t")]), 1,
+             "cvs watchers lines reporting the edit watcher:\n" + out)
+
+
 @test("repository operations append well-formed history records")
 def t_history_records(r):
     # History logging is enabled by the presence of CVSROOT/history (a full
