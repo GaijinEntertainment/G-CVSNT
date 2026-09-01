@@ -1123,6 +1123,17 @@ def t_watch_add_persist(r):
     check_eq(read(attr), before,
              "-a none rewrote fileattr.xml without changing anything")
 
+    # ... and against a never-watched file it must not persist an empty
+    # <watcher> husk either: the creation block raises no flag.
+    write(os.path.join(wc, "b.txt"), "b" + chr(10))
+    r.cvs(["add", "b.txt"], cwd=wc)
+    r.cvs(["commit", "-m", "add b"], cwd=wc)
+    before = read(attr)
+    r.cvs(["watch", "add", "-a", "none", "b.txt"], cwd=wc)
+    after = read(attr)
+    check_eq(after, before,
+             "-a none on a never-watched file rewrote fileattr.xml")
+
     # Argument-less adds go through the directory-default branch of the
     # braces fix; the re-add must find the existing default watcher.
     r.cvs(["watch", "add", "-a", "edit"], cwd=wc)
@@ -1130,7 +1141,7 @@ def t_watch_add_persist(r):
     content = read(attr)
     check_eq(content.count("<default"), 1,
              "argument-less add duplicated the default node:\n" + content)
-    check_eq(content.count("<watcher"), 2,
+    check_eq(content.count("<watcher"), 3,  # a.txt, b.txt, directory default
              "argument-less re-add duplicated a watcher node:\n" + content)
 
 
