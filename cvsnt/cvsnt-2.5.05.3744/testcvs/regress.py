@@ -1060,18 +1060,22 @@ def t_watch_on_off_persist(r):
     check("<watched" not in read(attr),
           "per-file watch off left the watched node:\n" + read(attr))
 
-    # watch off on a never-watched file must write nothing at all: the
-    # bare <file> node created for the lookup carries no flag.
+    # watch off on a never-watched file must write nothing: the bare
+    # <file> node created for the lookup carries no flag.  cvs add
+    # legitimately writes a fileattr.xml (directory owner, an empty
+    # file node), so the pin is that watch off leaves it byte-identical.
     virgin = os.path.join(wc, "virgin")
     os.makedirs(virgin)
     r.cvs(["add", "virgin"], cwd=wc)
     write(os.path.join(virgin, "v.txt"), "v\n")
     r.cvs(["add", "v.txt"], cwd=virgin)
     r.cvs(["commit", "-m", "add v"], cwd=virgin)
+    vattr = os.path.join(r.repo, "m", "virgin", "CVS", "fileattr.xml")
+    before = read(vattr) if os.path.isfile(vattr) else None
     r.cvs(["watch", "off", "v.txt"], cwd=virgin)
-    check(not os.path.isfile(os.path.join(r.repo, "m", "virgin", "CVS",
-                                          "fileattr.xml")),
-          "watch off on a never-watched file persisted an orphan node")
+    after = read(vattr) if os.path.isfile(vattr) else None
+    check_eq(after, before,
+             "watch off on a never-watched file rewrote fileattr.xml")
 
 
 @test("watch add persists a watcher that cvs watchers reports")
