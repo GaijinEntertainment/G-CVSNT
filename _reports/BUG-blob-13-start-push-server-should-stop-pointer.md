@@ -5,7 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/keyValueServer/serverLib/blob_push_server.cpp
 line: 57
 severity: medium
 category: typo
-status: fixed in this slice (audit/02)
+status: partially fixed - the loop tests the flag (now a synchronized std::atomic<bool>*; the signature change requires consumers of the installed library to rebuild), but both shipped servers still pass nullptr, so shipped shutdown remains impossible. Remaining limitations even with a wired flag - it is observed only between connections (blocking accept has no wake path), and forked (!MULTI_THREADED) child workers hold a post-fork copy the parent's store cannot reach - are open
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: yes
@@ -66,8 +66,10 @@ Two concrete consequences:
    library with a public `include/blob_server.h`; the natural use is
    `volatile bool stop = false; std::thread t([&]{ start_push_server(2403, 1024, &stop, secret, enc); });`
    With `&stop` non-null, `!should_stop` is false on the very first evaluation. The function skips
-   `accept()` entirely, runs `raw_close_socket(sockfd)` and returns `true`, so the caller sees
-   "server quit normally" and the port is never served. There is no diagnostic.
+   `accept()` entirely, runs `raw_close_socket(sockfd)` and returns `true` - which the shipped
+   mains print as "server quit with error" while returning process status 0 (their message and
+   exit code are inverted relative to each other). The port is never served; there is no
+   diagnostic beyond that line.
 2. **The shipped servers cannot be shut down cleanly.** With `nullptr` the loop is infinite and the
    only exit is an `accept()` error other than `EAGAIN` (`:85-89`). `cafs_server`'s `shouldStop`,
    `close_gc()` and `blob_close_sockets()` after the call are therefore unreachable in normal

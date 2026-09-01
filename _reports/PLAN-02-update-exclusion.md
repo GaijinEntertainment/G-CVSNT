@@ -370,7 +370,10 @@ Decision records (autonomous; each lists the alternatives that a reviewer may re
   lib/system.h:454-467). This matches every existing matcher (src/ignore.cpp:319 etc.). The
   asymmetry (Windows client folds, Linux server doesn't) is documented; users should write
   patterns in repository case. Alternative: force-fold everywhere — rejected, breaks
-  case-sensitive repositories; open question §6-Q2.
+  case-sensitive repositories; open question §6-Q2. Review caveat (sol): the asymmetry means one
+  pattern has two meanings — the client skips a path the server still traverses and transfers —
+  so the settled form should be one repository-case rule on both endpoints, or an explicit match
+  mode transmitted with the capability; D-9 as written is not the final answer.
 - **D-10 Scope: `update` first; `checkout`/`export` in a follow-up phase; `status` and all
   write commands never.** `status` is `W_LOCAL` and harmless (§1.9) and its `-X` letter is taken;
   exclusion during `commit`/`add`/`remove` would manufacture silent data-integrity surprises
@@ -463,6 +466,15 @@ trailing `/`, reject absolute paths and `..` (same checks args get: src/recurse.
 | 3 | server & local | `update_dirent_proc` | src/update.cpp:1184, beside :1189-1195 | Belt-and-braces with #2 (this proc contains the second `-d` creation path, :1220-1298) and produces the `Excluding` message. |
 | 4 | server & local | `update_fileproc` entry | src/update.cpp:711 (first statement, before `Classify_File` at :719) | File-level patterns: a matched versioned file is neither classified nor checked out/merged/patched; server sends nothing for it. |
 | 5 | client, responses | `call_in_directory` | src/client.cpp:812, after `dir_name` is computed at :887-895 and before the prune hook at :896 and dir creation at :971-999 | Old-server safety net (D-5): drop any response addressed into an excluded path, so an old server's `-d` push cannot materialize excluded content. Covers all 23 response call sites in one place. |
+
+Review caveats on cut point #5 (sol): at that anchor `call_in_directory` has consumed only the
+repository line - the response callback still owns the entries/mode/size/body fields, so a bare
+drop leaves them unread and desynchronizes the protocol. Each excluded response needs a
+response-specific drain path, or `--exclude` combined with `-d` must be rejected when the server
+lacks the `update-exclude` capability. And the exclusion list must reach this layer as a
+command-scoped response policy passed through the response dispatcher, not as ambient state read
+inside `call_in_directory`, which serves check-ins, notifications, templates and renames as well -
+an ambient list would make every unrelated handler depend on it being empty.
 
 Rejected cut points, with reasons:
 

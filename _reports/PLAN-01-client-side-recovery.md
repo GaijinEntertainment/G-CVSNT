@@ -250,6 +250,14 @@ perform.
 4. After overall success, attempt `DeleteFile` on the moved-aside copy once; if it fails (still
    mapped — expected), leave it and print nothing further.
 Timeout and give-up path unchanged when the aside-rename itself fails.
+Review caveat (sol): placing this inside `wnt_rename` puts move-aside behind every rename
+consumer - `CVS/Entries`, RCS and metadata replacement included, none of which can refuse it
+while a process-wide flag controls the shared primitive. The clean form is a dedicated
+working-file install rename used at the client install/edit sites, with repository and metadata
+replacement left on the untouched primitive. A later slice of this audit series implements the
+switch; whichever form lands (an in-`wnt_rename` gate is naturally bounded by the ~2 s
+ERROR_ACCESS_DENIED hold, which metadata replacements do not reach in practice), the dedicated
+working-file install rename stands recorded as the refinement to converge on.
 On disk afterwards: the new file at the destination; possibly one `.#...inuse...` remnant, in the
 `.#` family so item 10's `clean` and ignore conventions collect it later.
 
@@ -499,7 +507,10 @@ duplicating those externally is exactly what produces divergence bugs.
   unknown-file enumerator `ignore_files` (`src/ignore.cpp:377`), which already handles the
   per-directory `.cvsignore` hold semantics (`ign_add_file`) and skips symlinks unconditionally
   (`src/ignore.cpp:472-477`); never touch `CVS/` or `.git`; refuse to run if the starting
-  directory has no `CVS/`. Note the default ignore list covers `*.exe *.dll *.obj *.o` and
+  directory has no `CVS/`. Review caveat (sol): `ignore_files` as it stands discards every
+  `ign_name()` match before invoking the consumer (`src/ignore.cpp:451-452`), so the `-x` mode
+  cannot see ignored entries through it - the enumerator needs an `include_ignored` policy
+  parameter (or must return the ignore classification) before `-x` can work. Note the default ignore list covers `*.exe *.dll *.obj *.o` and
   friends (`ign_default`, `src/ignore.cpp:36-41`), so plain `clean -f` leaves typical build
   outputs alone — removing those too requires the explicit `-x`.
 - Prints one line per removal (`removed <path>`); summary count at the end. On disk: only

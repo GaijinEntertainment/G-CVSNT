@@ -43,7 +43,7 @@ The value is not a diagnostic — it is written verbatim into the repository:
 ```
 comment  @pnew file@;
 ```
-The `comment` field is the RCS comment leader, echoed by `cvs log` and used by RCS-compatible tools. Every RCS file created through a `userfile == NULL` call is permanently stamped with a misspelling. Compare the guarded path, which writes `get_comment (userfile)` (a real comment leader such as `"# "` or `""`).
+The `comment` field is the RCS comment leader, persisted in the `,v` and consumed by RCS-compatible tools and `cvs admin -c` (this fork's own `cvs log` does not print it - `log_fileproc` never reads `RCSNode::comment`). Every RCS file created through a `userfile == NULL` call is permanently stamped with a misspelling. Compare the guarded path, which writes `get_comment (userfile)` (a real comment leader such as `"# "` or `""`).
 
 ## Failure scenario
 `create_mapping_file` (mapping.cpp:1303) calls `add_rcs_file(message, fn, NULL /* userfile */, "1.1", ...)`. The `userfile?...:` ternary therefore selects the literal, and the generated `.directory_history,v` for every directory that gets a rename or a re-add contains:

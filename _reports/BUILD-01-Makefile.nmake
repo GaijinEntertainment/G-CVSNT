@@ -6,6 +6,10 @@
 
 S   = <path-to-cvsnt-2.5.05.3744>
 # EDIT: point S at your checkout's cvsnt/cvsnt-2.5.05.3744 before running.
+# NOTE: the source and flag manifest below duplicates cvsnt.vcxproj (652-709)
+# and the other project files; a change there must be mirrored here or this
+# recipe builds a different product. Generating these variables from the
+# project files (a PowerShell/Python XML pass) is the recorded follow-up.
 B   = $(MAKEDIR)
 OBJ = $(B)\obj
 LIBD= $(B)\lib
