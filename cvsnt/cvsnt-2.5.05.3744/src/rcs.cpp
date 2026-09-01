@@ -953,14 +953,18 @@ static int rcsbuf_open(struct rcsbuffer *rcsbuf, const char *filename)
 	   resident in one go, so a large cap trades realloc-memcpy for
 	   resident memory.  Below MAX_INCR expand_string already doubles
 	   geometrically, so 8 MiB captures nearly all of the win without
-	   making peak footprint track ,v size.  */
+	   making peak footprint track ,v size.  A ,v above the cap still
+	   pre-sizes to the cap and grows incrementally from there - a
+	   bound on the up-front allocation, not a cliff back to the
+	   from-scratch growth path.  */
 	{
 		struct stat sb;
-		if (fstat (fileno (rcsbuf->fp), &sb) == 0
-		    && sb.st_size > 0 && sb.st_size <= 8*1024*1024)
+		if (fstat (fileno (rcsbuf->fp), &sb) == 0 && sb.st_size > 0)
 		{
+			const size_t cap = 8*1024*1024;
+			size_t pre = (size_t) sb.st_size < cap ? (size_t) sb.st_size : cap;
 			expand_string (&rcsbuf->buffer, &rcsbuf->buffer_size,
-				       (size_t) sb.st_size + RCSBUF_BUFSIZE + 1);
+				       pre + RCSBUF_BUFSIZE + 1);
 			rcsbuf->ptr = rcsbuf->buffer;
 			rcsbuf->ptrend = rcsbuf->buffer;
 		}
@@ -6845,8 +6849,7 @@ static void RCS_copydeltas(RCSNode *rcs, FILE *fout, Deltatext *newdtext, char *
     char *bufrest;
     int nls;
     size_t buflen;
-    char buf[64*1024];
-    const size_t bufsize = sizeof(buf);
+    char buf[RCSBUF_BUFSIZE];
     int got;
 
     /* Count the number of versions for which we have to do some
@@ -6961,7 +6964,7 @@ static void RCS_copydeltas(RCSNode *rcs, FILE *fout, Deltatext *newdtext, char *
        ,v, and a heap buffer above ~512 KiB would go through
        VirtualAlloc/VirtualFree on the Windows CRT, which would make
        tagging a tree of small files slower, not faster.  */
-    while ((got = (int) fread (buf, 1, bufsize, rcs->rcsbuf.fp)) != 0)
+    while ((got = (int) fread (buf, 1, sizeof buf, rcs->rcsbuf.fp)) != 0)
     {
 	if (nls > 0
 	    && got >= nls
@@ -7220,7 +7223,7 @@ void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compres
 	   keeps its default buffer.  64 KiB for the same reason as the copy
 	   buffer above: large enough to collapse the small writes, small
 	   enough to stay out of the Windows CRT's VirtualAlloc path.  */
-	setvbuf (fout, NULL, _IOFBF, 64*1024);
+	setvbuf (fout, NULL, _IOFBF, RCSBUF_BUFSIZE);
 
     RCS_putadmin (rcs, fout);
     RCS_putdtree (rcs, rcs->head, fout);

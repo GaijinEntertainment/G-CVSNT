@@ -399,8 +399,10 @@ def t_large_text(r):
 
 @test("empty file round trips")
 def t_empty_file(r):
-    # Exercises the st_size == 0 branch of the RCS parse-buffer pre-size,
-    # which is skipped and must fall back to incremental growth.
+    # Pins the smallest-possible ,v through the parse-buffer pre-size (the
+    # ,v of an empty file still carries the admin block and desc, so the
+    # st_size == 0 branch is unreachable for a parseable file - this case
+    # covers the tiny-file end of the pre-size, not a zero-size one).
     r.import_tree("m", {"empty.txt": "", "a.txt": "one\n"})
     wc = r.checkout("m")
     check(os.path.isfile(os.path.join(wc, "empty.txt")), "empty.txt not checked out")
@@ -455,6 +457,21 @@ def t_attic_duplicate(r):
     _, out = r.cvs(["update"], cwd=wc)
     ents = entries_of(wc)
     check_eq(sorted(ents), ["a.txt", "b.txt"], "entries after update")
+
+
+@test("an args file with a trailing newline parses cleanly")
+def t_args_file(r):
+    # line2argv once read past the terminating NUL when the line ended in
+    # a separator (strchr(sepchars, '\\0') matches the separator string's
+    # own terminator); an args file ends with a newline in the ordinary
+    # case, so this drives exactly that input class through @response-file.
+    r.import_tree("m", {"a.txt": "one\n"})
+    wc = r.checkout("m")
+    args = os.path.join(r.root, "args.txt")
+    write(args, "log\na.txt\n")
+    rc, out = r.cvs(["@" + args], cwd=wc, expect_ok=False)
+    check_eq(rc, 0, "args-file invocation failed:\n" + out)
+    check("Initial revision" in out, "args-file log lacks the revision:\n" + out)
 
 
 @test("a second checkout of the same module matches the first")

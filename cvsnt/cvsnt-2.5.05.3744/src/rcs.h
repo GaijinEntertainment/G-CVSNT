@@ -371,6 +371,10 @@ void RCS_delaccess (RCSNode *, char *);
 char *RCS_getaccess (RCSNode *);
 RETSIGTYPE rcs_cleanup (int sig);
 void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, bool reparse = true);
+/* Discard form: the caller makes no further use of the node before it is
+   freed.  The refcount guard inside still re-parses shared nodes.  */
+inline void RCS_rewrite_final (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta)
+{ RCS_rewrite (rcs, newdtext, insertpt, compress_new_delta, false); }
 int rcs_change_text (const char *, char *, size_t, const char *,
 			    size_t, char **, size_t *);
 void RCS_deltas (RCSNode *, FILE *, struct rcsbuffer *, const char *,

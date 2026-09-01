@@ -256,7 +256,6 @@ void Scratch_Entry (List *list, const char *fname)
 			if (fprintf (entexfile, "R ") < 0)
 				error (1, errno, "cannot write %s", entexfilename);
 
-			write_ent_proc (node, NULL);
 			write_ent_ex_proc (node, NULL);
 
 			if (fclose (entfile) == EOF)
@@ -298,7 +297,6 @@ void Rename_Entry (List *list, const char *from, const char *to)
 			if (fprintf (entexfile, "R ") < 0)
 				error (1, errno, "cannot write %s", entexfilename);
 
-			write_ent_proc (node, NULL);
 			write_ent_ex_proc (node, NULL);
 
 			xfree(ent->user);
@@ -309,7 +307,6 @@ void Rename_Entry (List *list, const char *from, const char *to)
 			if (fprintf (entexfile, "A ") < 0)
 				error (1, errno, "cannot write %s", entexfilename);
 
-			write_ent_proc (node, NULL);
 			write_ent_ex_proc (node, NULL);
 
 			if (fclose (entfile) == EOF)
