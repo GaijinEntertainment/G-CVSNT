@@ -63,7 +63,9 @@ sudo make install
 ```
 
 Note the ordering: **zstd is built and installed before the main `make`**. The main build links
-against the installed `libzstd`, not against the in-tree copy.
+against the installed `libzstd`, not against the in-tree copy. The driver also runs
+`tools/build_tools` after the main build, so the hyphenated tool names described below are
+produced as well.
 
 ### The maintenance tools
 

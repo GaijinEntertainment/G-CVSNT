@@ -75,7 +75,7 @@ reference path (`src/update.cpp:410`); on commit the fallback decision sits in `
 | Response | Handler | Purpose |
 | --- | --- | --- |
 | `Blob-ref` | `handle_updated_blobs_refs` | "This file's content is blob *H*" — replaces `Updated` |
-| `Blob-ref-created` | `handle_created_blobs_refs` | Same, for a file being created (replaces `Created`) |
+| `Blob-ref-created` | `handle_created_blobs_refs` | Same, for a file being created (replaces `Created`). Advertised and handled, but never sent: the server-side test at `src/server.cpp:4506` reads `vers == NULL && vers->ts_user == NULL` (inverted, and a null dereference if it were ever true), so new `-kB` files arrive as plain `Blob-ref` |
 | `Blob-url` | `handle_blob_url` | Where to fetch blobs from; may be repeated to give several proxies |
 | `Blob-OTP` | `handle_blob_otp` | Time-based one-time secret plus page number, for authenticating to an encrypted blob server |
 
