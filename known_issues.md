@@ -111,9 +111,10 @@ Three behaviours combine:
    so **every** commit of a `-kb` file is forced onto the blob path regardless of how the file was
    registered. This is deliberate — the comment says "on checkin do not allow old binary files" —
    but it is unconditional.
-2. `caddressed_fs::set_root()` is called from exactly one place in the tree, `src/server.cpp:5375`,
-   inside the server path. In local mode the blob root is never configured and keeps its default
-   `"./blobs/"`, which resolves against the **current working directory**.
+2. Before the fix on this branch, `caddressed_fs::set_root()` was called from exactly one place in
+   the tree, `src/server.cpp:5375`, inside the server path. In local mode the blob root was never
+   configured and kept its default `"./blobs/"`, which resolves against the **current working
+   directory**.
 3. `RCS_read_binary_rev_data` cannot report failure ([`BUG-server-12`](_reports/BUG-server-12-blob-pull-failure-ignored.md)),
    so a checkout that cannot find the blob reports success and writes a zero-length file.
 

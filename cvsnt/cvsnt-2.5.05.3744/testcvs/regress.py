@@ -419,12 +419,10 @@ def t_missing_entries_recreated(r):
 
 @test("--rename-in-use is accepted globally and inert when nothing is locked")
 def t_rename_in_use_inert(r):
-    # The full recovery (renaming an open, memory-mapped file aside so the
-    # rename over it can complete) is Windows-only and needs a file another
-    # process holds mapped; it is exercised outside this suite.  Here we pin
-    # that the global switch parses and, crucially, is a no-op on the ordinary
-    # path: an update with the switch present but nothing locked behaves
-    # exactly as without it.
+    # The full recovery is exercised by t_rename_in_use_recovery below
+    # (Windows only).  Here we pin that the global switch parses and,
+    # crucially, is a no-op on the ordinary path: an update with the
+    # switch present but nothing locked behaves exactly as without it.
     r.import_tree("m", {"a.txt": "one\n"})
     wc = r.checkout("m")
     write(os.path.join(wc, "a.txt"), "one\ntwo\n")
@@ -437,6 +435,40 @@ def t_rename_in_use_inert(r):
              "content after update -C with the switch")
     check(not [f for f in os.listdir(wc) if ".inuse." in f],
           "the switch created an inuse aside with nothing locked")
+
+
+@test("--rename-in-use renames a mapped destination aside (Windows only)")
+def t_rename_in_use_recovery(r):
+    # The canonical in-use destination is a loaded image: a memory
+    # mapping blocks a rename *over* the file but allows the file itself
+    # to be renamed - exactly the escape the switch uses.  mmap gives
+    # the same sharing shape, so this exercises the aside rename, the
+    # retry continuation and the install.  POSIX renames over mapped
+    # files freely, so the case is Windows-only.
+    if not sys.platform.startswith("win"):
+        return
+    import mmap
+    r.import_tree("m", {"a.bin": "old\n"})
+    wc = r.checkout("m")
+    write(os.path.join(wc, "a.bin"), "one\ntwo\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)
+    write(os.path.join(wc, "a.bin"), "local\n")
+    f = open(os.path.join(wc, "a.bin"), "r+b")
+    m = mmap.mmap(f.fileno(), 0)
+    f.close()
+    try:
+        rc, out = run(["--rename-in-use", "-d", r.repo, "update", "-C"],
+                      cwd=wc, expect_ok=False)
+        check_eq(rc, 0,
+                 "update -C over a mapped destination did not succeed:\n" + out)
+        check_eq(read(os.path.join(wc, "a.bin")), "one\ntwo\n",
+                 "clean copy did not install over the mapped file")
+        asides = [g for g in os.listdir(wc) if ".inuse." in g]
+        check(asides, "no .inuse. aside was created for the mapped file")
+        check_eq(read(os.path.join(wc, asides[0])), "local\n",
+                 "the aside does not hold the previous working file")
+    finally:
+        m.close()
 
 
 @test("update -d picks up a directory added after checkout")

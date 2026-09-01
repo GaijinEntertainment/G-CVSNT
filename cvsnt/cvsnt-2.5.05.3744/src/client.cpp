@@ -1424,15 +1424,10 @@ extern int move_in_the_way;
    Returns 1 when the path is now clear.  */
 static int clear_obstruction (const char *filename, const char *short_pathname)
 {
-    char *realfilename = NULL;
-
     if (!move_in_the_way)
 	return 0;
-    if (filenames_case_insensitive && !case_isfile (filename, &realfilename))
-    {
-	xfree (realfilename);
+    if (filenames_case_insensitive && !case_isfile (filename, NULL))
 	return 0;
-    }
     return rename_notversioned_aside (filename, short_pathname);
 }
 

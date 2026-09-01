@@ -108,7 +108,10 @@ Ctype Classify_File (struct file_info *finfo, const char *tag, const char *date,
 	{
 	    extern int move_in_the_way;
 
+	    /* Case-ambiguous obstructions stay with the existing handling,
+	       matching the client-side clear_obstruction.  */
 	    if (move_in_the_way && !server_active
+		&& !(filenames_case_insensitive && !case_isfile (finfo->file, NULL))
 		&& rename_notversioned_aside (finfo->file, fn_root(finfo->fullname)))
 	    {
 		/* the obstruction is gone; just check the file out */

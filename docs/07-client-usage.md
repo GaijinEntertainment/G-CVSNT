@@ -116,11 +116,15 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
 
 Note the asymmetry between `-C` and `-n`: `-C` is what you want for a clean rebuild of a working
 copy, but by default it leaves a `.#name.rev` backup for every modified file, and those are never
-cleaned up. `cvs update -C -n` discards instead of backing up. The same applies to merges: every
-merge or `-j` join first copies the working file to `.#name.rev`, and `-n` (spelled readably:
-`--no-backups`) suppresses that too — including the copies a server instructs the client to make
-before a merge. With backups off, a merge that fails outright leaves the half-merged file in place
-(there is no backup to restore from) and says so.
+cleaned up. `cvs update -C -n` discards instead of backing up. The same applies to merges: `-n`
+(spelled readably: `--no-backups`) keeps the `.#name.rev` merge copies from being left behind —
+including the copies a server instructs the client to make before a merge. An update merge still
+uses a transient copy under `-n`, so a failed merge is restored and a no-op merge is detected; the
+copy is removed before the command returns. A `-j` join that fails under `-n` leaves the
+half-merged file in place (its copy is never made) and says so. In client/server mode the server
+does not see `-n`, so for a nonmergeable file it may still print
+`file from working directory is now in .#...` even though the client, under `-n`, has not created
+that file.
 
 **`-n` means two different things depending on position.** As a *global* option it is the classic
 CVS dry run (`noexec`, `src/main.cpp:938`); as an *update* option it means "do not keep backups"

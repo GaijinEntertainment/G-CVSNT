@@ -681,7 +681,7 @@ static bool rename_inuse_aside (const char *to)
 	uc_name fn_to = to;
 	const char *base = strrchr(to,'/');
 	const char *bslash = strrchr(to,'\\');
-	if (bslash > base) base = bslash;
+	if (bslash && (!base || bslash > base)) base = bslash;
 	cvs::string dir(to, base ? (size_t)(base+1-to) : 0);
 	base = base ? base+1 : to;
 
