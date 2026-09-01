@@ -100,7 +100,7 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 
 Recorded so they are not re-investigated:
 
-* The client→server protocol **is** properly batched — a 160 KiB flush threshold, not per-file.
+* The client→server protocol **is** properly batched — a `20 * BUFSIZ` flush threshold (about 160 KiB with glibc, about 10 KiB with the MSVC CRT), not per-file.
 * Blob downloads **are** already parallel, with persistent connections and a single end-of-command
   join.
 * `fileattr.xml` is read once per directory; only the *query* is per-file.
