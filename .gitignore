@@ -27,4 +27,4 @@ x64
 tmp/*.*
 CVS
 log1
-log2
+log2__pycache__/
