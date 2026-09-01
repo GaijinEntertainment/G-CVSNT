@@ -132,20 +132,25 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 		   "watch add" reuses its node instead of appending a second one,
 		   so the action nodes have to be guarded too, or they accumulate
 		   inside it and the file grows on every run.  fileattr_find is the
-		   same existence test watchers_fileproc reports from.  */
+		   same existence test watchers_fileproc reports from.  The flag
+		   rises only when a node actually landed: a same-action re-add or
+		   -a none must not rewrite the tree, nor persist a fresh empty
+		   <watcher> from the creation block above.  */
+		bool added = false;
 		if(what->edit && !fileattr_find(filehandle,"edit"))
-			filehandle->NewNode("edit",NULL,false);
+			{ filehandle->NewNode("edit",NULL,false); added = true; }
 		if(what->commit && !fileattr_find(filehandle,"commit"))
-			filehandle->NewNode("commit",NULL,false);
+			{ filehandle->NewNode("commit",NULL,false); added = true; }
 		if(what->unedit && !fileattr_find(filehandle,"unedit"))
-			filehandle->NewNode("unedit",NULL,false);
+			{ filehandle->NewNode("unedit",NULL,false); added = true; }
 		if(what->add_tedit && !fileattr_find(filehandle,"temp_edit"))
-			filehandle->NewNode("temp_edit",NULL,false);
+			{ filehandle->NewNode("temp_edit",NULL,false); added = true; }
 		if(what->add_tcommit && !fileattr_find(filehandle,"temp_commit"))
-			filehandle->NewNode("temp_commit",NULL,false);
+			{ filehandle->NewNode("temp_commit",NULL,false); added = true; }
 		if(what->add_tunedit && !fileattr_find(filehandle,"temp_unedit"))
-			filehandle->NewNode("temp_unedit",NULL,false);
-		fileattr_modified();
+			{ filehandle->NewNode("temp_unedit",NULL,false); added = true; }
+		if(added)
+			fileattr_modified();
 	}
 }
 

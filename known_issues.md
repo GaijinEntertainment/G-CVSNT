@@ -331,3 +331,15 @@ For reference, the 15 defects that were fixed:
 | [`BUG-server-08`](_reports/BUG-server-08-writelock-uses-CVSRFL.md) | `write_lock` built the write-lock filename from the read-lock prefix |
 | [`BUG-server-15`](_reports/BUG-server-15-checkin-format-missing-arg.md) | `%s` with no argument on the reopen-failure path |
 | [`BUG-server-17`](_reports/BUG-server-17-pnew-file-comment-typo.md) | `"pnew file"` written into the RCS `comment` field of every imported file |
+
+## Exposed by the watch-persistence fix
+
+The fix that makes watch mutations persist (`audit/07`) also makes the
+`cvs edit` notify path durable: each edit persists a
+`<watcher><temp_edit/><temp_commit/><temp_unedit/></watcher>` record into the
+repository's `fileattr.xml` (`edit.cpp` notify `'E'` ->
+`watch_modify_watchers` with the three temp flags). The removal side of that
+protocol does not fire, so temp watcher records accumulate; before the fix
+neither side persisted, which is why this went unseen. The records are inert
+for `cvs watchers` output but grow the tree. Open: make the `'U'`/`'C'`
+notify paths remove the temp records they are designed to clear.

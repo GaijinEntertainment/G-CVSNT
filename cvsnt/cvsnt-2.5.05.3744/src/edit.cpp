@@ -59,10 +59,14 @@ static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 	handle->xpathVariable("name",finfo->file);
 	if(!handle->Lookup("file[cvs:filename(@name,$name)]") || !handle->XPathResultNext())
 	{
+		/* Turning off a never-watched file: nothing to clear, and no
+		   bare node may be created - the modified flag is per tree, so a
+		   sibling mutation in the same run would persist it.  */
+		if(!turning_on)
+			return 0;
 		handle = fileattr_getroot();
 		handle->NewNode("file");
 		handle->NewAttribute("name",finfo->file);
-		fileattr_modified();
 	}
 
 	if(turning_on)
@@ -89,10 +93,13 @@ static int onoff_filesdoneproc (void *callerdat, int err, char *repository, char
 
 		if(!handle)
 		{
+			/* Same rule as onoff_fileproc: never create the node just to
+			   find nothing to turn off.  */
+			if(!turning_on)
+				return err;
 			handle = fileattr_getroot();
 			handle->NewNode("directory");
 			handle->NewNode("default");
-			fileattr_modified();
 		}
 
 		if(turning_on)
