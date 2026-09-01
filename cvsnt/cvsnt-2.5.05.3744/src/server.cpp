@@ -3423,6 +3423,7 @@ int send_rename_to_client(const char *oldfile, const char *newfile)
 {
 	if(supported_response("Rename"))
 	{
+		cvs_direct_response_begin();
 		buf_output0(buf_to_net,"Rename ");
 		server_buf_output0(buf_to_net,oldfile);
 		buf_output0(buf_to_net,"\n");
@@ -3441,6 +3442,7 @@ int server_rename_file(const char *oldfile, const char *newfile)
 {
 	if(supported_response("Renamed"))
 	{
+		cvs_direct_response_begin();
 		buf_output0(buf_to_net,"Renamed ./\n");
 		server_buf_output0(buf_to_net,oldfile);
 		buf_output0(buf_to_net,"\n");
@@ -3664,6 +3666,9 @@ static void serve_ci (char *arg)
 
 static void checked_in_response (const char *file, const char *update_dir, const char *repository)
 {
+	/* Checked-in and the entries lines go straight to buf_to_net; the
+	   file's "Checking in ..." progress text is usually still staged.  */
+	cvs_direct_response_begin ();
     if (supported_response ("Mode"))
     {
 	struct stat sb;
@@ -3704,6 +3709,7 @@ void server_checked_in (const char *file, const char *update_dir, const char *re
 	 * This happens if we are now doing a "cvs remove" after a previous
 	 * "cvs add" (without a "cvs ci" in between).
 	 */
+		cvs_direct_response_begin ();
 		buf_output0(buf_to_net,"Remove-entry ");
 		output_dir (update_dir, repository);
 		server_buf_output0(buf_to_net,file);
@@ -3775,6 +3781,7 @@ void server_update_entries (const char *file, const char *update_dir, const char
     {
 		if (!supported_response ("New-entry"))
 			return;
+		cvs_direct_response_begin();
 		buf_output0(buf_to_net,"New-entry ");
 		output_dir (update_dir, repository);
 		server_buf_output0(buf_to_net,file);
@@ -4377,6 +4384,10 @@ void server_updated (
 	}
 	return;
     }
+
+	/* Updated/Created/Merged and the payload go straight to buf_to_net;
+	   the status letter for this file is usually still staged.  */
+	cvs_direct_response_begin ();
 
     if (entries_line != NULL && scratched_file == NULL)
     {
@@ -6532,6 +6543,28 @@ int cvs_output (const char *str, size_t len)
 	return len;
 }
 
+/* Every response written straight to buf_to_net must call this first:
+   cvs_output stages M text (and cvs_outerr can stage E text), and a
+   direct write would overtake anything not yet pushed to the wire.  */
+void cvs_direct_response_begin ()
+{
+#ifdef SERVER_SUPPORT
+	if (server_active && !temp_protocol)
+	{
+		/* Only drain when something is staged: flushing an empty wrap
+		   buffer still pushes buf_to_net to the socket, one write per
+		   response - the very cost the output batching removed.  */
+		if (stderr_buf && !buf_empty_p (stderr_buf))
+			cvs_flusherr ();
+		if (stdout_buf && !buf_empty_p (stdout_buf))
+			cvs_flushout ();
+		return;
+	}
+#endif
+	cvs_flusherr ();
+	cvs_flushout ();
+}
+
 #ifdef SERVER_SUPPORT
 int cvs_no_translate_begin()
 {
@@ -6539,10 +6572,7 @@ int cvs_no_translate_begin()
 		return 0;
 	if(supported_response("NoTranslateBegin"))
 	{
-		/* Staged M text has to reach the wire before anything written
-		   directly to buf_to_net, or the bracket overtakes the body it is
-		   meant to enclose.  */
-		cvs_flushout ();
+		cvs_direct_response_begin ();
 		buf_output0 (buf_to_net, "NoTranslateBegin\n");
 	}
 	return 0;
@@ -6554,7 +6584,7 @@ int cvs_no_translate_end()
 		return 0;
 	if(supported_response("NoTranslateEnd"))
 	{
-		cvs_flushout ();
+		cvs_direct_response_begin ();
 		buf_output0 (buf_to_net, "NoTranslateEnd\n");
 	}
 	return 0;
@@ -6566,10 +6596,8 @@ int cvs_no_translate_end()
 
 int cvs_output_binary (char *str, size_t len)
 {
-	cvs_flusherr();
-	/* Mbinary is written straight to buf_to_net below, so staged M text has
-	   to be pushed out first or the binary body overtakes it.  */
-	cvs_flushout();
+	/* Mbinary is written straight to buf_to_net below.  */
+	cvs_direct_response_begin();
 #ifdef SERVER_SUPPORT
     if (server_active)
     {
@@ -6850,9 +6878,8 @@ void cvs_output_tagged (const char *tag, const char *text)
 #ifdef SERVER_SUPPORT
     if (server_active && supported_response ("MT"))
     {
-		/* Drain staged M text first: MT goes straight to buf_to_net, so
-		   without this it overtakes text cvs_output has not pushed yet.  */
-		cvs_flushout ();
+		/* MT goes straight to buf_to_net.  */
+		cvs_direct_response_begin ();
 		buf_output0 (buf_to_net, "MT ");
 		buf_output0 (buf_to_net, tag);
 		if (text != NULL)

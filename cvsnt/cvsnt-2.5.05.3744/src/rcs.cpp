@@ -6763,9 +6763,10 @@ static void RCS_putdtree (RCSNode *rcs, char *rev, FILE *fp)
 	/* No fflush here: this function recurses once per branch, so a flush
 	   at the end of every invocation forced one short write() per branch
 	   node.  The one place a flushed stream matters - computing delta_pos
-	   with CVS_FTELL - flushes explicitly at the call site (RCS_rewrite
-	   and RCS_checkin's fresh-file path), and closing the stream flushes
-	   everything before the file is renamed into place.  */
+	   with CVS_FTELL - is covered by the single fflush at the end of
+	   RCS_putdesc, the last header writer before every taker of
+	   delta_pos, and closing the stream flushes everything before the
+	   file is renamed into place.  */
 }
 
 static void RCS_putdesc (RCSNode *rcs, FILE *fp)
@@ -6782,6 +6783,10 @@ static void RCS_putdesc (RCSNode *rcs, FILE *fp)
 	}
     }
     fputs ("@\n", fp);
+    /* Last header-section writer before every caller takes delta_pos
+       with CVS_FTELL: this flush is the invariant's one home, so the
+       call sites need no flush of their own.  */
+    fflush (fp);
 }
 
 static void putdeltatext (FILE *fp, Deltatext *d, int compress)

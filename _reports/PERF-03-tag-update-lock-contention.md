@@ -7,12 +7,19 @@ area: locking / cross-command contention
 
 *All paths below are relative to `cvsnt/cvsnt-2.5.05.3744/`.*
 
+**Status:** written against the pre-Tier-2 tree. Two of the mechanisms below were fixed in the
+same slice that ships this report and are marked so where they appear: the whole-command write
+lock (tag pass 1 now takes read locks; `lock_for_write` brackets only pass 2) and the per-line
+output flush (`cvs_output` now stages and flushes a completed line only past an 8 KiB threshold).
+The quoted pre-fix code is kept as the record of what was diagnosed.
+
 ## Answer in three sentences
 
 `cvs update` **does** take a lock on every `,v` file it opens — a **shared/read** lock from
 `rcsbuf_open` (`src/rcs.cpp:908`) — and `cvs tag`/`cvs rtag` take an **exclusive/write** lock on
-every `,v` they open, because `tag.cpp:282` sets the global `lock_for_write = 1` for the whole
-command, so the lock server refuses the tag's Write while the update's Read is outstanding
+every `,v` they open during the tagging pass (before this slice, `tag.cpp:282` set the global
+`lock_for_write = 1` for the whole command, both passes; it now brackets only pass 2),
+so the lock server refuses the tag's Write while the update's Read is outstanding
 (`lockservice/LockParse.cpp:868`). The waiting side does not queue: it gets an immediate
 `002 busy`, then polls in a hand-rolled loop that sleeps **at least one second per retry and gives
 up fatally after twenty** (`src/lock.cpp:339-356`), so every single-file collision costs the tag a
@@ -183,8 +190,10 @@ has never used CVSNT directory renames), `RCS_parse` returns NULL before any loc
 `rcsbuf_open` locks only *after* a successful `CVS_FOPEN` (`src/rcs.cpp:889-908`) — and mechanism
 (b) does not apply. Check for the file before assuming it.
 
-**(c) Occasional in-window flushes.** `cvs_output` flushes synchronously on any newline-terminated
-string:
+**(c) Occasional in-window flushes.** *(Fixed in this slice: `cvs_output` now stages M text and
+flushes a completed line only once >= 8 KiB have accumulated, and `do_file_proc` flushes through
+`cvs_flushout_perfile`, which can skip. The pre-fix behaviour diagnosed here was:)* `cvs_output`
+flushed synchronously on any newline-terminated string:
 
 ```c
 /* src/server.cpp:6458-6460 */
@@ -232,6 +241,8 @@ remote one.
 - **Symptom it explains:** the operator's core claim. It is true, and it is the object the tag waits on.
 
 ### F2: `cvs tag`/`cvs rtag` upgrade *every* `,v` open to an exclusive lock, in both passes
+*(Fixed in this slice: `lock_for_write` now brackets only the second `start_recursion` pass, so
+the validation pass runs with read locks. The pre-fix mechanism below is kept as diagnosed.)*
 - **Location:** `src/tag.cpp:282` (`lock_for_write = 1`), `:305` (`= 0`), `src/rcs.cpp:35`
 - **Mechanism:** `lock_for_write` is a process-global consulted inside `rcsbuf_open`. It is set once
   for the entire `cvstag()` body, which covers **both** `start_recursion` passes
@@ -440,7 +451,7 @@ less often or less long.
 
 | # | What | Where | LoC | Risk | What could break | Protocol / format change? | Root cause or constant factor |
 | --- | --- | --- | ---: | --- | --- | --- | --- |
-| 1 | **Do not write-lock in tag pass 1.** Replace the `lock_for_write` global with a value carried on the recursion frame (or simply clear it around the `check_fileproc` pass) so the read-only validation pass takes Read locks. Halves the tag's exclusive footprint and lets pass 1 run concurrently with any number of updates. | `src/rcs.cpp:35`, `src/tag.cpp:282`, `src/recurse.cpp` frame | ~25 | low | any path relying on pass 1 pre-locking for pass 2 — there is none; locks are dropped per file at `recurse.cpp:959` regardless | no | **root cause** (for half the exposure) — `suggested_optimizations.md` item 9 |
+| 1 | **Do not write-lock in tag pass 1.** *(Implemented in this slice: the assignment now brackets only pass 2.)* Replace the `lock_for_write` global with a value carried on the recursion frame (or simply clear it around the `check_fileproc` pass) so the read-only validation pass takes Read locks. Halves the tag's exclusive footprint and lets pass 1 run concurrently with any number of updates. | `src/rcs.cpp:35`, `src/tag.cpp:282`, `src/recurse.cpp` frame | ~25 | low | any path relying on pass 1 pre-locking for pass 2 — there is none; locks are dropped per file at `recurse.cpp:959` regardless | no | **root cause** (for half the exposure) — `suggested_optimizations.md` item 9 |
 | 2 | **Fix the retry loop:** bounded exponential backoff starting at ~50 ms instead of a 1 s floor, and make the 20-retry cap a configurable timeout defaulting much higher. The 1 s floor turns a 5 ms conflict into a 1 s stall; the hard cap turns a busy repository into `Failed to obtain lock`. | `src/lock.cpp:339-356` | ~20 | low | busier lock-server chatter under heavy contention; the "waiting for X's lock" cadence changes (it is already misleading — printed after the sleep) | no | **constant factor**, but the largest one, and it removes the *fatal* |
 | 3 | **Suppress per-file locks for read-only recursions.** Add a "this recursion only reads" flag; when set, `rcsbuf_open` skips `do_lock_file` and the command relies on the per-directory read lock instead. Removes both round trips per file from `update`, `checkout`, `diff`, `log`, `status` — and removes the object the tag collides with. | `src/rcs.cpp:905-912`, `src/recurse.cpp`, `src/lock.cpp` | ~40 | medium | consistency the per-file lock provides against a concurrent commit mid-parse (the reason `rcsbuf_open` re-opens the file after locking on non-Windows, `src/rcs.cpp:917-937`); `AtomicCheckouts` asserts `rcs->rcsbuf.lockId` at `src/rcs.cpp:2561` and `:2846` | no — but stage behind a config switch and soak-test against concurrent commits | **root cause** — `suggested_optimizations.md` item 16, "the single biggest win available" |
 | 4 | **Release the directory mapping-file lock early.** `open_directory` needs `.directory_history,v` only long enough to resolve the version and check out the mapping (`src/mapping.cpp:1063-1117`). Drop the lock once `directory_version`/`directory_mappings` are populated, keeping the parsed data. Also collapse the double `open_directory` at `src/update.cpp:1145-1146`. | `src/mapping.cpp:1057-1120`, `:1392` | ~35 | medium | `commit_directory`/`create_mapping_file` (`src/mapping.cpp:1296-1380`) reuse `repository_rcsfile` to *write* and must re-acquire; `tag_dirproc`'s `get_directory_finfo` (`src/mapping.cpp:1491`) hands the node straight to `tag_fileproc` | no | **root cause** — the only lock held across client network I/O |

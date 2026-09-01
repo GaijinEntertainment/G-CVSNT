@@ -62,11 +62,19 @@ static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 
 	if(turning_on)
 	{
-		if(!handle->GetChild("watched")) handle->NewNode("watched");
+		if(!handle->GetChild("watched"))
+		{
+			handle->NewNode("watched");
+			fileattr_modified();
+		}
 	}
 	else
 	{
-		if(handle->GetChild("watched")) handle->Delete();
+		if(handle->GetChild("watched"))
+		{
+			handle->Delete();
+			fileattr_modified();
+		}
 	}
     return 0;
 }
@@ -86,11 +94,19 @@ static int onoff_filesdoneproc (void *callerdat, int err, char *repository, char
 
 		if(turning_on)
 		{
-			if(!handle->GetChild("watched")) handle->NewNode("watched");
+			if(!handle->GetChild("watched"))
+			{
+				handle->NewNode("watched");
+				fileattr_modified();
+			}
 		}
 		else
 		{
-			if(handle->GetChild("watched")) handle->Delete();
+			if(handle->GetChild("watched"))
+			{
+				handle->Delete();
+				fileattr_modified();
+			}
 		}
 	}
     return err;

@@ -112,6 +112,9 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 		if(what->add_tunedit)
 			filehandle->NewNode("temp_unedit",NULL,false);
 	}
+	/* The adding branch and the watcher-node creation above mutate the
+	   tree directly, without the fileattr_* wrappers.  */
+	fileattr_modified();
 }
 
 static int addremove_fileproc(void *callerdat,
