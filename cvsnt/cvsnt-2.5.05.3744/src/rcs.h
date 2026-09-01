@@ -370,7 +370,7 @@ void RCS_addaccess (RCSNode *, char *);
 void RCS_delaccess (RCSNode *, char *);
 char *RCS_getaccess (RCSNode *);
 RETSIGTYPE rcs_cleanup (int sig);
-void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, int reparse = 1);
+void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, bool reparse = true);
 int rcs_change_text (const char *, char *, size_t, const char *,
 			    size_t, char **, size_t *);
 void RCS_deltas (RCSNode *, FILE *, struct rcsbuffer *, const char *,

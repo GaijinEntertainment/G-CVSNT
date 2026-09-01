@@ -6845,8 +6845,8 @@ static void RCS_copydeltas(RCSNode *rcs, FILE *fout, Deltatext *newdtext, char *
     char *bufrest;
     int nls;
     size_t buflen;
-    char *buf;
-    const size_t bufsize = 64*1024;
+    char buf[64*1024];
+    const size_t bufsize = sizeof(buf);
     int got;
 
     /* Count the number of versions for which we have to do some
@@ -6956,12 +6956,11 @@ static void RCS_copydeltas(RCSNode *rcs, FILE *fout, Deltatext *newdtext, char *
     }
 
     /* An 8 KiB stack buffer here meant ~2*ceil(D/8192) read/write calls
-       for a D-byte deltatext section; copy through a 64 KiB heap buffer
+       for a D-byte deltatext section; copy through a 64 KiB stack buffer
        instead.  Deliberately not larger: this runs once per rewritten
-       ,v, and the Windows CRT serves requests above ~512 KiB with
-       VirtualAlloc/VirtualFree rather than the heap, which would make
+       ,v, and a heap buffer above ~512 KiB would go through
+       VirtualAlloc/VirtualFree on the Windows CRT, which would make
        tagging a tree of small files slower, not faster.  */
-    buf = (char *) xmalloc (bufsize);
     while ((got = (int) fread (buf, 1, bufsize, rcs->rcsbuf.fp)) != 0)
     {
 	if (nls > 0
@@ -6978,7 +6977,6 @@ static void RCS_copydeltas(RCSNode *rcs, FILE *fout, Deltatext *newdtext, char *
 
 	nls = 0;
     }
-    xfree (buf);
 }
 
 /* A helper procedure for RCS_copydeltas.  This is called via walklist
@@ -7192,12 +7190,15 @@ static char *rcs_lockfilename (const char *rcsfile)
    desired (via RCS_delete_revs, RCS_settag, &c), then call RCS_rewrite.
 
    REPARSE selects whether the node is re-parsed from the newly written
-   file before returning.  Pass 0 only when the caller makes no further
-   use of the node before it is freed: the rewrite closes the rcs buffer,
-   which leaves every buffer-backed string field of the node dangling
-   until the re-parse (or the teardown in freercsnode) replaces it.  */
+   file before returning.  Pass false only when the caller makes no
+   further use of the node before it is freed: the rewrite closes the rcs
+   buffer, which leaves every buffer-backed string field of the node
+   dangling until the re-parse (or the teardown in freercsnode) replaces
+   it.  The node is refcounted, so a false is honoured only for a sole
+   holder; with other holders alive the node is re-parsed anyway to keep
+   their view valid.  */
 
-void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, int reparse)
+void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, bool reparse)
 {
     FILE *fout;
 	size_t lockId_temp;
@@ -7257,7 +7258,7 @@ void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compres
 	   have spent anyway, and it turns a would-be silent use-after-free in
 	   any future caller into an immediate NULL dereference.  */
 	free_rcsnode_contents(rcs);
-	if (reparse)
+	if (reparse || rcs->refcount > 1)
 		RCS_reparsercsfile(rcs);
 }
 
