@@ -97,24 +97,6 @@ static void Entnode_Destroy (Entnode *ent)
 }
 
 /*
- * Write out the line associated with a node of an entries file
- */
-static int write_ent_proc (Node *node, void *closure)
-{
-    Entnode *entnode;
-
-    entnode = (Entnode *) node->data;
-
-    if (closure != NULL && entnode->type != ENT_FILE)
-		*(int *) closure = 1;
-
-    if (fputentent(entfile, entnode))
-		error (1, errno, "cannot write %s", entfilename);
-
-    return (0);
-}
-
-/*
  * Write out the line associated with a node of an entries.extra file
  */
 static int write_ent_ex_proc (Node *node, void *closure)

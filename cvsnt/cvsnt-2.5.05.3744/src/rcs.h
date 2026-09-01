@@ -372,7 +372,10 @@ char *RCS_getaccess (RCSNode *);
 RETSIGTYPE rcs_cleanup (int sig);
 void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, bool reparse = true);
 /* Discard form: the caller makes no further use of the node before it is
-   freed.  The refcount guard inside still re-parses shared nodes.  */
+   freed.  The refcount guard inside still re-parses shared nodes.  Safe
+   because free_rcsnode_contents leaves the node in the state a later
+   freercsnode expects: every free_* flag cleared and the buffer-backed
+   pointers dropped, so the second teardown frees nothing twice.  */
 inline void RCS_rewrite_final (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta)
 { RCS_rewrite (rcs, newdtext, insertpt, compress_new_delta, false); }
 int rcs_change_text (const char *, char *, size_t, const char *,

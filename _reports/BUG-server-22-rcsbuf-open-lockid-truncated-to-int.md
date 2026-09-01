@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/src/rcs.cpp
 line: 875
 severity: medium
 category: correctness
+status: fixed on this branch (Tier 1 slice: rcsbuf_open snapshots the lock id as size_t)
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: no
