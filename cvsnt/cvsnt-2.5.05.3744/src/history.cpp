@@ -750,6 +750,11 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 
     if (type == 'T')
     {
+		/* T records reinterpret the slots: the caller passes the tag
+		   type ("A"/"D"/revision/date) as update_dir, and it lands in
+		   the record's repos field; the reader takes rev as the tag
+		   and repos as the tag type (see report_tag).  The repository
+		   argument is unused for T.  */
 		repos = update_dir;
 		update_dir = "";
     }

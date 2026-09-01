@@ -301,6 +301,10 @@ int cvstag (int argc, char **argv)
     else
     {
 	int i;
+	/* Same convention as the rtag write above: for T records the
+	   update_dir slot carries the tag type and lands in the record's
+	   repos field; the record logs the tag command, before it runs,
+	   exactly as rtag's does.  */
 	for (i = 0; i < argc; i++)
 	    history_write ('T', tag_type, symtag, argv[i], "", NULL, NULL);
 	if (!argc)
