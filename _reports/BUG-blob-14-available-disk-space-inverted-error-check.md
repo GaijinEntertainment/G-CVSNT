@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/keyValueServer/proxy/free_disk_space.cpp
 line: 17
 severity: medium
 category: logic
+status: open - the sentinel-return fix was applied (e1a4bab) and reverted (535222a) in this slice: the stated consequence was wrong (the cache does not grow without bound) and the line-level fix alone makes the proxy noisier; the narrower defect stands
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: yes
@@ -48,7 +49,7 @@ POSIX proxy (`keyValueServer/proxy/Makefile.am` builds `gc_proc_monitor.cpp` + `
 The GC child process is the only consumer:
 
 ```cpp
-// keyValueServer/proxy/gc_proc_monitor.cpp:96, 100-113
+// keyValueServer/proxy/gc_proc_monitor.cpp:26-35, 65-73
   int64_t lastAvail = available_disk_space(cache_folder.c_str());        // -1
   while(1) {
     for (int i = 0; i < 10; ++i)
@@ -68,7 +69,7 @@ artefacts. Another process fills the partition to 0 bytes free while the blob ca
 `PullThroughTemp::start` then fails to create a temp file (`proxy_file_lib.cpp:335-337`), the proxy
 falls back to pure net-proxying, and `perform_immediate_gc(expectedSize*2)` — called from
 `proxy_file_lib.cpp:394` when a write fails — cannot help either, because its own
-`needed_sz < 0` early-out (`gc_proc_monitor.cpp:137-142`) is also gated on
+`needed_sz < 0` early-out (`gc_proc_monitor.cpp:67`) is also gated on
 `available_disk_space` and never fires.
 
 ## Suggested fix

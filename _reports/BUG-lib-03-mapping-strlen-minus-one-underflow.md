@@ -2,7 +2,7 @@
 id: BUG-lib-03
 area: cvsapi/cvstools/lib
 file: cvsnt/cvsnt-2.5.05.3744/src/mapping.cpp
-line: 1185
+line: 1186
 severity: medium
 category: memory-safety
 verdict: CONFIRMED
@@ -28,12 +28,12 @@ the file contains an embedded NUL byte.
 			from[strlen(from)-1]='\0';
 			to[strlen(to)-1]='\0';
 
-// src/mapping.cpp:1183-1185   (CVS/Repository.Virtual, heap buffer from getline)
+// src/mapping.cpp:1184-1186   (CVS/Repository.Virtual, heap buffer from getline)
 		if(getline(&current_directory->virtual_repos,&len,fp)<1)
 			error(1,errno,"Couldn't read %s",CVSADM_VIRTREPOS);
 		current_directory->virtual_repos[strlen(current_directory->virtual_repos)-1]='\0';
 
-// src/mapping.cpp:1192-1194   (CVS/Repository, heap buffer from getline)
+// src/mapping.cpp:1193-1195   (CVS/Repository, heap buffer from getline)
 		if(getline(&current_directory->real_repos,&len,fp)<1)
 			error(1,errno,"Couldn't read %s",CVSADM_REP);
 		current_directory->real_repos[strlen(current_directory->real_repos)-1]='\0';

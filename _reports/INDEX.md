@@ -38,6 +38,9 @@ the commit history, and their defects remain **open**.
 
 ## Everything else
 
+`BUG-server-22` (Blob-ref-created never sent) was found during review after the
+analysis pass and is open.
+
 Every other `BUG-*` page remains open work. A cross-reference of fixes to the
 regression suites (`known_issues.md`) lands with the test-suite slice
 (`audit/03`).

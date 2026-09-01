@@ -40,7 +40,7 @@ static void gc_thread_proc()
   while(1)
   {
     std::unique_lock<std::mutex> lock(gc_mutex);
-    wakeup_gc_cond.wait(lock);          // 145: no predicate, no loop
+    wakeup_gc_cond.wait(lock);          // 51: no predicate, no loop
     do_gc();
   }
 }
@@ -48,9 +48,9 @@ static void gc_thread_proc()
 void lazy_report_to_gc(uint64_t sz)
 {
   //wake up GC thread
-  cache_occupied_size += sz;            // 153: predicate mutated without gc_mutex
+  cache_occupied_size += sz;            // 59: predicate mutated without gc_mutex
   if (should_do_gc())
-    wakeup_gc_cond.notify_one();        // 155: notify without gc_mutex
+    wakeup_gc_cond.notify_one();        // 61: notify without gc_mutex
 }
 ```
 

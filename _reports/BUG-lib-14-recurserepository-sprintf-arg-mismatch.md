@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/src/RecurseRepository.cpp
 line: 102
 severity: low
 category: typo
+status: open, but dead code - src/RecurseRepository.cpp is in no build file (docs/08-source-map.md lists it under dead code); fixing it has no effect on any binary
 verdict: CONFIRMED
 fix_size_loc: 2
 behavior_change: yes

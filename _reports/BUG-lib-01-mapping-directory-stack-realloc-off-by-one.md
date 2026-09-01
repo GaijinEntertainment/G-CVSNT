@@ -2,7 +2,7 @@
 id: BUG-lib-01
 area: cvsapi/cvstools/lib
 file: cvsnt/cvsnt-2.5.05.3744/src/mapping.cpp
-line: 1043
+line: 1044
 severity: high
 category: memory-safety
 verdict: CONFIRMED
@@ -33,7 +33,7 @@ the stack has grown to full capacity, producing an out-of-bounds `memset` of a w
 		if(!directory_stack)
 			error(1,errno,"Out of memory");
 		if(current_directory)
-			current_directory = directory_stack + directory_stack_size;   // <-- line 1043, should be -1
+			current_directory = directory_stack + directory_stack_size;   // <-- line 1044, should be -1
 	}
 
 	if(!current_directory)
@@ -56,7 +56,7 @@ loop at line 77). The class invariant on entry to `open_directory()` — establi
 current_directory == directory_stack + (directory_stack_size - 1)
 ```
 
-The realloc fix-up at line 1043 must therefore reproduce `directory_stack_size - 1`, not
+The realloc fix-up at line 1044 must therefore reproduce `directory_stack_size - 1`, not
 `directory_stack_size`. Because it does not, the `++` at line 1049 skips one slot, and since
 `directory_stack_size` is also incremented, the new invariant becomes
 `current_directory == directory_stack + directory_stack_size`, i.e. permanently one past where

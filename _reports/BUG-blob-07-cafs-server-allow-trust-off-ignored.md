@@ -94,7 +94,7 @@ its build network.
 ## Refutation attempt
 I grepped the whole tree for `set_allow_trust` / `allow_trust`: the only definition is
 `content_addressed_fs.cpp:20`, the only default is `true` at line 19, and the only caller is
-`cafs_server.cpp:46`. No other translation unit sets it, and `blob_file_lib.cpp:212`
+`cafs_server.cpp:46`. No other translation unit sets it, and `blob_file_lib.cpp:18`
 (`blob_start_push_data`) unconditionally forwards the network-supplied `hhex` into `start_push`, so
 `provided_hash[0]` is always non-zero on the server. I also checked whether the client-side blake3
 check makes the poisoning harmless: it detects the corruption but cannot repair it, because
