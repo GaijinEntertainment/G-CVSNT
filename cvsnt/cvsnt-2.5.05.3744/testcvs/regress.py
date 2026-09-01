@@ -167,24 +167,43 @@ def t_commit(r):
           "status does not report 1.2:\n" + out)
 
 
-@test("Entries has exactly one line per file after commit")
+@test("Entries lists each file once; a surviving Entries.Log has one line per command")
 def t_entries_no_duplicates(r):
-    # Guards against a regression where each Entries.Log record was written
-    # twice, the second copy without its command prefix.
+    # BUG-update-08 (open): Scratch_Entry/Rename_Entry/Register write every
+    # Entries.Log record twice, the second copy without its command prefix,
+    # and replay reads an unprefixed line as an implicit A. A clean run
+    # collapses the log in Entries_Close, so the pair is observable only in
+    # a log that survived an interrupted run. This case pins the final
+    # Entries shape, and holds any surviving log to the one-command-one-line
+    # format with the same implicit-A reading the replay uses.
     r.import_tree("m", {"a.txt": "one\n", "c.txt": "three\n"})
     wc = r.checkout("m")
     write(os.path.join(wc, "a.txt"), "one\nchanged\n")
     r.cvs(["commit", "-m", "x"], cwd=wc)
-    for fn in ("Entries", "Entries.Log"):
-        p = os.path.join(wc, "CVS", fn)
-        if not os.path.exists(p):
-            continue
-        lines = [l for l in read(p).splitlines() if l.strip() and l.strip() != "D"]
-        seen = {}
-        for l in lines:
-            seen[l] = seen.get(l, 0) + 1
-        dupes = {k: v for k, v in seen.items() if v > 1}
-        check(not dupes, "%s has duplicate lines: %r" % (fn, dupes))
+
+    ent = os.path.join(wc, "CVS", "Entries")
+    lines = [l for l in read(ent).splitlines() if l.strip() and l.strip() != "D"]
+    names = {}
+    for l in lines:
+        parts = l.split("/")
+        name = parts[1] if len(parts) > 2 else l
+        names[name] = names.get(name, 0) + 1
+    dupes = {k: v for k, v in names.items() if v > 1}
+    check(not dupes, "Entries lists a file more than once: %r" % (dupes,))
+
+    log = os.path.join(wc, "CVS", "Entries.Log")
+    if os.path.exists(log):
+        # Strip the "X " command prefix the way fgetentent does; a body that
+        # then appears twice is the BUG-update-08 double write (the second
+        # copy replays as an implicit A and resurrects scratched entries).
+        body = {}
+        for l in read(log).splitlines():
+            if not l.strip():
+                continue
+            stripped = l[2:] if len(l) > 2 and l[1] == " " else l
+            body[stripped] = body.get(stripped, 0) + 1
+        dupes = {k: v for k, v in body.items() if v > 1}
+        check(not dupes, "Entries.Log records an entry twice: %r" % (dupes,))
 
 
 @test("tag and branch produce the right revision numbers")
