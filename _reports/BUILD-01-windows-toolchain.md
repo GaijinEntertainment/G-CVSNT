@@ -304,12 +304,13 @@ deliverables of the product, not link inputs of `cvs.exe`.
   at line 514: `catch(_com_error e)`).
 - **Diagnostic:** `warning C4530: C++ exception handler used, but unwind semantics
   are not enabled. Specify /EHsc`
-- **Cause:** all four configurations of `cvsnt.vcxproj` set
-  `<ExceptionHandling>false</ExceptionHandling>`, yet this TU has a real
-  `try`/`catch` around COM calls.
+- **Cause:** the `Release|x64` configuration of `cvsnt.vcxproj` sets
+  `<ExceptionHandling>false</ExceptionHandling>` (the single hit, line 188; the other three
+  configurations leave the toolset default), yet this TU has a real
+  `try`/`catch` around COM calls — see `BUG-build-02` for the single-config fact.
 - **Resolution:** compiled with `/EHsc` (build-flag only). The proper fix is a
   **project-file change**: set `<ExceptionHandling>Sync</ExceptionHandling>` in
-  `cvsnt.vcxproj` for all four configurations. With `ExceptionHandling=false` the
+  `cvsnt.vcxproj` for `Release|x64`. With `ExceptionHandling=false` the
   binary that MSBuild produces today does not run destructors when that `catch`
   fires — see *Source-level issues*.
 
@@ -377,9 +378,11 @@ handle:
 
 **Project-configuration bugs (not compiler bugs):**
 
-6. `cvsnt.vcxproj` sets `<ExceptionHandling>false</ExceptionHandling>` in all four
-   configurations while `windows-NT\setuid.cpp:501-514` uses `try`/`catch`. The
-   shipped binary therefore has no unwind semantics on that path. See P6.
+6. `cvsnt.vcxproj` sets `<ExceptionHandling>false</ExceptionHandling>` in its
+   `Release|x64` configuration (line 188; the other three leave the default)
+   while `windows-NT\setuid.cpp:501-514` uses `try`/`catch`. The shipped x64
+   release binary therefore has no unwind semantics on that path. See P6 and
+   `BUG-build-02`.
 
 7. `cvsnt.vcxproj` lines **204** and **309** (`Release|x64` and `Debug|x64`):
    ```xml

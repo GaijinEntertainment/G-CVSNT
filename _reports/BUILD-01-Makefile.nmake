@@ -4,7 +4,8 @@
 # Out-of-tree: every object/lib/exe goes under $(B); the repo is never written.
 # ---------------------------------------------------------------------------
 
-S   = D:\another\G-CVSNT\cvsnt\cvsnt-2.5.05.3744
+S   = <path-to-cvsnt-2.5.05.3744>
+# EDIT: point S at your checkout's cvsnt/cvsnt-2.5.05.3744 before running.
 B   = $(MAKEDIR)
 OBJ = $(B)\obj
 LIBD= $(B)\lib

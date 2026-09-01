@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/cvsapi/ServerIO.cpp
 line: 159
 severity: medium
 category: logic
+status: fixed in this slice (audit/02)
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: yes

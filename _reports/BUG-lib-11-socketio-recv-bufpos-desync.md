@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/cvsapi/unix/SocketIO.cpp
 line: 311
 severity: critical
 category: memory-safety
+status: fixed in the previous slice (audit/01)
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: no

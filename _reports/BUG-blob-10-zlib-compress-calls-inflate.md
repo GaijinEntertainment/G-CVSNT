@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/ca_blobs_fs/src/streaming_compressors.cpp
 line: 226
 severity: medium
 category: typo
+status: partially fixed in this slice (the inflate->deflate call at :226); the Unpacked-branch ctx cast and the missing inflateEnd remain open
 verdict: CONFIRMED
 fix_size_loc: 3
 behavior_change: yes

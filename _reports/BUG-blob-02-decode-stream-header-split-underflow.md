@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/ca_blobs_fs/streaming_blobs.h
 line: 57
 severity: critical
 category: memory-safety
+status: fixed in the previous slice (audit/01)
 verdict: CONFIRMED
 fix_size_loc: 2
 behavior_change: no

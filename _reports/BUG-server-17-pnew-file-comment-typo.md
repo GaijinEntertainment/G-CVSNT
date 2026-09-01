@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/src/import.cpp
 line: 1356
 severity: low
 category: message
+status: partially fixed in this slice (the string default; the pnew comment lines remain open)
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: yes
