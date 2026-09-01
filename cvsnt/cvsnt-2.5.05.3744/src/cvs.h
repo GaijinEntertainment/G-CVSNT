@@ -139,8 +139,6 @@ typedef std::map<cvs::string,cvs::string> variable_list_t;
 #define	CVSADM_ENT	"CVS/Entries"
 #define	CVSADM_ENTEXT	"CVS/Entries.Extra"
 #define	CVSADM_ENTEXTBAK	"CVS/Entries.Extra.Backup"
-#define	CVSADM_ENTOLD	"CVS/Entries.Old"
-#define	CVSADM_ENTEXTOLD	"CVS/Entries.Extra.Old"
 #define	CVSADM_ENTBAK	"CVS/Entries.Backup"
 #define CVSADM_ENTLOG	"CVS/Entries.Log"
 #define CVSADM_ENTEXTLOG	"CVS/Entries.Extra.Log"

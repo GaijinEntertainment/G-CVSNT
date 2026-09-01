@@ -42,13 +42,13 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 
 | # | ID | What | LoC | Risk | Status |
 | --- | --- | --- | ---: | --- | --- |
-| 1 | PERF-01 F5 | `rcsbuf_valfree()` is a linear scan of the relocation array, called ~4× per revision from `free_rcsvers_contents()` — O(revisions²) just to free one file. Set a teardown flag in `freercsnode()`; nothing can call `rcsbuf_fill()` during teardown, so the scan is unnecessary there. | ~15 | low | not started |
-| 2 | PERF-01 F6 | `rcsbuf_fill()` grows the parse buffer by a constant `MAX_INCR` (2 MiB), so a large `,v` is memcpy'd O(size²/2 MiB) times. Pre-size the buffer from `fstat`. | ~15 | low | not started |
-| 3 | PERF-02 F2.1 | `RCS_rewrite()` re-parses the file it has just written and throws the result away. Gate that behind a parameter and pass "don't re-parse" from the tag path — removes ~⅓ of all parse work in a tag. | ~8 | low | not started |
-| 4 | PERF-01 F3 | `Register()` writes each `Entries.Log` record **twice**: `write_ent_ex_proc` already writes the `Entries` line, so calling both it and `write_ent_proc` duplicates it. Delete the duplicate call. | 1 | low | not started |
-| 5 | PERF-01 F10a | `find_rcs()` looks a name up with `findnode_fn` and then calls `addnode` anyway, which looks it up again — and leaks the `Node` plus its key when the name is already present. Use `addnode`'s return value. | ~10 | low | not started |
-| 6 | PERF-01 F4 | `write_entries()` byte-copies and `fsync`s both Entries files to `.Old` backups on every directory. Drop the `.Old` copies. | ~25 | low | not started |
-| 7 | PERF-02 F1a + F7 | I/O is done in tiny chunks: `RCSBUF_BUFSIZE` is `BUFSIZ*10` (5120 bytes on MSVC) and the deltatext copy uses an 8 KiB stack buffer, with no `setvbuf` anywhere. Fixed 64 KiB parse buffer, 1 MiB copy buffer, `setvbuf` both streams in `RCS_rewrite`. | ~25 | low | not started |
+| 1 | PERF-01 F5 | `rcsbuf_valfree()` is a linear scan of the relocation array, called ~4× per revision from `free_rcsvers_contents()` — O(revisions²) just to free one file. Set a teardown flag in `freercsnode()`; nothing can call `rcsbuf_fill()` during teardown, so the scan is unnecessary there. | ~15 | low | skipped — premise refuted, see below |
+| 2 | PERF-01 F6 | `rcsbuf_fill()` grows the parse buffer by a constant `MAX_INCR` (2 MiB), so a large `,v` is memcpy'd O(size²/2 MiB) times. Pre-size the buffer from `fstat`. | ~15 | low | implemented |
+| 3 | PERF-02 F2.1 | `RCS_rewrite()` re-parses the file it has just written and throws the result away. Gate that behind a parameter and pass "don't re-parse" from the tag path — removes ~⅓ of all parse work in a tag. | ~8 | low | implemented |
+| 4 | PERF-01 F3 | `Register()` writes each `Entries.Log` record **twice**: `write_ent_ex_proc` already writes the `Entries` line, so calling both it and `write_ent_proc` duplicates it. Delete the duplicate call. | 1 | low | implemented |
+| 5 | PERF-01 F10a | `find_rcs()` looks a name up with `findnode_fn` and then calls `addnode` anyway, which looks it up again — and leaks the `Node` plus its key when the name is already present. Use `addnode`'s return value. | ~10 | low | implemented |
+| 6 | PERF-01 F4 | `write_entries()` byte-copies and `fsync`s both Entries files to `.Old` backups on every directory. Drop the `.Old` copies. | ~25 | low | implemented |
+| 7 | PERF-02 F1a + F7 | I/O is done in tiny chunks: `RCSBUF_BUFSIZE` is `BUFSIZ*10` (5120 bytes on MSVC) and the deltatext copy uses an 8 KiB stack buffer, with no `setvbuf` anywhere. Fixed 64 KiB parse buffer, a 64 KiB copy buffer (the originally proposed 1 MiB was cut back in review: the Windows CRT serves requests above ~512 KiB with VirtualAlloc/VirtualFree), `setvbuf` on the rewrite output stream (the input side already reads through the enlarged rcsbuf parse buffer). | ~25 | low | implemented |
 
 ### Tier 2 — needs real testing
 
@@ -100,6 +100,17 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 
 Recorded so they are not re-investigated:
 
+* **Tier 1 item 1 (PERF-01 F5) is a no-op — the teardown scans already iterate zero times.**
+  Every caller of `free_rcsnode_contents()` runs `rcsbuf_close()` first (`freercsnode` at
+  `src/rcs.cpp:769→771`, `RCS_rewrite` at `:7239→7244`, `rcs_checkin.cpp:41→62` and
+  `:965→969`), and `rcsbuf_close()` frees `reloc_ptr_base` and sets
+  `reloc_ptr_count = 0` — so by the time the ~4-per-revision `rcsbuf_valfree()` calls run
+  during teardown, each scan is over an **empty** array and costs only the function call.
+  The O(revisions²) teardown described in PERF-01 F5 does not exist; a teardown flag would
+  skip zero-iteration loops. (The scans that do run against a live array — single-node
+  `delnode`s in `RCS_checkin`/`RCS_delete_revs`, one-shot frees like `RCS_symbols`, and
+  `freedeltatext` during a delta walk — genuinely need the removal, so the flag must not
+  cover them anyway.)
 * The client→server protocol **is** properly batched — a 160 KiB flush threshold, not per-file.
 * Blob downloads **are** already parallel, with persistent connections and a single end-of-command
   join.

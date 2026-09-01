@@ -306,8 +306,10 @@ void line2argv (int *pargc, char ***argv, const char *line, const char *sepchars
 
   for(p=line;*p;p++)
   {
-    while(strchr(sepchars,*p))
+    while(*p && strchr(sepchars,*p))
 		p++;
+    if(!*p)
+      break;
 
 	qstart=q=(char*)xstrdup(p);
     for(;*p;p++)

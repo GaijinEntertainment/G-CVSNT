@@ -1232,10 +1232,16 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
           <term>Entries.Old</term>
 
           <listitem>
-            <para>This is the previous generation of the 'Entries' file. If
-            your program modifies the 'Entries' file rename the existing file
-            to 'Entries.Old' so that frontends are able to find out what has
-            changed.</para>
+            <para>Historically this was the previous generation of the
+            'Entries' file, and frontends were told to rename the existing
+            file to 'Entries.Old' when modifying 'Entries' so that other
+            frontends could find out what had changed.</para>
+
+            <para>CVSNT no longer maintains this file: writing it cost a
+            full copy and an fsync of both entries files on every directory
+            visited, and nothing read it back. A sandbox created by an older
+            version may still contain a stale 'Entries.Old'; do not rely on
+            it being the immediately previous generation.</para>
 
             <para><indexterm>
                 <primary>Entries.Static file, in CVS directory</primary>
@@ -1313,10 +1319,14 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
                 <primary>CVS/Entries.Extra.Old file</primary>
               </indexterm></para>
 
-            <para>This is the previous generation of the 'Entries.Extra' file.
-            If your program modifies the 'Entries' file rename the existing
-            file to 'Entries.Extra.Old' so that frontends are able to find out
-            what has changed.</para>
+            <para>Historically this was the previous generation of the
+            'Entries.Extra' file, and frontends were told to rename the
+            existing file to 'Entries.Extra.Old' when modifying it.</para>
+
+            <para>CVSNT no longer maintains this file, for the same reason as
+            'Entries.Old': writing it cost a full copy and an fsync per
+            directory, and nothing read it back. A stale copy left by an
+            older version is not the immediately previous generation.</para>
           </listitem>
         </varlistentry>
 

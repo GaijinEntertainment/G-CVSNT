@@ -330,6 +330,164 @@ def t_binary(r):
     check_eq(got, payload2, "binary commit/checkout round trip")
 
 
+@test("interrupted checkout leaves well-formed Entries logs")
+def t_entries_log_format(r):
+    # A checkout that dies mid-directory (here: on a corrupt ,v) leaves
+    # CVS/Entries.Log and CVS/Entries.Extra.Log behind for the next command
+    # to replay.  Every record in them must be complete: a command prefix
+    # ("A " / "R ") is optional, but a prefix with no record after it is
+    # corruption.  Replaying the surviving log must yield exactly the files
+    # that were checked out before the failure.
+    r.import_tree("m", {"a.txt": "one\n", "b.txt": "two\n", "z.txt": "three\n"})
+    zv = os.path.join(r.repo, "m", "z.txt,v")
+    os.chmod(zv, 0o644)                 # ,v files are checked in read-only
+    with open(zv, "w") as f:
+        f.write("this is not an rcs file\n")
+    wcroot = os.path.join(r.root, "wcbad")
+    os.makedirs(wcroot)
+    rc, out = r.cvs(["checkout", "m"], cwd=wcroot, expect_ok=False)
+    check(rc != 0, "checkout of a corrupt ,v unexpectedly succeeded")
+    wc = os.path.join(wcroot, "m")
+    check(os.path.isfile(os.path.join(wc, "a.txt")), "a.txt missing after partial checkout")
+    check(os.path.isfile(os.path.join(wc, "b.txt")), "b.txt missing after partial checkout")
+    for fn in ("Entries.Log", "Entries.Extra.Log"):
+        p = os.path.join(wc, "CVS", fn)
+        if not os.path.exists(p):
+            continue
+        for line in read(p).splitlines():
+            if not line.strip():
+                continue
+            body = line
+            if len(line) >= 2 and line[1] == " " and line[0] in "AR":
+                body = line[2:]
+            check(body.startswith("/") or body.startswith("D/"),
+                  "%s has a malformed record: %r" % (fn, line))
+    ents = entries_of(wc)
+    check_eq(sorted(ents), ["a.txt", "b.txt"], "entries after interrupted checkout")
+
+
+@test("rtag, tag -F and tag -d update the symbol table correctly")
+def t_tag_move_delete(r):
+    r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "two\n"})
+    wc = r.checkout("m")
+    r.cvs(["tag", "T1"], cwd=wc)                       # T1 -> 1.1
+    write(os.path.join(wc, "a.txt"), "one\ntwo\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)          # a.txt -> 1.2
+    r.cvs(["tag", "-F", "T1"], cwd=wc)                 # move T1 -> 1.2
+    r.cvs(["rtag", "-r", "T1", "R1", "m"])             # R1 -> wherever T1 is
+    r.cvs(["rtag", "-b", "BR2", "m"])                  # branch tag off head
+
+    _, out = r.cvs(["log", "a.txt"], cwd=wc)
+    for tag, pat in (("T1", r"^1\.2$"), ("R1", r"^1\.2$"), ("BR2", r"^1\.2\.0\.\d+$")):
+        m = re.search(r"^\t%s:\s*(\S+)$" % tag, out, re.M)
+        check(m is not None, "%s missing from symbolic names:\n%s" % (tag, out))
+        if m:
+            check(re.match(pat, m.group(1)) is not None,
+                  "%s points at %r, expected %r" % (tag, m.group(1), pat))
+
+    r.cvs(["tag", "-d", "T1"], cwd=wc)                 # delete via tag
+    r.cvs(["rtag", "-d", "R1", "m"])                   # delete via rtag
+    _, out = r.cvs(["log", "a.txt"], cwd=wc)
+    check(re.search(r"^\tT1:", out, re.M) is None, "T1 still present after tag -d:\n" + out)
+    check(re.search(r"^\tR1:", out, re.M) is None, "R1 still present after rtag -d:\n" + out)
+    check(re.search(r"^\tBR2:", out, re.M) is not None, "BR2 lost by the deletes:\n" + out)
+
+    # The rewritten ,v files must still be fully usable afterwards.
+    write(os.path.join(wc, "a.txt"), "one\ntwo\nthree\n")
+    _, out = r.cvs(["commit", "-m", "third"], cwd=wc)
+    check("new revision: 1.3" in out, "commit after tagging did not produce 1.3:\n" + out)
+    r.cvs(["update", "-r", "BR2"], cwd=wc)
+    check_eq(read(os.path.join(wc, "a.txt")), "one\ntwo\n", "content on branch BR2")
+    r.cvs(["update", "-A"], cwd=wc)
+    check_eq(read(os.path.join(wc, "a.txt")), "one\ntwo\nthree\n", "content back on head")
+
+
+@test("text file bigger than the RCS parse buffer round trips")
+def t_large_text(r):
+    # ~205 KiB, which crosses several 64 KiB RCSBUF_BUFSIZE boundaries in
+    # rcsbuf_fill and exercises the buffered delta walk; the @s exercise RCS
+    # @-escaping.  See t_huge_text for the regime past MAX_INCR.
+    payload = "".join("line %05d %s @@ at@sign\n" % (i, "x" * (i % 60))
+                      for i in range(4000))
+    r.import_tree("m", {"big.txt": payload})
+    wc = r.checkout("m")
+    check_eq(read(os.path.join(wc, "big.txt")), payload, "content after first checkout")
+
+    write(os.path.join(wc, "big.txt"), payload + "tail\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)
+
+    r.cvs(["update", "-r", "1.1", "big.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "big.txt")), payload, "content of revision 1.1")
+    r.cvs(["update", "-A", "big.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "big.txt")), payload + "tail\n", "content of head")
+
+    wc2root = os.path.join(r.root, "wc2")
+    os.makedirs(wc2root)
+    r.cvs(["checkout", "m"], cwd=wc2root)
+    check_eq(read(os.path.join(wc2root, "m", "big.txt")), payload + "tail\n",
+             "content after second checkout")
+
+
+@test("empty file round trips")
+def t_empty_file(r):
+    # Exercises the st_size == 0 branch of the RCS parse-buffer pre-size,
+    # which is skipped and must fall back to incremental growth.
+    r.import_tree("m", {"empty.txt": "", "a.txt": "one\n"})
+    wc = r.checkout("m")
+    check(os.path.isfile(os.path.join(wc, "empty.txt")), "empty.txt not checked out")
+    check_eq(read(os.path.join(wc, "empty.txt")), "", "empty file content")
+    write(os.path.join(wc, "empty.txt"), "now has content\n")
+    r.cvs(["commit", "-m", "fill it"], cwd=wc)
+    r.cvs(["update", "-r", "1.1", "empty.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "empty.txt")), "", "empty file at revision 1.1")
+
+
+@test("text file past the RCS buffer growth threshold round trips")
+def t_huge_text(r):
+    # The parse-buffer pre-size exists for ,v files past MAX_INCR (2 MiB),
+    # where expand_string stops doubling and grows by a constant instead.  The
+    # 205 KiB case above never leaves the geometric regime, so it cannot show a
+    # regression in the path the optimization actually targets.  ~3 MiB puts
+    # the ,v above MAX_INCR and below the 8 MiB pre-size cap.
+    line = "the quick brown fox jumps over the lazy dog 0123456789 @@\n"
+    payload = line * (3 * 1024 * 1024 // len(line))
+    r.import_tree("m", {"huge.txt": payload})
+    wc = r.checkout("m")
+    check_eq(len(read(os.path.join(wc, "huge.txt"))), len(payload), "huge file size")
+    check_eq(read(os.path.join(wc, "huge.txt")), payload, "huge file content")
+
+    write(os.path.join(wc, "huge.txt"), payload + "tail\n")
+    r.cvs(["commit", "-m", "second"], cwd=wc)
+    r.cvs(["update", "-r", "1.1", "huge.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "huge.txt")), payload, "huge file at revision 1.1")
+    r.cvs(["update", "-A", "huge.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "huge.txt")), payload + "tail\n", "huge file at head")
+
+    # Tagging rewrites the whole ,v, which is the RCS_copydeltas path.
+    r.cvs(["tag", "REL1"], cwd=wc)
+    r.cvs(["update", "-r", "REL1", "huge.txt"], cwd=wc)
+    check_eq(read(os.path.join(wc, "huge.txt")), payload + "tail\n",
+             "huge file content at REL1 after the ,v was rewritten")
+
+
+@test("a ,v present in both the repository and the Attic is listed once")
+def t_attic_duplicate(r):
+    r.import_tree("m", {"a.txt": "one\n", "b.txt": "two\n"})
+    attic = os.path.join(r.repo, "m", "Attic")
+    os.makedirs(attic, exist_ok=True)
+    shutil.copyfile(os.path.join(r.repo, "m", "a.txt,v"),
+                    os.path.join(attic, "a.txt,v"))
+    wc = r.checkout("m")
+    check_eq(read(os.path.join(wc, "a.txt")), "one\n", "a.txt content")
+    ents = entries_of(wc)
+    check_eq(sorted(ents), ["a.txt", "b.txt"], "entries with an Attic duplicate")
+    # An update in the working copy walks Entries plus repository plus Attic;
+    # the duplicate name must still collapse to a single entry.
+    _, out = r.cvs(["update"], cwd=wc)
+    ents = entries_of(wc)
+    check_eq(sorted(ents), ["a.txt", "b.txt"], "entries after update")
+
+
 @test("a second checkout of the same module matches the first")
 def t_second_checkout(r):
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "two\n"})

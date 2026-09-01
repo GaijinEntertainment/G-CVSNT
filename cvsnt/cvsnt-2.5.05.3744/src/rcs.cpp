@@ -859,9 +859,12 @@ static void rcsvers_delproc (Node *p)
    that for many common operations, CVS spends most of its time
    reading keys, so it's worth doing some fairly hairy optimization.  */
 
-/* The number of bytes we try to read each time we need more data.  */
+/* The number of bytes we try to read each time we need more data.
+   This used to be BUFSIZ*10, which is platform-dependent and tiny on
+   MSVC (BUFSIZ is 512 there, giving 5120-byte reads, versus 81920 on
+   glibc); use a fixed 64 KiB chunk on every platform.  */
 
-#define RCSBUF_BUFSIZE (BUFSIZ*10)
+#define RCSBUF_BUFSIZE (64*1024)
 
 /* Set up to start gathering keys and values from an RCS file.  This
    initializes RCSBUF.  */
@@ -869,7 +872,7 @@ static void rcsvers_delproc (Node *p)
 static int rcsbuf_open(struct rcsbuffer *rcsbuf, const char *filename)
 {
 	FILE *fp;
-	int orig_lockId = rcsbuf->lockId;
+	size_t orig_lockId = rcsbuf->lockId;
 
 	if(!filename)
 		filename = rcsbuf->filename;
@@ -933,6 +936,34 @@ static int rcsbuf_open(struct rcsbuffer *rcsbuf, const char *filename)
  		fclose(rcsbuf->fp);
  		rcsbuf->fp = fp;
 #endif
+	}
+
+	/* Pre-size the buffer from the file size so rcsbuf_fill never has to
+	   grow it while this file is parsed: above MAX_INCR, expand_string
+	   grows linearly, making a large ,v cost O(size^2/MAX_INCR) in
+	   realloc-memcpy, and every move also runs the pointer-relocation
+	   loop.  The extra RCSBUF_BUFSIZE gives the final, EOF-detecting
+	   fill room so it does not trigger one more expansion.  Very large
+	   files (or an fstat failure) simply keep the incremental-growth
+	   behaviour.  No values point into the buffer yet, so a move here
+	   relocates nothing.
+
+	   The cap is deliberately well below MAX_INCR*4: pre-sizing also
+	   makes rcsbuf_setpos_to_delta_base read the whole deltatext tail
+	   resident in one go, so a large cap trades realloc-memcpy for
+	   resident memory.  Below MAX_INCR expand_string already doubles
+	   geometrically, so 8 MiB captures nearly all of the win without
+	   making peak footprint track ,v size.  */
+	{
+		struct stat sb;
+		if (fstat (fileno (rcsbuf->fp), &sb) == 0
+		    && sb.st_size > 0 && sb.st_size <= 8*1024*1024)
+		{
+			expand_string (&rcsbuf->buffer, &rcsbuf->buffer_size,
+				       (size_t) sb.st_size + RCSBUF_BUFSIZE + 1);
+			rcsbuf->ptr = rcsbuf->buffer;
+			rcsbuf->ptrend = rcsbuf->buffer;
+		}
 	}
 
 	return 1;
@@ -6814,7 +6845,8 @@ static void RCS_copydeltas(RCSNode *rcs, FILE *fout, Deltatext *newdtext, char *
     char *bufrest;
     int nls;
     size_t buflen;
-    char buf[8192];
+    char buf[64*1024];
+    const size_t bufsize = sizeof(buf);
     int got;
 
     /* Count the number of versions for which we have to do some
@@ -6923,7 +6955,13 @@ static void RCS_copydeltas(RCSNode *rcs, FILE *fout, Deltatext *newdtext, char *
 	fwrite (bufrest, 1, buflen, fout);
     }
 
-    while ((got = fread (buf, 1, sizeof buf, rcs->rcsbuf.fp)) != 0)
+    /* An 8 KiB stack buffer here meant ~2*ceil(D/8192) read/write calls
+       for a D-byte deltatext section; copy through a 64 KiB stack buffer
+       instead.  Deliberately not larger: this runs once per rewritten
+       ,v, and a heap buffer above ~512 KiB would go through
+       VirtualAlloc/VirtualFree on the Windows CRT, which would make
+       tagging a tree of small files slower, not faster.  */
+    while ((got = (int) fread (buf, 1, bufsize, rcs->rcsbuf.fp)) != 0)
     {
 	if (nls > 0
 	    && got >= nls
@@ -7149,9 +7187,18 @@ static char *rcs_lockfilename (const char *rcsfile)
 
 /* Rewrite an RCS file.  The basic idea here is that the caller should
    first call RCS_reparsercsfile, then munge the data structures as
-   desired (via RCS_delete_revs, RCS_settag, &c), then call RCS_rewrite.  */
+   desired (via RCS_delete_revs, RCS_settag, &c), then call RCS_rewrite.
 
-void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta)
+   REPARSE selects whether the node is re-parsed from the newly written
+   file before returning.  Pass false only when the caller makes no
+   further use of the node before it is freed: the rewrite closes the rcs
+   buffer, which leaves every buffer-backed string field of the node
+   dangling until the re-parse (or the teardown in freercsnode) replaces
+   it.  The node is refcounted, so a false is honoured only for a sole
+   holder; with other holders alive the node is re-parsed anyway to keep
+   their view valid.  */
+
+void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compress_new_delta, bool reparse)
 {
     FILE *fout;
 	size_t lockId_temp;
@@ -7165,6 +7212,15 @@ void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compres
     resolve_symlink (&(rcs->path));
 
     fout = rcs_internal_lockfile (rcs->path, &lockId_temp);
+
+	/* The admin and delta-tree writers below emit thousands of small
+	   stdio calls per file; a large stream buffer keeps that from
+	   becoming one small write() per few KiB.  This must happen before
+	   the first byte is written to fout; if setvbuf fails, stdio simply
+	   keeps its default buffer.  64 KiB for the same reason as the copy
+	   buffer above: large enough to collapse the small writes, small
+	   enough to stay out of the Windows CRT's VirtualAlloc path.  */
+	setvbuf (fout, NULL, _IOFBF, 64*1024);
 
     RCS_putadmin (rcs, fout);
     RCS_putdtree (rcs, rcs->head, fout);
@@ -7196,8 +7252,14 @@ void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compres
     rcsbuf_close (&rcs->rcsbuf);
     rcs_internal_unlockfile (fout, rcs->path, lockId_temp);
 
+	/* rcsbuf_close above freed the buffer that every string in the node
+	   points into, so the node is unusable either way.  Release the
+	   contents even when not re-parsing: it costs what freercsnode would
+	   have spent anyway, and it turns a would-be silent use-after-free in
+	   any future caller into an immediate NULL dereference.  */
 	free_rcsnode_contents(rcs);
-	RCS_reparsercsfile(rcs);
+	if (reparse || rcs->refcount > 1)
+		RCS_reparsercsfile(rcs);
 }
 
 /*
