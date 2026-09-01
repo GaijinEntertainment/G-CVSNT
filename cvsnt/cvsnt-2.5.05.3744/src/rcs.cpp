@@ -7238,8 +7238,8 @@ void RCS_rewrite (RCSNode *rcs, Deltatext *newdtext, char *insertpt, int compres
     /* Update delta_pos to the current position in the output file.
        Do NOT move these statements: they must be done after fin has
        been positioned at the old delta_pos, but before any delta
-       texts have been written to fout. */
-	fflush(fout);
+       texts have been written to fout.  RCS_putdesc has flushed the
+       stream (the single home of that invariant). */
     rcs->delta_pos = CVS_FTELL (fout);
     if (rcs->delta_pos == -1)
 		error (1, errno, "cannot ftell in RCS file %s", rcs->path);

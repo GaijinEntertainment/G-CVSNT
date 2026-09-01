@@ -531,7 +531,6 @@ static void RCS_convert_to_new_binary(RCSNode *rcs)
   RCS_putdtree (rcs, rcs->head, fout);
   RCS_putdesc (rcs, fout);
 
-  fflush(fout);
   for (int i = 0; i < lst.count; i ++)
   {
     char *delta = (char*)xmalloc(16+lst.data[i]->text->len);

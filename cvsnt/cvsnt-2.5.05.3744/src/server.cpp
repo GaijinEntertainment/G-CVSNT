@@ -4328,6 +4328,7 @@ void server_copy_file (const char *file, const char *update_dir, const char *rep
 
     if (!supported_response ("Copy-file"))
 		return;
+	cvs_direct_response_begin ();
 	buf_output0(buf_to_net,"Copy-file ");
     output_dir (update_dir, repository);
 	server_buf_output0(buf_to_net,file);
@@ -4354,6 +4355,7 @@ void server_modtime (struct file_info *finfo, Vers_TS *vers_ts)
 	   circumstances.  */
 	return;
     date_to_internet (outdate, date);
+	cvs_direct_response_begin ();
 	buf_output0(buf_to_net,"Mod-time ");
 	buf_output0(buf_to_net,outdate);
 	buf_output0(buf_to_net,"\n");
@@ -6841,10 +6843,9 @@ void cvs_flushout_perfile ()
 #ifdef SERVER_SUPPORT
 	if (server_active && !(temp_protocol && temp_protocol->server_flush_data))
 	{
-		if ((!stdout_buf || stdout_buf->data == NULL)
-		    && (!stderr_buf || stderr_buf->data == NULL)
-		    && (!buf_to_net || buf_to_net->data == NULL
-			|| buf_to_net->data->next == NULL))
+		if ((!stdout_buf || buf_empty_p (stdout_buf))
+		    && (!stderr_buf || buf_empty_p (stderr_buf))
+		    && (!buf_to_net || buf_chunk_count (buf_to_net) <= 1))
 			return;
 	}
 #endif

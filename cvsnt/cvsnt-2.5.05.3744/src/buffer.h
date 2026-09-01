@@ -121,6 +121,7 @@ struct buffer *nonpacketizing_buffer_initialize(struct buffer *, int (*) (void *
 void packetizing_buffer_set_wrap(struct buffer *buf, struct buffer *wrap);
 
 int buf_empty_p(struct buffer *);
+int buf_chunk_count(struct buffer *);
 void buf_output(struct buffer *, const char *, size_t);
 void buf_output0(struct buffer *, const char *);
 void buf_append_char(struct buffer *, int);

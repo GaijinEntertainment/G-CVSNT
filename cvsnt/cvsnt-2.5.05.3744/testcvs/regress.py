@@ -820,6 +820,27 @@ def t_history_records(r):
           "cvs history reports nothing for the recorded operations:\n" + out)
 
 
+@test("an unwritable history file warns and the command still succeeds")
+def t_history_unwritable(r):
+    # history_write warns and continues when CVSROOT/history cannot be
+    # opened or written; the old per-record code aborted.  Pin the new
+    # semantics: a read-only history file costs one warning, not the
+    # checkout.
+    import stat
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    hist = os.path.join(r.repo, "CVSROOT", "history")
+    if not os.path.isfile(hist):
+        write(hist, "")
+    os.chmod(hist, stat.S_IREAD)
+    try:
+        rc, out = r.cvs(["checkout", "m"], expect_ok=False)
+    finally:
+        os.chmod(hist, stat.S_IREAD | stat.S_IWRITE)
+    check_eq(rc, 0, "checkout failed with an unwritable history file:" + chr(10) + out)
+    check("cannot write to history file" in out,
+          "no warning about the history file")
+
+
 @test("a second checkout of the same module matches the first")
 def t_second_checkout(r):
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "two\n"})
