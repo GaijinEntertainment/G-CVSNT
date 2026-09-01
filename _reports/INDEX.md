@@ -38,7 +38,7 @@ the commit history, and their defects remain **open**.
 
 ## Everything else
 
-`BUG-server-22` (Blob-ref-created never sent) was found during review after the
+`BUG-server-23` (Blob-ref-created never sent; the id skips 22, which a later slice uses) was found during review after the
 analysis pass and is open.
 
 Every other `BUG-*` page remains open work. A cross-reference of fixes to the
