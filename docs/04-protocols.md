@@ -67,7 +67,8 @@ an old client or an old server** — the blob extensions are mandatory.
 tells the CVS server only the 71-byte reference — so the payload does not cross the CVS connection,
 *provided* the background pre-upload already placed it in the store. If it did not, the client falls
 back to `Blob-transfer` with the full payload (`src/client.cpp:5864`). `update` always takes the
-reference path (`src/update.cpp:410`); `commit` can fall back (`src/commit.cpp:662`).
+reference path (`src/update.cpp:410`); on commit the fallback decision sits in `send_blob_file`
+(`src/client.cpp:5864`).
 
 ### Responses added by this fork
 
@@ -83,8 +84,8 @@ then a decimal byte count — but its "content" is the 71-byte reference rather 
 (`src/server.cpp:4509`, byte count at `src/server.cpp:4565`).
 
 `Blob-url` values come from the server's own configuration: `cvsnt/PServer/BlobURL` and
-`BlobURL0`...`BlobURL31` (`src/server.cpp:3346`). Later values *override* earlier ones, and the
-client round-robins between them: every value is appended to a list, none is discarded
+`BlobURL0`...`BlobURL31` (`src/server.cpp:3346`). The client appends every value to a list and
+round-robins between them — nothing is discarded
 (`add_blobs_url`, `src/client.cpp:2138`; `get_round_robin_blob_url`, `src/client.cpp:2183`). The
 "overwrite" wording in the server-side comments is stale. When an OTP is configured,
 `BlobEncryptedURL0`...`BlobEncryptedURL31` are sent *as well*, after the `Blob-OTP` line
@@ -92,7 +93,11 @@ client round-robins between them: every value is appended to a list, none is dis
 
 `Blob-OTP` sends a TOTP secret derived from the server-side shared secret `cvsnt/PServer/BlobOTP`
 plus the current page number, both hex-encoded (`src/server.cpp:3380`). The client uses it to
-authenticate to the CAFS server without ever seeing the shared secret.
+authenticate to the CAFS server without ever seeing the shared secret. The response rides the
+ordinary CVS stream (`buf_to_net`, `src/server.cpp:3402-3405`), so over a cleartext method such as
+`:pserver:` a network observer can read the OTP page and present it to the blob server for the
+page window — a `BlobOTP` deployment needs an encrypted CVS transport (`-x`, `sserver`, ssh) or an
+equivalently private path for that response.
 
 ### Client-side override
 
@@ -104,9 +109,12 @@ cvs --blob_url cvs-proxy.lan@2403 up
 
 The help text at `src/main.cpp:349` advertises a `|`-separated list with `def` meaning "the master".
 **Neither is implemented.** `parse_url_port` (`src/client.cpp:2123`) truncates at the first `@` and
-`atoi()`s the rest, so everything after the first entry is silently discarded, and
-`src/download_blob_to.cpp:258` then forces a single URL with no round-robin. No code anywhere
-compares against `def`.
+`atoi()`s the rest, so everything after the first entry is silently discarded. No code anywhere
+compares against `def`. The parsed URL replaces only the advertised download list: the master URL
+is still appended after it (`src/download_blob_to.cpp:258,283`), so downloads fall back to the
+master when the override fails, and uploads ignore the override entirely — an upload client always
+talks to the master (`getNext` with `id < 0` returns the last URL,
+`src/download_blob_to.cpp:216-222`).
 
 Two transport back-ends implement `BlobNetworkProcessor` (`src/blob_network_processor.h`):
 
@@ -126,8 +134,8 @@ connection; little-endian lengths.
 The server greets with `BLOBPUSH_SERVER_V` plus a three-character version (20 bytes total). The
 client replies `VERS` plus its own three-character version, then one of two negotiations:
 
-* **Authenticated (current)** — client sends an 8-byte OTP page number, then 8 random bytes and its
-  Diffie-Hellman parameters, all encrypted with the OTP. The server answers with its own 8 random
+* **Authenticated (current)** — client sends its 8-byte OTP page number in the clear, then 8 random
+  bytes and its Diffie-Hellman parameters encrypted with the OTP (`blob_push_protocol.h:17`). The server answers with its own 8 random
   bytes and DH parameters. Both derive the same session keys from the two nonces, the OTP page and
   the DH exchange. The client then sends its 64-bit timestamp plus 64 padding bits, encrypted with
   the session keys ("Client Ready"). The server echoes 64 bits of ones, which the client verifies —
@@ -156,14 +164,19 @@ followed by 32 raw bytes (`bin_hash_len`), for `hash_len = 38` bytes total.
 | `CHCK` | hash | `HAVE`, `NONE`, `ERxx` |
 | `PUSH` | hash plus 8-byte size, then that many bytes of prepared blob | `HAVE`, `ERxx` |
 | `STRM` | hash, then chunks until a zero-length chunk | `HAVE`, `ERxx` |
-| `PULL` | hash plus 8-byte size plus 4-byte start offset | `TAKE` plus echo of the request, then the bytes; or `NONE` / `ERxx` |
+| `PULL` | hash plus 8-byte size plus 4-byte start offset | `TAKE` with hash, 8-byte body length, 4-byte offset, then the bytes; or `NONE` / `ERxx` |
 
 Notes:
 
-* `PULL` with size 0 and offset 0 means "the whole blob". The *start offset* is counted in units of
-  `1 << 20` (`pull_chunk_size`), so a client can resume from any megabyte boundary. The body itself
-  is not chunked — after the `TAKE` header the server streams the whole remaining length in one run
-  (`keyValueServer/serverLib/blob_push_proc.cpp:214`).
+* `PULL` with size 0 and offset 0 means "the whole blob" — and that is the only shape that works
+  today. The `TAKE` size field is not an echo of the request: the server writes the byte count it
+  intends to send (`sizeLeft`, `blob_push_proc.cpp:201-208`). Two implementation defects break the
+  general form: a nonzero size is never clamped in the send loop — `blobe_fileio_pull` hands back
+  the whole remaining mapping and the server streams all of it (`blob_push_proc.cpp:217-229`),
+  misframing the connection; and a nonzero offset (counted in `1 << 20` units,
+  `pull_chunk_size`) returns bytes from the *start* of the blob — `ca_blobs_fs/src/fileio.cpp:313`
+  ignores `from` in the returned pointer — so a resume reconstructs invalid content. The body is
+  not chunked: after the `TAKE` header the server streams in one run.
 * `STRM` chunks are `uint16_t` length plus that many bytes; a zero length ends the stream, and
   `0xFFFF` aborts it (the server replies `ERIO`,
   `keyValueServer/serverLib/blob_push_proc.cpp:151`), so the largest data chunk is 65534 bytes. This
@@ -174,7 +187,8 @@ Notes:
 
 ### Why a separate protocol
 
-* Blob bytes never occupy the CVS connection, so metadata stays responsive on a slow link.
+* Blob bytes stay off the CVS connection (apart from the commit `Blob-transfer` fallback above),
+  so metadata stays responsive on a slow link.
 * Content addressing makes the service cacheable by a proxy that understands nothing about CVS
   (`keyValueServer/proxy/`).
 * Downloads can be parallelised across worker threads (`cvs -j N`) and across several URLs.

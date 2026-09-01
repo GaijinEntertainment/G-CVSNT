@@ -172,9 +172,11 @@ written regardless. Where `-n` does apply, the local version is deleted outright
 Two mechanisms coexist:
 
 1. **Filesystem locks** in the repository directory: `#cvs.lock` (the master lock — a *directory*,
-   created with `CVS_MKDIR` at `src/lock.cpp:1088`), `#cvs.rfl.<host>(<user>).<pid>` (read) and
-   `#cvs.wfl.<host>(<user>).<pid>` (write). Names at `src/cvs.h:222`; construction at
-   `src/lock.cpp:722` and `src/lock.cpp:878`. `LockDir` in `CVSROOT/config` can redirect them to a
+   created with `CVS_MKDIR` at `src/lock.cpp:1088`), plus read (`#cvs.rfl`) and write (`#cvs.wfl`)
+   marker files. On a Windows server the name is `#cvs.rfl.<host>(<user>).<pid>`; on POSIX it is
+   `#cvs.rfl.<host>.<pid>` (or a short form without the host when `HAVE_LONG_FILE_NAMES` is
+   absent) — the `(<user>)` part exists only in the `_WIN32` branches. Names at `src/cvs.h:222`;
+   construction at `src/lock.cpp:719-745` (read) and its write-lock mirror at `src/lock.cpp:878`. `LockDir` in `CVSROOT/config` can redirect them to a
    scratch filesystem.
 2. **The lock server** `cvslockd` on port 2402, selected with `LockServer` in `CVSROOT/config`
    (`src/lock.cpp:152`, connection at `src/lock.cpp:190`). Locks become in-memory state in a single

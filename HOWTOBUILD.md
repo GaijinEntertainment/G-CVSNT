@@ -1,7 +1,9 @@
 # How to build G-CVSNT
 
-All source lives under `cvsnt/cvsnt-2.5.05.3744/`. Every path below is relative to the repository
-root unless stated otherwise.
+All source lives under `cvsnt/cvsnt-2.5.05.3744/`. Repository files (`README.md`, `docs/`,
+`_reports/`, `cvsnt/build-*`) are cited relative to the repository root; bare source paths
+(`configure.in`, `Makefile.am`, `tools/...`, `osx/...`, `zstd/...`) are relative to
+`cvsnt/cvsnt-2.5.05.3744/`.
 
 Two build systems coexist:
 
@@ -93,8 +95,8 @@ installed by the main `make install`), compiles with `clang++ -O3 -msse4.1`, and
 | `--enable-gserver` / `--enable-sspi` | GSSAPI / SSPI methods |
 | `--enable-64bit` | 64-bit build |
 | `--disable-avx512` | Build BLAKE3 **without** AVX-512 kernels. AVX-512 is **on by default** on non-macOS targets (`configure.in:735`). AMD CPUs older than Zen 4 do not have it and will die with an illegal instruction, so use this flag if any target machine might be one (commit `2cd984a`) |
-| `--with-config_dir=DIR` | Where global settings live; defaults to `${sysconfdir}/cvsnt` |
-| `--with-protocol_dir=DIR` | Where protocol plugins are searched for |
+| `--with-config-dir=DIR` | Where global settings live; defaults to `${sysconfdir}/cvsnt` |
+| `--with-protocol-dir=DIR` | Where protocol plugins are searched for |
 | `--disable-mysql`, `--disable-postgres`, `--disable-sqlite`, `--disable-odbc` | Skip database back-ends you do not need — this removes most of the optional dependencies |
 | `--disable-hfs` | Skip HFS+ support (macOS only) |
 
@@ -119,9 +121,13 @@ cd cvsnt
 What it does:
 
 1. `brew install autoconf automake pkg-config libtool pcre openssl@3`.
-2. Symlinks the Homebrew OpenSSL 3 headers and libraries into `/usr/local/include` and
-   `/usr/local/lib`. It handles both the Intel (`/usr/local/opt`) and Apple Silicon
-   (`/opt/homebrew/opt`) prefixes.
+2. Force-symlinks the Homebrew OpenSSL 3 headers and libraries into `/usr/local/include` and
+   `/usr/local/lib`, replacing whatever was there — prior targets are not saved or restored, so
+   the machine-wide OpenSSL setup can change for other software. It handles both the Intel
+   (`/usr/local/opt`) and Apple Silicon (`/opt/homebrew/opt`) prefixes, but the library links use
+   a nonexistent `libopenssl.*` stem for everything except `libcrypto`
+   (`cvsnt/build-macosx:31-39`); `libssl` itself is never linked, so configure's `SSL_CTX_new`
+   probe can fail on a clean machine and silently disable `:sserver:`.
 3. `autoreconf -i --force`.
 4. Builds and installs the in-tree `zstd`.
 5. Runs `osx/build-mac`, which configures with clang for the chosen architecture and produces
@@ -155,7 +161,9 @@ tar xzf cvsnt-3.5.*.tar.gz
 That copies binaries and libraries into `/usr/local/bin`, `/usr/local/lib`, etc.
 
 `build-macosx` modifies the working tree. When it is done, run `git checkout .` to discard the
-generated files, as the script itself reminds you.
+generated files, as the script itself reminds you — but only if the tree was clean when you
+started: `git checkout .` throws away *every* tracked modification, not just what the build
+generated. Commit or stash your own edits before building.
 
 Prebuilt macOS packages for x64 and arm64 are published under
 [Releases](https://github.com/GaijinEntertainment/G-CVSNT/releases).
@@ -181,7 +189,10 @@ cvsnt\cvsnt-2.5.05.3744\cvsnt.sln
 ```
 
 Open it, pick `Release|x64` (or `Release|Win32`), and build the solution. All 58 projects in the
-solution are marked to build; `cvsnt` produces `cvs.exe`.
+solution are marked to build; `cvsnt` produces `cvs.exe`. The solution has no `cafs_server`
+project — build the Windows blob server separately with
+`keyValueServer/server/build_server_cafs.cmd`; the solution's `cafs_proxy` project produces
+`cafs_proxy.exe`.
 
 The main client/server project (`cvsnt.vcxproj`) is configured with:
 
@@ -200,8 +211,8 @@ make_msix64.bat        (64-bit)
 make_msi.bat           (32-bit)
 ```
 
-Both must be run **from the `cvsnt/` directory** — they invoke `msi_toolsin\candle.exe` and
-`msi_toolsin\light.exe` by relative path and read the `.wxs` from the current directory. The WiX
+Both must be run **from the `cvsnt/` directory** — they invoke `msi_tools\bin\candle.exe` and
+`msi_tools\bin\light.exe` by relative path and read the `.wxs` from the current directory. The WiX
 toolset ships in `cvsnt/msi_tools/bin/`; nothing needs to be on `PATH`.
 
 ### Building without Visual Studio
@@ -232,8 +243,9 @@ Two things to know:
 * `cvs init` needs the trigger plugin (`triggers/info_triggers.vcxproj`); without it you get
   `Couldn't open default trigger library`. Client commands work without it.
 
-`_reports/BUILD-01-windows-toolchain.md` has the full environment setup, the makefile, the exact
-dependency graph and every problem encountered along the way.
+`_reports/BUILD-01-windows-toolchain.md` (in the analysis-reports slice of this audit series) has
+the full environment setup, the makefile, the exact dependency graph and every problem encountered
+along the way.
 
 ---
 

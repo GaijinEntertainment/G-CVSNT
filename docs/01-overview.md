@@ -23,8 +23,11 @@ G-CVSNT adds a keyword-expansion mode **`-kB`** ("binary delta"), and its compre
 * The `,v` file stores only a fixed-size **blob reference** (`blake3:<64 hex chars>`) per revision.
 * Because the store is keyed by content hash, identical content anywhere in the repository — across
   paths, branches, and revisions — occupies exactly one blob.
-* Blobs are transferred over a **separate, dedicated TCP protocol** (`blob_push`), not inline in the
-  CVS stream. That connection can be pointed at a read-only caching **proxy** near the client.
+* Blobs are transferred over a **separate, dedicated TCP protocol** (`blob_push`), not inline in
+  the CVS stream — with one exception: a commit whose background pre-upload has not finished falls
+  back to `Blob-transfer` with the payload on the CVS connection (`send_blob_file_direct`,
+  `src/client.cpp:5775`). The blob connection can be pointed at a caching **proxy** near the
+  client (write-through by default).
 
 The result: `,v` files stay small and roughly constant in size, tag/branch operations touch only small
 headers, and binary payload moves over a channel that can be cached, parallelised and proxied.
@@ -49,11 +52,15 @@ headers, and binary payload moves over a channel that can be cached, parallelise
 | `cvs` / `cvs.exe` | The client, and (with `SERVER_SUPPORT`) the server-side command processor |
 | `cvslockd` | Lock server (advisory locking across concurrent server processes) |
 | `cafs_server` | Content-addressed blob store server — the authoritative blob storage |
-| `cafs_proxy_server` | Read-through caching proxy for `cafs_server`, deployable near clients |
-| `cvtblob` | Converts existing `,v` files with inline binary revisions into blob references |
-| `gc-blobs` | Garbage-collects blobs no longer referenced by any `,v` file |
-| `repack-blobs` | Recompresses blobs with the best available compressor |
-| `blake3-calc` | Prints the BLAKE3 hash (the blob key) of a file |
+| `cafs_proxy_server` | Caching proxy for `cafs_server`, deployable near clients; write-through by default (`cafs_proxy.exe` on Windows) |
+| `cvtblob` / `convert_to_blob` | Converts existing `,v` files with inline binary revisions into blob references |
+| `gc-blobs` / `gc_blobs` | Garbage-collects blobs no longer referenced by any `,v` file |
+| `repack-blobs` / `repack_blobs` | Recompresses blobs with the best available compressor |
+| `blake3-calc` / `blake3_calc` | Prints the BLAKE3 hash (the blob key) of a file |
+
+The default Linux `make install` ships the underscore names (`tools/Makefile.am:11`); the
+hyphenated names come from the alternate `tools/build_tools` path — see
+[06-server-operations.md](06-server-operations.md).
 
 ## Version and identity
 

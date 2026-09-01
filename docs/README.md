@@ -29,4 +29,5 @@ command set, the RCS format, ACLs, triggers — is unchanged.
 The `_reports/` directory at the repository root holds code-analysis output: individual bug findings
 (`BUG-*.md`), performance analyses of the update and tag paths (`PERF-*.md`), and build notes
 (`BUILD-*.md`). Each bug file is self-contained, with the offending code, a concrete failure
-scenario, and a suggested fix.
+scenario, and a suggested fix. The tree lands in the next slice of this audit series; on this
+branch every `_reports/` path is a forward reference.
