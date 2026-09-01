@@ -315,7 +315,19 @@ def t_binary(r):
     r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
     r.cvs(["checkout", "mb"])
     got = open(os.path.join(r.wc, "mb", "bin.dat"), "rb").read()
-    check_eq(got, payload, "binary round trip")
+    check_eq(got, payload, "binary import/checkout")
+
+    # The commit half of the round trip: change the bytes, commit, and
+    # read them back through a fresh checkout.
+    payload2 = bytes(reversed(payload)) + b"\x00\x01\x02"
+    with open(os.path.join(r.wc, "mb", "bin.dat"), "wb") as f:
+        f.write(payload2)
+    r.cvs(["commit", "-m", "bin2"], cwd=os.path.join(r.wc, "mb"))
+    wcroot = os.path.join(r.root, "wcbin2")
+    os.makedirs(wcroot)
+    r.cvs(["checkout", "mb"], cwd=wcroot)
+    got = open(os.path.join(wcroot, "mb", "bin.dat"), "rb").read()
+    check_eq(got, payload2, "binary commit/checkout round trip")
 
 
 @test("a second checkout of the same module matches the first")
