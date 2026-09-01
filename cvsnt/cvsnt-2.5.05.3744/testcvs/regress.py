@@ -459,20 +459,27 @@ def t_attic_duplicate(r):
     check_eq(sorted(ents), ["a.txt", "b.txt"], "entries after update")
 
 
-@test("an args file with a trailing newline parses cleanly")
-def t_args_file(r):
-    # line2argv once read past the terminating NUL when the line ended in
-    # a separator (strchr(sepchars, '\\0') matches the separator string's
-    # own terminator); an args file ends with a newline in the ordinary
-    # case, so this drives exactly that input class through @response-file.
-    r.import_tree("m", {"a.txt": "one\n"})
-    wc = r.checkout("m")
-    args = os.path.join(r.root, "args.txt")
-    write(args, "log\na.txt\n")
-    rc, out = r.cvs(["@" + args], cwd=wc, expect_ok=False)
-    check_eq(rc, 0, "args-file invocation failed:\n" + out)
-    check("Initial revision" in out, "args-file log lacks the revision:\n" + out)
-
+@test("a modules line ending in a separator parses (line2argv bounds)")
+def t_modules_trailing_separator(r):
+    # line2argv is what parses CVSROOT/modules (modules.cpp).  Its old
+    # separator skip tested strchr(sepchars, *p), which matches the NUL
+    # terminator, so a line whose last token is followed by a trailing
+    # space walked past the end of the buffer.  Drive exactly that class
+    # through a real modules file and check the alias resolves.
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    # The runtime modules file is the checked-out copy inside the
+    # repository; write it directly (CVSROOT checkout is ACL-gated).
+    import stat
+    mods = os.path.join(r.repo, "CVSROOT", "modules")
+    os.chmod(mods, stat.S_IREAD | stat.S_IWRITE)  # cvs init leaves it read-only
+    with open(mods, "a", newline=chr(10)) as f:
+        f.write("ali -a m " + chr(10))
+    wcroot = os.path.join(r.root, "wcali")
+    os.makedirs(wcroot)
+    rc, out = r.cvs(["checkout", "ali"], cwd=wcroot, expect_ok=False)
+    check_eq(rc, 0, "checkout through the alias failed:" + chr(10) + out)
+    check(os.path.isfile(os.path.join(wcroot, "m", "a.txt")),
+          "alias checkout did not produce m/a.txt")
 
 @test("a second checkout of the same module matches the first")
 def t_second_checkout(r):

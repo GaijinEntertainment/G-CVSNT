@@ -948,14 +948,14 @@ static int rcsbuf_open(struct rcsbuffer *rcsbuf, const char *filename)
 	   behaviour.  No values point into the buffer yet, so a move here
 	   relocates nothing.
 
-	   The cap is deliberately well below MAX_INCR*4: pre-sizing also
-	   makes rcsbuf_setpos_to_delta_base read the whole deltatext tail
-	   resident in one go, so a large cap trades realloc-memcpy for
-	   resident memory.  Below MAX_INCR expand_string already doubles
-	   geometrically, so 8 MiB captures nearly all of the win without
-	   making peak footprint track ,v size.  A ,v above the cap still
-	   pre-sizes to the cap and grows incrementally from there - a
-	   bound on the up-front allocation, not a cliff back to the
+	   The cap is deliberately well below MAX_INCR*4: the pre-size only
+	   sets capacity (the delta-tail reads stay chunked at RCSBUF_BUFSIZE),
+	   but a larger cap still costs resident memory per open ,v.  Below
+	   MAX_INCR expand_string already doubles geometrically, so 8 MiB
+	   captures nearly all of the realloc-memcpy win without making peak
+	   footprint track ,v size.  A ,v above the cap still pre-sizes to
+	   the cap and grows incrementally from there - a
+bound on the up-front allocation, not a cliff back to the
 	   from-scratch growth path.  */
 	{
 		struct stat sb;
@@ -6586,7 +6586,15 @@ static void rcsbuf_setpos_to_delta_base(RCSNode *rcs)
 {
 	rcs->rcsbuf.ptr=rcs->rcsbuf.buffer+rcs->delta_pos;
 	CVS_FSEEK(rcs->rcsbuf.fp,rcs->delta_pos,0);
-	size_t siz = fread(rcs->rcsbuf.ptr,1,rcs->rcsbuf.buffer_size-rcs->delta_pos,rcs->rcsbuf.fp);
+	/* Refill one chunk, not the whole remaining capacity: the pre-sized
+	   buffer would otherwise pull the entire deltatext tail resident, and
+	   rcsbuf_reuse_delta_buffer then memmoves that whole remainder once
+	   per delta on the RCS_deltas / RCS_fully_parse walks.  A chunk keeps
+	   the per-delta move bounded by RCSBUF_BUFSIZE.  */
+	size_t want = rcs->rcsbuf.buffer_size-rcs->delta_pos;
+	if (want > RCSBUF_BUFSIZE)
+		want = RCSBUF_BUFSIZE;
+	size_t siz = fread(rcs->rcsbuf.ptr,1,want,rcs->rcsbuf.fp);
 	if(!siz)
 	{
 		error(1,errno,"Couldn't read rcs file");
