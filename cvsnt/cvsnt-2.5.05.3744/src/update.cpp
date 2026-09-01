@@ -154,7 +154,7 @@ static const char *const update_usage[] =
     "\t-r rev\tUpdate using specified revision/tag (is sticky).\n",
 	"\t-S\tSelect between conflicting case sensitive names.\n",
 	"\t-t\tUpdate using last checkin time.\n",
-    "\t-n\tDo not leave .# backup copies behind (update -C overwrites, merges, joins). With -C the overwrite is irreversible.\n",
+    "\t-n\tDo not leave .# backup copies behind (update -C overwrites, merges, joins). Irreversible for -C overwrites and for nonmergeable (binary) conflicts, where the local file is replaced without a copy.\n",
     "\t--no-backups\tSame as -n.\n",
     "\t--move-in-the-way\tRename an unversioned file that blocks an incoming file to .#name.notversioned.* and continue.\n",
     "\t--recreate-entries\tRecreate a missing CVS/Entries as empty and refetch that directory instead of aborting.\n",
@@ -3285,7 +3285,10 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
     xfree (rev1);
     xfree (rev2);
 #ifdef SERVER_SUPPORT
-    if (server_active)
+    /* No copy was made under -n (backup is NULL then), so send none: a
+       client that forwards -n would otherwise hand a NULL name to
+       server_copy_file.  */
+    if (server_active && backup_local_files)
     {
 		server_copy_file (finfo->file, finfo->update_dir, finfo->repository,
 				backup);
