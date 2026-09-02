@@ -195,6 +195,13 @@ int add (int argc, char **argv)
 	       nothing, it would spit back a usage message).  */
 	    return err;
 
+	/* An explicit text -k on binary content is refused before anything is
+	   sent, for the whole command, as the local path does.  */
+	for (i = 0; i < argc; ++i)
+	    if (!isdir (argv[i])
+		&& content_kopt (argv[i], options, options && options[0]) == CONTENT_KOPT_REFUSE)
+		error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
+		       argv[i], options);
 	if (options && options[0])
 	    option_with_arg("-k", options);
 	option_with_arg ("-m", message);
@@ -337,41 +344,15 @@ int add (int argc, char **argv)
 		xfree (filedir);
 	    }
 	}
-	/* Binary-ness is decided from the bytes, and only this side has them.
-	   A file neither the wrappers nor -k marked binary goes over with a
-	   per-file Kopt: the server turns the Is-modified that follows into a
-	   dummy entry carrying it, so one add can mix text and binary.  */
-	if (!kopt_is_binary (options))
-	    for (i = 0; i < argc; ++i)
-	    {
-		if (isdir (argv[i]) || !isfile (argv[i])
-		    || !CFileAccess::looks_binary (argv[i]))
-		    continue;
-		if (options && options[0])
-		    error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
-			   argv[i], options);
-		error (0, 0, "%s has binary content, adding it as -kB", argv[i]);
-
-		const char *base = last_component (argv[i]);
-		if (base == argv[i])
-		    send_a_repository ("", (repository = Name_Repository (NULL, NULL)), "");
-		else
-		{
-		    char *dir = xstrdup (argv[i]);
-		    dir[base - argv[i] - 1] = '\0';
-		    send_a_repository ("", (repository = Name_Repository (dir, dir)), dir);
-		    xfree (dir);
-		}
-		xfree (repository);
-		send_to_server ("Kopt -kB\n", 0);
-		send_to_server ("Is-modified ", 0);
-		send_to_server (base, 0);
-		send_to_server ("\n", 1);
-	    }
+	/* Binary-ness is decided from the bytes, and only this side has them:
+	   send_files sends a per-file Kopt -kB with the Is-modified of any fresh
+	   add whose content looks binary, unless -k already said binary.  */
+	send_files_declared_kopt (options);
+	send_arg("--");
+	send_files (argc, argv, 0, 0, SEND_BUILD_DIRS | SEND_NO_CONTENTS | SEND_KOPT_BY_CONTENT);
+	send_files_declared_kopt (NULL);
 	if (options)
 	    xfree (options);
-	send_arg("--");
-	send_files (argc, argv, 0, 0, SEND_BUILD_DIRS | SEND_NO_CONTENTS);
 	send_file_names (argc, argv, SEND_EXPAND_WILD);
 	send_to_server ("add\n", 0);
 	if (message)
@@ -381,6 +362,15 @@ int add (int argc, char **argv)
 
 	if(!server_active)
 		expand_wild(argc,argv,&argc,&argv);
+
+    /* Same refusal as the remote path: the whole command, before any file is
+       registered.  In server mode the client already did this.  */
+    if (!server_active)
+	for (i = 0; i < argc; i++)
+	    if (!isdir (argv[i])
+		&& content_kopt (argv[i], options, options && options[0]) == CONTENT_KOPT_REFUSE)
+		error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
+		       argv[i], options);
 
     /* walk the arg list adding files/dirs */
     for (i = 0; i < argc; i++)
@@ -550,23 +540,15 @@ int add (int argc, char **argv)
               if (char *b = strstr(vers->options, "b"))
                 *b = 'B';
 
-		    /* Content, not the name, decides binary-ness.  Only the client
-		       has the bytes: in server mode the file is absent here and the
-		       client already sent a Kopt for it.  */
-		    int binary_as_text = 0;
-		    if (isfile (finfo.file) && !kopt_is_binary (vers->options)
-			&& CFileAccess::looks_binary (finfo.file))
+		    /* Content beats name.  Only the client has the bytes: in server
+		       mode the file is absent here and the Kopt already arrived.  */
+		    if (content_kopt (finfo.file, vers->options, 0) == CONTENT_KOPT_BINARY)
 		    {
-			if (options && options[0])
-			    binary_as_text = 1;
-			else
-			{
-			    if (vers->options)
-				xfree (vers->options);
-			    vers->options = xstrdup ("B");
-			    error (0, 0, "%s has binary content, adding it as -kB",
-				   fn_root(finfo.fullname));
-			}
+			if (vers->options)
+			    xfree (vers->options);
+			vers->options = xstrdup ("B");
+			error (0, 0, "%s has binary content, adding it as -kB",
+			       fn_root(finfo.fullname));
 		    }
 
 		    if (vers->nonbranch)
@@ -575,12 +557,6 @@ int add (int argc, char **argv)
 			error (0, 0,
 				"cannot add file on non-branch tag %s",
 				vers->tag);
-			++err;
-		    }
-		    else if (binary_as_text)
-		    {
-			error (0, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
-			       fn_root(finfo.fullname), options);
 			++err;
 		    }
 		    else

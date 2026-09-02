@@ -1179,9 +1179,32 @@ def t_add_binary_by_content(r):
 
     with open(os.path.join(wc, "blob2.txt"), "wb") as f:
         f.write(nul)
-    rc, out = r.cvs(["add", "-kkv", "blob2.txt"], cwd=wc, expect_ok=False)
+    write(os.path.join(wc, "plain2"), "text too" + chr(10))
+    rc, out = r.cvs(["add", "-kkv", "blob2.txt", "plain2"], cwd=wc, expect_ok=False)
     check(rc != 0, "add -kkv on binary content exited 0:" + chr(10) + out)
+    # The refusal covers the whole command: nothing is registered, not even
+    # the text file named alongside.
     check("blob2.txt" not in entries_of(wc), "add -kkv registered binary content as text")
+    check("plain2" not in entries_of(wc), "add -kkv registered the text sibling of a refused file")
+    # A +B delta already says binary and must be accepted as such.
+    with open(os.path.join(wc, "blob4.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["add", "-k+B", "blob4.txt"], cwd=wc, expect_ok=False)
+    check_eq(rc, 0, "add -k+B on binary content was refused:" + chr(10) + out)
+    check("B" in entries_of(wc).get("blob4.txt", "").split("/")[4],
+          "add -k+B did not register binary: " + entries_of(wc).get("blob4.txt", "<absent>"))
+    # One add spanning two directories keeps each file's own verdict.
+    os.makedirs(os.path.join(wc, "sub"))
+    r.cvs(["add", "sub"], cwd=wc)
+    with open(os.path.join(wc, "sub", "deep.txt"), "wb") as f:
+        f.write(nul)
+    write(os.path.join(wc, "top_text"), "top" + chr(10))
+    r.cvs(["add", "top_text", os.path.join("sub", "deep.txt")], cwd=wc)
+    check("-kB" in entries_of(os.path.join(wc, "sub")).get("deep.txt", ""),
+          "binary file in a second directory lost its -kB: "
+          + entries_of(os.path.join(wc, "sub")).get("deep.txt", "<absent>"))
+    check("-k" not in entries_of(wc).get("top_text", "/x/"),
+          "text file in the first directory got a kopt: " + entries_of(wc).get("top_text", "<absent>"))
 
     r.cvs(["commit", "-m", "bin"], cwd=wc)
     wcb = os.path.join(r.root, "wcBin")
@@ -1204,6 +1227,16 @@ def t_add_binary_by_content(r):
           "imported text notes.dat got a kopt: " + e.get("notes.dat", "<absent>"))
     check_eq(open(os.path.join(wci, "blob.txt"), "rb").read(), nul, "imported blob.txt content")
 
+    impk = os.path.join(r.root, "impk")
+    os.makedirs(impk)
+    with open(os.path.join(impk, "blobk.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["import", "-k", "kv", "-m", "i", "mk", "VENDOR", "REL0"], cwd=impk,
+                    expect_ok=False)
+    check(rc != 0, "import -k kv on binary content exited 0:" + chr(10) + out)
+    check(not os.path.exists(os.path.join(r.repo, "mk", "blobk.txt,v")),
+          "import -k kv stored binary content as text")
+
 
 @test("a per-file Kopt before Is-modified makes the server add that file as -kB")
 def t_add_binary_kopt_protocol(r):
@@ -1213,7 +1246,7 @@ def t_add_binary_kopt_protocol(r):
     # buildable here without admin rights, so this drives cvs server over
     # its protocol with the exact sequence the client emits and pins the
     # server half of that contract.
-    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    r.import_tree("m", {"a.txt": "one" + chr(10), "sub/b.txt": "two" + chr(10)})
     root = r.repo.replace(os.sep, "/")
     valid_responses = (
         "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
@@ -1233,9 +1266,18 @@ def t_add_binary_kopt_protocol(r):
         "Kopt -kB",
         "Is-modified blob1.txt",
         "Is-modified plain_text",
+        "Directory sub",
+        root + "/m/sub",
+        "Kopt -kB",
+        "Is-modified deep.txt",
+        # A real client ends the walk back at the top; the server runs the
+        # command from the last Directory it was given.
+        "Directory .",
+        root + "/m",
         "Argument --",
         "Argument blob1.txt",
         "Argument plain_text",
+        "Argument sub/deep.txt",
         "add",
     ])
     cmd = [CVS]
@@ -1264,6 +1306,10 @@ def t_add_binary_kopt_protocol(r):
           "Kopt -kB before Is-modified did not make the added entry binary:" + chr(10) + out)
     check(re.search(r"/plain_text/0/[^/]*//", out) is not None,
           "the file without a Kopt in the same add did not stay text:" + chr(10) + out)
+    # The second directory's file keeps its own Kopt: one Is-modified per file,
+    # sent inside its Directory, survives the flush a directory change causes.
+    check(re.search(r"/deep\.txt/0/[^/]*/-k[bB]/", out) is not None,
+          "the binary file in the second directory lost its Kopt:" + chr(10) + out)
 
 
 @test("binary content is detected on add through a client/server root too")
@@ -1275,7 +1321,7 @@ def t_add_binary_by_content_remote(r):
     if rc != 0:
         print("          (skipped: needs the fork protocol plugin and a registered root)")
         return
-    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    r.import_tree("m", {"a.txt": "one" + chr(10), "sub/b.txt": "two" + chr(10)})
     wcroot = os.path.join(r.root, "rwc")
     os.makedirs(wcroot)
     run(["-d", root, "checkout", "m"], cwd=wcroot)
@@ -1284,10 +1330,14 @@ def t_add_binary_by_content_remote(r):
     with open(os.path.join(wc, "blob1.txt"), "wb") as f:
         f.write(nul)
     write(os.path.join(wc, "plain_text"), "text" + chr(10))
-    run(["-d", root, "add", "blob1.txt", "plain_text"], cwd=wc)
+    with open(os.path.join(wc, "sub", "deep.txt"), "wb") as f:
+        f.write(nul)
+    run(["-d", root, "add", "blob1.txt", "plain_text", os.path.join("sub", "deep.txt")], cwd=wc)
     e = entries_of(wc)
     check("-kB" in e.get("blob1.txt", ""), "remote add: blob1.txt not -kB: " + e.get("blob1.txt", "<absent>"))
     check("-k" not in e.get("plain_text", "/x/"), "remote add: plain_text got a kopt: " + e.get("plain_text", "<absent>"))
+    es = entries_of(os.path.join(wc, "sub"))
+    check("-kB" in es.get("deep.txt", ""), "remote add: sub/deep.txt lost its -kB: " + es.get("deep.txt", "<absent>"))
     run(["-d", root, "commit", "-m", "bin"], cwd=wc)
     wc2 = os.path.join(r.root, "rwc2")
     os.makedirs(wc2)

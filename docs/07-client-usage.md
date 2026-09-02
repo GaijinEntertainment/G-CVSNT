@@ -71,7 +71,7 @@ Use `-kB`/`-kBz` for **every** large binary asset. A binary added with plain `-k
 Binary content is detected on `add` and `import` **by content**, never by name: a file with a NUL
 byte in its first 8000 bytes (UTF-16/32 text with a BOM is exempt) is added as `-kB` whatever
 `cvswrappers` or the extension say, with a note on stderr, and an explicit text `-k` on such a
-file is refused. The detector is `CFileAccess::looks_binary()` in cvsapi, so TortoiseCVS and other
+file is refused - the whole `add` or `import` stops before anything is registered. The detector is `CFileAccess::looks_binary()` in cvsapi, so TortoiseCVS and other
 cvsapi clients get the same answer. Wrappers remain useful for choosing `-kBz` over `-kB`:
 
 To make it automatic, put patterns in `CVSROOT/cvswrappers`:

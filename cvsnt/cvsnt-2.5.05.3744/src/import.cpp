@@ -658,7 +658,8 @@ static int import_descend (char *message, char *vtag, int targc, char *targv[])
                        {
                                t=time_stamp(p->key, 0);
                                r=wrap_rcsoption(p->key);
-                               if (!kopt_is_binary (r) && CFileAccess::looks_binary (p->key))
+                               /* Content beats name; the Kopt sent for the file says so aloud.  */
+                               if (content_kopt (p->key, r, 0) == CONTENT_KOPT_BINARY)
                                {
                                        xfree (r);
                                        r = xstrdup ("B");
@@ -755,22 +756,26 @@ static int process_import_file (char *message, char *vfile, char *vtag, int targ
 	    }
 #endif
 
-	    /* Content decides binary-ness: the client sends a matching Kopt,
-	       and in local mode this is the only check.  */
-	    if (isfile (vfile) && !kopt_is_binary (our_opt)
-		&& CFileAccess::looks_binary (vfile))
+	    /* Content beats name.  The kopt is the user's own only when it is the
+	       command-line -k itself (our_opt == keyword_opt); one the client sent
+	       in an entry was already vetted there.  Refusal stops the import,
+	       as it does on the client.  */
 	    {
-		if (keyword_opt && keyword_opt[0] && our_opt == keyword_opt)
+		int explicit_k = keyword_opt && keyword_opt[0] && our_opt == keyword_opt;
+		switch (content_kopt (vfile, our_opt, explicit_k))
 		{
-		    error (0, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
+		case CONTENT_KOPT_REFUSE:
+		    error (1, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
 			   vfile, keyword_opt);
+		case CONTENT_KOPT_BINARY:
 		    xfree (free_opt);
-		    xfree (rcs);
-		    return 1;
+		    free_opt = our_opt = xstrdup ("B");
+		    if (!server_active)
+			error (0, 0, "%s has binary content, importing it as -kB", vfile);
+		    break;
+		default:
+		    break;
 		}
-		xfree (free_opt);
-		free_opt = our_opt = xstrdup ("B");
-		error (0, 0, "%s has binary content, importing it as -kB", vfile);
 	    }
 
 	    retval = add_rcs_file (message, rcs, vfile, vhead, our_opt,

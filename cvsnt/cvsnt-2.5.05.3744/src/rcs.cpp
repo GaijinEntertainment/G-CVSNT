@@ -3323,20 +3323,24 @@ static char *translate_symtag (RCSNode *rcs, const char *tag)
     return NULL;
 }
 
+/* Whether KOPT (Entries/-k form, no leading -k) selects a binary mode.  A
+   +B delta adds one; a -X delta removes flags and never selects binary.  */
+bool kopt_is_binary (const char *kopt)
+{
+    kflag kf;
+    if (!kopt || !*kopt || *kopt == '-')
+	return false;
+    if (*kopt == '+')
+	++kopt;
+    RCS_get_kflags (kopt, false, kf);
+    return (kf.flags & KFLAG_BINARY) != 0;
+}
+
 /*
  * The argument ARG is the getopt remainder of the -k option specified on the
  * command line.  This function returns malloc'ed space that can be used
  * directly in calls to RCS V5, with the -k flag munged correctly.
  */
-bool kopt_is_binary (const char *kopt)
-{
-    kflag kf;
-    if (!kopt || !*kopt)
-	return false;
-    RCS_get_kflags (kopt, false, kf);
-    return (kf.flags & KFLAG_BINARY) != 0;
-}
-
 char *RCS_check_kflag (const char *arg, bool allow_modify, bool error)
 {
 	kflag kf;

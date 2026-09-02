@@ -461,6 +461,14 @@ bool wrap_name_has(const char *name, WrapMergeHas  has)
 /* Return the RCS options for FILENAME in a newly malloc'd string.  If
    ASFLAG, then include "-k" at the beginning (e.g. "-kb"), otherwise
    just give the option itself (e.g. "b").  */
+content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit)
+{
+    if (!file || !isfile (file) || kopt_is_binary (kopt)
+	|| !CFileAccess::looks_binary (file))
+	return CONTENT_KOPT_KEEP;
+    return kopt_explicit ? CONTENT_KOPT_REFUSE : CONTENT_KOPT_BINARY;
+}
+
 char *wrap_rcsoption(const char *filename)
 {
     WrapperEntry *e = wrap_matching_entry (filename);

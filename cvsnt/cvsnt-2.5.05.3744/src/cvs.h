@@ -914,6 +914,11 @@ void  wrap_setup();
 void wrap_close();
 bool wrap_name_has (const char *name,WrapMergeHas has);
 char *wrap_rcsoption(const char *filename);
+/* Content beats name: what kopt FILE gets given the declared one.  Binary
+   bytes under a non-binary kopt force B, or are refused when the kopt was
+   the user's own -k.  A file that is absent (server mode) keeps its kopt.  */
+enum content_kopt_verdict { CONTENT_KOPT_KEEP, CONTENT_KOPT_BINARY, CONTENT_KOPT_REFUSE };
+content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit);
 const char *wrap_xdiffwrapper(const char *filename);
 char *wrap_tocvs_process_file(const char *fileName);
 bool wrap_merge_is_copy (const char *fileName);
