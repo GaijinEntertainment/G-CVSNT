@@ -1118,33 +1118,33 @@ def t_second_checkout(r):
 
 # --------------------------------------------------------------------------- driver
 
-@xfail("small -kB binary second revision checks out byte for byte (BUG-blob-21 residual)",
-       "BUG-blob-21 is only partly fixed: a -kB revision below ~1.5 KB checks "
-       "out as a zero-length file in local mode; the committed blob is intact.")
+@test("small -kB binary second revision checks out byte for byte")
 def t_binary_small_second_commit(r):
-    # Same shape as t_binary_second_commit, but a small payload.  The blob
-    # is written whole at commit (payload + a 16-byte header), yet a fresh
-    # checkout produces an empty file: data loss once the working copy that
-    # still holds the bytes is deleted.  t_binary_second_commit passes only
-    # because its 1541-byte payload sits just above the failing range.
+    # Same shape as t_binary_second_commit, but a small payload.  Binary
+    # content used to pass through the codepage encoder, which guessed an
+    # encoding from the bytes; a wrong guess and a failed iconv wrote the
+    # working file out empty, and only payloads the guesser left alone
+    # (like the 1541-byte one above) survived.  Several sizes, so a lucky
+    # guess on one of them cannot hide a regression.
     payload1 = bytes(range(256))
-    payload2 = bytes(reversed(range(256)))  # 256 bytes
     imp = os.path.join(r.root, "impbin")
     os.makedirs(imp)
     with open(os.path.join(imp, "b.dat"), "wb") as f:
         f.write(payload1)
     r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
     wc = r.checkout("mb")
-    with open(os.path.join(wc, "b.dat"), "wb") as f:
-        f.write(payload2)
-    r.cvs(["commit", "-m", "second"], cwd=wc)
-    wc2root = os.path.join(r.root, "wc2")
-    os.makedirs(wc2root)
-    r.cvs(["checkout", "mb"], cwd=wc2root)
-    got = open(os.path.join(wc2root, "mb", "b.dat"), "rb").read()
-    check_eq(got, payload2,
-             "small binary second revision did not round trip (got %d bytes)"
-             % len(got))
+    for n, size in enumerate((100, 256, 300, 768, 1200, 1400)):
+        payload = (bytes(reversed(range(256))) * (size // 256 + 1))[:size]
+        with open(os.path.join(wc, "b.dat"), "wb") as f:
+            f.write(payload)
+        r.cvs(["commit", "-m", "rev %d" % n], cwd=wc)
+        fresh = os.path.join(r.root, "fresh%d" % n)
+        os.makedirs(fresh)
+        r.cvs(["checkout", "mb"], cwd=fresh)
+        got = open(os.path.join(fresh, "mb", "b.dat"), "rb").read()
+        check_eq(len(got), size,
+                 "%d-byte binary revision came back as %d bytes" % (size, len(got)))
+        check(got == payload, "%d-byte binary revision content differs" % size)
 
 def main():
     global CVS, LIBDIR, VERBOSE, CURRENT, PASSED

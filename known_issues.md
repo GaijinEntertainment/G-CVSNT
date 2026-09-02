@@ -1,6 +1,6 @@
 # Known issues
 
-87 defects were found by a review pass over the tree. 15 are fixed on this branch; **70 remain
+87 defects were found by a review pass over the tree. 16 are fixed on this branch; **69 remain
 open** and are listed here. Two more were fixed and then reverted, for reasons recorded below —
 those are the most interesting entries in this document, because in both cases the obvious one-line
 fix is wrong.
@@ -226,18 +226,7 @@ Ordered by severity. "Fix size" is the estimated lines of change; "changes behav
 applying the fix alters observable behaviour, which is what kept several of the small ones out of
 this branch.
 
-### High (23)
-
-### `BUG-blob-21` residual - small `-kB` revision checks out empty in local mode
-
-The [`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) blob-root fix is
-incomplete.  With the root set and the blob stored whole, a `-kB` revision below ~1.5 KB still
-checks out as a zero-length file in local mode (data loss once the holding working copy is gone).
-The decoder unit is clean; the fault is in the checkout dereference/size path
-(`RCS_read_binary_rev_data` -> `pull_at_once`).  Pinned by the expected-failure case
-`t_binary_small_second_commit`.  The shipped `t_binary_second_commit` masks it with a 1541-byte
-payload, just above the failing range.
-
+### High (22)
 
 | ID | Severity | Area | Issue | Fix size | Changes behaviour |
 | --- | --- | --- | --- | ---: | --- |
@@ -324,7 +313,7 @@ payload, just above the failing range.
 
 ## Fixed on this branch
 
-For reference, the 15 defects that were fixed:
+For reference, the 16 defects that were fixed:
 
 | ID | Issue |
 | --- | --- |
@@ -343,3 +332,4 @@ For reference, the 15 defects that were fixed:
 | [`BUG-server-08`](_reports/BUG-server-08-writelock-uses-CVSRFL.md) | `write_lock` built the write-lock filename from the read-lock prefix |
 | [`BUG-server-15`](_reports/BUG-server-15-checkin-format-missing-arg.md) | `%s` with no argument on the reopen-failure path |
 | [`BUG-server-17`](_reports/BUG-server-17-pnew-file-comment-typo.md) | `"pnew file"` written into the RCS `comment` field of every imported file |
+| [`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) (residual) | Small `-kB` revisions checked out as empty files: binary content went through the codepage encoder, whose failed iconv conversion collapsed the write length to 0 |

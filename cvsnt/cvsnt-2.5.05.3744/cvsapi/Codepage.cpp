@@ -293,7 +293,9 @@ int CCodepage::ConvertEncoding(const void *inbuf, size_t len, void *&outbuf, siz
 	}
 	m_blockcount++;
 
-	if(iconv((iconv_t)m_ic,(iconv_arg2_t)&inbufp,&in_remaining,&outbufp,&out_remaining)<0)
+	/* iconv returns size_t, so "< 0" could never fire: a failed conversion
+	   fell through with nothing converted and outlen collapsed to 0.  */
+	if(iconv((iconv_t)m_ic,(iconv_arg2_t)&inbufp,&in_remaining,&outbufp,&out_remaining)==(size_t)-1)
 		return -1;
 	outlen-= out_remaining;
 	return 1;
@@ -343,8 +345,14 @@ int CCodepage::OutputAsEncoded(int fd, const void *inbuf, size_t len, LineType C
 			outbuf=NULL;
 			if(l)
 			{
-				if(ConvertEncoding(o,l,outbuf,l))
+				/* Adopt the converted length only from a real conversion; a
+				   failed one keeps the raw bytes rather than dropping them.  */
+				size_t olen = 0;
+				if(ConvertEncoding(o,l,outbuf,olen)>0)
+				{
 					o=(char*)outbuf;
+					l=olen;
+				}
 
 				if(write(fd,o,(unsigned)l)<(int)l)
 				{
@@ -360,10 +368,15 @@ int CCodepage::OutputAsEncoded(int fd, const void *inbuf, size_t len, LineType C
 				free(outbuf);
 				outbuf=NULL;
 			}
-			if(ConvertEncoding(o,line_end_len,outbuf,l))
-				o=(char*)outbuf;
-			else
-				l=line_end_len;
+			l=line_end_len;
+			{
+				size_t olen = 0;
+				if(ConvertEncoding(o,line_end_len,outbuf,olen)>0)
+				{
+					o=(char*)outbuf;
+					l=olen;
+				}
+			}
 			if(write(fd,o,(unsigned)l)<(int)l)
 			{
 				if(outbuf)
@@ -379,10 +392,11 @@ int CCodepage::OutputAsEncoded(int fd, const void *inbuf, size_t len, LineType C
 		{
 			outbuf=NULL;
 			o=pinbuf;
-			if(ConvertEncoding(o,l,outbuf,len))
+			size_t olen = 0;
+			if(ConvertEncoding(o,l,outbuf,olen)>0)
 			{
 				o=(char*)outbuf;
-				l=len;
+				l=olen;
 			}
 			if(write(fd,o,(unsigned)l)<(int)l)
 			{
@@ -399,10 +413,18 @@ int CCodepage::OutputAsEncoded(int fd, const void *inbuf, size_t len, LineType C
 	else
 	{
 		outbuf = NULL;
-		char *p = (char*)inbuf, *o = (char*)inbuf;
+		char *o = (char*)inbuf;
 		size_t l = len;
-		if(ConvertEncoding(o,l,outbuf,l))
+		/* l was passed as both the input and the output length, so a failed
+		   conversion (which converted nothing) turned it into 0 and the file
+		   was written out empty.  Keep the raw bytes on anything but a real
+		   conversion.  */
+		size_t olen = 0;
+		if(ConvertEncoding(o,len,outbuf,olen)>0)
+		{
 			o=(char*)outbuf;
+			l=olen;
+		}
 		if(write(fd,o,(unsigned)l)<(int)l)
 		{
 			if(outbuf)
