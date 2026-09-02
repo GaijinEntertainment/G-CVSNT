@@ -74,7 +74,8 @@ byte in its first 8000 bytes (UTF-16/32 text with a BOM is exempt) is added as `
 file is refused (use `-kB`). The binary file is never stored as text in any case.
 
 `add` refuses the whole command up front, before it registers anything. `import` walks a tree and
-is not transactional: it aborts at the first binary file, but each file it reaches before that is
+is not transactional: an explicit text `-k` on binary content aborts it at that file, but each file
+it reaches before that is
 committed as it goes, so files earlier in the walk may already be imported. A current cvsnt client
 refuses during its own upload, before the server is asked to import anything, so a client/server
 import leaves the repository unchanged; an older client that skips the check relies on the server,
