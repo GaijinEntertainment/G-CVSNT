@@ -226,7 +226,18 @@ Ordered by severity. "Fix size" is the estimated lines of change; "changes behav
 applying the fix alters observable behaviour, which is what kept several of the small ones out of
 this branch.
 
-### High (22)
+### High (23)
+
+### `BUG-blob-21` residual - small `-kB` revision checks out empty in local mode
+
+The [`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) blob-root fix is
+incomplete.  With the root set and the blob stored whole, a `-kB` revision below ~1.5 KB still
+checks out as a zero-length file in local mode (data loss once the holding working copy is gone).
+The decoder unit is clean; the fault is in the checkout dereference/size path
+(`RCS_read_binary_rev_data` -> `pull_at_once`).  Pinned by the expected-failure case
+`t_binary_small_second_commit`.  The shipped `t_binary_second_commit` masks it with a 1541-byte
+payload, just above the failing range.
+
 
 | ID | Severity | Area | Issue | Fix size | Changes behaviour |
 | --- | --- | --- | --- | ---: | --- |

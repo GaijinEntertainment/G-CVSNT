@@ -788,6 +788,17 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
     }
     else
     {
+	if (status == T_CONFLICT && !vers->vn_user
+	    && move_in_the_way && !server_active)
+	{
+	    /* An unversioned file is in the way of a new one; Classify_File
+	       left both the rename and the message to this spot.  */
+	    if (rename_notversioned_aside (finfo->file, fn_root(finfo->fullname)))
+		status = T_CHECKOUT;
+	    else if (!really_quiet)
+		error (0, 0, "move away %s; it is in the way",
+		       fn_root(finfo->fullname));
+	}
 	switch (status)
 	{
 	    case T_UNKNOWN:		/* unknown file was explicitly asked about */
@@ -2506,7 +2517,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     /* -n promises no .# litter; the copy made above is removed unless
        the restore path already consumed it (unlink of a missing file
        fails silently).  */
-    if (!backup_local_files && backup)
+    if (!backup_local_files)
 	unlink_file (backup);
     xfree (backup);
     return retval;

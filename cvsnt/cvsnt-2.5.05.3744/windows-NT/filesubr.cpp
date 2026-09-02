@@ -685,26 +685,24 @@ static bool rename_inuse_aside (const char *to)
 	cvs::string dir(to, base ? (size_t)(base+1-to) : 0);
 	base = base ? base+1 : to;
 
-	for (int n=0; n<1000; ++n)
+	for (int n=0; n<=999; ++n)
 	{
-		cvs::string aside;
-		if (n)
-			cvs::sprintf(aside, 64, "%s" BAKPREFIX "%s.inuse.%lu.%lu.%d",
-				dir.c_str(), base, (unsigned long)GetCurrentProcessId(),
-				(unsigned long)time(NULL), n);
-		else
-			cvs::sprintf(aside, 64, "%s" BAKPREFIX "%s.inuse.%lu.%lu",
-				dir.c_str(), base, (unsigned long)GetCurrentProcessId(),
-				(unsigned long)time(NULL));
-		uc_name fn_aside = aside.c_str();
+		/* Same scheme as rename_notversioned_aside, plus the pid.  */
+		char *aside = make_aside_name(dir.c_str(), base, "inuse",
+			(unsigned long)GetCurrentProcessId(), n);
+		uc_name fn_aside = aside;
 		if (GetFileAttributes(fn_aside)!=0xFFFFFFFF)
-			continue;
-		if (MoveFile(fn_to,fn_aside))
 		{
-			printf("renamed in-use file %s aside to %s\n",
-				fn_root(to), fn_root(aside.c_str()));
-			return true;
+			xfree(aside);
+			continue;
 		}
+		const bool moved = MoveFile(fn_to,fn_aside)!=0;
+		if (moved)
+			printf("renamed in-use file %s aside to %s\n",
+				fn_root(to), fn_root(aside));
+		xfree(aside);
+		if (moved)
+			return true;
 		break;
 	}
 	return false;

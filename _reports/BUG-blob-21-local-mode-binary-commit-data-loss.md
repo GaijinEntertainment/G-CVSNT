@@ -8,7 +8,7 @@ category: correctness
 verdict: CONFIRMED
 fix_size_loc: 20
 behavior_change: yes
-status: partially fixed - parts 1 and the missing-blobs-dir case; parts 2 and 3 remain open
+status: partially fixed - the blob root and missing-blobs-dir cases; part 1 is itself incomplete (small revisions still check out empty), parts 2 and 3 remain open
 ---
 
 # In local mode, committing a second revision of a binary file either aborts or silently destroys the content
@@ -162,11 +162,33 @@ Parts of this are fixed on this branch:
 
 Verified by the regression case "second commit of a binary file round trips byte for byte", which
 fails against the previous build (commit aborted) and passes now, including a byte-exact fresh
-checkout and `update -r` back to the first revision.
+checkout and `update -r` back to the first revision. That case uses a 1541-byte payload; it does
+not exercise small revisions, which are still lost - see "Residual" below.
 
 Still open: the default root should fail loudly rather than silently resolving to a relative path
 (part 2 below), and the read path still cannot report a missing blob (`BUG-server-12`, part 3) — a
 repository already poisoned by the old behaviour still checks out empty files without an error.
+
+## Residual: a correctly stored small revision still checks out empty
+
+Part 1 above is incomplete.  With the blob root set and the `blobs/` directory present - the
+common case it is meant to fix - a `-kB` revision whose payload is below roughly 1.5 KB still
+checks out as a **zero-length** file in local mode.  This is not the missing-root or missing-dir
+case and not a dangling reference: the blob is written whole at commit (`<repos>/blobs/..`, the
+payload plus a 16-byte `NONE` header), yet a fresh checkout elsewhere produces an empty working
+file.  Deleting the working copy that still holds the bytes loses the revision.
+
+Reproduction (local mode, no server): import a `-kb` file, commit a second revision of ~256 bytes,
+check out into a fresh directory - the file is 0 bytes.  The boundary is size-driven: payloads at
+1541 bytes round-trip, payloads at 1400 and below do not, so the existing regression case passes
+only because its payload sits just above the failing range.
+
+The streaming decoder itself is not at fault - `unit_tests` feeds whole blobs through
+`decode_stream_blob_data` in fixed-size chunks at small sizes and passes - so the defect is in the
+checkout glue that dereferences the blob reference and sizes the working-file write
+(`RCS_checkout` -> `RCS_read_binary_rev_data` -> `pull_at_once`, `src/rcs_checkin.cpp:135`,
+`src/rcs_cvt_kB.cpp:32`).  Pinned as an expected-failure regression case,
+`t_binary_small_second_commit`, which flips to a hard failure (XPASS) once this is fixed.
 
 ## Suggested fix
 Three parts, smallest first:

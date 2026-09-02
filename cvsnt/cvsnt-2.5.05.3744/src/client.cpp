@@ -1419,14 +1419,11 @@ enum existp_t
 extern int move_in_the_way;
 
 /* --move-in-the-way: try to clear an unversioned file obstructing an
-   incoming one by renaming it aside.  The case-ambiguity situation (an
-   on-disk name differing only in case) is left to the existing handling.
-   Returns 1 when the path is now clear.  */
+   incoming one by renaming it aside (rename_notversioned_aside owns the
+   case-ambiguity exemption).  Returns 1 when the path is now clear.  */
 static int clear_obstruction (const char *filename, const char *short_pathname)
 {
     if (!move_in_the_way)
-	return 0;
-    if (filenames_case_insensitive && !case_isfile (filename, NULL))
 	return 0;
     return rename_notversioned_aside (filename, short_pathname);
 }
@@ -1556,13 +1553,18 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	    error (0, 0, "warning: %s unexpectedly disappeared",
 		   short_pathname);
 
+	/* An unversioned file where a new one goes.  The rename is a
+	   statement, so the guards decide whether it is tried at all.  */
+	int obstructed = data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename);
+	if (obstructed && clear_obstruction (filename, short_pathname))
+	    obstructed = 0;
+
 	if (filenames_case_insensitive && client_overwrite_existing && isfile(filename) && !case_isfile(filename,&realfilename))
 	{
 		xfree(realfilename);
 	}
 	else
-	if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename)
-	    && !clear_obstruction (filename, short_pathname))
+	if (obstructed)
 	{
 	    /* Emit a warning and refuse to update the file; we don't want
 	       to clobber a user's file.  */
@@ -2420,12 +2422,16 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
         error (0, 0, "warning: %s unexpectedly disappeared",
     	   short_pathname);
 
+    /* As in update_entries: the rename is a statement, not a conjunct.  */
+    int obstructed = data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename);
+    if (obstructed && clear_obstruction (filename, short_pathname))
+        obstructed = 0;
+
     if (filenames_case_insensitive && client_overwrite_existing && isfile(filename) && !case_isfile(filename,&realfilename))
     {
     	xfree(realfilename);
     }
-    else if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename)
-             && !clear_obstruction (filename, short_pathname))
+    else if (obstructed)
     {
       if (filenames_case_insensitive && !case_isfile(filename,&realfilename))
       {

@@ -747,6 +747,7 @@ char *shell_escape(char **buf, const char *str);
 char *shell_escape_backslash(char **buf, const char *str);
 char *backup_file (const char *filename, const char *suffix);
 int rename_notversioned_aside (const char *file, const char *fullname);
+char *make_aside_name (const char *dir, const char *base, const char *marker, unsigned long pid, int n);
 void resolve_symlink (char **filename);
 void sleep_past (time_t desttime);
 

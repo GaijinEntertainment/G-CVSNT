@@ -946,6 +946,23 @@ char *backup_file (const char *filename, const char *suffix)
  * name the default ignore list already covers.  Prints one line and
  * returns 1 on success; returns 0 on failure or in noexec mode.
  */
+/* Build the aside name every move-aside uses: DIR (may be empty, else
+   ends in a separator) + BAKPREFIX + BASE + "." + MARKER [+ "." + PID]
+   + "." + time [+ "." + N].  Returned string is xmalloc-ed.  */
+char *make_aside_name (const char *dir, const char *base, const char *marker,
+		       unsigned long pid, int n)
+{
+    char *s = (char*)xmalloc (strlen (dir) + sizeof (BAKPREFIX) + strlen (base)
+			      + strlen (marker) + 64);
+    char *p = s + sprintf (s, "%s%s%s.%s", dir, BAKPREFIX, base, marker);
+    if (pid)
+	p += sprintf (p, ".%lu", pid);
+    p += sprintf (p, ".%lu", (unsigned long) time (NULL));
+    if (n)
+	sprintf (p, ".%d", n);
+    return s;
+}
+
 int rename_notversioned_aside (const char *file, const char *fullname)
 {
     char *bak;
@@ -953,9 +970,12 @@ int rename_notversioned_aside (const char *file, const char *fullname)
 
     if (noexec)
 	return 0;
-    bak = (char*)xmalloc (sizeof (BAKPREFIX) + strlen (file) + 64);
-    sprintf (bak, "%s%s.notversioned.%lu", BAKPREFIX, file,
-	     (unsigned long) time (NULL));
+    /* A name differing only in case from the incoming one is not an
+       obstruction to move; the existing case-ambiguity handling owns it.
+       Both the local and the client/server callers rely on this.  */
+    if (filenames_case_insensitive && !case_isfile (file, NULL))
+	return 0;
+    bak = make_aside_name ("", file, "notversioned", 0, 0);
     while (isfile (bak))
     {
 	if (++n > 999)
@@ -965,8 +985,8 @@ int rename_notversioned_aside (const char *file, const char *fullname)
 	    xfree (bak);
 	    return 0;
 	}
-	sprintf (bak, "%s%s.notversioned.%lu.%d", BAKPREFIX, file,
-		 (unsigned long) time (NULL), n);
+	xfree (bak);
+	bak = make_aside_name ("", file, "notversioned", 0, n);
     }
     if (CVS_RENAME (file, bak) < 0)
     {
