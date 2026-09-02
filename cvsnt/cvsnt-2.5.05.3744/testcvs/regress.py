@@ -367,11 +367,8 @@ def t_no_backup_nonmergeable(r):
           "update -n did not report the nonmergeable conflict:" + chr(10) + out)
     check("file from working directory is now in" not in out,
           "update -n named a copy it does not keep:" + chr(10) + out)
-    # The local edit is discarded either way; do not assert the exact
-    # repository bytes here - a small -kB revision checks out empty under
-    # the residual BUG-blob-21 defect (see t_binary_small_second_commit).
-    check(open(os.path.join(wc, "b.dat"), "rb").read() != local,
-          "update -n kept the local edit on a nonmergeable conflict")
+    check_eq(open(os.path.join(wc, "b.dat"), "rb").read(), payload2,
+             "b.dat content after update -n on a nonmergeable conflict")
     backups = [f for f in os.listdir(wc) if f.startswith(".#")]
     check(not backups, "update -n left a pre-merge copy: %r" % backups)
 
@@ -1133,8 +1130,16 @@ def t_binary_small_second_commit(r):
         f.write(payload1)
     r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
     wc = r.checkout("mb")
-    for n, size in enumerate((100, 256, 300, 768, 1200, 1400)):
-        payload = (bytes(reversed(range(256))) * (size // 256 + 1))[:size]
+    # GuessEncoding keys on the leading bytes and on length parity, so the
+    # cases vary both: no BOM at even and odd lengths, the UCS-2LE and
+    # UCS-2BE guesses, a UTF-8 BOM, and the odd 1541-byte shape that used
+    # to dodge the defect - each takes its own branch.
+    base = bytes(range(256)) * 7
+    cases = ((100, bytes()), (301, bytes()), (768, bytes([255, 254])),
+             (1200, bytes([254, 255])), (1401, bytes([239, 187, 191])),
+             (1541, bytes([255, 254])))
+    for n, (size, prefix) in enumerate(cases):
+        payload = (prefix + base)[:size]
         with open(os.path.join(wc, "b.dat"), "wb") as f:
             f.write(payload)
         r.cvs(["commit", "-m", "rev %d" % n], cwd=wc)

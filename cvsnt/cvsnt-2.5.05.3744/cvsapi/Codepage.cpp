@@ -266,10 +266,11 @@ int CCodepage::ConvertEncoding(const void *inbuf, size_t len, void *&outbuf, siz
 		}
 	}
 
+	void *allocated = NULL;
 	if(!outbuf)
 	{
 		outlen = (len * 4) + 4; /* Enough for ansi -> ucs4-le + a BOM */
-		outbuf = malloc(outlen);
+		outbuf = allocated = malloc(outlen);
 		outbufp= (char*)outbuf;
 	}
 
@@ -296,7 +297,16 @@ int CCodepage::ConvertEncoding(const void *inbuf, size_t len, void *&outbuf, siz
 	/* iconv returns size_t, so "< 0" could never fire: a failed conversion
 	   fell through with nothing converted and outlen collapsed to 0.  */
 	if(iconv((iconv_t)m_ic,(iconv_arg2_t)&inbufp,&in_remaining,&outbufp,&out_remaining)==(size_t)-1)
+	{
+		/* Nothing comes back from a failed conversion: release the buffer
+		   this call allocated so no caller has to know whether one exists.  */
+		if(allocated)
+		{
+			free(allocated);
+			outbuf = NULL;
+		}
 		return -1;
+	}
 	outlen-= out_remaining;
 	return 1;
 }
