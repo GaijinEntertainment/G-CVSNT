@@ -71,12 +71,16 @@ Use `-kB`/`-kBz` for **every** large binary asset. A binary added with plain `-k
 Binary content is detected on `add` and `import` **by content**, never by name: a file with a NUL
 byte in its first 8000 bytes (UTF-16/32 text with a BOM is exempt) is added as `-kB` whatever
 `cvswrappers` or the extension say, with a note on stderr, and an explicit text `-k` on such a
-file is refused (use `-kB`). `add` refuses the whole command up front. A local `import` walks a
-tree, so it aborts at the first binary file and text files earlier in the walk may already be
-imported; the binary file itself is never stored as text. A local import commits file by file, so a refusal at a binary file leaves files earlier in the
-walk imported.  A current cvsnt client refuses during its own upload, before the server is asked
-to import anything, so a client/server import leaves the repository unchanged; an older client
-that does not check content relies on the server, which also commits file by file. The detector is `CFileAccess::looks_binary()` in cvsapi, so TortoiseCVS and other
+file is refused (use `-kB`). The binary file is never stored as text in any case.
+
+`add` refuses the whole command up front, before it registers anything. `import` walks a tree and
+is not transactional: it aborts at the first binary file, but each file it reaches before that is
+committed as it goes, so files earlier in the walk may already be imported. A current cvsnt client
+refuses during its own upload, before the server is asked to import anything, so a client/server
+import leaves the repository unchanged; an older client that skips the check relies on the server,
+which refuses the same way but, like a local import, commits file by file.
+
+The detector is `CFileAccess::looks_binary()` in cvsapi, so TortoiseCVS and other
 cvsapi clients get the same answer. Wrappers remain useful for choosing `-kBz` over `-kB`:
 
 To make it automatic, put patterns in `CVSROOT/cvswrappers`:
