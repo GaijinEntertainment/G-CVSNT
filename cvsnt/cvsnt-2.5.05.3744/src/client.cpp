@@ -5461,14 +5461,22 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 			   file's own Is-modified, in the Directory send_files already
 			   selected, so the server's dummy entry keeps it whatever else
 			   the command spans.  */
-			if (args->kopt_by_content && vers->vn_user == NULL
-			    && content_kopt (finfo->file, send_declared_kopt, 0) == CONTENT_KOPT_BINARY)
+			if (args->kopt_by_content && vers->vn_user == NULL)
+			switch (content_kopt (finfo->file, send_declared_kopt,
+					      send_declared_kopt && *send_declared_kopt))
 			{
+			case CONTENT_KOPT_REFUSE:
+				error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
+				       fn_root(finfo->fullname), send_declared_kopt);
+			case CONTENT_KOPT_BINARY:
 				if (!supported_request ("Kopt"))
 				    error (1, 0, "%s has binary content, and this server takes no per-file kopt; add it with -kB",
 					   fn_root(finfo->fullname));
 				error (0, 0, "%s has binary content, adding it as -kB", fn_root(finfo->fullname));
 				send_to_server ("Kopt -kB\n", 0);
+				break;
+			default:
+				break;
 			}
 			if (args->no_contents && supported_request ("Is-modified"))
 			{
@@ -6070,7 +6078,6 @@ int client_process_import_file(const char *message, const char *vfile, const cha
 	assign_options(&vers.options,options);
 	/* Content beats name; a forced B must reach the server or the file
 	   would be stored as text.  */
-	bool forced_binary = false;
 	switch (content_kopt (vfile, vers.options, options && options[0]))
 	{
 	case CONTENT_KOPT_REFUSE:
@@ -6079,15 +6086,14 @@ int client_process_import_file(const char *message, const char *vfile, const cha
 	case CONTENT_KOPT_BINARY:
 		xfree (vers.options);
 		vers.options = xstrdup ("B");
-		forced_binary = true;
 		error (0, 0, "%s has binary content, importing it as -kB", vfile);
+		if (!supported_request ("Kopt"))
+			error (1, 0, "%s has binary content, and this server takes no per-file kopt; import with -kB",
+			       vfile);
 		break;
 	default:
 		break;
 	}
-	if (forced_binary && !supported_request ("Kopt"))
-		error (1, 0, "%s has binary content, and this server takes no per-file kopt; import with -kB",
-		       vfile);
     if (vers.options != NULL)
     {
 		if (supported_request ("Kopt"))

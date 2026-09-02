@@ -52,6 +52,20 @@ static const char *const add_usage[] =
 static cvs::string bugid;
 static char *branch;
 
+/* An explicit text -k on binary content refuses the whole command before
+   anything is registered or sent; the per-file sites then only force.  */
+static void refuse_binary_as_text (int argc, char **argv, const char *options)
+{
+    int i;
+    if (!options || !options[0])
+	return;
+    for (i = 0; i < argc; i++)
+	if (!isdir (argv[i])
+	    && content_kopt (argv[i], options, 1) == CONTENT_KOPT_REFUSE)
+	    error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
+		   argv[i], options);
+}
+
 int add (int argc, char **argv)
 {
     char *message = NULL;
@@ -195,13 +209,7 @@ int add (int argc, char **argv)
 	       nothing, it would spit back a usage message).  */
 	    return err;
 
-	/* An explicit text -k on binary content is refused before anything is
-	   sent, for the whole command, as the local path does.  */
-	for (i = 0; i < argc; ++i)
-	    if (!isdir (argv[i])
-		&& content_kopt (argv[i], options, options && options[0]) == CONTENT_KOPT_REFUSE)
-		error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
-		       argv[i], options);
+	refuse_binary_as_text (argc, argv, options);
 	if (options && options[0])
 	    option_with_arg("-k", options);
 	option_with_arg ("-m", message);
@@ -363,14 +371,9 @@ int add (int argc, char **argv)
 	if(!server_active)
 		expand_wild(argc,argv,&argc,&argv);
 
-    /* Same refusal as the remote path: the whole command, before any file is
-       registered.  In server mode the client already did this.  */
+    /* In server mode the client already did this.  */
     if (!server_active)
-	for (i = 0; i < argc; i++)
-	    if (!isdir (argv[i])
-		&& content_kopt (argv[i], options, options && options[0]) == CONTENT_KOPT_REFUSE)
-		error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
-		       argv[i], options);
+	refuse_binary_as_text (argc, argv, options);
 
     /* walk the arg list adding files/dirs */
     for (i = 0; i < argc; i++)
@@ -541,14 +544,23 @@ int add (int argc, char **argv)
                 *b = 'B';
 
 		    /* Content beats name.  Only the client has the bytes: in server
-		       mode the file is absent here and the Kopt already arrived.  */
-		    if (content_kopt (finfo.file, vers->options, 0) == CONTENT_KOPT_BINARY)
+		       mode the file is absent here and the Kopt already arrived.
+		       refuse_binary_as_text ran first, so REFUSE cannot come back; the
+		       real bit goes in anyway so a new caller cannot get it wrong.  */
+		    switch (content_kopt (finfo.file, vers->options, options && options[0]))
 		    {
+		    case CONTENT_KOPT_REFUSE:
+			error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
+			       fn_root(finfo.fullname), options);
+		    case CONTENT_KOPT_BINARY:
 			if (vers->options)
 			    xfree (vers->options);
 			vers->options = xstrdup ("B");
 			error (0, 0, "%s has binary content, adding it as -kB",
 			       fn_root(finfo.fullname));
+			break;
+		    default:
+			break;
 		    }
 
 		    if (vers->nonbranch)

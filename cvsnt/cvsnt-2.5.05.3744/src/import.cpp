@@ -57,6 +57,8 @@ static char *repository;
 static int conflicts;
 static int use_file_modtime;
 static int create_cvs_dirs;
+/* Set for the walk that only asks content_kopt: nothing is created or logged.  */
+static int import_check_only;
 static char *keyword_opt = NULL;
 static char *current_date = NULL;
 static int force_tags;
@@ -404,6 +406,18 @@ int import (int argc, char **argv)
 		vargc=argc-(argvt+1);
 		vargv=argv+(argvt+1);
 	}
+	/* Under an explicit text -k, walk once with no side effects first: a
+	   refusal must leave nothing behind, and readdir order would otherwise
+	   register earlier files before the binary one is reached.  (A single
+	   file is refused in place - there is nothing earlier to register.)  */
+	if (!single_file && keyword_opt && keyword_opt[0] && !kopt_is_binary (keyword_opt))
+	{
+	    import_check_only = 1;
+	    err = import_descend (message, vtag, vargc, vargv);
+	    import_check_only = 0;
+	    if (err)
+		error (1, 0, "import refused: binary content under -k%s (use -kB)", keyword_opt);
+	}
 	if(single_file)
 		err = import_single_file (single_filename, message, vtag, vargc, vargv);
 	else
@@ -697,6 +711,18 @@ static int import_descend (char *message, char *vtag, int targc, char *targv[])
  */
 static int process_import_file (char *message, char *vfile, char *vtag, int targc, char *targv[])
 {
+    /* The check-only pass under an explicit text -k: refuse binary content
+       before any ,v or directory exists, so the whole import stops clean.  */
+    if (import_check_only)
+    {
+	if (content_kopt (vfile, keyword_opt, 1) == CONTENT_KOPT_REFUSE)
+	{
+	    error (0, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
+		   vfile, keyword_opt);
+	    return 1;
+	}
+	return 0;
+    }
     char *rcs;
 	const char *msg;
 	const char *fn = vfile;
@@ -1782,7 +1808,7 @@ static int import_descend_dir (char *message, char *dir, char *vtag, int targc, 
 	}
 
 	TRACE(3,"import_descend_dir() verify_create() succeeded.");
-    if (!quiet && !current_parsed_root->isremote)
+    if (!quiet && !current_parsed_root->isremote && !import_check_only)
 	{
 		TRACE(3,"import_descend_dir() Importing...");
 		error (0, 0, "Importing %s", repository);
@@ -1797,7 +1823,7 @@ static int import_descend_dir (char *message, char *dir, char *vtag, int targc, 
 	err = 1;
 	goto out;
     }
-    if (!current_parsed_root->isremote && !isdir (repository))
+    if (!import_check_only && !current_parsed_root->isremote && !isdir (repository))
     {
 	rcs = (char*)xmalloc (strlen (repository) + sizeof (RCSEXT) + 5);
 	sprintf (rcs, "%s%s", repository, RCSEXT);

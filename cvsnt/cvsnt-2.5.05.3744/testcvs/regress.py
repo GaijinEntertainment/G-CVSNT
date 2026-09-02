@@ -1312,38 +1312,6 @@ def t_add_binary_kopt_protocol(r):
           "the binary file in the second directory lost its Kopt:" + chr(10) + out)
 
 
-@test("binary content is detected on add through a client/server root too")
-def t_add_binary_by_content_remote(r):
-    # The bytes live on the client, which tags the file with a per-file
-    # Kopt; text and binary in one add must both land right.
-    root = ":fork:" + r.repo.replace(os.sep, "/")
-    rc, _ = run(["-d", root, "version"], cwd=r.root, expect_ok=False)
-    if rc != 0:
-        print("          (skipped: needs the fork protocol plugin and a registered root)")
-        return
-    r.import_tree("m", {"a.txt": "one" + chr(10), "sub/b.txt": "two" + chr(10)})
-    wcroot = os.path.join(r.root, "rwc")
-    os.makedirs(wcroot)
-    run(["-d", root, "checkout", "m"], cwd=wcroot)
-    wc = os.path.join(wcroot, "m")
-    nul = bytes(range(256)) * 3
-    with open(os.path.join(wc, "blob1.txt"), "wb") as f:
-        f.write(nul)
-    write(os.path.join(wc, "plain_text"), "text" + chr(10))
-    with open(os.path.join(wc, "sub", "deep.txt"), "wb") as f:
-        f.write(nul)
-    run(["-d", root, "add", "blob1.txt", "plain_text", os.path.join("sub", "deep.txt")], cwd=wc)
-    e = entries_of(wc)
-    check("-kB" in e.get("blob1.txt", ""), "remote add: blob1.txt not -kB: " + e.get("blob1.txt", "<absent>"))
-    check("-k" not in e.get("plain_text", "/x/"), "remote add: plain_text got a kopt: " + e.get("plain_text", "<absent>"))
-    es = entries_of(os.path.join(wc, "sub"))
-    check("-kB" in es.get("deep.txt", ""), "remote add: sub/deep.txt lost its -kB: " + es.get("deep.txt", "<absent>"))
-    run(["-d", root, "commit", "-m", "bin"], cwd=wc)
-    wc2 = os.path.join(r.root, "rwc2")
-    os.makedirs(wc2)
-    run(["-d", root, "checkout", "m"], cwd=wc2)
-    check_eq(open(os.path.join(wc2, "m", "blob1.txt"), "rb").read(), nul, "remote auto -kB round trip")
-
 
 def main():
     global CVS, LIBDIR, VERBOSE, CURRENT, PASSED

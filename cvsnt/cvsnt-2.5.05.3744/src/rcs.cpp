@@ -3324,11 +3324,11 @@ static char *translate_symtag (RCSNode *rcs, const char *tag)
 }
 
 /* Whether KOPT (Entries/-k form, no leading -k) selects a binary mode.  A
-   +B delta adds one; a -X delta removes flags and never selects binary.  */
+   +B delta adds one (a -X delta never parses to a binary flag).  */
 bool kopt_is_binary (const char *kopt)
 {
     kflag kf;
-    if (!kopt || !*kopt || *kopt == '-')
+    if (!kopt || !*kopt)
 	return false;
     if (*kopt == '+')
 	++kopt;
