@@ -20,6 +20,7 @@ AM_CPPFLAGS = -I$(top_srcdir)/lib $(pcre_inc) $(includeopt) $(INCLTDL) -D_CVSAPI
 libcvsapi_la_SOURCES = \
 	Codepage.cpp \
 	Codepage.h \
+	FileContent.cpp \
 	crypt.cpp \
 	crypt.h \
 	cvsapi.h \

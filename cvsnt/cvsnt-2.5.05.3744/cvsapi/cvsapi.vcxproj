@@ -260,6 +260,7 @@
   </ItemDefinitionGroup>
   <ItemGroup>
     <ClCompile Include="Codepage.cpp" />
+    <ClCompile Include="FileContent.cpp" />
     <ClCompile Include="crypt.cpp" />
     <ClCompile Include="cvs_string.cpp" />
     <ClCompile Include="diff\DiffBase.cpp" />

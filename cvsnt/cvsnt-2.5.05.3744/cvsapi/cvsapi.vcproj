@@ -219,6 +219,10 @@
 					>
 				</File>
 				<File
+					RelativePath=".\FileContent.cpp"
+					>
+				</File>
+				<File
 					RelativePath=".\crypt.cpp"
 					>
 				</File>

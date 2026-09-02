@@ -1151,6 +1151,150 @@ def t_binary_small_second_commit(r):
                  "%d-byte binary revision came back as %d bytes" % (size, len(got)))
         check(got == payload, "%d-byte binary revision content differs" % size)
 
+@test("binary content is detected on add and import by content, not by name")
+def t_add_binary_by_content(r):
+    # A NUL in the first 8000 bytes makes a file binary whatever its name
+    # or cvswrappers say; UTF-16 text with a BOM is exempt.  An explicit
+    # text -k on such a file is refused.  import follows the same rule.
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    wc = r.checkout("m")
+    nul = bytes(range(256)) * 3
+    with open(os.path.join(wc, "blob1.txt"), "wb") as f:
+        f.write(nul)
+    # Wrappers may still opt a text file into -kB by name (*.bin is one);
+    # content only ever adds binary-ness.  So the text case has no
+    # extension at all.
+    write(os.path.join(wc, "plain_text"), "just text" + chr(10))
+    with open(os.path.join(wc, "u16.txt"), "wb") as f:
+        f.write(bytes([255, 254]) + "hello".encode("utf-16-le"))
+    _, out = r.cvs(["add", "blob1.txt", "plain_text", "u16.txt"], cwd=wc)
+    ents = entries_of(wc)
+    check("-kB" in ents.get("blob1.txt", ""),
+          "NUL-bearing blob1.txt not added as -kB: " + ents.get("blob1.txt", "<absent>"))
+    check("-k" not in ents.get("plain_text", "/x/"),
+          "text plain_text got a kopt: " + ents.get("plain_text", "<absent>"))
+    check("-kB" not in ents.get("u16.txt", ""),
+          "UTF-16 text u16.txt treated as binary: " + ents.get("u16.txt", "<absent>"))
+    check("blob1.txt has binary content" in out, "no note about the auto -kB:" + chr(10) + out)
+
+    with open(os.path.join(wc, "blob2.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["add", "-kkv", "blob2.txt"], cwd=wc, expect_ok=False)
+    check(rc != 0, "add -kkv on binary content exited 0:" + chr(10) + out)
+    check("blob2.txt" not in entries_of(wc), "add -kkv registered binary content as text")
+
+    r.cvs(["commit", "-m", "bin"], cwd=wc)
+    wcb = os.path.join(r.root, "wcBin")
+    os.makedirs(wcb)
+    r.cvs(["checkout", "m"], cwd=wcb)
+    got = open(os.path.join(wcb, "m", "blob1.txt"), "rb").read()
+    check_eq(got, nul, "auto -kB file did not round trip")
+
+    imp = os.path.join(r.root, "impb")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "blob.txt"), "wb") as f:
+        f.write(nul)
+    write(os.path.join(imp, "notes.dat"), "text" + chr(10))
+    r.cvs(["import", "-m", "i", "mi", "VENDOR", "REL0"], cwd=imp)
+    wci = r.checkout("mi")
+    e = entries_of(wci)
+    check("-kB" in e.get("blob.txt", ""),
+          "imported NUL-bearing blob.txt not -kB: " + e.get("blob.txt", "<absent>"))
+    check("-k" not in e.get("notes.dat", "/x/"),
+          "imported text notes.dat got a kopt: " + e.get("notes.dat", "<absent>"))
+    check_eq(open(os.path.join(wci, "blob.txt"), "rb").read(), nul, "imported blob.txt content")
+
+
+@test("a per-file Kopt before Is-modified makes the server add that file as -kB")
+def t_add_binary_kopt_protocol(r):
+    # The client-side detector tags a binary file with "Kopt -kB" followed
+    # by "Is-modified", which the server turns into a dummy entry carrying
+    # the kopt, so one add can mix text and binary.  No remote method is
+    # buildable here without admin rights, so this drives cvs server over
+    # its protocol with the exact sequence the client emits and pins the
+    # server half of that contract.
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    root = r.repo.replace(os.sep, "/")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    reqs = "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "valid-requests",
+        "UseUnchanged",
+        "Directory .",
+        root + "/m",
+        "Kopt -kB",
+        "Is-modified blob1.txt",
+        "Is-modified plain_text",
+        "Argument --",
+        "Argument blob1.txt",
+        "Argument plain_text",
+        "add",
+    ])
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvadd")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        fail("server add did not complete within 120s")
+        return
+    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    check_eq(p.returncode, 0, "server exit status (output:" + chr(10) + out + ")")
+    check(not any(l.startswith("error") for l in out.split(chr(10))),
+          "server reported an error:" + chr(10) + out)
+    # In server mode the entry carries no timestamp, and a client that has
+    # not sent Valid-RcsOptions is answered with the compatibility spelling
+    # -kb (the kflag table maps B to b for pre-cvsnt clients).
+    check(re.search(r"/blob1\.txt/0/[^/]*/-k[bB]/", out) is not None,
+          "Kopt -kB before Is-modified did not make the added entry binary:" + chr(10) + out)
+    check(re.search(r"/plain_text/0/[^/]*//", out) is not None,
+          "the file without a Kopt in the same add did not stay text:" + chr(10) + out)
+
+
+@test("binary content is detected on add through a client/server root too")
+def t_add_binary_by_content_remote(r):
+    # The bytes live on the client, which tags the file with a per-file
+    # Kopt; text and binary in one add must both land right.
+    root = ":fork:" + r.repo.replace(os.sep, "/")
+    rc, _ = run(["-d", root, "version"], cwd=r.root, expect_ok=False)
+    if rc != 0:
+        print("          (skipped: needs the fork protocol plugin and a registered root)")
+        return
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    wcroot = os.path.join(r.root, "rwc")
+    os.makedirs(wcroot)
+    run(["-d", root, "checkout", "m"], cwd=wcroot)
+    wc = os.path.join(wcroot, "m")
+    nul = bytes(range(256)) * 3
+    with open(os.path.join(wc, "blob1.txt"), "wb") as f:
+        f.write(nul)
+    write(os.path.join(wc, "plain_text"), "text" + chr(10))
+    run(["-d", root, "add", "blob1.txt", "plain_text"], cwd=wc)
+    e = entries_of(wc)
+    check("-kB" in e.get("blob1.txt", ""), "remote add: blob1.txt not -kB: " + e.get("blob1.txt", "<absent>"))
+    check("-k" not in e.get("plain_text", "/x/"), "remote add: plain_text got a kopt: " + e.get("plain_text", "<absent>"))
+    run(["-d", root, "commit", "-m", "bin"], cwd=wc)
+    wc2 = os.path.join(r.root, "rwc2")
+    os.makedirs(wc2)
+    run(["-d", root, "checkout", "m"], cwd=wc2)
+    check_eq(open(os.path.join(wc2, "m", "blob1.txt"), "rb").read(), nul, "remote auto -kB round trip")
+
+
 def main():
     global CVS, LIBDIR, VERBOSE, CURRENT, PASSED
 

@@ -89,6 +89,11 @@ public:
 	static CVSAPI_EXPORT bool rename(const char *from, const char *to);
 
 	static CVSAPI_EXPORT bool exists(const char *file);
+	/* True when FILE looks binary by content: a NUL in its first 8000
+	   bytes, unless it opens with a UTF-16/32 BOM (text cvsnt carries
+	   with an encoding kflag).  Names and extensions play no part; this
+	   is the detector add/import use, and the one TortoiseCVS should. */
+	static CVSAPI_EXPORT bool looks_binary(const char *file);
 	static CVSAPI_EXPORT TypeEnum type(const char *file);
 	static CVSAPI_EXPORT bool absolute(const char *file);
 	static CVSAPI_EXPORT int uplevel(const char *file);

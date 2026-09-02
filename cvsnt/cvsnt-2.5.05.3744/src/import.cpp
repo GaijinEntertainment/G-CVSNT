@@ -658,6 +658,11 @@ static int import_descend (char *message, char *vtag, int targc, char *targv[])
                        {
                                t=time_stamp(p->key, 0);
                                r=wrap_rcsoption(p->key);
+                               if (!kopt_is_binary (r) && CFileAccess::looks_binary (p->key))
+                               {
+                                       xfree (r);
+                                       r = xstrdup ("B");
+                               }
 							   fprintf(f,"/%s/%s.1/%s/%s%s/\n",p->key,vbranch?vbranch:"1",t,r?"-k":"",r?r:"");
                                xfree(r);
                                xfree(t);
@@ -749,6 +754,24 @@ static int process_import_file (char *message, char *vfile, char *vtag, int targ
 			Entries_Close (entries);
 	    }
 #endif
+
+	    /* Content decides binary-ness: the client sends a matching Kopt,
+	       and in local mode this is the only check.  */
+	    if (isfile (vfile) && !kopt_is_binary (our_opt)
+		&& CFileAccess::looks_binary (vfile))
+	    {
+		if (keyword_opt && keyword_opt[0] && our_opt == keyword_opt)
+		{
+		    error (0, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
+			   vfile, keyword_opt);
+		    xfree (free_opt);
+		    xfree (rcs);
+		    return 1;
+		}
+		xfree (free_opt);
+		free_opt = our_opt = xstrdup ("B");
+		error (0, 0, "%s has binary content, importing it as -kB", vfile);
+	    }
 
 	    retval = add_rcs_file (message, rcs, vfile, vhead, our_opt,
 				   vbranch, vtag, targc, targv,

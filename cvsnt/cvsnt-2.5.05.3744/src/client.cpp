@@ -6047,6 +6047,15 @@ int client_process_import_file(const char *message, const char *vfile, const cha
     send_a_repository ("", repository, update_dir);
 	vers.options = wrap_rcsoption(vfile);
 	assign_options(&vers.options,options);
+	/* Content decides binary-ness, not the name.  */
+	if (!kopt_is_binary (vers.options) && CFileAccess::looks_binary (vfile))
+	{
+		if (options && options[0])
+			error (1, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
+			       vfile, options);
+		xfree (vers.options);
+		vers.options = xstrdup ("B");
+	}
     if (vers.options != NULL)
     {
 		if (supported_request ("Kopt"))
