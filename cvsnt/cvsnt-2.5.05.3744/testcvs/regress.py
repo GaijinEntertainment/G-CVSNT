@@ -594,9 +594,12 @@ def t_new_file_add_commit(r):
 def t_server_session(r):
     # Drive `cvs server` through its stdin/stdout protocol the way a network
     # client would: one session issuing valid-requests, a checkout, a noop and
-    # an rlog.  Pins (a) request dispatch, (b) that every command's output is
-    # flushed to the client by the time its terminating "ok" arrives, and
-    # (c) that the session never deadlocks waiting for a flush.
+    # an rlog.  Pins request dispatch, that the whole session's output arrives
+    # in protocol order, and that it never deadlocks.  It does not pin the
+    # per-command flush timing: communicate() sends every request before
+    # reading, so the EOF flush alone satisfies the byte checks - verifying
+    # the boundary flush needs an interactive read of each "ok", which is not
+    # portable over these pipes.
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "sub content\n"})
     root = r.repo.replace(os.sep, "/")
 

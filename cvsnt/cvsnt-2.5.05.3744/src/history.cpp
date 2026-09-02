@@ -736,12 +736,19 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 		{
 			TRACE(1,"fopen(%s,a)",fname.c_str());
 			hist_fp = CVS_FOPEN(fname.c_str(),"a");
+#if defined(_WIN32)
+			/* CRT handles are inheritable unless opened with "N", and the
+			   trigger runner spawns with bInheritHandles=TRUE - clear the
+			   flag so children do not pin the history file.  */
+			if(hist_fp)
+				SetHandleInformation((HANDLE)_get_osfhandle(_fileno(hist_fp)), HANDLE_FLAG_INHERIT, 0);
+#endif
 			/* The handle is held across records, which spans the
 			   historyinfo trigger's fork+exec and every other
 			   subprocess.  Nothing in the child needs it, and an
 			   inherited append handle pins the inode against log
-			   rotation - so mark it close-on-exec.  Windows handles
-			   from the CRT are not inheritable by default.  */
+			   rotation - so mark it close-on-exec on POSIX and clear the
+			   inherit flag on Windows.  */
 #if defined(FD_CLOEXEC) && !defined(_WIN32)
 			if(hist_fp)
 				fcntl(fileno(hist_fp), F_SETFD, FD_CLOEXEC);
@@ -878,10 +885,14 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 		   old per-record code aborted on a failed write (only its close
 		   path ignored errors), so a full CVSROOT partition killed
 		   checkouts that had otherwise succeeded.  */
-		if(fwrite(line.c_str(),1,line.length(),hist_fp)!=line.length())
-			error (0, errno, "warning: cannot write to history file: %s", fn_root(fname.c_str()));
-		else if(fflush(hist_fp))
-			error (0, errno, "warning: cannot flush history file: %s", fn_root(fname.c_str()));
+		/* Warn once per command, not once per record: a full partition
+		   would otherwise turn a large checkout into one E line per file. */
+		if(fwrite(line.c_str(),1,line.length(),hist_fp)!=line.length() || fflush(hist_fp))
+		{
+			if(!hist_fail)
+				error (0, errno, "warning: cannot write to history file: %s", fn_root(fname.c_str()));
+			hist_fail = 1;
+		}
 	}
 
 	historyproc_param_t args;

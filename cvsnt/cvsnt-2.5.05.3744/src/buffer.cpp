@@ -124,8 +124,6 @@ get_buffer_data (void)
     return ret;
 }
 
-/* See whether a buffer is empty.  */
-
 /* Number of pending data chunks; lets callers reason about "one chunk
    or less" without reading the chunk list themselves.  */
 int buf_chunk_count (struct buffer *buf)
@@ -137,6 +135,7 @@ int buf_chunk_count (struct buffer *buf)
     return n;
 }
 
+/* See whether a buffer is empty.  */
 int
 buf_empty_p (struct buffer *buf)
 {
