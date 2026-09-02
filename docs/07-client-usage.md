@@ -73,8 +73,9 @@ byte in its first 8000 bytes (UTF-16/32 text with a BOM is exempt) is added as `
 `cvswrappers` or the extension say, with a note on stderr, and an explicit text `-k` on such a
 file is refused (use `-kB`). `add` refuses the whole command up front. A local `import` walks a
 tree, so it aborts at the first binary file and text files earlier in the walk may already be
-imported; the binary file itself is never stored as text. A client/server `import` refuses
-before sending anything. The detector is `CFileAccess::looks_binary()` in cvsapi, so TortoiseCVS and other
+imported; the binary file itself is never stored as text. A client/server `import` aborts at the first binary file too; the server registers nothing until
+the whole upload finishes, so the repository is left unchanged (earlier files are transmitted but
+not committed). The detector is `CFileAccess::looks_binary()` in cvsapi, so TortoiseCVS and other
 cvsapi clients get the same answer. Wrappers remain useful for choosing `-kBz` over `-kB`:
 
 To make it automatic, put patterns in `CVSROOT/cvswrappers`:

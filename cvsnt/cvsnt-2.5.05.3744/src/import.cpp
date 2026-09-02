@@ -816,6 +816,24 @@ static int update_rcs_file(const char *fn, char *message, char *vfile, char *vta
     vers = Version_TS (&finfo, keyword_opt, vbranch, (char *) NULL, 1, 0, 0);
 	kflag kopt;
 	RCS_get_kflags(vers->options,false,kopt);
+	/* Content beats name here too: a re-import reaches this path over an
+	   existing ,v, and vers->options is that file's kopt.  Never let binary
+	   content land as a text revision.  */
+	switch (content_kopt (vfile, vers->options, keyword_opt && keyword_opt[0]))
+	{
+	case CONTENT_KOPT_REFUSE:
+	    error (1, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
+		   vfile, keyword_opt);
+	case CONTENT_KOPT_BINARY:
+	    xfree (vers->options);
+	    vers->options = xstrdup ("B");
+	    RCS_get_kflags (vers->options, false, kopt);
+	    if (!server_active)
+		error (0, 0, "%s has binary content, importing it as -kB", vfile);
+	    break;
+	default:
+	    break;
+	}
     if (vers->vn_rcs != NULL && !RCS_isdead(vers->srcfile, vers->vn_rcs))
     {
 		int different;

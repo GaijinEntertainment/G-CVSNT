@@ -1263,6 +1263,44 @@ def t_add_binary_by_content(r):
           "import -C -k kv did not store a text file:" + chr(10) + out)
     check(os.path.exists(os.path.join(r.repo, "mc", "d", "two.txt,v")),
           "import -C -k kv did not descend:" + chr(10) + out)
+    # A re-import over an existing text ,v must not store binary content as
+    # text: update_rcs_file runs the same content check.  First a text x.txt,
+    # then the same name with binary bytes under -k kv is refused, and without
+    # -k it is forced to -kB.
+    impr = os.path.join(r.root, "impr")
+    os.makedirs(impr)
+    write(os.path.join(impr, "x.txt"), "text one" + chr(10))
+    r.cvs(["import", "-k", "kv", "-m", "i", "mr", "VENDOR", "REL0"], cwd=impr)
+    v0 = read(os.path.join(r.repo, "mr", "x.txt,v"))
+    with open(os.path.join(impr, "x.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["import", "-k", "kv", "-m", "i2", "mr", "VENDOR", "REL1"], cwd=impr,
+                    expect_ok=False)
+    check(rc != 0, "re-import -k kv of binary over a text ,v exited 0:" + chr(10) + out)
+    check_eq(read(os.path.join(r.repo, "mr", "x.txt,v")), v0,
+             "re-import -k kv of binary changed the ,v")
+    _, out = r.cvs(["import", "-m", "i3", "mr", "VENDOR", "REL2"], cwd=impr)
+    check("x.txt has binary content" in out, "re-import without -k gave no auto -kB note:" + chr(10) + out)
+    wcr = r.checkout("mr")
+    check("-kB" in entries_of(wcr).get("x.txt", ""),
+          "re-imported binary x.txt not -kB: " + entries_of(wcr).get("x.txt", "<absent>"))
+    check_eq(open(os.path.join(wcr, "x.txt"), "rb").read(), nul, "re-imported binary x.txt content")
+
+    # A symlink in a source tree is its own kind of skip, never a false binary
+    # refusal (the reverted pre-walk had mapped any walk error to one).
+    imps = os.path.join(r.root, "imps")
+    os.makedirs(imps)
+    write(os.path.join(imps, "real.txt"), "real" + chr(10))
+    try:
+        os.symlink(os.path.join(imps, "real.txt"), os.path.join(imps, "link.txt"))
+    except OSError:
+        print("          (symlink case skipped: not permitted here)")
+    else:
+        _, out = r.cvs(["import", "-k", "kv", "-m", "i", "ms", "VENDOR", "REL0"], cwd=imps)
+        check("binary content" not in out,
+              "a symlink triggered a false binary refusal:" + chr(10) + out)
+        check(os.path.exists(os.path.join(r.repo, "ms", "real.txt,v")),
+              "the text file beside a symlink was not imported:" + chr(10) + out)
 
 
 @test("a per-file Kopt before Is-modified makes the server add that file as -kB")
