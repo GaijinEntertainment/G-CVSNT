@@ -1296,11 +1296,72 @@ def t_add_binary_by_content(r):
     except OSError:
         print("          (symlink case skipped: not permitted here)")
     else:
-        _, out = r.cvs(["import", "-k", "kv", "-m", "i", "ms", "VENDOR", "REL0"], cwd=imps)
+        # import counts a symlink as a walk error (L) on POSIX and exits 1,
+        # while Windows follows it; either way it must not be a binary
+        # refusal, and the real file beside it is still imported.
+        _, out = r.cvs(["import", "-k", "kv", "-m", "i", "ms", "VENDOR", "REL0"], cwd=imps,
+                       expect_ok=False)
         check("binary content" not in out,
               "a symlink triggered a false binary refusal:" + chr(10) + out)
         check(os.path.exists(os.path.join(r.repo, "ms", "real.txt,v")),
               "the text file beside a symlink was not imported:" + chr(10) + out)
+
+
+@test("cvs server refuses a re-import of binary content over a text ,v")
+def t_import_binary_over_text_server(r):
+    # The server-side half of the re-import content check: drive cvs server
+    # with an import of binary bytes, under -k kv, of a file that already has a
+    # text ,v.  The server must refuse and leave the ,v unchanged - an old or
+    # non-cvsnt client that skips the client-side check relies on this.
+    imp = os.path.join(r.root, "imp0")
+    os.makedirs(imp)
+    write(os.path.join(imp, "x.txt"), "text one" + chr(10))
+    r.cvs(["import", "-k", "kv", "-m", "i", "msrv", "VENDOR", "REL0"], cwd=imp)
+    vpath = os.path.join(r.repo, "msrv", "x.txt,v")
+    v0 = open(vpath, "rb").read()
+    root = r.repo.replace(os.sep, "/")
+    nul = bytes(range(256)) * 3
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    head = "".join(x + chr(10) for x in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "valid-requests",
+        "UseUnchanged",
+        "Directory .",
+        root,
+    ])
+    modhdr = "Modified x.txt" + chr(10) + "u=rw,g=rw,o=r" + chr(10) + str(len(nul)) + chr(10)
+    tail = "".join(x + chr(10) for x in [
+        "Argument -k", "Argument kv",
+        "Argument -m", "Argument reimport",
+        "Argument msrv", "Argument VENDOR", "Argument REL1",
+        "import",
+    ])
+    reqs = head.encode() + modhdr.encode() + nul + tail.encode()
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvimp")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs, timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill(); p.communicate(); fail("server import did not complete within 120s"); return
+    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    check("binary content" in out,
+          "server did not refuse the binary re-import:" + chr(10) + out)
+    check_eq(open(vpath, "rb").read(), v0,
+             "server-side binary re-import changed the ,v")
 
 
 @test("a per-file Kopt before Is-modified makes the server add that file as -kB")
