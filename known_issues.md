@@ -332,14 +332,31 @@ For reference, the 15 defects that were fixed:
 | [`BUG-server-15`](_reports/BUG-server-15-checkin-format-missing-arg.md) | `%s` with no argument on the reopen-failure path |
 | [`BUG-server-17`](_reports/BUG-server-17-pnew-file-comment-typo.md) | `"pnew file"` written into the RCS `comment` field of every imported file |
 
-## Exposed by the watch-persistence fix
+## Duplicate same-name fileattr nodes are mutated by first match only
 
-The fix that makes watch mutations persist (`audit/07`) also makes the
-`cvs edit` notify path durable: each edit persists a
-`<watcher><temp_edit/><temp_commit/><temp_unedit/></watcher>` record into the
-repository's `fileattr.xml` (`edit.cpp` notify `'E'` ->
-`watch_modify_watchers` with the three temp flags). The removal side of that
-protocol does not fire, so temp watcher records accumulate; before the fix
-neither side persisted, which is why this went unseen. The records are inert
-for `cvs watchers` output but grow the tree. Open: make the `'U'`/`'C'`
-notify paths remove the temp records they are designed to clear.
+The `fileattr.xml` model permits more than one node with the same name: a remove+re-add of a
+file (via `fileattr_newfile`) and `cvs chacl` (which can leave a `<directory>` carrying ACL
+children but no `<default>`) are the two sources. The watch-persistence fix stops *creating*
+new duplicates - `fileattr_newfile` now reuses an existing `<file>` node, and the default
+creators reuse an existing `<directory>` - and pins the re-add case with
+`t_watch_readd_single_node`. What remains open: a repository already carrying duplicate
+`<file>` or `<watcher>` nodes from before this fix is not retroactively canonicalized, and the
+per-file mutation paths (`watch off`/`remove`, unedit/commit cleanup) still act on the first
+match, so a pre-existing duplicate can keep stale watch state until a canonicalizing pass walks
+every same-name node. Open: canonicalize duplicate nodes, or make each mutation iterate all
+matches.
+## Temp watch records of an edit that is never finished
+
+The watch-persistence fix (`audit/07`) makes both halves of the `cvs edit`
+notify protocol durable: `'E'` records a
+`<watcher><temp_edit/><temp_commit/><temp_unedit/></watcher>` for the editor in
+the repository's `fileattr.xml`, and `'U'` (unedit) and `'C'` (commit) remove
+those temp records again, dropping the emptied `<watcher>` and the bare `<file>`
+node with it (`watch_modify_watchers`, `remove_temp`; pinned by
+`t_watch_temp_records`). What remains: an edit that is never followed by an
+unedit or a commit keeps its temp record for good, and `cvs watchers` reports
+it as `tedit`/`tunedit`/`tcommit`. Before the fix the 'E' half already persisted (editor_set
+raises the modified flag), but the removal half never fired, so the records could only accumulate;
+the leak was masked because watch commands themselves did not persist, so few repositories carried
+watch state to begin with. Open: an expiry, or an admin-side sweep, for temp
+records whose editor is gone.

@@ -51,10 +51,9 @@ static int unedit_fileproc (void *callerdat, struct file_info *finfo);
 
 static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 {
-	/* This walks the fileattr tree itself instead of going through
-	   fileattr_setvalue, so every mutation below has to raise the modified
-	   flag on its own; without it fileattr_write() early-returns and
-	   "watch on"/"watch off" are silent no-ops.  */
+	/* Only the fileattr mutators may touch the tree: they raise the
+	   modified flag, and without it fileattr_write() early-returns and
+	   "watch on"/"watch off" are silent no-ops (as they were).  */
 	CXmlNodePtr handle = fileattr_getroot();
 	handle->xpathVariable("name",finfo->file);
 	if(!handle->Lookup("file[cvs:filename(@name,$name)]") || !handle->XPathResultNext())
@@ -64,19 +63,13 @@ static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 		   sibling mutation in the same run would persist it.  */
 		if(!turning_on)
 			return 0;
-		handle = fileattr_getroot();
-		handle->NewNode("file");
-		handle->NewAttribute("name",finfo->file);
+		handle = fileattr_newnode(NULL,"file","name",finfo->file);
 	}
 
 	if(turning_on)
-	{
-		if(!handle->GetChild("watched")) { handle->NewNode("watched"); fileattr_modified(); }
-	}
+		fileattr_addchild(handle,"watched");
 	else
-	{
-		if(handle->GetChild("watched")) { handle->Delete(); fileattr_modified(); }
-	}
+		fileattr_delete(handle,"watched");
     return 0;
 }
 
@@ -97,19 +90,19 @@ static int onoff_filesdoneproc (void *callerdat, int err, char *repository, char
 			   find nothing to turn off.  */
 			if(!turning_on)
 				return err;
-			handle = fileattr_getroot();
-			handle->NewNode("directory");
-			handle->NewNode("default");
+			/* Reuse an existing <directory> - cvs chacl can leave one with
+			   ACL children but no <default>.  A second top-level <directory>
+			   would hide this default from fileattr_newfile.  */
+			CXmlNodePtr dir = fileattr_find(NULL,"directory");
+			if(!dir)
+				dir = fileattr_newnode(NULL,"directory");
+			handle = fileattr_newnode(dir,"default");
 		}
 
 		if(turning_on)
-		{
-			if(!handle->GetChild("watched")) { handle->NewNode("watched"); fileattr_modified(); }
-		}
+			fileattr_addchild(handle,"watched");
 		else
-		{
-			if(handle->GetChild("watched")) { handle->Delete(); fileattr_modified(); }
-		}
+			fileattr_delete(handle,"watched");
 	}
     return err;
 }

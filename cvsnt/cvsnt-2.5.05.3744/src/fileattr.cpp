@@ -201,7 +201,7 @@ void fileattr_delete_child(CXmlNodePtr parent, CXmlNodePtr child)
 	}
 }
 
-/* Delete a value under the node at the next prune.  */
+/* Delete the node and its subtree now, and mark the tree modified.  */
 void fileattr_batch_delete(CXmlNodePtr root)
 {
 	TRACE(3,"fileattr_batch_delete()");
@@ -213,6 +213,29 @@ void fileattr_batch_delete(CXmlNodePtr root)
 
 	node->Delete();
 	fileattr_modified();
+}
+
+CXmlNodePtr fileattr_newnode(CXmlNodePtr parent, const char *name, const char *attr, const char *value)
+{
+	TRACE(3,"fileattr_newnode(%s)",name);
+	CXmlNodePtr node = parent ? parent : fileattr_getroot();
+	node->NewNode(name);
+	if(attr)
+		node->NewAttribute(attr,value);
+	fileattr_modified();
+	return node;
+}
+
+bool fileattr_addchild(CXmlNodePtr parent, const char *name)
+{
+	TRACE(3,"fileattr_addchild(%s)",name);
+	/* select=false answers the presence question without moving PARENT
+	   or cloning it.  */
+	if(parent->GetChild(name,false))
+		return false;
+	parent->NewNode(name,NULL,false);
+	fileattr_modified();
+	return true;
 }
 
 /* Get a single value from a node.  Pass null to get value of this node. */
@@ -285,7 +308,15 @@ void fileattr_newfile (const char *filename)
 	else
 		dir_default = NULL;
 
+	/* Reuse an existing node for this name.  A remove+re-add would
+	   otherwise leave two <file name="X"> nodes, and every later
+	   per-file mutation (watch off/remove, watchers) acts on the first
+	   match only, so the second kept stale state.  */
 	CXmlNodePtr file = stored_root->Clone();
+	file->xpathVariable("name",filename);
+	if(file->Lookup("file[cvs:filename(@name,$name)]") && file->XPathResultNext())
+		return;
+	file = stored_root->Clone();
 	file->NewNode("file");
 	file->NewAttribute("name",filename);
 	fileattr_modified();
