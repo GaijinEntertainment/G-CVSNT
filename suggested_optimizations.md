@@ -8,6 +8,7 @@ The full analyses, with call chains and evidence, are in:
 
 * [`_reports/PERF-01-update-path.md`](_reports/PERF-01-update-path.md) — the update path
 * [`_reports/PERF-02-tag-branch-path.md`](_reports/PERF-02-tag-branch-path.md) — tag, rtag and branch
+* [`_reports/PERF-03-tag-update-lock-contention.md`](_reports/PERF-03-tag-update-lock-contention.md) — tag/update lock contention
 
 Every item below carries an ID from those reports. **Status** is updated as work lands; a commit
 implementing an item should flip its status in the same commit.
@@ -55,11 +56,11 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 
 | # | ID | What | LoC | Risk | Status |
 | --- | --- | --- | ---: | --- | --- |
-| 8 | PERF-02 F8 | `RCS_putdtree()` calls `fflush(fp)` at the end of *every* recursive invocation — one forced partial write per branch node per file. **Must be committed together with an explicit `fflush(fout)` before `CVS_FTELL(fout)` at `src/rcs_checkin.cpp:952`**, which silently depends on it. Splitting the two produces a wrong `delta_pos`, which is repository corruption. | ~10 | low *with* the companion change | implemented |
-| 9 | PERF-02 F3.2 | The first of the two tag passes takes a **write** lock on every file although it only reads. Replace the `lock_for_write` global with a per-recursion value. | ~25 | low | implemented |
-| 10 | PERF-02 F6 | `RCS_magicrev()` has two stacked `for` headers; the inner one resets `rev_num = 2` and discards the `findnextmagicrev` result computed just above, forcing a linear rescan with a full symbol-list walk per candidate. The outer loop is dead code. Needs branch-numbering tests first — the optimised path has never actually run. | 2 | medium | implemented |
-| 11 | PERF-01 F11 | A batch of per-file micro-costs: `strlen` in the dispatch table, the Entry line built twice, an unhoisted `getline` buffer, the history file handle reopened, `xgetwd` uncached. Individually small, together perhaps 10–20% of a large update. | ~165 | low | partial: dispatch scan, Entries `getline` buffer and history handle implemented; Entry-line assembly, mapping/modules2 lookups and `xgetwd` left `not started` — the first needs byte-exact codepage handling on the client send path, which the local suites cannot exercise, and the others sit on paths (directory mappings, modules2, blob download cwd) with no local test coverage and, for `xgetwd`, no invalidation point that does not itself cost a syscall |
-| 12 | PERF-01 F7 | The server flushes on every newline-terminated string, so a 300 k-file checkout does ~300 k tiny `write()` calls. Switch to a byte-threshold flush. **Requires a flush-before-read audit** or the session deadlocks. | ~30 | medium | implemented — the flush-before-read audit is in the commit message |
+| 8 | PERF-02 F8 | `RCS_putdtree()` called `fflush(fp)` at the end of *every* recursive invocation — one forced partial write per branch node per file. Removed. The slice also dropped the `fflush(fout)` before `CVS_FTELL(fout)`: `CVS_FTELL` returns the logical position including buffered bytes, so `delta_pos` is exact unflushed and `fclose` flushes before the rename. | ~10 | low | implemented (both flushes removed) |
+| 9 | PERF-02 F3.2 | The first of the two tag passes took a **write** lock on every file although it only reads. Fixed by keeping the `lock_for_write` global but raising it only around the second `start_recursion` pass (`src/tag.cpp:434`/`:439`), so pass 1 takes read locks. (The global was kept, not replaced with a per-recursion value.) | ~25 | low | implemented |
+| 10 | PERF-02 F6 | `RCS_magicrev()` had two stacked `for` headers; the inner one reset `rev_num = 2` and discarded the `findnextmagicrev` result computed just above, forcing a linear rescan with a full symbol-list walk per candidate. Collapsed to a single loop using `findnextmagicrev` (`src/rcs.cpp:2285-2288`); the branch-numbering tests it needed were added (`t_branch_numbers_multi` and the branch-after-delete cases). | 2 | medium | implemented |
+| 11 | PERF-01 F11 | A batch of per-file micro-costs: `strlen` in the dispatch table, the Entry line built twice, an unhoisted `getline` buffer, the history file handle reopened, `xgetwd` uncached. Individually small, together perhaps 10–20% of a large update. | ~165 | low | partial — see note after the Tier 4 table |
+| 12 | PERF-01 F7 | The server flushes on every newline-terminated string, so a 300 k-file checkout does ~300 k tiny `write()` calls. Switch to a byte-threshold flush. **Requires a flush-before-read audit** or the session deadlocks. | ~30 | medium | implemented — see PERF-03 mechanism (c) for the flush-before-read reasoning |
 | 13 | PERF-01 F9 | `open_directory()` fully parses and checks out `.directory_history,v` per directory, and `CVS/Tag` is opened up to three times. Memoise per directory. | ~90 | low-medium | skipped — premise partly refuted and no clean memo key, see below |
 | 14 | PERF-01 F8 | A libxml2 XPath is compiled and evaluated **per checked-out file** to answer "is this file watched?" — a fresh context, namespace and variable registration, and a re-parse of the expression each time. Hoist to one query per directory. Must preserve `fncmp` case-folding. | ~70 | low-medium | implemented |
 
@@ -67,7 +68,7 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 
 | # | ID | What | LoC | Risk | Status |
 | --- | --- | --- | ---: | --- | --- |
-| 15 | PERF-02 F4 | `history_write` per tagged file costs stat+open+append+close on one global file plus a full trigger dispatch. With any matching `CVSROOT/historyinfo` line that becomes **one process spawn per tagged file**, and `CVSROOT/history` grows ~60 MB per 500 k-file tag. Hold the file open for the command; move `historyinfo` from per-file to per-directory, mirroring `pretag`; add a config switch to restore the current behaviour. | ~125 | medium (trigger ABI) | not started |
+| 15 | PERF-02 F4 | `history_write` per tagged file costs stat+open+append+close on one global file plus a full trigger dispatch. With any matching `CVSROOT/historyinfo` line that becomes **one process spawn per tagged file**, and `CVSROOT/history` grows ~60 MB per 500 k-file tag. Hold the file open for the command; move `historyinfo` from per-file to per-directory, mirroring `pretag`; add a config switch to restore the current behaviour. | ~125 | medium (trigger ABI) | partial: the file is now held open for the command (`hist_fp` static) and a failed write warns and continues instead of aborting; `historyinfo` per-directory and the config knob are not started |
 | 16 | PERF-01 F1a | `rcsbuf_open()` takes a lock-server lock on **every** `,v` it opens and `freercsnode()` releases it — two blocking round trips per file, on one socket, even for files that turn out to be up to date. Suppress per-file locks for read-only recursions and restore the per-directory read lock. **The single biggest win available.** Stage behind a config switch and soak-test against concurrent commits. | ~40 | medium | not started |
 | 17 | PERF-02 F3.1 | `rcs_internal_lockfile()` takes a *second* write lock on a file `rcsbuf_open` has already locked. Reuse `rcs->rcsbuf.lockId`. Removes 2 of the 6 round trips per file in a tag. Must be validated against `lockservice/` or `RCS_rewrite` runs unlocked. | ~10 | medium | not started |
 | 18 | PERF-01 F2 | The lazy RCS parse was removed: `RCS_parsercsfile_i()` unconditionally calls `RCS_reparsercsfile()`, parsing the entire admin block *and every delta node*, when update needs only the head, the expand mode and one revision. The `PARTIAL` flag survives only as a stale comment. Reinstate a two-phase parse; ship a debug-build assert-on-unparsed guard first. ~80 direct `rcs->versions` users to audit. | ~120 | medium-high | not started |
@@ -80,6 +81,9 @@ symbol table and copies every deltatext, **each tag makes the next tag slower, p
 ---
 
 ### Tier 4 — cross-command lock contention
+
+Line numbers in this table reference the pre-Tier-2 tree (`01eb468`), as PERF-03 does; the
+post-fix locations are given in this table's own rows (e.g. item 9: the `lock_for_write` raise is now at `src/tag.cpp:434`/`:439`).
 
 Why a `cvs tag` cannot run while a slow client is updating, from
 [`_reports/PERF-03-tag-update-lock-contention.md`](_reports/PERF-03-tag-update-lock-contention.md).
@@ -96,10 +100,16 @@ takes a **write** lock on every `,v` it opens, and the loser does not queue — 
 | 24 | PERF-03 F2 | Tag pass 1 validates — it only reads — but took **write** locks, because `lock_for_write` is a global raised across the whole command (`src/tag.cpp:282`). Take read locks in pass 1. Halves the tag's exclusive footprint and lets validation run alongside any number of updates. | ~25 | low | **implemented** (Tier 2 item 9) |
 | 25 | PERF-03 F3 | The busy path is a fixed-schedule poll: ≥1 s per retry, 20 retries, then a fatal `Failed to obtain lock`. A 5 ms conflict costs a full second; a busy repository kills the command. Exponential backoff from ~50 ms, and make the cap a configurable timeout. **Removes the fatal**, which is the actual operational failure. | ~20 | low | not started |
 | 26 | PERF-03 F5 | `open_directory` parses `.directory_history,v` (`src/mapping.cpp:1057`) and holds its lock until `close_directory` (`:1391`) — spanning the entire directory, including every blocking write to the client. **This is the only lock genuinely held across client network I/O**, and it is the object a tag must write-lock to enter the directory at all. Release it once the version and mappings are read. Also collapses the double `open_directory` at `src/update.cpp:1145`. | ~35 | medium | not started |
-| 27 | PERF-03 F9 | `tag_fileproc` emits progress with a bare `cvs_output(..., 1)` (`src/tag.cpp:1160`), which flushed synchronously to the client while holding both the file's write lock and the directory lock. Largely addressed by the Tier 2 output batching (item 12); confirm the tag path no longer flushes inside the lock window. | ~15 | low | partly covered by item 12 |
+| 27 | PERF-03 fix list #9 | `tag_fileproc` emits progress with a bare `cvs_output(..., 1)` (`src/tag.cpp:1160`), which flushed synchronously to the client while holding both the file's write lock and the directory lock. Largely addressed by the Tier 2 output batching (item 12); confirm the tag path no longer flushes inside the lock window. | ~15 | low | partly covered by item 12 |
 | 28 | PERF-03 F4 | No fairness: a stream of read lock acquisitions can starve a waiting writer indefinitely, and the 20-retry cap converts starvation into a fatal rather than a delay. Fixed properly only by item 29. | — | — | see 29 |
 | 29 | PERF-03 F7 | Give the lock server a real wait queue with writer preference, replacing `002 busy` plus client polling. Kills both the 1 s granularity and the starvation. **Note the constraint:** the service is thread-per-connection under **one global mutex**, and `DoLock` writes its reply with `s->printf` *while holding it* — a blocking wait must not be held under that mutex or the whole service stalls. | ~200 | high | not started |
 | 30 | PERF-03 F10 | Lock keys are raw path strings, so an Attic move or two callers spelling the same file differently lock different keys. Normalise to a canonical attic-independent path. Correctness, not performance — and it may *introduce* contention that today silently does not exist. | ~30 | medium | not started |
+
+Note (item 11): the dispatch scan and the Entries `getline` buffer are implemented (the history
+hold-open is tracked under item 15); Entry-line assembly, the mapping/modules2 lookups and `xgetwd` are left `not
+started` — the first needs byte-exact codepage handling on the client send path (not exercised by
+the local suites), the others sit on paths with no local coverage (`xgetwd` has no cheap
+invalidation point).
 
 **If only two of these land:** 25 and 26. Item 25 is ~20 LoC and turns "the branch operation dies"
 into "it is slower"; item 26 removes the one lock that a slow client genuinely extends.

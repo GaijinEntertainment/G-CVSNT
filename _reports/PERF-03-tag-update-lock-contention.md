@@ -7,10 +7,11 @@ area: locking / cross-command contention
 
 *All paths below are relative to `cvsnt/cvsnt-2.5.05.3744/`.*
 
-**Status:** written against the pre-Tier-2 tree. Two of the mechanisms below were fixed in the
+**Status:** written against the pre-Tier-2 tree (`01eb468`, the `audit/04` head this slice starts from; line numbers are that revision's unless marked post-fix). Three of the mechanisms below were fixed in the
 same slice that ships this report and are marked so where they appear: the whole-command write
-lock (tag pass 1 now takes read locks; `lock_for_write` brackets only pass 2) and the per-line
-output flush (`cvs_output` now stages and flushes a completed line only past an 8 KiB threshold).
+lock (tag pass 1 now takes read locks; `lock_for_write` brackets only pass 2), the per-line
+output flush (`cvs_output` now stages and flushes a completed line only past an 8 KiB threshold),
+and `RCS_magicrev`'s dead stacked-`for` header (F9 below).
 The quoted pre-fix code is kept as the record of what was diagnosed.
 
 ## Answer in three sentences
@@ -82,7 +83,7 @@ serve_update → do_update (src/update.cpp:650)
   → start_recursion(update_fileproc, …, readlock=1, dosrcs=1)
     → do_recursion (src/recurse.cpp:806  Reader_Lock — no-op when lock_server)
       → walklist(filelist, do_file_proc)        src/recurse.cpp:826
-        → do_file_proc                           src/recurse.cpp:224
+        → do_file_proc                           src/recurse.cpp:884
             RCS_parse(finfo->mapped_file, …)     src/recurse.cpp:915
               → RCS_parsercsfile_i               src/rcs.cpp:326
                 → rcsbuf_open                    src/rcs.cpp:872
@@ -206,8 +207,10 @@ and `buf_send_output` on the wrapper ends with `return buf_send_output (pb->buf)
 (`src/buffer.cpp:1676`), i.e. a **blocking** `write()` on `buf_to_net` — `buf_to_net` is
 `fd_buffer_initialize(STDOUT_FILENO, 0, …)` (`src/server.cpp:5148`) and `buf->nonblocking` is left
 at 0 (`src/buffer.cpp:30`); `set_block` is only ever called on shutdown paths (`server.cpp:3303,
-3315, 5072`). Any `error(0,…)` emitted for a file reaches `cvs_flushout()` (`src/error.cpp:194`)
-and drains the whole pending `buf_to_net` — **while the current file's `,v` lock is held**. On the
+3315, 5072`). Any `error(0,…)` emitted for a file ends in `cvs_flusherr()` (`src/error.cpp:200`; only
+a fatal `error(1,…)` reaches `cvs_flushout()`), whose `buf_flush(stderr_buf, 0)` also pushes the
+wrapped `buf_to_net` and so drains the whole pending output — **while the current file's `,v` lock
+is held**. On the
 tag side this is not occasional: `tag_fileproc` prints its result with bare `cvs_output` calls
 ending in `cvs_output ("\n", 1)` (`src/tag.cpp:1160-1172`, `1206-1211`), so **every tagged file
 does a blocking socket write while holding that file's write lock plus the directory's**.
@@ -220,7 +223,7 @@ buffer-data pool grows without bound, and the one draining flush per file is `cv
 (every modern client) `write_letter` goes through `cvs_output_tagged`, which for `MT` uses
 `buf_output0` with no flush (`src/server.cpp:6785-6795`), so even the "U file" line does not block.
 The `-kB`/blob path is *better*, not worse: `server_updated` collapses the response to
-`SERVER_BLOB_REF` and sends a ~70-byte reference (`src/server.cpp:4429-4455`); the client fetches
+`SERVER_BLOB_REF` and sends a 71-byte reference (`src/server.cpp:4429-4455`); the client fetches
 the content out of band from the CAFS server on its own connections, with the CVS server no longer
 in the loop and holding nothing. The server-side blob resolution for legacy clients
 (`pull_at_once`, `src/rcs_cvt_kB.cpp:23-56`) reads the **local** content-addressed store, not a
@@ -375,7 +378,8 @@ the validation pass runs with read locks. The pre-fix mechanism below is kept as
   full `walklist(RCS_symbols(rcs), checkmagic_proc)` per candidate. And the function contains two
   stacked `for` headers — `for (; ; rev_num += 2)` immediately followed by
   `for (rev_num = 2; ; rev_num += 2)` — so the inner loop resets to 2 and discards the
-  `findnextmagicrev` result computed just above; the outer loop is dead. Every branch creation
+  `findnextmagicrev` result computed just above; the outer loop was dead.  **Fixed in this slice**: the headers are collapsed and
+  `findnextmagicrev`'s result is used (`src/rcs.cpp:2285-2288`).  Before the fix every branch creation
   therefore rescans from 2 with a symbol-table walk per step (also logged as
   `_reports/BUG-server-14-magicrev-duplicated-for.md`, `suggested_optimizations.md` item 10).
   Separately: `if (!force_tag_move || (isbranch && !move_branch_tag))` at `src/tag.cpp:1156` means
@@ -403,7 +407,7 @@ the validation pass runs with read locks. The pre-fix mechanism below is kept as
 Ordered by expected benefit, no code change.
 
 1. **Convert the big binaries to `-kB` (blob) storage and make sure clients are blob-capable.**
-   This is the highest-leverage no-code change. `server_updated` then sends a ~70-byte reference
+   This is the highest-leverage no-code change. `server_updated` then sends a 71-byte reference
    instead of the file body (`src/server.cpp:4429-4455`) and the client pulls content from the CAFS
    server on separate connections. The CVS server's walk stops being gated by the client link at
    all, which collapses the collision window that F5 and mechanism (a) depend on. Deploy a
@@ -432,7 +436,7 @@ Ordered by expected benefit, no code change.
    `atomic_checkouts` defaults to 0 (`src/main.cpp:78`), so verify your `AtomicCheckouts` global
    setting before changing this. Test on a copy.
 6. **`cvs -j N` helps, indirectly.** `-j` sets `blob_concurrency_download_level`
-   (`src/main.cpp:1013-1014`), used only in `src/client.cpp:2177` — it is **client-side blob
+   (`src/main.cpp:1013-1014`), used only in `src/client.cpp` (`:2106, 2177, 5231`) — it is **client-side blob
    download concurrency**, not server-side parallelism, and it does not change lock hold time. It
    shortens the update wall-clock, which shortens the exposure window. Default is
    `min(8, cpu_count-1)`.
@@ -453,10 +457,10 @@ less often or less long.
 | --- | --- | --- | ---: | --- | --- | --- | --- |
 | 1 | **Do not write-lock in tag pass 1.** *(Implemented in this slice: the assignment now brackets only pass 2.)* Replace the `lock_for_write` global with a value carried on the recursion frame (or simply clear it around the `check_fileproc` pass) so the read-only validation pass takes Read locks. Halves the tag's exclusive footprint and lets pass 1 run concurrently with any number of updates. | `src/rcs.cpp:35`, `src/tag.cpp:282`, `src/recurse.cpp` frame | ~25 | low | any path relying on pass 1 pre-locking for pass 2 — there is none; locks are dropped per file at `recurse.cpp:959` regardless | no | **root cause** (for half the exposure) — `suggested_optimizations.md` item 9 |
 | 2 | **Fix the retry loop:** bounded exponential backoff starting at ~50 ms instead of a 1 s floor, and make the 20-retry cap a configurable timeout defaulting much higher. The 1 s floor turns a 5 ms conflict into a 1 s stall; the hard cap turns a busy repository into `Failed to obtain lock`. | `src/lock.cpp:339-356` | ~20 | low | busier lock-server chatter under heavy contention; the "waiting for X's lock" cadence changes (it is already misleading — printed after the sleep) | no | **constant factor**, but the largest one, and it removes the *fatal* |
-| 3 | **Suppress per-file locks for read-only recursions.** Add a "this recursion only reads" flag; when set, `rcsbuf_open` skips `do_lock_file` and the command relies on the per-directory read lock instead. Removes both round trips per file from `update`, `checkout`, `diff`, `log`, `status` — and removes the object the tag collides with. | `src/rcs.cpp:905-912`, `src/recurse.cpp`, `src/lock.cpp` | ~40 | medium | consistency the per-file lock provides against a concurrent commit mid-parse (the reason `rcsbuf_open` re-opens the file after locking on non-Windows, `src/rcs.cpp:917-937`); `AtomicCheckouts` asserts `rcs->rcsbuf.lockId` at `src/rcs.cpp:2561` and `:2846` | no — but stage behind a config switch and soak-test against concurrent commits | **root cause** — `suggested_optimizations.md` item 16, "the single biggest win available" |
+| 3 | **Suppress per-file locks for read-only recursions.** Add a "this recursion only reads" flag; when set, `rcsbuf_open` skips `do_lock_file` **and** the recursion takes the per-directory read lock it forgoes under a lock server today (`Reader_Lock` returns at once when one is configured, `src/lock.cpp:704`; its caller is `src/recurse.cpp:806`) — without that half the flagged recursion runs unlocked. Under `LockServer=none` `do_lock_file` already returns the sentinel (`src/lock.cpp:364`), so the flag changes nothing there. Removes both round trips per file from `update`, `checkout`, `diff`, `log`, `status` — and removes the object the tag collides with. | `src/rcs.cpp:905-912`, `src/recurse.cpp`, `src/lock.cpp` | ~40 | medium | consistency the per-file lock provides against a concurrent commit mid-parse (the reason `rcsbuf_open` re-opens the file after locking on non-Windows, `src/rcs.cpp:917-937`); `AtomicCheckouts` asserts `rcs->rcsbuf.lockId` at `src/rcs.cpp:2561` and `:2846` | no — but stage behind a config switch and soak-test against concurrent commits | **root cause** — `suggested_optimizations.md` item 16, "the single biggest win available" |
 | 4 | **Release the directory mapping-file lock early.** `open_directory` needs `.directory_history,v` only long enough to resolve the version and check out the mapping (`src/mapping.cpp:1063-1117`). Drop the lock once `directory_version`/`directory_mappings` are populated, keeping the parsed data. Also collapse the double `open_directory` at `src/update.cpp:1145-1146`. | `src/mapping.cpp:1057-1120`, `:1392` | ~35 | medium | `commit_directory`/`create_mapping_file` (`src/mapping.cpp:1296-1380`) reuse `repository_rcsfile` to *write* and must re-acquire; `tag_dirproc`'s `get_directory_finfo` (`src/mapping.cpp:1491`) hands the node straight to `tag_fileproc` | no | **root cause** — the only lock held across client network I/O |
 | 5 | **Reuse the existing lockId in `rcs_internal_lockfile`** instead of taking a second Write lock on a file the `RCSNode` already holds. | `src/rcs.cpp:7097`, `:7155`, `:7213` | ~10 | medium | `RCS_rewrite` is also called on nodes from `RCS_fopen`/`RCS_parsercsfile` where `rcsbuf.lockId` may be stale or zero — must fall back; a wrong fallback leaves `RCS_rewrite` running **unlocked** | no | **constant factor** — 2 of 6 round trips per tagged file (item 17) |
-| 6 | **Fix `RCS_magicrev`'s dead outer loop** (delete the stray `for (; ; rev_num += 2)` header so `findnextmagicrev`'s result is used). Shortens the exclusive-lock hold per branched file. | `src/rcs.cpp:2284-2290` | 2 | medium | branch numbering — the optimised path has never executed; needs magic-branch tests first | no | **constant factor**, specific to `tag -b` (item 10) |
+| 6 | **Done in this slice: `RCS_magicrev`'s dead outer loop is gone** — the stray `for (; ; rev_num += 2)` header was removed and `findnextmagicrev`'s result is used, shortening the exclusive-lock hold per branched file. | `src/rcs.cpp:2285-2288` | 2 (done) | medium | landed with the Tier 2 slice (item 10) | no | **constant factor**, specific to `tag -b` |
 | 7 | **Give the lock server a real wait queue.** Replace `002 busy` + client polling with a server-side wait list: register the waiter, grant on release, hold new Read grants back when a Write is queued (writer preference). Kills both the 1 s granularity and the starvation. | `lockservice/LockParse.cpp:545-635`, `:888-912`, `src/lock.cpp:254-360` | ~200 | high | the lock server is thread-per-connection with **one global mutex** (`lockservice/LockParse.cpp:79-128`, `lockservice/server.cpp:57-90`) and `DoLock` writes its reply with `s->printf` *while holding it* — a blocking wait must not be held under that mutex or the whole service stalls | **yes** — new/changed responses; version bump (`CVSLock 2.21`, `LockParse.cpp:306`) and the client gate at `src/lock.cpp:205-215` | **root cause** — correct long-term fix, largest |
 | 8 | **Batch `LockMany`/`UnlockMany`.** One round trip per directory instead of two per file; fewer *moments* at which a collision can occur. | `src/lock.cpp`, `lockservice/LockParse.cpp` | ~150 | medium | partial-acquire semantics and rollback; interacts with #7 | **yes** — new commands + version bump | **constant factor** (item 21) — only if #3 proves insufficient |
 | 9 | **Move the tag's own progress output out of the lock window.** `tag_fileproc` calls bare `cvs_output(…"\n", 1)` (`src/tag.cpp:1160-1172`, `:1206-1211`), which flushes synchronously to the client while the file's Write lock and the directory lock are held. Buffer it (use `cvs_output_tagged`, or drop the trailing-newline flush). | `src/tag.cpp:1160-1211`, or `src/server.cpp:6458-6460` | ~15 locally, ~30 for a general byte-threshold flush | low locally / medium generally | the general change needs a flush-before-read audit or the session deadlocks (item 12) | no | **root cause** for the tag-holds-lock-across-network case |
@@ -466,7 +470,7 @@ less often or less long.
 the 1 s floor), #3 (stop `update` locking at all). #1 and #2 together are ~45 LoC, low risk, no
 protocol change, and turn "the tag dies" into "the tag is a bit slower".
 
-## Refuted
+## Hypotheses refuted
 
 * **"`cvs update` should not do a lock on files."** As a statement of what *ought* to happen it is
   defensible; as a description of the code it is a correct diagnosis, not a mistaken one. Update
@@ -493,10 +497,13 @@ protocol change, and turn "the tag dies" into "the tag is a bit slower".
   (`src/main.cpp:587-591`). The `#cvs.lock` / `#cvs.rfl.*` machinery is dead code on a stock server.
   It becomes live — and `readers_exist` really does become an `opendir` scan of a directory full of
   `,v` files per attempt — only if you set `LockServer=none`.
-* **"The lock server serialises unrelated files behind one another."** Not meaningfully. It is
-  thread-per-connection (`lockservice/server.cpp:57-90`) with one global mutex
-  (`lockservice/LockParse.cpp:79-128`) held for the duration of a hash-map lookup in `request_lock`
-  — microseconds. The genuine serialisation is per **CVS server process**: one global
+* **"The lock server serialises unrelated files behind one another."** Only while a reply is
+  being written. It is thread-per-connection (`lockservice/server.cpp:57-90`) with one global
+  mutex (`lockservice/LockParse.cpp:79-128`) that `ClientLock` holds across the whole command
+  dispatch (`LockParse.cpp:467-493`), `DoLock`'s reply write included (`s->printf` at `:618`,
+  `:625`, `:632`): a client that stalls mid-reply stalls every other lock command for that long,
+  which is what fix #7's risk column guards against; absent such a client the hold is
+  microseconds. The genuine serialisation is per **CVS server process**: one global
   `lock_server_socket` (`src/lock.cpp:156`) driven strictly request/response, so one command's
   per-file lock operations are inherently sequential. That is a throughput cost (2 round trips
   × file count), not a cross-command contention cost.

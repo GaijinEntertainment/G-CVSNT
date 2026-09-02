@@ -1,6 +1,6 @@
 # Known issues
 
-87 defects were found by a review pass over the tree. 15 are fixed on this branch; **70 remain
+87 defects were found by a review pass over the tree. 16 are fixed on this branch; **69 remain
 open** and are listed here. Two more were fixed and then reverted, for reasons recorded below —
 those are the most interesting entries in this document, because in both cases the obvious one-line
 fix is wrong.
@@ -250,7 +250,7 @@ this branch.
 | [`BUG-update-17`](_reports/BUG-update-17-xcmp-symlink-inverted.md) | medium | `src/filesubr.cpp:967` | `xcmp()` returns inverted results when both operands are symlinks | 1 | yes |
 | [`BUG-update-19`](_reports/BUG-update-19-send-repository-unchecked-fgets.md) | medium | `src/client.cpp:3444` | `send_repository()` ignores the `fgets()` return value and then indexes `line[strlen(line)-1]` on a possibly-uninitialised stack buffer | 6 | yes |
 
-### Low (16)
+### Low (15)
 
 | ID | Severity | Area | Issue | Fix size | Changes behaviour |
 | --- | --- | --- | --- | ---: | --- |
@@ -262,7 +262,6 @@ this branch.
 | [`BUG-lib-23`](_reports/BUG-lib-23-misspelled-user-facing-strings.md) | low | `src/buffer.cpp:1567` | Misspelled user-facing strings: "recieved", "Depreciated", "Eraseing", "FindPrototocol" | 10 | no |
 | [`BUG-server-06`](_reports/BUG-server-06-do-lock-server-shadowed-ob.md) | low | `src/lock.cpp:263` | Shadowed local `ob` in `do_lock_server` defeats all three `xfree(ob)` calls, leaking a path buffer per lock | 1 | no |
 | [`BUG-server-07`](_reports/BUG-server-07-win32-lockers-name-leak.md) | low | `src/lock.cpp:1053` | Windows variant of `set_lockers_name` never frees the previous `lockers_name` | 2 | no |
-| [`BUG-server-14`](_reports/BUG-server-14-magicrev-duplicated-for.md) | low | `src/rcs.cpp:2257` | Duplicated `for` header in `RCS_magicrev` makes the whole `findnextmagicrev` optimisation dead code | 2 | no |
 | [`BUG-server-19`](_reports/BUG-server-19-commitpt-cleared-before-ternary.md) | low | `src/rcs_checkin.cpp:967` | `commitpt` is set to NULL four lines before `commitpt?'A':'M'` is evaluated, so the lock server is never told "Added" | 3 | yes |
 | [`BUG-server-20`](_reports/BUG-server-20-cmp-file-bitwise-and.md) | low | `src/rcs_checkin.cpp:1450` | `RCS_cmp_file` uses bitwise `&` instead of `&&`, silently testing only bit 0 of `ignore_keywords` | 1 | no |
 | [`BUG-server-21`](_reports/BUG-server-21-history-cp-gt-workdir-string-compare.md) | low | `src/history.cpp:801` | `cp > workdir` in `history_write` is a lexicographic string comparison, not the intended pointer bounds check | 1 | yes |
@@ -273,7 +272,7 @@ this branch.
 
 ## Fixed on this branch
 
-For reference, the 15 defects that were fixed:
+For reference, the 16 defects that were fixed:
 
 | ID | Issue |
 | --- | --- |
@@ -292,3 +291,4 @@ For reference, the 15 defects that were fixed:
 | [`BUG-server-08`](_reports/BUG-server-08-writelock-uses-CVSRFL.md) | `write_lock` built the write-lock filename from the read-lock prefix |
 | [`BUG-server-15`](_reports/BUG-server-15-checkin-format-missing-arg.md) | `%s` with no argument on the reopen-failure path |
 | [`BUG-server-17`](_reports/BUG-server-17-pnew-file-comment-typo.md) | `"pnew file"` written into the RCS `comment` field of every imported file |
+| [`BUG-server-14`](_reports/BUG-server-14-magicrev-duplicated-for.md) | Duplicated `for` header in `RCS_magicrev` made the whole `findnextmagicrev` optimisation dead code (fixed in the Tier 2 slice, `suggested_optimizations.md` item 10) |
