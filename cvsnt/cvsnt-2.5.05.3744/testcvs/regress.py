@@ -1237,6 +1237,33 @@ def t_add_binary_by_content(r):
     check(not os.path.exists(os.path.join(r.repo, "mk", "blobk.txt,v")),
           "import -k kv stored binary content as text")
 
+    # A tree holding a text file and a binary file under an explicit text -k:
+    # the import aborts and the binary file is never stored as text (text files
+    # earlier in the walk may already be imported - that is documented).
+    impm = os.path.join(r.root, "impm")
+    os.makedirs(impm)
+    write(os.path.join(impm, "a_readme"), "plain" + chr(10))
+    with open(os.path.join(impm, "z_blob.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["import", "-k", "kv", "-m", "i", "mm", "VENDOR", "REL0"], cwd=impm,
+                    expect_ok=False)
+    check(rc != 0, "multi-file import -k kv over binary content exited 0:" + chr(10) + out)
+    check(not os.path.exists(os.path.join(r.repo, "mm", "z_blob.txt,v")),
+          "import stored binary content as text under -k kv")
+
+    # A normal multi-file text import under -k kv is not falsely refused, and
+    # import -C (create CVS dirs) still works - the reverted pre-walk had
+    # broken both.
+    impc = os.path.join(r.root, "impc")
+    os.makedirs(os.path.join(impc, "d"))
+    write(os.path.join(impc, "one.txt"), "one" + chr(10))
+    write(os.path.join(impc, "d", "two.txt"), "two" + chr(10))
+    _, out = r.cvs(["import", "-C", "-k", "kv", "-m", "i", "mc", "VENDOR", "REL0"], cwd=impc)
+    check(os.path.exists(os.path.join(r.repo, "mc", "one.txt,v")),
+          "import -C -k kv did not store a text file:" + chr(10) + out)
+    check(os.path.exists(os.path.join(r.repo, "mc", "d", "two.txt,v")),
+          "import -C -k kv did not descend:" + chr(10) + out)
+
 
 @test("a per-file Kopt before Is-modified makes the server add that file as -kB")
 def t_add_binary_kopt_protocol(r):

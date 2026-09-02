@@ -544,23 +544,16 @@ int add (int argc, char **argv)
                 *b = 'B';
 
 		    /* Content beats name.  Only the client has the bytes: in server
-		       mode the file is absent here and the Kopt already arrived.
-		       refuse_binary_as_text ran first, so REFUSE cannot come back; the
-		       real bit goes in anyway so a new caller cannot get it wrong.  */
-		    switch (content_kopt (finfo.file, vers->options, options && options[0]))
+		       mode the file is absent (Kopt already arrived) and content_kopt
+		       keeps.  refuse_binary_as_text has already refused any explicit
+		       text -k, so the verdict here is only KEEP or BINARY.  */
+		    if (content_kopt (finfo.file, vers->options, 0) == CONTENT_KOPT_BINARY)
 		    {
-		    case CONTENT_KOPT_REFUSE:
-			error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
-			       fn_root(finfo.fullname), options);
-		    case CONTENT_KOPT_BINARY:
 			if (vers->options)
 			    xfree (vers->options);
 			vers->options = xstrdup ("B");
 			error (0, 0, "%s has binary content, adding it as -kB",
 			       fn_root(finfo.fullname));
-			break;
-		    default:
-			break;
 		    }
 
 		    if (vers->nonbranch)
