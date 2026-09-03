@@ -463,8 +463,6 @@ bool wrap_name_has(const char *name, WrapMergeHas  has)
    just give the option itself (e.g. "b").  */
 content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit, const char **forced)
 {
-    if (forced)
-	*forced = "B";
     if (!file || !isfile (file) || kopt_is_binary (kopt))
 	return CONTENT_KOPT_KEEP;
     /* Already binary by extension/wrapper?  Then it is binary and needs no

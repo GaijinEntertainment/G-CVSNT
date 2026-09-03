@@ -21,7 +21,6 @@ libcvsapi_la_SOURCES = \
 	Codepage.cpp \
 	Codepage.h \
 	FileContent.cpp \
-	FileContent.cpp \
 	crypt.cpp \
 	crypt.h \
 	cvsapi.h \

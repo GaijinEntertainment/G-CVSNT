@@ -1163,7 +1163,12 @@ def t_add_binary_by_content(r):
     nul = bytes(range(256)) * 3                       # NUL, and compressible
     incomp = bytes([0]) + os.urandom(20000)           # NUL, but incompressible
     hitext = ("café — naïve — résumé" + chr(10)).encode("utf-8") * 400  # high bytes, no NUL
-    for name, data in (("blob1.txt", nul), ("incomp.bin", incomp), ("utext", hitext)):
+    # First 8 KB is all high/control bytes with no NUL (so the fast path cannot
+    # settle it), and the first NUL lands past 8 KB - only the extended scan
+    # catches this one.
+    latenul = bytes(range(1, 256)) * 40 + bytes([0]) + b"tail"
+    for name, data in (("blob1.txt", nul), ("incomp.bin", incomp), ("utext", hitext),
+                       ("late.dat", latenul)):
         with open(os.path.join(wc, name), "wb") as f:
             f.write(data)
     # Wrappers may still opt a text file into -kB by name (*.bin is one);
@@ -1172,7 +1177,7 @@ def t_add_binary_by_content(r):
     write(os.path.join(wc, "plain_text"), "just text" + chr(10))
     with open(os.path.join(wc, "u16.txt"), "wb") as f:
         f.write(bytes([255, 254]) + "hello".encode("utf-16-le"))
-    _, out = r.cvs(["add", "blob1.txt", "incomp.bin", "utext", "plain_text", "u16.txt"], cwd=wc)
+    _, out = r.cvs(["add", "blob1.txt", "incomp.bin", "utext", "late.dat", "plain_text", "u16.txt"], cwd=wc)
     ents = entries_of(wc)
     check("-kBz" in ents.get("blob1.txt", ""),
           "compressible binary blob1.txt not -kBz: " + ents.get("blob1.txt", "<absent>"))
@@ -1180,6 +1185,8 @@ def t_add_binary_by_content(r):
           "incompressible binary incomp.bin not -kB: " + ents.get("incomp.bin", "<absent>"))
     check("-k" not in ents.get("utext", "/x/"),
           "high-byte UTF-8 text utext treated as binary: " + ents.get("utext", "<absent>"))
+    check("-kB" in ents.get("late.dat", ""),
+          "file whose first NUL is past 8 KB not caught as binary: " + ents.get("late.dat", "<absent>"))
     check("-k" not in ents.get("plain_text", "/x/"),
           "text plain_text got a kopt: " + ents.get("plain_text", "<absent>"))
     check("-kB" not in ents.get("u16.txt", ""),
@@ -1247,8 +1254,8 @@ def t_add_binary_by_content(r):
     r.cvs(["import", "-m", "i", "mi", "VENDOR", "REL0"], cwd=imp)
     wci = r.checkout("mi")
     e = entries_of(wci)
-    check("-kB" in e.get("blob.txt", ""),
-          "imported NUL-bearing blob.txt not -kB: " + e.get("blob.txt", "<absent>"))
+    check("-kBz" in e.get("blob.txt", ""),
+          "imported compressible blob.txt not -kBz: " + e.get("blob.txt", "<absent>"))
     check("-k" not in e.get("notes.dat", "/x/"),
           "imported text notes.dat got a kopt: " + e.get("notes.dat", "<absent>"))
     check_eq(open(os.path.join(wci, "blob.txt"), "rb").read(), nul, "imported blob.txt content")

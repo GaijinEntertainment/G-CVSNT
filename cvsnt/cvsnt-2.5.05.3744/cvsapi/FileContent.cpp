@@ -118,18 +118,16 @@ const char *CFileAccess::content_binary_kopt (const char *file)
 	   the sampled bytes will not compress - already-compressed data such as
 	   jpeg, png or zip.  "Saves at least 5%" is the bar for calling it worth
 	   compressing. */
+	/* fc_scan only reports binary after finding a NUL, so n > 0 here. */
 	const char *kopt = "B";
-	if (n)
+	size_t bound = ZSTD_compressBound (n);
+	void *out = malloc (bound);
+	if (out)
 	{
-		size_t bound = ZSTD_compressBound (n);
-		void *out = malloc (bound);
-		if (out)
-		{
-			size_t csz = ZSTD_compress (out, bound, buf, n, 3);
-			if (!ZSTD_isError (csz) && csz * 20 < n * 19)
-				kopt = "Bz";
-			free (out);
-		}
+		size_t csz = ZSTD_compress (out, bound, buf, n, 3);
+		if (!ZSTD_isError (csz) && csz * 20 < n * 19)
+			kopt = "Bz";
+		free (out);
 	}
 
 	free (buf);
