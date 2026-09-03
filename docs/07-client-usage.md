@@ -72,7 +72,8 @@ Binary content is detected on `add` and `import` **by content**, never by name. 
 binary: the first 8 KB settles the common cases (a NUL there is binary, an all-normal 8 KB is
 text), and a file that is neither - unusual bytes but no NUL yet - is read up to 64 KB further
 for one, so a UTF-8 file full of accents or em dashes stays text while a binary file whose first
-NUL is past 8 KB is still caught. UTF-16/32 text (BOM) is exempt. A binary file is added as
+NUL is past 8 KB is still caught. UTF-16/32 text (BOM) is exempt. A file the `cvswrappers`/extension rules already make binary (`-kB`
+or `-kBz`) is taken as binary with no content read at all. Otherwise a binary file is added as
 `-kBz` (blob, zstd-compressed), or `-kB` when the sampled bytes will not compress - already-
 compressed data such as jpeg, png or zip - whatever `cvswrappers` or the extension say, with a
 note on stderr; an explicit text `-k` on such a

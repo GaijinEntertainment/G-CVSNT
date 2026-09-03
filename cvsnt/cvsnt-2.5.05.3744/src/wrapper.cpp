@@ -467,6 +467,19 @@ content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_
 	*forced = "B";
     if (!file || !isfile (file) || kopt_is_binary (kopt))
 	return CONTENT_KOPT_KEEP;
+    /* Already binary by extension/wrapper?  Then it is binary and needs no
+       content read - the wrapper stores it so, here or on the server.  An
+       explicit text -k is the one case we still read for, to refuse binary
+       content the user asked to keep as text.  */
+    if (!kopt_explicit)
+    {
+	char *wopt = wrap_rcsoption (file);
+	bool wbinary = kopt_is_binary (wopt);
+	if (wopt)
+	    xfree (wopt);
+	if (wbinary)
+	    return CONTENT_KOPT_KEEP;
+    }
     /* Only the force sites need the Bz/B recommendation, and computing it
        reads and compresses the file; the refuse-only pre-scan (forced ==
        NULL) uses the cheaper detector.  */

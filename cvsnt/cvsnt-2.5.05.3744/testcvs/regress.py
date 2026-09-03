@@ -1186,6 +1186,22 @@ def t_add_binary_by_content(r):
           "UTF-16 text u16.txt treated as binary: " + ents.get("u16.txt", "<absent>"))
     check("blob1.txt has binary content" in out, "no note about the auto -kB:" + chr(10) + out)
     check("adding it as -kBz" in out, "note did not name -kBz for compressible content:" + chr(10) + out)
+    # A file the wrappers already make binary (the built-in *.bin -kb) is
+    # binary without a content read: text bytes in a .bin are still added
+    # binary, with no content-detection note.
+    write(os.path.join(wc, "wrap.bin"), "plain text, no NUL here" + chr(10))
+    _, out = r.cvs(["add", "wrap.bin"], cwd=wc)
+    check("B" in entries_of(wc).get("wrap.bin", "").split("/")[4],
+          "wrapper-binary wrap.bin not added binary: " + entries_of(wc).get("wrap.bin", "<absent>"))
+    check("wrap.bin has binary content" not in out,
+          "wrapper-binary file was content-detected instead of taken from the wrapper:" + chr(10) + out)
+    # But an explicit text -k on binary content is still refused, wrapper or
+    # not - the content is read in that one case.
+    with open(os.path.join(wc, "hard.bin"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["add", "-kkv", "hard.bin"], cwd=wc, expect_ok=False)
+    check(rc != 0, "add -kkv on a binary-content .bin exited 0:" + chr(10) + out)
+    check("hard.bin" not in entries_of(wc), "add -kkv stored binary .bin content as text")
 
     with open(os.path.join(wc, "blob2.txt"), "wb") as f:
         f.write(nul)
