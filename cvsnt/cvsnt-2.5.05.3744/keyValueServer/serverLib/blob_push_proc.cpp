@@ -3,6 +3,7 @@
 #include <stdlib.h>
 #include <string.h>
 #include <algorithm>
+#include <atomic>
 #include "../include/blob_sockets.h"
 #include "../include/blob_push_protocol.h"
 #include "../include/blob_push_proto_ver.h"
@@ -398,7 +399,7 @@ static ServerRet syslog_on_authentication(ServerRet ret, uint32_t client_ip, boo
 }
 
 
-bool blob_push_thread_proc(intptr_t raw_socket, uint32_t client_ip, volatile bool *should_stop, const char *encryption_secret, CafsServerEncryption encryption)//return false on attack
+bool blob_push_thread_proc(intptr_t raw_socket, uint32_t client_ip, std::atomic<bool> *should_stop, const char *encryption_secret, CafsServerEncryption encryption)//return false on attack
 {
   if (!encryption_secret && encryption != CafsServerEncryption::Local)
     return false;
@@ -418,7 +419,7 @@ bool blob_push_thread_proc(intptr_t raw_socket, uint32_t client_ip, volatile boo
     return true;
   }
   ServerRet ret = ServerRet::OK;
-  while (!(should_stop && *should_stop))//command is processed
+  while (!(should_stop && should_stop->load()))//command is processed
   {
     ret = sleep_on_attack(blob_push_thread_proc_int(ctx, socket));
     if (ret != ServerRet::OK)

@@ -622,7 +622,7 @@ static void read_global_config(void)
 				if(*buffer && ISDIRSEP(buffer[strlen(buffer)-1]))
 					buffer[strlen(buffer)-1]='\0';
 				if(*buffer2 && ISDIRSEP(buffer2[strlen(buffer2)-1]))
-					buffer[strlen(buffer)-1]='\0';
+					buffer2[strlen(buffer2)-1]='\0';
 				int online = 1, readwrite = 1, repotype = 1, proxypasswd = 0;
 				proxy_repos[0]=remote_repos[0]=remote_serv[0]=remote_pass[0]='\0';
 				snprintf(tmp,sizeof(tmp),"Repository%dOnline",prefixnum);

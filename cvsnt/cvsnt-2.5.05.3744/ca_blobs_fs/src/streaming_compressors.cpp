@@ -223,7 +223,7 @@ static StreamStatus compress_stream_zlib(z_stream* stream, const char *src, size
     stream->next_in = (Bytef*)(src + src_pos);
     stream->avail_out = (uint32_t)(dest_capacity - dest_pos);
     stream->next_out = (Bytef*)(dest + dest_pos);
-    int result = inflate (stream, Z_NO_FLUSH);
+    int result = deflate (stream, Z_NO_FLUSH);
     dest_pos = dest_capacity - stream->avail_out;
     src_pos = src_size - stream->avail_in;
     if (result == Z_BUF_ERROR)

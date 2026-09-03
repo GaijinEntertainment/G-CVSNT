@@ -4,6 +4,7 @@
 #include "../include/blob_raw_sockets.h"
 #include "../include/blob_sockets.h"
 #include "../blob_push_log.h"
+#include <atomic>
 
 #if MULTI_THREADED
 #include <thread>
@@ -12,11 +13,11 @@
 #include <signal.h>
 #endif
 
-bool blob_push_thread_proc(intptr_t raw_socket, uint32_t client_ip, volatile bool *should_stop, const char *encryption_file, CafsServerEncryption encryption);//returns false on attach
+bool blob_push_thread_proc(intptr_t raw_socket, uint32_t client_ip, std::atomic<bool> *should_stop, const char *encryption_file, CafsServerEncryption encryption);//returns false on attach
 
-bool start_push_server(int portno, int max_connections, volatile bool* should_stop, const char *encryption_secret, CafsServerEncryption encryption)
+bool start_push_server(int portno, int max_connections, std::atomic<bool>* should_stop, const char *encryption_secret, CafsServerEncryption encryption)
 {
-  if (should_stop && *should_stop)
+  if (should_stop && should_stop->load())
     return true;
   if (!encryption_secret && encryption != CafsServerEncryption::Local)
   {
@@ -54,7 +55,7 @@ bool start_push_server(int portno, int max_connections, volatile bool* should_st
 
   listen(sockfd, max_connections);
   struct sockaddr_in client; socklen_t clientSz = sizeof(client);
-  while (!should_stop)
+  while (!(should_stop && should_stop->load()))
   {
     intptr_t client_raw_sock = (client_raw_sock = accept(sockfd, (struct sockaddr *)&client, (socklen_t*)&clientSz));
     if (client_raw_sock >= 0)

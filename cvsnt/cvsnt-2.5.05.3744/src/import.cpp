@@ -1353,7 +1353,7 @@ add_rcs_file (
 
     if (fprintf (fprcs, "locks    ; strict;\n") < 0 ||
 	/* XXX - make sure @@ processing works in the RCS file */
-	fprintf (fprcs, "comment  @%s@;\n", userfile?get_comment (userfile):"pnew file") < 0)
+	fprintf (fprcs, "comment  @%s@;\n", userfile?get_comment (userfile):"new file") < 0)
     {
 	goto write_error;
     }

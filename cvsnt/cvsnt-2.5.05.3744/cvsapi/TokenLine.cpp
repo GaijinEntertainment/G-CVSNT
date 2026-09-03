@@ -149,13 +149,13 @@ bool CTokenLine::addArgs(const char *line, int maxArg /* =0 */,const char **argP
 				switch(*p)
 				{
 				case 'n':
-					arg.append('\n',1); break;
+					arg.append(1,'\n'); break;
 				case 'r':
-					arg.append('\r',1); break;
+					arg.append(1,'\r'); break;
 				case 'b':
-					arg.append('\b',1); break;
+					arg.append(1,'\b'); break;
 				case 't':
-					arg.append('\t',1); break;
+					arg.append(1,'\t'); break;
 				default:
 					if(isspace(*p) || !strchr(m_separators.c_str(),*p) || *p=='%' || *p=='$' || *p==',' || *p=='{' || *p=='}' || *p=='<' || *p=='>' || *p=='\\' || *p=='\'' || *p=='"')
 						arg+=*p;
