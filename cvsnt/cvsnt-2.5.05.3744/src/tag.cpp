@@ -130,6 +130,7 @@ int cvstag (int argc, char **argv)
     int c;
     int err = 0;
     int run_module_prog = 1;
+    const char *tag_type;
 
     is_rtag = (strcmp (command_name, "rtag") == 0);
     
@@ -280,6 +281,7 @@ int cvstag (int argc, char **argv)
     }
 
 	lock_for_write = 1;
+    tag_type = delete_flag ? "D" : (numtag ? numtag : (date ? date : "A"));
     if (is_rtag)
     {
 	DBM *db;
@@ -288,8 +290,7 @@ int cvstag (int argc, char **argv)
 	for (i = 0; i < argc; i++)
 	{
 	    /* XXX last arg should be repository, but doesn't make sense here */
-	    history_write ('T', (delete_flag ? "D" : (numtag ? numtag : 
-			   (date ? date : "A"))), symtag, argv[i], "", NULL, NULL);
+	    history_write ('T', tag_type, symtag, argv[i], "", NULL, NULL);
 	    err += do_module (db, argv[i], TAG,
 			      delete_flag ? "Untagging" : "Tagging",
 			      rtag_proc, (char *) NULL, 0, 0, run_module_prog,
@@ -299,6 +300,15 @@ int cvstag (int argc, char **argv)
     }
     else
     {
+	int i;
+	/* Same convention as the rtag write above: for T records the
+	   update_dir slot carries the tag type and lands in the record's
+	   repos field; the record logs the tag command, before it runs,
+	   exactly as rtag's does.  */
+	for (i = 0; i < argc; i++)
+	    history_write ('T', tag_type, symtag, argv[i], "", NULL, NULL);
+	if (!argc)
+	    history_write ('T', tag_type, symtag, ".", "", NULL, NULL);
 	err = rtag_proc (argc + 1, argv - 1, NULL, NULL, NULL, 0, 0, NULL,
 			 NULL);
     }
@@ -1193,7 +1203,6 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 	else
 		tag_set_ok = 1;
 	TRACE(3,"tag_fileproc - finally RCS_settag ok");
-	history_write ('T', finfo->update_dir, rev, finfo->file, finfo->repository, NULL, NULL);
     if (branch_mode)
 	xfree (rev);
 	TRACE(3,"tag_fileproc(2) rewrite rcsfile=\"%s\" symtag=\"%s\", rev=\"%s\", date=\"%s\"",

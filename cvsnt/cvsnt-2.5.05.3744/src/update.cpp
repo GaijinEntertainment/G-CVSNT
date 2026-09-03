@@ -49,6 +49,14 @@ struct modproc_args_t
 };
 extern int premodule_proc(void *param, const trigger_interface *cb);
 
+/* command_name is always "server" in server mode; the client's own
+   command is in server_command_name. */
+static int is_update_command (void)
+{
+    const char *cmd = server_command_name ? server_command_name : command_name;
+    return strcmp (cmd, "update") == 0;
+}
+
 int checkout_file(struct file_info *finfo, Vers_TS *vers_ts,
 				 int adding, int merging, int update_server, int resurrect, int is_rcs, const char *merge_rev1, const char *merge_rev2);
 #ifdef SERVER_SUPPORT
@@ -1820,10 +1828,13 @@ VERS: ", 0);
 			vers_ts->vn_rcs = xstrdup (xvers_ts->vn_rcs);
 		}
 
-		/* Recode history */
-        TRACE(3,"Recode history.");
-        history_write ('U', finfo->update_dir, xvers_ts->vn_rcs, xfile,
-            finfo->repository, xvers_ts->edit_bugid, NULL);
+		/* If this is really Update and not Checkout, recode history */
+		if (is_update_command ())
+		{
+			TRACE(3,"If this is really Update and not Checkout, recode history.");
+			history_write ('U', finfo->update_dir, xvers_ts->vn_rcs, xfile,
+				finfo->repository, xvers_ts->edit_bugid, NULL);
+		}
 		TRACE(3,"free xvers_ts");
 		freevers_ts (&xvers_ts);
 		TRACE(3,"free xvers_ts OK");
@@ -2190,9 +2201,10 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 	if (CVS_STAT (finfo->file, &file_info) < 0)
 	    error (1, errno, "could not stat %s", finfo->file);
 
-	/* Recode history */
-    history_write ('P', finfo->update_dir, xvers_ts->vn_rcs, finfo->file,
-           finfo->repository, xvers_ts->edit_bugid, NULL);
+	/* If this is really Update and not Checkout, recode history */
+	if (is_update_command ())
+	    history_write ('P', finfo->update_dir, xvers_ts->vn_rcs, finfo->file,
+			   finfo->repository, xvers_ts->edit_bugid, NULL);
 
 	freevers_ts (&xvers_ts);
 
