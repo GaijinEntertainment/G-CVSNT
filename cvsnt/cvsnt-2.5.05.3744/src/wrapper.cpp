@@ -461,10 +461,23 @@ bool wrap_name_has(const char *name, WrapMergeHas  has)
 /* Return the RCS options for FILENAME in a newly malloc'd string.  If
    ASFLAG, then include "-k" at the beginning (e.g. "-kb"), otherwise
    just give the option itself (e.g. "b").  */
-content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit)
+content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit, const char **forced)
 {
-    if (!file || !isfile (file) || kopt_is_binary (kopt)
-	|| !CFileAccess::looks_binary (file))
+    if (forced)
+	*forced = "B";
+    if (!file || !isfile (file) || kopt_is_binary (kopt))
+	return CONTENT_KOPT_KEEP;
+    /* Only the force sites need the Bz/B recommendation, and computing it
+       reads and compresses the file; the refuse-only pre-scan (forced ==
+       NULL) uses the cheaper detector.  */
+    if (forced)
+    {
+	const char *rec = CFileAccess::content_binary_kopt (file);
+	if (!rec[0])
+	    return CONTENT_KOPT_KEEP;
+	*forced = rec;
+    }
+    else if (!CFileAccess::looks_binary (file))
 	return CONTENT_KOPT_KEEP;
     return kopt_explicit ? CONTENT_KOPT_REFUSE : CONTENT_KOPT_BINARY;
 }

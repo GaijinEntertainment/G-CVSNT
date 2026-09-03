@@ -547,13 +547,14 @@ int add (int argc, char **argv)
 		       mode the file is absent (Kopt already arrived) and content_kopt
 		       keeps.  refuse_binary_as_text has already refused any explicit
 		       text -k, so the verdict here is only KEEP or BINARY.  */
-		    if (content_kopt (finfo.file, vers->options, 0) == CONTENT_KOPT_BINARY)
+		    const char *forced;
+		    if (content_kopt (finfo.file, vers->options, 0, &forced) == CONTENT_KOPT_BINARY)
 		    {
 			if (vers->options)
 			    xfree (vers->options);
-			vers->options = xstrdup ("B");
-			error (0, 0, "%s has binary content, adding it as -kB",
-			       fn_root(finfo.fullname));
+			vers->options = xstrdup (forced);
+			error (0, 0, "%s has binary content, adding it as -k%s",
+			       fn_root(finfo.fullname), forced);
 		    }
 
 		    if (vers->nonbranch)

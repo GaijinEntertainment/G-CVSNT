@@ -5463,14 +5463,17 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 			   the command spans.  */
 			/* add owns refusal in refuse_binary_as_text, so the verdict here is
 			   only KEEP or BINARY.  */
+			const char *forced;
 			if (args->kopt_by_content && vers->vn_user == NULL
-			    && content_kopt (finfo->file, send_declared_kopt, 0) == CONTENT_KOPT_BINARY)
+			    && content_kopt (finfo->file, send_declared_kopt, 0, &forced) == CONTENT_KOPT_BINARY)
 			{
 				if (!supported_request ("Kopt"))
 				    error (1, 0, "%s has binary content, and this server takes no per-file kopt; add it with -kB",
 					   fn_root(finfo->fullname));
-				error (0, 0, "%s has binary content, adding it as -kB", fn_root(finfo->fullname));
-				send_to_server ("Kopt -kB\n", 0);
+				error (0, 0, "%s has binary content, adding it as -k%s", fn_root(finfo->fullname), forced);
+				send_to_server ("Kopt -k", 0);
+				send_to_server (forced, 0);
+				send_to_server ("\n", 1);
 			}
 			if (args->no_contents && supported_request ("Is-modified"))
 			{
@@ -6072,15 +6075,16 @@ int client_process_import_file(const char *message, const char *vfile, const cha
 	assign_options(&vers.options,options);
 	/* Content beats name; a forced B must reach the server or the file
 	   would be stored as text.  */
-	switch (content_kopt (vfile, vers.options, options && options[0]))
+	const char *forced;
+	switch (content_kopt (vfile, vers.options, options && options[0], &forced))
 	{
 	case CONTENT_KOPT_REFUSE:
 		error (1, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
 		       vfile, options);
 	case CONTENT_KOPT_BINARY:
 		xfree (vers.options);
-		vers.options = xstrdup ("B");
-		error (0, 0, "%s has binary content, importing it as -kB", vfile);
+		vers.options = xstrdup (forced);
+		error (0, 0, "%s has binary content, importing it as -k%s", vfile, forced);
 		if (!supported_request ("Kopt"))
 			error (1, 0, "%s has binary content, and this server takes no per-file kopt; import with -kB",
 			       vfile);

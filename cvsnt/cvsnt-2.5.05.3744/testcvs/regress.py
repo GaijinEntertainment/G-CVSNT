@@ -1153,29 +1153,39 @@ def t_binary_small_second_commit(r):
 
 @test("binary content is detected on add and import by content, not by name")
 def t_add_binary_by_content(r):
-    # A NUL in the first 8000 bytes makes a file binary whatever its name
-    # or cvswrappers say; UTF-16 text with a BOM is exempt.  An explicit
-    # text -k on such a file is refused.  import follows the same rule.
+    # Binary is decided by content: a NUL, in the first 8 KB or (when the
+    # bytes look unusual but no NUL turned up) up to 64 KB more.  UTF-16
+    # text (BOM) and a high-byte UTF-8 file are text; an explicit text -k
+    # on binary content is refused.  Binary defaults to -kBz, or -kB when
+    # the bytes will not compress.  import follows the same rules.
     r.import_tree("m", {"a.txt": "one" + chr(10)})
     wc = r.checkout("m")
-    nul = bytes(range(256)) * 3
-    with open(os.path.join(wc, "blob1.txt"), "wb") as f:
-        f.write(nul)
+    nul = bytes(range(256)) * 3                       # NUL, and compressible
+    incomp = bytes([0]) + os.urandom(20000)           # NUL, but incompressible
+    hitext = ("café — naïve — résumé" + chr(10)).encode("utf-8") * 400  # high bytes, no NUL
+    for name, data in (("blob1.txt", nul), ("incomp.bin", incomp), ("utext", hitext)):
+        with open(os.path.join(wc, name), "wb") as f:
+            f.write(data)
     # Wrappers may still opt a text file into -kB by name (*.bin is one);
     # content only ever adds binary-ness.  So the text case has no
     # extension at all.
     write(os.path.join(wc, "plain_text"), "just text" + chr(10))
     with open(os.path.join(wc, "u16.txt"), "wb") as f:
         f.write(bytes([255, 254]) + "hello".encode("utf-16-le"))
-    _, out = r.cvs(["add", "blob1.txt", "plain_text", "u16.txt"], cwd=wc)
+    _, out = r.cvs(["add", "blob1.txt", "incomp.bin", "utext", "plain_text", "u16.txt"], cwd=wc)
     ents = entries_of(wc)
-    check("-kB" in ents.get("blob1.txt", ""),
-          "NUL-bearing blob1.txt not added as -kB: " + ents.get("blob1.txt", "<absent>"))
+    check("-kBz" in ents.get("blob1.txt", ""),
+          "compressible binary blob1.txt not -kBz: " + ents.get("blob1.txt", "<absent>"))
+    check("-kB" in ents.get("incomp.bin", "") and "-kBz" not in ents.get("incomp.bin", ""),
+          "incompressible binary incomp.bin not -kB: " + ents.get("incomp.bin", "<absent>"))
+    check("-k" not in ents.get("utext", "/x/"),
+          "high-byte UTF-8 text utext treated as binary: " + ents.get("utext", "<absent>"))
     check("-k" not in ents.get("plain_text", "/x/"),
           "text plain_text got a kopt: " + ents.get("plain_text", "<absent>"))
     check("-kB" not in ents.get("u16.txt", ""),
           "UTF-16 text u16.txt treated as binary: " + ents.get("u16.txt", "<absent>"))
     check("blob1.txt has binary content" in out, "no note about the auto -kB:" + chr(10) + out)
+    check("adding it as -kBz" in out, "note did not name -kBz for compressible content:" + chr(10) + out)
 
     with open(os.path.join(wc, "blob2.txt"), "wb") as f:
         f.write(nul)

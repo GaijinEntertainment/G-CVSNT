@@ -47,7 +47,7 @@
 				EnableIntrinsicFunctions="true"
 				FavorSizeOrSpeed="1"
 				OmitFramePointers="true"
-				AdditionalIncludeDirectories=".\lib;.\win32;..\libxml\include"
+				AdditionalIncludeDirectories=".\lib;.\win32;..\libxml\include;..\zstd"
 				PreprocessorDefinitions="_WINDOWS;NDEBUG;WIN32;HAVE_CONFIG_H;CVSAPI_EXPORT=__declspec(dllexport),XML_STATIC,PCRE_STATIC"
 				StringPooling="true"
 				RuntimeLibrary="2"
@@ -140,7 +140,7 @@
 				Name="VCCLCompilerTool"
 				Optimization="0"
 				OmitFramePointers="false"
-				AdditionalIncludeDirectories=".\lib;.\win32;..\libxml\include"
+				AdditionalIncludeDirectories=".\lib;.\win32;..\libxml\include;..\zstd"
 				PreprocessorDefinitions="_DEBUG;_WINDOWS;WIN32;HAVE_CONFIG_H;CVSAPI_EXPORT=__declspec(dllexport),XML_STATIC,PCRE_STATIC"
 				MinimalRebuild="true"
 				BasicRuntimeChecks="3"
@@ -216,6 +216,10 @@
 				>
 				<File
 					RelativePath=".\Codepage.cpp"
+					>
+				</File>
+				<File
+					RelativePath=".\FileContent.cpp"
 					>
 				</File>
 				<File

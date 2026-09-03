@@ -918,7 +918,7 @@ char *wrap_rcsoption(const char *filename);
    bytes under a non-binary kopt force B, or are refused when the kopt was
    the user's own -k.  A file that is absent (server mode) keeps its kopt.  */
 enum content_kopt_verdict { CONTENT_KOPT_KEEP, CONTENT_KOPT_BINARY, CONTENT_KOPT_REFUSE };
-content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit);
+content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit, const char **forced = NULL);
 const char *wrap_xdiffwrapper(const char *filename);
 char *wrap_tocvs_process_file(const char *fileName);
 bool wrap_merge_is_copy (const char *fileName);

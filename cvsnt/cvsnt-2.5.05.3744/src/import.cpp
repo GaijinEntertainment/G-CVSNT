@@ -659,10 +659,11 @@ static int import_descend (char *message, char *vtag, int targc, char *targv[])
                                t=time_stamp(p->key, 0);
                                r=wrap_rcsoption(p->key);
                                /* Content beats name; the Kopt sent for the file says so aloud.  */
-                               if (content_kopt (p->key, r, 0) == CONTENT_KOPT_BINARY)
+                               const char *forced;
+                               if (content_kopt (p->key, r, 0, &forced) == CONTENT_KOPT_BINARY)
                                {
                                        xfree (r);
-                                       r = xstrdup ("B");
+                                       r = xstrdup (forced);
                                }
 							   fprintf(f,"/%s/%s.1/%s/%s%s/\n",p->key,vbranch?vbranch:"1",t,r?"-k":"",r?r:"");
                                xfree(r);
@@ -762,16 +763,17 @@ static int process_import_file (char *message, char *vfile, char *vtag, int targ
 	       as it does on the client.  */
 	    {
 		int explicit_k = keyword_opt && keyword_opt[0] && our_opt == keyword_opt;
-		switch (content_kopt (vfile, our_opt, explicit_k))
+		const char *forced;
+		switch (content_kopt (vfile, our_opt, explicit_k, &forced))
 		{
 		case CONTENT_KOPT_REFUSE:
 		    error (1, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
 			   vfile, keyword_opt);
 		case CONTENT_KOPT_BINARY:
 		    xfree (free_opt);
-		    free_opt = our_opt = xstrdup ("B");
+		    free_opt = our_opt = xstrdup (forced);
 		    if (!server_active)
-			error (0, 0, "%s has binary content, importing it as -kB", vfile);
+			error (0, 0, "%s has binary content, importing it as -k%s", vfile, forced);
 		    break;
 		default:
 		    break;
@@ -819,17 +821,18 @@ static int update_rcs_file(const char *fn, char *message, char *vfile, char *vta
 	/* Content beats name here too: a re-import reaches this path over an
 	   existing ,v, and vers->options is that file's kopt.  Never let binary
 	   content land as a text revision.  */
-	switch (content_kopt (vfile, vers->options, keyword_opt && keyword_opt[0]))
+	const char *forced;
+	switch (content_kopt (vfile, vers->options, keyword_opt && keyword_opt[0], &forced))
 	{
 	case CONTENT_KOPT_REFUSE:
 	    error (1, 0, "%s has binary content; refusing to import it with -k%s (use -kB)",
 		   vfile, keyword_opt);
 	case CONTENT_KOPT_BINARY:
 	    xfree (vers->options);
-	    vers->options = xstrdup ("B");
+	    vers->options = xstrdup (forced);
 	    RCS_get_kflags (vers->options, false, kopt);
 	    if (!server_active)
-		error (0, 0, "%s has binary content, importing it as -kB", vfile);
+		error (0, 0, "%s has binary content, importing it as -k%s", vfile, forced);
 	    break;
 	default:
 	    break;
