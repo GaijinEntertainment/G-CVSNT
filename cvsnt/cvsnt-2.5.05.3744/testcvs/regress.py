@@ -1187,6 +1187,8 @@ def t_add_binary_by_content(r):
           "incompressible binary incompdat not -kB: " + ents.get("incompdat", "<absent>"))
     check("incompdat has binary content, adding it as -kB" in out,
           "incompressible content not content-detected as -kB:" + chr(10) + out)
+    check("incompdat has binary content, adding it as -kBz" not in out,
+          "incompressible content was noted as -kBz:" + chr(10) + out)
     check("-k" not in ents.get("utext", "/x/"),
           "high-byte UTF-8 text utext treated as binary: " + ents.get("utext", "<absent>"))
     check("-kB" in ents.get("late.dat", ""),
