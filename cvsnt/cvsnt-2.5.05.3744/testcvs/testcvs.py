@@ -7,14 +7,14 @@ import filecmp
 import getopt
 
 def usage():
-  print 'testcvs [options]'
-  print '  -v  --verbose    verbose output'
+  print('testcvs [options]')
+  print('  -v  --verbose    verbose output')
   
 def cvs(command):
   global count, verbose
   #cmd = 'valgrind -q --logfile-fd=9 cvs --allow-root='+base_dir+'/repos,/repos -d'+current_cvsroot+' '+command+' >'+outfile+' 2>'+errfile+' 9>/dev/stderr'
   cmd = 'cvs --allow-root="'+current_physroot+','+current_cvsroot+'" -d'+current_cvsroot+' '+command+' >"'+outfile+'" 2>"'+errfile+'"'
-  if(verbose): print count,': ',cmd
+  if(verbose): print(count,': ',cmd)
   count = count + 1
   result = os.system(cmd)
   if(verbose):
@@ -26,15 +26,15 @@ def cat(file):
   for line in fileinput.input(file):
     if line and line[-1] == '\n':
       line = line[:-1]
-    print line
+    print(line)
 
 def fail(command, result):
-  print 'Test \''+current_test+'\' failed ('+command+') (result='+str(result)+')'
+  print('Test \''+current_test+'\' failed ('+command+') (result='+str(result)+')')
   cat (errfile)
   raise SystemExit
 
 def chdir(directoryname):
-  print 'chdir '+directoryname
+  print('chdir '+directoryname)
   os.chdir(directoryname)
 
 def cvs_pass(command):
@@ -48,35 +48,35 @@ def cvs_fail(command):
 def start_test(name):
   global current_test
   current_test = name
-  print current_test
+  print(current_test)
 
 def dir_exists(dirname):
   if(not os.path.isdir(dirname)):
-    print 'Directory '+dirname+' Which should exist, doesn\'t.  Terminating.'
+    print('Directory '+dirname+' Which should exist, doesn\'t.  Terminating.')
     raise SystemExit
 
 def file_exists(filename):
   if(not os.path.isfile(filename)):
-    print 'File '+filename+' Which should exist, doesn\'t.  Terminating.'
+    print('File '+filename+' Which should exist, doesn\'t.  Terminating.')
     raise SystemExit
 
 def file_not_exists(filename):
   if(os.path.isfile(filename)):
-    print 'File '+filename+' Which shouldn\'t exist, does.  Terminating.'
+    print('File '+filename+' Which shouldn\'t exist, does.  Terminating.')
     raise SystemExit
 
 def file_copy(srcfile,destfile):
-  if(verbose): print "Copy "+srcfile+" -> "+destfile
+  if(verbose): print("Copy "+srcfile+" -> "+destfile)
   shutil.copyfile(srcfile,destfile) 
 
 def file_compare(file1,file2):
-  if(verbose): print "Compare "+file1+" -> "+file2
+  if(verbose): print("Compare "+file1+" -> "+file2)
   if(filecmp.cmp(file1,file2) == 0):
-    print 'File '+file1+' Should be identical to File '+file2+'. Terminating.'
+    print('File '+file1+' Should be identical to File '+file2+'. Terminating.')
     raise SystemExit
 
 def file_delete(filename):
-  if(verbose): print "Delete "+filename
+  if(verbose): print("Delete "+filename)
   os.unlink(filename)
 
 def main():
@@ -444,9 +444,9 @@ def main():
 
   start_test('*info')
 
-  os.chmod(current_physroot+'/CVSROOT/commitinfo',0644)
-  os.chmod(current_physroot+'/CVSROOT/loginfo',0644)
-  os.chmod(current_physroot+'/CVSROOT/postcommand',0644)
+  os.chmod(current_physroot+'/CVSROOT/commitinfo',0o644)
+  os.chmod(current_physroot+'/CVSROOT/loginfo',0o644)
+  os.chmod(current_physroot+'/CVSROOT/postcommand',0o644)
   file_copy(test_data + '/commitinfo_test', current_physroot+'/CVSROOT/commitinfo')
   file_copy(test_data + '/loginfo_test', current_physroot+'/CVSROOT/loginfo')
   file_copy(test_data + '/postcommand_test', current_physroot+'/CVSROOT/postcommand')
