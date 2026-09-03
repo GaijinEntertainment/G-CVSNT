@@ -1167,7 +1167,7 @@ def t_add_binary_by_content(r):
     # settle it), and the first NUL lands past 8 KB - only the extended scan
     # catches this one.
     latenul = bytes(range(1, 256)) * 40 + bytes([0]) + b"tail"
-    for name, data in (("blob1.txt", nul), ("incomp.bin", incomp), ("utext", hitext),
+    for name, data in (("blob1.txt", nul), ("incompdat", incomp), ("utext", hitext),
                        ("late.dat", latenul)):
         with open(os.path.join(wc, name), "wb") as f:
             f.write(data)
@@ -1177,12 +1177,16 @@ def t_add_binary_by_content(r):
     write(os.path.join(wc, "plain_text"), "just text" + chr(10))
     with open(os.path.join(wc, "u16.txt"), "wb") as f:
         f.write(bytes([255, 254]) + "hello".encode("utf-16-le"))
-    _, out = r.cvs(["add", "blob1.txt", "incomp.bin", "utext", "late.dat", "plain_text", "u16.txt"], cwd=wc)
+    _, out = r.cvs(["add", "blob1.txt", "incompdat", "utext", "late.dat", "plain_text", "u16.txt"], cwd=wc)
     ents = entries_of(wc)
     check("-kBz" in ents.get("blob1.txt", ""),
           "compressible binary blob1.txt not -kBz: " + ents.get("blob1.txt", "<absent>"))
-    check("-kB" in ents.get("incomp.bin", "") and "-kBz" not in ents.get("incomp.bin", ""),
-          "incompressible binary incomp.bin not -kB: " + ents.get("incomp.bin", "<absent>"))
+    # incompdat has no wrapper extension, so the content detector runs: a NUL
+    # makes it binary and the incompressible sample keeps it -kB, not -kBz.
+    check("-kB" in ents.get("incompdat", "") and "-kBz" not in ents.get("incompdat", ""),
+          "incompressible binary incompdat not -kB: " + ents.get("incompdat", "<absent>"))
+    check("incompdat has binary content, adding it as -kB" in out,
+          "incompressible content not content-detected as -kB:" + chr(10) + out)
     check("-k" not in ents.get("utext", "/x/"),
           "high-byte UTF-8 text utext treated as binary: " + ents.get("utext", "<absent>"))
     check("-kB" in ents.get("late.dat", ""),
