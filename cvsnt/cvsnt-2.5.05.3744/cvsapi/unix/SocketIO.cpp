@@ -308,7 +308,7 @@ int CSocketIO::recv(char *buf, int len)
 	if((len-oldlen)<=m_buflen)
 	{
 		memcpy(buf+oldlen,m_buffer,len-oldlen);
-		m_bufpos+=len;
+		m_bufpos+=(len-oldlen);
 		return len;
 	}
 	memcpy(buf+oldlen,m_buffer,m_buflen);

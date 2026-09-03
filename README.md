@@ -22,3 +22,12 @@ OSX 10.9+ notes:
 
 * prebuilt package archives are available in Releases (for x64 and arm64 arch):
   https://github.com/GaijinEntertainment/G-CVSNT/releases
+
+Documentation
+-------------
+
+* [docs/](docs/) — architecture, blob storage, protocols, repository layout, server operations,
+  client usage and a source map
+* [HOWTOBUILD.md](HOWTOBUILD.md) — building on Windows, Linux and macOS
+* [_reports/](_reports/) — code-analysis findings and performance analyses (lands in the next
+  slice of the audit series; a forward reference on this branch)
