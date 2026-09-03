@@ -51,23 +51,25 @@ static int unedit_fileproc (void *callerdat, struct file_info *finfo);
 
 static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 {
+	/* Only the fileattr mutators may touch the tree: they raise the
+	   modified flag, and without it fileattr_write() early-returns and
+	   "watch on"/"watch off" are silent no-ops (as they were).  */
 	CXmlNodePtr handle = fileattr_getroot();
 	handle->xpathVariable("name",finfo->file);
 	if(!handle->Lookup("file[cvs:filename(@name,$name)]") || !handle->XPathResultNext())
 	{
-		handle = fileattr_getroot();
-		handle->NewNode("file");
-		handle->NewAttribute("name",finfo->file);
+		/* Turning off a never-watched file: nothing to clear, and no
+		   bare node may be created - the modified flag is per tree, so a
+		   sibling mutation in the same run would persist it.  */
+		if(!turning_on)
+			return 0;
+		handle = fileattr_newnode(NULL,"file","name",finfo->file);
 	}
 
 	if(turning_on)
-	{
-		if(!handle->GetChild("watched")) handle->NewNode("watched");
-	}
+		fileattr_addchild(handle,"watched");
 	else
-	{
-		if(handle->GetChild("watched")) handle->Delete();
-	}
+		fileattr_delete(handle,"watched");
     return 0;
 }
 
@@ -75,23 +77,32 @@ static int onoff_filesdoneproc (void *callerdat, int err, char *repository, char
 {
     if (setting_default)
 	{
-		CXmlNodePtr handle = fileattr_find(NULL,"/directory/default");
+		/* Relative to the <fileattr> document element, as everywhere else
+		   (add.cpp:816 looks up this very node).  With the leading slash it
+		   was an absolute path to a nonexistent /directory, so the lookup
+		   never matched and every run appended a fresh <directory><default>
+		   instead of reusing the one it had to clear.  */
+		CXmlNodePtr handle = fileattr_find(NULL,"directory/default");
 
 		if(!handle)
 		{
-			handle = fileattr_getroot();
-			handle->NewNode("directory");
-			handle->NewNode("default");
+			/* Same rule as onoff_fileproc: never create the node just to
+			   find nothing to turn off.  */
+			if(!turning_on)
+				return err;
+			/* Reuse an existing <directory> - cvs chacl can leave one with
+			   ACL children but no <default>.  A second top-level <directory>
+			   would hide this default from fileattr_newfile.  */
+			CXmlNodePtr dir = fileattr_find(NULL,"directory");
+			if(!dir)
+				dir = fileattr_newnode(NULL,"directory");
+			handle = fileattr_newnode(dir,"default");
 		}
 
 		if(turning_on)
-		{
-			if(!handle->GetChild("watched")) handle->NewNode("watched");
-		}
+			fileattr_addchild(handle,"watched");
 		else
-		{
-			if(handle->GetChild("watched")) handle->Delete();
-		}
+			fileattr_delete(handle,"watched");
 	}
     return err;
 }

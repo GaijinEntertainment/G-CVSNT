@@ -38,17 +38,36 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 	filehandle = fileattr_getroot();
 	filehandle->xpathVariable("name",file?file:"");
 	filehandle->xpathVariable("user",who?who:"");
+	/* Braces matter here: without them the else binds to the inner if, so a
+	   per-file lookup that succeeded was immediately overwritten by a
+	   directory/default one that cannot match, and the search below could
+	   never find an existing watcher.  A file means look up that file's
+	   node; no file means look up the directory default.  */
 	if(file)
+	{
 		if(!filehandle->Lookup("file[cvs:filename(@name,$name)]")) filehandle=NULL;
+	}
 	else
+	{
 		if(!filehandle->Lookup("directory/default")) filehandle=NULL;
+	}
 
 	if(filehandle && !filehandle->XPathResultNext()) filehandle = NULL;
 	
 	if(filehandle && (!filehandle->Lookup("watcher[cvs:username(@name,$user)]") || !filehandle->XPathResultNext()))
 	  filehandle=NULL;
 
-	if(filehandle && !what->adding)
+	/* Nothing recorded for this user, so a removal has nothing to do.
+	   Testing filehandle instead of its absence had this bail out of
+	   exactly the case it was meant to handle, and fall through to the
+	   create-a-watcher branch below in the case it was meant to skip.  */
+	if(!filehandle && !what->adding)
+		return;
+	/* Nothing to add either (-a none): create no <watcher> husk for the
+	   next write of this tree to persist.  */
+	const bool wants_add = what->edit || what->commit || what->unedit
+		|| what->add_tedit || what->add_tcommit || what->add_tunedit;
+	if(!filehandle && !wants_add)
 		return;
 	if(!filehandle)
 	{
@@ -57,26 +76,26 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 			filehandle = fileattr_getroot();
 			filehandle->xpathVariable("name",file);
 			if(!filehandle->Lookup("file[cvs:filename(@name,$name)]") || !filehandle->XPathResultNext())
-			{
-				filehandle=fileattr_getroot();
-				filehandle->NewNode("file");
-				filehandle->NewAttribute("name",file);
-			}
+				filehandle = fileattr_newnode(NULL,"file","name",file);
 		}
 		else
 		{
 			filehandle = fileattr_getroot();
 			if(!filehandle->Lookup("directory/default") || !filehandle->XPathResultNext())
 			{
-				filehandle=fileattr_getroot();
-				filehandle->NewNode("directory");
-				filehandle->NewNode("default");
+				/* Reuse an existing <directory> so the default is not split
+				   across a second top-level node (see onoff_filesdoneproc).  */
+				CXmlNodePtr dir = fileattr_find(NULL,"directory");
+				if(!dir)
+					dir = fileattr_newnode(NULL,"directory");
+				filehandle = fileattr_find(dir,"default");
+				if(!filehandle)
+					filehandle = fileattr_newnode(dir,"default");
 			}
 		}
 
 		// We already know that these don't exist, from the search above
-		filehandle->NewNode("watcher");
-		filehandle->NewAttribute("name",who);
+		filehandle = fileattr_newnode(filehandle,"watcher","name",who);
 	}
 	if(!filehandle)
 		error(0,0,"Couldn't create node in modify_watchers");
@@ -95,22 +114,33 @@ void watch_modify_watchers (const char *file, const char *who, struct addremove_
 			fileattr_delete(filehandle,"temp_commit");
 			fileattr_delete(filehandle,"temp_unedit");
 		}
-		fileattr_prune(filehandle);
+		/* A watcher with no actions left is not a watcher: cvs watchers
+		   prints a line per <watcher> and the next add finds the husk.
+		   Blanks are stripped at parse time, so no actions means no
+		   children.  (fileattr_prune is dead: its body is commented out.)
+		   The <file> node it hung on says nothing once bare, and no
+		   other path prunes it - take it along.  */
+		if(!filehandle->GetChild(NULL,false))
+		{
+			CXmlNodePtr parent = filehandle->Clone();
+			if(!parent->GetParent())
+				parent = NULL;
+			fileattr_batch_delete(filehandle);
+			if(parent && !strcmp(parent->GetName(),"file") && !parent->GetChild(NULL,false))
+				fileattr_batch_delete(parent);
+		}
 	}
 	else
 	{
-		if(what->edit)
-			filehandle->NewNode("edit",NULL,false);
-		if(what->commit)
-			filehandle->NewNode("commit",NULL,false);
-		if(what->unedit)
-			filehandle->NewNode("unedit",NULL,false);
-		if(what->add_tedit)
-			filehandle->NewNode("temp_edit",NULL,false);
-		if(what->add_tcommit)
-			filehandle->NewNode("temp_commit",NULL,false);
-		if(what->add_tunedit)
-			filehandle->NewNode("temp_unedit",NULL,false);
+		/* The search above finds an existing watcher, so a repeated
+		   "watch add" reuses its node; fileattr_addchild guards each
+		   action the same way and raises the flag only when one lands.  */
+		if(what->edit)		fileattr_addchild(filehandle,"edit");
+		if(what->commit)	fileattr_addchild(filehandle,"commit");
+		if(what->unedit)	fileattr_addchild(filehandle,"unedit");
+		if(what->add_tedit)	fileattr_addchild(filehandle,"temp_edit");
+		if(what->add_tcommit)	fileattr_addchild(filehandle,"temp_commit");
+		if(what->add_tunedit)	fileattr_addchild(filehandle,"temp_unedit");
 	}
 }
 
