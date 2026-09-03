@@ -665,6 +665,49 @@ int readlink (char *path, char *buf, int buf_size)
 // From win32.cpp
 bool validate_filename(const char *path, bool warn);
 
+/* Set by the global --rename-in-use option (main.cpp).  When set, a rename
+   whose destination exists but cannot be replaced because another process
+   holds it open or mapped (a loaded .exe/.dll) is recovered by renaming that
+   destination aside rather than retrying for ten seconds and then aborting
+   the whole run.  Off by default: it moves a file another process is using. */
+int rename_in_use = 0;
+
+/* Rename TO aside to .#<name>.inuse.<pid>.<timestamp> in the same directory
+   (adding .1, .2, ... on collision).  A mapped image cannot be deleted but
+   can be renamed, which is exactly the escape hatch this uses.  Returns true
+   if TO no longer exists at its original path afterwards. */
+static bool rename_inuse_aside (const char *to)
+{
+	uc_name fn_to = to;
+	const char *base = strrchr(to,'/');
+	const char *bslash = strrchr(to,'\\');
+	if (bslash && (!base || bslash > base)) base = bslash;
+	cvs::string dir(to, base ? (size_t)(base+1-to) : 0);
+	base = base ? base+1 : to;
+
+	for (int n=0; n<=999; ++n)
+	{
+		/* Same scheme as rename_notversioned_aside, plus the pid.  */
+		char *aside = make_aside_name(dir.c_str(), base, "inuse",
+			(unsigned long)GetCurrentProcessId(), n);
+		uc_name fn_aside = aside;
+		if (GetFileAttributes(fn_aside)!=0xFFFFFFFF)
+		{
+			xfree(aside);
+			continue;
+		}
+		const bool moved = MoveFile(fn_to,fn_aside)!=0;
+		if (moved)
+			printf("renamed in-use file %s aside to %s\n",
+				fn_root(to), fn_root(aside));
+		xfree(aside);
+		if (moved)
+			return true;
+		break;
+	}
+	return false;
+}
+
 /* Rename for NT which works for read only files.  */
 int wnt_rename (const char *from, const char *to)
 {
@@ -727,6 +770,7 @@ int wnt_rename (const char *from, const char *to)
 	}
 #else
 	count=0;
+	bool tried_aside=false;
 	while(!(result = MoveFileEx(fn_from,fn_to,MOVEFILE_COPY_ALLOWED|MOVEFILE_REPLACE_EXISTING)))
 	{
 		save_errno = GetLastError();
@@ -734,6 +778,23 @@ int wnt_rename (const char *from, const char *to)
 
 		if(save_errno != ERROR_ACCESS_DENIED)
 			break;
+
+		/* If the destination exists and cannot be replaced because another
+		   process holds it open or mapped, and --rename-in-use is set, move
+		   it aside so this rename can complete rather than waiting out the
+		   full retry and then aborting.  Try once, after a couple of seconds
+		   of the retry pattern that would otherwise end in a fatal error. */
+		if(rename_in_use && !tried_aside && count>=20
+			&& GetFileAttributes(fn_to)!=0xFFFFFFFF)
+		{
+			tried_aside=true;
+			if(rename_inuse_aside(to))
+			{
+				fa_to=0xFFFFFFFF;	/* destination is gone now */
+				continue;
+			}
+		}
+
 		Sleep(100);
 		count++;
 		if(count==100)

@@ -1190,6 +1190,7 @@ warning: server is not creating directories one at a time");
 static void copy_a_file (char *data, List *ent_list, char *short_pathname, char *filename)
 {
     char *newname;
+    extern int backup_local_files;
 
     read_line (&newname);
 
@@ -1199,7 +1200,11 @@ static void copy_a_file (char *data, List *ent_list, char *short_pathname, char 
     if (last_component (newname) != newname)
 	error (1, 0, "protocol error: Copy-file tried to specify directory");
 
-    copy_file (filename, newname, 1, 1);
+    /* The server cannot know that backups are disabled on this side, so it
+       still sends Copy-file before a merge; accept the response but write
+       nothing when update -n / --no-backups was given.  */
+    if (backup_local_files)
+	copy_file (filename, newname, 1, 1);
     xfree (newname);
 }
 
@@ -1411,6 +1416,18 @@ enum existp_t
 	UPDATE_ENTRIES_EXISTING_OR_NEW
 };
 
+extern int move_in_the_way;
+
+/* --move-in-the-way: try to clear an unversioned file obstructing an
+   incoming one by renaming it aside (rename_notversioned_aside owns the
+   case-ambiguity exemption).  Returns 1 when the path is now clear.  */
+static int clear_obstruction (const char *filename, const char *short_pathname)
+{
+    if (!move_in_the_way)
+	return 0;
+    return rename_notversioned_aside (filename, short_pathname);
+}
+
 struct update_entries_data
 {
     enum contents_t contents;
@@ -1536,12 +1553,18 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	    error (0, 0, "warning: %s unexpectedly disappeared",
 		   short_pathname);
 
+	/* An unversioned file where a new one goes.  The rename is a
+	   statement, so the guards decide whether it is tried at all.  */
+	int obstructed = data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename);
+	if (obstructed && clear_obstruction (filename, short_pathname))
+	    obstructed = 0;
+
 	if (filenames_case_insensitive && client_overwrite_existing && isfile(filename) && !case_isfile(filename,&realfilename))
 	{
 		xfree(realfilename);
 	}
 	else
-	if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename))
+	if (obstructed)
 	{
 	    /* Emit a warning and refuse to update the file; we don't want
 	       to clobber a user's file.  */
@@ -2399,11 +2422,16 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
         error (0, 0, "warning: %s unexpectedly disappeared",
     	   short_pathname);
 
+    /* As in update_entries: the rename is a statement, not a conjunct.  */
+    int obstructed = data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename);
+    if (obstructed && clear_obstruction (filename, short_pathname))
+        obstructed = 0;
+
     if (filenames_case_insensitive && client_overwrite_existing && isfile(filename) && !case_isfile(filename,&realfilename))
     {
     	xfree(realfilename);
     }
-    else if (data->existp == UPDATE_ENTRIES_NEW && !client_overwrite_existing && isfile (filename))
+    else if (obstructed)
     {
       if (filenames_case_insensitive && !case_isfile(filename,&realfilename))
       {

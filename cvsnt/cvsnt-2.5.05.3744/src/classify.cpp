@@ -106,8 +106,13 @@ Ctype Classify_File (struct file_info *finfo, const char *tag, const char *date,
 	}
 	else if (!pipeout && vers->ts_user && No_Difference(finfo, vers, (kf.flags&KFLAG_STATIC || kf_ent.flags&KFLAG_STATIC), ignore_keywords))
 	{
-	    /* the files were different so it is a conflict */
-	    if (!really_quiet)
+	    /* the files were different so it is a conflict.  Under
+	       --move-in-the-way update_fileproc moves the obstruction aside
+	       and reports either outcome; the classifier itself does no
+	       filesystem work.  */
+	    extern int move_in_the_way;
+
+	    if (!really_quiet && !(move_in_the_way && !server_active))
 		error (0, 0, "move away %s; it is in the way",
 		       fn_root(finfo->fullname));
 	    ret = T_CONFLICT;

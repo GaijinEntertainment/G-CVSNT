@@ -91,6 +91,46 @@ full-tree stat storm that did not exist before.
 **The right change:** give `available_disk_space` an `int64_t` return so the sentinel is honest, or
 have `init_gc` test for the sentinel explicitly instead of relying on `-1` arithmetic.
 
+## The most serious thing found
+
+**[`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) — a local-mode binary
+commit silently destroys the content.** The data-loss core is **fixed on this branch**: local mode
+now points the blob store at the repository (mirroring the server's per-request call), and the
+`blobs/` directory is created on first write, so a fresh `cvs init` repository works. Pinned by a
+regression case that commits a second binary revision and checks the bytes out again exactly.
+
+Two parts remain open: the compiled-in default root of `"./blobs/"` should fail loudly instead of
+silently resolving against the process working directory, and the read path still cannot report a
+missing blob (`BUG-server-12`) — so a repository already poisoned by the old behaviour still checks
+out empty files without an error. The unconditional `b`→`B` rewrite at `rcs_checkin.cpp:512` also
+stays as-is pending a maintainer decision.
+
+Three behaviours combine:
+
+1. `src/rcs_checkin.cpp:512` rewrites every `b` in the keyword options to `B` before parsing them,
+   so **every** commit of a `-kb` file is forced onto the blob path regardless of how the file was
+   registered. This is deliberate — the comment says "on checkin do not allow old binary files" —
+   but it is unconditional.
+2. Before the fix on this branch, `caddressed_fs::set_root()` was called from exactly one place in
+   the tree, `src/server.cpp:5375`, inside the server path. In local mode the blob root was never
+   configured and kept its default `"./blobs/"`, which resolves against the **current working
+   directory**.
+3. `RCS_read_binary_rev_data` cannot report failure ([`BUG-server-12`](_reports/BUG-server-12-blob-pull-failure-ignored.md)),
+   so a checkout that cannot find the blob reports success and writes a zero-length file.
+
+The result, verified end to end on a plain `cvs -d /path/to/repo` repository: the second commit of a
+binary file either aborts with `Couldn't write blob ... No such file or directory`, or — if the
+working directory happens to contain a `blobs/` subdirectory — reports `new revision: 1.2; done`
+while writing the repository's content **into the user's working copy**. A later checkout elsewhere
+prints `U file` and produces an **empty file**. Deleting that working copy destroys the revision
+permanently.
+
+An abort is recoverable. A commit that reports success and loses the data is not.
+
+The existing regression case "binary file survives a commit/checkout round trip byte for byte" does
+not catch this because it only *imports*, and `import` does not go through `RCS_checkin`, so the
+`b`→`B` rewrite never fires.
+
 ## Corrections to commit messages on this branch
 
 A review pass over the fix commits found four factual slips in commit-message *rationale*. The code
@@ -186,7 +226,18 @@ Ordered by severity. "Fix size" is the estimated lines of change; "changes behav
 applying the fix alters observable behaviour, which is what kept several of the small ones out of
 this branch.
 
-### High (22)
+### High (23)
+
+### `BUG-blob-21` residual - small `-kB` revision checks out empty in local mode
+
+The [`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) blob-root fix is
+incomplete.  With the root set and the blob stored whole, a `-kB` revision below ~1.5 KB still
+checks out as a zero-length file in local mode (data loss once the holding working copy is gone).
+The decoder unit is clean; the fault is in the checkout dereference/size path
+(`RCS_read_binary_rev_data` -> `pull_at_once`).  Pinned by the expected-failure case
+`t_binary_small_second_commit`.  The shipped `t_binary_second_commit` masks it with a 1541-byte
+payload, just above the failing range.
+
 
 | ID | Severity | Area | Issue | Fix size | Changes behaviour |
 | --- | --- | --- | --- | ---: | --- |
