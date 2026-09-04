@@ -14,6 +14,7 @@
 #include "../version.h"
 
 #include "cvs.h"
+#include "access_log.h"
 #include "timegm.h"
 
 /* This structure holds information parsed from the -r option.  */
@@ -889,6 +890,8 @@ static int log_fileproc (void *callerdat, struct file_info *finfo)
 	
 	return (1);
     }
+
+    access_log_file ("read", "log", finfo->update_dir, finfo->repository, finfo->file, NULL, NULL, NULL, 0);
 
     /* Turn any symbolic revisions in the revision list into numeric
        revisions.  */

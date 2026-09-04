@@ -16,6 +16,7 @@
 #include "../version.h"
 
 #include "cvs.h"
+#include "access_log.h"
 #include "getline.h"
 #include "edit.h"
 #include "fileattr.h"
@@ -1786,6 +1787,7 @@ static int remove_file (struct file_info *finfo, const char *tag, const char *me
 	    return (1);
 	}
 	RCS_rewrite (finfo->rcs, NULL, NULL, 0);
+	access_log_file ("write", "untag", finfo->update_dir, finfo->repository, finfo->file, NULL, tag, NULL, 0);
 	Scratch_Entry (finfo->entries, finfo->file);
 	return (0);
     }
@@ -1886,6 +1888,7 @@ static int remove_file (struct file_info *finfo, const char *tag, const char *me
     /* At this point, the file has been committed as removed.  We should
        probably tell the history file about it  */
     history_write ('R', NULL, real_rev, finfo->file, finfo->repository, bugid, message);
+    access_log_file ("write", "remove", finfo->update_dir, finfo->repository, finfo->file, real_rev, tag, NULL, 0);
 
 	xfree(real_rev);
 

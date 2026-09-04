@@ -16,6 +16,18 @@
 # history file, or a subset as needed (ie `TMAR' logs all write operations)
 #LogHistory=TOFEWGCMAR
 
+# Set 'AccessLog' to 'yes' to log every file a client reads or writes, one record
+# per file, buffered in memory and appended at command end; a command that buffers
+# more than a few MB flushes early, so a large command may write more than once.
+#AccessLog=no
+# 'AccessLogPath' is expanded with strftime at each write. The default is
+# CVSROOT/access-%Y%m%d.jsonl
+#AccessLogPath=/var/log/cvs/access-%Y%m%d.jsonl
+# 'AccessLogFormat' uses $name placeholders ($$ for a literal $): $ts $ts_unix $sid $user
+# $host $cmd $root $server $pid $op $kind $dir $file $path $rev $tag $hash $size.
+# The default is a JSON object per line. 'AccessLogEscape' is json (default) or none.
+#AccessLogFormat={"ts":"$ts","user":"$user","cmd":"$cmd","kind":"$kind","path":"$path","rev":"$rev"}
+
 # Set `AtomicCommits' to `yes' to do atomic commits on systems that support this.
 AtomicCommits=yes
 

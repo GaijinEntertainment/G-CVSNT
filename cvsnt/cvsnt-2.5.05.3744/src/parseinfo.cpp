@@ -10,6 +10,7 @@
 
 #include "cvs.h"
 #include "getline.h"
+#include "access_log.h"
 #include "../version.h"
 
 extern char *logHistory;
@@ -338,6 +339,26 @@ int parse_config (const char *cvsroot)
 	    {
 		logHistory=(char*)xmalloc(strlen (p) + 1);
 		strcpy (logHistory, p);
+	    }
+	}
+	else if (strcasecmp (line, "AccessLog") == 0)
+	{
+	    if (!access_log_set_enabled (p))
+	    {
+			error (0, 0, "unrecognized value '%s' for AccessLog", p);
+			goto error_return;
+	    }
+	}
+	else if (strcasecmp (line, "AccessLogPath") == 0)
+	    access_log_set_path (p);
+	else if (strcasecmp (line, "AccessLogFormat") == 0)
+	    access_log_set_format (p);
+	else if (strcasecmp (line, "AccessLogEscape") == 0)
+	{
+	    if (!access_log_set_escape (p))
+	    {
+			error (0, 0, "unrecognized value '%s' for AccessLogEscape", p);
+			goto error_return;
 	    }
 	}
 	else if (strcasecmp (line, "AtomicCommits") == 0)

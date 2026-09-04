@@ -13,6 +13,7 @@
  */
 
 #include "cvs.h"
+#include "access_log.h"
 #include "savecwd.h"
 
 static int rtag_proc(int argc, char **argv, const char *xwhere,
@@ -31,7 +32,7 @@ static Dtype tag_dirproc(void *callerdat, char *dir,
 				 char *repos, char *update_dir,
 				 List *entries, const char *virtual_repository, Dtype hint);
 static int rtag_fileproc(void *callerdat, struct file_info *finfo);
-static int rtag_delete(RCSNode *rcsfile);
+static int rtag_delete(struct file_info *finfo, RCSNode *rcsfile);
 static int tag_fileproc(void *callerdat, struct file_info *finfo);
 static int add_to_valtags(char *name);
 
@@ -682,7 +683,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
      */
 
     if (delete_flag)
-		return rtag_delete (rcsfile);
+		return rtag_delete (finfo, rcsfile);
 
 	if(numtag && !date && alias_branch)
 	{
@@ -714,7 +715,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 	if (version == NULL)
 	{
 		/* Clean up any old tags */
-		rtag_delete (rcsfile);
+		rtag_delete (finfo, rcsfile);
 
 		if (!quiet && !force_tag_match)
 		{
@@ -747,6 +748,8 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(current_date) );
 			RCS_rewrite (rcsfile, NULL, NULL, 0);
 			tag_set_ok = 1;
+			access_log_file ("write", branch_mode ? "branch" : "tag", finfo->update_dir, finfo->repository,
+					 finfo->file, numtag, symtag, NULL, 0);
 		}
     }
     else
@@ -810,6 +813,8 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(current_date) );
 	    RCS_rewrite (rcsfile, NULL, NULL, 0);
 		tag_set_ok = 1;
+		access_log_file ("write", branch_mode ? "branch" : "tag", finfo->update_dir, finfo->repository,
+				 finfo->file, rev, symtag, NULL, 0);
 	}
     }
 
@@ -843,7 +848,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
  * This is done here because it's MUCH faster than just blindly calling
  * "rcs" to remove the tag... trust me.
  */
-static int rtag_delete (RCSNode *rcsfile)
+static int rtag_delete (struct file_info *finfo, RCSNode *rcsfile)
 {
     char *version;
     int retcode;
@@ -891,6 +896,7 @@ static int rtag_delete (RCSNode *rcsfile)
     }
 	TRACE(3,"rtag_delete(2) rewrite rcsfile");
     RCS_rewrite (rcsfile, NULL, NULL, 0);
+    access_log_file ("write", "untag", finfo->update_dir, finfo->repository, finfo->file, NULL, symtag, NULL, 0);
     return (0);
 }
 
@@ -1046,6 +1052,7 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(vers->srcfile->path),
 					PATCH_NULL(symtag) );
 	RCS_rewrite (vers->srcfile, NULL, NULL, 0);
+	access_log_file ("write", "untag", finfo->update_dir, finfo->repository, finfo->file, NULL, symtag, NULL, 0);
 
 	/* warm fuzzies */
 	if (!really_quiet)
@@ -1194,14 +1201,22 @@ static int tag_fileproc (void *callerdat, struct file_info *finfo)
 		tag_set_ok = 1;
 	TRACE(3,"tag_fileproc - finally RCS_settag ok");
 	history_write ('T', finfo->update_dir, rev, finfo->file, finfo->repository, NULL, NULL);
-    if (branch_mode)
-	xfree (rev);
+	{
+		/* Copy the revision before branch_mode frees rev below, so a branch
+		   record keeps its magic branch number instead of an empty rev. */
+		cvs::string al_rev = rev ? rev : "";
+		const char *al_kind = branch_mode ? "branch" : "tag";
+		if (branch_mode)
+			xfree (rev);
 	TRACE(3,"tag_fileproc(2) rewrite rcsfile=\"%s\" symtag=\"%s\", rev=\"%s\", date=\"%s\"",
 					PATCH_NULL(vers->srcfile->path),
 					PATCH_NULL(symtag),
 					PATCH_NULL(rev),
 					PATCH_NULL(current_date) );
     RCS_rewrite (vers->srcfile, NULL, NULL, 0);
+		access_log_file ("write", al_kind, finfo->update_dir, finfo->repository,
+				 finfo->file, al_rev.c_str (), symtag, NULL, 0);
+	}
 
     /* more warm fuzzies */
     if (!really_quiet)
