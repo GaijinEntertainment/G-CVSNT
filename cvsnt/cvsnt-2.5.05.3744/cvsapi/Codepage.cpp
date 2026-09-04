@@ -373,7 +373,12 @@ int CCodepage::OutputAsEncoded(int fd, const void *inbuf, size_t len, LineType C
 				}
 			}
 			o=(char*)line_end;
-			if(l<8 && outbuf)
+			/* Never reuse the text buffer here: ConvertEncoding only knows
+			   the capacity of a buffer it allocates itself, and the call
+			   below passes 0 for an existing one.  With the reuse, every
+			   line ending after a non-empty line came out as the raw CRLF
+			   in a -ku (UTF-16) file.  */
+			if(outbuf)
 			{
 				free(outbuf);
 				outbuf=NULL;
