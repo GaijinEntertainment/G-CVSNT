@@ -230,7 +230,9 @@ Two things to know:
   it is the only one of the two the binary actually imports. Copy `libssl-1_1-x64.dll` as well; a
   build that enables `:sserver:` will need it.
 * `cvs init` needs the trigger plugin (`triggers/info_triggers.vcxproj`); without it you get
-  `Couldn't open default trigger library`. Client commands work without it.
+  `Couldn't open default trigger library`. Client commands work without it. The makefile's
+  `plugins` target builds it as `bin\triggers\info.dll`, together with the `pserver` and `ext`
+  protocol plugins under `bin\protocols\`; run the client with `-L <bin>` to use them.
 
 `_reports/BUILD-01-windows-toolchain.md` has the full environment setup, the makefile, the exact
 dependency graph and every problem encountered along the way.

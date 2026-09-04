@@ -268,6 +268,7 @@ $(LIBD)\libsuid.lib: dirs
 CVSAPI_SRC = \
 	"$(S)\cvsapi\Codepage.cpp" "$(S)\cvsapi\crypt.cpp" "$(S)\cvsapi\cvs_string.cpp" \
 	"$(S)\cvsapi\diff\DiffBase.cpp" "$(S)\cvsapi\diff\StringDiff.cpp" \
+	"$(S)\cvsapi\FileContent.cpp" \
 	"$(S)\cvsapi\GetOptions.cpp" "$(S)\cvsapi\lib\fncmp.c" "$(S)\cvsapi\lib\fnmatch.c" \
 	"$(S)\cvsapi\lib\getdate.c" "$(S)\cvsapi\lib\getmode.c" "$(S)\cvsapi\lib\GetOsVersion.cpp" \
 	"$(S)\cvsapi\lib\md5.c" "$(S)\cvsapi\lib\md5crypt.c" "$(S)\cvsapi\lib\ndir.cpp" \
@@ -283,17 +284,17 @@ CVSAPI_SRC = \
 	"$(S)\cvsapi\win32\SSPIHandler.cpp" "$(S)\cvsapi\XmlNode.cpp" \
 	"$(S)\cvsapi\xmltree.cpp" "$(S)\cvsapi\Zeroconf.cpp"
 
-$(BIN)\cvsapi.dll: dirs $(GEN)\cvsapi\ServiceMsg.h $(LIBD)\libxml2.lib $(LIBD)\pcre.lib $(LIBD)\ufccrypt.lib
+$(BIN)\cvsapi.dll: dirs $(GEN)\cvsapi\ServiceMsg.h $(LIBD)\libxml2.lib $(LIBD)\pcre.lib $(LIBD)\ufccrypt.lib $(LIBD)\zstd.lib
 	@if not exist "$(OBJ)\cvsapi" mkdir "$(OBJ)\cvsapi"
 	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /EHsc /D "_WINDOWS" /D "HAVE_CONFIG_H" \
 		/D "CVSAPI_EXPORT=__declspec(dllexport)" /D "XML_STATIC" /D "PCRE_STATIC" \
 		/I "$(GEN)\cvsapi" /I "$(S)\external_libs" /I "$(S)\cvsapi" /I "$(S)\cvsapi\lib" \
-		/I "$(S)\cvsapi\win32" /I "$(S)\libxml\include" /I "$(S)\pcre" /I "$(S)" \
+		/I "$(S)\cvsapi\win32" /I "$(S)\libxml\include" /I "$(S)\pcre" /I "$(S)\zstd" /I "$(S)" \
 		/Fo"$(OBJ)\cvsapi\\" /Fd"$(OBJ)\cvsapi\a.pdb" $(CVSAPI_SRC)
 	cd /d "$(S)\cvsapi" && $(RC) /nologo /d "NDEBUG" /I "$(GEN)\cvsapi" /I "$(S)\cvsapi\win32" /fo"$(OBJ)\cvsapi\cvsapi.res" win32\cvsapi.rc
 	$(LINK) /nologo /DLL /OUT:$@ /IMPLIB:"$(LIBD)\cvsapi.lib" /DEBUG /INCREMENTAL:NO \
 		"$(OBJ)\cvsapi\*.obj" "$(OBJ)\cvsapi\cvsapi.res" \
-		"$(LIBD)\libxml2.lib" "$(LIBD)\pcre.lib" "$(LIBD)\ufccrypt.lib" \
+		"$(LIBD)\libxml2.lib" "$(LIBD)\pcre.lib" "$(LIBD)\ufccrypt.lib" "$(LIBD)\zstd.lib" \
 		/LIBPATH:"$(EXTLIB)" libiconv.lib ws2_32.lib urlmon.lib wininet.lib secur32.lib \
 		dnsapi.lib wintrust.lib advapi32.lib user32.lib ole32.lib oleaut32.lib shell32.lib \
 		crypt32.lib netapi32.lib mpr.lib
@@ -370,6 +371,40 @@ $(BIN)\cvs.exe: cvsnt_objs $(LIBD)\gnulib.lib $(LIBD)\libdiff.lib $(LIBD)\zlib.l
 		/LIBPATH:"$(EXTLIB)" libssl.lib libcrypto.lib comctl32.lib wsock32.lib ws2_32.lib \
 		netapi32.lib mpr.lib ole32.lib oleaut32.lib libiconv.lib wininet.lib dbghelp.lib \
 		advapi32.lib user32.lib shell32.lib gdi32.lib crypt32.lib secur32.lib
+
+# --------------------------------------------------------------------------- plugins (x64)
+# Layout the client expects under "-L <libdir>": protocols\<name>.dll, triggers\info.dll.
+# pserver is what a real client needs; info lets "cvs init" (and so regress.py) run out of
+# the build tree; ext is what the client/server case in regress.py connects through.
+PLUGIN_INC = /I "$(S)\external_libs" /I "$(S)\cvsapi\win32" /I "$(S)\cvsapi" /I "$(S)\cvstools" \
+	/I "$(S)\libxml\include" /I "$(S)"
+PLUGIN_LIBS = "$(LIBD)\cvsapi.lib" "$(LIBD)\cvstools.lib" ws2_32.lib wsock32.lib advapi32.lib user32.lib
+
+plugins: $(BIN)\protocols\pserver.dll $(BIN)\protocols\ext.dll $(BIN)\triggers\info.dll
+
+$(BIN)\protocols\pserver.dll: $(BIN)\cvsapi.dll $(BIN)\cvstools.dll
+	@if not exist "$(OBJ)\pserver" mkdir "$(OBJ)\pserver"
+	@if not exist "$(BIN)\protocols" mkdir "$(BIN)\protocols"
+	$(CC) $(CFLAGS_COMMON) /EHsc /D "_WINDOWS" /D "_USRDLL" /D "PSERVER_PROTOCOL_EXPORTS" $(PLUGIN_INC) \
+		/Fo"$(OBJ)\pserver\\" /Fd"$(OBJ)\pserver\a.pdb" "$(S)\protocols\common.cpp" "$(S)\protocols\pserver.cpp"
+	cd /d "$(S)\protocols" && $(RC) /nologo /d "NDEBUG" /fo"$(OBJ)\pserver\proto_resource.res" proto_resource.rc
+	$(LINK) /nologo /DLL /OUT:$@ /DEBUG /INCREMENTAL:NO "$(OBJ)\pserver\*.obj" "$(OBJ)\pserver\proto_resource.res" $(PLUGIN_LIBS)
+
+$(BIN)\protocols\ext.dll: $(BIN)\cvsapi.dll $(BIN)\cvstools.dll
+	@if not exist "$(OBJ)\ext" mkdir "$(OBJ)\ext"
+	@if not exist "$(BIN)\protocols" mkdir "$(BIN)\protocols"
+	$(CC) $(CFLAGS_COMMON) /EHsc /D "_WINDOWS" /D "_USRDLL" /D "ext_PROTOCOL_EXPORTS" $(PLUGIN_INC) \
+		/Fo"$(OBJ)\ext\\" /Fd"$(OBJ)\ext\a.pdb" "$(S)\protocols\common.cpp" "$(S)\protocols\ext.cpp"
+	cd /d "$(S)\protocols" && $(RC) /nologo /d "NDEBUG" /fo"$(OBJ)\ext\proto_resource.res" proto_resource.rc
+	$(LINK) /nologo /DLL /OUT:$@ /DEBUG /INCREMENTAL:NO "$(OBJ)\ext\*.obj" "$(OBJ)\ext\proto_resource.res" $(PLUGIN_LIBS)
+
+$(BIN)\triggers\info.dll: $(BIN)\cvsapi.dll $(BIN)\cvstools.dll
+	@if not exist "$(OBJ)\info" mkdir "$(OBJ)\info"
+	@if not exist "$(BIN)\triggers" mkdir "$(BIN)\triggers"
+	$(CC) $(CFLAGS_COMMON) /EHsc /D "_WINDOWS" /D "_USRDLL" /D "info_triggers_EXPORTS" $(PLUGIN_INC) \
+		/Fo"$(OBJ)\info\\" /Fd"$(OBJ)\info\a.pdb" "$(S)\triggers\info_trigger.cpp"
+	cd /d "$(S)\triggers" && $(RC) /nologo /d "NDEBUG" /fo"$(OBJ)\info\info_trigger.res" info_trigger.rc
+	$(LINK) /nologo /DLL /OUT:$@ /DEBUG /INCREMENTAL:NO "$(OBJ)\info\*.obj" "$(OBJ)\info\info_trigger.res" $(PLUGIN_LIBS)
 
 clean:
 	@if exist "$(OBJ)"  rmdir /s /q "$(OBJ)"

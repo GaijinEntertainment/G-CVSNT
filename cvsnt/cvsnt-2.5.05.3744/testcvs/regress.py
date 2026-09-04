@@ -36,15 +36,20 @@ CURRENT = "<none>"
 
 # --------------------------------------------------------------------------- infra
 
-def run(args, cwd, expect_ok=True):
-    """Run cvs with the global options, return (rc, stdout+stderr)."""
+def run(args, cwd, expect_ok=True, env=None):
+    """Run cvs with the global options, return (rc, stdout+stderr).
+    env adds to (or overrides) the inherited environment."""
     cmd = [CVS]
     if LIBDIR:
         cmd += ["-L", LIBDIR]
     cmd += args
     if VERBOSE:
         print("    $ " + " ".join(cmd) + ("   (in %s)" % cwd))
-    p = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE,
+    full_env = None
+    if env:
+        full_env = dict(os.environ)
+        full_env.update(env)
+    p = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, env=full_env,
                        stderr=subprocess.STDOUT, universal_newlines=True)
     if VERBOSE and p.stdout:
         print("      " + p.stdout.rstrip().replace("\n", "\n      "))
@@ -119,8 +124,9 @@ class Repo:
         # which needs privileges we do not want a test to require.
         run(["-d", self.repo, "init", "-n"], cwd=root)
 
-    def cvs(self, args, cwd=None, expect_ok=True):
-        return run(["-d", self.repo] + args, cwd=cwd or self.wc, expect_ok=expect_ok)
+    def cvs(self, args, cwd=None, expect_ok=True, env=None):
+        return run(["-d", self.repo] + args, cwd=cwd or self.wc, expect_ok=expect_ok,
+                   env=env)
 
     def import_tree(self, module, files):
         imp = os.path.join(self.root, "imp")
@@ -1151,6 +1157,55 @@ def t_binary_small_second_commit(r):
                  "%d-byte binary revision came back as %d bytes" % (size, len(got)))
         check(got == payload, "%d-byte binary revision content differs" % size)
 
+@test("a -ku text file checks out with every line ending encoded")
+def t_unicode_text_line_endings(r):
+    # The line-ending branch of OutputAsEncoded reused the buffer left by
+    # the preceding text conversion but told ConvertEncoding it had no room,
+    # so after every non-empty line the raw CRLF went into the UTF-16 file.
+    # Empty lines had no buffer to reuse and came out right, which is why
+    # the lines below alternate.  A raw 0D 0A inside UTF-16 text decodes
+    # as U+0A0D, so decoding and comparing the lines catches it.
+    #
+    # Only the client side writes through that path (update_entries), so
+    # the checkout goes through a real client/server session: :ext: with
+    # CVS_EXT as a pass-through transport and CVS_SERVER naming this cvs
+    # with --allow-root, which is how the server accepts a repository that
+    # is not registered in the machine settings.  The source is UTF-8 with
+    # a BOM, which is what makes the encoder convert at all.
+    lines = ["first line, long enough to leave a conversion buffer behind",
+             "", "third", "", "x", "last line"]
+    imp = os.path.join(r.root, "impuni")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "u.txt"), "wb") as f:
+        f.write(b"\xef\xbb\xbf" + ("\n".join(lines) + "\n").encode("utf-8"))
+    r.cvs(["import", "-m", "uni", "-kukv", "mu", "VENDOR", "REL0"], cwd=imp)
+
+    repo = r.repo.replace(os.sep, "/")
+    # The transport is a Python pass-through that just runs the rest of
+    # its command line, so every path can be quoted the same way on
+    # Windows (cmd.exe) and POSIX (sh).
+    helper = os.path.join(r.root, "passthru.py")
+    write(helper, "import subprocess, sys\nsys.exit(subprocess.call(sys.argv[1:]))\n")
+    q = lambda s: '"%s"' % s
+    server = q(CVS) + (" -L " + q(LIBDIR) if LIBDIR else "") + " " + q("--allow-root=" + repo)
+    env = {"CVS_EXT": q(sys.executable) + " " + q(helper), "CVS_SERVER": server}
+    wc = os.path.join(r.root, "extwc")
+    os.makedirs(wc)
+    rc, out = run(["-d", ":ext:localhost:" + repo, "checkout", "mu"], cwd=wc,
+                  expect_ok=False, env=env)
+    if rc != 0 and "protocol" in out.lower() and "ext" in out.lower():
+        print("          (skipped: the :ext: protocol plugin is not available here)")
+        return
+    if not check_eq(rc, 0, "checkout over :ext: failed:\n" + out):
+        return
+    raw = open(os.path.join(wc, "mu", "u.txt"), "rb").read()
+    if not check(raw[:2] == b"\xff\xfe" and len(raw) % 2 == 0,
+                 "-ku file is not BOM-led UTF-16LE: %s" % ascii(raw[:16])):
+        return
+    got = raw[2:].decode("utf-16-le").splitlines()
+    check(got == lines, "-ku file lines after checkout: expected %s, got %s"
+          % (ascii(lines), ascii(got)))
+
 @test("binary content is detected on add and import by content, not by name")
 def t_add_binary_by_content(r):
     # Binary is decided by content: a NUL, in the first 8 KB or (when the
@@ -1530,7 +1585,11 @@ def main():
         else:
             print("  FAIL  " + CURRENT)
             for _, msg in FAILURES[before:]:
-                print("          " + msg.replace("\n", "\n          "))
+                # A message may quote file content the console cannot
+                # encode; a failure report must never crash the run.
+                text = "          " + msg.replace("\n", "\n          ")
+                enc = sys.stdout.encoding or "utf-8"
+                print(text.encode(enc, "backslashreplace").decode(enc))
 
     print()
     xf = len(XFAILED)
