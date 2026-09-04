@@ -54,6 +54,13 @@ Note that the tests initialise repositories with `cvs init -n`. Without `-n`, `i
 register the repository in the machine-global settings, which needs privileges a test should not
 require.
 
+One case, the `-ku` line-ending test, has to go through a real client/server session because only
+the client-side write path is affected. It uses the `:ext:` protocol with `CVS_EXT` set to a Python
+pass-through and `CVS_SERVER` set to `<cvs> --allow-root=<repo> server`, so it needs the `ext`
+protocol plugin as `<libdir>/protocols/ext.<so|dll>` and nothing registered anywhere. When the
+plugin is missing the case prints a skip note instead of failing. On Windows the standalone
+makefile in `_reports/BUILD-01-Makefile.nmake` builds it with `mk.bat plugins`.
+
 ## `testcvs.py`
 
 The suite that shipped with CVSNT. It expects `cvs` on `PATH` and creates `tree/`, `tree_0/`,
