@@ -53,6 +53,7 @@ bin_PROGRAMS = cvsnt
 
 # The cvs executable
 cvsnt_SOURCES = \
+    access_log.cpp \
     blob_operations.cpp \
     download_blob_to.cpp \
     blob_http_processor.cpp \
@@ -134,6 +135,7 @@ cvsnt_SOURCES = \
 	fileattr.h \
 	hardlink.h \
 	hash.h \
+	access_log.h \
 	mapping.h \
 	myndbm.h \
 	rcs.h \

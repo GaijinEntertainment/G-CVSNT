@@ -15,6 +15,7 @@
  */
 
 #include "cvs.h"
+#include "access_log.h"
 
 enum diff_file
 {
@@ -630,6 +631,13 @@ static int diff_fileproc (void *callerdat, struct file_info *finfo)
 	    }
 	}
     }
+
+    /* Diff output is about to be produced; the dead-revision paths above have
+       returned. Record one read per revision, like the D history records. */
+    if (use_rev1 != NULL && empty_file != DIFF_ADDED)
+	access_log_file ("read", "diff", finfo->update_dir, finfo->repository, finfo->file, use_rev1, NULL, NULL, 0);
+    if (use_rev2 != NULL && empty_file != DIFF_REMOVED)
+	access_log_file ("read", "diff", finfo->update_dir, finfo->repository, finfo->file, use_rev2, NULL, NULL, 0);
 
     /* Output an "Index:" line for patch to use */
 	if(!is_rcs)
