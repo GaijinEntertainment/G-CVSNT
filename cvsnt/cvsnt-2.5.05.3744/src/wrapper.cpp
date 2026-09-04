@@ -461,6 +461,38 @@ bool wrap_name_has(const char *name, WrapMergeHas  has)
 /* Return the RCS options for FILENAME in a newly malloc'd string.  If
    ASFLAG, then include "-k" at the beginning (e.g. "-kb"), otherwise
    just give the option itself (e.g. "b").  */
+content_kopt_verdict content_kopt (const char *file, const char *kopt, int kopt_explicit, const char **forced)
+{
+    if (!file || !isfile (file) || kopt_is_binary (kopt))
+	return CONTENT_KOPT_KEEP;
+    /* Already binary by extension/wrapper?  Then it is binary and needs no
+       content read - the wrapper stores it so, here or on the server.  An
+       explicit text -k is the one case we still read for, to refuse binary
+       content the user asked to keep as text.  */
+    if (!kopt_explicit)
+    {
+	char *wopt = wrap_rcsoption (file);
+	bool wbinary = kopt_is_binary (wopt);
+	if (wopt)
+	    xfree (wopt);
+	if (wbinary)
+	    return CONTENT_KOPT_KEEP;
+    }
+    /* Only the force sites need the Bz/B recommendation, and computing it
+       reads and compresses the file; the refuse-only pre-scan (forced ==
+       NULL) uses the cheaper detector.  */
+    if (forced)
+    {
+	const char *rec = CFileAccess::content_binary_kopt (file);
+	if (!rec[0])
+	    return CONTENT_KOPT_KEEP;
+	*forced = rec;
+    }
+    else if (!CFileAccess::looks_binary (file))
+	return CONTENT_KOPT_KEEP;
+    return kopt_explicit ? CONTENT_KOPT_REFUSE : CONTENT_KOPT_BINARY;
+}
+
 char *wrap_rcsoption(const char *filename)
 {
     WrapperEntry *e = wrap_matching_entry (filename);

@@ -52,6 +52,20 @@ static const char *const add_usage[] =
 static cvs::string bugid;
 static char *branch;
 
+/* An explicit text -k on binary content refuses the whole command before
+   anything is registered or sent; the per-file sites then only force.  */
+static void refuse_binary_as_text (int argc, char **argv, const char *options)
+{
+    int i;
+    if (!options || !options[0])
+	return;
+    for (i = 0; i < argc; i++)
+	if (!isdir (argv[i])
+	    && content_kopt (argv[i], options, 1) == CONTENT_KOPT_REFUSE)
+	    error (1, 0, "%s has binary content; refusing to add it with -k%s (use -kB)",
+		   argv[i], options);
+}
+
 int add (int argc, char **argv)
 {
     char *message = NULL;
@@ -195,11 +209,9 @@ int add (int argc, char **argv)
 	       nothing, it would spit back a usage message).  */
 	    return err;
 
+	refuse_binary_as_text (argc, argv, options);
 	if (options && options[0])
-	{
 	    option_with_arg("-k", options);
-	    xfree (options);
-	}
 	option_with_arg ("-m", message);
 
 	char *bg = xstrdup(bugid.c_str()),*p=NULL;
@@ -340,8 +352,15 @@ int add (int argc, char **argv)
 		xfree (filedir);
 	    }
 	}
+	/* Binary-ness is decided from the bytes, and only this side has them:
+	   send_files sends a per-file Kopt -kB with the Is-modified of any fresh
+	   add whose content looks binary, unless -k already said binary.  */
+	send_files_declared_kopt (options);
 	send_arg("--");
-	send_files (argc, argv, 0, 0, SEND_BUILD_DIRS | SEND_NO_CONTENTS);
+	send_files (argc, argv, 0, 0, SEND_BUILD_DIRS | SEND_NO_CONTENTS | SEND_KOPT_BY_CONTENT);
+	send_files_declared_kopt (NULL);
+	if (options)
+	    xfree (options);
 	send_file_names (argc, argv, SEND_EXPAND_WILD);
 	send_to_server ("add\n", 0);
 	if (message)
@@ -351,6 +370,10 @@ int add (int argc, char **argv)
 
 	if(!server_active)
 		expand_wild(argc,argv,&argc,&argv);
+
+    /* In server mode the client already did this.  */
+    if (!server_active)
+	refuse_binary_as_text (argc, argv, options);
 
     /* walk the arg list adding files/dirs */
     for (i = 0; i < argc; i++)
@@ -519,6 +542,20 @@ int add (int argc, char **argv)
     	    if (vers->options != NULL && *vers->options != '\0')
               if (char *b = strstr(vers->options, "b"))
                 *b = 'B';
+
+		    /* Content beats name.  Only the client has the bytes: in server
+		       mode the file is absent (Kopt already arrived) and content_kopt
+		       keeps.  refuse_binary_as_text has already refused any explicit
+		       text -k, so the verdict here is only KEEP or BINARY.  */
+		    const char *forced;
+		    if (content_kopt (finfo.file, vers->options, 0, &forced) == CONTENT_KOPT_BINARY)
+		    {
+			if (vers->options)
+			    xfree (vers->options);
+			vers->options = xstrdup (forced);
+			error (0, 0, "%s has binary content, adding it as -k%s",
+			       fn_root(finfo.fullname), forced);
+		    }
 
 		    if (vers->nonbranch)
 		    {

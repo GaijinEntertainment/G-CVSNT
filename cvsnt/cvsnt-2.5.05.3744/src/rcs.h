@@ -320,6 +320,8 @@ struct kflag
 
 char *RCS_check_kflag (const char *arg, bool allow_modify, bool error);
 bool RCS_get_kflags(const char *arg, bool err, kflag& result);
+/* Whether KOPT (Entries/-k form, no leading -k) selects a binary mode. */
+bool kopt_is_binary(const char *kopt);
 char *RCS_rebuild_options(kflag* kf, char *options);
 char *RCS_getdate (RCSNode * rcs, const char *date, int force_tag_match);
 char *RCS_gettag (RCSNode *rcs, const char *symtag, int force_tag_match, int *simple_tag);

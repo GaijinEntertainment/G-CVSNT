@@ -1151,6 +1151,333 @@ def t_binary_small_second_commit(r):
                  "%d-byte binary revision came back as %d bytes" % (size, len(got)))
         check(got == payload, "%d-byte binary revision content differs" % size)
 
+@test("binary content is detected on add and import by content, not by name")
+def t_add_binary_by_content(r):
+    # Binary is decided by content: a NUL, in the first 8 KB or (when the
+    # bytes look unusual but no NUL turned up) up to 64 KB more.  UTF-16
+    # text (BOM) and a high-byte UTF-8 file are text; an explicit text -k
+    # on binary content is refused.  Binary defaults to -kBz, or -kB when
+    # the bytes will not compress.  import follows the same rules.
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    wc = r.checkout("m")
+    nul = bytes(range(256)) * 3                       # NUL, and compressible
+    incomp = bytes([0]) + os.urandom(20000)           # NUL, but incompressible
+    hitext = ("café — naïve — résumé" + chr(10)).encode("utf-8") * 400  # high bytes, no NUL
+    # First 8 KB is all high/control bytes with no NUL (so the fast path cannot
+    # settle it), and the first NUL lands past 8 KB - only the extended scan
+    # catches this one.
+    latenul = bytes(range(1, 256)) * 40 + bytes([0]) + b"tail"
+    for name, data in (("blob1.txt", nul), ("incompdat", incomp), ("utext", hitext),
+                       ("late.dat", latenul)):
+        with open(os.path.join(wc, name), "wb") as f:
+            f.write(data)
+    # Wrappers may still opt a text file into -kB by name (*.bin is one);
+    # content only ever adds binary-ness.  So the text case has no
+    # extension at all.
+    write(os.path.join(wc, "plain_text"), "just text" + chr(10))
+    with open(os.path.join(wc, "u16.txt"), "wb") as f:
+        f.write(bytes([255, 254]) + "hello".encode("utf-16-le"))
+    _, out = r.cvs(["add", "blob1.txt", "incompdat", "utext", "late.dat", "plain_text", "u16.txt"], cwd=wc)
+    ents = entries_of(wc)
+    check("-kBz" in ents.get("blob1.txt", ""),
+          "compressible binary blob1.txt not -kBz: " + ents.get("blob1.txt", "<absent>"))
+    # incompdat has no wrapper extension, so the content detector runs: a NUL
+    # makes it binary and the incompressible sample keeps it -kB, not -kBz.
+    check("-kB" in ents.get("incompdat", "") and "-kBz" not in ents.get("incompdat", ""),
+          "incompressible binary incompdat not -kB: " + ents.get("incompdat", "<absent>"))
+    check("incompdat has binary content, adding it as -kB" in out,
+          "incompressible content not content-detected as -kB:" + chr(10) + out)
+    check("incompdat has binary content, adding it as -kBz" not in out,
+          "incompressible content was noted as -kBz:" + chr(10) + out)
+    check("-k" not in ents.get("utext", "/x/"),
+          "high-byte UTF-8 text utext treated as binary: " + ents.get("utext", "<absent>"))
+    check("-kB" in ents.get("late.dat", ""),
+          "file whose first NUL is past 8 KB not caught as binary: " + ents.get("late.dat", "<absent>"))
+    check("-k" not in ents.get("plain_text", "/x/"),
+          "text plain_text got a kopt: " + ents.get("plain_text", "<absent>"))
+    check("-kB" not in ents.get("u16.txt", ""),
+          "UTF-16 text u16.txt treated as binary: " + ents.get("u16.txt", "<absent>"))
+    check("blob1.txt has binary content" in out, "no note about the auto -kB:" + chr(10) + out)
+    check("adding it as -kBz" in out, "note did not name -kBz for compressible content:" + chr(10) + out)
+    # A file the wrappers already make binary (the built-in *.bin -kb) is
+    # binary without a content read: text bytes in a .bin are still added
+    # binary, with no content-detection note.
+    write(os.path.join(wc, "wrap.bin"), "plain text, no NUL here" + chr(10))
+    _, out = r.cvs(["add", "wrap.bin"], cwd=wc)
+    check("B" in entries_of(wc).get("wrap.bin", "").split("/")[4],
+          "wrapper-binary wrap.bin not added binary: " + entries_of(wc).get("wrap.bin", "<absent>"))
+    check("wrap.bin has binary content" not in out,
+          "wrapper-binary file was content-detected instead of taken from the wrapper:" + chr(10) + out)
+    # But an explicit text -k on binary content is still refused, wrapper or
+    # not - the content is read in that one case.
+    with open(os.path.join(wc, "hard.bin"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["add", "-kkv", "hard.bin"], cwd=wc, expect_ok=False)
+    check(rc != 0, "add -kkv on a binary-content .bin exited 0:" + chr(10) + out)
+    check("hard.bin" not in entries_of(wc), "add -kkv stored binary .bin content as text")
+
+    with open(os.path.join(wc, "blob2.txt"), "wb") as f:
+        f.write(nul)
+    write(os.path.join(wc, "plain2"), "text too" + chr(10))
+    rc, out = r.cvs(["add", "-kkv", "blob2.txt", "plain2"], cwd=wc, expect_ok=False)
+    check(rc != 0, "add -kkv on binary content exited 0:" + chr(10) + out)
+    # The refusal covers the whole command: nothing is registered, not even
+    # the text file named alongside.
+    check("blob2.txt" not in entries_of(wc), "add -kkv registered binary content as text")
+    check("plain2" not in entries_of(wc), "add -kkv registered the text sibling of a refused file")
+    # A +B delta already says binary and must be accepted as such.
+    with open(os.path.join(wc, "blob4.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["add", "-k+B", "blob4.txt"], cwd=wc, expect_ok=False)
+    check_eq(rc, 0, "add -k+B on binary content was refused:" + chr(10) + out)
+    check("B" in entries_of(wc).get("blob4.txt", "").split("/")[4],
+          "add -k+B did not register binary: " + entries_of(wc).get("blob4.txt", "<absent>"))
+    # One add spanning two directories keeps each file's own verdict.
+    os.makedirs(os.path.join(wc, "sub"))
+    r.cvs(["add", "sub"], cwd=wc)
+    with open(os.path.join(wc, "sub", "deep.txt"), "wb") as f:
+        f.write(nul)
+    write(os.path.join(wc, "top_text"), "top" + chr(10))
+    r.cvs(["add", "top_text", os.path.join("sub", "deep.txt")], cwd=wc)
+    check("-kB" in entries_of(os.path.join(wc, "sub")).get("deep.txt", ""),
+          "binary file in a second directory lost its -kB: "
+          + entries_of(os.path.join(wc, "sub")).get("deep.txt", "<absent>"))
+    check("-k" not in entries_of(wc).get("top_text", "/x/"),
+          "text file in the first directory got a kopt: " + entries_of(wc).get("top_text", "<absent>"))
+
+    r.cvs(["commit", "-m", "bin"], cwd=wc)
+    wcb = os.path.join(r.root, "wcBin")
+    os.makedirs(wcb)
+    r.cvs(["checkout", "m"], cwd=wcb)
+    got = open(os.path.join(wcb, "m", "blob1.txt"), "rb").read()
+    check_eq(got, nul, "auto -kB file did not round trip")
+
+    imp = os.path.join(r.root, "impb")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "blob.txt"), "wb") as f:
+        f.write(nul)
+    write(os.path.join(imp, "notes.dat"), "text" + chr(10))
+    r.cvs(["import", "-m", "i", "mi", "VENDOR", "REL0"], cwd=imp)
+    wci = r.checkout("mi")
+    e = entries_of(wci)
+    check("-kBz" in e.get("blob.txt", ""),
+          "imported compressible blob.txt not -kBz: " + e.get("blob.txt", "<absent>"))
+    check("-k" not in e.get("notes.dat", "/x/"),
+          "imported text notes.dat got a kopt: " + e.get("notes.dat", "<absent>"))
+    check_eq(open(os.path.join(wci, "blob.txt"), "rb").read(), nul, "imported blob.txt content")
+
+    impk = os.path.join(r.root, "impk")
+    os.makedirs(impk)
+    with open(os.path.join(impk, "blobk.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["import", "-k", "kv", "-m", "i", "mk", "VENDOR", "REL0"], cwd=impk,
+                    expect_ok=False)
+    check(rc != 0, "import -k kv on binary content exited 0:" + chr(10) + out)
+    check(not os.path.exists(os.path.join(r.repo, "mk", "blobk.txt,v")),
+          "import -k kv stored binary content as text")
+
+    # A tree holding a text file and a binary file under an explicit text -k:
+    # the import aborts and the binary file is never stored as text (text files
+    # earlier in the walk may already be imported - that is documented).
+    impm = os.path.join(r.root, "impm")
+    os.makedirs(impm)
+    write(os.path.join(impm, "a_readme"), "plain" + chr(10))
+    with open(os.path.join(impm, "z_blob.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["import", "-k", "kv", "-m", "i", "mm", "VENDOR", "REL0"], cwd=impm,
+                    expect_ok=False)
+    check(rc != 0, "multi-file import -k kv over binary content exited 0:" + chr(10) + out)
+    check(not os.path.exists(os.path.join(r.repo, "mm", "z_blob.txt,v")),
+          "import stored binary content as text under -k kv")
+
+    # A normal multi-file text import under -k kv is not falsely refused, and
+    # import -C (create CVS dirs) still works - the reverted pre-walk had
+    # broken both.
+    impc = os.path.join(r.root, "impc")
+    os.makedirs(os.path.join(impc, "d"))
+    write(os.path.join(impc, "one.txt"), "one" + chr(10))
+    write(os.path.join(impc, "d", "two.txt"), "two" + chr(10))
+    _, out = r.cvs(["import", "-C", "-k", "kv", "-m", "i", "mc", "VENDOR", "REL0"], cwd=impc)
+    check(os.path.exists(os.path.join(r.repo, "mc", "one.txt,v")),
+          "import -C -k kv did not store a text file:" + chr(10) + out)
+    check(os.path.exists(os.path.join(r.repo, "mc", "d", "two.txt,v")),
+          "import -C -k kv did not descend:" + chr(10) + out)
+    # A re-import over an existing text ,v must not store binary content as
+    # text: update_rcs_file runs the same content check.  First a text x.txt,
+    # then the same name with binary bytes under -k kv is refused, and without
+    # -k it is forced to -kB.
+    impr = os.path.join(r.root, "impr")
+    os.makedirs(impr)
+    write(os.path.join(impr, "x.txt"), "text one" + chr(10))
+    r.cvs(["import", "-k", "kv", "-m", "i", "mr", "VENDOR", "REL0"], cwd=impr)
+    v0 = read(os.path.join(r.repo, "mr", "x.txt,v"))
+    with open(os.path.join(impr, "x.txt"), "wb") as f:
+        f.write(nul)
+    rc, out = r.cvs(["import", "-k", "kv", "-m", "i2", "mr", "VENDOR", "REL1"], cwd=impr,
+                    expect_ok=False)
+    check(rc != 0, "re-import -k kv of binary over a text ,v exited 0:" + chr(10) + out)
+    check_eq(read(os.path.join(r.repo, "mr", "x.txt,v")), v0,
+             "re-import -k kv of binary changed the ,v")
+    _, out = r.cvs(["import", "-m", "i3", "mr", "VENDOR", "REL2"], cwd=impr)
+    check("x.txt has binary content" in out, "re-import without -k gave no auto -kB note:" + chr(10) + out)
+    wcr = r.checkout("mr")
+    check("-kB" in entries_of(wcr).get("x.txt", ""),
+          "re-imported binary x.txt not -kB: " + entries_of(wcr).get("x.txt", "<absent>"))
+    check_eq(open(os.path.join(wcr, "x.txt"), "rb").read(), nul, "re-imported binary x.txt content")
+
+    # A symlink in a source tree is its own kind of skip, never a false binary
+    # refusal (the reverted pre-walk had mapped any walk error to one).
+    imps = os.path.join(r.root, "imps")
+    os.makedirs(imps)
+    write(os.path.join(imps, "real.txt"), "real" + chr(10))
+    try:
+        os.symlink(os.path.join(imps, "real.txt"), os.path.join(imps, "link.txt"))
+    except OSError:
+        print("          (symlink case skipped: not permitted here)")
+    else:
+        # import counts a symlink as a walk error (L) on POSIX and exits 1,
+        # while Windows follows it; either way it must not be a binary
+        # refusal, and the real file beside it is still imported.
+        _, out = r.cvs(["import", "-k", "kv", "-m", "i", "ms", "VENDOR", "REL0"], cwd=imps,
+                       expect_ok=False)
+        check("binary content" not in out,
+              "a symlink triggered a false binary refusal:" + chr(10) + out)
+        check(os.path.exists(os.path.join(r.repo, "ms", "real.txt,v")),
+              "the text file beside a symlink was not imported:" + chr(10) + out)
+
+
+@test("cvs server refuses a re-import of binary content over a text ,v")
+def t_import_binary_over_text_server(r):
+    # The server-side half of the re-import content check: drive cvs server
+    # with an import of binary bytes, under -k kv, of a file that already has a
+    # text ,v.  The server must refuse and leave the ,v unchanged - an old or
+    # non-cvsnt client that skips the client-side check relies on this.
+    imp = os.path.join(r.root, "imp0")
+    os.makedirs(imp)
+    write(os.path.join(imp, "x.txt"), "text one" + chr(10))
+    r.cvs(["import", "-k", "kv", "-m", "i", "msrv", "VENDOR", "REL0"], cwd=imp)
+    vpath = os.path.join(r.repo, "msrv", "x.txt,v")
+    v0 = open(vpath, "rb").read()
+    root = r.repo.replace(os.sep, "/")
+    nul = bytes(range(256)) * 3
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    head = "".join(x + chr(10) for x in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "valid-requests",
+        "UseUnchanged",
+        "Directory .",
+        root,
+    ])
+    modhdr = "Modified x.txt" + chr(10) + "u=rw,g=rw,o=r" + chr(10) + str(len(nul)) + chr(10)
+    tail = "".join(x + chr(10) for x in [
+        "Argument -k", "Argument kv",
+        "Argument -m", "Argument reimport",
+        "Argument msrv", "Argument VENDOR", "Argument REL1",
+        "import",
+    ])
+    reqs = head.encode() + modhdr.encode() + nul + tail.encode()
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvimp")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs, timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill(); p.communicate(); fail("server import did not complete within 120s"); return
+    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    check("binary content" in out,
+          "server did not refuse the binary re-import:" + chr(10) + out)
+    check_eq(open(vpath, "rb").read(), v0,
+             "server-side binary re-import changed the ,v")
+
+
+@test("a per-file Kopt before Is-modified makes the server add that file as -kB")
+def t_add_binary_kopt_protocol(r):
+    # The client-side detector tags a binary file with "Kopt -kB" followed
+    # by "Is-modified", which the server turns into a dummy entry carrying
+    # the kopt, so one add can mix text and binary.  No remote method is
+    # buildable here without admin rights, so this drives cvs server over
+    # its protocol with the exact sequence the client emits and pins the
+    # server half of that contract.
+    r.import_tree("m", {"a.txt": "one" + chr(10), "sub/b.txt": "two" + chr(10)})
+    root = r.repo.replace(os.sep, "/")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    reqs = "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "valid-requests",
+        "UseUnchanged",
+        "Directory .",
+        root + "/m",
+        "Kopt -kB",
+        "Is-modified blob1.txt",
+        "Is-modified plain_text",
+        "Directory sub",
+        root + "/m/sub",
+        "Kopt -kB",
+        "Is-modified deep.txt",
+        # A real client ends the walk back at the top; the server runs the
+        # command from the last Directory it was given.
+        "Directory .",
+        root + "/m",
+        "Argument --",
+        "Argument blob1.txt",
+        "Argument plain_text",
+        "Argument sub/deep.txt",
+        "add",
+    ])
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvadd")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        fail("server add did not complete within 120s")
+        return
+    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    check_eq(p.returncode, 0, "server exit status (output:" + chr(10) + out + ")")
+    check(not any(l.startswith("error") for l in out.split(chr(10))),
+          "server reported an error:" + chr(10) + out)
+    # In server mode the entry carries no timestamp, and a client that has
+    # not sent Valid-RcsOptions is answered with the compatibility spelling
+    # -kb (the kflag table maps B to b for pre-cvsnt clients).
+    check(re.search(r"/blob1\.txt/0/[^/]*/-k[bB]/", out) is not None,
+          "Kopt -kB before Is-modified did not make the added entry binary:" + chr(10) + out)
+    check(re.search(r"/plain_text/0/[^/]*//", out) is not None,
+          "the file without a Kopt in the same add did not stay text:" + chr(10) + out)
+    # The second directory's file keeps its own Kopt: one Is-modified per file,
+    # sent inside its Directory, survives the flush a directory change causes.
+    check(re.search(r"/deep\.txt/0/[^/]*/-k[bB]/", out) is not None,
+          "the binary file in the second directory lost its Kopt:" + chr(10) + out)
+
+
+
 def main():
     global CVS, LIBDIR, VERBOSE, CURRENT, PASSED
 
