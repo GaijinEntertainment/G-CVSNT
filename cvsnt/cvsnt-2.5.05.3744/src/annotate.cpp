@@ -13,6 +13,7 @@
  */
 
 #include "cvs.h"
+#include "access_log.h"
 
 /* Options from the command line.  */
 
@@ -258,6 +259,7 @@ static int annotate_fileproc (void *callerdat, struct file_info *finfo)
     cvs_outerr (fn_root(finfo->fullname), 0);
     cvs_outerr ("\n***************\n", 0);
 
+    access_log_file ("read", "annotate", finfo->update_dir, finfo->repository, finfo->file, version, NULL, NULL, 0);
     RCS_deltas (finfo->rcs, (FILE *) NULL, (struct rcsbuffer *) NULL,
 		version, RCS_ANNOTATE, NULL, NULL, NULL, NULL);
     xfree (version);

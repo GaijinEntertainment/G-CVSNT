@@ -17,6 +17,7 @@
  */
 
 #include "cvs.h"
+#include "access_log.h"
 #include "fileattr.h"
 #include "savecwd.h"
 
@@ -753,6 +754,8 @@ static int process_import_file (char *message, char *vfile, char *vtag, int targ
 	    retval = add_rcs_file (message, rcs, vfile, vhead, our_opt,
 				   vbranch, vtag, targc, targv,
 				   NULL, 0, logfp, NULL);
+	    if (retval == 0)
+		access_log_file ("write", "import", NULL, repository, fn, vhead, vtag, NULL, 0);
 		xfree (free_opt);
 	    xfree (rcs);
 	    return retval;
@@ -818,16 +821,41 @@ static int update_rcs_file(const char *fn, char *message, char *vfile, char *vta
 			if (add_tags (vers->srcfile, vfile, vtag, targc, targv))
 				retval = 1;
 			else
+			{
 				add_log ('U', (char*)fn);
+				access_log_file ("write", "import", NULL, finfo.repository, finfo.mapped_file, vers->vn_rcs, vtag, NULL, 0);
+			}
 			freevers_ts (&vers);
 			return (retval);
 		}
     }
 
+    /* The import -R path (absent source) routes add_rev through remove_file: a
+       removal, and a no-op when the leaf is already dead. Note both before
+       add_rev mutates the file, to log the right kind afterwards. */
+    int al_is_removal = single_file_remove && !isfile (vfile);
+    int al_removal_real = al_is_removal && vers->srcfile && vers->vn_rcs
+			  && !RCS_isdead (vers->srcfile, vers->vn_rcs);
+
     /* We may have failed to parse the RCS file; check just in case */
     if (vers->srcfile == NULL ||
-		add_rev (message, vers->srcfile, vfile, vers->vn_rcs, vers->options) ||
-		add_tags (vers->srcfile, vfile, vtag, targc, targv))
+		add_rev (message, vers->srcfile, vfile, vers->vn_rcs, vers->options))
+    {
+		freevers_ts (&vers);
+		return (1);
+    }
+    /* Record the write add_rev just made, before add_tags can fail: an import
+       for a normal add, or a remove for import -R when it killed a live
+       revision. vers->vn_rcs is the pre-import leaf (the removed revision, and
+       for an add the wrong leaf -- so an import passes no revision). */
+    if (al_is_removal)
+    {
+	if (al_removal_real)
+	    access_log_file ("write", "remove", NULL, finfo.repository, finfo.mapped_file, vers->vn_rcs, NULL, NULL, 0);
+    }
+    else
+	access_log_file ("write", "import", NULL, finfo.repository, finfo.mapped_file, NULL, vtag, NULL, 0);
+    if (add_tags (vers->srcfile, vfile, vtag, targc, targv))
     {
 		freevers_ts (&vers);
 		return (1);

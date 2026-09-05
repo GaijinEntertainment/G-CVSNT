@@ -11,6 +11,7 @@
    GNU General Public License for more details.  */
 
 #include "cvs.h"
+#include "access_log.h"
 #include "getline.h"
 #include "watch.h"
 #include "edit.h"
@@ -1120,6 +1121,8 @@ static void editor_set (char type, const char *filename, const char *editor, con
 			fileattr_prune(handle);
 		}
 		history_write('u',pathname,tag,filename,repository,bugid,message);
+		if (type == 'U') /* 'C' is a commit clearing the edit, logged by the commit itself */
+			access_log_file ("write", "unedit", pathname, repository, filename, NULL, tag, NULL, 0);
 	}
 	else
 	{
@@ -1150,6 +1153,7 @@ static void editor_set (char type, const char *filename, const char *editor, con
 		if(flags && flags[0]=='X')
 			fileattr_setvalue(handle,"exclusive",NULL);
 		history_write('e',pathname,tag,filename,repository,bugid,message);
+		access_log_file ("write", "edit", pathname, repository, filename, NULL, tag, NULL, 0);
 	}
 }
 

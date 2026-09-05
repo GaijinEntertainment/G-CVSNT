@@ -318,6 +318,12 @@
     </Manifest>
   </ItemDefinitionGroup>
   <ItemGroup>
+    <ClCompile Include="src\access_log.cpp">
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
+      </PrecompiledHeader>
+      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
+      </PrecompiledHeader>
+    </ClCompile>
     <ClCompile Include="src\add.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
@@ -720,6 +726,7 @@
     <ClInclude Include="src\buffer.h" />
     <ClInclude Include="src\calc_hash.h" />
     <ClInclude Include="src\client.h" />
+    <ClInclude Include="src\access_log.h" />
     <ClInclude Include="src\cvs.h" />
     <ClInclude Include="src\edit.h" />
     <ClInclude Include="src\fileattr.h" />

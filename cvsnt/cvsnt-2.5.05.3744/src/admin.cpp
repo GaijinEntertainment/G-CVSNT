@@ -10,6 +10,7 @@
  */
 
 #include "cvs.h"
+#include "access_log.h"
 
 static Dtype admin_dirproc (void *callerdat, char *dir,
 				   char *repos, char *update_dir,
@@ -847,6 +848,7 @@ static int admin_fileproc (void *callerdat, struct file_info *finfo)
     if (status == 0)
     {
 	RCS_rewrite (rcs, NULL, NULL, 0);
+	access_log_file ("write", "admin", finfo->update_dir, finfo->repository, finfo->file, NULL, NULL, NULL, 0);
 	if (!really_quiet)
 	    cvs_output ("done\n", 5);
     }
