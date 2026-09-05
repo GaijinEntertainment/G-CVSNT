@@ -48,3 +48,6 @@ redhat/cvsnt.spec
 Releasex64/*
 Debugx64/*
 ReleaseWin32/*
+config.log
+config.status
+stamp-h1

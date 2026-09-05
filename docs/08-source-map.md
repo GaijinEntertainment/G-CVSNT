@@ -12,7 +12,6 @@ Paths below are relative to that directory unless stated otherwise.
 | `cvsnt/build-linux-server`, `build-macosx`, `build-rhel6`, `build-altlinux` | Platform build drivers |
 | `cvsnt/install-yum-packages` | RHEL/CentOS dependency list |
 | `cvsnt/*.wxs`, `cvsnt/make_msi*.bat`, `cvsnt/msi_tools/` | WiX installer definitions for Windows |
-| `cvsnt/*.patch` | Patches against stock CVSNT kept for reference |
 | `cvsnt/tortoiseCVS/` | TortoiseCVS integration |
 | `cvsnt/cvsnt-2.5.05.3744/` | The actual source tree |
 
