@@ -196,25 +196,32 @@ if [[ `/usr/bin/id %{_system_user} &> /dev/null; echo $?` > 0 ]]; then
 fi
 
 %postun server
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %post cafs
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %postun cafs
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %post proxy
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %postun proxy
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %post cvslockd
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %postun cvslockd
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %files
 %defattr(644,root,root,755)
