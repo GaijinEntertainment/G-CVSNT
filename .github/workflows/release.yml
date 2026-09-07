@@ -1,0 +1,495 @@
+name: release
+
+# Manually triggered release build. Produces installable packages for every
+# platform as workflow artifacts and, when a tag is given, a *draft* GitHub
+# release holding them. Server container images go to ghcr.io on request.
+#
+# Nothing here runs on push.
+
+on:
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: "Create a draft GitHub release under this tag (empty = artifacts only)"
+        required: false
+        default: ""
+      images:
+        description: "Server images: skip, build only, or push up to the given tag"
+        type: choice
+        default: build
+        options:
+          - skip
+          - build
+          - push version-sha
+          - push version-sha, version
+          - push version-sha, version, latest
+      deb:
+        description: "Build the Debian packages"
+        type: boolean
+        default: true
+      rpm:
+        description: "Build the RPM packages"
+        type: boolean
+        default: true
+      macos:
+        description: "Build the macOS clients"
+        type: boolean
+        default: true
+      windows:
+        description: "Build the Windows client"
+        type: boolean
+        default: true
+
+# only the docker job pushes images and only the release job writes to the
+# repository; everything else runs read-only
+permissions:
+  contents: read
+
+# one release run at a time: the image tags and the draft release are shared
+concurrency:
+  group: release
+  cancel-in-progress: false
+
+env:
+  SRC: cvsnt/cvsnt-2.5.05.3744
+
+jobs:
+  # --------------------------------------------------------------------------
+  version:
+    name: Version
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - id: v
+        name: Read version_no.h and build.h
+        run: |
+          product=$(sed -n 's/^#define[[:space:]]\+CVSNT_PRODUCT_\(MAJOR\|MINOR\|PATCHLEVEL\)[[:space:]]\+\([0-9]\+\).*/\2/p' "$SRC/version_no.h" | paste -sd.)
+          build=$(sed -n 's/^#define[[:space:]]\+CVSNT_PRODUCT_BUILD[[:space:]]\+\([0-9]\+\).*/\1/p' "$SRC/build.h")
+          echo "version=$product.$build" | tee -a "$GITHUB_OUTPUT"
+
+  # --------------------------------------------------------------------------
+  deb:
+    name: Debian packages (${{ matrix.name }})
+    if: ${{ inputs.deb }}
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    container: ${{ matrix.image }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "ubuntu:22.04",    name: ubuntu22.04 }
+          - { image: "ubuntu:24.04",    name: ubuntu24.04 }
+          - { image: "debian:bookworm", name: debian12 }
+    steps:
+      - name: Install build dependencies
+        run: |
+          apt-get update
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends \
+            build-essential debhelper dh-autoreconf autoconf automake g++ libtool libtool-bin \
+            libltdl-dev libxml2-dev libpam0g-dev libpcre3-dev pkg-config zlib1g-dev libzstd-dev \
+            libssl-dev fakeroot git ca-certificates
+      - uses: actions/checkout@v4
+      - name: Build
+        working-directory: ${{ env.SRC }}
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          # debian/ ships with a {%%VERSION%%} placeholder (changelog, vars, *.install)
+          grep -rl '{%%VERSION%%}' debian | xargs -r sed -i "s/{%%VERSION%%}/$VERSION/g"
+          # distinguish the per-distro builds in the package version
+          sed -i "1s/($VERSION)/($VERSION~${{ matrix.name }})/" debian/changelog
+          dpkg-buildpackage -rfakeroot -uc -us -b
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          mv ../*.deb "$GITHUB_WORKSPACE/dist/"
+          rm -f "$GITHUB_WORKSPACE"/dist/*-dbgsym_*.deb    # debian builds them by default; not released
+          ls -la "$GITHUB_WORKSPACE/dist"
+      - name: Install the packages
+        run: |
+          DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ./dist/*.deb
+          cvs version
+          dpkg -l 'cvsnt*' | grep '^ii'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: deb-${{ matrix.name }}
+          path: dist/*.deb
+          if-no-files-found: error
+
+  # --------------------------------------------------------------------------
+  rpm:
+    name: RPM packages (${{ matrix.name }})
+    if: ${{ inputs.rpm }}
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    container: ${{ matrix.image }}
+    continue-on-error: ${{ matrix.experimental }}
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { image: "rockylinux:8", name: el8, extra_repo: powertools, experimental: false, toolset: gcc-toolset-9,
+              toolset_pkgs: "gcc-toolset-9-gcc gcc-toolset-9-gcc-c++ gcc-toolset-9-toolchain gcc-toolset-9-annobin" }
+          - { image: "rockylinux:9", name: el9, extra_repo: crb,        experimental: true,  toolset: gcc-toolset-12,
+              toolset_pkgs: "gcc-toolset-12-gcc gcc-toolset-12-gcc-c++ gcc-toolset-12 gcc-toolset-12-annobin-plugin-gcc" }
+    steps:
+      - name: Install build dependencies
+        run: |
+          dnf install -y epel-release dnf-plugins-core
+          dnf config-manager --set-enabled ${{ matrix.extra_repo }}
+          dnf install -y rpm-build rpmdevtools git tar ${{ matrix.toolset_pkgs }} \
+            autoconf automake m4 make libtool libtool-ltdl-devel libxml2-devel pcre-devel \
+            libzstd-devel openssl-devel pam-devel glibc-static libstdc++-static xmlto
+      - uses: actions/checkout@v4
+      - name: Check the expanded spec
+        working-directory: ${{ env.SRC }}/redhat
+        run: |
+          sed 's/@VERSION@/0/' cvsnt.spec.in > /tmp/check.spec
+          rpmspec -P /tmp/check.spec > /tmp/check.expanded
+          grep -E '^BuildRequires: +${{ matrix.toolset }}-' /tmp/check.expanded
+          grep -qE '^BuildRequires: +${{ matrix.toolset }}-annobin' /tmp/check.expanded
+          grep -q -- '-fplugin=annobin' /tmp/check.expanded
+          ! grep -q 'redhat-annobin-cc1' /tmp/check.expanded
+          if [ "${{ matrix.name }}" = el9 ]; then grep -q -- '-mno-avx512f' /tmp/check.expanded; fi
+      - name: Build
+        working-directory: ${{ env.SRC }}/redhat
+        run: |
+          # build.sh tars the source, fetches zlib 1.2.8 and produces the SRPM
+          bash build.sh
+          rpmbuild --define "_topdir $PWD/rpmbuild" -bb rpmbuild/SPECS/cvsnt.spec
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          find rpmbuild/RPMS rpmbuild/SRPMS -name '*.rpm' -exec cp {} "$GITHUB_WORKSPACE/dist/" \;
+          ls -la "$GITHUB_WORKSPACE/dist"
+      - name: Install the packages
+        run: |
+          # cvsnt-server requires xinetd, which el9 no longer ships; the server
+          # package is not installable there until it gains a systemd socket unit
+          pkgs=$(ls dist/*.rpm | grep -v -e '\.src\.rpm$' -e debuginfo)
+          dnf list --available xinetd >/dev/null 2>&1 || pkgs=$(echo "$pkgs" | grep -v '/cvsnt-server-[0-9]')
+          dnf install -y $pkgs
+          cvs version
+          rpm -qa 'cvsnt*'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: rpm-${{ matrix.name }}
+          path: dist/*.rpm
+          if-no-files-found: error
+
+  # --------------------------------------------------------------------------
+  macos:
+    name: macOS client (${{ matrix.suffix }})
+    if: ${{ inputs.macos }}
+    needs: version
+    runs-on: ${{ matrix.runner }}
+    timeout-minutes: 60
+    strategy:
+      fail-fast: false
+      matrix:
+        include:
+          - { runner: macos-15-intel, arch: x86_64, min: "10.13", suffix: osx10.13-x64, extra: "-msse4.1" }
+          - { runner: macos-latest,   arch: arm64,  min: "11.0",  suffix: osx11-arm64,  extra: "" }
+    steps:
+      - uses: actions/checkout@v4
+      - name: Install dependencies
+        run: brew install autoconf automake libtool pkg-config pcre openssl@3
+      - name: Build and package
+        working-directory: ${{ env.SRC }}
+        env:
+          BUILD_ARCH: "-arch ${{ matrix.arch }} ${{ matrix.extra }} -mmacosx-version-min=${{ matrix.min }}"
+          PKG_BUILD_SUFFIX: "-${{ matrix.suffix }}"
+        run: |
+          SSL="$(brew --prefix openssl@3)"
+          export CPPFLAGS="-I$SSL/include"
+          export LDFLAGS="-L$SSL/lib"
+          # autoconf 2.72 would add -std=gnu23, where the K&R-style
+          # definitions in lib/ no longer compile
+          export CFLAGS="-O2 -g -std=gnu11"
+          export PKG_CONFIG_PATH="$(brew --prefix pcre)/lib/pkgconfig:$SSL/lib/pkgconfig"
+          autoreconf -i --force
+          # osx/build-mac copies /usr/local/lib/libzstd*.dylib into the package
+          (cd zstd && CFLAGS="$BUILD_ARCH" LDFLAGS="$BUILD_ARCH" sudo -E make clean install)
+          cd osx && ./build-mac
+          # build-mac writes cvsnt-<version><suffix>.tar.gz to the repository root
+          mkdir -p "$GITHUB_WORKSPACE/dist"
+          mv "$GITHUB_WORKSPACE"/cvsnt-*.tar.gz "$GITHUB_WORKSPACE/dist/"
+          ls -la "$GITHUB_WORKSPACE/dist"
+      - name: Smoke test
+        working-directory: ${{ env.SRC }}/osx/Distribution_folder/Package_Root/usr/local
+        # the package is built to live in /usr/local; point dyld at the staged libs
+        run: |
+          DYLD_LIBRARY_PATH="$PWD/lib" bin/cvsnt version
+          otool -L bin/cvsnt lib/*.dylib | grep -E '/opt/homebrew|/usr/local/(opt|Cellar)' && exit 1 || true
+          # only versioned copies of the bundled third-party libraries
+          ls lib | grep -E '^lib(ssl|crypto|zstd)\.dylib$' && exit 1 || true
+          ls lib | grep -qE '^libcrypto\.[0-9]+\.dylib$' && ls lib | grep -qE '^libzstd\.[0-9]+\.dylib$'
+      - uses: actions/upload-artifact@v4
+        with:
+          name: macos-${{ matrix.suffix }}
+          path: dist/*.tar.gz
+          if-no-files-found: error
+
+  # --------------------------------------------------------------------------
+  windows:
+    name: Windows client (x64)
+    if: ${{ inputs.windows }}
+    needs: version
+    runs-on: windows-2022
+    timeout-minutes: 60
+    env:
+      MSB: /m /v:m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0
+    steps:
+      - uses: actions/checkout@v4
+      - uses: microsoft/setup-msbuild@v2
+      - name: Repo-state workarounds (longfilenames.xml is not tracked; genbuild.ico is rejected by current SDKs)
+        shell: cmd
+        working-directory: ${{ env.SRC }}
+        run: |
+          > longfilenames.xml echo ^<?xml version="1.0" encoding="UTF-8" standalone="yes"?^>
+          >> longfilenames.xml echo ^<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"^>
+          >> longfilenames.xml echo   ^<application xmlns="urn:schemas-microsoft-com:asm.v3"^>
+          >> longfilenames.xml echo     ^<windowsSettings^>
+          >> longfilenames.xml echo       ^<longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings"^>true^</longPathAware^>
+          >> longfilenames.xml echo     ^</windowsSettings^>
+          >> longfilenames.xml echo   ^</application^>
+          >> longfilenames.xml echo ^</assembly^>
+          type nul > genbuild\genbuild.rc
+      - name: Build cafs_proxy.exe
+        shell: cmd
+        working-directory: ${{ env.SRC }}
+        run: msbuild keyValueServer\proxy\cafs_proxy.vcxproj %MSB%
+      - name: Build cvs.exe (retry once on the transient mt.exe failure)
+        shell: cmd
+        working-directory: ${{ env.SRC }}
+        run: msbuild cvsnt.vcxproj %MSB% || msbuild cvsnt.vcxproj %MSB%
+      - name: Pack client zip (protocols pserver, sspi, ssh, server, fork, enum; the plugins cvsnt.vcxproj builds)
+        shell: pwsh
+        working-directory: ${{ env.SRC }}
+        env:
+          VERSION: ${{ needs.version.outputs.version }}
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP "cvsnt-$env:VERSION-win-x64"
+          New-Item -ItemType Directory -Force -Path "$stage\protocols", "$stage\triggers" | Out-Null
+          foreach ($f in "cvs.exe", "cafs_proxy.exe", "cvsapi.dll", "cvstools.dll") {
+            $hit = Get-ChildItem -Recurse -Filter $f -File | Where-Object FullName -match 'Releasex64' | Select-Object -First 1
+            if (-not $hit) { throw "$f not found" }
+            Copy-Item $hit.FullName $stage
+          }
+          Copy-Item external_libs\x64\dll\libcrypto-1_1-x64.dll, external_libs\x64\dll\libssl-1_1-x64.dll $stage
+          # the protocol and trigger plugins cvsnt.vcxproj builds; cvs init needs the info trigger
+          Get-ChildItem -Recurse -Filter *.dll -File | Where-Object FullName -match 'Releasex64\\protocols\\' |
+            ForEach-Object { Copy-Item $_.FullName "$stage\protocols" }
+          Get-ChildItem -Recurse -Filter *.dll -File | Where-Object FullName -match 'Releasex64\\triggers\\' |
+            ForEach-Object { Copy-Item $_.FullName "$stage\triggers" }
+          foreach ($p in "pserver", "sspi", "ssh", "server", "fork", "enum") {
+            if (-not (Test-Path "$stage\protocols\$p.dll")) { throw "protocol plugin $p.dll not built" }
+          }
+          if (-not (Test-Path "$stage\triggers\info.dll")) { throw "trigger plugin info.dll not built" }
+          Copy-Item COPYING "$stage\COPYING"
+          Set-Content -Path "$stage\THIRD-PARTY.txt" -Value @'
+          cvsnt is distributed under the GNU General Public License v2 or later; see COPYING.
+
+          This archive also contains third-party libraries:
+          - OpenSSL (https://www.openssl.org/): OpenSSL/SSLeay dual license for 1.1.x,
+            Apache License 2.0 for 3.x.
+          - zstd (https://github.com/facebook/zstd): BSD 3-Clause License.
+          '@
+          Get-ChildItem -Recurse $stage | Select-Object FullName
+          & "$stage\cvs.exe" --version
+          New-Item -ItemType Directory -Force -Path "$env:GITHUB_WORKSPACE\dist" | Out-Null
+          Compress-Archive -Path "$stage\*" -DestinationPath "$env:GITHUB_WORKSPACE\dist\cvsnt-$env:VERSION-win-x64.zip"
+      - uses: actions/upload-artifact@v4
+        with:
+          name: windows-x64
+          path: dist/*.zip
+          if-no-files-found: error
+
+  # --------------------------------------------------------------------------
+  docker:
+    name: Server images
+    if: ${{ inputs.images != 'skip' }}
+    needs: version
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    permissions:
+      contents: read
+      packages: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: docker/setup-buildx-action@v3
+      - name: Image name prefix (ghcr wants lowercase)
+        id: img
+        run: |
+          echo "prefix=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/cvsnt" >> "$GITHUB_OUTPUT"
+          echo "vsha=${VERSION}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - name: Login to ghcr.io
+        if: ${{ startsWith(inputs.images, 'push') }}
+        uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      # One buildx builder, four targets: the build stage is compiled once and
+      # reused from the local layer cache by the following steps. Images are
+      # only loaded here; they are pushed together at the end, so a failed
+      # target never leaves a partial set under the release tags.
+      - name: authserver
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: authserver
+          load: true
+          tags: |
+            ${{ steps.img.outputs.prefix }}-authserver:${{ env.VERSION }}
+            ${{ steps.img.outputs.prefix }}-authserver:${{ steps.img.outputs.vsha }}
+            ${{ steps.img.outputs.prefix }}-authserver:latest
+      - name: cafs-server
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: cafs-server
+          load: true
+          tags: |
+            ${{ steps.img.outputs.prefix }}-cafs-server:${{ env.VERSION }}
+            ${{ steps.img.outputs.prefix }}-cafs-server:${{ steps.img.outputs.vsha }}
+            ${{ steps.img.outputs.prefix }}-cafs-server:latest
+      - name: cafs-proxy
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: cafs-proxy
+          load: true
+          tags: |
+            ${{ steps.img.outputs.prefix }}-cafs-proxy:${{ env.VERSION }}
+            ${{ steps.img.outputs.prefix }}-cafs-proxy:${{ steps.img.outputs.vsha }}
+            ${{ steps.img.outputs.prefix }}-cafs-proxy:latest
+      - name: cvslockd
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          file: docker/Dockerfile
+          target: cvslockd
+          load: true
+          tags: |
+            ${{ steps.img.outputs.prefix }}-cvslockd:${{ env.VERSION }}
+            ${{ steps.img.outputs.prefix }}-cvslockd:${{ steps.img.outputs.vsha }}
+            ${{ steps.img.outputs.prefix }}-cvslockd:latest
+      - name: Smoke test
+        run: |
+          P="${{ steps.img.outputs.prefix }}"
+          docker run --rm --entrypoint /usr/local/cvsnt/bin/cvs "$P-authserver:$VERSION" version | grep 'CVSNT'
+          # start every image through its own entrypoint with the minimum
+          # configuration and require it to still be running afterwards
+          mkdir -p /tmp/cvs /tmp/conf && printf 'LockServer=none\n' > /tmp/conf/PServer && : > /tmp/conf/Plugins
+          docker run -d --name t-auth  -v /tmp/conf:/etc/cvsnt:ro "$P-authserver:$VERSION"
+          docker run -d --name t-lock  -v /tmp/conf:/etc/cvsnt:ro "$P-cvslockd:$VERSION"
+          docker run -d --name t-cafs  -t -e DIR_FOR_ROOTS=/tmp -e SECRET=0123456789abcdef "$P-cafs-server:$VERSION"
+          docker run -d --name t-proxy -t -e MASTER_URL=localhost -e BLOB_OTP=0123456789abcdef "$P-cafs-proxy:$VERSION"
+          # each server must accept a connection on its port within 30 s
+          accepts() {
+            ip=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' "$1")
+            for _ in $(seq 30); do
+              (exec 3<>"/dev/tcp/$ip/$2") 2>/dev/null && return 0
+              sleep 1
+            done
+            echo "$1 does not accept connections on port $2"; docker logs "$1"; return 1
+          }
+          accepts t-auth 2401 && accepts t-lock 2402 && accepts t-cafs 2403 && accepts t-proxy 2403
+          for c in t-auth t-lock t-cafs t-proxy; do docker logs "$c" 2>&1 | tail -3; done
+          docker rm -f t-auth t-lock t-cafs t-proxy >/dev/null
+          docker images "$P-*"
+      - name: Push the per-commit tags
+        if: ${{ startsWith(inputs.images, 'push') }}
+        # only the immutable <version>-<sha7> tags leave this job; the
+        # release tags are advanced by publish-images after every other
+        # job succeeded, so a failed run leaves nothing under <version>
+        run: |
+          P="${{ steps.img.outputs.prefix }}"
+          for t in authserver cafs-server cafs-proxy cvslockd; do
+            docker push "$P-$t:${{ steps.img.outputs.vsha }}"
+          done
+
+  # --------------------------------------------------------------------------
+  publish-images:
+    name: Publish the server images
+    # runs for the two levels that advance <version>; a client platform that
+    # was switched off is a skipped job, not a failure
+    if: ${{ !cancelled() && !contains(needs.*.result, 'failure') && contains(inputs.images, 'version,') }}
+    needs: [version, deb, rpm, macos, windows, docker]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: read
+      packages: write
+    env:
+      VERSION: ${{ needs.version.outputs.version }}
+    steps:
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+      - name: Advance <version> (and latest) to the images this run built
+        run: |
+          P="ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/cvsnt"
+          VSHA="$VERSION-${GITHUB_SHA::7}"
+          for t in authserver cafs-server cafs-proxy cvslockd; do
+            docker pull "$P-$t:$VSHA"
+            docker tag "$P-$t:$VSHA" "$P-$t:$VERSION"
+            docker push "$P-$t:$VERSION"
+            if [ "${{ inputs.images }}" = "push version-sha, version, latest" ]; then
+              docker tag "$P-$t:$VSHA" "$P-$t:latest"
+              docker push "$P-$t:latest"
+            fi
+          done
+
+  # --------------------------------------------------------------------------
+  release:
+    name: Draft GitHub release
+    if: ${{ inputs.tag != '' && !cancelled() && !contains(needs.*.result, 'failure') }}
+    needs: [version, deb, rpm, macos, windows, docker, publish-images]
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    permissions:
+      contents: write
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          path: dist
+          merge-multiple: true
+      - name: List
+        id: files
+        run: |
+          ls -la dist
+          { echo 'list<<EOF'; ls dist; echo EOF; } >> "$GITHUB_OUTPUT"
+      - name: Image name prefix (the same lowercase form the images were tagged with)
+        id: img
+        run: |
+          echo "prefix=ghcr.io/${GITHUB_REPOSITORY_OWNER,,}/cvsnt" >> "$GITHUB_OUTPUT"
+          echo "vsha=${{ needs.version.outputs.version }}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
+      - uses: softprops/action-gh-release@v2
+        with:
+          tag_name: ${{ inputs.tag }}
+          name: cvsnt-${{ needs.version.outputs.version }}
+          draft: true
+          generate_release_notes: true
+          files: dist/*
+          body: |
+            Version ${{ needs.version.outputs.version }} built from ${{ github.sha }}.
+
+            Artifacts (the el9 RPMs are experimental and may be missing):
+            ```
+            ${{ steps.files.outputs.list }}
+            ```
+
+            Server images: ${{ inputs.images }}.
+            `${{ steps.img.outputs.prefix }}-{authserver,cafs-server,cafs-proxy,cvslockd}:${{ steps.img.outputs.vsha }}`
+            is the commit-bound tag; `:${{ needs.version.outputs.version }}` and `:latest` move with later pushes.
