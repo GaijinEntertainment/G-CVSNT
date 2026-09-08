@@ -3,4 +3,5 @@ if   [ "configure" = "$1" ] && [ "." = ".$2" ]; then  shift ; set -- "1" "$@"
 elif [ "configure" = "$1" ] && [ "." != ".$2" ]; then shift ; set -- "2" "$@"
 fi
 
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
