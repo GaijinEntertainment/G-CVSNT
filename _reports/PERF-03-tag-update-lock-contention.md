@@ -193,7 +193,10 @@ has never used CVSNT directory renames), `RCS_parse` returns NULL before any loc
 
 **(c) Occasional in-window flushes.** *(Fixed in this slice: `cvs_output` now stages M text and
 flushes a completed line only once >= 8 KiB have accumulated, and `do_file_proc` flushes through
-`cvs_flushout_perfile`, which can skip. The pre-fix behaviour diagnosed here was:)* `cvs_output`
+`cvs_flushout_perfile`, which can skip. The threshold applies only once `server()` has created
+`stdout_buf`: before that, in `server_authenticate_connection`, nothing drains `buf_to_net` before
+the next read or the direct `exit()`, so the `I LOVE YOU` / `error 0` auth replies still go out per
+line - batching them hung every `:pserver:` connection. The pre-fix behaviour diagnosed here was:)* `cvs_output`
 flushed synchronously on any newline-terminated string:
 
 ```c

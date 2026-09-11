@@ -6494,17 +6494,9 @@ int cvs_output (const char *str, size_t len)
 			len=olen;
 		}
  		buf_output (stdout_buf?stdout_buf:buf_to_net, str, len);
-		/* Push to the network on a byte threshold, not on every
-		   newline: flushing per line made a line of M output cost one
-		   write() each, which dominates commands like log and annotate.
-		   Correctness does not rest on this flush - every blocking read
-		   of buf_from_net happens in the request loop, which drains both
-		   wrap buffers after each request (see server_serve), and
-		   do_cvs_command flushes both blocking before it sends ok/error.
-		   The counter is a heuristic: flushes done elsewhere leave it
-		   high, which only makes the next flush here come sooner.  */
 		pending_output += len;
- 		if(str[len-1]=='\n' && pending_output >= SERVER_FLUSH_THRESHOLD)
+		/* Before server() nothing drains: pserver auth replies.  */
+ 		if(str[len-1]=='\n' && (!stdout_buf || pending_output >= SERVER_FLUSH_THRESHOLD))
 		{
 			pending_output = 0;
  			buf_send_output(stdout_buf?stdout_buf:buf_to_net);
