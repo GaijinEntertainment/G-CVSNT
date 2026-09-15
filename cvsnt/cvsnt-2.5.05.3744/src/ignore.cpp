@@ -38,7 +38,7 @@ const char *ign_default = ". .. core RCSLOG tags TAGS RCS SCCS .make.state "
 			  "*.a *.olb *.o *.obj *.so *.Z *~ *.old *.elc *.ln "
 			  "*.bak *.BAK *.orig *.rej *.exe *.dll *.pdb *.lib "
 			  "*.ncb *.ilk *.exp *.suo .DS_Store _$* *$ *.lo "
-			  "*.pch *.idb *.class ~*";
+			  "*.pch *.idb *.class ~* " CVSDOTEXCLUDE;
 
 #define IGN_GROW 16			/* grow the list by 16 elements at a
 					 * time */
@@ -196,7 +196,7 @@ void ign_add_file (const char *file, int hold)
     xfree (line);
 }
 
-static char *next_token(const char **line)
+char *ign_next_token(const char **line)
 {
 	const char *cp;
 	char *ptr,*np;
@@ -245,7 +245,7 @@ void ign_add (const char *ign, int hold)
 
     for (; *ign; )
     {
-		ptr = next_token(&ign);
+		ptr = ign_next_token(&ign);
 		if(!ptr)
 			break; /* Shouldn't happen */
 		/*
@@ -448,7 +448,7 @@ void ignore_files (List *ilist, List *entries, char *update_dir, Ignore_proc pro
 
 		/* We could be ignoring FIFOs and other files which are neither
 		regular files nor directories here.  */
-		if (ign_name (file))
+		if (ign_name (file) || excl_name_here (file))
 			continue;
 
 		if (CVS_LSTAT(file, &sb) != -1)
