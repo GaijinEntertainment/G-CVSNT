@@ -34,6 +34,7 @@
 
 #include <vector>
 #include <memory>
+#include <string>
 int client_overwrite_existing;
 int client_max_dotdot;
 int is_cvsnt = 1;
@@ -64,6 +65,19 @@ int tag (int argc, char **argv);
 int update (int argc, char **argv);
 
 /* All the response handling functions.  */
+/* .cvsexclude support: response callbacks run in discard mode for excluded
+   paths, and output about excluded paths is dropped.  */
+static int excl_discard;
+static int excl_filter_m (char *args, int len);
+static int excl_filter_e (char *args);
+static void excl_flush_output ();
+static void set_static (char *data, List *ent_list, char *short_pathname, char *filename);
+static void clear_static (char *data, List *ent_list, char *short_pathname, char *filename);
+static void clear_rename (char *data, List *ent_list, char *short_pathname, char *filename);
+static void set_sticky (char *data, List *ent_list, char *short_pathname, char *filename);
+static void clear_sticky (char *data, List *ent_list, char *short_pathname, char *filename);
+static void templat (char *data, List *ent_list, char *short_pathname, char *filename);
+
 static void handle_ok(char *, int);
 static void handle_error(char *, int);
 static void handle_valid_requests(char *, int);
@@ -713,11 +727,13 @@ char *toplevel_wd;
 
 static void handle_ok (char *args, int len)
 {
+    excl_flush_output ();
     return;
 }
 
 static void handle_error (char *args, int len)
-{   
+{
+    excl_flush_output ();
     /*
      * First there is a symbolic error code followed by a space, which
      * we ignore.
@@ -806,6 +822,24 @@ static List *last_entries;
  * taking place; and FILENAME is the filename portion only of
  * SHORT_PATHNAME.  When we call FUNC, the curent directory points to
  * the directory portion of SHORT_PATHNAME.  */
+
+/* Directory-level responses name the repository directory, so their
+   FILENAME is not an entry of PATHNAME and only the path is judged.  */
+static int excl_response_excluded (const char *pathname, const char *filename, void (*func)(char *data, List *ent_list, char *short_pathname, char *filename))
+{
+    if (toplevel_wd == NULL)
+    {
+        toplevel_wd = xgetwd_mapped ();
+        if (toplevel_wd == NULL)
+            error (1, errno, "could not get working directory");
+    }
+    if (excl_path (pathname))
+        return 1;
+    if (func == set_static || func == clear_static || func == clear_rename
+        || func == set_sticky || func == clear_sticky || func == templat)
+        return 0;
+    return excl_name_in (pathname, filename);
+}
 
 static char *last_dir_name;
 
@@ -905,6 +939,18 @@ static void call_in_directory (char *pathname, void (*func)(char *data, List *en
     short_pathname = (char*)xmalloc (strlen (pathname) + strlen (filename) + 5);
     strcpy (short_pathname, pathname);
     strcat (short_pathname, filename);
+
+    if (excl_response_excluded (pathname, filename, func))
+    {
+        excl_discard = 1;
+        (*func) (data, (List *) NULL, short_pathname, filename);
+        excl_discard = 0;
+        xfree (dir_name);
+        xfree (short_pathname);
+        xfree (reposdirname);
+        xfree (reposname);
+        return;
+    }
 
     if (last_dir_name == NULL
 	|| strcmp (last_dir_name, dir_name) != 0)
@@ -1193,6 +1239,12 @@ static void copy_a_file (char *data, List *ent_list, char *short_pathname, char 
 
     read_line (&newname);
 
+    if (excl_discard)
+    {
+        xfree (newname);
+        return;
+    }
+
     /* cvsclient.texi has said for a long time that newname must be in the
        same directory.  Wouldn't want a malicious or buggy server overwriting
        ~/.profile, /etc/passwd, or anything like that.  */
@@ -1213,6 +1265,22 @@ static void handle_copy_file (char *args, int len)
    the name of the file for use in error messages.  FIXME-someday:
    extend this to deal with compressed files and make update_entries
    use it.  On error, gives a fatal error.  */
+/* Read a counted file from the server and drop it.  */
+static void discard_counted_file ()
+{
+    char *size_string;
+    size_t size;
+    char buf[8192];
+
+    read_line (&size_string);
+    if (size_string[0] == 'z')
+        error (1, 0, "protocol error: compressed files not supported for that operation");
+    size = atoi (size_string);
+    xfree (size_string);
+    while (size > 0)
+        size -= try_read_from_server (buf, size > sizeof buf ? sizeof buf : size);
+}
+
 static void read_counted_file (char *filename, char *fullname)
 {
     char *size_string;
@@ -1504,6 +1572,13 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 
     /* Done parsing the entries line. */
 
+    if (excl_discard && data->contents == UPDATE_ENTRIES_CHECKIN)
+    {
+        xfree (scratch_entries);
+        xfree (entries_line);
+        return;
+    }
+
     if (data->contents == UPDATE_ENTRIES_UPDATE
 	|| data->contents == UPDATE_ENTRIES_PATCH
 	|| data->contents == UPDATE_ENTRIES_RCS_DIFF)
@@ -1521,6 +1596,8 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	read_line (&size_string);
     size = atoi (size_string);
 	xfree (size_string);
+    if (excl_discard)
+        goto discard_file_and_return;
 
 	/* Note that checking this separately from writing the file is
 	   a race condition: if the existence or lack thereof of the
@@ -2384,6 +2461,8 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
     char blob_ref[blob_reference_size+1];
     read_from_server(blob_ref, size);
     blob_ref[blob_reference_size] = 0;
+    if (excl_discard)
+      goto discard_file_and_return;
 
     /* Note that checking this separately from writing the file is
        a race condition: if the existence or lack thereof of the
@@ -2681,6 +2760,25 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
 
     read_line (&mode_string);
 
+    if (excl_discard)
+    {
+      xfree (mode_string);
+      xfree (scratch_entries);
+      xfree (entries_line);
+      if (stored_mode != NULL)
+      {
+        xfree (stored_mode);
+        stored_mode = NULL;
+      }
+      stored_checksum_valid = 0;
+      if (updated_fname != NULL)
+      {
+        xfree (updated_fname);
+        updated_fname = NULL;
+      }
+      return;
+    }
+
     if (!isfile (filename))
         /* Emit a warning and update the file anyway.  */
         error (0, 0, "warning: %s unexpectedly disappeared",
@@ -2955,6 +3053,16 @@ static void update_baserev(char *data, List *ent_list, char *short_pathname, cha
 
 	read_line(&type);
 
+	if (excl_discard)
+	{
+		if (type[0] == 'U')
+			discard_counted_file ();
+		xfree (type);
+		xfree (basepathgz);
+		xfree (basepath);
+		return;
+	}
+
 	TRACE(3,"Updating base revision %s [%c]",basepath,type[0]);
 	switch(type[0])
 	{
@@ -2992,6 +3100,8 @@ static void handle_update_baserev(char *args, int len)
 
 static void remove_entry (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+        return;
     Scratch_Entry (ent_list, filename);
 }
 
@@ -3002,6 +3112,8 @@ static void handle_remove_entry (char *args, int len)
 
 static void remove_entry_and_file (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+        return;
     Scratch_Entry (ent_list, filename);
     /* Note that we don't ignore existence_error's here.  The server
        should be sending Remove-entry rather than Removed in cases
@@ -3017,6 +3129,12 @@ static void rename_entry_and_file (char *data, List *ent_list, char *short_pathn
 	char *renamed_to;
 
     read_line (&renamed_to);
+
+    if (excl_discard)
+    {
+        xfree (renamed_to);
+        return;
+    }
 
     Rename_Entry (ent_list, filename, renamed_to);
 
@@ -3059,6 +3177,8 @@ static void handle_module_expansion(char *args, int len)
 
 static void set_static (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+        return;
     FILE *fp;
     fp = open_file (CVSADM_ENTSTAT, "w+");
     if (fclose (fp) == EOF)
@@ -3078,12 +3198,16 @@ static void handle_set_static_directory (char *args, int len)
 
 static void clear_static (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+        return;
     if (unlink_file (CVSADM_ENTSTAT) < 0 && ! existence_error (errno))
         error (1, errno, "cannot remove file %s", CVSADM_ENTSTAT);
 }
 
 static void clear_rename (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+        return;
 	if (unlink_file (CVSADM_RENAME) < 0 && ! existence_error(errno))
         error (1, errno, "cannot remove file %s", CVSADM_RENAME);
 }
@@ -3135,6 +3259,12 @@ static void set_sticky (char *data, List *ent_list, char *short_pathname, char *
 
     read_line (&tagspec);
 
+    if (excl_discard)
+    {
+        xfree (tagspec);
+        return;
+    }
+
     /* FIXME-update-dir: error messages should include the directory.  */
     f = CVS_FOPEN (CVSADM_TAG, "w+");
     if (f == NULL)
@@ -3184,6 +3314,8 @@ static void handle_set_sticky (char *pathname, int len)
 
 static void clear_sticky (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+        return;
     if (unlink_file (CVSADM_TAG) < 0 && ! existence_error (errno))
 		error (1, errno, "cannot remove %s", CVSADM_TAG);
 }
@@ -3212,6 +3344,11 @@ static void handle_clear_sticky (char *pathname, int len)
 
 static void templat (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+    {
+        discard_counted_file ();
+        return;
+    }
     /* FIXME: should be computing second argument from CVSADM_TEMPLATE
        and short_pathname.  */
     read_counted_file (CVSADM_TEMPLATE, "<CVS/Template file>");
@@ -3674,8 +3811,150 @@ static void handle_rename(char *args, int len)
 }
 
 
+/* Output about excluded content is dropped: the "U path" lines of update,
+   checkout and export, and the status blocks of files this client refuses
+   to have.  A "File:" line carries no directory, so a status block is held
+   until the directory of the last "Examining" message or the RCS path in
+   its "Repository revision" line settles it.  */
+static std::vector<std::string> excl_held;
+static int excl_dropping;
+static char *excl_examining;
+static int excl_examining_excluded;
+
+static void excl_flush_output ()
+{
+    for (size_t i = 0; i < excl_held.size (); ++i)
+    {
+        cvs_output (excl_held[i].c_str (), 0);
+        cvs_output ("\n", 1);
+    }
+    excl_held.clear ();
+}
+
+/* RCSPATH is "<repository>/<dir>/<file>,v"; judge the working copy path it
+   maps to below toplevel_repos.  */
+static int excl_rcs_path (const char *rcspath)
+{
+    size_t len = toplevel_repos != NULL ? strlen (toplevel_repos) : 0;
+    if (len == 0 || fnncmp (rcspath, toplevel_repos, len) != 0 || !ISDIRSEP (rcspath[len]))
+        return 0;
+    std::string rel (rcspath + len + 1);
+    if (rel.size () > 2 && rel.compare (rel.size () - 2, 2, RCSEXT) == 0)
+        rel.erase (rel.size () - 2);
+    return excl_path (rel.c_str ());
+}
+
+static int excl_status_block (char *args, int len)
+{
+    if (excl_dropping)
+    {
+        if (len == 0 || args[0] == ' ' || args[0] == '\t')
+            return 1;
+        excl_dropping = 0;
+    }
+    if (!excl_held.empty () && !(excl_held.size () == 1 && excl_held[0][0] == '='))
+    {
+        if (strncmp (args, "   Repository revision:\t", 24) == 0)
+        {
+            const char *rcs = strchr (args + 24, '\t');
+            excl_held.push_back (args);
+            if (rcs != NULL && excl_rcs_path (rcs + 1))
+            {
+                excl_held.clear ();
+                excl_dropping = 1;
+            }
+            else
+                excl_flush_output ();
+            return 1;
+        }
+        if (len == 0 || args[0] == ' ' || args[0] == '\t')
+        {
+            excl_held.push_back (args);
+            return 1;
+        }
+        excl_flush_output ();
+    }
+    if (strncmp (args, "File: ", 6) == 0)
+    {
+        const char *name = args + 6;
+        if (strncmp (name, "no file ", 8) == 0)
+            name += 8;
+        const char *end = strchr (name, '\t');
+        std::string fname (name, end != NULL ? end - name : strlen (name));
+        while (!fname.empty () && fname[fname.size () - 1] == ' ')
+            fname.erase (fname.size () - 1);
+        if (excl_examining != NULL)
+        {
+            if (excl_examining_excluded || excl_name_in (excl_examining, fname.c_str ()))
+            {
+                excl_held.clear ();
+                excl_dropping = 1;
+                return 1;
+            }
+            excl_flush_output ();
+            return 0;
+        }
+        excl_held.push_back (args);
+        return 1;
+    }
+    if (len > 0 && args[0] == '=' && strspn (args, "=") == (size_t) len)
+    {
+        excl_flush_output ();
+        excl_held.push_back (args);
+        return 1;
+    }
+    excl_flush_output ();
+    return 0;
+}
+
+static int excl_filter_m (char *args, int len)
+{
+    if (strcmp (command_name, "status") == 0)
+        return excl_status_block (args, len);
+    if (len > 2 && args[1] == ' ' && strchr ("UPARMC?", args[0]) != NULL
+        && (strcmp (command_name, "update") == 0 || strcmp (command_name, "checkout") == 0
+            || strcmp (command_name, "export") == 0)
+        && excl_path (args + 2))
+        return 1;
+    return 0;
+}
+
+static int excl_filter_e (char *args)
+{
+    static const char examining[] = ": Examining ";
+    static const char updating[] = ": Updating ";
+    static const char unknown[] = ": nothing known about ";
+    static const char newdir[] = "New directory `";
+    const char *p;
+
+    if ((p = strstr (args, examining)) != NULL)
+    {
+        excl_flush_output ();
+        excl_dropping = 0;
+        xfree (excl_examining);
+        excl_examining = xstrdup (p + sizeof examining - 1);
+        excl_examining_excluded = excl_path (excl_examining);
+        return excl_examining_excluded;
+    }
+    if ((p = strstr (args, updating)) != NULL)
+        return excl_path (p + sizeof updating - 1);
+    if ((p = strstr (args, unknown)) != NULL)
+        return excl_path (p + sizeof unknown - 1);
+    if ((p = strstr (args, newdir)) != NULL)
+    {
+        std::string dir (p + sizeof newdir - 1);
+        size_t q = dir.find_first_of ("'");
+        if (q != std::string::npos)
+            dir.erase (q);
+        return excl_path (dir.c_str ());
+    }
+    return 0;
+}
+
 static void handle_m (char *args, int len)
 {
+    if (excl_filter_m (args, len))
+        return;
     /* In the case where stdout and stderr point to the same place,
        fflushing stderr will make output happen in the correct order.
        Often stderr will be line-buffered and this won't be needed,
@@ -3722,6 +4001,8 @@ static void handle_mbinary (char *args, int len)
 
 static void handle_e (char *args, int len)
 {
+    if (excl_filter_e (args))
+        return;
 	if(global_ls_response_hack && strstr(args,"checkout: "))
 	{
 		char *p=strchr(args,':')+2;
@@ -3884,7 +4165,8 @@ static void handle_mt (char *args, int len)
 				}
 				xfree (updated_fname);
 		    }
-		    updated_fname = xstrdup (text);
+		    /* Excluded content is never reported.  */
+		    updated_fname = (text != NULL && excl_path (text)) ? NULL : xstrdup (text);
 		}
 		/* Swallow all other tags.  Either they are extraneous
 		   or they reflect future extensions that we can
@@ -5304,12 +5586,27 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
     const char *filename;
 
     TRACE(3,"send_fileproc (1)");
-    send_a_repository ("", finfo->repository, finfo->update_dir);
-
     xfinfo = *finfo;
     xfinfo.repository = NULL;
     xfinfo.rcs = NULL;
     vers = Version_TS (&xfinfo, NULL, NULL, NULL, 0, 0, args->case_sensitive);
+
+    if (excl_name_here (finfo->file))
+    {
+        /* Excluded content stays unknown to the server.  */
+        excl_remove_file (finfo, vers);
+        if (ignlist)
+        {
+            Node *p = getnode ();
+            p->type = FILES;
+            p->key = xstrdup (finfo->file);
+            (void) addnode (ignlist, p);
+        }
+        freevers_ts (&vers);
+        return 0;
+    }
+
+    send_a_repository ("", finfo->repository, finfo->update_dir);
 
     if (vers->entdata != NULL)
 	filename = vers->entdata->user;
@@ -5520,6 +5817,11 @@ static Dtype send_dirent_proc (void *callerdat, char *dir, char *repository, cha
     char *cvsadm_name=NULL;
 
 	TRACE(3,"send_dirent_proc called by recursion processor?");
+    if (excl_name_here (dir))
+    {
+        excl_remove_dir (dir, update_dir, entries);
+        return R_SKIP_ALL;
+    }
     if (ignore_directory (update_dir))
     {
 	/* print the warm fuzzy message */
@@ -5689,6 +5991,9 @@ void send_file_names (int argc, char **argv, unsigned int flags)
 
 		if (arg_should_not_be_sent_to_server (file))
 		    continue;
+
+		if (excl_path (file))
+			error (0, 0, "%s is excluded by %s", file, CVSDOTEXCLUDE);
 
 		if(flags&SEND_DIRECTORIES_ONLY && !isdir(file))
 		{
@@ -6079,6 +6384,8 @@ client_import_done ()
 
 static void notified_a_file (char *data, List *ent_list, char *short_pathname, char *filename)
 {
+    if (excl_discard)
+        return;
     FILE *fp;
     FILE *newf;
     size_t line_len = 8192;
