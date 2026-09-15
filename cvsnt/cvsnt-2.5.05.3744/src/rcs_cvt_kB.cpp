@@ -1,6 +1,8 @@
 #include "sha_blob_reference.h"
 #include "../ca_blobs_fs/push_whole_blob.h"
 #include "../ca_blobs_fs/streaming_blobs.h"
+#include "../ca_blobs_fs/src/details.h"
+#include "../ca_blobs_fs/src/fileio.h"
 
 void* blob_alloc(size_t sz);
 static void RCS_write_binary_rev_data_blob(const char *fn_context, char *&data, size_t &len, bool store_packed, bool write_it)
@@ -8,6 +10,13 @@ static void RCS_write_binary_rev_data_blob(const char *fn_context, char *&data, 
   //todo: skip actual write, if !write_it. we then just need hash
   //however, new client should never send data
   char hash[64];
+  /* A repository that has never held a blob has no blobs/ directory, and
+     nothing below creates it - blob_fileio_ensure_dir is a single-level
+     mkdir, so both the temp file and the fan-out directories fail without
+     the parent.  Create it here; if it already exists this is a no-op, and
+     if it genuinely cannot be created the push fails with the same error it
+     always did.  */
+  blob_fileio_ensure_dir(caddressed_fs::blobs_dir_path(caddressed_fs::get_default_ctx()).c_str());
   bool res = caddressed_fs::push_whole_blob_from_raw_data(caddressed_fs::get_default_ctx(), data, len, hash, store_packed);
   if (!res)
     error(1,errno,"Couldn't write blob of %s", fn_context);
