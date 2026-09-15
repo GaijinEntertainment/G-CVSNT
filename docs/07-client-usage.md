@@ -243,6 +243,22 @@ Sources, in increasing precedence: the built-in list, `CVSROOT/cvsignore`, `~/.c
 `$CVSIGNORE`, the `-I` option, and a `.cvsignore` file in each directory. `!` anywhere in a list
 clears everything seen so far (`src/ignore.cpp`).
 
+## Excluding repository content locally: `.cvsexclude`
+
+A `.cvsexclude` file has the `.cvsignore` syntax and, like it, applies to the directory it is in;
+`~/.cvsexclude` and `$CVSEXCLUDE` apply everywhere, and `!` clears the list. The difference is what
+happens to a matching file or directory that exists in the repository:
+
+* it is never downloaded or updated, and never sent to the server;
+* if it is present in the working copy it is removed on the next command, together with its
+  `CVS/Entries` line; a file with local changes is kept and reported instead;
+* `update`, `status` and `-n` do not report it as missing, unknown or needing checkout.
+
+The list is local: the server never sees it, and `.cvsexclude` itself is always excluded, so it is
+never checked in and never overwritten from the repository. A command started inside an excluded
+directory is refused. Removing the pattern and running `update` (with `-d` for a directory) brings
+the content back (`src/exclude.cpp`).
+
 ## Diagnostics
 
 ```

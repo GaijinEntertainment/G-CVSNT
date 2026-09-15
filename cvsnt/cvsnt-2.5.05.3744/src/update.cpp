@@ -742,6 +742,13 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
     status = Classify_File (finfo, tag, date, options, force_tag_match,
 			    aflag, &vers, pipeout, 0, 0);
 
+    if (excl_name_here (finfo->file))
+    {
+        excl_remove_file (finfo, vers);
+        freevers_ts (&vers);
+        return 0;
+    }
+
     /* Keep track of whether TAG is a branch tag.
        Note that if it is a branch tag in some files and a nonbranch tag
        in others, treat it as a nonbranch tag.  It is possible that case
@@ -1112,6 +1119,8 @@ static int update_predirent_proc (void *callerdat, char *dir, char *repository, 
 
 	if(ignore_directory(update_dir))
 		return R_SKIP_ALL;
+	if (excl_name_here (dir))
+		return R_SKIP_ALL;
 	if(!isdir(dir))
 	{
 		if(!update_build_dirs || (!server_active && !isdir (repository)))
@@ -1220,6 +1229,11 @@ static Dtype update_dirent_proc (void *callerdat, char *dir, char *repository, c
 	const char *msg;
 
     TRACE(1,"debug: update_dirent_proc");
+    if (excl_name_here (dir))
+    {
+        excl_remove_dir (dir, update_dir, entries);
+        return R_SKIP_ALL;
+    }
     if (ignore_directory (update_dir))
     {
 	/* print the warm fuzzy message */
