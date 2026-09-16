@@ -78,13 +78,17 @@ namespace
 	void GetUserConfigFile(const char *product, const char *key, cvs::filename& fn)
 	{
   		struct passwd *pw = getpwuid(getuid());
+		/* a uid without a passwd entry (containers) has no pw; fall back to $HOME */
+		const char *home = (pw && pw->pw_dir) ? pw->pw_dir : getenv("HOME");
+		if(!home)
+			home = "";
 
 		if(!product || !strcmp(product,"cvsnt"))
 			product = "cvs";
 
-		cvs::sprintf(fn,80,"%s/.%s",pw->pw_dir?pw->pw_dir:"",product);
+		cvs::sprintf(fn,80,"%s/.%s",home,product);
   		mkdir(fn.c_str(),0777);
-		cvs::sprintf(fn,80,"%s/.cvs/%s",pw->pw_dir?pw->pw_dir:"",key?key:"config");
+		cvs::sprintf(fn,80,"%s/.cvs/%s",home,key?key:"config");
 
   		CServerIo::trace(2,"Config file name %s",fn.c_str());
 	}

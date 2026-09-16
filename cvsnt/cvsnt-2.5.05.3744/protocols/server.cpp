@@ -134,7 +134,10 @@ int server_connect(const struct protocol_interface *protocol, int verify_only)
 		GetUserNameA(current_user,&dwLen);
 	}
 #else
-	strncpy(current_user,getpwuid(geteuid())->pw_name,sizeof(current_user));
+	{
+		struct passwd *pw = getpwuid(geteuid());
+		strncpy(current_user,pw?pw->pw_name:"",sizeof(current_user));
+	}
 #endif
 
 	if(current_server()->current_root->username)
