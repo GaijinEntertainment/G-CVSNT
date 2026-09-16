@@ -256,7 +256,11 @@ jobs:
         shell: cmd
         working-directory: ${{ env.SRC }}
         run: msbuild cvsnt.vcxproj %MSB%
-      - name: Pack client zip (protocols pserver, sspi, ssh, server, fork, enum; the plugins cvsnt.vcxproj builds)
+      - name: Build the ext protocol plugin (cvsnt.vcxproj does not reference it)
+        shell: cmd
+        working-directory: ${{ env.SRC }}
+        run: msbuild protocols\ext_protocol.vcxproj %MSB%
+      - name: Pack client zip (protocols pserver, sspi, ssh, server, fork, enum, ext; the info trigger)
         shell: pwsh
         working-directory: ${{ env.SRC }}
         env:
@@ -275,7 +279,7 @@ jobs:
             ForEach-Object { Copy-Item $_.FullName "$stage\protocols" }
           Get-ChildItem -Recurse -Filter *.dll -File | Where-Object FullName -match 'Releasex64\\triggers\\' |
             ForEach-Object { Copy-Item $_.FullName "$stage\triggers" }
-          foreach ($p in "pserver", "sspi", "ssh", "server", "fork", "enum") {
+          foreach ($p in "pserver", "sspi", "ssh", "server", "fork", "enum", "ext") {
             if (-not (Test-Path "$stage\protocols\$p.dll")) { throw "protocol plugin $p.dll not built" }
           }
           if (-not (Test-Path "$stage\triggers\info.dll")) { throw "trigger plugin info.dll not built" }
