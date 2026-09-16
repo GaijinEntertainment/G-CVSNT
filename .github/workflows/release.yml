@@ -115,9 +115,12 @@ jobs:
           rm -f "$GITHUB_WORKSPACE"/dist/*-dbgsym_*.deb    # debian builds them by default; not released
           ls -la "$GITHUB_WORKSPACE/dist"
       - name: Install the packages
+        env:
+          BUILD: ${{ needs.version.outputs.build }}
         run: |
           DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends ./dist/*.deb
           cvs version
+          test "$(cvs version -b)" = "$BUILD"
           dpkg -l 'cvsnt*' | grep '^ii'
       - uses: actions/upload-artifact@v4
         with:
@@ -173,6 +176,8 @@ jobs:
           find rpmbuild/RPMS rpmbuild/SRPMS -name '*.rpm' -exec cp {} "$GITHUB_WORKSPACE/dist/" \;
           ls -la "$GITHUB_WORKSPACE/dist"
       - name: Install the packages
+        env:
+          BUILD: ${{ needs.version.outputs.build }}
         run: |
           # cvsnt-server requires xinetd, which el9 no longer ships; the server
           # package is not installable there until it gains a systemd socket unit
@@ -180,6 +185,7 @@ jobs:
           dnf list --available xinetd >/dev/null 2>&1 || pkgs=$(echo "$pkgs" | grep -v '/cvsnt-server-[0-9]')
           dnf install -y $pkgs
           cvs version
+          test "$(cvs version -b)" = "$BUILD"
           rpm -qa 'cvsnt*'
       - uses: actions/upload-artifact@v4
         with:
@@ -230,8 +236,11 @@ jobs:
       - name: Smoke test
         working-directory: ${{ env.SRC }}/osx/Distribution_folder/Package_Root/usr/local
         # the package is built to live in /usr/local; point dyld at the staged libs
+        env:
+          BUILD: ${{ needs.version.outputs.build }}
         run: |
           DYLD_LIBRARY_PATH="$PWD/lib" bin/cvsnt version
+          test "$(DYLD_LIBRARY_PATH="$PWD/lib" bin/cvsnt version -b)" = "$BUILD"
           otool -L bin/cvsnt lib/*.dylib | grep -E '/opt/homebrew|/usr/local/(opt|Cellar)' && exit 1 || true
           # only versioned copies of the bundled third-party libraries
           ls lib | grep -E '^lib(ssl|crypto|zstd)\.dylib$' && exit 1 || true
@@ -396,9 +405,12 @@ jobs:
             ${{ steps.img.outputs.prefix }}-cvslockd:${{ steps.img.outputs.vsha }}
             ${{ steps.img.outputs.prefix }}-cvslockd:latest
       - name: Smoke test
+        env:
+          BUILD: ${{ needs.version.outputs.build }}
         run: |
           P="${{ steps.img.outputs.prefix }}"
           docker run --rm --entrypoint /usr/local/cvsnt/bin/cvs "$P-authserver:$VERSION" version | grep 'CVSNT'
+          test "$(docker run --rm --entrypoint /usr/local/cvsnt/bin/cvs "$P-authserver:$VERSION" version -b)" = "$BUILD"
           # start every image through its own entrypoint with the minimum
           # configuration and require it to still be running afterwards
           mkdir -p /tmp/cvs /tmp/conf && printf 'LockServer=none\n' > /tmp/conf/PServer && : > /tmp/conf/Plugins
