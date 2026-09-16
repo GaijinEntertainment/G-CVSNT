@@ -252,10 +252,10 @@ jobs:
         shell: cmd
         working-directory: ${{ env.SRC }}
         run: msbuild keyValueServer\proxy\cafs_proxy.vcxproj %MSB%
-      - name: Build cvs.exe (retry once on the transient mt.exe failure)
+      - name: Build cvs.exe
         shell: cmd
         working-directory: ${{ env.SRC }}
-        run: msbuild cvsnt.vcxproj %MSB% || msbuild cvsnt.vcxproj %MSB%
+        run: msbuild cvsnt.vcxproj %MSB%
       - name: Pack client zip (protocols pserver, sspi, ssh, server, fork, enum; the plugins cvsnt.vcxproj builds)
         shell: pwsh
         working-directory: ${{ env.SRC }}
