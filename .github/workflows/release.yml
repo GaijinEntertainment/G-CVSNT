@@ -244,19 +244,10 @@ jobs:
     steps:
       - uses: actions/checkout@v4
       - uses: microsoft/setup-msbuild@v2
-      - name: Repo-state workarounds (longfilenames.xml is not tracked; genbuild.ico is rejected by current SDKs)
+      - name: Repo-state workaround (genbuild.ico is rejected by current SDKs)
         shell: cmd
         working-directory: ${{ env.SRC }}
-        run: |
-          > longfilenames.xml echo ^<?xml version="1.0" encoding="UTF-8" standalone="yes"?^>
-          >> longfilenames.xml echo ^<assembly xmlns="urn:schemas-microsoft-com:asm.v1" manifestVersion="1.0"^>
-          >> longfilenames.xml echo   ^<application xmlns="urn:schemas-microsoft-com:asm.v3"^>
-          >> longfilenames.xml echo     ^<windowsSettings^>
-          >> longfilenames.xml echo       ^<longPathAware xmlns="http://schemas.microsoft.com/SMI/2016/WindowsSettings"^>true^</longPathAware^>
-          >> longfilenames.xml echo     ^</windowsSettings^>
-          >> longfilenames.xml echo   ^</application^>
-          >> longfilenames.xml echo ^</assembly^>
-          type nul > genbuild\genbuild.rc
+        run: type nul > genbuild\genbuild.rc
       - name: Build cafs_proxy.exe
         shell: cmd
         working-directory: ${{ env.SRC }}
