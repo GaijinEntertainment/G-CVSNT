@@ -29,5 +29,7 @@ Documentation
 * [docs/](docs/) — architecture, blob storage, protocols, repository layout, server operations,
   client usage and a source map
 * [HOWTOBUILD.md](HOWTOBUILD.md) — building on Windows, Linux and macOS
+* [docker/](docker/README.md) — the server in containers, from an empty host to a working
+  repository; [docker/sssd/](docker/sssd/README.md) for directory logins
 * [_reports/](_reports/) — code-analysis findings and performance analyses (lands in the next
   slice of the audit series; a forward reference on this branch)
