@@ -17,6 +17,7 @@ files.
 Build instructions are in INSTALL.  Typically, the following is
 sufficient:
 
+ $ autoreconf -i   (generates configure and INSTALL from a fresh checkout)
  $ ./configure
  $ make
  $ make check

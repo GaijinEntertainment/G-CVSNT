@@ -253,10 +253,6 @@
       <EnableCOMDATFolding />
       <AdditionalLibraryDirectories>..\external_libs\Win32;.\external_libs\Win32;</AdditionalLibraryDirectories>
     </Link>
-    <PostBuildEvent>
-      <Message>Deploying</Message>
-      <Command>"$(SolutionDir)\tonys scripts\debug cvs.bat" "$(SolutionDir)"</Command>
-    </PostBuildEvent>
     <Manifest>
       <AdditionalManifestFiles>longfilenames.xml %(AdditionalManifestFiles)</AdditionalManifestFiles>
     </Manifest>
