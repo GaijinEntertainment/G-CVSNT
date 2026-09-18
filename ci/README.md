@@ -8,11 +8,6 @@ by hand; nothing here needs credentials.
 | `.github/workflows/test.yml` | pull requests; `workflow_dispatch` with a PR list | builds base + PRs, runs every suite on Linux and Windows, runs the `:pserver:` scenario |
 | `.github/workflows/release.yml` | push of a `v*` tag; `workflow_dispatch` | builds deb/rpm/macOS/Windows packages and server images, drafts a GitHub release |
 
-## Fork and enable Actions
-
-Fork `GaijinEntertainment/G-CVSNT`, push this branch, and enable Actions (**Settings → Actions →
-General → Allow all actions**; the default **Read repository contents** permission is enough).
-
 ## Running a PR set
 
 **Actions → test → Run workflow**:
@@ -21,12 +16,12 @@ General → Allow all actions**; the default **Read repository contents** permis
 | --- | --- |
 | `prs` | PR numbers and/or branch names, comma-separated, merged onto `base` **in this order**; empty = base only |
 | `base` | Base branch, default `master` |
-| `source_repo` | `owner/repo` to fetch `base` and `prs` from, default `GaijinEntertainment/G-CVSNT` |
+| `source_repo` | `owner/repo` to fetch `base` and `prs` from; defaults to this repository, override only to test against a different source |
 
 Example: `prs: 28,29,30` with `base: master` merges those three PR heads onto `master` in order
 and runs the full suite on the result; `integrate` stops at the first conflict, naming the item
-and the conflicting files. No secrets are needed against a public repo; `SOURCE_REPO_TOKEN`
-(read-only PAT) is only used for a private `source_repo`.
+and the conflicting files. `SOURCE_REPO_TOKEN` (read-only PAT) is only needed when `source_repo`
+is overridden to a private repository.
 
 ## What it does
 
