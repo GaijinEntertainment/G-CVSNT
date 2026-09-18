@@ -23,6 +23,11 @@ if [ -n "$EXPECTED_BUILD" ]; then
 fi
 ls "$PREFIX/lib/cvsnt/protocols/ext.so" >/dev/null   # the -ku case needs it, or it skips
 
+if [ ! -f "$SRC/testcvs/regress.py" ]; then
+  echo "::error::$SRC/testcvs/regress.py not found — this tree has no test suites yet (they arrive with an audit branch, e.g. audit/02-analysis-reports-and-fixes); pass a base/prs combination that includes testcvs/"
+  exit 1
+fi
+
 cvslockd
 sleep 1
 

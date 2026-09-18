@@ -259,8 +259,10 @@ jobs:
 
       - name: unit_tests (testcvs/unit, /MD to match the in-tree zlib/zstd CRT)
         shell: pwsh
-        working-directory: src/${{ env.SRC }}/testcvs/unit
+        working-directory: src/${{ env.SRC }}/testcvs
         run: |
+          if (-not (Test-Path unit)) { throw "testcvs/unit not found — this tree has no unit tests yet (they arrive with an audit branch, e.g. audit/02-analysis-reports-and-fixes); pass a base/prs combination that includes testcvs/unit" }
+          cd unit
           $root = (Resolve-Path ..\..).Path
           $zlib = Get-ChildItem -Path $root -Recurse -Filter zlib.lib -File | Where-Object FullName -match 'x64|Releasex64' | Select-Object -First 1
           $zstd = Get-ChildItem -Path $root -Recurse -Filter zstd.lib -File | Where-Object FullName -match 'x64|Releasex64' | Select-Object -First 1
