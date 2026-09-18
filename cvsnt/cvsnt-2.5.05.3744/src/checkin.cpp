@@ -16,6 +16,7 @@
  */
 
 #include "cvs.h"
+#include "access_log.h"
 #include "fileattr.h"
 #include "edit.h"
 
@@ -116,6 +117,8 @@ int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
 	    vers = Version_TS (finfo, NULL, tag, NULL, 1, set_time, 0);
 	    history_write (type, NULL, vers->vn_rcs,
 			   finfo->file, finfo->repository,bugid,message);
+	    access_log_file ("write", type == 'A' ? "add" : "modify", finfo->update_dir, finfo->repository,
+			     finfo->file, vers->vn_rcs, tag, NULL, 0);
 
 		{
 			CMD5Calc *md5 = NULL;

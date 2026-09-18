@@ -16,6 +16,7 @@
 #include "buffer.h"
 #include "savecwd.h"
 #include "sha_blob_reference.h"
+#include "access_log.h"
 #include "../ca_blobs_fs/streaming_blobs.h"
 #include <../keyValueServer/include/blob_sockets.h>
 #include <../keyValueServer/include/blob_hash_util.h>
@@ -3280,6 +3281,8 @@ error  \n");
 	lib.CloseAllTriggers(); /* This command has finished */
 	tf_loaded=false;
 
+	access_log_flush (); /* before the client sees "ok" */
+
 	if (errs)
 		/* We will have printed an error message already.  */
 		buf_output0 (buf_to_net, "error  \n");
@@ -4077,6 +4080,11 @@ static void serve_expand_modules(char *arg)
 
 static void serve_noop (char *arg)
 {
+	/* edit/unedit notifications are logged from here, not from a command routed
+	   through do_cvs_command, so name the command "noop" rather than leaving
+	   $cmd as the preceding command. */
+	const char *saved_command_name = server_command_name;
+	server_command_name = "noop";
 
     server_write_entries();
 	server_write_renames();
@@ -4084,6 +4092,9 @@ static void serve_noop (char *arg)
 		buf_output0 (buf_to_net, "error \n");
 	else
 		buf_output0 (buf_to_net, "ok\n");
+	access_log_flush (); /* server_notify may have logged edit/unedit records */
+
+	server_command_name = saved_command_name;
     buf_flush (buf_to_net, 1);
 }
 
@@ -4476,6 +4487,23 @@ void server_updated (
 
 	new_entries_ex_line();
 
+	/* Prepare the access-log read record here, where filebuf still holds the
+	   blob reference, but defer writing it until the payload has actually been
+	   queued below -- a read that fails mid-transfer must not be recorded. */
+	const char *al_kind = NULL;
+	char al_hash[hash_encoded_size + 1] = "";
+	if (access_log_enabled)
+	{
+	    al_kind = updated == SERVER_BLOB_REF ? "blobref"
+		    : updated == SERVER_MERGED ? "merged"
+		    : updated == SERVER_PATCHED ? "patched"
+		    : updated == SERVER_RCS_DIFF ? "rcsdiff"
+		    : updated == SERVER_UPDATED_META ? "meta"
+		    : "updated";
+	    if (updated == SERVER_BLOB_REF && filebuf != NULL)
+		get_blob_reference_content_hash ((const unsigned char *) filebuf->data->bufp, blob_reference_size, al_hash);
+	}
+
 	if (updated == SERVER_UPDATED)
 	{
 	    Node *node;
@@ -4552,13 +4580,22 @@ void server_updated (
                 TRACE(3,"read and output file %s (%s)", finfo->file, finfo->fullname);
     			f = CVS_FOPEN (finfo->file, "rb");
     			if (f == NULL)
+    			{
+    				CServerIo::log (CServerIo::logError, "cannot read %s to send to client: %s", finfo->file, strerror (errno));
     				error (1, errno, "reading %s", fn_root(finfo->fullname));
+    			}
     			status = buf_read_file (f, size, &list, &last);
     			if (status != 0)
+    			{
+    				CServerIo::log (CServerIo::logError, "failed reading %s to send to client", finfo->file);
     				error (1, ferror (f) ? errno : 0, "reading %s",
     				   fn_root(finfo->fullname));
+    			}
     			if (fclose (f) == EOF)
+    			{
+    				CServerIo::log (CServerIo::logError, "cannot close %s after sending to client: %s", finfo->file, strerror (errno));
     				error (1, errno, "reading %s", fn_root(finfo->fullname));
+    			}
     	    }
     	}
 
@@ -4582,6 +4619,12 @@ void server_updated (
     	    buf_free (filebuf);
     	}
     }
+
+	/* The payload is queued; now it is safe to record the read. */
+	if (al_kind)
+	    access_log_file ("read", al_kind, finfo->update_dir, finfo->repository, finfo->file,
+			     vers ? vers->vn_rcs : NULL, NULL, al_hash,
+			     updated == SERVER_UPDATED_META ? 0 : size);
 	/* Note we only send a newline here if the file ended with one.  */
 
 	/*
@@ -4622,6 +4665,11 @@ void server_updated (
 		buf_output0(buf_to_net,"Removed ");
 	else
 		buf_output0(buf_to_net,"Remove-entry ");
+	/* Remove-entry is entry bookkeeping (e.g. after committing a removal);
+	   only a real "Removed" means the client lost a file. */
+	if (access_log_enabled && kill_scratched_file)
+	    access_log_file ("read", "removed", finfo->update_dir, finfo->repository,
+			     finfo->file, vers ? vers->vn_rcs : NULL, NULL, NULL, 0);
 	output_dir (finfo->update_dir, finfo->repository);
 	server_buf_output0(buf_to_net,finfo->file);
 	buf_output0(buf_to_net,"\n");
@@ -5057,6 +5105,11 @@ void server_cleanup (int sig)
     return;
 
   server_cleanup_already_done = true;
+
+  /* Only on normal or error_exit cleanup (sig == 0); flushing from a real
+     signal handler could re-enter a half-updated access-log buffer. */
+  if (sig == 0)
+    access_log_flush ();
 
     /* Do "rm -rf" on the temp directory.  */
     int status;
