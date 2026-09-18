@@ -1,0 +1,5 @@
+# CI test contour: production uses pam_sss.so (SSSD -> AD). There is no
+# directory here and the contour listens on localhost only, so every login is
+# accepted. Never use this in production.
+auth       required     pam_permit.so
+account    required     pam_permit.so

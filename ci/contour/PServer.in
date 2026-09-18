@@ -1,0 +1,14 @@
+# CI test contour, not a production config. up.sh appends BlobOTP.
+Repository0=/data/repos/cvs
+Repository0Name=/cvs
+Repository0Description=CI test repository
+Repository0Default=1
+Repository0Publish=0
+Repository0Online=1
+LockServer=cvslockd:2402
+LockServerLocal=0
+NoReverseDns=1
+RunAsUser=cvs
+CompressionLevel=0
+EncryptionLevel=0
+AllowTrace=1

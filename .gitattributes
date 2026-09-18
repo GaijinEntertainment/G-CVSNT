@@ -1,0 +1,11 @@
+# Files the Linux server build and the CI scripts consume must stay LF even
+# on a Windows checkout with core.autocrlf=true: autoreconf rejects a CRLF
+# continuation in configure.in, and xinetd silently loads zero services
+# from a CRLF config.
+ci/**                    text eol=lf
+docker/**                text eol=lf
+*.sh                     text eol=lf
+*.am                     text eol=lf
+*.m4                     text eol=lf
+configure.in             text eol=lf
+configure                text eol=lf
