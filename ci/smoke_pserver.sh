@@ -1,23 +1,7 @@
 #!/usr/bin/env bash
-# Functional scenario through :pserver: against a freshly initialised
-# repository (ci/contour).
-#
-#   smoke_pserver.sh <cvs binary> <work dir>
-#   ROOT   CVS root, default :pserver:cvs:cvs@127.0.0.1:2401/cvs
-#
-# Every mutation (add, commit, remove, commit, modify) is followed by
-# "update -dP" in a second working copy and a full tree compare against the
-# first one, plus what the open PRs need: a binary commit (blob push through
-# cafs_server), a 400-file commit (crosses the >= 8 KiB output batching of
-# PR #29), tag, branch switch.
-#
-# Not idempotent: the repository must be fresh (the contour recreates it
-# with "docker compose down -v").
 set -euo pipefail
 CVS="$1"
 W="$2"
-# every cvs call is bounded: a hung client fails the step with a message
-# instead of eating the runner until the job timeout
 CVS_TIMEOUT=${CVS_TIMEOUT:-120}
 cvs_cmd() {
   timeout "$CVS_TIMEOUT" "$CVS" "$@"
@@ -32,20 +16,8 @@ cd "$W"
 
 step() { echo; echo "### $*"; }
 
-# Text files land in a working copy with the platform line ending, so compare
-# text modulo CR; binaries byte for byte.
 cmp_text() { diff <(tr -d '\r' < "$1") <(tr -d '\r' < "$2") > /dev/null; }
 hash_tree() { (cd "$1" && find . -type f -not -path '*/CVS/*' | LC_ALL=C sort | xargs -r sha256sum); }
-# Every file under <source dir> must come back from <working copy> intact:
-# .txt modulo CR, everything else byte for byte. Two checkouts agreeing does
-# not prove that: an import path that stores a blob reference as file content
-# hands the same wrong bytes to every checkout (ci/repro_import_kB.sh).
-# A mismatch is recorded, not fatal: the rest of the scenario still runs and
-# the script exits 1 at the end, so one defect does not hide the others.
-# With a third argument "known-import-defect" the mismatches are the known
-# import -kB data loss: reported as warnings, the job stays green.
-# ci/repro_import_kB.sh in the workflow fails the job once that defect
-# stops reproducing, so this mode cannot outlive the bug.
 SOURCE_MISMATCH=0
 IMPORT_DEFECT_SEEN=0
 compare_with_source() {
@@ -69,12 +41,7 @@ compare_with_source() {
   echo "    compared with the source: $src"
   return 0
 }
-# <path> <total bytes>: two-byte binary header, then 'x' filler. Unambiguously
-# binary by content, so the client's automatic -kB on a .dat name is what gets
-# exercised; no cvswrappers entry is involved.
 mkbin() { { printf '\000\377'; head -c $(( $2 - 2 )) /dev/zero | tr '\0' 'x'; } > "$1"; }
-# After "update -dP" in wc2, both working copies must hold the same files with
-# the same content.
 sync_and_compare() {
   (cd wc2 && cvs_cmd -Q update -dP)
   if ! diff <(hash_tree proj) <(hash_tree wc2); then
@@ -134,8 +101,6 @@ test ! -f wc2/n.dat
 
 step "tag / log / status / history"
 (cd proj && cvs_cmd tag SMOKE_TAG)
-# capture, then show: piping cvs into head closes its stdout early and the
-# client gets SIGPIPE mid-output
 (cd proj && cvs_cmd log a.txt > ../log.out && head -3 ../log.out)
 (cd proj && cvs_cmd status a.txt > ../status.out && head -3 ../status.out)
 cvs_cmd -d "$ROOT" history -a -x MAR > history.out 2>&1 || true

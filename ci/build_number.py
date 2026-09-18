@@ -18,7 +18,7 @@ import argparse
 import subprocess
 import sys
 
-BUILD_FROB = 0          # keep in sync with genbuild.cpp
+BUILD_FROB = 0
 
 
 def build_number(commit_ts):

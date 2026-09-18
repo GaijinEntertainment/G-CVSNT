@@ -1,14 +1,7 @@
 name: test
 
-# Builds the tree and runs every suite on every pull request and every push to a
-# ci/** branch, and on demand
-# for "base + these PRs": workflow_dispatch merges the listed PR heads onto
-# the base branch in order and tests the result. ci/README.md explains how to
-# use it from a fork.
-
 on:
   pull_request:
-  # a push to a ci/** branch tests that branch's own tree, like a pull request
   push:
     branches: ["ci/**"]
   workflow_dispatch:
@@ -37,11 +30,6 @@ env:
   SRC: cvsnt/cvsnt-2.5.05.3744
 
 jobs:
-  # --------------------------------------------------------------------------
-  # Produces the exact source tree every other job builds: the PR merge commit
-  # on pull_request, or base + the listed PRs on workflow_dispatch. build.h is
-  # regenerated from the commit date (ci/build_number.py), so the version is a
-  # function of the commit and identical on Linux and Windows.
   integrate:
     name: Integrate (${{ github.event_name == 'workflow_dispatch' && format('{0} + [{1}]', inputs.base, inputs.prs) || 'pull request' }})
     runs-on: ubuntu-latest
@@ -61,8 +49,6 @@ jobs:
           PRS: ${{ inputs.prs }}
           BASE: ${{ inputs.base }}
           SOURCE_REPO: ${{ inputs.source_repo }}
-          # only needed when source_repo is private; a fine-grained PAT with
-          # read access to contents and pull requests
           TOKEN: ${{ secrets.SOURCE_REPO_TOKEN }}
         run: |
           set -euo pipefail
@@ -99,9 +85,6 @@ jobs:
             merged="${merged} ${item}"
           done
 
-          # The tree under test is base + PRs; only the CI tooling and the two
-          # build fixes it relies on are taken from the commit this workflow
-          # runs from. Nothing else of this repository's branch leaks in.
           git checkout "$GITHUB_SHA" -- ci docker .github .gitattributes .dockerignore \
             "$SRC/longfilenames.xml" "$SRC/genbuild/genbuild.vcxproj"
           git diff --cached --quiet || git commit -qm "ci: overlay CI tooling from ${GITHUB_SHA::7}"
@@ -122,9 +105,6 @@ jobs:
           } | tee -a "$GITHUB_OUTPUT"
 
       - name: Export the source tree
-        # git archive honours .gitattributes, so the export is LF where the
-        # Linux build needs it regardless of what the runner checked out.
-        # build.h comes from the working tree, not the commit.
         run: |
           set -euo pipefail
           mkdir export
@@ -140,7 +120,6 @@ jobs:
           retention-days: 3
           if-no-files-found: error
 
-  # --------------------------------------------------------------------------
   linux-server-tests:
     name: Linux server (${{ needs.integrate.outputs.version }})
     needs: integrate
@@ -191,14 +170,6 @@ jobs:
             -v "$PWD/ci:/ci:ro" -e HOME=/work \
             cvsnt-test:"$VERSION" bash /ci/smoke_pserver.sh /usr/local/cvsnt/bin/cvs /work/smoke
 
-      # Known defect (found 2026-09-16): `cvs import` of a -kB binary stores the
-      # 79-byte blob reference as RCS text, import.cpp has no blob handling.
-      # The smoke reports it as a warning (compare_with_source ... known-import-defect);
-      # this step keeps that mode honest: it FAILS the job as soon as the
-      # reproduction passes, i.e. when the defect is fixed and the warning
-      # mode in ci/smoke_pserver.sh must be removed. -kB is passed explicitly
-      # so the guard tests import.cpp itself, not the client's binary
-      # auto-detection (PR #34), which a tree under test may not carry.
       - name: "Known defect check: import of -kB binaries must still reproduce"
         timeout-minutes: 5
         run: |
@@ -212,7 +183,6 @@ jobs:
         if: always()
         run: bash ci/contour/down.sh ${{ job.status == 'failure' && 'logs' || '' }}
 
-  # --------------------------------------------------------------------------
   windows-client:
     name: Windows client (${{ needs.integrate.outputs.version }})
     needs: integrate
@@ -232,8 +202,6 @@ jobs:
 
       - uses: microsoft/setup-msbuild@v2
 
-      # build.h in the exported tree carries the build number; genbuild only
-      # regenerates it when the file is missing (genbuild.vcxproj)
       - name: Repo-state workaround (genbuild.ico is rejected by current SDKs; from ci-release)
         shell: cmd
         working-directory: src/${{ env.SRC }}
@@ -284,9 +252,6 @@ jobs:
           python regress.py --cvs ../Releasex64/cvs.exe --libdir ../Releasex64 2>&1 | tee regress.log
           test "${PIPESTATUS[0]}" -eq 0
 
-      # The exported tree is LF (git archive), but cvs on Windows checks text
-      # files out with CRLF and testcvs.py compares them byte for byte with
-      # the import source; locally core.autocrlf gives CRLF sources
       - name: CRLF for the testcvs text fixtures
         shell: pwsh
         working-directory: src/${{ env.SRC }}/testcvs

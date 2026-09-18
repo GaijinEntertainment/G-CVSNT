@@ -1,12 +1,4 @@
 #!/bin/bash
-# Reproduces the `cvs import` data loss for -kB files: the server stores the
-# 79-byte session blob reference (or, for a server-forced kopt, the raw text
-# body) as the RCS text instead of the file content.  Exit 1 on any DIFFER.
-#
-#   repro_import_kB.sh <cvs.exe> <cvsroot> <workdir> [import-flags]
-#
-# Default import is plain (the new client sniffs .dat as binary and forces -kB);
-# pass -kB as the 4th argument to make the old client hit the same server path.
 set -u
 export MSYS_NO_PATHCONV=1
 CVS="$1"
@@ -18,7 +10,7 @@ MOD="repro_import_kb_$(date +%Y%m%d%H%M%S)_$$"
 rm -rf "$W"; mkdir -p "$W/src"
 cd "$W"
 
-mkfile() {  # <name> <total bytes>: two-byte binary header, then 'x' filler
+mkfile() {
     printf '\000\377' > "src/$1"
     head -c $(( $2 - 2 )) /dev/zero | tr '\0' 'x' >> "src/$1"
 }

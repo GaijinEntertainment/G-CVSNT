@@ -1,9 +1,3 @@
-# CI test contour: cvslockd + authserver (pserver) + cafs-server, from the
-# images built in the same job. The blob secret is generated per run by
-# up.sh and never committed.
-#
-# CONTOUR_CONF is a directory holding PServer (with BlobOTP) and an empty
-# Plugins; up.sh creates it.
 name: cvs-ci
 
 services:
@@ -17,8 +11,6 @@ services:
     volumes:
       - repos:/data/repos
       - ${CONTOUR_CONF:?}:/etc/cvsnt:ro
-      # the image's PAM stack ends in pam_sss/pam_deny; there is no directory
-      # here, so accept every login on this localhost-only contour
       - ./pam-cvsnt:/etc/pam.d/cvsnt:ro
     ports:
       - "127.0.0.1:2401:2401"
@@ -31,7 +23,6 @@ services:
     environment:
       DIR_FOR_ROOTS: /data/repos
       ALLOW_TRUST: "on"
-      # production runs "encryption", not "mandatory_encryption"
       ENCRYPTION: encryption
       SECRET: ${CAFS_SECRET:?}
     volumes:
