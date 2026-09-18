@@ -15991,9 +15991,14 @@ cvs -s TESTDIR=/work/local/tests
 
           <listitem>
             <para>Control what is logged to the
-            <command>CVSROOT/history</command> file. Default of
-            <command>TOFEWGCMAR</command> (or simply <command>all</command>)
+            <command>CVSROOT/history</command> file and passed to the
+            <command>CVSROOT/historyinfo</command> trigger. Default of
+            <command>TOEFWUCGMAReuPD</command> (or simply <command>all</command>)
             will log all transactions. Any subset of the default is legal.
+            The record letters are case sensitive, so <command>E</command>
+            (export) and <command>e</command> (edit) are distinct types,
+            while <command>all</command> itself is matched without regard
+            to case.
             (For example, to only log transactions that modify the
             <command>*,v</command> files, use
             <command>LogHistory=TMAR</command>.)</para>
