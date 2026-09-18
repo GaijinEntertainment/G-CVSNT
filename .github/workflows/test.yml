@@ -1,0 +1,296 @@
+name: test
+
+on:
+  pull_request:
+  push:
+    branches: ["ci/**"]
+  workflow_dispatch:
+    inputs:
+      prs:
+        description: "PR numbers or branch names to merge onto base, in order, comma-separated (empty = base only)"
+        required: false
+        default: ""
+      base:
+        description: "Base branch"
+        required: false
+        default: master
+      source_repo:
+        description: "owner/repo the base and the PRs are fetched from"
+        required: false
+        default: GaijinEntertainment/G-CVSNT
+
+permissions:
+  contents: read
+
+concurrency:
+  group: test-${{ github.event.pull_request.number || github.run_id }}
+  cancel-in-progress: true
+
+env:
+  SRC: cvsnt/cvsnt-2.5.05.3744
+
+jobs:
+  integrate:
+    name: Integrate (${{ github.event_name == 'workflow_dispatch' && format('{0} + [{1}]', inputs.base, inputs.prs) || 'pull request' }})
+    runs-on: ubuntu-latest
+    timeout-minutes: 15
+    outputs:
+      version: ${{ steps.v.outputs.version }}
+      build: ${{ steps.v.outputs.build }}
+      sha7: ${{ steps.v.outputs.sha7 }}
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+
+      - name: Merge the requested PRs onto ${{ inputs.base }}
+        if: github.event_name == 'workflow_dispatch'
+        env:
+          PRS: ${{ inputs.prs }}
+          BASE: ${{ inputs.base }}
+          SOURCE_REPO: ${{ inputs.source_repo }}
+          TOKEN: ${{ secrets.SOURCE_REPO_TOKEN }}
+        run: |
+          set -euo pipefail
+          git config user.name "cvsnt-ci"
+          git config user.email "cvsnt-ci@users.noreply.github.com"
+          if [ -n "$TOKEN" ]; then
+            git config --global "url.https://x-access-token:${TOKEN}@github.com/.insteadOf" "https://github.com/"
+          fi
+          url="https://github.com/${SOURCE_REPO}.git"
+
+          git fetch --no-tags "$url" "refs/heads/${BASE}:refs/remotes/src/base"
+          git checkout -B ci/integration refs/remotes/src/base
+          echo "base ${BASE} = $(git rev-parse --short=7 HEAD)"
+
+          merged=""
+          IFS=, read -ra items <<< "$PRS"
+          for raw in "${items[@]}"; do
+            item=$(echo "$raw" | xargs)
+            [ -z "$item" ] && continue
+            if [[ "$item" =~ ^[0-9]+$ ]]; then
+              ref="refs/pull/${item}/head"; label="PR #${item}"
+            else
+              ref="refs/heads/${item}"; label="branch ${item}"
+            fi
+            git fetch --no-tags "$url" "+${ref}:refs/remotes/src/item"
+            head=$(git rev-parse --short=7 refs/remotes/src/item)
+            if ! git merge --no-ff --no-edit -m "ci: merge ${label} (${head})" refs/remotes/src/item; then
+              echo "::error title=Merge conflict::${label} (${head}) does not merge onto ${BASE}${merged:+ after${merged}}"
+              echo "Conflicting files:"
+              git diff --name-only --diff-filter=U
+              exit 1
+            fi
+            echo "merged ${label} at ${head}"
+            merged="${merged} ${item}"
+          done
+
+          git checkout "$GITHUB_SHA" -- ci docker .github .gitattributes .dockerignore \
+            "$SRC/longfilenames.xml" "$SRC/genbuild/genbuild.vcxproj"
+          git diff --cached --quiet || git commit -qm "ci: overlay CI tooling from ${GITHUB_SHA::7}"
+          echo
+          git log --oneline --first-parent -n $(( ${#items[@]} + 2 ))
+
+      - name: Version
+        id: v
+        run: |
+          set -euo pipefail
+          build=$(python3 ci/build_number.py --write "$SRC/build.h")
+          product=$(sed -n 's/^#define[[:space:]]\+CVSNT_PRODUCT_\(MAJOR\|MINOR\|PATCHLEVEL\)[[:space:]]\+\([0-9]\+\).*/\2/p' "$SRC/version_no.h" | paste -sd.)
+          sha7=$(git rev-parse --short=7 HEAD)
+          {
+            echo "build=$build"
+            echo "sha7=$sha7"
+            echo "version=$product.$build-$sha7"
+          } | tee -a "$GITHUB_OUTPUT"
+
+      - name: Export the source tree
+        run: |
+          set -euo pipefail
+          mkdir export
+          git archive --format=tar HEAD | tar -x -C export
+          cp "$SRC/build.h" "export/$SRC/build.h"
+          tar -czf source.tar.gz -C export .
+          ls -la source.tar.gz
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: source-${{ steps.v.outputs.version }}
+          path: source.tar.gz
+          retention-days: 3
+          if-no-files-found: error
+
+  linux-server-tests:
+    name: Linux server (${{ needs.integrate.outputs.version }})
+    needs: integrate
+    runs-on: ubuntu-latest
+    timeout-minutes: 90
+    env:
+      VERSION: ${{ needs.integrate.outputs.version }}
+      EXPECTED_BUILD: ${{ needs.integrate.outputs.build }}
+      CVSNT_IMAGE_PREFIX: cvsnt
+      CVSNT_IMAGE_TAG: ${{ needs.integrate.outputs.version }}
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: source-${{ needs.integrate.outputs.version }}
+      - name: Unpack
+        working-directory: .
+        run: mkdir src && tar -xzf source.tar.gz -C src
+
+      - name: Build the server tree (docker/Dockerfile, stage build)
+        run: |
+          docker build --target build -t cvsnt-build:"$VERSION" -f docker/Dockerfile .
+          docker build -t cvsnt-test:"$VERSION" -f ci/test.Dockerfile --build-arg BASE=cvsnt-build:"$VERSION" .
+
+      - name: regress.py + testcvs.py inside the build image
+        timeout-minutes: 30
+        run: |
+          docker run --rm --user 52:52 --tmpfs /work:uid=52,gid=52,size=2g \
+            -v "$PWD/ci:/ci:ro" -e EXPECTED_BUILD \
+            cvsnt-test:"$VERSION" bash /ci/run_linux_suites.sh
+
+      - name: Server images (authserver, cafs-server, cvslockd) from the same build stage
+        run: |
+          for t in authserver cafs-server cvslockd; do
+            docker build --target "$t" -t "cvsnt-$t:$VERSION" -f docker/Dockerfile .
+          done
+          docker run --rm --entrypoint /usr/local/cvsnt/bin/cvs "cvsnt-authserver:$VERSION" --version | tee /dev/stderr | grep -F "Build $EXPECTED_BUILD"
+
+      - name: Bring up the contour with a fresh repository
+        run: bash ci/contour/up.sh "$RUNNER_TEMP/contour-conf"
+
+      - name: "Smoke scenario through :pserver: (Linux client from the same build)"
+        timeout-minutes: 10
+        run: |
+          docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g \
+            -v "$PWD/ci:/ci:ro" -e HOME=/work \
+            cvsnt-test:"$VERSION" bash /ci/smoke_pserver.sh /usr/local/cvsnt/bin/cvs /work/smoke
+
+      - name: "Known defect check: import of -kB binaries must still reproduce"
+        timeout-minutes: 5
+        run: |
+          if docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g               -v "$PWD/ci:/ci:ro" -e HOME=/work               cvsnt-test:"$VERSION" bash /ci/repro_import_kB.sh /usr/local/cvsnt/bin/cvs               ":pserver:cvs:cvs@127.0.0.1:2401/cvs" /work/repro -kB; then
+            echo "::error title=import -kB data loss no longer reproduces::repro_import_kB.sh passed: import.cpp is fixed, remove the known-import-defect mode from ci/smoke_pserver.sh and make this step a plain regression check"
+            exit 1
+          fi
+          echo "::warning title=import -kB data loss (known defect)::repro_import_kB.sh still fails, the import.cpp defect is present"
+
+      - name: Tear down (drops the repository volume)
+        if: always()
+        run: bash ci/contour/down.sh ${{ job.status == 'failure' && 'logs' || '' }}
+
+  windows-client:
+    name: Windows client (${{ needs.integrate.outputs.version }})
+    needs: integrate
+    runs-on: windows-2022
+    timeout-minutes: 90
+    env:
+      VERSION: ${{ needs.integrate.outputs.version }}
+      EXPECTED_BUILD: ${{ needs.integrate.outputs.build }}
+      MSB: /m /v:m /p:Configuration=Release /p:Platform=x64 /p:PlatformToolset=v143 /p:WindowsTargetPlatformVersion=10.0
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: source-${{ needs.integrate.outputs.version }}
+      - name: Unpack
+        shell: bash
+        run: mkdir src && tar -xzf source.tar.gz -C src
+
+      - uses: microsoft/setup-msbuild@v2
+
+      - name: Repo-state workaround (genbuild.ico is rejected by current SDKs; from ci-release)
+        shell: cmd
+        working-directory: src/${{ env.SRC }}
+        run: type nul > genbuild\genbuild.rc
+
+      - name: Build cvsnt.sln Release|x64
+        shell: cmd
+        working-directory: src/${{ env.SRC }}
+        run: msbuild cvsnt.sln %MSB%
+
+      - name: Stage the client and check what the suites depend on
+        shell: pwsh
+        working-directory: src/${{ env.SRC }}
+        run: |
+          $out = "Releasex64"
+          Copy-Item external_libs\x64\dll\libcrypto-1_1-x64.dll, external_libs\x64\dll\libssl-1_1-x64.dll $out
+          foreach ($f in "cvs.exe", "cvsapi.dll", "cvstools.dll", "protocols\pserver.dll", "protocols\ext.dll", "protocols\server.dll", "triggers\info.dll") {
+            if (-not (Test-Path "$out\$f")) { throw "$f was not built" }
+          }
+          $v = & "$out\cvs.exe" --version
+          $v
+          if (-not ($v -match "Build $env:EXPECTED_BUILD\b")) { throw "cvs.exe does not report Build $env:EXPECTED_BUILD" }
+
+      - name: unit_tests (testcvs/unit, /MD to match the in-tree zlib/zstd CRT)
+        shell: pwsh
+        working-directory: src/${{ env.SRC }}/testcvs
+        run: |
+          if (-not (Test-Path unit)) { throw "testcvs/unit not found — this tree has no unit tests yet (they arrive with an audit branch, e.g. audit/02-analysis-reports-and-fixes); pass a base/prs combination that includes testcvs/unit" }
+          cd unit
+          $root = (Resolve-Path ..\..).Path
+          $zlib = Get-ChildItem -Path $root -Recurse -Filter zlib.lib -File | Where-Object FullName -match 'x64|Releasex64' | Select-Object -First 1
+          $zstd = Get-ChildItem -Path $root -Recurse -Filter zstd.lib -File | Where-Object FullName -match 'x64|Releasex64' | Select-Object -First 1
+          if (-not $zlib -or -not $zstd) { throw "zlib.lib / zstd.lib from the Release|x64 build not found" }
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          $cmd = "call `"$vs\VC\Auxiliary\Build\vcvars64.bat`" && " +
+                 "cl /nologo /EHsc /MD /std:c++17 /I.. /I..\..\ca_blobs_fs /I..\..\src /I..\..\zstd /I..\..\zlib /I..\..\keyValueServer\include " +
+                 "unit_tests.cpp ..\..\ca_blobs_fs\src\streaming_compressors.cpp /Fe:unit_tests.exe " +
+                 "/link `"/LIBPATH:$($zlib.DirectoryName)`" `"/LIBPATH:$($zstd.DirectoryName)`" zlib.lib zstd.lib"
+          cmd /c $cmd
+          if ($LASTEXITCODE -ne 0) { throw "unit_tests did not compile" }
+          .\unit_tests.exe
+          if ($LASTEXITCODE -ne 0) { throw "unit_tests failed" }
+
+      - name: regress.py
+        shell: bash
+        working-directory: src/${{ env.SRC }}/testcvs
+        run: |
+          python regress.py --cvs ../Releasex64/cvs.exe --libdir ../Releasex64 2>&1 | tee regress.log
+          test "${PIPESTATUS[0]}" -eq 0
+
+      - name: CRLF for the testcvs text fixtures
+        shell: pwsh
+        working-directory: src/${{ env.SRC }}/testcvs
+        run: |
+          $utf8 = [Text.UTF8Encoding]::new($false)
+          Get-ChildItem -Recurse -File test_data | Where-Object Extension -ne '.gif' | ForEach-Object {
+            $text = [IO.File]::ReadAllText($_.FullName) -replace "`r?`n", "`r`n"
+            [IO.File]::WriteAllText($_.FullName, $text, $utf8)
+          }
+
+      - name: testcvs.bat (cvs.exe on PATH, plugins next to it)
+        shell: cmd
+        working-directory: src/${{ env.SRC }}/testcvs
+        run: |
+          set PATH=%CD%\..\Releasex64;%PATH%
+          call testcvs.bat > testcvs.log 2>&1
+          type testcvs.log
+
+      - name: Every case executed, none skipped
+        shell: bash
+        working-directory: src/${{ env.SRC }}/testcvs
+        run: bash ../../../ci/check_suite_logs.sh regress.log testcvs.log regress.py
+
+      - name: Pack the client
+        shell: pwsh
+        working-directory: src/${{ env.SRC }}
+        run: |
+          $stage = Join-Path $env:RUNNER_TEMP "cvsnt-$env:VERSION-win-x64"
+          New-Item -ItemType Directory -Force -Path "$stage\protocols", "$stage\triggers" | Out-Null
+          foreach ($f in "cvs.exe", "cvsapi.dll", "cvstools.dll", "libcrypto-1_1-x64.dll", "libssl-1_1-x64.dll") { Copy-Item "Releasex64\$f" $stage }
+          if (Test-Path "Releasex64\cafs_proxy.exe") { Copy-Item "Releasex64\cafs_proxy.exe" $stage }
+          Copy-Item Releasex64\protocols\*.dll "$stage\protocols"
+          Copy-Item Releasex64\triggers\*.dll "$stage\triggers"
+          Copy-Item COPYING "$stage\COPYING"
+          Get-ChildItem -Recurse $stage | Select-Object FullName
+          echo "STAGE=$stage" >> $env:GITHUB_ENV
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: cvsnt-${{ needs.integrate.outputs.version }}-win-x64
+          path: ${{ env.STAGE }}
+          if-no-files-found: error
