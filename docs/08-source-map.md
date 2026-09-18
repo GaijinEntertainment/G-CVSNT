@@ -50,6 +50,7 @@ sending requests) and the server half (executing against the repository), separa
 | `root.cpp` | 1176 | `CVSROOT` string parsing, protocol plugin selection |
 | `modules.cpp` | | Module database |
 | `classify.cpp`, `vers_ts.cpp` | | Deciding a file's state (up-to-date / modified / needs merge / …) |
+| `exclude.cpp` | | Local-only `.cvsexclude` filtering of the working copy (client side) |
 | `hash.cpp` | 521 | The `List`/`Node` container used pervasively for entries, files, directories |
 | `httplib.h` | 6707 | Vendored single-header HTTP client, used by the HTTP blob back-end |
 
