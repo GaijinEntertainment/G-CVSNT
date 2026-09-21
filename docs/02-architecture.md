@@ -14,7 +14,7 @@
                               ▼                    ▼
         ┌──────────────────────────────┐   ┌──────────────────────────┐
         │ inetd/service → protocol lib │   │ cafs_proxy_server        │
-        │      ↓                       │   │  (read-through cache,    │
+        │      ↓                       │   │  (write-through cache,   │
         │ cvs  (server mode)           │   │   near the client)       │
         │      │           │           │   └───────────┬──────────────┘
         │      │           │           │               │ miss → master
@@ -35,8 +35,9 @@ Three independent network services:
 | `cvslockd` | 2402 | Advisory read/write locks shared between concurrent CVS server processes (`src/lock.cpp:190`) |
 | `cafs_server` / `cafs_proxy_server` | 2403 | Content-addressed blob storage (`keyValueServer/server/cafs_server.cpp`) |
 
-The blob channel is deliberately separate. It carries no repository semantics — only
-`hash → bytes` — which is what makes a dumb caching proxy possible.
+The blob channel is deliberately separate. It carries no revision or path semantics — only
+`repository root + hash → bytes`: the `VERS` handshake carries the root, and the server serves
+`<dir_for_roots>/<root>/blobs` from it — which is what makes a dumb caching proxy possible.
 
 ## The single binary
 
@@ -117,20 +118,25 @@ directory, which is a different thing.
    (`src/download_blob_to.cpp`), optionally with several worker threads (`cvs -j N`).
 5. **Client** writes the file, updates `CVS/Entries`, and moves on.
 
-Step 4 is the pivot of the whole design: the CVS connection never carries large payloads, so it stays
-responsive and its cost is proportional to the *number* of files, not their size.
+Step 4 is the pivot of the whole design: on update the CVS connection never carries large
+payloads, so it stays responsive and its cost is proportional to the *number* of files, not their
+size. (Commit has one fallback that does put payload on the CVS connection — see below.)
 
 ## Commit flow for a `-kB` file
 
-1. Client hashes the working file with BLAKE3, compresses it, and **pushes the blob first**
-   (`src/blob_kv_processor.cpp` / `src/blob_http_processor.cpp`). If the store already has that hash,
-   the push is deduplicated server-side and costs one round trip.
+1. Client hashes the working file with BLAKE3 and **pushes the blob first** over the KV protocol
+   (`src/blob_kv_processor.cpp`; the HTTP processor is download-only, `canUpload() == false`). If
+   the store already has that hash, the client's `SIZE` probe reports it and the push is skipped
+   altogether (`src/blob_kv_processor.cpp:144-151`) — no payload bytes move. If the background
+   pre-upload has not finished by send time, the client falls back to `Blob-transfer` with the
+   payload on the CVS connection (`send_blob_file_direct`, `src/client.cpp:5775`).
 2. Client sends `Blob-ref-transfer` with the reference in place of file content.
 3. Server checks in a new revision whose *text* is the 71-byte reference. The shrink from the
    79-byte server-side session marker down to the 71-byte reference happens in
    `RCS_write_binary_rev_data` (`src/rcs_cvt_kB.cpp:91`).
 
-Because the `,v` file grows by ~100 bytes per revision regardless of file size, tag, branch and
+Because the `,v` file grows by only ~250 bytes plus the log message per revision regardless of file
+size (see [05-repository-layout.md](05-repository-layout.md) for the breakdown), tag, branch and
 `rlog` costs stop tracking payload size.
 
 ## Triggers
