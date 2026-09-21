@@ -142,18 +142,23 @@ jobs:
         run: mkdir src && tar -xzf source.tar.gz -C src
 
       - name: Build the server tree (docker/Dockerfile, stage build)
+        id: build
         run: |
           docker build --target build -t cvsnt-build:"$VERSION" -f docker/Dockerfile .
           docker build -t cvsnt-test:"$VERSION" -f ci/test.Dockerfile --build-arg BASE=cvsnt-build:"$VERSION" .
 
       - name: regress.py + testcvs.py inside the build image
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         timeout-minutes: 30
         run: |
+          mkdir -p "$RUNNER_TEMP/suite-logs" && chmod 777 "$RUNNER_TEMP/suite-logs"
           docker run --rm --user 52:52 --tmpfs /work:uid=52,gid=52,size=2g \
-            -v "$PWD/ci:/ci:ro" -e EXPECTED_BUILD \
+            -v "$PWD/ci:/ci:ro" -v "$RUNNER_TEMP/suite-logs:/logs" -e EXPECTED_BUILD \
             cvsnt-test:"$VERSION" bash /ci/run_linux_suites.sh
 
       - name: Server images (authserver, cafs-server, cvslockd) from the same build stage
+        id: images
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         run: |
           for t in authserver cafs-server cvslockd; do
             docker build --target "$t" -t "cvsnt-$t:$VERSION" -f docker/Dockerfile .
@@ -161,9 +166,12 @@ jobs:
           docker run --rm --entrypoint /usr/local/cvsnt/bin/cvs "cvsnt-authserver:$VERSION" --version | tee /dev/stderr | grep -F "Build $EXPECTED_BUILD"
 
       - name: Bring up the contour with a fresh repository
+        id: contour
+        if: ${{ !cancelled() && steps.images.outcome == 'success' }}
         run: bash ci/contour/up.sh "$RUNNER_TEMP/contour-conf"
 
       - name: "Smoke scenario through :pserver: (Linux client from the same build)"
+        if: ${{ !cancelled() && steps.contour.outcome == 'success' }}
         timeout-minutes: 10
         run: |
           docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g \
@@ -171,6 +179,7 @@ jobs:
             cvsnt-test:"$VERSION" bash /ci/smoke_pserver.sh /usr/local/cvsnt/bin/cvs /work/smoke
 
       - name: "Known defect check: import of -kB binaries must still reproduce"
+        if: ${{ !cancelled() && steps.contour.outcome == 'success' }}
         timeout-minutes: 5
         run: |
           if docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g               -v "$PWD/ci:/ci:ro" -e HOME=/work               cvsnt-test:"$VERSION" bash /ci/repro_import_kB.sh /usr/local/cvsnt/bin/cvs               ":pserver:cvs:cvs@127.0.0.1:2401/cvs" /work/repro -kB; then
@@ -182,6 +191,14 @@ jobs:
       - name: Tear down (drops the repository volume)
         if: always()
         run: bash ci/contour/down.sh ${{ job.status == 'failure' && 'logs' || '' }}
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: suite-logs-linux-${{ needs.integrate.outputs.version }}
+          path: ${{ runner.temp }}/suite-logs
+          retention-days: 7
+          if-no-files-found: warn
 
   windows-client:
     name: Windows client (${{ needs.integrate.outputs.version }})
@@ -208,11 +225,14 @@ jobs:
         run: type nul > genbuild\genbuild.rc
 
       - name: Build cvsnt.sln Release|x64
+        id: build
         shell: cmd
         working-directory: src/${{ env.SRC }}
         run: msbuild cvsnt.sln %MSB%
 
       - name: Stage the client and check what the suites depend on
+        id: stage
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         shell: pwsh
         working-directory: src/${{ env.SRC }}
         run: |
@@ -226,6 +246,7 @@ jobs:
           if (-not ($v -match "Build $env:EXPECTED_BUILD\b")) { throw "cvs.exe does not report Build $env:EXPECTED_BUILD" }
 
       - name: unit_tests (testcvs/unit, /MD to match the in-tree zlib/zstd CRT)
+        if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: pwsh
         working-directory: src/${{ env.SRC }}/testcvs
         run: |
@@ -246,6 +267,7 @@ jobs:
           if ($LASTEXITCODE -ne 0) { throw "unit_tests failed" }
 
       - name: regress.py
+        if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: bash
         working-directory: src/${{ env.SRC }}/testcvs
         run: |
@@ -253,6 +275,7 @@ jobs:
           test "${PIPESTATUS[0]}" -eq 0
 
       - name: CRLF for the testcvs text fixtures
+        if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: pwsh
         working-directory: src/${{ env.SRC }}/testcvs
         run: |
@@ -263,6 +286,7 @@ jobs:
           }
 
       - name: testcvs.bat (cvs.exe on PATH, plugins next to it)
+        if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: cmd
         working-directory: src/${{ env.SRC }}/testcvs
         run: |
@@ -271,11 +295,14 @@ jobs:
           type testcvs.log
 
       - name: Every case executed, none skipped
+        if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: bash
         working-directory: src/${{ env.SRC }}/testcvs
         run: bash ../../../ci/check_suite_logs.sh regress.log testcvs.log regress.py
 
       - name: Pack the client
+        id: pack
+        if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: pwsh
         working-directory: src/${{ env.SRC }}
         run: |
@@ -290,7 +317,19 @@ jobs:
           echo "STAGE=$stage" >> $env:GITHUB_ENV
 
       - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() && steps.pack.outcome == 'success' }}
         with:
           name: cvsnt-${{ needs.integrate.outputs.version }}-win-x64
           path: ${{ env.STAGE }}
           if-no-files-found: error
+
+
+      - uses: actions/upload-artifact@v4
+        if: ${{ !cancelled() }}
+        with:
+          name: suite-logs-windows-${{ needs.integrate.outputs.version }}
+          path: |
+            src/${{ env.SRC }}/testcvs/regress.log
+            src/${{ env.SRC }}/testcvs/testcvs.log
+          retention-days: 7
+          if-no-files-found: warn

@@ -26,11 +26,20 @@ sleep 1
 
 echo "=== regress.py"
 python3.9 "$SRC/testcvs/regress.py" --cvs "$PREFIX/bin/cvs" --libdir "$PREFIX/lib/cvsnt" 2>&1 | tee regress.log
-test "${PIPESTATUS[0]}" -eq 0
+regress_rc=${PIPESTATUS[0]}
 
 echo "=== testcvs.py"
 rm -rf suite && cp -r "$SRC/testcvs" suite && cd suite
 python3.9 testcvs.py 2>&1 | tee ../testcvs.log
 cd ..
 
-bash "$(dirname "$0")/check_suite_logs.sh" regress.log testcvs.log "$SRC/testcvs/regress.py"
+gate_rc=0
+bash "$(dirname "$0")/check_suite_logs.sh" regress.log testcvs.log "$SRC/testcvs/regress.py" || gate_rc=$?
+
+if [ -d /logs ]; then cp regress.log testcvs.log /logs/ 2>/dev/null || true; fi
+
+if [ "$regress_rc" -ne 0 ] || [ "$gate_rc" -ne 0 ]; then
+  echo "::error::suites failed (regress.py exit $regress_rc, log check exit $gate_rc) - the FAIL lines above name every case, full logs are in the suite-logs artifact"
+  exit 1
+fi
+echo "suites passed"

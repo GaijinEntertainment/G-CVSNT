@@ -33,6 +33,12 @@ is overridden to a private repository.
 - **`windows-client`** (`windows-2022`) — builds the client, runs `unit_tests`, `regress.py`,
   `testcvs.bat`, uploads the client tree as an artifact.
 
+A failing suite does not stop its job: every later step still runs, so one broken case cannot
+hide the rest of the result. Each step is gated on the step it actually needs — the suites gate
+nothing, the contour gates the smoke scenario. `regress.log` and `testcvs.log` are uploaded as
+the `suite-logs-*` artifact from both platforms, failed run or not, and the failing step still
+marks the run red.
+
 `ci/` scripts:
 
 - `build_number.py` — build number from the commit's committer date.
