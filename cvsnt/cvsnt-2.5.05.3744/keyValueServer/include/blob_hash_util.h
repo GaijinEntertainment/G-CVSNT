@@ -93,7 +93,7 @@ inline bool encode_hash_str_to_blob_hash_s(const char *hash_type, const char *ha
 }
 
 inline bool encode_hash_str_to_blob_hash(const char *hash_type, const char *hash_hex_string, unsigned char *blob_hash)
-{ return encode_hash_str_to_blob_hash(hash_type, hash_hex_string, blob_hash); }
+{ return encode_hash_str_to_blob_hash_s(hash_type, hash_hex_string, blob_hash, 32+6); }
 
 //requires: hash_type_capacity >= 8, blob_hash_capacity==32+7, hash_hex_string_capacity>=65
 //prints hash_type, and hash_hex_string, including trailing zero

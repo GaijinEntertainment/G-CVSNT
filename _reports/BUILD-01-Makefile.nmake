@@ -1,0 +1,382 @@
+# ---------------------------------------------------------------------------
+# G-CVSNT Windows client (cvs.exe) - standalone nmake build, x64 Release
+# Replaces cvsnt.sln / MSBuild (no Visual Studio installed).
+# Out-of-tree: every object/lib/exe goes under $(B); the repo is never written.
+# ---------------------------------------------------------------------------
+
+S   = <path-to-cvsnt-2.5.05.3744>
+# EDIT: point S at your checkout's cvsnt/cvsnt-2.5.05.3744 before running.
+# NOTE: the source and flag manifest below duplicates cvsnt.vcxproj (652-709)
+# and the other project files; a change there must be mirrored here or this
+# recipe builds a different product. Generating these variables from the
+# project files (a PowerShell/Python XML pass) is the recorded follow-up.
+B   = $(MAKEDIR)
+OBJ = $(B)\obj
+LIBD= $(B)\lib
+BIN = $(B)\bin
+GEN = $(B)\gen
+MC  = mc
+
+CC   = cl
+LIBX = lib
+LINK = link
+RC   = rc
+
+# Common MSVC flags mirroring the vcxproj Release|x64 ItemDefinitionGroup:
+#   MaxSpeed(/O2) IntrinsicFunctions(/Oi) FavorSpeed(/Ot) OmitFramePointers(/Oy)
+#   StringPooling(/GF) MultiThreadedDLL(/MD) BufferSecurityCheck=false(/GS-)
+#   ExceptionHandling=false, RuntimeTypeInfo=false(/GR-), Level3(/W3)
+# No /wd suppressions are needed: MSVC 19.44 compiles the whole tree at /W3
+# with warnings only (see log-warnscan.txt).  _CRT_SECURE_NO_WARNINGS and
+# _WINSOCK_DEPRECATED_NO_WARNINGS only cut deprecation noise.
+CFLAGS_COMMON = /nologo /c /O2 /Oi /Ot /Oy /GF /MD /GS- /GR- /W3 /Zi /FS \
+	/D "NDEBUG" /D "WIN32" /D "_CRT_SECURE_NO_WARNINGS" \
+	/D "_WINSOCK_DEPRECATED_NO_WARNINGS"
+
+UNICODE_D = /D "_UNICODE" /D "UNICODE"
+
+INC_CVSNT = /I "$(S)\zstd" /I "$(S)\external_libs" /I "$(S)\windows-NT" \
+	/I "$(S)\src" /I "$(S)\lib" /I "$(S)\diff" /I "$(S)\zlib" /I "$(S)\cvsgui" \
+	/I "$(S)\xmlapi" /I "$(S)\cvsapi\lib" /I "$(S)\cvsapi" /I "$(S)\cvstools" \
+	/I "$(S)\libxml\include" /I "$(S)"
+
+EXTLIB = $(S)\external_libs\x64
+
+all: $(BIN)\cvs.exe
+
+# short aliases for iterating on a single component
+zlib:     $(LIBD)\zlib.lib
+zstd:     $(LIBD)\zstd.lib
+pcre:     $(LIBD)\pcre.lib
+libxml2:  $(LIBD)\libxml2.lib
+blake3:   $(LIBD)\blake3.lib
+cablobs:  $(LIBD)\ca_blobs_fs.lib
+clientlib:$(LIBD)\clientLib.lib
+blobsock: $(LIBD)\blob_sockets.lib
+cvsgui:   $(LIBD)\cvsgui.lib
+gnulib:   $(LIBD)\gnulib.lib
+libdiff:  $(LIBD)\libdiff.lib
+ufccrypt: $(LIBD)\ufccrypt.lib
+cvsapi:   $(BIN)\cvsapi.dll
+cvstools: $(BIN)\cvstools.dll
+cvsexe:   $(BIN)\cvs.exe
+
+# --------------------------------------------------------------------------- dirs
+dirs:
+	@if not exist "$(OBJ)"  mkdir "$(OBJ)"
+	@if not exist "$(LIBD)" mkdir "$(LIBD)"
+	@if not exist "$(BIN)"  mkdir "$(BIN)"
+	@if not exist "$(GEN)\cvsapi" mkdir "$(GEN)\cvsapi"
+	@if not exist "$(GEN)\cvstools\win32" mkdir "$(GEN)\cvstools\win32"
+
+# ------------------------------------------------------- midl-generated trigger_h
+# cvstools.vcxproj has <Midl Include="win32\trigger.idl">.  MSBuild's default
+# MIDL naming is %(Filename)_h.h / %(Filename)_i.c, hence trigger_h.h+trigger_i.c.
+$(GEN)\cvstools\trigger_h.h: dirs
+	cd /d "$(S)\cvstools" && midl /nologo /env x64 /W1 /char signed \
+		/out "$(GEN)\cvstools" /h trigger_h.h /iid trigger_i.c /proxy trigger_p.c \
+		/dlldata trigger_dlldata.c /tlb win32\trigger.tlb \
+		/I "$(WSDK)\lib\$(SDKVER)\um\x64" win32\trigger.idl
+
+# ------------------------------------------------------- mc-generated ServiceMsg
+# The cvsapi vcxproj has a CustomBuild step "mc win32/ServiceMsg.mc" that emits
+# ServiceMsg.h / ServiceMsg.rc / MSG00001.bin into the project dir.  We redirect
+# them into $(GEN)\cvsapi so the repository stays untouched.
+$(GEN)\cvsapi\ServiceMsg.h: dirs
+	cd /d "$(S)\cvsapi" && $(MC) -h "$(GEN)\cvsapi" -r "$(GEN)\cvsapi" win32\ServiceMsg.mc
+
+# --------------------------------------------------------------------------- zlib-ng
+ZLIB_SRC = \
+	"$(S)\zlib\adler32.c" "$(S)\zlib\arch\x86\adler32_ssse3.c" \
+	"$(S)\zlib\arch\x86\chunkset_sse.c" "$(S)\zlib\arch\x86\compare258_sse.c" \
+	"$(S)\zlib\arch\x86\crc_folding.c" "$(S)\zlib\arch\x86\insert_string_sse.c" \
+	"$(S)\zlib\arch\x86\slide_sse.c" "$(S)\zlib\arch\x86\x86.c" \
+	"$(S)\zlib\chunkset.c" "$(S)\zlib\compare258.c" "$(S)\zlib\compress.c" \
+	"$(S)\zlib\crc32.c" "$(S)\zlib\deflate.c" "$(S)\zlib\deflate_fast.c" \
+	"$(S)\zlib\deflate_medium.c" "$(S)\zlib\deflate_quick.c" "$(S)\zlib\deflate_slow.c" \
+	"$(S)\zlib\functable.c" "$(S)\zlib\gzlib.c" "$(S)\zlib\gzread.c" \
+	"$(S)\zlib\gzwrite.c" "$(S)\zlib\infback.c" "$(S)\zlib\inffast.c" \
+	"$(S)\zlib\inflate.c" "$(S)\zlib\inftrees.c" "$(S)\zlib\insert_string.c" \
+	"$(S)\zlib\trees.c" "$(S)\zlib\uncompr.c" "$(S)\zlib\zutil.c"
+
+ZLIB_D = /D "ZLIB_COMPAT=1" /D "UNALIGNED_OK" /D "UNALIGNED64_OK" /D "X86_FEATURES" \
+	/D "X86_SSE2" /D "X86_SSE2_CHUNKSET" /D "X86_SSE2_SLIDEHASH" /D "X86_SSSE3" \
+	/D "X86_SSE42_CRC_HASH" /D "X86_SSE42_CRC_INTRIN" /D "X86_SSE42_CMP_STR" /D "_WINDOWS"
+
+$(LIBD)\zlib.lib: dirs
+	@if not exist "$(OBJ)\zlib" mkdir "$(OBJ)\zlib"
+	$(CC) $(CFLAGS_COMMON) $(ZLIB_D) /I "$(S)\zlib" /I "$(S)\zlib\win32" \
+		/Fo"$(OBJ)\zlib\\" /Fd"$(OBJ)\zlib\zlib.pdb" $(ZLIB_SRC)
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\zlib\*.obj"
+
+# --------------------------------------------------------------------------- zstd
+ZSTD_SRC = \
+	"$(S)\zstd\common\debug.c" "$(S)\zstd\common\entropy_common.c" \
+	"$(S)\zstd\common\error_private.c" "$(S)\zstd\common\fse_decompress.c" \
+	"$(S)\zstd\common\pool.c" "$(S)\zstd\common\threading.c" "$(S)\zstd\common\xxhash.c" \
+	"$(S)\zstd\common\zstd_common.c" "$(S)\zstd\compress\fse_compress.c" \
+	"$(S)\zstd\compress\hist.c" "$(S)\zstd\compress\huf_compress.c" \
+	"$(S)\zstd\compress\zstdmt_compress.c" "$(S)\zstd\compress\zstd_compress.c" \
+	"$(S)\zstd\compress\zstd_compress_literals.c" "$(S)\zstd\compress\zstd_compress_sequences.c" \
+	"$(S)\zstd\compress\zstd_compress_superblock.c" "$(S)\zstd\compress\zstd_double_fast.c" \
+	"$(S)\zstd\compress\zstd_fast.c" "$(S)\zstd\compress\zstd_lazy.c" \
+	"$(S)\zstd\compress\zstd_ldm.c" "$(S)\zstd\compress\zstd_opt.c" \
+	"$(S)\zstd\decompress\huf_decompress.c" "$(S)\zstd\decompress\zstd_ddict.c" \
+	"$(S)\zstd\decompress\zstd_decompress.c" "$(S)\zstd\decompress\zstd_decompress_block.c"
+
+$(LIBD)\zstd.lib: dirs
+	@if not exist "$(OBJ)\zstd" mkdir "$(OBJ)\zstd"
+	$(CC) $(CFLAGS_COMMON) /I "$(S)\zstd" /I "$(S)\zstd\common" /I "$(S)\zstd\compress" \
+		/Fo"$(OBJ)\zstd\\" /Fd"$(OBJ)\zstd\zstd.pdb" $(ZSTD_SRC)
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\zstd\*.obj"
+
+# --------------------------------------------------------------------------- pcre
+PCRE_SRC = \
+	"$(S)\pcre\pcreposix.c" "$(S)\pcre\pcre_compile.c" "$(S)\pcre\pcre_config.c" \
+	"$(S)\pcre\pcre_dfa_exec.c" "$(S)\pcre\pcre_exec.c" "$(S)\pcre\pcre_fullinfo.c" \
+	"$(S)\pcre\pcre_get.c" "$(S)\pcre\pcre_globals.c" "$(S)\pcre\pcre_info.c" \
+	"$(S)\pcre\pcre_maketables.c" "$(S)\pcre\pcre_ord2utf8.c" "$(S)\pcre\pcre_refcount.c" \
+	"$(S)\pcre\pcre_study.c" "$(S)\pcre\pcre_tables.c" "$(S)\pcre\pcre_try_flipped.c" \
+	"$(S)\pcre\pcre_ucp_searchfuncs.c" "$(S)\pcre\pcre_valid_utf8.c" \
+	"$(S)\pcre\pcre_version.c" "$(S)\pcre\pcre_xclass.c" "$(S)\pcre\win32\pcre_chartables.c"
+
+$(LIBD)\pcre.lib: dirs
+	@if not exist "$(OBJ)\pcre" mkdir "$(OBJ)\pcre"
+	$(CC) $(CFLAGS_COMMON) /D "_WINDOWS" /D "SUPPORT_UTF8" /D "SUPPORT_UCP" /D "PCRE_STATIC" \
+		/I "$(S)\pcre" /I "$(S)\pcre\win32" \
+		/Fo"$(OBJ)\pcre\\" /Fd"$(OBJ)\pcre\pcre.pdb" $(PCRE_SRC)
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\pcre\*.obj"
+
+# --------------------------------------------------------------------------- libxml2
+XML_SRC = \
+	"$(S)\libxml\c14n.c" "$(S)\libxml\catalog.c" "$(S)\libxml\chvalid.c" \
+	"$(S)\libxml\debugXML.c" "$(S)\libxml\dict.c" "$(S)\libxml\DOCBparser.c" \
+	"$(S)\libxml\encoding.c" "$(S)\libxml\entities.c" "$(S)\libxml\error.c" \
+	"$(S)\libxml\globals.c" "$(S)\libxml\hash.c" "$(S)\libxml\HTMLparser.c" \
+	"$(S)\libxml\HTMLtree.c" "$(S)\libxml\legacy.c" "$(S)\libxml\list.c" \
+	"$(S)\libxml\nanoftp.c" "$(S)\libxml\nanohttp.c" "$(S)\libxml\parser.c" \
+	"$(S)\libxml\parserInternals.c" "$(S)\libxml\pattern.c" "$(S)\libxml\relaxng.c" \
+	"$(S)\libxml\SAX.c" "$(S)\libxml\SAX2.c" "$(S)\libxml\schematron.c" \
+	"$(S)\libxml\threads.c" "$(S)\libxml\tree.c" "$(S)\libxml\uri.c" \
+	"$(S)\libxml\valid.c" "$(S)\libxml\xinclude.c" "$(S)\libxml\xlink.c" \
+	"$(S)\libxml\xmlIO.c" "$(S)\libxml\xmlmemory.c" "$(S)\libxml\xmlmodule.c" \
+	"$(S)\libxml\xmlreader.c" "$(S)\libxml\xmlregexp.c" "$(S)\libxml\xmlsave.c" \
+	"$(S)\libxml\xmlschemas.c" "$(S)\libxml\xmlschemastypes.c" "$(S)\libxml\xmlstring.c" \
+	"$(S)\libxml\xmlunicode.c" "$(S)\libxml\xmlwriter.c" "$(S)\libxml\xpath.c" \
+	"$(S)\libxml\xpointer.c"
+
+$(LIBD)\libxml2.lib: dirs
+	@if not exist "$(OBJ)\libxml2" mkdir "$(OBJ)\libxml2"
+	$(CC) $(CFLAGS_COMMON) /D "_LIB" /D "LIBXML_STATIC" /D "_WINDOWS" /D "_MBCS" \
+		/I "$(S)\external_libs" /I "$(S)\libxml" /I "$(S)\libxml\include" \
+		/Fo"$(OBJ)\libxml2\\" /Fd"$(OBJ)\libxml2\libxml2.pdb" $(XML_SRC)
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\libxml2\*.obj"
+
+# --------------------------------------------------------------------------- blake3
+$(LIBD)\blake3.lib: dirs
+	@if not exist "$(OBJ)\blake3" mkdir "$(OBJ)\blake3"
+	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /D "_LIB" \
+		/D "BLAKE3_NO_SSE2" /D "BLAKE3_NO_AVX2" /D "BLAKE3_NO_AVX512" /D "BLAKE3_NO_SSE41" \
+		/I "$(S)\blake3" /Fo"$(OBJ)\blake3\\" /Fd"$(OBJ)\blake3\blake3.pdb" \
+		"$(S)\blake3\blake3.c" "$(S)\blake3\blake3_dispatch.c" "$(S)\blake3\blake3_portable.c"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\blake3\*.obj"
+
+# --------------------------------------------------------------------------- ca_blobs_fs
+$(LIBD)\ca_blobs_fs.lib: dirs
+	@if not exist "$(OBJ)\cablobs" mkdir "$(OBJ)\cablobs"
+	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /EHsc /D "_LIB" \
+		/I "$(S)\zstd" /I "$(S)\blake3" /I "$(S)\zlib" /I "$(S)\ca_blobs_fs" \
+		/Fo"$(OBJ)\cablobs\\" /Fd"$(OBJ)\cablobs\ca.pdb" \
+		"$(S)\ca_blobs_fs\src\calc_hash.cpp" "$(S)\ca_blobs_fs\src\content_addressed_fs.cpp" \
+		"$(S)\ca_blobs_fs\src\fileio.cpp" "$(S)\ca_blobs_fs\src\streaming_compressors.cpp"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\cablobs\*.obj"
+
+# --------------------------------------------------------------------------- kv clientLib
+$(LIBD)\clientLib.lib: dirs
+	@if not exist "$(OBJ)\clientlib" mkdir "$(OBJ)\clientlib"
+	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /EHsc /D "_LIB" \
+		/I "$(S)\keyValueServer" /I "$(S)\keyValueServer\clientLib" /I "$(S)\external_libs" \
+		/Fo"$(OBJ)\clientlib\\" /Fd"$(OBJ)\clientlib\c.pdb" \
+		"$(S)\keyValueServer\clientLib\blob_chck_client_cmd.cpp" \
+		"$(S)\keyValueServer\clientLib\blob_pull_client_cmd.cpp" \
+		"$(S)\keyValueServer\clientLib\blob_push_client_cmd.cpp" \
+		"$(S)\keyValueServer\clientLib\blob_push_pull_client.cpp" \
+		"$(S)\keyValueServer\clientLib\blob_strm_client_cmd.cpp"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\clientlib\*.obj"
+
+# --------------------------------------------------------------------------- kv blob_sockets
+$(LIBD)\blob_sockets.lib: dirs
+	@if not exist "$(OBJ)\blobsock" mkdir "$(OBJ)\blobsock"
+	$(CC) $(CFLAGS_COMMON) /EHsc /D "MULTI_THREADED=1" /D "_WINDOWS" \
+		/I "$(S)\external_libs" /I "$(S)\windows-NT" /I "$(S)\keyValueServer" \
+		/Fo"$(OBJ)\blobsock\\" /Fd"$(OBJ)\blobsock\b.pdb" \
+		"$(S)\keyValueServer\blob_sockets\blob_sockets.cpp"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\blobsock\*.obj"
+
+# --------------------------------------------------------------------------- cvsgui
+$(LIBD)\cvsgui.lib: dirs
+	@if not exist "$(OBJ)\cvsgui" mkdir "$(OBJ)\cvsgui"
+	$(CC) $(CFLAGS_COMMON) /D "_LIB" /I "$(S)\cvsgui" \
+		/Fo"$(OBJ)\cvsgui\\" /Fd"$(OBJ)\cvsgui\g.pdb" \
+		"$(S)\cvsgui\cvsgui.cpp" "$(S)\cvsgui\cvsgui_process.cpp" "$(S)\cvsgui\cvsgui_wire.cpp"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\cvsgui\*.obj"
+
+# --------------------------------------------------------------------------- gnulib
+$(LIBD)\gnulib.lib: dirs
+	@if not exist "$(OBJ)\gnulib" mkdir "$(OBJ)\gnulib"
+	$(CC) $(CFLAGS_COMMON) /D "_WINDOWS" /D "HAVE_CONFIG_H" /D "CVSGUI_PIPE" \
+		/I "$(S)\windows-NT" /I "$(S)\cvsgui" /I "$(S)\cvsapi\lib" /I "$(S)\lib" /I "$(S)" \
+		/Fo"$(OBJ)\gnulib\\" /Fd"$(OBJ)\gnulib\l.pdb" \
+		"$(S)\lib\argmatch.c" "$(S)\lib\getdelim.c" "$(S)\lib\getline.c" \
+		"$(S)\lib\getopt_long.c" "$(S)\lib\regcomp.c" "$(S)\lib\sighandle.c"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\gnulib\*.obj"
+
+# --------------------------------------------------------------------------- libdiff
+$(LIBD)\libdiff.lib: dirs
+	@if not exist "$(OBJ)\libdiff" mkdir "$(OBJ)\libdiff"
+	$(CC) $(CFLAGS_COMMON) /EHsc /D "_WINDOWS" /D "HAVE_TIME_H" /D "WANT_WIN_COMPILER_VERSION" \
+		/I "$(S)\external_libs" /I "$(S)\windows-NT" /I "$(S)\lib" /I "$(S)\cvsapi\lib" \
+		/I "$(S)\cvsapi" /I "$(S)\libxml\include" /I "$(S)\diff" /I "$(S)" \
+		/Fo"$(OBJ)\libdiff\\" /Fd"$(OBJ)\libdiff\d.pdb" \
+		"$(S)\diff\analyze.c" "$(S)\diff\cmpbuf.c" "$(S)\diff\context.c" "$(S)\diff\diff.c" \
+		"$(S)\diff\diff3.c" "$(S)\diff\dir.c" "$(S)\diff\ed.c" "$(S)\diff\ifdef.c" \
+		"$(S)\diff\io.c" "$(S)\diff\normal.c" "$(S)\diff\side.c" "$(S)\diff\unicodeapi.cpp" \
+		"$(S)\diff\util.c" "$(S)\diff\version.c"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\libdiff\*.obj"
+
+# --------------------------------------------------------------------------- ufc-crypt
+$(LIBD)\ufccrypt.lib: dirs
+	@if not exist "$(OBJ)\ufc" mkdir "$(OBJ)\ufc"
+	$(CC) $(CFLAGS_COMMON) /D "_LIB" /I "$(S)\ufc-crypt" /I "$(S)\windows-NT" /I "$(S)" \
+		/Fo"$(OBJ)\ufc\\" /Fd"$(OBJ)\ufc\u.pdb" \
+		"$(S)\ufc-crypt\crypt.c" "$(S)\ufc-crypt\crypt_util.c"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\ufc\*.obj"
+
+# --------------------------------------------------------------------------- cvsdelta
+$(LIBD)\cvsdelta.lib: dirs
+	@if not exist "$(OBJ)\cvsdelta" mkdir "$(OBJ)\cvsdelta"
+	$(CC) $(CFLAGS_COMMON) /EHsc /D "_CONSOLE" /I "$(S)\windows-NT" /I "$(S)\cvsdelta" /I "$(S)" \
+		/Fo"$(OBJ)\cvsdelta\\" /Fd"$(OBJ)\cvsdelta\cd.pdb" \
+		"$(S)\cvsdelta\cvsdelta.cpp" "$(S)\cvsdelta\libinterface.cpp"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\cvsdelta\*.obj"
+
+# --------------------------------------------------------------------------- libsuid
+$(LIBD)\libsuid.lib: dirs
+	@if not exist "$(OBJ)\libsuid" mkdir "$(OBJ)\libsuid"
+	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /EHsc /D "_WINDOWS" /D "_USRDLL" /D "SUID_EXPORTS" \
+		/I "$(S)\windows-NT\setuid\libsuid" /I "$(S)\windows-NT" /I "$(S)" \
+		/Fo"$(OBJ)\libsuid\\" /Fd"$(OBJ)\libsuid\s.pdb" \
+		"$(S)\windows-NT\setuid\libsuid\stdafx.cpp" "$(S)\windows-NT\setuid\libsuid\suid.cpp"
+	$(LIBX) /nologo /OUT:$@ "$(OBJ)\libsuid\*.obj"
+
+# --------------------------------------------------------------------------- cvsapi.dll
+CVSAPI_SRC = \
+	"$(S)\cvsapi\Codepage.cpp" "$(S)\cvsapi\crypt.cpp" "$(S)\cvsapi\cvs_string.cpp" \
+	"$(S)\cvsapi\diff\DiffBase.cpp" "$(S)\cvsapi\diff\StringDiff.cpp" \
+	"$(S)\cvsapi\GetOptions.cpp" "$(S)\cvsapi\lib\fncmp.c" "$(S)\cvsapi\lib\fnmatch.c" \
+	"$(S)\cvsapi\lib\getdate.c" "$(S)\cvsapi\lib\getmode.c" "$(S)\cvsapi\lib\GetOsVersion.cpp" \
+	"$(S)\cvsapi\lib\md5.c" "$(S)\cvsapi\lib\md5crypt.c" "$(S)\cvsapi\lib\ndir.cpp" \
+	"$(S)\cvsapi\lib\timegm.c" "$(S)\cvsapi\md5calc.cpp" "$(S)\cvsapi\mdns.cpp" \
+	"$(S)\cvsapi\rpcBase.cpp" "$(S)\cvsapi\ServerIO.cpp" "$(S)\cvsapi\SplitPath.cpp" \
+	"$(S)\cvsapi\SqlConnection.cpp" "$(S)\cvsapi\SqlConnectionInformation.cpp" \
+	"$(S)\cvsapi\SqlRecordset.cpp" "$(S)\cvsapi\SqlVariant.cpp" "$(S)\cvsapi\TagDate.cpp" \
+	"$(S)\cvsapi\TokenLine.cpp" "$(S)\cvsapi\win32\autoproxy.cpp" \
+	"$(S)\cvsapi\win32\DirectoryAccess.cpp" "$(S)\cvsapi\win32\DnsApi.cpp" \
+	"$(S)\cvsapi\win32\FileAccess.cpp" "$(S)\cvsapi\win32\FileCompat.cpp" \
+	"$(S)\cvsapi\win32\HttpSocket.cpp" "$(S)\cvsapi\win32\LibraryAccess.cpp" \
+	"$(S)\cvsapi\win32\RunFile.cpp" "$(S)\cvsapi\win32\SocketIO.cpp" \
+	"$(S)\cvsapi\win32\SSPIHandler.cpp" "$(S)\cvsapi\XmlNode.cpp" \
+	"$(S)\cvsapi\xmltree.cpp" "$(S)\cvsapi\Zeroconf.cpp"
+
+$(BIN)\cvsapi.dll: dirs $(GEN)\cvsapi\ServiceMsg.h $(LIBD)\libxml2.lib $(LIBD)\pcre.lib $(LIBD)\ufccrypt.lib
+	@if not exist "$(OBJ)\cvsapi" mkdir "$(OBJ)\cvsapi"
+	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /EHsc /D "_WINDOWS" /D "HAVE_CONFIG_H" \
+		/D "CVSAPI_EXPORT=__declspec(dllexport)" /D "XML_STATIC" /D "PCRE_STATIC" \
+		/I "$(GEN)\cvsapi" /I "$(S)\external_libs" /I "$(S)\cvsapi" /I "$(S)\cvsapi\lib" \
+		/I "$(S)\cvsapi\win32" /I "$(S)\libxml\include" /I "$(S)\pcre" /I "$(S)" \
+		/Fo"$(OBJ)\cvsapi\\" /Fd"$(OBJ)\cvsapi\a.pdb" $(CVSAPI_SRC)
+	cd /d "$(S)\cvsapi" && $(RC) /nologo /d "NDEBUG" /I "$(GEN)\cvsapi" /I "$(S)\cvsapi\win32" /fo"$(OBJ)\cvsapi\cvsapi.res" win32\cvsapi.rc
+	$(LINK) /nologo /DLL /OUT:$@ /IMPLIB:"$(LIBD)\cvsapi.lib" /DEBUG /INCREMENTAL:NO \
+		"$(OBJ)\cvsapi\*.obj" "$(OBJ)\cvsapi\cvsapi.res" \
+		"$(LIBD)\libxml2.lib" "$(LIBD)\pcre.lib" "$(LIBD)\ufccrypt.lib" \
+		/LIBPATH:"$(EXTLIB)" libiconv.lib ws2_32.lib urlmon.lib wininet.lib secur32.lib \
+		dnsapi.lib wintrust.lib advapi32.lib user32.lib ole32.lib oleaut32.lib shell32.lib \
+		crypt32.lib netapi32.lib mpr.lib
+
+# --------------------------------------------------------------------------- cvstools.dll
+$(BIN)\cvstools.dll: dirs $(GEN)\cvstools\trigger_h.h $(BIN)\cvsapi.dll $(LIBD)\cvsgui.lib
+	@if not exist "$(OBJ)\cvstools" mkdir "$(OBJ)\cvstools"
+	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /EHsc /D "_WINDOWS" /D "HAVE_CONFIG_H" \
+		/D "CVSTOOLS_EXPORT=__declspec(dllexport)" /D "XML_STATIC" \
+		/I "$(GEN)\cvstools" /I "$(S)\external_libs" /I "$(S)\cvstools" /I "$(S)\cvstools\win32" \
+		/I "$(S)\cvsapi" /I "$(S)\cvsapi\win32" /I "$(S)\libxml\include" /I "$(S)" \
+		/Fo"$(OBJ)\cvstools\\" /Fd"$(OBJ)\cvstools\t.pdb" \
+		"$(S)\cvstools\Cvsgui.cpp" "$(S)\cvstools\EntriesParser.cpp" \
+		"$(S)\cvstools\ProtocolLibrary.cpp" "$(S)\cvstools\RootSplitter.cpp" \
+		"$(S)\cvstools\Scramble.cpp" "$(S)\cvstools\ServerConnection.cpp" \
+		"$(S)\cvstools\ServerInfo.cpp" "$(S)\cvstools\TriggerLibrary.cpp" \
+		"$(GEN)\cvstools\trigger_i.c" "$(S)\cvstools\win32\CvsCommonDialogs.cpp" \
+		"$(S)\cvstools\win32\GlobalSettings.cpp" "$(S)\cvstools\win32\InfoPanel.cpp"
+	cd /d "$(S)\cvstools" && $(RC) /nologo /d "NDEBUG" /I "$(GEN)\cvstools" /I "$(S)\cvstools\win32" /fo"$(OBJ)\cvstools\cvstools.res" win32\cvstools.rc
+	$(LINK) /nologo /DLL /OUT:$@ /IMPLIB:"$(LIBD)\cvstools.lib" /DEBUG /INCREMENTAL:NO \
+		"$(OBJ)\cvstools\*.obj" "$(OBJ)\cvstools\cvstools.res" \
+		"$(LIBD)\cvsapi.lib" "$(LIBD)\cvsgui.lib" ws2_32.lib comctl32.lib advapi32.lib \
+		user32.lib ole32.lib oleaut32.lib shell32.lib gdi32.lib
+
+# --------------------------------------------------------------------------- cvs.exe
+CVSNT_SRC = \
+	"$(S)\src\add.cpp" "$(S)\src\admin.cpp" "$(S)\src\annotate.cpp" \
+	"$(S)\src\blob_http_processor.cpp" "$(S)\src\blob_kv_processor.cpp" \
+	"$(S)\src\blob_operations.cpp" "$(S)\src\buffer.cpp" "$(S)\src\chacl.cpp" \
+	"$(S)\src\checkin.cpp" "$(S)\src\checkout.cpp" "$(S)\src\chown.cpp" \
+	"$(S)\src\classify.cpp" "$(S)\src\client.cpp" "$(S)\src\commit.cpp" \
+	"$(S)\src\create_adm.cpp" "$(S)\src\cvsrc.cpp" "$(S)\src\cvsrcs.cpp" \
+	"$(S)\src\diff.cpp" "$(S)\src\download_blob_to.cpp" "$(S)\src\edit.cpp" \
+	"$(S)\src\entries.cpp" "$(S)\src\error.cpp" "$(S)\src\expand_path.cpp" \
+	"$(S)\src\fileattr.cpp" "$(S)\src\find_names.cpp" "$(S)\src\hash.cpp" \
+	"$(S)\src\history.cpp" "$(S)\src\ignore.cpp" "$(S)\src\import.cpp" \
+	"$(S)\src\info.cpp" "$(S)\src\lock.cpp" "$(S)\src\log.cpp" "$(S)\src\login.cpp" \
+	"$(S)\src\logmsg.cpp" "$(S)\src\ls.cpp" "$(S)\src\lsacl.cpp" "$(S)\src\main.cpp" \
+	"$(S)\src\mapping.cpp" "$(S)\src\mkmodules.cpp" "$(S)\src\modules.cpp" \
+	"$(S)\src\myndbm.cpp" "$(S)\src\no_diff.cpp" "$(S)\src\parseinfo.cpp" \
+	"$(S)\src\passwd.cpp" "$(S)\src\patch.cpp" "$(S)\src\perms.cpp" \
+	"$(S)\src\rcs_checkin.cpp" "$(S)\src\rcscmds.cpp" "$(S)\src\recurse.cpp" \
+	"$(S)\src\release.cpp" "$(S)\src\remove.cpp" "$(S)\src\rename.cpp" \
+	"$(S)\src\repos.cpp" "$(S)\src\root.cpp" "$(S)\src\run.cpp" "$(S)\src\savecwd.cpp" \
+	"$(S)\src\scramble.cpp" "$(S)\src\server.cpp" "$(S)\src\sha256\sha256.c" \
+	"$(S)\src\status.cpp" "$(S)\src\subr.cpp" "$(S)\src\switch.cpp" "$(S)\src\tag.cpp" \
+	"$(S)\src\update.cpp" "$(S)\src\version.cpp" "$(S)\src\vers_ts.cpp" \
+	"$(S)\src\watch.cpp" "$(S)\src\wrapper.cpp" "$(S)\src\xdiff.cpp" \
+	"$(S)\src\xgetwd.cpp" "$(S)\src\zlib.cpp" "$(S)\src\zstd_buffer.cpp" \
+	"$(S)\windows-NT\filesubr.cpp" "$(S)\windows-NT\mkdir.cpp" "$(S)\windows-NT\pwd.cpp" \
+	"$(S)\windows-NT\setuid.cpp" "$(S)\windows-NT\sockerror.cpp" \
+	"$(S)\windows-NT\stripslash.cpp" "$(S)\windows-NT\waitpid.cpp" \
+	"$(S)\windows-NT\win32.cpp"
+
+cvsnt_objs: dirs
+	@if not exist "$(OBJ)\cvsnt" mkdir "$(OBJ)\cvsnt"
+	$(CC) $(CFLAGS_COMMON) $(UNICODE_D) /EHsc /D "ISOLATION_AWARE_ENABLED" /D "_CONSOLE" \
+		/D "HAVE_CONFIG_H" /D "POSIX" /D "CVSGUI_PIPE" \
+		$(INC_CVSNT) /Fo"$(OBJ)\cvsnt\\" /Fd"$(OBJ)\cvsnt\cvs.pdb" $(CVSNT_SRC)
+	cd /d "$(S)" && $(RC) /nologo /d "NDEBUG" /I "$(S)\windows-NT" /fo"$(OBJ)\cvsnt\cvsnt.res" windows-NT\cvsnt.rc
+
+$(BIN)\cvs.exe: cvsnt_objs $(LIBD)\gnulib.lib $(LIBD)\libdiff.lib $(LIBD)\zlib.lib \
+		$(LIBD)\zstd.lib $(LIBD)\cvsgui.lib $(LIBD)\blake3.lib $(LIBD)\ca_blobs_fs.lib \
+		$(LIBD)\clientLib.lib $(LIBD)\blob_sockets.lib $(LIBD)\ufccrypt.lib \
+		$(LIBD)\cvsdelta.lib $(LIBD)\libsuid.lib \
+		$(BIN)\cvsapi.dll $(BIN)\cvstools.dll
+	$(LINK) /nologo /OUT:$@ /DEBUG /INCREMENTAL:NO /SUBSYSTEM:CONSOLE \
+		"$(OBJ)\cvsnt\*.obj" "$(OBJ)\cvsnt\cvsnt.res" \
+		"$(LIBD)\gnulib.lib" "$(LIBD)\libdiff.lib" "$(LIBD)\zlib.lib" "$(LIBD)\zstd.lib" \
+		"$(LIBD)\cvsgui.lib" "$(LIBD)\blake3.lib" "$(LIBD)\ca_blobs_fs.lib" \
+		"$(LIBD)\clientLib.lib" "$(LIBD)\blob_sockets.lib" "$(LIBD)\ufccrypt.lib" \
+		"$(LIBD)\cvsdelta.lib" "$(LIBD)\libsuid.lib" \
+		"$(LIBD)\cvsapi.lib" "$(LIBD)\cvstools.lib" \
+		/LIBPATH:"$(EXTLIB)" libssl.lib libcrypto.lib comctl32.lib wsock32.lib ws2_32.lib \
+		netapi32.lib mpr.lib ole32.lib oleaut32.lib libiconv.lib wininet.lib dbghelp.lib \
+		advapi32.lib user32.lib shell32.lib gdi32.lib crypt32.lib secur32.lib
+
+clean:
+	@if exist "$(OBJ)"  rmdir /s /q "$(OBJ)"
+	@if exist "$(LIBD)" rmdir /s /q "$(LIBD)"
+	@if exist "$(BIN)"  rmdir /s /q "$(BIN)"

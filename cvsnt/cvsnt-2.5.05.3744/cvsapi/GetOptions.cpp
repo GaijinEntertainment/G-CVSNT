@@ -52,7 +52,7 @@ CGetOptions::CGetOptions(CTokenLine& tokens, size_t& argnum, const char *format_
 				m_error = true;
 				return;
 			}
-			const char *q=strchr(format_string, p[0]);
+			const char *q = p[0] ? strchr(format_string, p[0]) : NULL;
 			if(!q)
 			{
 				m_error = true;

@@ -156,7 +156,7 @@ void CServerIo::log(logType type, const char *fmt, ...)
 		l = LOG_DAEMON | LOG_NOTICE;
 		break;
 	}
-	syslog(l | LOG_NOTICE, "%s", str.c_str());
+	syslog(l, "%s", str.c_str());
 #endif
 }
 
