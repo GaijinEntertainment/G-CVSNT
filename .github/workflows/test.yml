@@ -182,11 +182,18 @@ jobs:
         if: ${{ !cancelled() && steps.contour.outcome == 'success' }}
         timeout-minutes: 5
         run: |
-          if docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g               -v "$PWD/ci:/ci:ro" -e HOME=/work               cvsnt-test:"$VERSION" bash /ci/repro_import_kB.sh /usr/local/cvsnt/bin/cvs               ":pserver:cvs:cvs@127.0.0.1:2401/cvs" /work/repro -kB; then
-            echo "::error title=import -kB data loss no longer reproduces::repro_import_kB.sh passed: import.cpp is fixed, remove the known-import-defect mode from ci/smoke_pserver.sh and make this step a plain regression check"
-            exit 1
-          fi
-          echo "::warning title=import -kB data loss (known defect)::repro_import_kB.sh still fails, the import.cpp defect is present"
+          rc=0
+          docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g \
+            -v "$PWD/ci:/ci:ro" -e HOME=/work \
+            cvsnt-test:"$VERSION" bash /ci/repro_import_kB.sh /usr/local/cvsnt/bin/cvs \
+            ":pserver:cvs:cvs@127.0.0.1:2401/cvs" /work/repro -kB || rc=$?
+          case "$rc" in
+            0) echo "::error title=import -kB data loss no longer reproduces::repro_import_kB.sh passed: import.cpp is fixed, remove the known-import-defect mode from ci/smoke_pserver.sh and make this step a plain regression check"
+               exit 1 ;;
+            1) echo "::warning title=import -kB data loss (known defect)::repro_import_kB.sh still fails, the import.cpp defect is present" ;;
+            *) echo "::error title=import -kB check inconclusive::repro_import_kB.sh exited $rc: the client crashed or never produced a checkout, so this run proves nothing either way - see the step log"
+               exit 1 ;;
+          esac
 
       - name: Tear down (drops the repository volume)
         if: always()

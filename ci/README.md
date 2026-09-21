@@ -71,7 +71,9 @@ agreeing proves nothing if the server stored the wrong bytes at import time.
 the file content. The smoke scenario downgrades that one mismatch to a `::warning::` instead of
 failing the job. `repro_import_kB.sh` runs separately as a guard that **fails the job the day
 the defect stops reproducing**, telling the maintainer to remove the warning mode from
-`smoke_pserver.sh` — the check cannot silently outlive the bug.
+`smoke_pserver.sh` — the check cannot silently outlive the bug. It fails just as loudly when it
+cannot judge: a client that crashes, or an import that never produces a checkout, is not evidence
+that the defect is still there, and is reported as inconclusive rather than as the known defect.
 
 ## Versioning
 
