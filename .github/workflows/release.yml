@@ -339,6 +339,7 @@ jobs:
       packages: write
     env:
       VERSION: ${{ needs.version.outputs.version }}
+      DOCKER_BUILD_RECORD_UPLOAD: false   # no *.dockerbuild artifacts
     steps:
       - uses: actions/checkout@v4
       - name: Write build.h
@@ -488,6 +489,7 @@ jobs:
     steps:
       - uses: actions/download-artifact@v4
         with:
+          pattern: "{deb,rpm,macos,windows}-*"
           path: dist
           merge-multiple: true
       - name: List
