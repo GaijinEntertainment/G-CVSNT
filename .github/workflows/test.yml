@@ -121,7 +121,7 @@ jobs:
           if-no-files-found: error
 
   linux-server-tests:
-    name: Linux server (${{ needs.integrate.outputs.version }})
+    name: Linux build and local suites (${{ needs.integrate.outputs.version }})
     needs: integrate
     runs-on: ubuntu-latest
     timeout-minutes: 90
@@ -155,49 +155,6 @@ jobs:
           docker run --rm --user 52:52 --tmpfs /work:uid=52,gid=52,size=2g \
             -v "$PWD/ci:/ci:ro" -v "$RUNNER_TEMP/suite-logs:/logs" -e EXPECTED_BUILD \
             cvsnt-test:"$VERSION" bash /ci/run_linux_suites.sh
-
-      - name: Server images (authserver, cafs-server, cvslockd) from the same build stage
-        id: images
-        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
-        run: |
-          for t in authserver cafs-server cvslockd; do
-            docker build --target "$t" -t "cvsnt-$t:$VERSION" -f docker/Dockerfile .
-          done
-          docker run --rm --entrypoint /usr/local/cvsnt/bin/cvs "cvsnt-authserver:$VERSION" --version | tee /dev/stderr | grep -F "Build $EXPECTED_BUILD"
-
-      - name: Bring up the contour with a fresh repository
-        id: contour
-        if: ${{ !cancelled() && steps.images.outcome == 'success' }}
-        run: bash ci/contour/up.sh "$RUNNER_TEMP/contour-conf"
-
-      - name: "Smoke scenario through :pserver: (Linux client from the same build)"
-        if: ${{ !cancelled() && steps.contour.outcome == 'success' }}
-        timeout-minutes: 10
-        run: |
-          docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g \
-            -v "$PWD/ci:/ci:ro" -e HOME=/work \
-            cvsnt-test:"$VERSION" bash /ci/smoke_pserver.sh /usr/local/cvsnt/bin/cvs /work/smoke
-
-      - name: "Known defect check: import of -kB binaries must still reproduce"
-        if: ${{ !cancelled() && steps.contour.outcome == 'success' }}
-        timeout-minutes: 5
-        run: |
-          rc=0
-          docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g \
-            -v "$PWD/ci:/ci:ro" -e HOME=/work \
-            cvsnt-test:"$VERSION" bash /ci/repro_import_kB.sh /usr/local/cvsnt/bin/cvs \
-            ":pserver:cvs:cvs@127.0.0.1:2401/cvs" /work/repro -kB || rc=$?
-          case "$rc" in
-            0) echo "::error title=import -kB data loss no longer reproduces::repro_import_kB.sh passed: import.cpp is fixed, remove the known-import-defect mode from ci/smoke_pserver.sh and make this step a plain regression check"
-               exit 1 ;;
-            1) echo "::warning title=import -kB data loss (known defect)::repro_import_kB.sh still fails, the import.cpp defect is present" ;;
-            *) echo "::error title=import -kB check inconclusive::repro_import_kB.sh exited $rc: the client crashed or never produced a checkout, so this run proves nothing either way - see the step log"
-               exit 1 ;;
-          esac
-
-      - name: Tear down (drops the repository volume)
-        if: always()
-        run: bash ci/contour/down.sh ${{ job.status == 'failure' && 'logs' || '' }}
 
       - uses: actions/upload-artifact@v4
         if: ${{ !cancelled() }}
@@ -340,3 +297,78 @@ jobs:
             src/${{ env.SRC }}/testcvs/testcvs.log
           retention-days: 7
           if-no-files-found: warn
+
+  # The assembled stack is a job of its own, and it depends on `integrate`
+  # alone - not on the suites above. The local suites answer for a code path
+  # no client here uses, so a red among them must not hide, skip or take credit
+  # for what the deployed shape does. This job builds the same images the
+  # deployment gets, stands them up and drives a client through :pserver:.
+  assembled-stack:
+    name: "Assembled stack through :pserver: (${{ needs.integrate.outputs.version }})"
+    needs: integrate
+    runs-on: ubuntu-latest
+    timeout-minutes: 60
+    env:
+      VERSION: ${{ needs.integrate.outputs.version }}
+      EXPECTED_BUILD: ${{ needs.integrate.outputs.build }}
+      CVSNT_IMAGE_PREFIX: cvsnt
+      CVSNT_IMAGE_TAG: ${{ needs.integrate.outputs.version }}
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/download-artifact@v4
+        with:
+          name: source-${{ needs.integrate.outputs.version }}
+      - name: Unpack
+        working-directory: .
+        run: mkdir src && tar -xzf source.tar.gz -C src
+
+      - name: Build the server tree and the client image
+        id: build
+        run: |
+          docker build --target build -t cvsnt-build:"$VERSION" -f docker/Dockerfile .
+          docker build -t cvsnt-test:"$VERSION" -f ci/test.Dockerfile --build-arg BASE=cvsnt-build:"$VERSION" .
+
+      - name: Server images (authserver, cafs-server, cvslockd) from the same build stage
+        id: images
+        if: ${{ !cancelled() && steps.build.outcome == 'success' }}
+        run: |
+          for t in authserver cafs-server cvslockd; do
+            docker build --target "$t" -t "cvsnt-$t:$VERSION" -f docker/Dockerfile .
+          done
+          docker run --rm --entrypoint /usr/local/cvsnt/bin/cvs "cvsnt-authserver:$VERSION" --version | tee /dev/stderr | grep -F "Build $EXPECTED_BUILD"
+
+      - name: Bring up the contour with a fresh repository
+        id: contour
+        if: ${{ !cancelled() && steps.images.outcome == 'success' }}
+        run: bash ci/contour/up.sh "$RUNNER_TEMP/contour-conf"
+
+      - name: "Smoke scenario through :pserver: (Linux client from the same build)"
+        if: ${{ !cancelled() && steps.contour.outcome == 'success' }}
+        timeout-minutes: 15
+        run: |
+          docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g \
+            -v "$PWD/ci:/ci:ro" -e HOME=/work \
+            cvsnt-test:"$VERSION" bash /ci/smoke_pserver.sh /usr/local/cvsnt/bin/cvs /work/smoke
+
+      - name: "Known defect check: import of -kB binaries must still reproduce"
+        if: ${{ !cancelled() && steps.contour.outcome == 'success' }}
+        timeout-minutes: 5
+        run: |
+          rc=0
+          docker run --rm --network host --user 52:52 --tmpfs /work:uid=52,gid=52,size=1g \
+            -v "$PWD/ci:/ci:ro" -e HOME=/work \
+            cvsnt-test:"$VERSION" bash /ci/repro_import_kB.sh /usr/local/cvsnt/bin/cvs \
+            ":pserver:cvs:cvs@127.0.0.1:2401/cvs" /work/repro -kB || rc=$?
+          case "$rc" in
+            0) echo "::error title=import -kB data loss no longer reproduces::repro_import_kB.sh passed: import.cpp is fixed, remove the known-import-defect mode from ci/smoke_pserver.sh and make this step a plain regression check"
+               exit 1 ;;
+            1) echo "::warning title=import -kB data loss (known defect)::repro_import_kB.sh still fails, the import.cpp defect is present" ;;
+            *) echo "::error title=import -kB check inconclusive::repro_import_kB.sh exited $rc: the client crashed or never produced a checkout, so this run proves nothing either way - see the step log"
+               exit 1 ;;
+          esac
+
+      - name: Tear down (drops the repository volume)
+        if: always()
+        run: bash ci/contour/down.sh ${{ job.status == 'failure' && 'logs' || '' }}
