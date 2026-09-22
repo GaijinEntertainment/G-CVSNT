@@ -14,7 +14,30 @@ ROOT=${ROOT:-":pserver:cvs:cvs@127.0.0.1:2401/cvs"}
 rm -rf "$W"; mkdir -p "$W/imp/sub/deep"
 cd "$W"
 
-step() { echo; echo "### $*"; }
+# The total comes out of the script itself, so adding a scenario cannot leave
+# the count behind. A `?` means the file could not be read, not zero scenarios.
+STEP_TOTAL=$(grep -c '^step "' "$0" 2>/dev/null) || STEP_TOTAL=0
+[ "$STEP_TOTAL" -gt 0 ] 2>/dev/null || STEP_TOTAL='?'
+STEP_DONE=0
+STEP_NAME='(none)'
+FINISHED=0
+step() {
+  STEP_DONE=$(( STEP_DONE + 1 ))
+  STEP_NAME="$*"
+  echo
+  echo "### [$STEP_DONE/$STEP_TOTAL] $*"
+}
+
+# set -e aborts on the first failed check, so without this the log ends on
+# whatever command failed and never says how far the scenario list got.
+on_exit() {
+  [ "$FINISHED" = 1 ] && return 0
+  echo
+  echo "### SMOKE FAILED in scenario $STEP_DONE of $STEP_TOTAL: $STEP_NAME"
+  echo "###   $(( STEP_DONE - 1 )) scenarios passed before it"
+  return 0
+}
+trap on_exit EXIT
 
 cmp_text() { diff <(tr -d '\r' < "$1") <(tr -d '\r' < "$2") > /dev/null; }
 same_bytes() {  # <expected file> <file under test> <what it proves>
@@ -214,11 +237,14 @@ for line in from-trunk from-branch; do
 done
 echo "    the merge carries both the trunk and the branch change"
 
+FINISHED=1
 echo
 if [ "$SOURCE_MISMATCH" -ne 0 ]; then
   echo "### SMOKE FAILED: a working copy differed from its source (see ::error:: above)"
+  echo "###   all $STEP_DONE of $STEP_TOTAL scenarios ran, but a comparison did not hold"
   exit 1
 fi
+echo "### $STEP_DONE of $STEP_TOTAL scenarios passed"
 if [ "$IMPORT_DEFECT_SEEN" -ne 0 ]; then
   echo "### SMOKE OK (with the known import -kB defect, see ::warning:: above)"
 else

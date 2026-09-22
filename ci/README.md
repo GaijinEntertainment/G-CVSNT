@@ -72,6 +72,11 @@ repository (`caddressed_fs::set_root` is called on the server path only), so it 
 path no client here uses. The local suites still carry the breadth of commands; this carries the
 same ground over the protocol people actually work on.
 
+19 scenarios in all. Each one is numbered `[k/19]` as it starts and the run ends with how many
+passed; the total is counted out of the script itself, so adding a scenario cannot leave it
+behind. `set -e` aborts on the first failed check, so an `EXIT` trap names the scenario that
+failed and how many passed before it — otherwise the log just stops on whatever command failed.
+
 Two non-obvious properties. After the import and after the mixed add, the working copy is also
 compared against the **import source**, not just the second checkout — two checkouts agreeing
 proves nothing if the server stored the wrong bytes at import time. And the binary scenarios
