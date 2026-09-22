@@ -126,7 +126,7 @@ int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
 				FILE *cf = CVS_FOPEN(finfo->file,"r");
 				if(!cf)
 				{
-					error(1,errno,"Unable to reopen %s for checksum");
+					error(1,errno,"Unable to reopen %s for checksum",fn_root(finfo->file));
 				}
 				CVS_FSEEK(cf,0,SEEK_END);
 				if(CVS_FTELL(cf)>=server_checksum_threshold)

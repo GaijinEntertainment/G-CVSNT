@@ -31,5 +31,10 @@ Documentation
 * [HOWTOBUILD.md](HOWTOBUILD.md) — building on Windows, Linux and macOS
 * [docker/](docker/README.md) — the server in containers, from an empty host to a working
   repository; [docker/sssd/](docker/sssd/README.md) for directory logins
-* [_reports/](_reports/) — code-analysis findings and performance analyses (lands in the next
-  slice of the audit series; a forward reference on this branch)
+* [known_issues.md](known_issues.md) — open defects, with the reasoning behind the ones that are
+  deliberately not fixed
+* [suggested_optimizations.md](suggested_optimizations.md) — why update and tag scale with file
+  count, and the ranked plan to fix it
+* [cvsnt/cvsnt-2.5.05.3744/testcvs/](cvsnt/cvsnt-2.5.05.3744/testcvs/) — unit, regression and
+  acceptance test suites
+* [_reports/](_reports/) — the individual analysis findings behind all of the above

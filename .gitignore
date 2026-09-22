@@ -28,3 +28,4 @@ tmp/*.*
 CVS
 log1
 log2
+__pycache__/

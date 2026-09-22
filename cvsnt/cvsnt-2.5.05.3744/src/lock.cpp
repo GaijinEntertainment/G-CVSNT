@@ -893,7 +893,7 @@ static int write_lock (struct lock *lock)
 #ifdef HAVE_LONG_FILE_NAMES
 			"%s.%s.%ld", CVSWFL, hostname,
 #else
-			"%s.%ld", CVSRFL,
+			"%s.%ld", CVSWFL,
 #endif
 			(long) getpid ());
 #endif
