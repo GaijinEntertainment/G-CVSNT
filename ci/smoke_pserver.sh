@@ -17,6 +17,13 @@ cd "$W"
 step() { echo; echo "### $*"; }
 
 cmp_text() { diff <(tr -d '\r' < "$1") <(tr -d '\r' < "$2") > /dev/null; }
+same_bytes() {  # <expected file> <file under test> <what it proves>
+  if ! cmp -s "$1" "$2"; then
+    echo "::error::$3: expected $(stat -c %s "$1") bytes, got $(stat -c %s "$2" 2>/dev/null || echo 0)"
+    exit 1
+  fi
+  echo "    $3"
+}
 hash_tree() { (cd "$1" && find . -type f -not -path '*/CVS/*' | LC_ALL=C sort | xargs -r sha256sum); }
 SOURCE_MISMATCH=0
 IMPORT_DEFECT_SEEN=0
@@ -125,6 +132,87 @@ test -f wc4/f1.txt
 
 step "an independent checkout equals the updated working copy"
 diff <(hash_tree wc2) <(hash_tree wc4)
+
+# From here on everything works in working copies of its own, so the tree
+# comparison above keeps comparing the trees it was written to compare.
+#
+# These scenarios exist against the assembled stack because their local-mode
+# counterparts in testcvs.py and regress.py cannot answer for it: local mode
+# never points the blob store at the repository, so it exercises a code path no
+# client here uses. This is the same ground over the protocol people work on.
+
+step "binary kflags end to end: -kb and -kB survive a fresh checkout"
+# A fresh checkout, not an update: it proves the bytes came back out of the
+# repository and the blob store, not out of a working copy that still held them.
+cvs_cmd -d "$ROOT" checkout -d wc5 proj
+mkdir -p bin1
+head -c 120000 /dev/urandom > bin1/plain_bin.dat
+head -c 120000 /dev/urandom > bin1/delta_bin.dat
+# The names differ by more than case: names that differ only in case are one
+# file on a Windows working copy, and this scenario is meant to port there.
+cp bin1/plain_bin.dat bin1/delta_bin.dat wc5/
+(cd wc5 && cvs_cmd add -kb plain_bin.dat && cvs_cmd add -kB delta_bin.dat \
+        && cvs_cmd commit -m "add -kb and -kB")
+cvs_cmd -d "$ROOT" checkout -d wc6 proj
+same_bytes bin1/plain_bin.dat wc6/plain_bin.dat "-kb 1.1 checks out byte for byte"
+same_bytes bin1/delta_bin.dat wc6/delta_bin.dat "-kB 1.1 checks out byte for byte"
+
+step "second revision of each binary, fresh checkout"
+mkdir -p bin2
+head -c 90000 /dev/urandom > bin2/plain_bin.dat
+head -c 90000 /dev/urandom > bin2/delta_bin.dat
+cp bin2/plain_bin.dat bin2/delta_bin.dat wc5/
+(cd wc5 && cvs_cmd commit -m "second revision of both binaries")
+cvs_cmd -d "$ROOT" checkout -d wc7 proj
+same_bytes bin2/plain_bin.dat wc7/plain_bin.dat "-kb 1.2 checks out byte for byte"
+same_bytes bin2/delta_bin.dat wc7/delta_bin.dat "-kB 1.2 checks out byte for byte"
+
+step "an older binary revision, and back to the head"
+(cd wc5 && cvs_cmd update -r 1.1 plain_bin.dat delta_bin.dat)
+same_bytes bin1/plain_bin.dat wc5/plain_bin.dat "-kb update -r 1.1"
+same_bytes bin1/delta_bin.dat wc5/delta_bin.dat "-kB update -r 1.1"
+(cd wc5 && cvs_cmd update -A plain_bin.dat delta_bin.dat)
+same_bytes bin2/plain_bin.dat wc5/plain_bin.dat "-kb update -A"
+same_bytes bin2/delta_bin.dat wc5/delta_bin.dat "-kB update -A"
+
+step "sticky tag on a binary"
+(cd wc5 && cvs_cmd tag SMOKE_BIN_TAG plain_bin.dat)
+mkdir -p bin3
+head -c 70000 /dev/urandom > bin3/plain_bin.dat
+cp bin3/plain_bin.dat wc5/
+(cd wc5 && cvs_cmd commit -m "third revision of plain_bin.dat")
+(cd wc5 && cvs_cmd update -r SMOKE_BIN_TAG plain_bin.dat)
+same_bytes bin2/plain_bin.dat wc5/plain_bin.dat "the tag still resolves to 1.2"
+(cd wc5 && cvs_cmd update -A plain_bin.dat)
+same_bytes bin3/plain_bin.dat wc5/plain_bin.dat "update -A returns to 1.3"
+
+step "remove a binary, then check out an older revision of it"
+(cd wc5 && cvs_cmd remove -f delta_bin.dat && cvs_cmd commit -m "remove delta_bin.dat")
+if [ -f wc5/delta_bin.dat ]; then
+  echo "::error::delta_bin.dat is still in the working copy after remove + commit"; exit 1
+fi
+(cd wc5 && cvs_cmd update -r 1.1 delta_bin.dat)
+same_bytes bin1/delta_bin.dat wc5/delta_bin.dat "a removed binary still checks out at 1.1"
+
+step "branch and merge over :pserver:"
+printf 'base1\nbase2\nbase3\n' > wc5/merge_src.txt
+(cd wc5 && cvs_cmd add merge_src.txt && cvs_cmd commit -m "base for the merge")
+(cd wc5 && cvs_cmd tag -b SMOKE_MERGE_BRANCH merge_src.txt \
+        && cvs_cmd update -r SMOKE_MERGE_BRANCH merge_src.txt)
+printf 'base1\nbase2\nbase3\nfrom-branch\n' > wc5/merge_src.txt
+(cd wc5 && cvs_cmd commit -m "branch change")
+(cd wc5 && cvs_cmd update -A merge_src.txt)
+printf 'from-trunk\nbase1\nbase2\nbase3\n' > wc5/merge_src.txt
+(cd wc5 && cvs_cmd commit -m "trunk change")
+(cd wc5 && cvs_cmd update -j SMOKE_MERGE_BRANCH merge_src.txt)
+merged=$(tr -d '\r' < wc5/merge_src.txt)
+for line in from-trunk from-branch; do
+  case "$merged" in
+    *"$line"*) ;;
+    *) echo "::error::the merge lost $line"; exit 1 ;;
+  esac
+done
+echo "    the merge carries both the trunk and the branch change"
 
 echo
 if [ "$SOURCE_MISMATCH" -ne 0 ]; then

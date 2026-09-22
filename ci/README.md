@@ -61,9 +61,22 @@ modify → remove → binary remove → tag / log / status / history → checkou
 commit → branch switch. Each mutation is followed by `update -dP` in a second working copy and
 a tree compare between the two.
 
-The one non-obvious property: after the import and after the mixed add, the working copy is
-also compared against the **import source**, not just the second checkout — two checkouts
-agreeing proves nothing if the server stored the wrong bytes at import time.
+Then, in working copies of its own so the tree compare above keeps its meaning: `-kb` and `-kB`
+side by side through a **fresh checkout**, a second revision of each, `update -r 1.1` and back
+with `update -A`, a sticky tag on a binary, remove followed by a checkout of an older revision,
+and a branch/merge round trip.
+
+Those last scenarios are here because their local-mode counterparts in `testcvs.py` and
+`regress.py` cannot answer for the assembled stack: local mode never points the blob store at the
+repository (`caddressed_fs::set_root` is called on the server path only), so it exercises a code
+path no client here uses. The local suites still carry the breadth of commands; this carries the
+same ground over the protocol people actually work on.
+
+Two non-obvious properties. After the import and after the mixed add, the working copy is also
+compared against the **import source**, not just the second checkout — two checkouts agreeing
+proves nothing if the server stored the wrong bytes at import time. And the binary scenarios
+compare after a *fresh checkout*, not an update, because an update can be satisfied out of a
+working copy that already holds the bytes.
 
 ## The known `import -kB` defect
 
