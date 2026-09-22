@@ -52,7 +52,7 @@ marks the run red.
 - `contour/` — a throwaway `cvslockd` + `authserver` + `cafs-server` stack; `pam-cvsnt` is
   `pam_permit.so` only (no directory service in CI, localhost-only); the blob secret is
   generated per run and masked in the log.
-- `test.Dockerfile` — the build stage of `docker/Dockerfile` plus `python3`/`diffutils`.
+- `test.Dockerfile` — the runtime stage of `docker/Dockerfile` plus `python3`/`diffutils` and `testcvs/`; the `cvs` user is homed at `/work`, the tmpfs every step mounts.
 
 ## The `:pserver:` scenario
 

@@ -141,13 +141,13 @@ jobs:
         working-directory: .
         run: mkdir src && tar -xzf source.tar.gz -C src
 
-      - name: Build the server tree (docker/Dockerfile, stage build)
+      - name: Build the server tree (docker/Dockerfile, stage runtime)
         id: build
         run: |
-          docker build --target build -t cvsnt-build:"$VERSION" -f docker/Dockerfile .
-          docker build -t cvsnt-test:"$VERSION" -f ci/test.Dockerfile --build-arg BASE=cvsnt-build:"$VERSION" .
+          docker build --target runtime -t cvsnt-runtime:"$VERSION" -f docker/Dockerfile .
+          docker build -t cvsnt-test:"$VERSION" -f ci/test.Dockerfile --build-arg BASE=cvsnt-runtime:"$VERSION" .
 
-      - name: regress.py + testcvs.py inside the build image
+      - name: regress.py + testcvs.py inside the runtime image
         if: ${{ !cancelled() && steps.build.outcome == 'success' }}
         timeout-minutes: 30
         run: |
@@ -327,8 +327,8 @@ jobs:
       - name: Build the server tree and the client image
         id: build
         run: |
-          docker build --target build -t cvsnt-build:"$VERSION" -f docker/Dockerfile .
-          docker build -t cvsnt-test:"$VERSION" -f ci/test.Dockerfile --build-arg BASE=cvsnt-build:"$VERSION" .
+          docker build --target runtime -t cvsnt-runtime:"$VERSION" -f docker/Dockerfile .
+          docker build -t cvsnt-test:"$VERSION" -f ci/test.Dockerfile --build-arg BASE=cvsnt-runtime:"$VERSION" .
 
       - name: Server images (authserver, cafs-server, cvslockd) from the same build stage
         id: images
