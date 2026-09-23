@@ -154,8 +154,8 @@ static const char *const update_usage[] =
     "\t-r rev\tUpdate using specified revision/tag (is sticky).\n",
 	"\t-S\tSelect between conflicting case sensitive names.\n",
 	"\t-t\tUpdate using last checkin time.\n",
-    "\t-n\tDo not backup local files(silently remove). Irreversibly deletes locally modified files.\n",
-    "\t--no-backups\tSame as -n; also suppresses the .# copies merges leave behind.\n",
+    "\t-n\tDo not leave .# backup copies behind (update -C overwrites, merges, joins). Irreversible for -C overwrites and for nonmergeable (binary) conflicts, where the local file is replaced without a copy.\n",
+    "\t--no-backups\tSame as -n.\n",
     "\t--move-in-the-way\tRename an unversioned file that blocks an incoming file to .#name.notversioned.* and continue.\n",
     "\t--recreate-entries\tRecreate a missing CVS/Entries as empty and refetch that directory instead of aborting.\n",
     "\t-W spec\tWrappers specification line (! to reset).\n",
@@ -788,6 +788,17 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
     }
     else
     {
+	if (status == T_CONFLICT && !vers->vn_user
+	    && move_in_the_way && !server_active)
+	{
+	    /* An unversioned file is in the way of a new one; Classify_File
+	       left both the rename and the message to this spot.  */
+	    if (rename_notversioned_aside (finfo->file, fn_root(finfo->fullname)))
+		status = T_CHECKOUT;
+	    else if (!really_quiet)
+		error (0, 0, "move away %s; it is in the way",
+		       fn_root(finfo->fullname));
+	}
 	switch (status)
 	{
 	    case T_UNKNOWN:		/* unknown file was explicitly asked about */
@@ -2334,8 +2345,10 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 		      + 10);
     (void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
 
-    if (backup_local_files)
-	copy_file (finfo->file, backup, 1, 1);
+    /* Under -n the copy is still made: it feeds the failed-merge
+       restore and the no-op merge detection below, and is consumed or
+       removed before returning, so no .# file is left behind.  */
+    copy_file (finfo->file, backup, 1, 1);
     xchmod (finfo->file, 1);
 
 	RCS_get_kflags(vers->options, false, kf);
@@ -2416,15 +2429,9 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     {
 		error (0, status == -1 ? errno : 0,
 			"could not merge revision %s of %s", vers->vn_user, fn_root(finfo->fullname));
-		if (backup_local_files)
-		{
-			error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
-				fn_root(finfo->fullname), backup);
-			rename_file (backup, finfo->file);
-		}
-		else
-			error (status == -1 ? 1 : 0, 0, "no backup of %s to restore (backups disabled by -n)",
-				fn_root(finfo->fullname));
+		error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
+			fn_root(finfo->fullname), backup);
+		rename_file (backup, finfo->file);
 		retval = 1;
 		goto out;
     }
@@ -2470,7 +2477,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 
     /* FIXME: the noexec case is broken.  RCS_merge could be doing the
        xcmp on the temporary files without much hassle, I think.  */
-    if (!noexec && backup_local_files && !xcmp (backup, finfo->file))
+    if (!noexec && !xcmp (backup, finfo->file))
     {
 	cvs_output (fn_root(finfo->fullname), 0);
 	cvs_output (" already contains the differences between ", 0);
@@ -2507,6 +2514,11 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     }
     retval = 0;
  out:
+    /* -n promises no .# litter; the copy made above is removed unless
+       the restore path already consumed it (unlink of a missing file
+       fails silently).  */
+    if (!backup_local_files)
+	unlink_file (backup);
     xfree (backup);
     return retval;
 }
@@ -2708,7 +2720,7 @@ bool bound_merge_by_bugid(RCSNode *rcs, const char *&rev1, const char *&rev2, co
  */
 static void join_file (struct file_info *finfo, Vers_TS *vers)
 {
-    char *backup;
+    char *backup = NULL;
     char *t_options;
 	kflag kf;
     int status;
@@ -3109,14 +3121,15 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
      * is the version of the file that the user was most up-to-date with
      * before the merge.
      */
-    backup = (char*)xmalloc (strlen (finfo->file)
-		      + strlen (vers->vn_user)
-		      + sizeof (BAKPREFIX)
-		      + 10);
-    (void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
-
     if (backup_local_files)
+    {
+	backup = (char*)xmalloc (strlen (finfo->file)
+			  + strlen (vers->vn_user)
+			  + sizeof (BAKPREFIX)
+			  + 10);
+	(void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
 	copy_file (finfo->file, backup, 1, 1);
+    }
     xchmod (finfo->file, 1);
 
     /* If the source of the merge is the same as the working file
@@ -3283,7 +3296,10 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
     xfree (rev1);
     xfree (rev2);
 #ifdef SERVER_SUPPORT
-    if (server_active)
+    /* No copy was made under -n (backup is NULL then), so send none: a
+       client that forwards -n would otherwise hand a NULL name to
+       server_copy_file.  */
+    if (server_active && backup_local_files)
     {
 		server_copy_file (finfo->file, finfo->update_dir, finfo->repository,
 				backup);

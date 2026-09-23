@@ -1,8 +1,20 @@
 %define   _system_user    cvs
+# The gcc-toolset compilers keep their annobin plugin as annobin.so in their
+# own plugin directory; the distribution spec file would ask for the system
+# compiler's plugin instead. (_annobin_cflags is the el7/el8 macro name,
+# _annobin_gcc_plugin the el9 one.)
+%global   _annobin_cflags      -fplugin=annobin
+%global   _annobin_gcc_plugin  -fplugin=annobin
+# The gcc-toolset packages come from AppStream; glibc-static and
+# libstdc++-static from PowerTools (el8) or CRB (el9).
 %if 0%{?rhel} == 7
 %define   _toolset_name     devtoolset-9
 %else
+%if 0%{?rhel} == 8
 %define   _toolset_name     gcc-toolset-9
+%else
+%define   _toolset_name     gcc-toolset-12
+%endif
 %endif
 
 Summary:  Concurrent Versioning System
@@ -25,7 +37,12 @@ BuildRequires:  pam-devel
 BuildRequires:  libtool
 BuildRequires:  %{_toolset_name}-gcc
 BuildRequires:  %{_toolset_name}-gcc-c++
+%if 0%{?rhel} < 9
 BuildRequires:  %{_toolset_name}-toolchain
+BuildRequires:  %{_toolset_name}-annobin
+%else
+BuildRequires:  %{_toolset_name}-annobin-plugin-gcc
+%endif
 BuildRequires:  glibc-static
 BuildRequires:  libstdc++-static
 Requires:       %{name}-libs = %{version}-%{release}
@@ -116,17 +133,26 @@ Documentation for CVSNT
 %setup -q
 %setup -q -T -D -a 1
 %build
+# put the toolset compiler first in PATH for the whole section; wrapping
+# each command in `scl enable ... '...'` breaks on el9, where %%configure
+# expands to text containing single quotes
+. /opt/rh/%{_toolset_name}/enable
 cd zlib-1.2.8
-scl enable %{_toolset_name} './configure --prefix=/tmp/zlib --libdir=%{_libdir}/cvsnt/zlib --sharedlibdir=%{_libdir}/cvsnt/zlib'
-scl enable %{_toolset_name} '%__make -j4'
+./configure --prefix=/tmp/zlib --libdir=%{_libdir}/cvsnt/zlib --sharedlibdir=%{_libdir}/cvsnt/zlib
+%__make -j4
 cd ..
 export CPPFLAGS="-I$(pwd)/zlib-1.2.8"
 export PKG_CONFIG_PATH="$(pwd)/zlib-1.2.8"
 export LD_LIBRARY_PATH="$(pwd)/ca_blobs_fs/.libs:$(pwd)/blake3/.libs:$LD_LIBRARY_PATH"
 export CXXFLAGS="$(rpm --eval "%{optflags}" | sed 's/-Werror=format-security //')"
+%if 0%{?rhel} >= 9
+# el9 builds must not use AVX-512 instructions
+export CFLAGS="%{optflags} -mno-avx512f"
+export CXXFLAGS="$CXXFLAGS -mno-avx512f"
+%endif
 
-scl enable %{_toolset_name} 'autoreconf -if'
-scl enable %{_toolset_name} '%configure  \
+autoreconf -if
+%configure  \
         --prefix=/usr \
         --enable-pam \
         --enable-server \
@@ -136,13 +162,13 @@ scl enable %{_toolset_name} '%configure  \
         --disable-mysql \
         --disable-postgres \
         --disable-sqlite \
-        --enable-64bit'
+        --enable-64bit
 
-scl enable %{_toolset_name} '%__make -j4'
+%__make -j4
 cd tools
-scl enable %{_toolset_name} '%__make -j4'
-scl enable %{_toolset_name} 'g++ -std=c++11 simplelock.cpp -o simplelock'
-scl enable %{_toolset_name} 'g++ -std=c++11 unlock.cpp -o unlock'
+%__make -j4
+g++ -std=c++11 simplelock.cpp -o simplelock
+g++ -std=c++11 unlock.cpp -o unlock
 cd ..
 cd doc
 sed "s/__VERSION__/%{version}/" < cvs.dbk > cvs2.dbk
@@ -151,19 +177,20 @@ xmlto --skip-validation -o html_cvs html cvs2.dbk
 xmlto --skip-validation -o html_cvsclient html cvsclient2.dbk
 
 %install
+. /opt/rh/%{_toolset_name}/enable
 rm -rf $RPM_BUILD_ROOT
 install -d $RPM_BUILD_ROOT{%{_sysconfdir}/{pam.d,xinetd.d,sysconfig,systemd/system},%{_cvs_root}}
 
-scl enable %{_toolset_name} '%{__make} install -j1 \
-  DESTDIR=$RPM_BUILD_ROOT'
+%{__make} install -j1 \
+  DESTDIR=$RPM_BUILD_ROOT
 
 cd tools
-scl enable %{_toolset_name} '%{__make} install -j1 \
-  DESTDIR=$RPM_BUILD_ROOT'
+%{__make} install -j1 \
+  DESTDIR=$RPM_BUILD_ROOT
 cd ..
 cd zlib-1.2.8
-scl enable %{_toolset_name} '%{__make} install -j1 \
-  DESTDIR=$RPM_BUILD_ROOT'
+%{__make} install -j1 \
+  DESTDIR=$RPM_BUILD_ROOT
 rm -rf $RPM_BUILD_ROOT/tmp/zlib
 rm -rf $RPM_BUILD_ROOT/%{_libdir}/cvsnt/zlib/pkgconfig
 cd ..
@@ -196,25 +223,32 @@ if [[ `/usr/bin/id %{_system_user} &> /dev/null; echo $?` > 0 ]]; then
 fi
 
 %postun server
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %post cafs
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %postun cafs
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %post proxy
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %postun proxy
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %post cvslockd
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %postun cvslockd
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
 
 %files
 %defattr(644,root,root,755)

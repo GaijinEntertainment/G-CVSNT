@@ -890,11 +890,13 @@ int main (int argc, char **argv)
 		crlf_mode=ltCr;
 		break;
 	    case 12:
-		/* --rename-in-use */
+		/* --rename-in-use: Windows only, accepted and ignored elsewhere */
+#ifdef _WIN32
 		{
 		    extern int rename_in_use;
 		    rename_in_use = 1;
 		}
+#endif
 		break;
 #if defined(SERVER_SUPPORT)
 			case 7:

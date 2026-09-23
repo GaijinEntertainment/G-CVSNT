@@ -160,16 +160,10 @@ int checkout (int argc, char **argv)
 	{"move-in-the-way", 0, NULL, 1},
 	{0, 0, NULL, 0},
     };
-    static struct option export_long_options[] =
-    {
-	{0, 0, NULL, 0},
-    };
-    int options_index = 0;
-
     optind = 0;
     while ((c = getopt_long (argc, argv, valid_options,
-			     m_type == EXPORT ? export_long_options : checkout_long_options,
-			     &options_index)) != -1)
+			     m_type == EXPORT ? NULL : checkout_long_options,
+			     NULL)) != -1)
     {
 	switch (c)
 	{

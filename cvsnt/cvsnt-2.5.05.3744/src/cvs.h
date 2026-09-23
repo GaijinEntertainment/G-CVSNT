@@ -139,8 +139,6 @@ typedef std::map<cvs::string,cvs::string> variable_list_t;
 #define	CVSADM_ENT	"CVS/Entries"
 #define	CVSADM_ENTEXT	"CVS/Entries.Extra"
 #define	CVSADM_ENTEXTBAK	"CVS/Entries.Extra.Backup"
-#define	CVSADM_ENTOLD	"CVS/Entries.Old"
-#define	CVSADM_ENTEXTOLD	"CVS/Entries.Extra.Old"
 #define	CVSADM_ENTBAK	"CVS/Entries.Backup"
 #define CVSADM_ENTLOG	"CVS/Entries.Log"
 #define CVSADM_ENTEXTLOG	"CVS/Entries.Extra.Log"
@@ -747,6 +745,7 @@ char *shell_escape(char **buf, const char *str);
 char *shell_escape_backslash(char **buf, const char *str);
 char *backup_file (const char *filename, const char *suffix);
 int rename_notversioned_aside (const char *file, const char *fullname);
+char *make_aside_name (const char *dir, const char *base, const char *marker, unsigned long pid, int n);
 void resolve_symlink (char **filename);
 void sleep_past (time_t desttime);
 
@@ -991,6 +990,7 @@ int cvs_outerr(const char *, size_t);
 void cvs_flusherr();
 void cvs_flushout();
 void cvs_flushout_perfile();
+void cvs_direct_response_begin();
 void cvs_output_tagged (const char *tag, const char *text);
 void server_error_exit();
 

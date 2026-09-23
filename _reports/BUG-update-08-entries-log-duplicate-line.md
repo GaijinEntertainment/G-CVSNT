@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/src/entries.cpp
 line: 257
 severity: high
 category: correctness
+status: fixed on this branch - Register in the Tier 1 slice, Scratch_Entry and Rename_Entry completed during its review
 verdict: CONFIRMED
 fix_size_loc: 4
 behavior_change: yes

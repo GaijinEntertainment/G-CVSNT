@@ -1,0 +1,34 @@
+name: cvs-ci
+
+services:
+  cvslockd:
+    image: ${CVSNT_IMAGE_PREFIX:-cvsnt}-cvslockd:${CVSNT_IMAGE_TAG:-ci}
+    volumes:
+      - ${CONTOUR_CONF:?}:/etc/cvsnt:ro
+
+  authserver:
+    image: ${CVSNT_IMAGE_PREFIX:-cvsnt}-authserver:${CVSNT_IMAGE_TAG:-ci}
+    volumes:
+      - repos:/data/repos
+      - ${CONTOUR_CONF:?}:/etc/cvsnt:ro
+      - ./pam-cvsnt:/etc/pam.d/cvsnt:ro
+    ports:
+      - "127.0.0.1:2401:2401"
+    depends_on:
+      - cvslockd
+
+  cafs-server:
+    image: ${CVSNT_IMAGE_PREFIX:-cvsnt}-cafs-server:${CVSNT_IMAGE_TAG:-ci}
+    tty: true
+    environment:
+      DIR_FOR_ROOTS: /data/repos
+      ALLOW_TRUST: "on"
+      ENCRYPTION: encryption
+      SECRET: ${CAFS_SECRET:?}
+    volumes:
+      - repos:/data/repos
+    ports:
+      - "127.0.0.1:2403:2403"
+
+volumes:
+  repos:

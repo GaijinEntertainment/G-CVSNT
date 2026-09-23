@@ -6,4 +6,5 @@ if [ "configure" = "$1" ]; then
     chmod 755 /var/cache/cafs
     chown cvs:cvs /var/cache/cafs
 fi
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi

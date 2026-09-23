@@ -31,7 +31,7 @@ Run `cvs --help-options` for the full list. The ones specific to, or important f
 | Option | Effect |
 | --- | --- |
 | `-j N` | Number of blob download worker threads. When not given, the default is `min(8, max(1, cpu_count - 1))` (`src/download_blob_to.cpp:241`). The single biggest client-side knob for update speed on binary-heavy trees (`src/main.cpp:1013`). `-j 0` is documented as "download in the main thread" but is currently a no-op — `src/client.cpp:2210` treats 0 as "unset", so the default applies |
-| `--blob_url <spec>` | Override the blob server the CVS server advertised. Takes a **single** URL `host[/path][@port]`, and disables round-robin (`src/download_blob_to.cpp:258`). The `\|`-separated list and `def` shown in `cvs --help-options` are not implemented — only the first `@` is parsed (`src/client.cpp:2123`) |
+| `--blob_url <spec>` | Override the advertised blob download list with a single URL `host[@port]` (a `/path` is not parsed out and breaks name resolution, `src/client.cpp:2123`). The master URL is still appended as a fallback (`src/download_blob_to.cpp:258,283`), and uploads ignore the override — they always go to the master. The `\|`-separated list and `def` shown in `cvs --help-options` are not implemented — only the first `@` is parsed (`src/client.cpp:2123`) |
 | `-z <0-9>` | Stream compression level for the CVS connection (gzip or zstd, negotiated) |
 | `-x` / `-y` | Require / request encryption of the CVS connection |
 | `-a` | Authenticate (sign) all traffic |
@@ -94,8 +94,10 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
            [-B bugid] [-I ign] [-W spec] [--blob_zero] [files...]
 ```
 
-(`update_usage`, `src/update.cpp:131`. The synopsis above is expanded to include `-3`, `-n` and
-`--blob_zero`, which the getopt string at `src/update.cpp:184` accepts but the usage text omits.)
+(`update_usage`, `src/update.cpp:131`. The synopsis above adds `3` and `n` to the short-option
+cluster, which the Usage line omits even though the detailed text lists all of `-3`, `-n` and
+`--blob_zero` (`src/update.cpp:133,155,157`) and the getopt string at `src/update.cpp:183`
+accepts them.)
 
 | Option | Meaning |
 | --- | --- |
@@ -112,23 +114,27 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
 | `-I ign` | Extra ignore pattern; `-I !` resets the ignore list |
 | `--blob_zero` | Write downloaded blobs as zero-length files. For "hot proxy" machines that only need to warm a cache |
 | `--move-in-the-way` | When an unversioned file occupies the path of a file the repository wants to create — the `move away <file>; it is in the way` situation, which otherwise blocks that file on every run until someone deletes it by hand — rename the obstruction to `.#name.notversioned.<timestamp>` in the same directory and install the incoming file. A rename, never a delete; the `.#` name is already on the default ignore list. Off by default. Also accepted by `checkout` |
-| `--recreate-entries` | A subdirectory whose `CVS/Entries` file is missing normally aborts the **entire** update (`while updating <dir>, CVS/Entries is missing ... create empty Entries to get all files`). This switch performs that documented remedy automatically: an empty `Entries` is written, the run continues, and every file in the directory is fetched again. Files on disk that then conflict are exactly the in-the-way case — pair with `--move-in-the-way` to keep locally edited copies as `.#*.notversioned.*` backups. Off by default: a vanished `Entries` can indicate wider corruption worth a human look |
+| `--recreate-entries` | A subdirectory whose `CVS/Entries` file is missing normally aborts the **entire** update (`while updating <dir>, CVS/Entries is missing ... create empty Entries to get all files`). This switch performs that documented remedy automatically: an empty `Entries` is written, the run continues, and every file in the directory is fetched again. The survivors on disk are unversioned after the rewrite: content-identical ones are silently re-checked in, edited ones are exactly the in-the-way case — reported `C` and left alone; `-C` does not overwrite them — so pair with `--move-in-the-way` to keep the edited copies as `.#*.notversioned.*` backups. Off by default: a vanished `Entries` can indicate wider corruption worth a human look |
 
 Note the asymmetry between `-C` and `-n`: `-C` is what you want for a clean rebuild of a working
 copy, but by default it leaves a `.#name.rev` backup for every modified file, and those are never
-cleaned up. `cvs update -C -n` discards instead of backing up. The same applies to merges: every
-merge or `-j` join first copies the working file to `.#name.rev`, and `-n` (spelled readably:
-`--no-backups`) suppresses that too — including the copies a server instructs the client to make
-before a merge. With backups off, a merge that fails outright leaves the half-merged file in place
-(there is no backup to restore from) and says so.
+cleaned up. `cvs update -C -n` discards instead of backing up. The same applies to merges: `-n`
+(spelled readably: `--no-backups`) keeps the `.#name.rev` merge copies from being left behind —
+including the copies a server instructs the client to make before a merge. An update merge still
+uses a transient copy under `-n`, so a failed merge is restored and a no-op merge is detected; the
+copy is removed before the command returns. A `-j` join that fails under `-n` leaves the
+half-merged file in place (its copy is never made) and says so. In client/server mode the server
+does not see `-n`, so for a nonmergeable file it may still print
+`file from working directory is now in .#...` even though the client, under `-n`, has not created
+that file.
 
 **`-n` means two different things depending on position.** As a *global* option it is the classic
-CVS dry run (`noexec`, `src/main.cpp:938`); as an *update* option it means "do not keep backups"
+CVS dry run (`noexec`, `src/main.cpp:938`); as an *update* option it merely drops the `-C` backups
 (`src/update.cpp:204`):
 
 ```
 cvs -n update -d       # dry run: show what would happen, change nothing
-cvs update -d -n       # really update, and destroy local modifications without a backup
+cvs update -d -C -n    # really update, and overwrite local modifications without a backup
 ```
 
 Getting these the wrong way round destroys work. Prefer `cvs -n update` written exactly that way
@@ -186,8 +192,9 @@ reasons and the proposed fixes.
 Nothing fork-specific in the option set, but the blob path changes the shape of a commit:
 
 1. The client hashes each `-kB` file with BLAKE3.
-2. It asks the blob server `CHCK <hash>`. If the answer is `HAVE`, no bytes are transferred at all.
-3. Otherwise it compresses and `PUSH`es the blob.
+2. It asks the blob server `SIZE <hash>`. If the blob is already there, no bytes are transferred at
+   all (`src/blob_kv_processor.cpp:144-151`).
+3. Otherwise it compresses the blob and streams it with `STRM`.
 4. Only then does it send `Blob-ref-transfer` on the CVS connection.
 
 So re-committing an unchanged asset, or committing an asset that already exists elsewhere in the

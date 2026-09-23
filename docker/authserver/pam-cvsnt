@@ -1,0 +1,17 @@
+#%PAM-1.0
+# Used by `cvsnt authserver` for logins that are not in CVSROOT/passwd.
+#
+# Logins reach this stack only when they are not in CVSROOT/passwd. The
+# working path is pam_sss against the sssd sidecar (docker/sssd), which
+# shares /var/lib/sss/pipes with this container. pam_unix is kept for the
+# standard stack shape but cannot verify other users' passwords, since the
+# server runs as cvs; without the sidecar the stack simply denies.
+auth        required      pam_env.so
+auth        sufficient    pam_unix.so nullok
+auth        sufficient    pam_sss.so forward_pass
+auth        required      pam_deny.so
+
+account     required      pam_unix.so broken_shadow
+account     sufficient    pam_localuser.so
+account     [default=bad success=ok user_unknown=ignore] pam_sss.so
+account     required      pam_permit.so

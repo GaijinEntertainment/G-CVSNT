@@ -753,11 +753,6 @@ void xchmod (const char *fname, int writable)
 	error (0, errno, "cannot change mode of file %s", fn_root(fname));
 }
 
-/* Set by the global --rename-in-use option.  On this platform there is no
-   "destination is in use" rename failure to recover from, so it is only
-   defined here to satisfy the reference in main.cpp and is otherwise unused. */
-int rename_in_use = 0;
-
 /*
  * Rename a file and die if it fails
  */

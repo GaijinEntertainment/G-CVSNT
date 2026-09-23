@@ -30,6 +30,7 @@ VERBOSE = False
 
 FAILURES = []
 PASSED = 0
+XFAILED = []
 CURRENT = "<none>"
 
 
@@ -141,6 +142,18 @@ def test(name):
         return fn
     return deco
 
+def xfail(name, reason):
+    """A test that pins a known-open defect: it is expected to fail today.
+    Reported XFAIL when it fails (no suite failure) and XPASS when it
+    unexpectedly passes - which means the defect is fixed and the marker
+    should come off.  An XPASS counts as a suite failure so it is not
+    missed."""
+    def deco(fn):
+        fn._test_name = name
+        fn._xfail = reason
+        return fn
+    return deco
+
 
 # --------------------------------------------------------------------------- tests
 
@@ -167,24 +180,43 @@ def t_commit(r):
           "status does not report 1.2:\n" + out)
 
 
-@test("Entries has exactly one line per file after commit")
+@test("Entries lists each file once; a surviving Entries.Log has one line per command")
 def t_entries_no_duplicates(r):
-    # Guards against a regression where each Entries.Log record was written
-    # twice, the second copy without its command prefix.
+    # BUG-update-08 (open): Scratch_Entry/Rename_Entry/Register write every
+    # Entries.Log record twice, the second copy without its command prefix,
+    # and replay reads an unprefixed line as an implicit A. A clean run
+    # collapses the log in Entries_Close, so the pair is observable only in
+    # a log that survived an interrupted run. This case pins the final
+    # Entries shape, and holds any surviving log to the one-command-one-line
+    # format with the same implicit-A reading the replay uses.
     r.import_tree("m", {"a.txt": "one\n", "c.txt": "three\n"})
     wc = r.checkout("m")
     write(os.path.join(wc, "a.txt"), "one\nchanged\n")
     r.cvs(["commit", "-m", "x"], cwd=wc)
-    for fn in ("Entries", "Entries.Log"):
-        p = os.path.join(wc, "CVS", fn)
-        if not os.path.exists(p):
-            continue
-        lines = [l for l in read(p).splitlines() if l.strip() and l.strip() != "D"]
-        seen = {}
-        for l in lines:
-            seen[l] = seen.get(l, 0) + 1
-        dupes = {k: v for k, v in seen.items() if v > 1}
-        check(not dupes, "%s has duplicate lines: %r" % (fn, dupes))
+
+    ent = os.path.join(wc, "CVS", "Entries")
+    lines = [l for l in read(ent).splitlines() if l.strip() and l.strip() != "D"]
+    names = {}
+    for l in lines:
+        parts = l.split("/")
+        name = parts[1] if len(parts) > 2 else l
+        names[name] = names.get(name, 0) + 1
+    dupes = {k: v for k, v in names.items() if v > 1}
+    check(not dupes, "Entries lists a file more than once: %r" % (dupes,))
+
+    log = os.path.join(wc, "CVS", "Entries.Log")
+    if os.path.exists(log):
+        # Strip the "X " command prefix the way fgetentent does; a body that
+        # then appears twice is the BUG-update-08 double write (the second
+        # copy replays as an implicit A and resurrects scratched entries).
+        body = {}
+        for l in read(log).splitlines():
+            if not l.strip():
+                continue
+            stripped = l[2:] if len(l) > 2 and l[1] == " " else l
+            body[stripped] = body.get(stripped, 0) + 1
+        dupes = {k: v for k, v in body.items() if v > 1}
+        check(not dupes, "Entries.Log records an entry twice: %r" % (dupes,))
 
 
 @test("tag and branch produce the right revision numbers")
@@ -323,6 +355,46 @@ def t_merge_no_backup(r):
     check(not backups, "update --no-backups left backups: %r" % backups)
 
 
+@test("update -n on a nonmergeable conflict installs the repository revision and keeps no copy")
+def t_no_backup_nonmergeable(r):
+    # The most destructive -n consequence, pinned: a -kb file with a local
+    # edit meets a newer repository revision.  A binary merge is a conflict
+    # by definition, so the repository revision replaces the local file,
+    # and the pre-merge copy that would have held the local edit is
+    # removed before the command returns - nothing names where it went.
+    payload1 = bytes(range(256)) * 2
+    payload2 = bytes(reversed(range(256))) * 3
+    local = b"local edit " * 40
+    imp = os.path.join(r.root, "impbin")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "b.dat"), "wb") as f:
+        f.write(payload1)
+    r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
+    wc = r.checkout("mb")
+    wc2root = os.path.join(r.root, "wc2")
+    os.makedirs(wc2root)
+    r.cvs(["checkout", "mb"], cwd=wc2root)
+    wc2 = os.path.join(wc2root, "mb")
+    with open(os.path.join(wc2, "b.dat"), "wb") as f:
+        f.write(payload2)
+    r.cvs(["commit", "-m", "second"], cwd=wc2)
+    with open(os.path.join(wc, "b.dat"), "wb") as f:
+        f.write(local)
+
+    rc, out = r.cvs(["update", "-n"], cwd=wc, expect_ok=False)
+    check("nonmergeable file needs merge" in out,
+          "update -n did not report the nonmergeable conflict:" + chr(10) + out)
+    check("file from working directory is now in" not in out,
+          "update -n named a copy it does not keep:" + chr(10) + out)
+    # The local edit is discarded either way; do not assert the exact
+    # repository bytes here - a small -kB revision checks out empty under
+    # the residual BUG-blob-21 defect (see t_binary_small_second_commit).
+    check(open(os.path.join(wc, "b.dat"), "rb").read() != local,
+          "update -n kept the local edit on a nonmergeable conflict")
+    backups = [f for f in os.listdir(wc) if f.startswith(".#")]
+    check(not backups, "update -n left a pre-merge copy: %r" % backups)
+
+
 def _in_the_way_setup(r):
     """Commit a new file b.txt from a second working copy and obstruct its
     path in the first working copy with an unversioned file.  Returns the
@@ -419,12 +491,14 @@ def t_missing_entries_recreated(r):
 
 @test("--rename-in-use is accepted globally and inert when nothing is locked")
 def t_rename_in_use_inert(r):
-    # The full recovery (renaming an open, memory-mapped file aside so the
-    # rename over it can complete) is Windows-only and needs a file another
-    # process holds mapped; it is exercised outside this suite.  Here we pin
-    # that the global switch parses and, crucially, is a no-op on the ordinary
-    # path: an update with the switch present but nothing locked behaves
-    # exactly as without it.
+    # The recovery branch itself (destination in use when the temp file is
+    # renamed over it) is reachable only through the client/server
+    # update_entries path with a running image holding the file: a local
+    # update -C renames the old file aside first, and a mapping held by a
+    # plain file handle blocks that rename too, so it cannot be driven from
+    # this local-mode suite.  A real test needs the piped-server harness
+    # and a spawned executable; recorded as open.  Here we pin that the
+    # global switch parses and is a no-op on the ordinary path.
     r.import_tree("m", {"a.txt": "one\n"})
     wc = r.checkout("m")
     write(os.path.join(wc, "a.txt"), "one\ntwo\n")
@@ -481,7 +555,19 @@ def t_binary(r):
     r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
     r.cvs(["checkout", "mb"])
     got = open(os.path.join(r.wc, "mb", "bin.dat"), "rb").read()
-    check_eq(got, payload, "binary round trip")
+    check_eq(got, payload, "binary import/checkout")
+
+    # The commit half of the round trip: change the bytes, commit, and
+    # read them back through a fresh checkout.
+    payload2 = bytes(reversed(payload)) + b"\x00\x01\x02"
+    with open(os.path.join(r.wc, "mb", "bin.dat"), "wb") as f:
+        f.write(payload2)
+    r.cvs(["commit", "-m", "bin2"], cwd=os.path.join(r.wc, "mb"))
+    wcroot = os.path.join(r.root, "wcbin2")
+    os.makedirs(wcroot)
+    r.cvs(["checkout", "mb"], cwd=wcroot)
+    got = open(os.path.join(wcroot, "mb", "bin.dat"), "rb").read()
+    check_eq(got, payload2, "binary commit/checkout round trip")
 
 
 @test("second commit of a binary file round trips byte for byte")
@@ -624,8 +710,10 @@ def t_large_text(r):
 
 @test("empty file round trips")
 def t_empty_file(r):
-    # Exercises the st_size == 0 branch of the RCS parse-buffer pre-size,
-    # which is skipped and must fall back to incremental growth.
+    # Pins the smallest-possible ,v through the parse-buffer pre-size (the
+    # ,v of an empty file still carries the admin block and desc, so the
+    # st_size == 0 branch is unreachable for a parseable file - this case
+    # covers the tiny-file end of the pre-size, not a zero-size one).
     r.import_tree("m", {"empty.txt": "", "a.txt": "one\n"})
     wc = r.checkout("m")
     check(os.path.isfile(os.path.join(wc, "empty.txt")), "empty.txt not checked out")
@@ -819,9 +907,12 @@ def t_new_file_add_commit(r):
 def t_server_session(r):
     # Drive `cvs server` through its stdin/stdout protocol the way a network
     # client would: one session issuing valid-requests, a checkout, a noop and
-    # an rlog.  Pins (a) request dispatch, (b) that every command's output is
-    # flushed to the client by the time its terminating "ok" arrives, and
-    # (c) that the session never deadlocks waiting for a flush.
+    # an rlog.  Pins request dispatch, that the whole session's output arrives
+    # in protocol order, and that it never deadlocks.  It does not pin the
+    # per-command flush timing: communicate() sends every request before
+    # reading, so the EOF flush alone satisfies the byte checks - verifying
+    # the boundary flush needs an interactive read of each "ok", which is not
+    # portable over these pipes.
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "sub content\n"})
     root = r.repo.replace(os.sep, "/")
 
@@ -1326,6 +1417,48 @@ def t_history_records(r):
           "cvs history reports nothing for the recorded operations:\n" + out)
 
 
+@test("an unwritable history file warns and the command still succeeds")
+def t_history_unwritable(r):
+    # history_write warns and continues when CVSROOT/history cannot be
+    # opened or written; the old per-record code aborted.  Pin the new
+    # semantics: a read-only history file costs one warning, not the
+    # checkout.
+    import stat
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    hist = os.path.join(r.repo, "CVSROOT", "history")
+    if not os.path.isfile(hist):
+        write(hist, "")
+    os.chmod(hist, stat.S_IREAD)
+    try:
+        rc, out = r.cvs(["checkout", "m"], expect_ok=False)
+    finally:
+        os.chmod(hist, stat.S_IREAD | stat.S_IWRITE)
+    check_eq(rc, 0, "checkout failed with an unwritable history file:" + chr(10) + out)
+    check("cannot write to history file" in out,
+          "no warning about the history file")
+
+@test("a modules line ending in a separator parses (line2argv bounds)")
+def t_modules_trailing_separator(r):
+    # line2argv is what parses CVSROOT/modules (modules.cpp).  Its old
+    # separator skip tested strchr(sepchars, *p), which matches the NUL
+    # terminator, so a line whose last token is followed by a trailing
+    # space walked past the end of the buffer.  Drive exactly that class
+    # through a real modules file and check the alias resolves.
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    # The runtime modules file is the checked-out copy inside the
+    # repository; write it directly (CVSROOT checkout is ACL-gated).
+    import stat
+    mods = os.path.join(r.repo, "CVSROOT", "modules")
+    os.chmod(mods, stat.S_IREAD | stat.S_IWRITE)  # cvs init leaves it read-only
+    with open(mods, "a", newline=chr(10)) as f:
+        f.write("ali -a m " + chr(10))
+    wcroot = os.path.join(r.root, "wcali")
+    os.makedirs(wcroot)
+    rc, out = r.cvs(["checkout", "ali"], cwd=wcroot, expect_ok=False)
+    check_eq(rc, 0, "checkout through the alias failed:" + chr(10) + out)
+    check(os.path.isfile(os.path.join(wcroot, "m", "a.txt")),
+          "alias checkout did not produce m/a.txt")
+
 @test("a second checkout of the same module matches the first")
 def t_second_checkout(r):
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "two\n"})
@@ -1343,6 +1476,34 @@ def t_second_checkout(r):
 
 
 # --------------------------------------------------------------------------- driver
+
+@xfail("small -kB binary second revision checks out byte for byte (BUG-blob-21 residual)",
+       "BUG-blob-21 is only partly fixed: a -kB revision below ~1.5 KB checks "
+       "out as a zero-length file in local mode; the committed blob is intact.")
+def t_binary_small_second_commit(r):
+    # Same shape as t_binary_second_commit, but a small payload.  The blob
+    # is written whole at commit (payload + a 16-byte header), yet a fresh
+    # checkout produces an empty file: data loss once the working copy that
+    # still holds the bytes is deleted.  t_binary_second_commit passes only
+    # because its 1541-byte payload sits just above the failing range.
+    payload1 = bytes(range(256))
+    payload2 = bytes(reversed(range(256)))  # 256 bytes
+    imp = os.path.join(r.root, "impbin")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "b.dat"), "wb") as f:
+        f.write(payload1)
+    r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
+    wc = r.checkout("mb")
+    with open(os.path.join(wc, "b.dat"), "wb") as f:
+        f.write(payload2)
+    r.cvs(["commit", "-m", "second"], cwd=wc)
+    wc2root = os.path.join(r.root, "wc2")
+    os.makedirs(wc2root)
+    r.cvs(["checkout", "mb"], cwd=wc2root)
+    got = open(os.path.join(wc2root, "mb", "b.dat"), "rb").read()
+    check_eq(got, payload2,
+             "small binary second revision did not round trip (got %d bytes)"
+             % len(got))
 
 def main():
     global CVS, LIBDIR, VERBOSE, CURRENT, PASSED
@@ -1380,7 +1541,17 @@ def main():
             fn(Repo(root))
         except Exception as e:  # noqa: BLE001 - a crashing test is a failed test
             fail("raised %s: %s" % (type(e).__name__, e))
-        if len(FAILURES) == before:
+        failed_now = len(FAILURES) > before
+        xreason = getattr(fn, "_xfail", None)
+        if xreason:
+            del FAILURES[before:]
+            if failed_now:
+                XFAILED.append(CURRENT)
+                print("  xfail " + CURRENT)
+            else:
+                fail("XPASS: expected to fail but passed - remove the xfail marker (%s)" % xreason)
+                print("  XPASS " + CURRENT)
+        elif not failed_now:
             PASSED += 1
             print("  ok    " + CURRENT)
         else:
@@ -1389,7 +1560,10 @@ def main():
                 print("          " + msg.replace("\n", "\n          "))
 
     print()
-    print("%d passed, %d failed" % (PASSED, len(tests) - PASSED))
+    xf = len(XFAILED)
+    print("%d passed, %d failed%s" % (
+          PASSED, len(tests) - PASSED - xf,
+          (", %d xfail" % xf) if xf else ""))
 
     if not args.keep:
         shutil.rmtree(scratch, ignore_errors=True)

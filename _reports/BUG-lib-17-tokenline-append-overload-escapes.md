@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/cvsapi/TokenLine.cpp
 line: 152
 severity: medium
 category: typo
+status: fixed in this slice (audit/02)
 verdict: CONFIRMED
 fix_size_loc: 4
 behavior_change: yes

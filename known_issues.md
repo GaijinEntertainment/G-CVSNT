@@ -1,6 +1,6 @@
 # Known issues
 
-87 defects were found by a review pass over the tree. 15 are fixed on this branch; **70 remain
+87 defects were found by a review pass over the tree. 16 are fixed on this branch; **69 remain
 open** and are listed here. Two more were fixed and then reverted, for reasons recorded below —
 those are the most interesting entries in this document, because in both cases the obvious one-line
 fix is wrong.
@@ -111,9 +111,10 @@ Three behaviours combine:
    so **every** commit of a `-kb` file is forced onto the blob path regardless of how the file was
    registered. This is deliberate — the comment says "on checkin do not allow old binary files" —
    but it is unconditional.
-2. `caddressed_fs::set_root()` is called from exactly one place in the tree, `src/server.cpp:5375`,
-   inside the server path. In local mode the blob root is never configured and keeps its default
-   `"./blobs/"`, which resolves against the **current working directory**.
+2. Before the fix on this branch, `caddressed_fs::set_root()` was called from exactly one place in
+   the tree, `src/server.cpp:5375`, inside the server path. In local mode the blob root was never
+   configured and kept its default `"./blobs/"`, which resolves against the **current working
+   directory**.
 3. `RCS_read_binary_rev_data` cannot report failure ([`BUG-server-12`](_reports/BUG-server-12-blob-pull-failure-ignored.md)),
    so a checkout that cannot find the blob reports success and writes a zero-length file.
 
@@ -225,7 +226,18 @@ Ordered by severity. "Fix size" is the estimated lines of change; "changes behav
 applying the fix alters observable behaviour, which is what kept several of the small ones out of
 this branch.
 
-### High (22)
+### High (23)
+
+### `BUG-blob-21` residual - small `-kB` revision checks out empty in local mode
+
+The [`BUG-blob-21`](_reports/BUG-blob-21-local-mode-binary-commit-data-loss.md) blob-root fix is
+incomplete.  With the root set and the blob stored whole, a `-kB` revision below ~1.5 KB still
+checks out as a zero-length file in local mode (data loss once the holding working copy is gone).
+The decoder unit is clean; the fault is in the checkout dereference/size path
+(`RCS_read_binary_rev_data` -> `pull_at_once`).  Pinned by the expected-failure case
+`t_binary_small_second_commit`.  The shipped `t_binary_second_commit` masks it with a 1541-byte
+payload, just above the failing range.
+
 
 | ID | Severity | Area | Issue | Fix size | Changes behaviour |
 | --- | --- | --- | --- | ---: | --- |
@@ -247,10 +259,10 @@ this branch.
 | [`BUG-server-12`](_reports/BUG-server-12-blob-pull-failure-ignored.md) | high | `src/rcs_cvt_kB.cpp:73` | A failed or truncated blob pull is reported as success: `-kB` checkout silently yields an empty file, a NULL deref, or a tail of uninitialized heap | 15 | yes |
 | [`BUG-update-01`](_reports/BUG-update-01-global-tag-clobbered-head.md) | high | `src/update.cpp:1372` | `update_dirent_proc` overwrites the file-static `tag` with the string literal `"HEAD"`, which is later passed to `xfree()` | 6 | yes |
 | [`BUG-update-04`](_reports/BUG-update-04-join-file-frees-static-options.md) | high | `src/update.cpp:3207` | `join_file()` frees the file-static `options` instead of its local `t_options` (double free / use-after-free via `checkout()`) | 1 | yes |
-| [`BUG-update-08`](_reports/BUG-update-08-entries-log-duplicate-line.md) | high | `src/entries.cpp:257` | Every `Entries.Log` record is written twice; the unprefixed second copy replays as an implicit `A`, resurrecting scratched/renamed entries | 4 | yes |
+| [`BUG-update-08`](_reports/BUG-update-08-entries-log-duplicate-line.md) | high | `src/entries.cpp:257` | **Fixed on this branch** (Register in the Tier 1 slice; Scratch_Entry and Rename_Entry completed during its review). Was: every `Entries.Log` record written twice; the unprefixed second copy replays as an implicit `A`, resurrecting scratched/renamed entries | 4 | yes |
 | [`BUG-update-10`](_reports/BUG-update-10-client-file-mode-never-applied.md) | high | `src/client.cpp:1938` | `update_entries()` applies the wire `mode_string` only when a `Mode` response was *also* received, so checked-out file permissions are never set | 2 | yes |
 | [`BUG-update-12`](_reports/BUG-update-12-renamed-response-path-traversal.md) | high | `src/client.cpp:3015` | `rename_entry_and_file()` accepts an unvalidated destination path from the server — the `Renamed` response can write outside the working copy | 4 | yes |
-| [`BUG-update-18`](_reports/BUG-update-18-line2argv-runs-off-buffer.md) | high | `src/subr.cpp:309` | `line2argv()` skips separators with `strchr(sepchars, *p)`, which is true for the NUL terminator — it walks off the end of the buffer | 2 | no |
+| [`BUG-update-18`](_reports/BUG-update-18-line2argv-runs-off-buffer.md) | high | `src/subr.cpp:309` | **Fixed on this branch** (Tier 1 slice, pinned by `t_args_file`). Was: `line2argv()` skipped separators with `strchr(sepchars, *p)`, which is true for the NUL terminator, and walked off the end of the buffer | 2 | no |
 
 ### Medium (32)
 
@@ -284,12 +296,12 @@ this branch.
 | [`BUG-update-06`](_reports/BUG-update-06-bound-merge-bugid-null-deref.md) | medium | `src/update.cpp:2687` | `bound_merge_by_bugid()` dereferences the result of `previous_version()` without a NULL check | 6 | yes |
 | [`BUG-update-07`](_reports/BUG-update-07-nonrecursive-module-noop.md) | medium | `src/recurse.cpp:779` | `nonrecursive_module()` check in `do_recursion()` is a no-op — non-recursive modules are still recursed into | 1 | yes |
 | [`BUG-update-09`](_reports/BUG-update-09-scratch-rename-entry-unchecked-fopen.md) | medium | `src/entries.cpp:252` | `Scratch_Entry()` and `Rename_Entry()` use the result of `CVS_FOPEN()` without a NULL check — `fprintf(NULL, ...)` crash on a read-only working directory | 16 | yes |
-| [`BUG-update-15`](_reports/BUG-update-15-find-rcs-node-leak.md) | medium | `src/find_names.cpp:297` | `find_rcs()` leaks a `Node` plus its key for every repository file that is already in the list — i.e. for nearly every file of every update | 3 | no |
+| [`BUG-update-15`](_reports/BUG-update-15-find-rcs-node-leak.md) | medium | `src/find_names.cpp:297` | **Fixed on this branch** (Tier 1 slice: one `addnode`, rejected node freed). Was: `find_rcs()` leaked a `Node` plus its key for every repository file already in the list — nearly every file of every update | 3 | no |
 | [`BUG-update-16`](_reports/BUG-update-16-ign-add-else-misplaced.md) | medium | `src/ignore.cpp:276` | `ign_add()`: the temporary-reset `else if` is attached to the wrong `if`, so a lone `!` in `.cvsignore` does nothing and any `!xxx` token wipes the ignore list | 3 | yes |
 | [`BUG-update-17`](_reports/BUG-update-17-xcmp-symlink-inverted.md) | medium | `src/filesubr.cpp:967` | `xcmp()` returns inverted results when both operands are symlinks | 1 | yes |
 | [`BUG-update-19`](_reports/BUG-update-19-send-repository-unchecked-fgets.md) | medium | `src/client.cpp:3444` | `send_repository()` ignores the `fgets()` return value and then indexes `line[strlen(line)-1]` on a possibly-uninitialised stack buffer | 6 | yes |
 
-### Low (16)
+### Low (15)
 
 | ID | Severity | Area | Issue | Fix size | Changes behaviour |
 | --- | --- | --- | --- | ---: | --- |
@@ -301,7 +313,6 @@ this branch.
 | [`BUG-lib-23`](_reports/BUG-lib-23-misspelled-user-facing-strings.md) | low | `src/buffer.cpp:1567` | Misspelled user-facing strings: "recieved", "Depreciated", "Eraseing", "FindPrototocol" | 10 | no |
 | [`BUG-server-06`](_reports/BUG-server-06-do-lock-server-shadowed-ob.md) | low | `src/lock.cpp:263` | Shadowed local `ob` in `do_lock_server` defeats all three `xfree(ob)` calls, leaking a path buffer per lock | 1 | no |
 | [`BUG-server-07`](_reports/BUG-server-07-win32-lockers-name-leak.md) | low | `src/lock.cpp:1053` | Windows variant of `set_lockers_name` never frees the previous `lockers_name` | 2 | no |
-| [`BUG-server-14`](_reports/BUG-server-14-magicrev-duplicated-for.md) | low | `src/rcs.cpp:2257` | Duplicated `for` header in `RCS_magicrev` makes the whole `findnextmagicrev` optimisation dead code | 2 | no |
 | [`BUG-server-19`](_reports/BUG-server-19-commitpt-cleared-before-ternary.md) | low | `src/rcs_checkin.cpp:967` | `commitpt` is set to NULL four lines before `commitpt?'A':'M'` is evaluated, so the lock server is never told "Added" | 3 | yes |
 | [`BUG-server-20`](_reports/BUG-server-20-cmp-file-bitwise-and.md) | low | `src/rcs_checkin.cpp:1450` | `RCS_cmp_file` uses bitwise `&` instead of `&&`, silently testing only bit 0 of `ignore_keywords` | 1 | no |
 | [`BUG-server-21`](_reports/BUG-server-21-history-cp-gt-workdir-string-compare.md) | low | `src/history.cpp:801` | `cp > workdir` in `history_write` is a lexicographic string comparison, not the intended pointer bounds check | 1 | yes |
@@ -312,7 +323,7 @@ this branch.
 
 ## Fixed on this branch
 
-For reference, the 15 defects that were fixed:
+For reference, the 16 defects that were fixed:
 
 | ID | Issue |
 | --- | --- |
@@ -331,7 +342,7 @@ For reference, the 15 defects that were fixed:
 | [`BUG-server-08`](_reports/BUG-server-08-writelock-uses-CVSRFL.md) | `write_lock` built the write-lock filename from the read-lock prefix |
 | [`BUG-server-15`](_reports/BUG-server-15-checkin-format-missing-arg.md) | `%s` with no argument on the reopen-failure path |
 | [`BUG-server-17`](_reports/BUG-server-17-pnew-file-comment-typo.md) | `"pnew file"` written into the RCS `comment` field of every imported file |
-
+| [`BUG-server-14`](_reports/BUG-server-14-magicrev-duplicated-for.md) | Duplicated `for` header in `RCS_magicrev` made the whole `findnextmagicrev` optimisation dead code (fixed in the Tier 2 slice, `suggested_optimizations.md` item 10) |
 ## Duplicate same-name fileattr nodes are mutated by first match only
 
 The `fileattr.xml` model permits more than one node with the same name: a remove+re-add of a
