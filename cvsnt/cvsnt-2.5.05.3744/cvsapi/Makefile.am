@@ -15,11 +15,12 @@ pcre_lib = @PCRE_LIBS@
 libxml_lib = @LIBXML_LIBS@
 zlib_lib = @ZLIB_LIBS@
 
-AM_CPPFLAGS = -I$(top_srcdir)/lib $(pcre_inc) $(includeopt) $(INCLTDL) -D_CVSAPI
+AM_CPPFLAGS = -I$(top_srcdir)/lib -I$(top_srcdir)/zstd $(pcre_inc) $(includeopt) $(INCLTDL) -D_CVSAPI
 
 libcvsapi_la_SOURCES = \
 	Codepage.cpp \
 	Codepage.h \
+	FileContent.cpp \
 	crypt.cpp \
 	crypt.h \
 	cvsapi.h \

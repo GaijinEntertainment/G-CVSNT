@@ -89,6 +89,15 @@ public:
 	static CVSAPI_EXPORT bool rename(const char *from, const char *to);
 
 	static CVSAPI_EXPORT bool exists(const char *file);
+	/* Classify FILE by content, never by name.  A NUL in the first 8 KB
+	   means binary; an all-normal 8 KB means text; anything else reads up
+	   to 64 KB more for a NUL.  UTF-16/32 text (BOM) is exempt.  These are
+	   the detectors add/import use, and the ones TortoiseCVS should. */
+	static CVSAPI_EXPORT bool looks_binary(const char *file);
+	/* Recommended keyword mode for a binary file, without the -k prefix:
+	   empty for text, Bz when the sampled bytes compress with zstd, B when
+	   they do not (already-compressed data). */
+	static CVSAPI_EXPORT const char *content_binary_kopt(const char *file);
 	static CVSAPI_EXPORT TypeEnum type(const char *file);
 	static CVSAPI_EXPORT bool absolute(const char *file);
 	static CVSAPI_EXPORT int uplevel(const char *file);

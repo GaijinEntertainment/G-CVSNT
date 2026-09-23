@@ -78,6 +78,12 @@ send_files(int argc, char **argv, int local, int aflag, unsigned int flags);
 #define SEND_DIRECTORIES_ONLY	0x010
 #define SEND_CASE_SENSITIVE		0x020
 #define SEND_NO_BLOBS_CONTENT   0x080
+/* add: a file whose bytes look binary gets its own Kopt -kB (see send_files_declared_kopt). */
+#define SEND_KOPT_BY_CONTENT	0x040
+
+/* The -k the user gave add, or NULL: SEND_KOPT_BY_CONTENT forces B only past a
+   non-binary one.  */
+void send_files_declared_kopt (const char *kopt);
 
 /* Send an argument to the remote server.  */
 void send_arg(const char *string);
