@@ -217,7 +217,11 @@ parsed — before a single byte of user data moves.
   on demand from a new `rcs_ensure_deltas(RCSNode*)` guard placed at the top of
   `RCS_isdead`, `RCS_getrevtime`, `RCS_getproplist`, `RCS_getexpand`, `RCS_getversion`,
   `RCS_checkout`, `RCS_symbols`. For the overwhelmingly common
-  "no tag, HEAD, unchanged" case, phase 2 never runs.
+  "no tag, HEAD, unchanged" case, phase 2 never runs. Review caveat (sol): guarding a
+  list of accessors leaves `symbols`/`versions`/`locks`/`other` public with ~80 direct
+  consumers, and one missed consumer silently reads an empty partial node - the
+  load-bearing form makes those collections private behind lazy accessors so `RCSNode`
+  itself enforces the invariant; the guard list above is a floor, not the design.
   Bigger win, later: keep an in-`,v` index (offset table) so a single revision can be
   seeked to without walking all deltas.
 - **Estimated LoC:** ~120 in `src/rcs.cpp` (+ a one-line guard in ~8 accessors).

@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/src/mapping.cpp
 line: 484
 severity: high
 category: memory-safety
+status: fixed in this slice (audit/02)
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: yes

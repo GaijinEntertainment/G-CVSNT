@@ -3,4 +3,5 @@ if   [ "remove" = "$1" ]; then  shift ; set -- "0" "$@"
 elif [ "upgrade" = "$1" ]; then shift ; set -- "1" "$@"
 fi
 
-/usr/bin/systemctl daemon-reload
+# no systemd in a container or chroot: nothing to reload there
+if [ -d /run/systemd/system ]; then /usr/bin/systemctl daemon-reload; fi
