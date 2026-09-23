@@ -247,10 +247,6 @@
       <EnableCOMDATFolding />
       <AdditionalLibraryDirectories>..\external_libs\Win32;.\external_libs\Win32;</AdditionalLibraryDirectories>
     </Link>
-    <PostBuildEvent>
-      <Message>Deploying</Message>
-      <Command>"$(SolutionDir)\tonys scripts\debug cvs.bat" "$(SolutionDir)"</Command>
-    </PostBuildEvent>
   </ItemDefinitionGroup>
   <ItemDefinitionGroup Condition="'$(Configuration)|$(Platform)'=='Debug|x64'">
     <Midl>
