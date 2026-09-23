@@ -49,9 +49,8 @@ same_bytes() {  # <expected file> <file under test> <what it proves>
 }
 hash_tree() { (cd "$1" && find . -type f -not -path '*/CVS/*' | LC_ALL=C sort | xargs -r sha256sum); }
 SOURCE_MISMATCH=0
-IMPORT_DEFECT_SEEN=0
 compare_with_source() {
-  local src="$1" wc="$2" mode="${3:-}" f rel msg
+  local src="$1" wc="$2" f rel msg
   while IFS= read -r f; do
     rel=${f#"$src"/}
     msg=""
@@ -60,13 +59,8 @@ compare_with_source() {
       *)     cmp "$f" "$wc/$rel" || msg="$rel: binary differs from the source ($(stat -c %s "$f") vs $(stat -c %s "$wc/$rel" 2>/dev/null || echo 0) bytes)" ;;
     esac
     [ -z "$msg" ] && continue
-    if [ "$mode" = known-import-defect ]; then
-      echo "::warning title=import -kB data loss (known defect)::$msg"
-      IMPORT_DEFECT_SEEN=1
-    else
-      echo "::error::$msg"
-      SOURCE_MISMATCH=1
-    fi
+    echo "::error::$msg"
+    SOURCE_MISMATCH=1
   done < <(find "$src" -type f -not -path '*/CVS/*' | LC_ALL=C sort)
   echo "    compared with the source: $src"
   return 0
@@ -94,7 +88,7 @@ step "import"
 step "checkout, twice; the checkout must equal the import source"
 cvs_cmd -d "$ROOT" checkout proj
 test -f proj/a.txt && test -f proj/sub/deep/d.txt
-compare_with_source imp proj known-import-defect
+compare_with_source imp proj
 cvs_cmd -d "$ROOT" checkout -d wc2 proj
 sync_and_compare "checkout"
 
@@ -245,8 +239,4 @@ if [ "$SOURCE_MISMATCH" -ne 0 ]; then
   exit 1
 fi
 echo "### $STEP_DONE of $STEP_TOTAL scenarios passed"
-if [ "$IMPORT_DEFECT_SEEN" -ne 0 ]; then
-  echo "### SMOKE OK (with the known import -kB defect, see ::warning:: above)"
-else
-  echo "### SMOKE OK"
-fi
+echo "### SMOKE OK"
