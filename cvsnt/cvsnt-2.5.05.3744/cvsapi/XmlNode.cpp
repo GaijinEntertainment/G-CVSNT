@@ -114,6 +114,12 @@ const char *CXmlNode::GetAttrValue(const char *name)
 	return (const char *)xmlGetProp(m_node, (const xmlChar *)name);
 }
 
+void CXmlNode::FreeAttrValue(const char *value)
+{
+	if(value)
+		myxmlFree((void*)value);
+}
+
 bool CXmlNode::SetAttrValue(const char *name, const char *value)
 {
 	if(!xmlSetProp(m_node, (const xmlChar *)name, (const xmlChar *)value))

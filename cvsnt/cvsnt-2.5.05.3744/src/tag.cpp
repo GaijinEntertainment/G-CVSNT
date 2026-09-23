@@ -279,7 +279,9 @@ int cvstag (int argc, char **argv)
         return get_responses_and_close ();
     }
 
-	lock_for_write = 1;
+	/* lock_for_write is raised around the second recursion pass in
+	   rtag_proc, which is the only pass that rewrites ,v files; the
+	   validation pass only reads and takes read locks.  */
     if (is_rtag)
     {
 	DBM *db;
@@ -302,7 +304,6 @@ int cvstag (int argc, char **argv)
 	err = rtag_proc (argc + 1, argv - 1, NULL, NULL, NULL, 0, 0, NULL,
 			 NULL);
     }
-	lock_for_write = 0;
 
     Lock_Cleanup ();
     return (err);
@@ -427,11 +428,15 @@ static int rtag_proc(int argc, char **argv, const char *xwhere,
 	tag_set_ok = 0;
 
 	current_date = date_from_time_t(global_session_time_t);
-    /* start the recursion processor */
+    /* start the recursion processor.  Only this pass rewrites ,v files,
+       so only this pass asks rcsbuf_open for exclusive per-file locks;
+       the validation pass above ran with read locks.  */
+	lock_for_write = 1;
     err = start_recursion (is_rtag ? rtag_fileproc : tag_fileproc,
 			   (FILESDONEPROC) NULL, (PREDIRENTPROC) NULL, tag_dirproc,
 			   (DIRLEAVEPROC) NULL, NULL, argc - 1, argv + 1,
 			   local, which, 0, 0, where, repository, 1, verify_tag, numtag);
+	lock_for_write = 0;
 	xfree(current_date);
     dellist (&mtlist);
     if (where != NULL)

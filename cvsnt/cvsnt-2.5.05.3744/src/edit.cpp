@@ -62,11 +62,19 @@ static int onoff_fileproc(void *callerdat, struct file_info *finfo)
 
 	if(turning_on)
 	{
-		if(!handle->GetChild("watched")) handle->NewNode("watched");
+		if(!handle->GetChild("watched"))
+		{
+			handle->NewNode("watched");
+			fileattr_modified();
+		}
 	}
 	else
 	{
-		if(handle->GetChild("watched")) handle->Delete();
+		if(handle->GetChild("watched"))
+		{
+			handle->Delete();
+			fileattr_modified();
+		}
 	}
     return 0;
 }
@@ -75,22 +83,42 @@ static int onoff_filesdoneproc (void *callerdat, int err, char *repository, char
 {
     if (setting_default)
 	{
-		CXmlNodePtr handle = fileattr_find(NULL,"/directory/default");
+		/* Relative to the <fileattr> root, as add.cpp:816 looks it up.  A
+		   leading slash made this an absolute path to a nonexistent
+		   /directory, so watch off never found the stored default and every
+		   run appended a fresh one.  Reuse an existing <directory> too - cvs
+		   chacl can leave one with ACL children but no <default>.  */
+		CXmlNodePtr handle = fileattr_find(NULL,"directory/default");
 
 		if(!handle)
 		{
-			handle = fileattr_getroot();
-			handle->NewNode("directory");
+			/* Do not create the node just to find nothing to turn off.  */
+			if(!turning_on)
+				return err;
+			handle = fileattr_find(NULL,"directory");
+			if(!handle)
+			{
+				handle = fileattr_getroot();
+				handle->NewNode("directory");
+			}
 			handle->NewNode("default");
 		}
 
 		if(turning_on)
 		{
-			if(!handle->GetChild("watched")) handle->NewNode("watched");
+			if(!handle->GetChild("watched"))
+			{
+				handle->NewNode("watched");
+				fileattr_modified();
+			}
 		}
 		else
 		{
-			if(handle->GetChild("watched")) handle->Delete();
+			if(handle->GetChild("watched"))
+			{
+				handle->Delete();
+				fileattr_modified();
+			}
 		}
 	}
     return err;

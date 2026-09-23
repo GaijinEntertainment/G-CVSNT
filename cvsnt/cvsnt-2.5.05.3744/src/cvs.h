@@ -987,6 +987,8 @@ int cvs_output_binary(char *, size_t);
 int cvs_outerr(const char *, size_t);
 void cvs_flusherr();
 void cvs_flushout();
+void cvs_flushout_perfile();
+void cvs_direct_response_begin();
 void cvs_output_tagged (const char *tag, const char *text);
 void server_error_exit();
 

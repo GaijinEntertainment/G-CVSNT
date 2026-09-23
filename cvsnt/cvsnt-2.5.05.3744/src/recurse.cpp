@@ -961,10 +961,11 @@ static int do_file_proc (Node *p, void *closure)
 	xfree (mapped_name);
 	xfree (mapped_file_repository);
 
-    /* Allow the user to monitor progress with tail -f.  Doing this once
-       per file should be no big deal, but we don't want the performance
-       hit of flushing on every line like previous versions of CVS.  */
-    cvs_flushout ();
+    /* Allow the user to monitor progress with tail -f.  In server mode
+       the flush is skipped while next to nothing is pending, so small
+       files batch into full network writes; any staged text or a full
+       chunk still flushes here, once per file.  */
+    cvs_flushout_perfile ();
 
     return (ret);
 }

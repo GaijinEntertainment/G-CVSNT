@@ -950,6 +950,7 @@ int RCS_checkin (RCSNode *rcs, const char *workfile, const char *message, const 
 		RCS_putadmin (rcs, fout);
 		RCS_putdtree (rcs, rcs->head, fout);
 		RCS_putdesc (rcs, fout);
+		/* CVS_FTELL counts buffered bytes: delta_pos is exact unflushed.  */
 		rcs->delta_pos = CVS_FTELL (fout);
 		if (rcs->delta_pos == -1)
 			error (1, errno, "cannot ftell for %s", fn_root(rcs->path));

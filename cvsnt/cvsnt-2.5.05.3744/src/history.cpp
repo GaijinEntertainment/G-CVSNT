@@ -668,7 +668,14 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 	cvs::string workdir;
 	cvs::string real_workdir;
     const char *username = getcaller ();
-    CFileAccess acc;
+	/* The history file stays open across records (for the life of the
+	   process; a root change reopens): one stat+open+close per record was
+	   a measurable per-file cost on large updates.  Records are fflushed
+	   as they are written, so durability matches the old
+	   open-append-close.  */
+	static FILE *hist_fp;
+	static char *hist_fname;
+	static int hist_fail;
 	cvs::string line;
     char *slash = "", *cp;
     const char *repos,*cp2;
@@ -686,16 +693,74 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 
 	cvs::sprintf(fname, 80, "%s/%s/%s", current_parsed_root->directory, CVSROOTADM, CVSROOTADM_HISTORY);
 
-	if (CFileAccess::exists(fname.c_str()))
-    {
-		TRACE(1,"fopen(%s,a)",fname.c_str());
-		if(!acc.open(fname.c_str(),"a+"))
+	if (!hist_fname || fncmp(hist_fname, fname.c_str()))
+	{
+		if (hist_fp)
 		{
-			if (! really_quiet)
+			fclose(hist_fp);
+			hist_fp = NULL;
+		}
+		xfree(hist_fname);
+		hist_fname = xstrdup(fname.c_str());
+		hist_fail = 0;
+	}
+#ifndef _WIN32
+	if (hist_fp)
+	{
+		/* Rotation probe: if the path no longer names the open file
+		   (deleted, or renamed away by log rotation), drop the handle so
+		   the block below reopens the current file.  One stat per record
+		   is still far cheaper than the old stat+open+close.  On Windows
+		   the open append handle blocks the rename, so no probe.  */
+		struct stat pathst, fpst;
+		if (CVS_STAT (fname.c_str(), &pathst) != 0
+		    || fstat (fileno (hist_fp), &fpst) != 0
+		    || pathst.st_ino != fpst.st_ino
+		    || pathst.st_dev != fpst.st_dev)
+		{
+			fclose (hist_fp);
+			hist_fp = NULL;
+		}
+	}
+#endif
+	if (!hist_fp)
+	{
+		/* Re-probe while the handle is missing: the file can be created
+		   or become writable between records (a server process serves
+		   many commands), and the old open-per-record behaviour picked
+		   that up.  hist_fail only keeps the warning from repeating per
+		   record; it does not stop the retry.  A missing file skips only
+		   the guarded write below - the historyinfo trigger still runs,
+		   exactly as it did with the per-record open.  */
+		if (CFileAccess::exists(fname.c_str()))
+		{
+			TRACE(1,"fopen(%s,a)",fname.c_str());
+			hist_fp = CVS_FOPEN(fname.c_str(),"a");
+#if defined(_WIN32)
+			/* CRT handles are inheritable unless opened with "N", and the
+			   trigger runner spawns with bInheritHandles=TRUE - clear the
+			   flag so children do not pin the history file.  */
+			if(hist_fp)
+				SetHandleInformation((HANDLE)_get_osfhandle(_fileno(hist_fp)), HANDLE_FLAG_INHERIT, 0);
+#endif
+			/* The handle is held across records, which spans the
+			   historyinfo trigger's fork+exec and every other
+			   subprocess.  Nothing in the child needs it, and an
+			   inherited append handle pins the inode against log
+			   rotation - so mark it close-on-exec on POSIX and clear the
+			   inherit flag on Windows.  */
+#if defined(FD_CLOEXEC) && !defined(_WIN32)
+			if(hist_fp)
+				fcntl(fileno(hist_fp), F_SETFD, FD_CLOEXEC);
+#endif
+			if(!hist_fp)
 			{
-				error (0, errno, "warning: cannot write to history file %s", fn_root(fname.c_str()));
+				if (!hist_fail && !really_quiet)
+					error (0, errno, "warning: cannot write to history file %s", fn_root(fname.c_str()));
+				hist_fail = 1;
+				return;
 			}
-			return;
+			hist_fail = 0;
 		}
 	}
     repos = Short_Repository (repository);
@@ -811,14 +876,23 @@ void history_write (int type, const char *update_dir, const char *revs, const ch
 		revs = "";
 
 
-	if(acc.isopen())
+	if(hist_fp)
 	{
 		cvs::sprintf(line,80,"%c%08" TIME_T_SPRINTF "x|%s|%s|%s|%s|%s|%s\n",
 	     		type, global_session_time_t, username, workdir.c_str(), repos, revs, name, bugid?bugid:"");
-		if(!acc.write(line.c_str(),line.length()))
-			error (1, errno, "cannot write to history file: %s", fn_root(fname.c_str()));
-		if(!acc.close())
-			error (1, errno, "cannot close history file: %s", fn_root(fname.c_str()));
+		/* The history log is advisory, so a failure here warns and the
+		   command continues.  That is a deliberate behaviour change: the
+		   old per-record code aborted on a failed write (only its close
+		   path ignored errors), so a full CVSROOT partition killed
+		   checkouts that had otherwise succeeded.  */
+		/* Warn once per command, not once per record: a full partition
+		   would otherwise turn a large checkout into one E line per file. */
+		if(fwrite(line.c_str(),1,line.length(),hist_fp)!=line.length() || fflush(hist_fp))
+		{
+			if(!hist_fail)
+				error (0, errno, "warning: cannot write to history file: %s", fn_root(fname.c_str()));
+			hist_fail = 1;
+		}
 	}
 
 	historyproc_param_t args;
