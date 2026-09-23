@@ -213,14 +213,12 @@ int RCS_checkout (RCSNode *rcs, const char *workfile, const char *rev, const cha
 	else if(expand.flags&(KFLAG_BINARY|KFLAG_UNIX))
 		crlf=ltLf;
 
-	bool oopen_binary = ((expand.flags&KFLAG_BINARY) || (expand.flags&KFLAG_UNIX));
-	bool oencode = (((expand.flags&KFLAG_ENCODED) || (crlf!=CRLF_DEFAULT)) && !server_active);
-	bool nopen_binary = ((expand.flags&KFLAG_BINARY) || (crlf!=CRLF_DEFAULT) || ((expand.flags&(KFLAG_BINARY|KFLAG_ENCODED) && (!server_active))));
-	bool nencode = !(expand.flags&KFLAG_BINARY) && (((expand.flags&KFLAG_ENCODED) || (crlf!=CRLF_DEFAULT)) && !server_active);
-	bool xopen_binary = (expand.flags&(KFLAG_BINARY|KFLAG_ENCODED)) || (crlf!=CRLF_DEFAULT) && !server_active;
-	bool xencode = !(expand.flags&KFLAG_BINARY) && ((expand.flags&KFLAG_ENCODED) || (crlf!=CRLF_DEFAULT)) && !server_active;
-	bool encode=oencode;
-	bool open_binary=xopen_binary;
+	/* Binary content must never pass through the codepage encoder: it
+	   guesses an encoding from the bytes, and a wrong guess followed by a
+	   failed iconv wrote the file out empty (BUG-blob-21 residual).  */
+	bool encode = !(expand.flags&KFLAG_BINARY)
+		&& ((expand.flags&KFLAG_ENCODED) || (crlf!=CRLF_DEFAULT)) && !server_active;
+	bool open_binary = (expand.flags&(KFLAG_BINARY|KFLAG_ENCODED)) || (crlf!=CRLF_DEFAULT) && !server_active;
 
 	if (free_rev)
 		xfree (rev);

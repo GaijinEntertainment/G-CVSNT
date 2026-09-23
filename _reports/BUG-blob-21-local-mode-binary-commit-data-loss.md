@@ -8,7 +8,7 @@ category: correctness
 verdict: CONFIRMED
 fix_size_loc: 20
 behavior_change: yes
-status: partially fixed - the blob root and missing-blobs-dir cases; part 1 is itself incomplete (small revisions still check out empty), parts 2 and 3 remain open
+status: part 1 fixed (blob root, missing blobs dir, and the small-revision empty checkout); parts 2 and 3 remain open
 ---
 
 # In local mode, committing a second revision of a binary file either aborts or silently destroys the content
@@ -162,34 +162,44 @@ Parts of this are fixed on this branch:
 
 Verified by the regression case "second commit of a binary file round trips byte for byte", which
 fails against the previous build (commit aborted) and passes now, including a byte-exact fresh
-checkout and `update -r` back to the first revision. That case uses a 1541-byte payload; it does
-not exercise small revisions, which are still lost - see "Residual" below.
+checkout and `update -r` back to the first revision. That case uses a 1541-byte payload, which
+happened to dodge a second defect on the checkout side - see "Residual" below, now fixed.
 
 Still open: the default root should fail loudly rather than silently resolving to a relative path
 (part 2 below), and the read path still cannot report a missing blob (`BUG-server-12`, part 3) — a
 repository already poisoned by the old behaviour still checks out empty files without an error.
 
-## Residual: a correctly stored small revision still checks out empty
+## Residual (fixed): a correctly stored small revision checked out empty
 
-Part 1 above is incomplete.  With the blob root set and the `blobs/` directory present - the
-common case it is meant to fix - a `-kB` revision whose payload is below roughly 1.5 KB still
-checks out as a **zero-length** file in local mode.  This is not the missing-root or missing-dir
-case and not a dangling reference: the blob is written whole at commit (`<repos>/blobs/..`, the
-payload plus a 16-byte `NONE` header), yet a fresh checkout elsewhere produces an empty working
-file.  Deleting the working copy that still holds the bytes loses the revision.
+Part 1 above was itself incomplete.  With the blob root set and the `blobs/` directory present, a
+`-kB` revision whose payload was below roughly 1.5 KB still checked out as a **zero-length** file in
+local mode: the blob was written whole at commit, the reference in the `,v` pointed at it, and the
+pull returned the right bytes - yet the working file came out empty.  Deleting the working copy
+that still held the bytes lost the revision.
 
-Reproduction (local mode, no server): import a `-kb` file, commit a second revision of ~256 bytes,
-check out into a fresh directory - the file is 0 bytes.  The boundary is size-driven: payloads at
-1541 bytes round-trip, payloads at 1400 and below do not, so the existing regression case passes
-only because its payload sits just above the failing range.
+Root cause, three layers deep in the working-file write (`RCS_checkout`, `src/rcs_checkin.cpp`):
 
-The streaming decoder itself is not at fault - `unit_tests` feeds whole blobs through
-`decode_stream_blob_data` in fixed-size chunks at small sizes and passes - so the defect is in the
-checkout glue that dereferences the blob reference and sizes the working-file write
-(`RCS_checkout` -> `RCS_read_binary_rev_data` -> `pull_at_once`, `src/rcs_checkin.cpp:135`,
-`src/rcs_cvt_kB.cpp:32`).  Pinned as an expected-failure regression case,
-`t_binary_small_second_commit`, which flips to a hard failure (XPASS) once this is fixed.
+1. Binary content was routed through the **codepage encoder**: `encode = oencode`, whose
+   condition does not exclude `KFLAG_BINARY` (the `nencode` variable beside it did, and was
+   unused).  So `-kB` bytes went to `CCodepage::OutputAsEncoded`.
+2. `CCodepage::ConvertEncoding` **guesses an encoding from the bytes** (`GuessEncoding`).  When
+   the binary garbage happened to look like some charset, it opened iconv; iconv failed on the
+   first invalid sequence - but the check `iconv(...) < 0` on a `size_t` can never fire, so the
+   call "succeeded" having converted nothing, and `outlen -= out_remaining` landed on **0**.
+3. `OutputAsEncoded`'s `ltLf` branch passed `l` as **both** the input length and the output
+   length (`ConvertEncoding(o, l, outbuf, l)`), so `l` became 0 and `write(fd, o, 0)` succeeded
+   with an empty file and no error.
 
+When the guess said "no conversion", `outlen` was left alone and the file was right - which is why
+the boundary shifted with content and size rather than sitting on a clean threshold, and why the
+1541-byte regression payload passed.  The same hole could empty a **text** file whose guessed
+encoding failed to convert.
+
+Fixed on this branch: binary never enters the encoder; `ConvertEncoding` detects an iconv failure
+(`== (size_t)-1`); every `OutputAsEncoded` call site keeps a separate output length and adopts it
+only from a real conversion, writing the raw bytes otherwise.  Pinned by
+`t_binary_small_second_commit`, which now commits and checks out six payload sizes from 100 to
+1400 bytes so a lucky guess on one size cannot hide a regression.
 ## Suggested fix
 Three parts, smallest first:
 
