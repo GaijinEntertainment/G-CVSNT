@@ -294,11 +294,12 @@ static int find_rcs (const char *dir, List *list, const char *regex)
 				p = getnode ();
 				p->type = FILES;
 				p->key = xstrdup (q);
-				if(!findnode_fn(list,p->key))
-				{
-					if(addnode (list, p) != 0)
-						freenode (p);
-				}
+				/* addnode already rejects a duplicate key (returning
+				   non-zero) with the same fncmp comparison a findnode_fn
+				   pre-check would use, so look up once - and free the
+				   node on rejection, which the pre-check version leaked. */
+				if(addnode (list, p) != 0)
+					freenode (p);
 			}
 		}
 		errno = 0;

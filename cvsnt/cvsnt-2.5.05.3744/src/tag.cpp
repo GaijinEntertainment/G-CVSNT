@@ -745,7 +745,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(numtag),
 					PATCH_NULL(current_date) );
-			RCS_rewrite (rcsfile, NULL, NULL, 0);
+			RCS_rewrite_final (rcsfile, NULL, NULL, 0);
 			tag_set_ok = 1;
 		}
     }
@@ -808,7 +808,7 @@ static int rtag_fileproc (void *callerdat, struct file_info *finfo)
 					PATCH_NULL(symtag),
 					PATCH_NULL(rev),
 					PATCH_NULL(current_date) );
-	    RCS_rewrite (rcsfile, NULL, NULL, 0);
+	    RCS_rewrite_final (rcsfile, NULL, NULL, 0);
 		tag_set_ok = 1;
 	}
     }
@@ -890,7 +890,7 @@ static int rtag_delete (RCSNode *rcsfile)
 	return (1);
     }
 	TRACE(3,"rtag_delete(2) rewrite rcsfile");
-    RCS_rewrite (rcsfile, NULL, NULL, 0);
+    RCS_rewrite_final (rcsfile, NULL, NULL, 0);
     return (0);
 }
 

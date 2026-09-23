@@ -111,6 +111,7 @@ myworkdir/
 │   ├── Repository            path of this directory inside the repository
 │   ├── Entries               one line per versioned file/subdirectory
 │   ├── Entries.Log           pending appends to Entries (merged lazily)
+│   ├── Entries.Old           stale; no longer written (see below)
 │   ├── Entries.Extra         CVSNT extra per-entry data
 │   ├── Entries.Extra.Log
 │   ├── Entries.Static        marks a directory checked out non-recursively
@@ -127,6 +128,12 @@ myworkdir/
 ```
 
 Constants are at `src/cvs.h:139`.
+
+`Entries.Old` and `Entries.Extra.Old` are no longer written. They were a convention for third-party
+frontends — rename the old file aside so another tool can diff against it — but nothing in CVS ever
+read them back, and producing them cost a full copy and an `fsync` of both entries files on every
+directory visited. A working copy created by an older version may still contain a stale one; it is
+not the immediately previous generation.
 
 ### `CVS/Entries` format
 
