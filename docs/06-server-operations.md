@@ -2,7 +2,10 @@
 
 ## The three services
 
-A complete G-CVSNT deployment runs up to three server processes. Only the first is mandatory.
+A complete G-CVSNT deployment runs up to three server processes. Only the first is mandatory — and
+only for repositories without `-kB` content: a `-kB` update sends 71-byte references, and the
+client fetches the bytes from the blob service on port 2403, so a blob-enabled deployment also
+needs `cafs_server` (or a proxy backed by it) reachable from every client.
 
 ### 1. The CVS server
 
@@ -22,8 +25,9 @@ LockServer=localhost:2402
 ```
 
 Without it, CVS falls back to `#cvs.lock` / `#cvs.rfl.*` / `#cvs.wfl.*` files created and removed in
-every repository directory it touches (names at `src/cvs.h:222`, read lock created at
-`src/lock.cpp:722`). On a repository with tens of thousands
+every repository directory it touches (names at `src/cvs.h:222`, built at `src/lock.cpp:719-745`;
+the master lock directory itself is made with `CVS_MKDIR` at `src/lock.cpp:1088`). On a repository
+with tens of thousands
 of directories that is a very large amount of filesystem churn, so the lock server is strongly
 recommended at this scale. The wire protocol is documented in
 `lockservice/cvslock_protocol.txt`.
@@ -43,9 +47,9 @@ cafs_server <dir_for_roots> <allow_trust: on|off> [norepack]
 | `dir_for_roots` | Parent directory of all repository roots; `/` means "roots are absolute paths" |
 | `allow_trust` | Intended as `on` = accept client-supplied hashes without re-hashing, `off` = always verify. **`off` currently has no effect** — the argument is parsed but never applied; see `_reports/BUG-blob-07-cafs-server-allow-trust-off-ignored.md` |
 | `norepack` | Do not recompress blobs on arrival. Without it the server repacks every newly stored blob at lowered priority (`keyValueServer/server/blob_file_lib.cpp:70`) |
-| `encryption` | Offer encryption; clients may still opt out |
-| `mandatory_encryption` | Refuse unencrypted clients |
-| `<secret>` | Shared secret, at least `minimum_shared_secret_length` (16) characters. **Either** encryption mode also clears `allow_trust` (`cafs_server.cpp:44`) |
+| `encryption` | Encrypt public-network clients only: an authenticated client at a private IP has encryption removed for the session, and unauthenticated clients are refused only from public IPs (`blob_push_proc.cpp:327-351`) |
+| `mandatory_encryption` | Keep encryption on every address; refuse unencrypted clients outright |
+| `<secret>` | Shared secret, at least `minimum_shared_secret_length` (16) characters. Either encryption mode also clears `allow_trust`, but only when it was `on` — the clear sits inside `if (allow)`, so with `allow_trust off` nothing is cleared and the never-applied default stays trusting (`cafs_server.cpp:45-46`) |
 | `port` | Default 2403 |
 | `max_pending` | Listen backlog, default 1024 |
 
@@ -62,9 +66,17 @@ cafs_proxy_server <master_url> <cache_folder>
 
 (`keyValueServer/proxy/cafs_proxy_server.cpp:19`)
 
-A read-through cache. On a miss it pulls from the master and stores locally; on a hit it serves from
-its own store. Because blobs are immutable there is no invalidation problem — the cache is
-correct by construction.
+Both the listen port and the master port are hard-coded to 2403 and cannot be set from argv
+(`cafs_proxy_server.cpp:61-66`); `master_url` is a host string only. The Visual Studio project for
+it is named `cafs_proxy`, so the Windows build produces `cafs_proxy.exe`, not
+`cafs_proxy_server.exe`.
+
+A read-and-write-through cache. On a miss it pulls from the master and stores locally; on a hit it
+serves from its own store. Pushes are accepted and forwarded to the master by default
+(`proxy_allow_push` starts true, `keyValueServer/proxy/proxy_file_lib.cpp:228`); only
+`mandatory_encryption` turns that off (`cafs_proxy_server.cpp:46`), so a default proxy is a write
+endpoint too, not cache-only. Because blobs are immutable there is no invalidation problem for
+cached reads.
 
 * `validate_blobs_from_master` re-hashes what the master sends before caching it.
 * `update_mtime_on_access` makes the cache LRU-evictable by mtime.
@@ -85,16 +97,19 @@ The CVS server advertises blob URLs to clients using its own global settings (se
 | `BlobURL` | Primary blob URL |
 | `BlobURL0` … `BlobURL31` | Additional URLs; the client may round-robin. Enumeration stops at the first missing index |
 | `BlobOTP` | Shared secret for TOTP authentication to an encrypted blob server |
-| `BlobEncryptedURL0` … `BlobEncryptedURL31` | URLs used instead of the plain ones once `BlobOTP` is configured |
+| `BlobEncryptedURL0` … `BlobEncryptedURL31` | Sent *in addition to* the plain ones once `BlobOTP` is configured, after the `Blob-OTP` line (`src/server.cpp:3406-3413`); the client files them as a separate encrypting list, so keep the plain `BlobURL*` entries too |
 
-Values are `host[/path][@port]`, e.g. `cvs-proxy.lan@2403`, or `http://cache.lan@8080` for the HTTP
-back-end.
+Values are `host[@port]`, e.g. `cvs-proxy.lan@2403`. A `/path` component is not supported by the
+native client: `parse_url_port` (`src/client.cpp:2123`) strips only `@port`, so a path stays inside
+the host string and name resolution fails. An `http://` value does not select the
+HTTP back-end: the client builds only KV-protocol processors (`src/download_blob_to.cpp:291-295`),
+so the HTTP processor is compiled but unreachable from here.
 
 Where these settings live:
 
 * **Unix** — a plain `key=value` file at `<sysconfdir>/cvsnt/PServer`
   (`cvstools/unix/GlobalSettings.cpp:91`). `<sysconfdir>/cvsnt` is the default and is overridable
-  wholesale with `--with-config_dir` at configure time (`configure.in:805`) — it replaces the entire
+  wholesale with `--with-config-dir` at configure time (`configure.in:805`) — it replaces the entire
   path, not just the `<sysconfdir>` part. Per-user settings go in `~/.cvs/<key>`.
 * **Windows** — the registry, under the CVSNT product key
   (`cvstools/win32/GlobalSettings.cpp`).
@@ -144,8 +159,9 @@ On Linux the main `make` builds all four, as `convert_to_blob`, `gc_blobs`, `rep
 `blake3_calc` (`tools/Makefile.am:12`). `tools/build_tools` is an alternative clang path that
 produces the hyphenated names used below.
 
-Only `cvtblob` and `gc-blobs` take a lock-server lock (`tools/simpleLock.cpp.inc`), so only those two
-are safe to run against a live server. `repack-blobs` and `blake3-calc` take no lock at all.
+Only `cvtblob` and `gc-blobs` take a lock-server lock (`tools/simpleLock.cpp.inc`);
+`repack-blobs` and `blake3-calc` take no lock at all. The lock alone does not make
+`gc-blobs delete_unused` safe on a live repository — see its section below.
 
 ### `cvtblob` — migrate existing binaries into the blob store
 
@@ -167,6 +183,12 @@ cvtblob -root <cvs_root> -lock_url <lock_server_url> -user <lock_user>
   scratch space the conversion needs.
 * `-db` (default `cvs_cvt_db.txt`) records progress so an interrupted conversion can resume.
 
+`cvtblob` rewrites RCS history in place: by default the converted temporary `,v` replaces the
+original and the extracted old-version files are removed. Take a verified repository backup before
+a real run, and stage the migration: `-no_rcs` (leave `,v` files untouched) and `-no_remove` (keep
+old version files) let you validate the blob push and the rewrite separately before the
+destructive pass (`tools/convert_to_blob.cpp:652-653`).
+
 ### `gc-blobs` — reclaim space
 
 `tools/gc-blobs.cpp`. Nothing reference-counts blobs, so collection is mark-and-sweep:
@@ -183,9 +205,11 @@ The mode is positional and decides what the tool does: `used` and `unused` only 
 lists `,v` references whose blob is **missing from the store** — it does not read or verify blob
 contents; and `delete_unused` is the only mode that removes anything. Start with `unused` and read the output before ever running `delete_unused`.
 
-It takes a per-`,v` read lock through the lock server while scanning (`tools/gc-blobs.cpp:102`), so
-it can run against a live repository. Do not work around that lock: a blob pushed during the mark
-phase and referenced only after the sweep would otherwise be deleted while in use.
+It takes a per-`,v` read lock through the lock server while scanning (`tools/gc-blobs.cpp:102`),
+but each lock is released as soon as that file is copied, and the sweep later unlinks with no lock
+and no re-scan. A commit that lands after its `,v` was scanned can reference a blob the mark phase
+classified unused, and `delete_unused` then removes it while referenced. The listing modes are
+safe anywhere; run `delete_unused` only on an offline or otherwise quiescent repository.
 
 ### `repack-blobs` — improve compression
 
@@ -197,8 +221,9 @@ for the full option list.
 ### `blake3-calc`
 
 `tools/blake3-calc.cpp`. A BLAKE3 micro-benchmark — it hashes the file 500 times inside an `rdtsc`
-loop — that also prints the file's blob key on its second output line. Useful for answering "is this
-asset already in the store?".
+loop — whose second output line is `BLAKE3=` followed by the file's blob key: the key is the 64 hex
+digits after that prefix (`tools/blake3-calc.cpp:52-54`). Useful for answering "is this asset
+already in the store?".
 
 ## Operational notes for large repositories
 

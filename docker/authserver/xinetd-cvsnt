@@ -1,0 +1,20 @@
+service cvsnt
+{
+  disable          = no
+  type             = UNLISTED
+  port             = 2401
+  socket_type      = stream
+  wait             = no
+  user             = cvs
+  group            = cvs
+  groups           = yes
+  server           = /usr/local/cvsnt/bin/cvsnt
+  server_args      = authserver
+  flags            = IPv4
+  log_type         = FILE /var/log/xinetd/xinetd.log
+  log_on_failure  += USERID
+  passenv         += CVS_SERVER_LOG
+  cps              = 65535 0
+  instances        = UNLIMITED
+  per_source       = 50
+}

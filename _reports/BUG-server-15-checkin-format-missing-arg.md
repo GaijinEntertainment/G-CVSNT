@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/src/checkin.cpp
 line: 129
 severity: low
 category: typo
+status: fixed in this slice (audit/02)
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: no

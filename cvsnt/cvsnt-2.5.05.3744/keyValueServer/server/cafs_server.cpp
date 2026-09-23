@@ -48,7 +48,6 @@ int main(int argc, const char **argv)
 
   int port = argc>pc ? atoi(argv[pc]) : 2403;
   int max_pending = argc>pc+1 ? atoi(argv[pc+1]) : 1024;
-  volatile bool shouldStop = false;
   printf("Starting %s server listening at port %d%s\n",
     encryption_secret ? "encrypted" : "unencrypted",
     port, repack_immediately ? ", with auto repacking" : ", without auto repacking");
