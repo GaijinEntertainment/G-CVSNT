@@ -8,7 +8,7 @@ images from it:
 | `authserver`  | 2401 | `cvsnt authserver` behind xinetd (the pserver)  |
 | `cvslockd`    | 2402 | the lock server                                 |
 | `cafs-server` | 2403 | the content-addressed blob store                |
-| `cafs-proxy`  | 2403 | a caching blob proxy for remote sites           |
+| `cafs-proxy`  | 2403 | a caching blob proxy, remote or on the LAN      |
 
 Directory (AD/LDAP/Kerberos) logins are optional and come from an sssd
 container that runs next to the authserver; `sssd/README.md` describes that
@@ -273,3 +273,24 @@ connects to it on port 2403.
 
 Clients at that site then use `--blob_url <proxy host>@2403`, or
 `BlobEncryptedURL0` in a pserver configuration that points at the proxy.
+
+## A blob proxy on the LAN
+
+```bash
+mkdir -p /srv/cafs-cache && chown 52:52 /srv/cafs-cache
+
+docker run -d --name cafs-proxy --restart unless-stopped -t \
+    --ulimit nofile=65536:65536 \
+    -v /srv/cafs-cache:/var/cache/cafs \
+    -e MASTER_URL=cafs.lan -e ENCRYPTION=none \
+    -p 2403:2403 \
+    cvsnt-cafs-proxy
+```
+
+With `ENCRYPTION=none` the proxy runs without a secret. It connects to
+the blob server unauthenticated, which works only over a private-network
+address and only when the blob server runs with `ENCRYPTION=encryption`
+(add `-e ENCRYPTION=encryption` to the cafs container in step 5).
+It refuses clients that authenticate with the secret, and it checks no
+client addresses and accepts uploads, so do not publish its port outside
+the LAN.
