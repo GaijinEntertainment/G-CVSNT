@@ -13,6 +13,7 @@
  */
 
 #include "cvs.h"
+#include "access_log.h"
 #include "getline.h"
 
 static RETSIGTYPE patch_cleanup(int sig);
@@ -529,6 +530,13 @@ static int patch_fileproc (void *callerdat, struct file_info *finfo)
 	       and therefore should be on the server, not the client.  */
 	    (void) utime (tmpfile2, &t);
     }
+
+    /* Both revisions have been checked out and a diff is about to run; record
+       one read per revision. (patch_short and the setup failures returned.) */
+    if (vers_tag != NULL)
+	access_log_file ("read", "rdiff", finfo->update_dir, finfo->repository, finfo->file, vers_tag, NULL, NULL, 0);
+    if (vers_head != NULL)
+	access_log_file ("read", "rdiff", finfo->update_dir, finfo->repository, finfo->file, vers_head, NULL, NULL, 0);
 
     switch (diff_exec (tmpfile1, tmpfile2, NULL, NULL, unidiff ? "-u" : "-c", tmpfile3))
     {
