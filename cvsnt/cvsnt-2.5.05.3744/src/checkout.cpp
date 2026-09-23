@@ -75,6 +75,7 @@ static const char *const checkout_usage[] =
     "\t-3\tProduce 3-way conflicts.\n",
 	"\t-S\tSelect between conflicting case sensitive names.\n",
 	"\t-t\tUpdate using last checkin time.\n",
+    "\t--move-in-the-way\tRename an unversioned file that blocks an incoming file to .#name.notversioned.* and continue.\n",
     "(Specify the --help global option for a list of other help options)\n",
     NULL
 };
@@ -152,11 +153,26 @@ int checkout (int argc, char **argv)
     if (argc == -1)
 	usage (valid_usage);
 
+    /* export deliberately gets an empty long-option table: the recovery
+       option below is checkout-only.  */
+    static struct option checkout_long_options[] =
+    {
+	{"move-in-the-way", 0, NULL, 1},
+	{0, 0, NULL, 0},
+    };
     optind = 0;
-    while ((c = getopt (argc, argv, valid_options)) != -1)
+    while ((c = getopt_long (argc, argv, valid_options,
+			     m_type == EXPORT ? NULL : checkout_long_options,
+			     NULL)) != -1)
     {
 	switch (c)
 	{
+	    case 1:		/* --move-in-the-way */
+	    {
+		extern int move_in_the_way;
+		move_in_the_way = 1;
+		break;
+	    }
 	    case 'A':
 		aflag = 1;
 		break;

@@ -1149,12 +1149,32 @@ static int do_dir_proc (Node *p, void *closure)
 		strcat (cvsadmdir, CVSADM_ENT);
 		if (!isfile (cvsadmdir))
 		{
-		    /* Some commands like update may have printed "? foo" but
-		       if we were planning to recurse, and don't on account of
-		       CVS/Repository, we want to say why.  */
-		    error (1, 0, "while updating %s, %s is missing (%s). If intentional, create empty Entries to get all files.", update_dir,
-			   CVSADM_ENT, cvsadmdir);
-		    dir_return = R_SKIP_ALL;
+		    /* --recreate-entries: write the empty Entries the message
+		       below prescribes and carry on; every file in the
+		       directory is then fetched again.  An empty file (not a
+		       lone "D" line) keeps subdirectory information unknown,
+		       so on-disk subdirectories are still found and
+		       recursed into.  */
+		    extern int recreate_entries;
+		    FILE *fp;
+
+		    if (recreate_entries && !noexec
+			&& (fp = CVS_FOPEN (cvsadmdir, "w+")) != NULL)
+		    {
+			if (fclose (fp) == EOF)
+			    error (1, errno, "cannot close %s", cvsadmdir);
+			error (0, 0, "recreated missing %s in %s; files there will be fetched again",
+			       CVSADM_ENT, update_dir);
+		    }
+		    else
+		    {
+			/* Some commands like update may have printed "? foo" but
+			   if we were planning to recurse, and don't on account of
+			   CVS/Repository, we want to say why.  */
+			error (1, 0, "while updating %s, %s is missing (%s). If intentional, create empty Entries to get all files.", update_dir,
+			       CVSADM_ENT, cvsadmdir);
+			dir_return = R_SKIP_ALL;
+		    }
 		}
 	    }
 	}

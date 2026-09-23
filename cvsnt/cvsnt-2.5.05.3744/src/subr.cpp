@@ -939,6 +939,67 @@ char *backup_file (const char *filename, const char *suffix)
 }
 
 /*
+ * Move FILE, an unversioned file standing where a versioned file must be
+ * created, aside to .#FILE.notversioned.<timestamp> in the same directory
+ * (adding .1, .2, ... on collision).  FULLNAME is FILE with its path, for
+ * messages.  A rename, never a delete: the user's bytes survive, under a
+ * name the default ignore list already covers.  Prints one line and
+ * returns 1 on success; returns 0 on failure or in noexec mode.
+ */
+/* Build the aside name every move-aside uses: DIR (may be empty, else
+   ends in a separator) + BAKPREFIX + BASE + "." + MARKER [+ "." + PID]
+   + "." + time [+ "." + N].  Returned string is xmalloc-ed.  */
+char *make_aside_name (const char *dir, const char *base, const char *marker,
+		       unsigned long pid, int n)
+{
+    char *s = (char*)xmalloc (strlen (dir) + sizeof (BAKPREFIX) + strlen (base)
+			      + strlen (marker) + 64);
+    char *p = s + sprintf (s, "%s%s%s.%s", dir, BAKPREFIX, base, marker);
+    if (pid)
+	p += sprintf (p, ".%lu", pid);
+    p += sprintf (p, ".%lu", (unsigned long) time (NULL));
+    if (n)
+	sprintf (p, ".%d", n);
+    return s;
+}
+
+int rename_notversioned_aside (const char *file, const char *fullname)
+{
+    char *bak;
+    int n = 0;
+
+    if (noexec)
+	return 0;
+    /* A name differing only in case from the incoming one is not an
+       obstruction to move; the existing case-ambiguity handling owns it.
+       Both the local and the client/server callers rely on this.  */
+    if (filenames_case_insensitive && !case_isfile (file, NULL))
+	return 0;
+    bak = make_aside_name ("", file, "notversioned", 0, 0);
+    while (isfile (bak))
+    {
+	if (++n > 999)
+	{
+	    error (0, 0, "too many %s%s.notversioned.* files already",
+		   BAKPREFIX, file);
+	    xfree (bak);
+	    return 0;
+	}
+	xfree (bak);
+	bak = make_aside_name ("", file, "notversioned", 0, n);
+    }
+    if (CVS_RENAME (file, bak) < 0)
+    {
+	error (0, errno, "cannot move %s aside to %s", fullname, bak);
+	xfree (bak);
+	return 0;
+    }
+    error (0, 0, "moved %s aside to %s (it was in the way)", fullname, bak);
+    xfree (bak);
+    return 1;
+}
+
+/*
  * Copy a string into a buffer escaping any shell metacharacters. 
  *
  * Returns a pointer to the allocated buffer

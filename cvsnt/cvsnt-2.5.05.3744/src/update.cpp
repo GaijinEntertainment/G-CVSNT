@@ -104,6 +104,8 @@ static const char *join_rev1, *date_rev1;
 static const char *join_rev2, *date_rev2;
 static int aflag = 0;
 int backup_local_files = 1;
+int move_in_the_way = 0;
+int recreate_entries = 0;
 static int toss_local_changes;
 static int force_tag_match = 1;
 static int update_build_dirs;
@@ -152,7 +154,10 @@ static const char *const update_usage[] =
     "\t-r rev\tUpdate using specified revision/tag (is sticky).\n",
 	"\t-S\tSelect between conflicting case sensitive names.\n",
 	"\t-t\tUpdate using last checkin time.\n",
-    "\t-n\tDo not backup local files(silently remove). Irreversibly deletes locally modified files.\n",
+    "\t-n\tDo not leave .# backup copies behind (update -C overwrites, merges, joins). Irreversible for -C overwrites and for nonmergeable (binary) conflicts, where the local file is replaced without a copy.\n",
+    "\t--no-backups\tSame as -n.\n",
+    "\t--move-in-the-way\tRename an unversioned file that blocks an incoming file to .#name.notversioned.* and continue.\n",
+    "\t--recreate-entries\tRecreate a missing CVS/Entries as empty and refetch that directory instead of aborting.\n",
     "\t-W spec\tWrappers specification line (! to reset).\n",
     "\t--blob_zero\tDownloaded blobs would be written as zero length file. That is for 'hot-proxy' scenario (to save space and optimize performance of update).\n",
     "(Specify the --help global option for a list of other help options)\n",
@@ -175,6 +180,9 @@ int update (int argc, char **argv)
     static struct option long_update_options[] =
     {
     	{"blob_zero", 0, NULL, 1},
+    	{"no-backups", 0, NULL, 2},
+    	{"move-in-the-way", 0, NULL, 3},
+    	{"recreate-entries", 0, NULL, 4},
     	{0, 0, NULL, 0},
     };
 
@@ -202,7 +210,14 @@ int update (int argc, char **argv)
 		toss_local_changes = 1;
 		break;
         case 'n':
+        case 2:			/* --no-backups */
 		backup_local_files = 0;
+		break;
+        case 3:			/* --move-in-the-way */
+		move_in_the_way = 1;
+		break;
+        case 4:			/* --recreate-entries */
+		recreate_entries = 1;
 		break;
 		case 'c':
 		update_baserev = 1;
@@ -773,6 +788,17 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
     }
     else
     {
+	if (status == T_CONFLICT && !vers->vn_user
+	    && move_in_the_way && !server_active)
+	{
+	    /* An unversioned file is in the way of a new one; Classify_File
+	       left both the rename and the message to this spot.  */
+	    if (rename_notversioned_aside (finfo->file, fn_root(finfo->fullname)))
+		status = T_CHECKOUT;
+	    else if (!really_quiet)
+		error (0, 0, "move away %s; it is in the way",
+		       fn_root(finfo->fullname));
+	}
 	switch (status)
 	{
 	    case T_UNKNOWN:		/* unknown file was explicitly asked about */
@@ -2319,6 +2345,9 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 		      + 10);
     (void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
 
+    /* Under -n the copy is still made: it feeds the failed-merge
+       restore and the no-op merge detection below, and is consumed or
+       removed before returning, so no .# file is left behind.  */
     copy_file (finfo->file, backup, 1, 1);
     xchmod (finfo->file, 1);
 
@@ -2357,7 +2386,8 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 	error (0, 0, "nonmergeable file needs merge");
 	error (0, 0, "revision %s from repository is now in %s",
 	       vers->vn_rcs, fn_root(finfo->fullname));
-	error (0, 0, "file from working directory is now in %s", backup);
+	if (backup_local_files)
+	    error (0, 0, "file from working directory is now in %s", backup);
 	write_letter (finfo, 'C');
 
 	history_write ('C', finfo->update_dir, vers->vn_rcs, finfo->file,
@@ -2484,6 +2514,11 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     }
     retval = 0;
  out:
+    /* -n promises no .# litter; the copy made above is removed unless
+       the restore path already consumed it (unlink of a missing file
+       fails silently).  */
+    if (!backup_local_files)
+	unlink_file (backup);
     xfree (backup);
     return retval;
 }
@@ -2685,7 +2720,7 @@ bool bound_merge_by_bugid(RCSNode *rcs, const char *&rev1, const char *&rev2, co
  */
 static void join_file (struct file_info *finfo, Vers_TS *vers)
 {
-    char *backup;
+    char *backup = NULL;
     char *t_options;
 	kflag kf;
     int status;
@@ -3086,13 +3121,15 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
      * is the version of the file that the user was most up-to-date with
      * before the merge.
      */
-    backup = (char*)xmalloc (strlen (finfo->file)
-		      + strlen (vers->vn_user)
-		      + sizeof (BAKPREFIX)
-		      + 10);
-    (void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
-
-    copy_file (finfo->file, backup, 1, 1);
+    if (backup_local_files)
+    {
+	backup = (char*)xmalloc (strlen (finfo->file)
+			  + strlen (vers->vn_user)
+			  + sizeof (BAKPREFIX)
+			  + 10);
+	(void) sprintf (backup, "%s%s.%s", BAKPREFIX, finfo->file, vers->vn_user);
+	copy_file (finfo->file, backup, 1, 1);
+    }
     xchmod (finfo->file, 1);
 
     /* If the source of the merge is the same as the working file
@@ -3172,7 +3209,8 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	error (0, 0, "nonmergeable file needs merge");
 	error (0, 0, "revision %s from repository is now in %s",
 	       rev2, fn_root(finfo->fullname));
-	error (0, 0, "file from working directory is now in %s", backup);
+	if (backup_local_files)
+	    error (0, 0, "file from working directory is now in %s", backup);
 	write_letter (finfo, 'C');
     }
     else
@@ -3214,9 +3252,15 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
     {
 	error (0, status == -1 ? errno : 0,
 	       "could not merge revision %s of %s", rev2, fn_root(finfo->fullname));
-	error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
-	       fn_root(finfo->fullname), backup);
-	rename_file (backup, finfo->file);
+	if (backup_local_files)
+	{
+	    error (status == -1 ? 1 : 0, 0, "restoring %s from backup file %s",
+		   fn_root(finfo->fullname), backup);
+	    rename_file (backup, finfo->file);
+	}
+	else
+	    error (status == -1 ? 1 : 0, 0, "no backup of %s to restore (backups disabled by -n)",
+		   fn_root(finfo->fullname));
     }
 	else if(status == 1)
 	{
@@ -3252,7 +3296,10 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
     xfree (rev1);
     xfree (rev2);
 #ifdef SERVER_SUPPORT
-    if (server_active)
+    /* No copy was made under -n (backup is NULL then), so send none: a
+       client that forwards -n would otherwise hand a NULL name to
+       server_copy_file.  */
+    if (server_active && backup_local_files)
     {
 		server_copy_file (finfo->file, finfo->update_dir, finfo->repository,
 				backup);

@@ -14,6 +14,7 @@
 
 #include "../version.h"
 #include "cvs.h"
+#include "../ca_blobs_fs/content_addressed_fs.h"
 
 #ifdef HAVE_LOCALE_H
 #include <locale.h>
@@ -354,6 +355,7 @@ static const char *const opt_usage[] =
     "    --cr            Use Mac (cr) line endings by default.\n",
     "    --lf            Use Unix (lf) line endings by default.\n",
     "    --crlf          Use Windows (crlf) line endings by default.\n",
+    "    --rename-in-use When a file to be written is open/mapped by another process and cannot be replaced, move it aside (.#name.inuse.*) so the write completes instead of aborting.\n",
 #ifdef _WIN32
     "    --nostats       Override sending statistics via client when server statistics are not up to date.\n",
 #endif
@@ -759,6 +761,7 @@ int main (int argc, char **argv)
 		{"debug", 0, NULL, 9},
 #endif
     	{"blob_url", required_argument, NULL, 11},
+    	{"rename-in-use", 0, NULL, 12},
         {0, 0, 0, 0}
     };
     /* `getopt_long' stores the option index here, but right now we
@@ -885,6 +888,15 @@ int main (int argc, char **argv)
 	    case 10:
 		/* --cr */
 		crlf_mode=ltCr;
+		break;
+	    case 12:
+		/* --rename-in-use: Windows only, accepted and ignored elsewhere */
+#ifdef _WIN32
+		{
+		    extern int rename_in_use;
+		    rename_in_use = 1;
+		}
+#endif
 		break;
 #if defined(SERVER_SUPPORT)
 			case 7:
@@ -1564,7 +1576,18 @@ int main (int argc, char **argv)
 		   if we didn't, then there would be no way to check in a new
 		   CVSROOT/config file to fix the broken one!  */
 		if(current_parsed_root)
+		{
 			parse_config (current_parsed_root->directory);
+			/* Point the content-addressed blob store at this repository.
+			   The server does the same per request (server.cpp, before
+			   dispatch); without this, local-mode commands leave the
+			   store at its compiled-in default of "./blobs/" - relative
+			   to whatever directory the user happens to be in - so a
+			   local commit of a -kB file either aborts or writes the
+			   repository's content into the working copy.  */
+			caddressed_fs::set_root(caddressed_fs::get_default_ctx(),
+						current_parsed_root->directory);
+		}
 #ifdef _WIN32
 		if(current_parsed_root && w32_is_network_share(current_parsed_root->directory))
 		{
