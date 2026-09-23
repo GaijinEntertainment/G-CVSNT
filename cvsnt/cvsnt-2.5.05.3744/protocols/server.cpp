@@ -136,7 +136,8 @@ int server_connect(const struct protocol_interface *protocol, int verify_only)
 #else
 	{
 		struct passwd *pw = getpwuid(geteuid());
-		strncpy(current_user,pw?pw->pw_name:"",sizeof(current_user));
+		const char *name = pw ? pw->pw_name : getenv("USER");
+		strncpy(current_user,name?name:"",sizeof(current_user));
 	}
 #endif
 
