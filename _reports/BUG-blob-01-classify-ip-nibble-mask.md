@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/keyValueServer/blob_sockets/blob_sockets.cpp
 line: 24
 severity: critical
 category: typo
+status: fixed in the previous slice (audit/01)
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: yes

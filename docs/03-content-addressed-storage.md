@@ -86,8 +86,9 @@ It exists because the server reconstructs a scratch working directory from the c
 When a client sends `Blob-ref-transfer`, the server writes a 79-byte marker file instead of real
 content (`src/server.cpp:1926`). Later, on the way out, the server treats any 79-byte file that
 carries a valid session MAC as "this is a reference, not content", truncates it to 71 bytes and sends
-`Blob-ref` (`src/server.cpp:4429`); `rcs_checkin` does the same on the commit path
-(`src/rcs_checkin.cpp:1491`).
+`Blob-ref` (`src/server.cpp:4429`); on the commit path the shrink happens in
+`RCS_write_binary_rev_data` (`src/rcs_cvt_kB.cpp:91`), while `rcs_checkin` only extracts the
+referenced hash to compare revisions (`src/rcs_checkin.cpp:1491`).
 
 The salt is what stops an ordinary versioned file whose content happens to be 79 bytes beginning
 with `blake3:` and 64 hex digits — or a deliberately crafted one uploaded by a client — from being
@@ -112,7 +113,9 @@ start_push(ctx, hash)  →  stream_push(pd, data, len)*  →  finish(pd, &actual
 3. Each `stream_push` writes the *already-compressed* bytes straight through, and — unless the
    client's hash is trusted — simultaneously decompresses them into a BLAKE3 hasher so the true hash
    of the uncompressed content is known by the end.
-4. `finish` compares the computed hash with the claimed one (`WRONG_HASH` on mismatch), then
+4. `finish` compares the computed hash with the claimed one (`WRONG_HASH` on mismatch) — but only
+   when trust is off or no hash was provided; with default trust and a client hash the claim is
+   copied unverified (`content_addressed_fs.cpp:203-211`, see the trust model below). Then it
    `rename`s the temp file into place with `blob_fileio_rename_file_if_nexist`. If someone else won
    the race, the temp file is unlinked and the result is `DEDUPLICATED`.
 
@@ -122,11 +125,17 @@ two as success.
 ### The trust model
 
 `set_allow_trust(bool)` decides whether a client-supplied hash is believed without verification. It
-defaults to **on**, and the reasoning is written out at `ca_blobs_fs/content_addressed_fs.h:27`:
-an existing blob is never overwritten, so a lying client cannot corrupt content that is already
-stored — the worst outcome is an unreferenced junk blob that garbage collection later removes.
-Trust is switched off automatically when the server runs with encryption enabled
-(`keyValueServer/server/cafs_server.cpp:46`).
+defaults to **on**. The reasoning written out at `ca_blobs_fs/content_addressed_fs.h:27` — an
+existing blob is never overwritten, so a lying client cannot corrupt content that is already
+stored — undersells the risk: with trust on the data is stored under the client-supplied hash
+unverified (`content_addressed_fs.cpp:158,203-211`) and the first writer wins. A client that
+pushes junk under a real BLAKE3 key binds that key for good — later honest pushes of the true
+content return `DEDUPLICATED` and never overwrite, `gc-blobs` keeps the referenced poison, and
+every later download of it fails client-side validation. Working copies are not silently
+corrupted, but that store key is dead.
+Enabling encryption switches trust off automatically — but only when `allow_trust` was `on`: the
+clear sits inside `if (allow)` (`keyValueServer/server/cafs_server.cpp:45-46`), so with
+`allow_trust off` (itself a no-op, see below) the never-applied default stays trusting.
 
 The header comment at `ca_blobs_fs/content_addressed_fs.h:41` claims the networking server never
 trusts client hashes. **The code does not implement that.**
@@ -141,15 +150,21 @@ see `_reports/BUG-blob-07-cafs-server-allow-trust-off-ignored.md`.
 start_pull(ctx, hash, &blob_sz)  →  pull(pd, from, &data_pulled)*  →  destroy(pd)
 ```
 
-Reads are memory-mapped and support random access from an arbitrary offset, which is what lets a
-client resume a `PULL` from any megabyte boundary (`blob_push_proto::pull_chunk_size` quantises the
-start offset). The body of a `PULL` is streamed in one run, not in chunks.
+Reads are memory-mapped. The API shape allows random access, but the implementation returns data
+from the start of the mapping no matter what `from` says (`ca_blobs_fs/src/fileio.cpp:305-313`),
+so a `PULL` resumed at a nonzero megabyte boundary yields wrong bytes — whole-blob pulls are the
+only correct form today (see [04-protocols.md](04-protocols.md)). The body of a `PULL` is streamed
+in one run, not in chunks.
 
 ## Immutability and its consequences
 
-A blob's *uncompressed content* under a given hash never changes, and the push path never
-overwrites an existing file (`blob_fileio_rename_file_if_nexist`,
-`ca_blobs_fs/src/content_addressed_fs.cpp:219`). The stored *bytes* can still be replaced by a
+A blob's *uncompressed content* under a given hash never changes as long as hashes are verified.
+The push path's no-overwrite guard is check-then-rename (`blob_fileio_rename_file_if_nexist`,
+`ca_blobs_fs/src/fileio.h:19-27`, used at `content_addressed_fs.cpp:219`), and a POSIX `rename`
+replaces its target: two concurrent pushers of one hash can both pass the check, and the later
+rename silently replaces the earlier file. With verified hashes both hold the same content and the
+race is harmless; with `allow_trust` on it is one more way a wrong payload can land under a real
+key. The stored *bytes* can still be replaced by a
 repack, which rewrites the same path with a better-compressed payload using the unconditional
 rename (`ca_blobs_fs/src/content_addressed_fs.cpp:354`); the proxy accounts for this
 (`keyValueServer/proxy/proxy_file_lib.cpp:198`).

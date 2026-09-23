@@ -5,6 +5,7 @@ file: cvsnt/cvsnt-2.5.05.3744/src/update.cpp
 line: 3370
 severity: medium
 category: typo
+status: open - the one-line fix below was applied (f791743) and reverted (9376253) in this slice: the working-file mode is umask-reduced on checkout while the repository records the unreduced mode, so on a umask 027 client every executable-file merge became a conflict; a correct fix must compare umask-masked modes
 verdict: CONFIRMED
 fix_size_loc: 1
 behavior_change: yes
@@ -106,6 +107,8 @@ merge target (a very common case: `chmod +x build.sh; cvs ci` on a branch, then
 The same happens in `merge_file()` for `T_NEEDS_MERGE`.
 
 ## Suggested fix
+As written this was tried and reverted (see status); flip the return value only once both
+sides are compared under the effective umask.
 ```cpp
 	    error (0, 0, "%s: permission mismatch between %s and %s",
 		   fn_root(finfo->file),

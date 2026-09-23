@@ -60,7 +60,6 @@ int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
 		strcpy(cp,cp+2);
 	}
 
-    CXmlNodePtr node;
     switch (RCS_checkin (finfo->rcs, finfo->file, message, rev, options, RCS_FLAGS_KEEPFILE, merge_from_tag1, merge_from_tag2, callback, NULL, bugid, &variable_list))
     {
 	case 0:			/* everything normal */
@@ -107,9 +106,7 @@ int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
 	     * If we want read-only files, muck the permissions here, before
 	     * getting the file time-stamp.
 	     */
-	    node = fileattr_getroot();
-	    node->xpathVariable("file",finfo->file);
-	    if (!(commit_keep_edits && edit_revision) && (!cvswrite || (node->Lookup("file[cvs:filename(@name,$file)]/watched") && node->XPathResultNext()) || (kf.flags&KFLAG_RESERVED_EDIT)))
+	    if (!(commit_keep_edits && edit_revision) && (!cvswrite || fileattr_iswatched(finfo->file) || (kf.flags&KFLAG_RESERVED_EDIT)))
 			xchmod (finfo->file, 0);
 
 	    /* Re-register with the new data.  */
