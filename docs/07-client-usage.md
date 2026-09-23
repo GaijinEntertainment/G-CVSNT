@@ -31,7 +31,7 @@ Run `cvs --help-options` for the full list. The ones specific to, or important f
 | Option | Effect |
 | --- | --- |
 | `-j N` | Number of blob download worker threads. When not given, the default is `min(8, max(1, cpu_count - 1))` (`src/download_blob_to.cpp:241`). The single biggest client-side knob for update speed on binary-heavy trees (`src/main.cpp:1013`). `-j 0` is documented as "download in the main thread" but is currently a no-op — `src/client.cpp:2210` treats 0 as "unset", so the default applies |
-| `--blob_url <spec>` | Override the blob server the CVS server advertised. Takes a **single** URL `host[/path][@port]`, and disables round-robin (`src/download_blob_to.cpp:258`). The `\|`-separated list and `def` shown in `cvs --help-options` are not implemented — only the first `@` is parsed (`src/client.cpp:2123`) |
+| `--blob_url <spec>` | Override the advertised blob download list with a single URL `host[@port]` (a `/path` is not parsed out and breaks name resolution, `src/client.cpp:2123`). The master URL is still appended as a fallback (`src/download_blob_to.cpp:258,283`), and uploads ignore the override — they always go to the master. The `\|`-separated list and `def` shown in `cvs --help-options` are not implemented — only the first `@` is parsed (`src/client.cpp:2123`) |
 | `-z <0-9>` | Stream compression level for the CVS connection (gzip or zstd, negotiated) |
 | `-x` / `-y` | Require / request encryption of the CVS connection |
 | `-a` | Authenticate (sign) all traffic |
@@ -93,8 +93,10 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
            [-B bugid] [-I ign] [-W spec] [--blob_zero] [files...]
 ```
 
-(`update_usage`, `src/update.cpp:131`. The synopsis above is expanded to include `-3`, `-n` and
-`--blob_zero`, which the getopt string at `src/update.cpp:184` accepts but the usage text omits.)
+(`update_usage`, `src/update.cpp:131`. The synopsis above adds `3` and `n` to the short-option
+cluster, which the Usage line omits even though the detailed text lists all of `-3`, `-n` and
+`--blob_zero` (`src/update.cpp:133,155,157`) and the getopt string at `src/update.cpp:183`
+accepts them.)
 
 | Option | Meaning |
 | --- | --- |
@@ -102,7 +104,7 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
 | `-P` | Prune directories that became empty |
 | `-A` | Reset sticky tag/date/kopt back to HEAD |
 | `-C` | Overwrite locally modified files with clean repository copies, keeping a `.#file.rev` backup |
-| `-n` | Do *not* keep those backups — silently discard local modifications. Irreversible |
+| `-n` | With `-C`: do not keep those backups — discard local modifications irreversibly. Alone it changes nothing: `backup_local_files` is tested only on the `-C` paths (`src/update.cpp:801`, `src/client.cpp:5436`) |
 | `-r rev` | Update to a tag/branch/revision (sticky) |
 | `-D date` | Update as of a date (sticky) |
 | `-f` | Fall back to the head revision when the tag/date does not match a file |
@@ -113,15 +115,15 @@ cvs update [-3ACPdfilRpbmnt] [-k kopt] [-r rev] [-D date] [-j rev]
 
 Note the asymmetry between `-C` and `-n`: `-C` is what you want for a clean rebuild of a working
 copy, but by default it leaves a `.#name.rev` backup for every modified file, and those are never
-cleaned up. `cvs update -C -n` discards instead of backing up.
+cleaned up. `cvs update -C -n` discards instead of backing up; `-n` without `-C` changes nothing.
 
 **`-n` means two different things depending on position.** As a *global* option it is the classic
-CVS dry run (`noexec`, `src/main.cpp:938`); as an *update* option it means "do not keep backups"
+CVS dry run (`noexec`, `src/main.cpp:938`); as an *update* option it merely drops the `-C` backups
 (`src/update.cpp:204`):
 
 ```
 cvs -n update -d       # dry run: show what would happen, change nothing
-cvs update -d -n       # really update, and destroy local modifications without a backup
+cvs update -d -C -n    # really update, and overwrite local modifications without a backup
 ```
 
 Getting these the wrong way round destroys work. Prefer `cvs -n update` written exactly that way
@@ -178,8 +180,9 @@ reasons and the proposed fixes.
 Nothing fork-specific in the option set, but the blob path changes the shape of a commit:
 
 1. The client hashes each `-kB` file with BLAKE3.
-2. It asks the blob server `CHCK <hash>`. If the answer is `HAVE`, no bytes are transferred at all.
-3. Otherwise it compresses and `PUSH`es the blob.
+2. It asks the blob server `SIZE <hash>`. If the blob is already there, no bytes are transferred at
+   all (`src/blob_kv_processor.cpp:144-151`).
+3. Otherwise it compresses the blob and streams it with `STRM`.
 4. Only then does it send `Blob-ref-transfer` on the CVS connection.
 
 So re-committing an unchanged asset, or committing an asset that already exists elsewhere in the

@@ -5,15 +5,9 @@
 // wire hash encoding.  Each of them has had a real defect, so each is worth a
 // permanent test.
 //
-// Build (Linux/macOS):
-//   c++ -std=c++17 -I.. -I../ca_blobs_fs -I../src -I../zstd -I../zlib \
-//       unit_tests.cpp ../ca_blobs_fs/src/streaming_compressors.cpp \
-//       -lz -lzstd -o unit_tests
-//
-// Build (Windows, standalone MSVC toolchain - see HOWTOBUILD.md):
-//   cl /nologo /EHsc /std:c++17 /I.. /I..\ca_blobs_fs /I..\src /I..\zstd /I..\zlib ^
-//      unit_tests.cpp ..\ca_blobs_fs\src\streaming_compressors.cpp ^
-//      zlib.lib zstd.lib /Fe:unit_tests.exe
+// Build: see testcvs/README.md for the working Linux/macOS and Windows
+// command lines (from this directory the include roots are ../.., and the
+// Windows build needs /MD to match the in-tree zlib/zstd CRT).
 //
 // Exit status is 0 if every check passed.
 
