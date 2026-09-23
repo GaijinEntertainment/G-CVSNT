@@ -167,24 +167,43 @@ def t_commit(r):
           "status does not report 1.2:\n" + out)
 
 
-@test("Entries has exactly one line per file after commit")
+@test("Entries lists each file once; a surviving Entries.Log has one line per command")
 def t_entries_no_duplicates(r):
-    # Guards against a regression where each Entries.Log record was written
-    # twice, the second copy without its command prefix.
+    # BUG-update-08 (open): Scratch_Entry/Rename_Entry/Register write every
+    # Entries.Log record twice, the second copy without its command prefix,
+    # and replay reads an unprefixed line as an implicit A. A clean run
+    # collapses the log in Entries_Close, so the pair is observable only in
+    # a log that survived an interrupted run. This case pins the final
+    # Entries shape, and holds any surviving log to the one-command-one-line
+    # format with the same implicit-A reading the replay uses.
     r.import_tree("m", {"a.txt": "one\n", "c.txt": "three\n"})
     wc = r.checkout("m")
     write(os.path.join(wc, "a.txt"), "one\nchanged\n")
     r.cvs(["commit", "-m", "x"], cwd=wc)
-    for fn in ("Entries", "Entries.Log"):
-        p = os.path.join(wc, "CVS", fn)
-        if not os.path.exists(p):
-            continue
-        lines = [l for l in read(p).splitlines() if l.strip() and l.strip() != "D"]
-        seen = {}
-        for l in lines:
-            seen[l] = seen.get(l, 0) + 1
-        dupes = {k: v for k, v in seen.items() if v > 1}
-        check(not dupes, "%s has duplicate lines: %r" % (fn, dupes))
+
+    ent = os.path.join(wc, "CVS", "Entries")
+    lines = [l for l in read(ent).splitlines() if l.strip() and l.strip() != "D"]
+    names = {}
+    for l in lines:
+        parts = l.split("/")
+        name = parts[1] if len(parts) > 2 else l
+        names[name] = names.get(name, 0) + 1
+    dupes = {k: v for k, v in names.items() if v > 1}
+    check(not dupes, "Entries lists a file more than once: %r" % (dupes,))
+
+    log = os.path.join(wc, "CVS", "Entries.Log")
+    if os.path.exists(log):
+        # Strip the "X " command prefix the way fgetentent does; a body that
+        # then appears twice is the BUG-update-08 double write (the second
+        # copy replays as an implicit A and resurrects scratched entries).
+        body = {}
+        for l in read(log).splitlines():
+            if not l.strip():
+                continue
+            stripped = l[2:] if len(l) > 2 and l[1] == " " else l
+            body[stripped] = body.get(stripped, 0) + 1
+        dupes = {k: v for k, v in body.items() if v > 1}
+        check(not dupes, "Entries.Log records an entry twice: %r" % (dupes,))
 
 
 @test("tag and branch produce the right revision numbers")
@@ -296,7 +315,19 @@ def t_binary(r):
     r.cvs(["import", "-m", "bin", "-kb", "mb", "VENDOR", "REL0"], cwd=imp)
     r.cvs(["checkout", "mb"])
     got = open(os.path.join(r.wc, "mb", "bin.dat"), "rb").read()
-    check_eq(got, payload, "binary round trip")
+    check_eq(got, payload, "binary import/checkout")
+
+    # The commit half of the round trip: change the bytes, commit, and
+    # read them back through a fresh checkout.
+    payload2 = bytes(reversed(payload)) + b"\x00\x01\x02"
+    with open(os.path.join(r.wc, "mb", "bin.dat"), "wb") as f:
+        f.write(payload2)
+    r.cvs(["commit", "-m", "bin2"], cwd=os.path.join(r.wc, "mb"))
+    wcroot = os.path.join(r.root, "wcbin2")
+    os.makedirs(wcroot)
+    r.cvs(["checkout", "mb"], cwd=wcroot)
+    got = open(os.path.join(wcroot, "mb", "bin.dat"), "rb").read()
+    check_eq(got, payload2, "binary commit/checkout round trip")
 
 
 @test("interrupted checkout leaves well-formed Entries logs")
@@ -399,8 +430,10 @@ def t_large_text(r):
 
 @test("empty file round trips")
 def t_empty_file(r):
-    # Exercises the st_size == 0 branch of the RCS parse-buffer pre-size,
-    # which is skipped and must fall back to incremental growth.
+    # Pins the smallest-possible ,v through the parse-buffer pre-size (the
+    # ,v of an empty file still carries the admin block and desc, so the
+    # st_size == 0 branch is unreachable for a parseable file - this case
+    # covers the tiny-file end of the pre-size, not a zero-size one).
     r.import_tree("m", {"empty.txt": "", "a.txt": "one\n"})
     wc = r.checkout("m")
     check(os.path.isfile(os.path.join(wc, "empty.txt")), "empty.txt not checked out")
@@ -843,6 +876,27 @@ def t_history_unwritable(r):
     check("cannot write to history file" in out,
           "no warning about the history file")
 
+@test("a modules line ending in a separator parses (line2argv bounds)")
+def t_modules_trailing_separator(r):
+    # line2argv is what parses CVSROOT/modules (modules.cpp).  Its old
+    # separator skip tested strchr(sepchars, *p), which matches the NUL
+    # terminator, so a line whose last token is followed by a trailing
+    # space walked past the end of the buffer.  Drive exactly that class
+    # through a real modules file and check the alias resolves.
+    r.import_tree("m", {"a.txt": "one" + chr(10)})
+    # The runtime modules file is the checked-out copy inside the
+    # repository; write it directly (CVSROOT checkout is ACL-gated).
+    import stat
+    mods = os.path.join(r.repo, "CVSROOT", "modules")
+    os.chmod(mods, stat.S_IREAD | stat.S_IWRITE)  # cvs init leaves it read-only
+    with open(mods, "a", newline=chr(10)) as f:
+        f.write("ali -a m " + chr(10))
+    wcroot = os.path.join(r.root, "wcali")
+    os.makedirs(wcroot)
+    rc, out = r.cvs(["checkout", "ali"], cwd=wcroot, expect_ok=False)
+    check_eq(rc, 0, "checkout through the alias failed:" + chr(10) + out)
+    check(os.path.isfile(os.path.join(wcroot, "m", "a.txt")),
+          "alias checkout did not produce m/a.txt")
 
 @test("a second checkout of the same module matches the first")
 def t_second_checkout(r):

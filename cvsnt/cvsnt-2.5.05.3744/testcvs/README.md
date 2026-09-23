@@ -6,7 +6,7 @@ Three suites, in increasing order of what they need to run.
 | --- | --- | --- |
 | `unit/unit_tests.cpp` | Header-resident blob code: header format, the streaming header accumulator, wire hash encoding | A C++17 compiler, zlib, zstd. No repository, no server, no socket |
 | `regress.py` | End-to-end behaviour against a **local** repository: import, checkout, commit, tag, branch, sticky tags, `-C`/`-n` backups, pruning | A built `cvs` and its plugin directory |
-| `testcvs.py` | The original CVSNT acceptance suite: 18 scenarios including `-kB` binary delta and the `*info` triggers | A built `cvs` on `PATH`, and `test_data/` |
+| `testcvs.py` | The original CVSNT acceptance suite: 17 scenarios including `-kB` binary delta and the `*info` triggers | A built `cvs`, and `test_data/` |
 
 ## `unit/unit_tests.cpp`
 
@@ -56,16 +56,30 @@ require.
 
 ## `testcvs.py`
 
-The suite that shipped with CVSNT. It expects `cvs` on `PATH` and creates `tree/`, `tree_0/`,
-`repos/` and `repos_0/` beside itself.
+The suite that shipped with CVSNT, in its original scenarios and order. It works in `work_<instance>/`
+beside itself and removes that directory on entry and on exit (`--keep` to inspect it).
 
 ```bash
-python3 testcvs.py -v
+python3 testcvs.py --cvs /usr/local/bin/cvs
+python3 testcvs.py --cvs ../Releasex64/cvs.exe --libdir ../Releasex64 -v
+python3 testcvs.py -v                      # cvs from PATH
 ```
 
-or, on Windows, `testcvs.bat`, which clears those directories first.
+or, on Windows, `testcvs.bat`, which just forwards its arguments.
 
-It stops at the first failure and prints the captured stderr.
+The scenarios run in five groups, each with a repository of its own. The order inside a group is
+fixed, because the golden outputs in `test_data` pin revision numbers, branch numbers and tag sets
+that only the whole sequence produces — `info_test_output.txt`, for one, names
+`new revision: 1.6`. A scenario that fails is reported `FAIL` with the failing command, the exit
+code (a death by signal is named as such, not reported as an error code) and the captured stderr;
+the rest of *its* group is then reported `blocked` and the other groups still run. A scenario two
+groups both need is listed in both.
+
+Every command has a timeout (`--timeout`, 300 s by default), so a client that hangs fails its
+scenario instead of the whole job. `--cvs` and `--libdir` mean the same as in `regress.py`, and
+`-i/--instance` separates the scratch directories of parallel runs.
+
+Exit status is 0 only if every scenario passed.
 
 ## What to test when changing things
 

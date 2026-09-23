@@ -49,16 +49,48 @@ fi
 rm -rf $InstallerRoot/* 
 mkdir -p $InstallerRoot/usr/local/lib
 mkdir -p $InstallerRoot/usr/local/bin
-cp -r /usr/local/lib/libzstd*.dylib $InstallerRoot/usr/local/lib
+# versioned dylibs only: the unversioned names are link-time aliases that
+# would shadow -lzstd/-lcrypto for anything built on the target machine
+cp -R /usr/local/lib/libzstd.1*.dylib $InstallerRoot/usr/local/lib
 if [[ "$BUILD_ARCH" == *"arm64"* ]]; then
-cp -R /opt/homebrew/opt/openssl@3/lib/*.dylib $InstallerRoot/usr/local/lib
+cp -R /opt/homebrew/opt/openssl@3/lib/libcrypto.*.dylib /opt/homebrew/opt/openssl@3/lib/libssl.*.dylib $InstallerRoot/usr/local/lib
 else
-cp -R /usr/local/opt/openssl@3/lib/*.dylib $InstallerRoot/usr/local/lib
+cp -R /usr/local/opt/openssl@3/lib/libcrypto.*.dylib /usr/local/opt/openssl@3/lib/libssl.*.dylib $InstallerRoot/usr/local/lib
 fi
 make -j8 install DESTDIR=$InstallerRoot
 if [ $? != 0 ]; then
   echo "ERROR: make failed!"
   exit 3
+fi
+
+# The package carries its own copies of the OpenSSL and zstd dylibs in
+# /usr/local/lib, but the linker recorded them under their Homebrew paths
+# (/opt/homebrew/opt/..., /usr/local/opt/..., /usr/local/Cellar/...), which
+# do not exist on a machine without Homebrew. Point every Mach-O in the
+# package at /usr/local/lib instead, then re-sign: editing a binary breaks
+# its signature and arm64 refuses to run unsigned code.
+fix_install_names() {
+  local f dep
+  for f in "$@"; do
+    [ -f "$f" ] || continue
+    file "$f" | grep -q 'Mach-O' || continue
+    for dep in $(otool -L "$f" | awk 'NR>1 {print $1}' \
+                 | grep -E '^(/opt/homebrew|/usr/local/opt|/usr/local/Cellar)/'); do
+      install_name_tool -change "$dep" "/usr/local/lib/$(basename "$dep")" "$f" || return 1
+    done
+    case "$f" in
+      *.dylib) install_name_tool -id "/usr/local/lib/$(basename "$f")" "$f" || return 1 ;;
+    esac
+    codesign --force --sign - "$f" || return 1
+  done
+}
+fix_install_names $InstallerRoot/usr/local/bin/* \
+                  $InstallerRoot/usr/local/lib/*.dylib \
+                  $InstallerRoot/usr/local/lib/cvsnt/*/*.so \
+                  $InstallerRoot/usr/local/lib/cvsnt/*/*.dylib
+if [ $? != 0 ]; then
+  echo "ERROR: fixing install names failed!"
+  exit 4
 fi
 cd $SAVEDIR
 
@@ -85,6 +117,15 @@ if [ $BuildPackage -eq 1 ]; then
 	cp -r $InstallerFiles/Library $InstallerRoot
 	cp -r $InstallerFiles/InstallerResources $InstallerResources
 	cp -r $InstallerFiles/install_copy_cvsnt.sh $Distribution_Dir
+	cp $SourceRoot/../COPYING $Distribution_Dir/COPYING
+	cat > $Distribution_Dir/THIRD-PARTY.txt <<'NOTICE'
+cvsnt is distributed under the GNU General Public License v2 or later; see COPYING.
+
+This archive also contains third-party libraries:
+- OpenSSL (https://www.openssl.org/): OpenSSL/SSLeay dual license for 1.1.x,
+  Apache License 2.0 for 3.x.
+- zstd (https://github.com/facebook/zstd): BSD 3-Clause License.
+NOTICE
 	
 	sed "s/%CVSNT_VERSION%/$BUILD/g" <$InstallerFiles/Info.plist |
 	sed "s/%CVSNT_SHORTVERSION%/$ShortVer/g" >$InstallerFilesInfo

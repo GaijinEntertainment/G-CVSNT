@@ -97,24 +97,6 @@ static void Entnode_Destroy (Entnode *ent)
 }
 
 /*
- * Write out the line associated with a node of an entries file
- */
-static int write_ent_proc (Node *node, void *closure)
-{
-    Entnode *entnode;
-
-    entnode = (Entnode *) node->data;
-
-    if (closure != NULL && entnode->type != ENT_FILE)
-		*(int *) closure = 1;
-
-    if (fputentent(entfile, entnode))
-		error (1, errno, "cannot write %s", entfilename);
-
-    return (0);
-}
-
-/*
  * Write out the line associated with a node of an entries.extra file
  */
 static int write_ent_ex_proc (Node *node, void *closure)
@@ -256,7 +238,6 @@ void Scratch_Entry (List *list, const char *fname)
 			if (fprintf (entexfile, "R ") < 0)
 				error (1, errno, "cannot write %s", entexfilename);
 
-			write_ent_proc (node, NULL);
 			write_ent_ex_proc (node, NULL);
 
 			if (fclose (entfile) == EOF)
@@ -298,7 +279,6 @@ void Rename_Entry (List *list, const char *from, const char *to)
 			if (fprintf (entexfile, "R ") < 0)
 				error (1, errno, "cannot write %s", entexfilename);
 
-			write_ent_proc (node, NULL);
 			write_ent_ex_proc (node, NULL);
 
 			xfree(ent->user);
@@ -309,7 +289,6 @@ void Rename_Entry (List *list, const char *from, const char *to)
 			if (fprintf (entexfile, "A ") < 0)
 				error (1, errno, "cannot write %s", entexfilename);
 
-			write_ent_proc (node, NULL);
 			write_ent_ex_proc (node, NULL);
 
 			if (fclose (entfile) == EOF)

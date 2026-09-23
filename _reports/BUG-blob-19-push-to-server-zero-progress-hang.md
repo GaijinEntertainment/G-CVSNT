@@ -17,7 +17,9 @@ The push loop advances only by whatever `pull_data()` reports, and treats `data_
 non-null pointer as a normal (zero-byte) iteration. Nothing detects lack of progress, so a callback
 that returns 0 makes the loop spin forever holding the connection open. The in-tree
 `cafs_client` push callback has an off-by-`hdrSize` in its length arithmetic that produces exactly
-that, so `cafs_client push*` hangs on every file.
+that, so `cafs_client pushfile` hangs on every file (`pushblob` passes `hdrSize == 0`, where
+`data_pulled = fsz - at` still makes progress, so only the nonzero-header `pushfile` variant
+reaches the zero-progress arithmetic).
 
 ## Code
 ```cpp
