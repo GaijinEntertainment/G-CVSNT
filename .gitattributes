@@ -1,0 +1,7 @@
+ci/**                    text eol=lf
+docker/**                text eol=lf
+*.sh                     text eol=lf
+*.am                     text eol=lf
+*.m4                     text eol=lf
+configure.in             text eol=lf
+configure                text eol=lf
