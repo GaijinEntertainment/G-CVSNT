@@ -1630,6 +1630,9 @@ add_rcs_file (
 				cdp.EndEncoding();
 			}
 
+			if(local_opt_flags.flags & KFLAG_BINARY_DELTA)
+				RCS_write_binary_rev_data(rcs, buf, len, local_opt_flags.flags & KFLAG_COMPRESS_DELTA, true);
+
 			if((local_opt_flags.flags & (KFLAG_BINARY_DELTA|KFLAG_COMPRESS_DELTA)) == KFLAG_COMPRESS_DELTA)
 			{
 				uLong zlen;

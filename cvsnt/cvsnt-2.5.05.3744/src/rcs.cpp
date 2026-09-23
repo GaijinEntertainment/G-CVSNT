@@ -71,7 +71,6 @@ const kflag_t kflag_flags[] =
   { 0 , NULL, NULL, 0, 0, 0, 0, 0 }
 };
 
-static void RCS_write_binary_rev_data(const char *context, char * &data, size_t &len, bool guessed_compression, bool write_it);
 static bool RCS_read_binary_rev_data(char **out_data, size_t *out_len, int *inout_data_allocated, bool packed, bool *is_ref);
 
 static void rcsbuf_setpos_to_delta_base(RCSNode *rcsbuf);
