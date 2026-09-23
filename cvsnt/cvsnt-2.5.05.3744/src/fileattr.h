@@ -63,8 +63,16 @@ void fileattr_delete(CXmlNodePtr root, const char *exp, ...);
 /* Delete a value under the node. */
 void fileattr_delete_child(CXmlNodePtr root, CXmlNodePtr child);
 
-/* Delete a value under the node at the next prune operation */
+/* Delete the node and its subtree now, and mark the tree modified. */
 void fileattr_batch_delete(CXmlNodePtr root);
+
+/* Create NAME under PARENT (NULL: the tree root), with one optional
+   attribute, and mark the tree modified.  Returns the new node. */
+CXmlNodePtr fileattr_newnode(CXmlNodePtr parent, const char *name, const char *attr = NULL, const char *value = NULL);
+
+/* Add child NAME under PARENT unless it is there already.  Returns
+   whether a node landed; the tree is marked modified only then. */
+bool fileattr_addchild(CXmlNodePtr parent, const char *name);
 
 /* If this node has no children, delete it & recurse upwards.  Rinse. Wash. Repeat. */
 void fileattr_prune(CXmlNodePtr node);
