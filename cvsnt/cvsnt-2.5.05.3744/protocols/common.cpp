@@ -574,10 +574,12 @@ win32_port_reuse_hack:
 
 	tcp_fd = sock;
 
-/*	{
+	/* Requests go out as several small segments; with Nagle on each waits for
+	   the server's delayed ACK. */
+	{
 	int v=1;
 	setsockopt(sock,IPPROTO_TCP,TCP_NODELAY,(const char *)&v,sizeof(v));
-	} */
+	}
 
 	return sock;
 }
