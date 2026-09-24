@@ -323,6 +323,7 @@ bool RCS_get_kflags(const char *arg, bool err, kflag& result);
 /* Whether KOPT (Entries/-k form, no leading -k) selects a binary mode. */
 bool kopt_is_binary(const char *kopt);
 char *RCS_rebuild_options(kflag* kf, char *options);
+void RCS_write_binary_rev_data(const char *context, char * &data, size_t &len, bool guessed_compression, bool write_it);
 char *RCS_getdate (RCSNode * rcs, const char *date, int force_tag_match);
 char *RCS_gettag (RCSNode *rcs, const char *symtag, int force_tag_match, int *simple_tag);
 int RCS_isfloating(RCSNode *rcs, const char *rev);

@@ -1277,6 +1277,8 @@ add_rcs_file (
 	bool open_binary, encode;
 	CCodepage::Encoding encoding,targetencoding;
 	LineType crlf;
+	char *buf = NULL;
+	size_t len = 0;
 
     if (noexec)
 		return (0);
@@ -1366,6 +1368,43 @@ add_rcs_file (
 				goto read_error;
 			}
 		}
+	}
+
+	/* Read the contents before the RCS file exists: storing a -kB body in
+	   the blob store can fail fatally, and must not leave a partial ,v.  */
+	if(add_vhead != NULL && fpuser)
+	{
+		fseek(fpuser,0,SEEK_END);
+		len = ftell(fpuser);
+		fseek(fpuser,0,SEEK_SET);
+		buf = (char*)xmalloc(len);
+
+		len = fread (buf, 1, len, fpuser);
+		if (len == 0)
+		{
+			if (ferror (fpuser))
+				error (1, errno, "cannot read file %s for copying", userfile);
+		}
+		if(encode)
+		{
+			void *newbuf = NULL;
+			CCodepage cdp;
+			int res;
+
+			cdp.BeginEncoding(encoding,targetencoding);
+			if((res=cdp.ConvertEncoding(buf,len,newbuf,len))>0)
+			{
+				xfree(buf);
+				buf = (char*)newbuf;
+			}
+			else if(res<0)
+				error(0,0,"Unable to convert from %s to UTF-8",local_opt_flags.encoding.encoding);
+			cdp.StripCrLf(buf,len);
+			cdp.EndEncoding();
+		}
+
+		if(local_opt_flags.flags & KFLAG_BINARY_DELTA)
+			RCS_write_binary_rev_data(rcs, buf, len, local_opt_flags.flags & KFLAG_COMPRESS_DELTA, true);
 	}
 
     fprcs = fopen (rcs, "w+b");
@@ -1598,38 +1637,6 @@ add_rcs_file (
 		/* Now copy over the contents of the file, expanding at signs. */
 		if(fpuser)
 		{
-			char *buf;
-			size_t len;
-
-			fseek(fpuser,0,SEEK_END);
-			len = ftell(fpuser);
-			fseek(fpuser,0,SEEK_SET);
-			buf = (char*)xmalloc(len);
-
-			len = fread (buf, 1, len, fpuser);
-			if (len == 0)
-			{
-				if (ferror (fpuser))
-					error (1, errno, "cannot read file %s for copying", userfile);
-			}
-			if(encode)
-			{
-				void *newbuf = NULL;
-				CCodepage cdp;
-				int res;
-
-				cdp.BeginEncoding(encoding,targetencoding);
-				if((res=cdp.ConvertEncoding(buf,len,newbuf,len))>0)
-				{
-					xfree(buf);
-					buf = (char*)newbuf;
-				}
-				else if(res<0)
-					error(0,0,"Unable to convert from %s to UTF-8",local_opt_flags.encoding.encoding);
-				cdp.StripCrLf(buf,len);
-				cdp.EndEncoding();
-			}
-
 			if((local_opt_flags.flags & (KFLAG_BINARY_DELTA|KFLAG_COMPRESS_DELTA)) == KFLAG_COMPRESS_DELTA)
 			{
 				uLong zlen;
@@ -1711,6 +1718,7 @@ write_error_noclose:
     }
 read_error:
 
+	xfree (buf);
 	xfree (local_opt);
 
     return (err + 1);

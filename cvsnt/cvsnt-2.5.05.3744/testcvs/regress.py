@@ -1516,6 +1516,30 @@ def t_binary_small_second_commit(r):
                  "%d-byte binary revision came back as %d bytes" % (size, len(got)))
         check(got == payload, "%d-byte binary revision content differs" % size)
 
+@test("an import -kB that cannot store its blob leaves no ,v behind")
+def t_import_kB_blob_failure(r):
+    # A plain file where the blob store directory belongs makes every blob
+    # write fail, for root and on Windows too.  A truncated ,v left by the
+    # failed import made every later import and checkout of the module abort.
+    imp = os.path.join(r.root, "impfail")
+    os.makedirs(imp)
+    payload = bytes(range(256))
+    with open(os.path.join(imp, "b.dat"), "wb") as f:
+        f.write(payload)
+    blobs = os.path.join(r.repo, "blobs")
+    write(blobs, "")
+    rc, out = r.cvs(["import", "-kB", "-m", "i", "mf", "VENDOR", "REL0"], cwd=imp,
+                    expect_ok=False)
+    os.remove(blobs)
+    check(rc != 0, "import -kB with no usable blob store exited 0:" + chr(10) + out)
+    check(not os.path.exists(os.path.join(r.repo, "mf", "b.dat,v")),
+          "failed import -kB left b.dat,v behind")
+
+    r.cvs(["import", "-kB", "-m", "i", "mf", "VENDOR", "REL1"], cwd=imp)
+    wc = r.checkout("mf")
+    check_eq(open(os.path.join(wc, "b.dat"), "rb").read(), payload,
+             "re-imported b.dat content")
+
 @test("a -ku text file checks out with every line ending encoded")
 def t_unicode_text_line_endings(r):
     # The line-ending branch of OutputAsEncoded reused the buffer left by

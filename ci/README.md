@@ -48,7 +48,7 @@ marks the run red.
 - `run_linux_suites.sh` — runs the Linux suites; `cvslockd` must already be running (or every
   locking call hangs), and CVSNT refuses to commit as root, so they run as an unprivileged uid.
 - `smoke_pserver.sh` — the `:pserver:` functional scenario, below.
-- `repro_import_kB.sh` — standalone reproduction of the known `import -kB` defect, below.
+- `repro_import_kB.sh` — `import -kB` of three binaries through `:pserver:`, then a byte compare of the checkout, below.
 - `contour/` — a throwaway `cvslockd` + `authserver` + `cafs-server` stack; `pam-cvsnt` is
   `pam_permit.so` only (no directory service in CI, localhost-only); the blob secret is
   generated per run and masked in the log.
@@ -83,15 +83,12 @@ proves nothing if the server stored the wrong bytes at import time. And the bina
 compare after a *fresh checkout*, not an update, because an update can be satisfied out of a
 working copy that already holds the bytes.
 
-## The known `import -kB` defect
+## `import -kB`
 
-`cvs import` of a `-kB` file stores the 79-byte session blob reference as RCS text instead of
-the file content. The smoke scenario downgrades that one mismatch to a `::warning::` instead of
-failing the job. `repro_import_kB.sh` runs separately as a guard that **fails the job the day
-the defect stops reproducing**, telling the maintainer to remove the warning mode from
-`smoke_pserver.sh` — the check cannot silently outlive the bug. It fails just as loudly when it
-cannot judge: a client that crashes, or an import that never produces a checkout, is not evidence
-that the defect is still there, and is reported as inconclusive rather than as the known defect.
+`cvs import` of a `-kB` file used to store the 79-byte session blob reference as RCS text instead
+of the file content. `repro_import_kB.sh` imports three binaries with an explicit `-kB` and fails
+the job if any of them checks out different. It fails just as loudly when it cannot judge: a
+client that crashes, or an import that never produces a checkout, is reported as inconclusive.
 
 ## Versioning
 
