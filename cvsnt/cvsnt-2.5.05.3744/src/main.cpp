@@ -34,6 +34,8 @@
   #define SET_BINARY_MODE(file) _setmode(fileno(file), _O_BINARY);
 #else
   #include <sys/socket.h>
+  #include <netinet/in.h>
+  #include <netinet/tcp.h>
   #include <unistd.h>
   #include <netdb.h>
   #define SET_BINARY_MODE(file) do { } while(0);
@@ -1296,9 +1298,19 @@ int main (int argc, char **argv)
 #endif
 		{
 			char host[NI_MAXHOST];
+			int nodelay = 1;
 
 			if(!getnameinfo((struct sockaddr*)&ss,ss_len,host,NI_MAXHOST,NULL,0,flags))
 				remote_host_name = xstrdup(host);
+
+			/* This is the client socket (stdin/stdout, or server_io_socket on
+			   Windows).  Replies go out as several small segments, so with Nagle
+			   on each waits for the client's delayed ACK. */
+#ifdef _WIN32
+			setsockopt(_get_osfhandle(server_io_socket),IPPROTO_TCP,TCP_NODELAY,(const char *)&nodelay,sizeof(nodelay));
+#else
+			setsockopt(0,IPPROTO_TCP,TCP_NODELAY,(const char *)&nodelay,sizeof(nodelay));
+#endif
 		}
 		else
 		{
