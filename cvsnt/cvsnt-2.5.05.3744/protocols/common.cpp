@@ -959,7 +959,10 @@ const char* get_username(const cvsroot* current_root)
     username=current_root->username;
     if(!username)
     {
-		username = getpwuid(getuid())->pw_name;
+		struct passwd *pw = getpwuid(getuid());
+		username = pw ? pw->pw_name : getenv("USER");
+		if(!username)
+			username = "";
     }
     return username;
 }
