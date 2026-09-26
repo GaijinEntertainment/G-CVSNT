@@ -76,6 +76,7 @@ cvsnt_SOURCES = \
 	edit.cpp \
 	entries.cpp \
 	error.cpp \
+	exclude.cpp \
 	expand_path.cpp \
 	fileattr.cpp \
 	filesubr.cpp \

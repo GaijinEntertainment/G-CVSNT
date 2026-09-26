@@ -225,6 +225,7 @@ typedef std::map<cvs::string,cvs::string> variable_list_t;
 #define	CVSPREFIX	",,"
 #define CVSDOTIGNORE	".cvsignore"
 #define CVSDOTWRAPPER   ".cvswrappers"
+#define CVSDOTEXCLUDE   ".cvsexclude"
 
 /* Command attributes -- see function lookup_command_attribute(). */
 #define CVS_CMD_IGNORE_ADMROOT        1
@@ -296,6 +297,7 @@ typedef std::map<cvs::string,cvs::string> variable_list_t;
 
 #define	IGNORE_ENV	"CVSIGNORE"	/* More files to ignore */
 #define WRAPPER_ENV     "CVSWRAPPERS"   /* name of the wrapper file */
+#define EXCLUDE_ENV     "CVSEXCLUDE"    /* Repository content to keep out of the working copy */
 
 #define	CVSUMASK_ENV	"CVSUMASK"	/* Effective umask for repository */
 /* #define	CVSUMASK_DFLT		   Set by options.h */
@@ -630,6 +632,7 @@ void ign_dir_add (const char *name);
 int ignore_directory (const char *name);
 void ign_send ();
 void ign_display();
+char *ign_next_token (const char **line);
 
 typedef void (*Ignore_proc)(char *, char *);
 void ignore_files (List *ilist, List *entries, char *update_dir, Ignore_proc proc);
@@ -846,6 +849,16 @@ typedef struct vers_ts Vers_TS;
 Vers_TS *Version_TS (struct file_info *finfo, const char *options, const char *tag,
     const char *date, int force_tag_match, int set_time, int force_case_match);
 void freevers_ts(Vers_TS **versp);
+
+/* Local-only exclusion of repository content (.cvsexclude), see exclude.cpp.  */
+void excl_setup (int uses_work_dir);
+void excl_close ();
+int excl_name_here (const char *name);
+int excl_name_in (const char *dir, const char *name);
+int excl_path (const char *path);
+int excl_file_is_modified (struct file_info *finfo, Vers_TS *vers);
+void excl_remove_file (struct file_info *finfo, Vers_TS *vers);
+void excl_remove_dir (const char *dir, const char *update_dir, List *entries);
 void assign_options(char **existing_options, const char *options);
 
 /* Miscellaneous CVS infrastructure which layers on top of the recursion
