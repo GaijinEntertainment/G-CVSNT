@@ -986,6 +986,72 @@ def t_server_session(r):
               "checkout content arrived after the co terminator:\n" + out)
 
 
+@test("the server handles an update of an added file with long EntryExtra fields")
+def t_entry_extra_long_fields(r):
+    # An added file's EntryExtra carries the edit_revision/edit_tag/edit_bugid
+    # fields, which the server copies into the Entries.Extra line it builds
+    # for the entry.  Long values must be handled normally, not truncated or
+    # dropped, and the session must complete.
+    r.import_tree("m", {"a.txt": "one\n"})
+    root = r.repo.replace(os.sep, "/")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    body = "added file body\n"
+    # A distinct value per field, so a field dropped on its own is caught.
+    edit_revision = "1" * 2000000
+    edit_tag = "2" * 2000000
+    edit_bugid = "3" * 2000000
+    # EntryExtra line: /name/merge1/merge2/rcs_timestamp/edit_revision/
+    #                  edit_tag/edit_bugid/md5/
+    entry_extra = "/added.txt///0/%s/%s/%s//" % (edit_revision, edit_tag, edit_bugid)
+    reqs = "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "UseUnchanged",
+        "Directory .",
+        root + "/m",
+        "Entry /added.txt/0/Initial//",
+        "EntryExtra " + entry_extra,
+        "Modified added.txt",
+        "u=rw,g=r,o=r",
+        str(len(body)),
+        body.rstrip(chr(10)),
+        "Argument --",
+        "Argument added.txt",
+        "update",
+    ]).encode("utf-8")
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvextra")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs, timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        fail("server session did not complete within 120s")
+        return
+    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    check_eq(p.returncode, 0, "server exit status (output:%s%s)" % (chr(10), out))
+    check(not any(l.startswith("error") for l in out.split(chr(10))),
+          "server reported an error:%s%s" % (chr(10), out))
+    # The server echoes the entry back, each long field intact rather than
+    # truncated or dropped, in its EntriesExtra response.
+    for field, name in ((edit_revision, "edit_revision"), (edit_tag, "edit_tag"),
+                        (edit_bugid, "edit_bugid")):
+        check(field in out, "the long %s field did not survive the round trip" % name)
+
+
 @test("checkout -p sends the file body before its trailing partial line")
 def t_server_pipeout_order(r):
     # `co -p` on a file that does not end in a newline emits, in order:
