@@ -2064,6 +2064,88 @@ def t_add_binary_kopt_protocol(r):
 
 
 
+@test("the server fails cleanly on a repository path longer than MAX_PATH")
+def t_long_repository_path(r):
+    # A repository path far longer than MAX_PATH reaches the module-lookup
+    # code, which copies it into fixed-size buffers.  An over-long path must
+    # be rejected without the server dying.
+    root = r.repo.replace(os.sep, "/")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    # 39-char components, each under NAME_MAX and with no "..", joined to a
+    # path well past MAX_PATH (4096 on Linux, 1024 here).
+    comp = "a" * 39
+    long_rel = "/".join([comp] * (20000 // (len(comp) + 1)))
+
+    def run_session(sub, reqs):
+        cmd = [CVS]
+        if LIBDIR:
+            cmd += ["-L", LIBDIR]
+        cmd += ["--allow-root=" + r.repo, "server"]
+        wcdir = os.path.join(r.root, sub)
+        os.makedirs(wcdir)
+        p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            p.communicate()
+            fail("server session did not complete within 120s")
+            return None, ""
+        out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+        return p.returncode, out
+    def check_clean(rc, out, what, expect_msg=None):
+        # A clean rejection: the server exits (no signal) and reports the
+        # problem, rather than dying on the over-long path.
+        if rc is None:
+            return  # a timeout was already recorded by run_session
+        if not check(rc >= 0,
+                     "%s on an over-long repository path killed the server "
+                     "(rc=%r)" % (what, rc)):
+            return
+        if expect_msg is not None:
+            check(expect_msg in out,
+                  "%s did not report the over-long path (%r):%s%s"
+                  % (what, expect_msg, chr(10), out))
+        else:
+            check(any(l.startswith("error") or l.startswith("E ")
+                      for l in out.split(chr(10))),
+                  "%s on an over-long repository path did not report an error:%s%s"
+                  % (what, chr(10), out))
+
+    # The repository path rides the second line of a Directory request while
+    # the first line stays short.
+    rc, out = run_session("srvlong_update", "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "UseUnchanged",
+        "Directory sub",
+        root + "/" + long_rel,
+        "Argument sub",
+        "update",
+    ]))
+    check_clean(rc, out, "update")
+
+    # The repository path rides the command argument.
+    rc, out = run_session("srvlong_rlog", "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "UseUnchanged",
+        "Argument " + long_rel,
+        "rlog",
+    ]))
+    # rlog reaches the module-lookup guard, which names the over-long path.
+    check_clean(rc, out, "rlog",
+                expect_msg="Repository path too long for module lookup")
+
+
 def main():
     global CVS, LIBDIR, VERBOSE, CURRENT, PASSED
 
