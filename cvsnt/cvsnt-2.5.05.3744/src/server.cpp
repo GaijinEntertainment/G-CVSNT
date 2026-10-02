@@ -1832,6 +1832,12 @@ static void serve_blob (char *arg)
     error(1,0,"incorrect blob size<%s> == %d for %s", size_text, (int)size, arg);
   xfree (size_text);
 
+  if (strlen(arg) != hash_encoded_size || !is_encoded_hash(arg, hash_encoded_size))
+  {
+    error(1,0,"received hash is not a valid hash for blob %s", arg);
+    return;
+  }
+
   size_t sizeLeft = size;
   const bool exists = caddressed_fs::exists(caddressed_fs::get_default_ctx(), arg);
   caddressed_fs::PushData *pd = caddressed_fs::start_push(caddressed_fs::get_default_ctx(), arg);

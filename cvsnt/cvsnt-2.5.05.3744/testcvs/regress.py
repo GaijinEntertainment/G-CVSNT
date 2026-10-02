@@ -20,6 +20,7 @@ import argparse
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -1055,6 +1056,87 @@ def t_server_pipeout_order(r):
         check(i_body < i_tail,
               "trailing partial line arrived before the body (%d,%d):\n%s"
               % (i_body, i_tail, out))
+
+
+@test("the server rejects a Blob-transfer whose hash is not 64 lowercase hex characters")
+def t_blob_transfer_bad_hash(r):
+    # Blob-transfer names the blob by its hash, which also places it in the
+    # blob store.  Any other argument must be refused before the store is
+    # touched, so no file appears anywhere.
+    root = r.repo.replace(os.sep, "/")
+    blobs = os.path.join(r.repo, "blobs")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    payload = b"blob body" + bytes([10])
+    blob = struct.pack("<4sHHQ", b"NONE", 16, 0, len(payload)) + payload
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvblob")
+    os.makedirs(wcdir)
+
+    def snapshot():
+        found = set()
+        for d, dirs, files in os.walk(r.root):
+            found.update(os.path.join(d, n) for n in dirs + files)
+        return found
+
+    def transfer(arg, body):
+        reqs = "".join(s + chr(10) for s in [
+            "Root " + root,
+            "Valid-responses " + valid_responses,
+            "UseUnchanged",
+            "Blob-transfer " + arg,
+            str(len(body)),
+        ]).encode("utf-8") + body
+        p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            out_b, err_b = p.communicate(reqs, timeout=120)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            p.communicate()
+            fail("Blob-transfer %r did not complete within 120s" % arg)
+            return None
+        return out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+
+    for arg in ("../." + "0" * 60, "...." + "0" * 60, "0" * 63, "0" * 65,
+                "A" * 64, "0" * 62 + "/x"):
+        before = snapshot()
+        out = transfer(arg, blob)
+        if out is None:
+            continue
+        check(any(l.startswith("error") for l in out.split(chr(10))),
+              "Blob-transfer %r was not refused:%s%s" % (arg, chr(10), out))
+        created = sorted(snapshot() - before)
+        check(not created, "Blob-transfer %r created files: %r"
+              % (arg, created))
+
+    # A conforming hash is still accepted: a stored blob pushed back after
+    # its file is removed lands under its hash again.
+    imp = os.path.join(r.root, "impblob")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "b.dat"), "wb") as f:
+        f.write(bytes(range(256)))
+    r.cvs(["import", "-kB", "-m", "i", "mb", "VENDOR", "REL0"], cwd=imp)
+    stored = [os.path.join(d, n) for d, _, files in os.walk(blobs) for n in files]
+    if not check_eq(len(stored), 1, "blobs stored by import -kB"):
+        return
+    with open(stored[0], "rb") as f:
+        body = f.read()
+    os.remove(stored[0])
+    out = transfer(os.path.basename(stored[0]), body)
+    check(out is not None and not any(l.startswith("error") for l in out.split(chr(10))),
+          "a conforming Blob-transfer hash was refused:%s%s" % (chr(10), out))
+    check(os.path.isfile(stored[0]) and open(stored[0], "rb").read() == body,
+          "the pushed blob was not stored under its hash")
 
 
 def fresh_checkout(r, sub, module="m"):
