@@ -1832,6 +1832,12 @@ static void serve_blob (char *arg)
     error(1,0,"incorrect blob size<%s> == %d for %s", size_text, (int)size, arg);
   xfree (size_text);
 
+  if (strlen(arg) != hash_encoded_size || !is_encoded_hash(arg, hash_encoded_size))
+  {
+    error(1,0,"received hash is not a valid hash for blob %s", arg);
+    return;
+  }
+
   size_t sizeLeft = size;
   const bool exists = caddressed_fs::exists(caddressed_fs::get_default_ctx(), arg);
   caddressed_fs::PushData *pd = caddressed_fs::start_push(caddressed_fs::get_default_ctx(), arg);
@@ -3552,6 +3558,16 @@ void server_register(const char *name, const char *version, const char *timestam
 	len += strlen (timestamp);
 	if(md5)
 	len += strlen(md5);
+	if (merge_from_tag_1)
+	len += strlen (merge_from_tag_1);
+	if (merge_from_tag_2)
+	len += strlen (merge_from_tag_2);
+	if (edit_revision)
+	len += strlen (edit_revision);
+	if (edit_tag)
+	len += strlen (edit_tag);
+	if (edit_bugid)
+	len += strlen (edit_bugid);
 
 	len += 128; // This is for patching the md5 in later...
     

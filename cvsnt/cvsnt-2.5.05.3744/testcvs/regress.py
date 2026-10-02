@@ -20,6 +20,7 @@ import argparse
 import os
 import re
 import shutil
+import struct
 import subprocess
 import sys
 import tempfile
@@ -985,6 +986,72 @@ def t_server_session(r):
               "checkout content arrived after the co terminator:\n" + out)
 
 
+@test("the server handles an update of an added file with long EntryExtra fields")
+def t_entry_extra_long_fields(r):
+    # An added file's EntryExtra carries the edit_revision/edit_tag/edit_bugid
+    # fields, which the server copies into the Entries.Extra line it builds
+    # for the entry.  Long values must be handled normally, not truncated or
+    # dropped, and the session must complete.
+    r.import_tree("m", {"a.txt": "one\n"})
+    root = r.repo.replace(os.sep, "/")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    body = "added file body\n"
+    # A distinct value per field, so a field dropped on its own is caught.
+    edit_revision = "1" * 2000000
+    edit_tag = "2" * 2000000
+    edit_bugid = "3" * 2000000
+    # EntryExtra line: /name/merge1/merge2/rcs_timestamp/edit_revision/
+    #                  edit_tag/edit_bugid/md5/
+    entry_extra = "/added.txt///0/%s/%s/%s//" % (edit_revision, edit_tag, edit_bugid)
+    reqs = "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "UseUnchanged",
+        "Directory .",
+        root + "/m",
+        "Entry /added.txt/0/Initial//",
+        "EntryExtra " + entry_extra,
+        "Modified added.txt",
+        "u=rw,g=r,o=r",
+        str(len(body)),
+        body.rstrip(chr(10)),
+        "Argument --",
+        "Argument added.txt",
+        "update",
+    ]).encode("utf-8")
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvextra")
+    os.makedirs(wcdir)
+    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs, timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        fail("server session did not complete within 120s")
+        return
+    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    check_eq(p.returncode, 0, "server exit status (output:%s%s)" % (chr(10), out))
+    check(not any(l.startswith("error") for l in out.split(chr(10))),
+          "server reported an error:%s%s" % (chr(10), out))
+    # The server echoes the entry back, each long field intact rather than
+    # truncated or dropped, in its EntriesExtra response.
+    for field, name in ((edit_revision, "edit_revision"), (edit_tag, "edit_tag"),
+                        (edit_bugid, "edit_bugid")):
+        check(field in out, "the long %s field did not survive the round trip" % name)
+
+
 @test("checkout -p sends the file body before its trailing partial line")
 def t_server_pipeout_order(r):
     # `co -p` on a file that does not end in a newline emits, in order:
@@ -1055,6 +1122,87 @@ def t_server_pipeout_order(r):
         check(i_body < i_tail,
               "trailing partial line arrived before the body (%d,%d):\n%s"
               % (i_body, i_tail, out))
+
+
+@test("the server rejects a Blob-transfer whose hash is not 64 lowercase hex characters")
+def t_blob_transfer_bad_hash(r):
+    # Blob-transfer names the blob by its hash, which also places it in the
+    # blob store.  Any other argument must be refused before the store is
+    # touched, so no file appears anywhere.
+    root = r.repo.replace(os.sep, "/")
+    blobs = os.path.join(r.repo, "blobs")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    payload = b"blob body" + bytes([10])
+    blob = struct.pack("<4sHHQ", b"NONE", 16, 0, len(payload)) + payload
+    cmd = [CVS]
+    if LIBDIR:
+        cmd += ["-L", LIBDIR]
+    cmd += ["--allow-root=" + r.repo, "server"]
+    wcdir = os.path.join(r.root, "srvblob")
+    os.makedirs(wcdir)
+
+    def snapshot():
+        found = set()
+        for d, dirs, files in os.walk(r.root):
+            found.update(os.path.join(d, n) for n in dirs + files)
+        return found
+
+    def transfer(arg, body):
+        reqs = "".join(s + chr(10) for s in [
+            "Root " + root,
+            "Valid-responses " + valid_responses,
+            "UseUnchanged",
+            "Blob-transfer " + arg,
+            str(len(body)),
+        ]).encode("utf-8") + body
+        p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            out_b, err_b = p.communicate(reqs, timeout=120)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            p.communicate()
+            fail("Blob-transfer %r did not complete within 120s" % arg)
+            return None
+        return out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+
+    for arg in ("../." + "0" * 60, "...." + "0" * 60, "0" * 63, "0" * 65,
+                "A" * 64, "0" * 62 + "/x"):
+        before = snapshot()
+        out = transfer(arg, blob)
+        if out is None:
+            continue
+        check(any(l.startswith("error") for l in out.split(chr(10))),
+              "Blob-transfer %r was not refused:%s%s" % (arg, chr(10), out))
+        created = sorted(snapshot() - before)
+        check(not created, "Blob-transfer %r created files: %r"
+              % (arg, created))
+
+    # A conforming hash is still accepted: a stored blob pushed back after
+    # its file is removed lands under its hash again.
+    imp = os.path.join(r.root, "impblob")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "b.dat"), "wb") as f:
+        f.write(bytes(range(256)))
+    r.cvs(["import", "-kB", "-m", "i", "mb", "VENDOR", "REL0"], cwd=imp)
+    stored = [os.path.join(d, n) for d, _, files in os.walk(blobs) for n in files]
+    if not check_eq(len(stored), 1, "blobs stored by import -kB"):
+        return
+    with open(stored[0], "rb") as f:
+        body = f.read()
+    os.remove(stored[0])
+    out = transfer(os.path.basename(stored[0]), body)
+    check(out is not None and not any(l.startswith("error") for l in out.split(chr(10))),
+          "a conforming Blob-transfer hash was refused:%s%s" % (chr(10), out))
+    check(os.path.isfile(stored[0]) and open(stored[0], "rb").read() == body,
+          "the pushed blob was not stored under its hash")
 
 
 def fresh_checkout(r, sub, module="m"):
@@ -1914,6 +2062,88 @@ def t_add_binary_kopt_protocol(r):
     check(re.search(r"/deep\.txt/0/[^/]*/-k[bB]/", out) is not None,
           "the binary file in the second directory lost its Kopt:" + chr(10) + out)
 
+
+
+@test("the server fails cleanly on a repository path longer than MAX_PATH")
+def t_long_repository_path(r):
+    # A repository path far longer than MAX_PATH reaches the module-lookup
+    # code, which copies it into fixed-size buffers.  An over-long path must
+    # be rejected without the server dying.
+    root = r.repo.replace(os.sep, "/")
+    valid_responses = (
+        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+        "Mod-time Removed Remove-entry Set-static-directory "
+        "Clear-static-directory Set-sticky Clear-sticky Template "
+        "Notified Module-expansion Clear-rename Rename EntriesExtra "
+        "M Mbinary E F MT")
+    # 39-char components, each under NAME_MAX and with no "..", joined to a
+    # path well past MAX_PATH (4096 on Linux, 1024 here).
+    comp = "a" * 39
+    long_rel = "/".join([comp] * (20000 // (len(comp) + 1)))
+
+    def run_session(sub, reqs):
+        cmd = [CVS]
+        if LIBDIR:
+            cmd += ["-L", LIBDIR]
+        cmd += ["--allow-root=" + r.repo, "server"]
+        wcdir = os.path.join(r.root, sub)
+        os.makedirs(wcdir)
+        p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
+                             stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+        try:
+            out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
+        except subprocess.TimeoutExpired:
+            p.kill()
+            p.communicate()
+            fail("server session did not complete within 120s")
+            return None, ""
+        out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+        return p.returncode, out
+    def check_clean(rc, out, what, expect_msg=None):
+        # A clean rejection: the server exits (no signal) and reports the
+        # problem, rather than dying on the over-long path.
+        if rc is None:
+            return  # a timeout was already recorded by run_session
+        if not check(rc >= 0,
+                     "%s on an over-long repository path killed the server "
+                     "(rc=%r)" % (what, rc)):
+            return
+        if expect_msg is not None:
+            check(expect_msg in out,
+                  "%s did not report the over-long path (%r):%s%s"
+                  % (what, expect_msg, chr(10), out))
+        else:
+            check(any(l.startswith("error") or l.startswith("E ")
+                      for l in out.split(chr(10))),
+                  "%s on an over-long repository path did not report an error:%s%s"
+                  % (what, chr(10), out))
+
+    # The repository path rides the second line of a Directory request while
+    # the first line stays short.
+    rc, out = run_session("srvlong_update", "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "UseUnchanged",
+        "Directory sub",
+        root + "/" + long_rel,
+        "Argument sub",
+        "update",
+    ]))
+    check_clean(rc, out, "update")
+
+    # The repository path rides the command argument.
+    rc, out = run_session("srvlong_rlog", "".join(s + chr(10) for s in [
+        "Root " + root,
+        "Valid-responses " + valid_responses,
+        "UseUnchanged",
+        "Argument " + long_rel,
+        "rlog",
+    ]))
+    # rlog reaches the module-lookup guard, which names the over-long path.
+    check_clean(rc, out, "rlog",
+                expect_msg="Repository path too long for module lookup")
 
 
 def main():
