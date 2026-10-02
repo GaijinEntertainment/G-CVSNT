@@ -2110,6 +2110,44 @@ def t_add_binary_kopt_protocol(r):
           "the binary file in the second directory lost its Kopt:" + chr(10) + out)
 
 
+@test("the server fails cleanly on a repository path longer than MAX_PATH")
+def t_long_repository_path(r):
+    # A repository path far longer than MAX_PATH reaches the module-lookup
+    # code, which copies it into fixed-size buffers.  An over-long path must
+    # be rejected without the server dying.
+    root = r.repo.replace(os.sep, "/")
+    # 39-char components, each under NAME_MAX and with no "..", joined to a
+    # path well past MAX_PATH (4096 on Linux, 1024 here).
+    comp = "a" * 39
+    long_rel = "/".join([comp] * (20000 // (len(comp) + 1)))
+
+    def check_clean(what, reqs, expect_msg=None):
+        # A clean rejection: the server exits (no signal) and reports the
+        # problem, rather than dying on the over-long path.
+        rc, out, err = server_session(r, ["Root " + root,
+                                          "Valid-responses " + VALID_RESPONSES,
+                                          "UseUnchanged"] + reqs)
+        out += err
+        if not check(rc >= 0, "%s on an over-long repository path killed the server "
+                              "(rc=%r)" % (what, rc)):
+            return
+        if expect_msg is not None:
+            check(expect_msg in out, "%s did not report the over-long path (%r):\n%s"
+                                     % (what, expect_msg, out))
+        else:
+            check(any(l.startswith("error") or l.startswith("E ") for l in out.split("\n")),
+                  "%s on an over-long repository path did not report an error:\n%s"
+                  % (what, out))
+
+    # The repository path rides the second line of a Directory request while
+    # the first line stays short.
+    check_clean("update", ["Directory sub", root + "/" + long_rel,
+                           "Argument sub", "update"])
+    # The repository path rides the command argument; rlog reaches the
+    # module-lookup guard, which names the over-long path.
+    check_clean("rlog", ["Argument " + long_rel, "rlog"],
+                expect_msg="Repository path too long for module lookup")
+
 
 def main():
     global CVS, LIBDIR, VERBOSE, CURRENT, PASSED

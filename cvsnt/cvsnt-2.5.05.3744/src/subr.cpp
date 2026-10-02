@@ -1387,6 +1387,12 @@ const char *fn_root(const char *path)
 
 	if(!fnncmp(path,current_parsed_root->directory,strlen(current_parsed_root->directory)))
 	{
+		/* fnroot is a fixed MAX_PATH buffer; path is client-supplied.  Fall
+		   back to the repository-relative tail rather than overflow it or
+		   leak the server's directory. */
+		if(strlen(current_parsed_root->unparsed_directory)
+			+ strlen(path+strlen(current_parsed_root->directory)) >= sizeof(fnroot[fnr]))
+			return path+strlen(current_parsed_root->directory);
 		fnr=(fnr+1)&1;
 		strcpy(fnroot[fnr],current_parsed_root->unparsed_directory);
 		strcat(fnroot[fnr],path+strlen(current_parsed_root->directory));

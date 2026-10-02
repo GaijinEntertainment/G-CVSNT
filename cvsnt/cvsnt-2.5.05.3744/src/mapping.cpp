@@ -469,6 +469,11 @@ static int lookup_module2(const char *file, char *left, char *right, modules2_st
 	modules2_module_struct *saved_dir, *mydir;
 	int lookupid = ++global_lookupid;
 
+	/* Cleared up front so an early return leaves no indeterminate value for
+	   callers that read these without checking the result. */
+	if(pmod) *pmod=NULL;
+	if(pdir) *pdir=NULL;
+
 	TRACE(3,"lookup_module2(%s)",PATCH_NULL(file));
 	if(current_directory && current_directory->virtual_repos)
 	{
@@ -484,6 +489,12 @@ static int lookup_module2(const char *file, char *left, char *right, modules2_st
 		TRACE(3,"lookup_module2() check between virtual_repos length and file[%u]",(unsigned)vrlen);
 		if(!fnncmp(file,current_directory->virtual_repos,vrlen) && file[vrlen]=='/')
 		{
+			/* tmp is a fixed MAX_PATH buffer; file is client-supplied. */
+			if(strlen(current_directory->real_repos)+strlen(file+vrlen) >= sizeof(tmp))
+			{
+				error(0,0,"Repository path too long for module lookup");
+				return 0;
+			}
 			sprintf(tmp,"%s%s",current_directory->real_repos,file+vrlen);
 			file = tmp;
 			renamed = 1;
@@ -525,6 +536,12 @@ static int lookup_module2(const char *file, char *left, char *right, modules2_st
 	if(!file)
 		return 2; /* Deleted */
 
+	/* tmp is a fixed MAX_PATH buffer; file is client-supplied. */
+	if(strlen(file) >= sizeof(tmp))
+	{
+		error(0,0,"Repository path too long for module lookup");
+		return 0;
+	}
 	strcpy(tmp,file);
 	do
 	{
@@ -539,6 +556,10 @@ static int lookup_module2(const char *file, char *left, char *right, modules2_st
 		if(right) strcpy(saved_right,right);
 		if(pmod) saved_mod=*pmod;
 		if(pdir) saved_dir=*pdir;
+		/* left and right are independent MAX_PATH buffers; stop recursing
+		   rather than overflow tmp with their composition. */
+		if(left && right && strlen(left)+strlen(right) >= sizeof(tmp))
+			break;
 		sprintf(tmp,"%s%s",PATCH_NULL(left),PATCH_NULL(right));
 		found=1;
 		TRACE(3,"lookup_module2() found \"%s\"",PATCH_NULL(tmp));
@@ -558,7 +579,8 @@ static int lookup_module2(const char *file, char *left, char *right, modules2_st
 			ret,(current_directory)?"!=NULL":"==NULL",(current_directory->directory_mappings)?"!=NULL":"==NULL");
 	else
 		TRACE(3,"lookup_module2() ret=%d, current_directory==NULL, current_directory->directory_mappings=!!!!",ret);
-	if(ret!=2 && current_directory && current_directory->directory_mappings)
+	if(ret!=2 && current_directory && current_directory->directory_mappings
+		&& !(left && right && strlen(left)+strlen(right) >= sizeof(tmp)))
 	{
 		TRACE(3,"lookup_module2() lookup current_directory->directory_mappings");
 		Node *head,*p;
@@ -742,6 +764,12 @@ int find_virtual_dirs (const char *repository, List *list)
 	if(!mod)
 		return 0;
 
+	/* left is a fixed MAX_PATH buffer; an over-long path cannot be composed. */
+	if(strlen(left)+strlen(right) >= sizeof(left))
+	{
+		error(0,0,"Repository path too long for module lookup");
+		return 0;
+	}
 	/* At this point (I think) everything is normalised so don't have to take into account case, etc. */
 	strcat(left,right);
 	dir = mod->module;
@@ -817,6 +845,12 @@ int find_virtual_rcs (const char *repository, List *list)
 	if(!mod)
 		return 0;
 
+	/* left is a fixed MAX_PATH buffer; an over-long path cannot be composed. */
+	if(strlen(left)+strlen(right) >= sizeof(left))
+	{
+		error(0,0,"Repository path too long for module lookup");
+		return 0;
+	}
 	/* At this point (I think) everything is normalised so don't have to take into account case, etc. */
 	strcat(left,right);
 	dir = mod->module;
