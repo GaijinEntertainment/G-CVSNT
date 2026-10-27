@@ -216,9 +216,15 @@ printf 'base1\nbase2\nbase3\n' > wc5/merge_src.txt
 (cd wc5 && cvs_cmd add merge_src.txt && cvs_cmd commit -m "base for the merge")
 (cd wc5 && cvs_cmd tag -b SMOKE_MERGE_BRANCH merge_src.txt \
         && cvs_cmd update -r SMOKE_MERGE_BRANCH merge_src.txt)
+# The working file is rewritten in the same wall-clock second as the update
+# above.  CVS/Entries timestamps have 1-second granularity, so a same-second
+# rewrite can read as unmodified and the commit becomes a no-op; wait out the
+# second so the change is always detected.
+sleep 1
 printf 'base1\nbase2\nbase3\nfrom-branch\n' > wc5/merge_src.txt
 (cd wc5 && cvs_cmd commit -m "branch change")
 (cd wc5 && cvs_cmd update -A merge_src.txt)
+sleep 1  # same 1-second Entries-timestamp window as above
 printf 'from-trunk\nbase1\nbase2\nbase3\n' > wc5/merge_src.txt
 (cd wc5 && cvs_cmd commit -m "trunk change")
 (cd wc5 && cvs_cmd update -j SMOKE_MERGE_BRANCH merge_src.txt)
