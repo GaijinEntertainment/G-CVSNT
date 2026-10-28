@@ -254,12 +254,15 @@ happens to a matching file or directory that exists in the repository:
   `CVS/Entries` line; a file with local changes is kept and reported instead. Other commands
   that work through a server leave it in place and skip it; against a `:local:` root only
   `update`, `checkout` and `commit` apply the list;
+* a file scheduled for removal with `cvs remove` keeps its `CVS/Entries` line, and `update`
+  reports it;
 * `update`, `status` and `-n` do not report it as missing, unknown or needing checkout.
 
 The list is local: the server never sees it, and `.cvsexclude` itself is always excluded, so it is
 never checked in and never overwritten from the repository. A command started inside an excluded
-directory is refused. Removing the pattern and running `update` (with `-d` for a directory) brings
-the content back (`src/exclude.cpp`).
+directory is refused. Removing the pattern and running `update` (with `-d` for a directory) brings the content
+back, except that a file scheduled for removal stays scheduled until `cvs add` undoes it
+(`src/exclude.cpp`).
 
 ## Diagnostics
 

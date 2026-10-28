@@ -14,9 +14,9 @@
  * A .cvsexclude file has the .cvsignore syntax and applies to the working
  * directory it is in; ~/.cvsexclude and $CVSEXCLUDE apply everywhere.  A
  * file or directory whose name matches is kept out of the working copy:
- * update removes it unless it has local changes, it is never sent to the
- * server, and nothing the server sends about it is written or shown.  The
- * server never learns about the list.  .cvsexclude itself is always
+ * update removes it unless it has local changes or is scheduled for removal,
+ * it is never sent to the server, and nothing the server sends about it is
+ * written or shown.  The server never learns about the list.  .cvsexclude itself is always
  * excluded, so it can neither be checked in nor overwritten from the server.
  */
 
@@ -267,19 +267,30 @@ static void excl_report_removed (const char *what)
         error (0, 0, "%s is excluded by %s; removed from the working copy", what, CVSDOTEXCLUDE);
 }
 
-static void excl_report_kept (const char *what)
+static void excl_report_kept (const char *what, const char *why)
 {
-    error (0, 0, "%s is excluded by %s but has local changes; not removed", what, CVSDOTEXCLUDE);
+    error (0, 0, "%s is excluded by %s but %s; not removed", what, CVSDOTEXCLUDE, why);
+}
+
+/* A file `cvs remove` scheduled for removal, not committed yet.  */
+static bool excl_scheduled_for_removal (const Vers_TS *vers)
+{
+    return vers->vn_user != NULL && vers->vn_user[0] == '-';
 }
 
 /* During update, take the excluded file FINFO out of the working copy.  A
-   file the server knows nothing about is left alone; a modified file is kept
-   and reported.  */
+   file the server knows nothing about is left alone; a modified file or one
+   scheduled for removal is kept and reported.  */
 void excl_remove_file (struct file_info *finfo, Vers_TS *vers)
 {
     if (!excl_active || strcmp (command_name, "update") != 0 || noexec || vers->vn_user == NULL
         || finfo->entries == NULL)
         return;
+    if (excl_scheduled_for_removal (vers))
+    {
+        excl_report_kept (finfo->fullname, "is scheduled for removal");
+        return;
+    }
     if (vers->ts_user == NULL || fncmp (finfo->file, CVSDOTEXCLUDE) == 0)
     {
         Scratch_Entry (finfo->entries, finfo->file);
@@ -287,7 +298,7 @@ void excl_remove_file (struct file_info *finfo, Vers_TS *vers)
     }
     if (excl_file_is_modified (finfo, vers))
     {
-        excl_report_kept (finfo->fullname);
+        excl_report_kept (finfo->fullname, "has local changes");
         return;
     }
     if (unlink_file (finfo->file) < 0)
@@ -300,8 +311,9 @@ void excl_remove_file (struct file_info *finfo, Vers_TS *vers)
 }
 
 /* Remove DIR, an excluded subdirectory of the current directory, one
-   version-controlled file at a time.  Files with local changes and files
-   not under version control are kept, and then so is the directory.
+   version-controlled file at a time.  Files with local changes, files
+   scheduled for removal and files not under version control are kept, and then so is
+   the directory.
    Returns nonzero when the directory is gone.  */
 static int excl_remove_tree (const char *dir, const char *update_dir, List *parent_entries)
 {
@@ -346,9 +358,14 @@ static int excl_remove_tree (const char *dir, const char *update_dir, List *pare
             finfo.entries = entries;
 
             Vers_TS *vers = Version_TS (&finfo, NULL, NULL, NULL, 0, 0, 0);
-            if (vers->ts_user != NULL && excl_file_is_modified (&finfo, vers))
+            if (excl_scheduled_for_removal (vers))
             {
-                excl_report_kept (full.c_str ());
+                excl_report_kept (full.c_str (), "is scheduled for removal");
+                kept = 1;
+            }
+            else if (excl_file_is_modified (&finfo, vers))
+            {
+                excl_report_kept (full.c_str (), "has local changes");
                 kept = 1;
             }
             else if (vers->ts_user != NULL && unlink_file (finfo.file) < 0)
@@ -394,7 +411,7 @@ void excl_remove_dir (const char *dir, const char *update_dir, List *entries)
     if (excl_remove_tree (dir, update_dir, entries))
         excl_report_removed (update_dir);
     else
-        error (0, 0, "%s is excluded by %s but was not removed: it has local changes or files not under version control", update_dir, CVSDOTEXCLUDE);
+        error (0, 0, "%s is excluded by %s but was not removed: it has local changes, files scheduled for removal or files not under version control", update_dir, CVSDOTEXCLUDE);
 }
 
 /* A command started inside a directory that an enclosing working directory
