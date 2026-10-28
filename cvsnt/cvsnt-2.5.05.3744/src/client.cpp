@@ -6047,8 +6047,13 @@ void send_file_names (int argc, char **argv, unsigned int flags)
 		if (arg_should_not_be_sent_to_server (file))
 		    continue;
 
+		/* checkout, export, ls and rls take module names, not working copy paths.  */
 		if (excl_path (file))
-			error (0, 0, "%s is excluded by %s", file, CVSDOTEXCLUDE);
+		{
+			int fatal = strcmp (command_name, "checkout") != 0 && strcmp (command_name, "export") != 0
+				&& strcmp (command_name, "ls") != 0 && strcmp (command_name, "rls") != 0;
+			error (fatal, 0, "%s is excluded by %s", file, CVSDOTEXCLUDE);
+		}
 
 		if(flags&SEND_DIRECTORIES_ONLY && !isdir(file))
 		{
