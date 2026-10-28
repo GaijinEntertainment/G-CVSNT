@@ -75,6 +75,17 @@ static size_t excl_last_sep (const std::string &path)
     return std::string::npos;
 }
 
+/* A single entry name, as opposed to a path, ".", "..", or nothing.  */
+static bool excl_simple (const char *name)
+{
+    if (name[0] == 0 || strcmp (name, ".") == 0 || strcmp (name, "..") == 0)
+        return false;
+    for (const char *p = name; *p; ++p)
+        if (ISDIRSEP (*p))
+            return false;
+    return true;
+}
+
 static void excl_add_line (excl_list &list, bool *reset, const char *line)
 {
     if (line == NULL)
@@ -154,18 +165,10 @@ static std::string excl_cwd ()
     return s;
 }
 
-/* Server pathnames and message paths are relative to the directory the
-   command started in, which the client records in toplevel_wd.  */
-static std::string excl_top ()
-{
-    if (toplevel_wd != NULL)
-        return toplevel_wd;
-    return excl_cwd ();
-}
-
 /* Walk PATH component by component below ABS; return true when a component
-   is excluded by the directory holding it.  */
-static bool excl_walk (std::string abs, const char *path)
+   is excluded by the directory holding it.  Otherwise *END, when given, gets
+   the absolute directory PATH leads to.  */
+static bool excl_walk (std::string abs, const char *path, std::string *end = NULL)
 {
     const char *p = path;
     while (*p)
@@ -188,6 +191,8 @@ static bool excl_walk (std::string abs, const char *path)
         }
         p = *e ? e + 1 : e;
     }
+    if (end != NULL)
+        *end = abs;
     return false;
 }
 
@@ -213,41 +218,108 @@ static const std::string &excl_inside (const std::string &dir)
     return excl_inside_memo[key] = where;
 }
 
+/* The current directory as last looked up, identified by device and inode so
+   that it is looked up again only after a change of directory.  Where stat
+   reports no inode numbers (st_ino 0) it is looked up every time, and "." is
+   not probed again.  */
+static bool excl_here_valid;
+static bool excl_no_inodes;
+static dev_t excl_here_dev;
+static ino_t excl_here_ino;
+static std::string excl_here_abs;
+static const excl_dir *excl_here_dir;
+static bool excl_here_inside;
+
+static void excl_here ()
+{
+    struct stat st;
+    bool known = false;
+    if (!excl_no_inodes && CVS_STAT (".", &st) == 0)
+    {
+        known = st.st_ino != 0;
+        excl_no_inodes = !known;
+    }
+    if (known && excl_here_valid && st.st_dev == excl_here_dev && st.st_ino == excl_here_ino)
+        return;
+    excl_here_abs = excl_cwd ();
+    excl_here_dir = &excl_dir_at (excl_here_abs);
+    excl_here_inside = !excl_inside (excl_here_abs).empty ();
+    excl_here_valid = known;
+    if (known)
+    {
+        excl_here_dev = st.st_dev;
+        excl_here_ino = st.st_ino;
+    }
+}
+
+/* Server pathnames and message paths are relative to the directory the
+   command started in, which the client records in toplevel_wd at the first
+   server response; until then they are relative to the current directory.  */
+static std::string excl_top ()
+{
+    if (toplevel_wd != NULL)
+        return toplevel_wd;
+    excl_here ();
+    return excl_here_abs;
+}
+
+/* The patterns for the entries of the directory REL, relative to the top, or
+   NULL when that directory is excluded itself; remembered per directory for
+   as long as the top stays the same.  */
+static std::map<std::string, const excl_dir *> excl_rel_memo;
+static std::string excl_rel_top;
+
+static const excl_dir *excl_rel (const char *rel)
+{
+    std::string top = excl_top ();
+    if (top != excl_rel_top)
+    {
+        excl_rel_memo.clear ();
+        excl_rel_top = top;
+    }
+    std::string key = excl_key (rel);
+    std::map<std::string, const excl_dir *>::iterator it = excl_rel_memo.find (key);
+    if (it != excl_rel_memo.end ())
+        return it->second;
+    std::string abs;
+    const excl_dir *dir = excl_walk (top, rel, &abs) ? NULL : &excl_dir_at (abs);
+    return excl_rel_memo[key] = dir;
+}
+
 /* NAME, a path relative to the current directory, is excluded, or the
    current directory itself is inside an excluded directory.  */
 int excl_name_here (const char *name)
 {
     if (!excl_active || name == NULL)
         return 0;
-    std::string cwd = excl_cwd ();
-    return excl_walk (cwd, name) || !excl_inside (cwd).empty ();
+    excl_here ();
+    if (excl_here_inside)
+        return 1;
+    if (excl_simple (name))
+        return excl_match (*excl_here_dir, name);
+    return excl_walk (excl_here_abs, name);
 }
 
 int excl_name_in (const char *dir, const char *name)
 {
     if (!excl_active || name == NULL)
         return 0;
-    std::string abs = excl_top ();
-    if (dir != NULL && excl_walk (abs, dir))
-        return 1;
-    for (const char *p = dir ? dir : ""; *p; )
-    {
-        const char *e = p;
-        while (*e && !ISDIRSEP (*e))
-            ++e;
-        std::string comp (p, e - p);
-        if (!comp.empty () && comp != ".")
-            abs = excl_join (abs, comp.c_str ());
-        p = *e ? e + 1 : e;
-    }
-    return excl_name_abs (abs, name);
+    return excl_path (excl_join (dir != NULL ? dir : "", name).c_str ());
 }
 
 int excl_path (const char *path)
 {
     if (!excl_active || path == NULL)
         return 0;
-    return excl_walk (excl_top (), path);
+    std::string p (path);
+    while (!p.empty () && ISDIRSEP (p[p.size () - 1]))
+        p.erase (p.size () - 1);
+    size_t slash = excl_last_sep (p);
+    std::string name = slash == std::string::npos ? p : p.substr (slash + 1);
+    if (!excl_simple (name.c_str ()))
+        return excl_walk (excl_top (), path);
+    const excl_dir *dir = excl_rel (slash == std::string::npos ? "" : p.substr (0, slash).c_str ());
+    return dir == NULL || excl_match (*dir, name.c_str ());
 }
 
 /* The same test send_fileproc uses: timestamps first, then the stored md5.  */
@@ -466,5 +538,8 @@ void excl_close ()
     excl_global.clear ();
     excl_dirs.clear ();
     excl_inside_memo.clear ();
+    excl_rel_memo.clear ();
+    excl_rel_top.clear ();
+    excl_here_valid = false;
     excl_active = false;
 }
