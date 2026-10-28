@@ -1180,6 +1180,12 @@ static int outside_root (const char *repos)
 	    goto not_within;
     }
 
+    if (in_blob_store (current_parsed_root->unparsed_directory, repos))
+    {
+		error(1,0,"protocol error: directory '%s' is reserved for the blob store", repos);
+		return 1;
+    }
+
     return 0;
 }
 

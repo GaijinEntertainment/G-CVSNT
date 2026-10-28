@@ -52,6 +52,14 @@ The `CVSROOT/` names are the `CVSROOTADM_*` constants at `src/cvs.h:179`, and th
 (`ca_blobs_fs/src/content_addressed_fs.cpp:16`), and `fileattr.xml` is `CVSREP_FILEATTR`
 (`src/fileattr.h:41`).
 
+CVS keeps `<root>/blobs` out of the repository (`in_blob_store`, `src/repos.cpp:199`). Recursion
+never lists it, and a module argument that names a path into it is reported as not found. A
+modules-file entry that points into it, a path reached through such an entry or a `mod .` module
+(`all/blobs/...`), a directory or file argument that leads into it, and a working-copy directory
+recorded against it are skipped with a warning. The server rejects a `Directory` request for it.
+Only the `blobs` directly under the root is reserved; a deeper one, such as `m/blobs`, is an
+ordinary directory.
+
 ### A `,v` file for a `-kB` file
 
 An ordinary CVS `,v` file stores each revision's text (or a delta) in a `@...@` block. For a `-kB`

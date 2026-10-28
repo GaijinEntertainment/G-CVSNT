@@ -17,6 +17,7 @@ Exit status is 0 if every test passed.
 """
 
 import argparse
+import contextlib
 import os
 import re
 import shutil
@@ -1380,6 +1381,319 @@ def t_import_kB_blob_failure(r):
     wc = r.checkout("mf")
     check_eq(open(os.path.join(wc, "b.dat"), "rb").read(), payload,
              "re-imported b.dat content")
+
+# The blob store lives inside the repository root as <root>/blobs; CVS must
+# not treat it as a module directory.  A subdirectory called blobs further
+# down (m/blobs here) is an ordinary directory and stays visible.
+
+BLOB_DECOY = "decoy revision kept inside the blob store\n"
+
+
+@contextlib.contextmanager
+def _blob_store_repo(r):
+    # Module m with its own blobs/k.txt, plus a hand-built <repo>/blobs: one
+    # blob in the fan-out layout and a valid ,v (blobs/ab/decoy.txt,v) whose
+    # name and content show up wherever a command descends into the store.
+    # For a non-root POSIX user the fan-out directory is unreadable inside
+    # the block, so a descent also aborts; the mode is restored on exit so
+    # the scratch directory can be removed.
+    r.import_tree("m", {"a.txt": "one\n", "blobs/k.txt": "module key\n"})
+    r.import_tree("decoysrc", {"decoy.txt": BLOB_DECOY})
+    fanout = os.path.join(r.repo, "blobs", "ab", "cd")
+    write(os.path.join(fanout, "0123456789abcdef" * 4), "blob\n")
+    os.replace(os.path.join(r.repo, "decoysrc", "decoy.txt,v"),
+               os.path.join(r.repo, "blobs", "ab", "decoy.txt,v"))
+    shutil.rmtree(os.path.join(r.repo, "decoysrc"))
+    sealed = os.name != "nt" and os.geteuid() != 0
+    if sealed:
+        os.chmod(fanout, 0)
+    try:
+        yield
+    finally:
+        if sealed:
+            os.chmod(fanout, 0o755)
+
+
+def _blob_session(r, requests):
+    # server_session after the Root / Valid-responses / UseUnchanged
+    # preamble.  Returns the exit status and stdout followed by stderr.
+    rc, out, err = server_session(r, ["Root " + r.repo.replace(os.sep, "/"),
+                                      "Valid-responses " + VALID_RESPONSES,
+                                      "UseUnchanged"] + requests)
+    out += err
+    if VERBOSE:
+        print("      " + out.rstrip().replace("\n", "\n      "))
+    return rc, out
+
+
+def _plant_blobs_wc_dir(wcroot, rel="blobs"):
+    # A store directory (rel, "/"-separated) in a root working copy, the way a
+    # checkout of "." made before the store was hidden left it.  Its parent
+    # must already be a working directory.
+    parts = rel.split("/")
+    adm = os.path.join(wcroot, *parts + ["CVS"])
+    write(os.path.join(adm, "Root"), read(os.path.join(wcroot, "CVS", "Root")))
+    write(os.path.join(adm, "Repository"), rel + "\n")
+    write(os.path.join(adm, "Entries"), "")
+    with open(os.path.join(wcroot, *parts[:-1] + ["CVS", "Entries"]), "a", newline="\n") as f:
+        f.write("D/%s////\n" % parts[-1])
+
+
+def _decoys_in(top):
+    return [os.path.join(d, f) for d, _, fs in os.walk(top) for f in fs if f == "decoy.txt"]
+
+
+@test("the root blob store is invisible to recursion, locally and over the server protocol")
+def t_blob_store_not_recursed(r):
+    root = r.repo.replace(os.sep, "/")
+
+    def not_listed(what, out):
+        # The skip warning would mean the store was listed and only then dropped.
+        check("reserved for the blob store" not in out,
+              "%s listed the blob store before skipping it:\n%s" % (what, out))
+
+    with _blob_store_repo(r):
+        wcroot = os.path.join(r.root, "wcroot")
+        os.makedirs(wcroot)
+        rc, out = r.cvs(["checkout", "."], cwd=wcroot, expect_ok=False)
+        check_eq(rc, 0, "checkout . exit status (output:\n%s)" % out)
+        not_listed("checkout .", out)
+        check(not os.path.exists(os.path.join(wcroot, "blobs")),
+              "checkout . created blobs/ in the working copy:\n" + out)
+        check(os.path.isfile(os.path.join(wcroot, "m", "blobs", "k.txt")),
+              "checkout . lost the module's own m/blobs/k.txt:\n" + out)
+
+        rc, out = r.cvs(["update", "-d"], cwd=wcroot, expect_ok=False)
+        check_eq(rc, 0, "update -d exit status (output:\n%s)" % out)
+        not_listed("update -d", out)
+        check(not os.path.exists(os.path.join(wcroot, "blobs")),
+              "update -d created blobs/ in the working copy:\n" + out)
+
+        rc, out = r.cvs(["export", "-r", "HEAD", "-d", "exp", "."], cwd=r.root,
+                        expect_ok=False)
+        exp = os.path.join(r.root, "exp")
+        check_eq(rc, 0, "export . exit status (output:\n%s)" % out)
+        not_listed("export .", out)
+        check(not os.path.exists(os.path.join(exp, "blobs")),
+              "export . wrote a blobs/ directory:\n" + out)
+        check(os.path.isfile(os.path.join(exp, "m", "blobs", "k.txt")),
+              "export . lost m/blobs/k.txt:\n" + out)
+
+        rc, out = r.cvs(["rlog", "."], cwd=r.root, expect_ok=False)
+        check_eq(rc, 0, "rlog . exit status (output:\n%s)" % out)
+        not_listed("rlog .", out)
+        check("blobs/ab" not in out and "decoy" not in out,
+              "rlog . reported files inside the blob store:\n" + out)
+        check("m/blobs/k.txt,v" in out, "rlog . lost m/blobs/k.txt,v:\n" + out)
+
+        rc, out = r.cvs(["ls"], cwd=r.root, expect_ok=False)
+        not_listed("ls", out)
+        listed = out.split("\n")
+        check(rc == 0 and "m" in listed and "blobs" not in listed,
+              "ls must list m and not the blob store (rc=%d):\n%s" % (rc, out))
+        rc, out = r.cvs(["ls", "m"], cwd=r.root, expect_ok=False)
+        check(rc == 0 and "blobs" in out.split("\n"),
+              "ls m no longer lists the module's own blobs (rc=%d):\n%s" % (rc, out))
+
+        rc, out = _blob_session(r, ["Argument .", "Directory .", root, "co",
+                                   "Argument .", "rlog", "rls"])
+        lines = out.split("\n")
+        check_eq(rc, 0, "server exit status (output:\n%s)" % out)
+        not_listed("the server session", out)
+        check_eq(len([l for l in lines if l == "ok"]), 3,
+                 "one ok per command (co, rlog, rls):\n" + out)
+        check(not any(l.startswith("error") for l in lines),
+              "server reported an error:\n" + out)
+        check("blobs/ab" not in out and "decoy" not in out,
+              "the server descended into the blob store:\n" + out)
+        check("m/blobs/k.txt" in out, "the server lost m/blobs/k.txt:\n" + out)
+        check("M m" in lines and "M blobs" not in lines,
+              "rls must list m and not the blob store:\n" + out)
+
+
+@test("module names inside the root blob store are not found, locally and over the server protocol")
+def t_blob_store_not_a_module(r):
+    import stat
+    root = r.repo.replace(os.sep, "/")
+    with _blob_store_repo(r):
+        mods = os.path.join(r.repo, "CVSROOT", "modules")
+        os.chmod(mods, stat.S_IREAD | stat.S_IWRITE)  # cvs init leaves it read-only
+        with open(mods, "a", newline="\n") as f:
+            f.write("bal -a blobs\n")
+        cases = [(["checkout", n], n) for n in
+                 ("blobs", "blobs/", "blobs/ab", "./blobs", "CVSROOT/../blobs",
+                  "blobs/ab/decoy.txt")]
+        cases += [(["rlog", "blobs"], "blobs"), (["ls", "blobs"], "blobs"),
+                  (["checkout", "bal"], "blobs")]
+        for i, (args, name) in enumerate(cases):
+            wc = os.path.join(r.root, "wcmod%d" % i)
+            os.makedirs(wc)
+            rc, out = r.cvs(args, cwd=wc, expect_ok=False)
+            what = " ".join(args)
+            check(rc != 0, "%s exited 0:\n%s" % (what, out))
+            check("cannot find module `%s' - ignored" % name in out,
+                  "%s did not report an unknown module %s:\n%s" % (what, name, out))
+            check(os.listdir(wc) == [],
+                  "%s created %s:\n%s" % (what, os.listdir(wc), out))
+            check(BLOB_DECOY.strip() not in out and "RCS file" not in out,
+                  "%s reached the blob store:\n%s" % (what, out))
+
+        wc = os.path.join(r.root, "wcmodctl")
+        os.makedirs(wc)
+        rc, out = r.cvs(["checkout", "m/blobs"], cwd=wc, expect_ok=False)
+        check(rc == 0 and os.path.isfile(os.path.join(wc, "m", "blobs", "k.txt")),
+              "checkout m/blobs no longer works (rc=%d):\n%s" % (rc, out))
+
+        rc, out = _blob_session(r, ["Argument blobs", "Directory .", root, "co",
+                                   "Argument blobs/ab", "rlog"])
+        lines = out.split("\n")
+        check_eq(out.count("cannot find module"), 2,
+                 "co blobs and rlog blobs/ab must both be unknown modules:\n" + out)
+        check_eq(len([l for l in lines if l.startswith("error")]), 2,
+                 "one error per command (co, rlog):\n" + out)
+        check("decoy" not in out, "the server reached the blob store:\n" + out)
+
+
+@test("a Directory request inside the root blob store is a protocol error")
+def t_blob_store_directory_refused(r):
+    root = r.repo.replace(os.sep, "/")
+    with _blob_store_repo(r):
+        for i, (local, remote) in enumerate((
+                ("blobs", root + "/blobs"),
+                ("blobs/ab", root + "/blobs/ab"),
+                ("x", root + "/m/../blobs"),
+                ("x", root + "/./blobs/"))):
+            rc, out = _blob_session(r, ["Directory " + local, remote, "noop"])
+            check("reserved for the blob store" in out,
+                  "Directory %s was not refused:\n%s" % (remote, out))
+            check("ok" not in out.split("\n"),
+                  "noop after Directory %s answered ok:\n%s" % (remote, out))
+            check(rc not in (0, None),
+                  "server exit status %r after Directory %s" % (rc, remote))
+
+        rc, out = _blob_session(r, ["Directory m/blobs", root + "/m/blobs", "noop"])
+        check(rc == 0 and "ok" in out.split("\n"),
+              "Directory m/blobs was refused (rc=%r):\n%s" % (rc, out))
+
+
+@test("an explicitly named root blob store directory or file is skipped with a warning")
+def t_blob_store_named_skipped(r):
+    import stat
+    root = r.repo.replace(os.sep, "/")
+    warning = "is reserved for the blob store)"
+    with _blob_store_repo(r):
+        wcroot = os.path.join(r.root, "wcroot")
+        os.makedirs(wcroot)
+        r.cvs(["checkout", "."], cwd=wcroot, expect_ok=False)
+
+        rc, out = r.cvs(["update", "-d", "blobs"], cwd=wcroot, expect_ok=False)
+        check("ignoring blobs (" in out and warning in out,
+              "update -d blobs gave no blob store warning:\n" + out)
+        check(not os.path.exists(os.path.join(wcroot, "blobs")),
+              "update -d blobs created blobs/ in the working copy:\n" + out)
+
+        mods = os.path.join(r.repo, "CVSROOT", "modules")
+        os.chmod(mods, stat.S_IREAD | stat.S_IWRITE)  # cvs init leaves it read-only
+        with open(mods, "a", newline="\n") as f:
+            f.write("bref blobs\nall .\n")
+        wc = os.path.join(r.root, "wcbref")
+        os.makedirs(wc)
+        rc, out = r.cvs(["checkout", "bref"], cwd=wc, expect_ok=False)
+        check(warning in out, "checkout of a module entry naming blobs gave no warning:\n" + out)
+        check(not _decoys_in(wc), "checkout bref fetched %s:\n%s" % (_decoys_in(wc), out))
+
+        _plant_blobs_wc_dir(wcroot)
+        rc, out = r.cvs(["update", "-d"], cwd=wcroot, expect_ok=False)
+        check_eq(rc, 0, "update -d with a blobs/ in the working copy (output:\n%s)" % out)
+        check("ignoring blobs (" in out and warning in out,
+              "update -d did not skip the working copy's blobs/:\n" + out)
+        check(not _decoys_in(wcroot), "update -d fetched %s:\n%s" % (_decoys_in(wcroot), out))
+
+        # File arguments: these reach their directory without the directory walk.
+        _plant_blobs_wc_dir(wcroot, "blobs/ab")
+        wcab = os.path.join(wcroot, "blobs", "ab")
+        store = os.path.join(r.repo, "blobs")
+
+        def store_listing():
+            return sorted(os.path.relpath(os.path.join(d, n), store)
+                          for d, ds, fs in os.walk(store) for n in ds + fs)
+
+        before = store_listing()
+        with open(os.path.join(wcab, "x.bin"), "wb") as f:
+            f.write(bytes(range(256)))
+        r.cvs(["add", "-kB", "blobs/ab/x.bin"], cwd=wcroot, expect_ok=False)
+        rc, out = r.cvs(["commit", "-m", "kb", "blobs/ab/x.bin"], cwd=wcroot, expect_ok=False)
+        check("ignoring blobs/ab (" in out and warning in out,
+              "commit blobs/ab/x.bin gave no blob store warning:\n" + out)
+        check(not os.path.exists(os.path.join(store, "ab", "x.bin,v")),
+              "commit blobs/ab/x.bin wrote x.bin,v into the blob store:\n" + out)
+        check_eq(store_listing(), before, "the blob store's contents after commit blobs/ab/x.bin")
+
+        rc, out = r.cvs(["update", "blobs/ab/decoy.txt"], cwd=wcroot, expect_ok=False)
+        check(warning in out, "update blobs/ab/decoy.txt gave no blob store warning:\n" + out)
+        check(not _decoys_in(wcab), "update blobs/ab/decoy.txt fetched the decoy:\n" + out)
+        rc, out = r.cvs(["update", "decoy.txt"], cwd=wcab, expect_ok=False)
+        check(warning in out, "update decoy.txt inside blobs/ab gave no blob store warning:\n" + out)
+        check(not _decoys_in(wcab), "update decoy.txt inside blobs/ab fetched the decoy:\n" + out)
+
+        wc = os.path.join(r.root, "wcall")
+        os.makedirs(wc)
+        rc, out = r.cvs(["checkout", "all/blobs/ab/decoy.txt"], cwd=wc, expect_ok=False)
+        check(warning in out, "checkout all/blobs/ab/decoy.txt gave no blob store warning:\n" + out)
+        check(not _decoys_in(wc), "checkout all/blobs/ab/decoy.txt fetched the decoy:\n" + out)
+        rc, out = r.cvs(["rlog", "all/blobs/ab/decoy.txt"], cwd=wc, expect_ok=False)
+        check(warning in out, "rlog all/blobs/ab/decoy.txt gave no blob store warning:\n" + out)
+        check("decoy.txt,v" not in out, "rlog all/blobs/ab/decoy.txt logged the decoy:\n" + out)
+
+        rc, out = _blob_session(r, ["Argument -d", "Argument blobs", "Directory .", root,
+                                   "update",
+                                   "Argument all/blobs/ab/decoy.txt", "Argument m/a.txt",
+                                   "co"])
+        lines = [l for l in out.split("\n") if l]
+        check_eq(rc, 0, "server exit status (output:\n%s)" % out)
+        check(any(l.startswith("E ") and "ignoring blobs (" in l and warning in l
+                  for l in lines),
+              "server update -d blobs gave no blob store warning:\n" + out)
+        check(any(l.startswith("E ") and "ignoring all/blobs/ab (" in l and warning in l
+                  for l in lines),
+              "server co all/blobs/ab/decoy.txt gave no blob store warning:\n" + out)
+        check("decoy" not in out, "the server reached the blob store:\n" + out)
+        check("m/a.txt" in out and "one" in lines,
+              "server co dropped m/a.txt next to the skipped argument:\n" + out)
+        check_eq(len([l for l in lines if l == "ok"]), 2, "one ok per command (update, co):\n" + out)
+        check(lines[-1:] == ["ok"], "the server session did not end in ok:\n" + out)
+
+
+@test("a client skips an existing root blob store directory in its working copy")
+def t_blob_store_wc_dir_client(r):
+    # The client must skip the directory itself: the server refuses a
+    # Directory request for the store with a fatal protocol error.  Same
+    # PserverShim session as t_unicode_text_line_endings.
+    with _blob_store_repo(r):
+        shim = PserverShim(r.repo.replace(os.sep, "/"))
+        wcroot = os.path.join(r.root, "pswc-blobs")
+        os.makedirs(wcroot)
+        try:
+            # -l: only the top directory, so this step never reaches the store.
+            rc, out = run(["-d", shim.root(), "checkout", "-l", "."], cwd=wcroot,
+                          expect_ok=False)
+            if not check_eq(rc, 0, "checkout -l . over :pserver: failed:\n" + out):
+                return
+            _plant_blobs_wc_dir(wcroot)
+            rc, out = run(["update", "-d"], cwd=wcroot, expect_ok=False)
+        finally:
+            # The root's password was saved; remove it.
+            run(["-d", shim.root(), "logout"], cwd=wcroot, expect_ok=False)
+            shim.close()
+        check_eq(rc, 0, "update -d over :pserver: exit status (output:\n%s)" % out)
+        check("ignoring blobs (" in out and "is reserved for the blob store)" in out,
+              "the client did not skip the working copy's blobs/:\n" + out)
+        check("protocol error" not in out,
+              "the client sent the blob store to the server:\n" + out)
+        check(not _decoys_in(wcroot), "update -d fetched %s:\n%s" % (_decoys_in(wcroot), out))
+        check(os.path.isfile(os.path.join(wcroot, "m", "blobs", "k.txt")),
+              "update -d over :pserver: did not bring in m/blobs/k.txt:\n" + out)
+
 
 @test("a -ku text file checks out with every line ending encoded")
 def t_unicode_text_line_endings(r):

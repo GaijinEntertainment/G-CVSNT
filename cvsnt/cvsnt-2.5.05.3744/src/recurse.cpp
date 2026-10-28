@@ -696,6 +696,21 @@ static int do_recursion (struct recursion_frame *frame, int top_level)
 		mapped_repository=xstrdup(repository);
 	}
 
+    if (mapped_repository
+	&& in_blob_store (current_parsed_root->directory, mapped_repository))
+    {
+	error (0, 0, "ignoring %s (%s is reserved for the blob store)",
+	       update_dir[0] ? update_dir : ".", fn_root (mapped_repository));
+	if (filelist)
+	    dellist (&filelist);
+	if (dirlist)
+	    dellist (&dirlist);
+	xfree (srepository);
+	xfree (mapped_repository);
+	repository = NULL;
+	return (0);
+    }
+
 	xfree(last_repository);
 	last_repository = xstrdup(mapped_repository);
 
@@ -1097,6 +1112,13 @@ static int do_dir_proc (Node *p, void *closure)
 	    newrepos = xstrdup (mapped_repository);
 		virtrepos = xstrdup (repository);
 	}
+    }
+
+    if (in_blob_store (current_parsed_root->directory, newrepos))
+    {
+	error (0, 0, "ignoring %s (%s is reserved for the blob store)",
+	       update_dir, fn_root (newrepos));
+	dir_return = R_SKIP_ALL;
     }
 
 	/* Check to see that the CVSADM directory, if it exists, seems to be

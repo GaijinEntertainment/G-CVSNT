@@ -374,6 +374,8 @@ static int find_dirs (const char *dir, List *list, int checkadm, List *entries, 
 			   &tmp_size,
 			   strlen (dir) + strlen (dp->d_name) + 10);
 	    sprintf (tmp, "%s/%s", dir, dp->d_name);
+	    if (in_blob_store (current_parsed_root->directory, tmp))
+		goto do_it_again;
 	    if (!isdir (tmp))
 		goto do_it_again;
 

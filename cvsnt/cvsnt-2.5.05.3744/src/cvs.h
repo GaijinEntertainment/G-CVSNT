@@ -486,6 +486,7 @@ void tm_to_rcsdiff(char *, const struct tm *);
 char *Name_Repository(const char *dir, const char *update_dir);
 const char *Short_Repository(const char *repository);
 void Sanitize_Repository_Name(char **repository);
+int in_blob_store (const char *root, const char *path);
 
 char *Name_Root (const char *dir, const char *update_dir);
 void free_cvsroot_t(cvsroot *root_in);

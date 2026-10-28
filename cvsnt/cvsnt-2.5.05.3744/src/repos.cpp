@@ -8,6 +8,7 @@
 
 #include "cvs.h"
 #include "getline.h"
+#include "../ca_blobs_fs/src/details.h"
 
 /* Determine the name of the RCS repository for directory DIR in the
    current working directory, or for the current working directory
@@ -192,6 +193,40 @@ const char *Short_Repository (const char *repository)
     }
     else
 	return (repository);
+}
+
+/* Nonzero if PATH, an absolute path, is ROOT's blob store or lies below it.  */
+int in_blob_store (const char *root, const char *path)
+{
+    const char *name = caddressed_fs::blobs_subfolder ();
+    size_t root_len = strlen (root);
+    size_t name_len = strlen (name);
+    size_t n;
+    int depth = 0, found = 0;
+    const char *p;
+
+    while (root_len > 0 && ISDIRSEP (root[root_len - 1]))
+	--root_len;
+    if (fnncmp (path, root, root_len) != 0 || !ISDIRSEP (path[root_len]))
+	return 0;
+    for (p = path + root_len; *p; p += n)
+    {
+	while (ISDIRSEP (*p))
+	    ++p;
+	for (n = 0; p[n] != '\0' && !ISDIRSEP (p[n]); n++)
+	    ;
+	if (n == 0 || (n == 1 && p[0] == '.'))
+	    continue;
+	if (n == 2 && p[0] == '.' && p[1] == '.')
+	{
+	    if (depth > 0 && --depth == 0)
+		found = 0;
+	    continue;
+	}
+	if (depth++ == 0)
+	    found = (n == name_len && fnncmp (p, name, n) == 0);
+    }
+    return found;
 }
 
 /* Sanitize the repository name (in place) by removing trailing
