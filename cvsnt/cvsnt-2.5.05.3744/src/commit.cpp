@@ -169,6 +169,17 @@ struct find_data {
 };
 
 
+/* Leave NAME, an excluded file or directory, out of the commit, telling the
+   user when REPORT is set.  */
+static int excl_skip (const char *name, const char *fullname, int report)
+{
+    if (!excl_name_here (name))
+	return 0;
+    if (report)
+	error (0, 0, "%s is excluded by %s; not committed", fn_root (fullname), CVSDOTEXCLUDE);
+    return 1;
+}
+
 static Dtype find_dirent_proc (void *callerdat, char *dir, char *repository, char *update_dir, List *entries, const char *virtual_repository, Dtype hint)
 {
     struct find_data *find_data = (struct find_data *)callerdat;
@@ -178,6 +189,9 @@ static Dtype find_dirent_proc (void *callerdat, char *dir, char *repository, cha
 		return hint;
 
     TRACE(3,"find_dirent_proc");
+
+    if (excl_skip (dir, update_dir, 1))
+	return R_SKIP_ALL;
 
     /* initialize the ignore list for this directory */
     find_data->ignlist = getlist ();
@@ -310,6 +324,12 @@ static int find_fileproc(void *callerdat, struct file_info *finfo)
 		exactly which ones).  */
 		freevers_ts (&vers);
 		return 0;
+    }
+
+    if (excl_skip (finfo->file, finfo->fullname, 1))
+    {
+	freevers_ts (&vers);
+	return 0;
     }
 
     node = getnode ();
@@ -872,6 +892,13 @@ static int check_fileproc (void *callerdat, struct file_info *finfo)
     if (force_ci && status == T_UPTODATE)
 		status = T_MODIFIED;
 
+    if (excl_skip (finfo->file, finfo->fullname,
+		   status == T_MODIFIED || status == T_ADDED || status == T_REMOVED))
+    {
+	freevers_ts (&vers);
+	return 0;
+    }
+
 	/* We're never going to get to the next stage, so update the entries file here */
 	if(status == T_UPTODATE && vers->ts_rcs && vers->ts_user && 
 		vers->ts_rcs[0] && strcmp(vers->ts_user,vers->ts_rcs))
@@ -1168,6 +1195,9 @@ check_direntproc (void *callerdat, char *dir, char *repos, char *update_dir, Lis
 
 	if(hint!=R_PROCESS)
 		return hint;
+
+    if (excl_skip (dir, update_dir, 1))
+	return R_SKIP_ALL;
 
     if (!quiet)
 	error (0, 0, "Examining %s", update_dir);
