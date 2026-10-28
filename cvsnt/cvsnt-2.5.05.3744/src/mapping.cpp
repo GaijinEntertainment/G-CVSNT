@@ -1502,7 +1502,7 @@ int get_directory_finfo(const char *repository, const char *dir, const char *upd
 	finfo->update_dir=(char*)update_dir;
 	finfo->repository=(char*)repository;
 	finfo->entries=getlist();
-	Fast_Register(finfo->entries,RCSREPOVERSION,current_directory->directory_version,"","",current_directory->repository_map_tag,current_directory->repository_map_date,"","","",0,"","","", NULL);
+	Fast_Register(finfo->entries,RCSREPOVERSION,current_directory->directory_version,"","",current_directory->repository_map_tag,current_directory->repository_map_date,"","","",0,"", NULL);
 
 	return 0;
 }

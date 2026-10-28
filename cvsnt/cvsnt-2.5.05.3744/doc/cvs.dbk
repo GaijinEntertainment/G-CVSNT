@@ -768,8 +768,7 @@ export CVSROOT
         in the repository. <command>CVSUMASK</command> does not affect the
         file permissions in the working directory; such files have the
         permissions which are typical for newly created files, except that
-        sometimes cvsnt creates them read-only (see the sections on watches,
-        <xref linkend="Setting-a-watch" />; -r, <xref
+        sometimes cvsnt creates them read-only (see -r, <xref
         linkend="Global-options" />; or <command>CVSREAD</command>, <xref
         linkend="Environment-variables" />).</para>
 
@@ -850,8 +849,7 @@ export CVSROOT
         silently ignore additional files.</para>
 
         <para>The format of the fileattr.xml file is a series of XML entries
-        describing the edit state of each file, and any access permissions
-        that are current.</para>
+        describing the access permissions that are current.</para>
       </sect2>
 
       <sect2 id="Locks">
@@ -1285,11 +1283,9 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
             <para>The format of the lines is:</para>
 
             <para><symbol> /name/saved
-            mergepoint/filler1/rcstime/edit_revision/edit_tag/edit_bugid/
+            mergepoint/filler1/rcstime/filler2/filler3/bugid/md5/
             </symbol></para>
 
-            <para>If there are any extra fields after rcstime these should be
-            ignored.</para>
 
             <para>The second field is the saved tag from an update -j, which
             is recorded the next time the file is committed to store the
@@ -1301,9 +1297,9 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
             expressed as a time_t. Do not assume that this value will fit into
             a 32bit variable, as this will cause problems in 2038.</para>
 
-            <para>The fifth, sixth and seventh fields define the revision,
-            tag/branch and bug identifier of the last <command>cvs
-            edit</command> that was invoked by the client.</para>
+            <para>The fifth and sixth fields are unused. The seventh field
+            is the bug identifier given to <command>cvs add -b</command>,
+            which the next commit of the file uses.</para>
           </listitem>
         </varlistentry>
 
@@ -1374,60 +1370,6 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
             numeric tag.</para>
 
             <para><indexterm>
-                <primary>Notify file, in CVS directory</primary>
-              </indexterm><indexterm>
-                <primary>CVS/Notify file</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Notify</term>
-
-          <listitem>
-            <para>This file stores notifications (for example, for
-            <command>edit</command> or <command>unedit</command>) which have
-            not yet been sent to the server. Its format is not yet documented
-            here.</para>
-
-            <para><indexterm>
-                <primary>Notify.tmp file, in CVS directory</primary>
-              </indexterm><indexterm>
-                <primary>CVS/Notify.tmp file</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Notify.tmp</term>
-
-          <listitem>
-            <para>This file is to <command>Notify</command> as
-            <command>Entries.Backup</command> is to
-            <command>Entries</command>. That is, to write
-            <command>Notify</command>, first write the new contents to
-            <command>Notify.tmp</command> and then (atomically where
-            possible), rename it to <command>Notify</command>.</para>
-
-            <para><indexterm>
-                <primary>Base directory, in CVS directory</primary>
-              </indexterm><indexterm>
-                <primary>CVS/Base directory</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Base</term>
-
-          <listitem>
-            <para>If watches are in use, then an <command>edit</command>
-            command stores the original copy of the file in the
-            <command>Base</command> directory. This allows the
-            <command>unedit</command> command to operate even if it is unable
-            to communicate with the server.</para>
-
-            <para><indexterm>
                 <primary>Template file, in CVS directory</primary>
               </indexterm><indexterm>
                 <primary>CVS/Template file</primary>
@@ -1446,6 +1388,11 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
           </listitem>
         </varlistentry>
       </variablelist>
+
+      <para>Older versions of cvsnt also stored the files
+      <command>Notify</command> and <command>Notify.tmp</command> and the
+      directory <command>Base</command> here. Current cvsnt does not use
+      them.</para>
     </sect1>
 
     <sect1 id="Intro-administrative-files">
@@ -4689,12 +4636,7 @@ $ mv <varname>old-dir</varname> <varname>new-dir</varname>
       (<xref linkend="loginfo" />). To log commits, checkouts, exports, and
       tags, respectively, you can also use the <command>-i</command>,
       <command>-o</command>, <command>-e</command>, and <command>-t</command>
-      options in the modules file. For a more flexible way of giving
-      notifications to various users, which requires less in the way of
-      keeping centralized scripts up to date, use the <command>cvs watch
-      add</command> command (<xref linkend="Getting-Notified" />); this
-      command is useful even if you are not using <command>cvs watch
-      on</command>.</para>
+      options in the modules file.</para>
 
       <sect2 id="taginfo">
         <title>The taginfo file</title>
@@ -4998,12 +4940,7 @@ $ cvs commit -fm "make it binary" kotest
     to edit each file at a time. This is the only solution with some version
     control systems, including rcs and sccs. Currently the usual way to get
     reserved checkouts with cvsnt is the <command>cvs admin -l</command>
-    command (<xref linkend="admin-options" />). This is not as nicely
-    integrated into cvsnt as the watch features, described below, but it seems
-    that most people with a need for reserved checkouts find it adequate. It
-    also may be possible to use the watches features described below, together
-    with suitable procedures (not enforced by software), to avoid having two
-    people edit at the same time.</para>
+    command (<xref linkend="admin-options" />).</para>
 
     <para>The default model with cvsnt is known as <firstterm>unreserved
     checkouts</firstterm>. In this model, developers can edit their own
@@ -5014,9 +4951,9 @@ $ cvs commit -fm "make it binary" kotest
     working copy up to date with the repository revision. This process is
     almost automatic.</para>
 
-    <para>cvsnt also supports mechanisms which facilitate various kinds of
-    communication, without actually enforcing rules like reserved checkouts
-    do.</para>
+    <para>The commands <command>edit</command>, <command>unedit</command>,
+    <command>watch</command>, <command>editors</command> and
+    <command>watchers</command> are not available.</para>
 
     <para>The rest of this chapter describes how these various models work,
     and some of the issues involved in choosing between them.</para>
@@ -5494,386 +5431,6 @@ cvs ci a/two.c b/three.c
       updated.</para>
     </sect1>
 
-    <sect1 id="Watches">
-      <title>Mechanisms to track who is editing files</title>
-
-      <para><indexterm>
-          <primary>Watches</primary>
-        </indexterm> For many groups, use of cvsnt in its default mode is
-      perfectly satisfactory. Users may sometimes go to check in a
-      modification only to find that another modification has intervened, but
-      they deal with it and proceed with their check in. Other groups prefer
-      to be able to know who is editing what files, so that if two people try
-      to edit the same file they can choose to talk about who is doing what
-      when rather than be surprised at check in time. The features in this
-      section allow such coordination, while retaining the ability of two
-      developers to edit the same file at the same time.</para>
-
-      <para>For maximum benefit developers should use <command>cvs
-      edit</command> (not <command>chmod</command>) to make files read-write
-      to edit them, and <command>cvs release</command> (not
-      <command>rm</command>) to discard a working directory which is no longer
-      in use, but cvsnt is not able to enforce this behavior.</para>
-
-      <sect2 id="Setting-a-watch">
-        <title>Setting up cooperative edits</title>
-
-        <para><indexterm>
-            <primary>watch on</primary>
-          </indexterm><function>cvs watch ro</function>
-        [<command>-lR</command>] files ... <indexterm role="fn">
-            <primary>cvs watch ro</primary>
-          </indexterm><indexterm role="fn">
-            <primary>cvs watch on</primary>
-          </indexterm> <indexterm>
-            <primary>Read-only files, and watches</primary>
-          </indexterm>Specify that developers should run <command>cvs
-        edit</command> before editing <varname>files</varname>. cvsnt will
-        create working copies of <varname>files</varname> read-only, to remind
-        developers to run the <command>cvs edit</command> command before
-        working on them.</para>
-
-        <para>If <varname>files</varname> includes the name of a directory,
-        cvsnt sets up cooperative edits for all files added to the
-        corresponding repository directory, and sets a default for files added
-        in the future; this allows the user to set notification policies on a
-        per-directory basis. The contents of the directory are processed
-        recursively, unless the <command>-l</command> option is given. The
-        <command>-R</command> option can be used to force recursion if the
-        <command>-l</command> option is set in <command>~/.cvsrc</command>
-        (<xref linkend="cvsrc" />).</para>
-
-        <para>If <varname>files</varname> is omitted, it defaults to the
-        current directory.</para>
-
-        <para><indexterm>
-            <primary>watch rw</primary>
-          </indexterm><indexterm>
-            <primary>watch off</primary>
-          </indexterm> <function>cvs watch rw</function>
-        [<command>-lR</command>] files ... <indexterm role="fn">
-            <primary>cvs watch off</primary>
-          </indexterm> Do not create <varname>files</varname> read-only on
-        checkout; thus, developers will not be reminded to use <command>cvs
-        edit</command> and <command>cvs unedit</command>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        <command>cvs watch ro</command>.</para>
-      </sect2>
-
-      <sect2 id="Getting-Notified">
-        <title>Telling CVS to notify you when someone modifies a file</title>
-
-        <para>You can tell cvsnt that you want to receive notifications about
-        various actions taken on a file. You can do this without using
-        <command>cvs watch ro</command> for the file, however generally you
-        will want to use <command>cvs watch ro</command>, so that developers
-        are reminded to use the <command>cvs edit</command> command.</para>
-
-        <para><indexterm>
-            <primary>watch add</primary>
-          </indexterm><function>cvs watch add</function>
-        [<command>-a</command> action] [<command>-lR</command>] files ...
-        <indexterm role="fn">
-            <primary>cvs watch add</primary>
-          </indexterm> Add the current user to the list of people to receive
-        notification of work done on <varname>files</varname>.</para>
-
-        <para>The <command>-a</command> option specifies what kinds of events
-        cvsnt should notify the user about. <varname>action</varname> is one
-        of the following:</para>
-
-        <variablelist>
-          <varlistentry>
-            <term>edit</term>
-
-            <listitem>
-              <para>Another user has applied the <command>cvs edit</command>
-              command (described below) to a file.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>unedit</term>
-
-            <listitem>
-              <para>Another user has applied the <command>cvs unedit</command>
-              command (described below) or the <command>cvs release</command>
-              command to a file, or has deleted the file and allowed
-              <command>cvs update</command> to recreate it.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>commit</term>
-
-            <listitem>
-              <para>Another user has committed changes to a file.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>all</term>
-
-            <listitem>
-              <para>All of the above.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>none</term>
-
-            <listitem>
-              <para>None of the above. (This is useful with <command>cvs
-              edit</command>, described below.)</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-
-        <para>The <command>-a</command> option may appear more than once, or
-        not at all. If omitted, the action defaults to
-        <command>all</command>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para><indexterm>
-            <primary>watch remove</primary>
-          </indexterm> <function>cvs watch remove</function>
-        [<command>-a</command> action] [<command>-lR</command>] files ...
-        <indexterm role="fn">
-            <primary>cvs watch remove</primary>
-          </indexterm> Remove a notification request established using
-        <command>cvs watch add</command>; the arguments are the same. If the
-        <command>-a</command> option is present, only watches for the
-        specified actions are removed.</para>
-
-        <para><indexterm>
-            <primary>notify (admin file)</primary>
-          </indexterm>When the conditions exist for notification, cvsnt calls
-        the <command>notify</command> administrative file. Edit
-        <command>notify</command> as one edits the other administrative files
-        (<xref linkend="Intro-administrative-files" />). This file follows the
-        usual conventions for administrative files (<xref
-        linkend="syntax" />), where each line is a regular expression followed
-        by a command to execute. The command should contain a single
-        occurrence of <command>%s</command> which will be replaced by the user
-        to notify; the rest of the information regarding the notification will
-        be supplied to the command on standard input. A common thing to put in
-        the <command>notify</command> file is the single line:</para>
-
-        <para><screen>
-ALL mail %s -s "CVS notification for bug %b"
-</screen></para>
-
-        <para>This causes users to be notified by electronic mail (assuming
-        the command 'mail' exists).</para>
-
-        <para><indexterm>
-            <primary>users (admin file)</primary>
-          </indexterm>Note that if you set this up in the straightforward way,
-        users receive notifications on the server machine. One could of course
-        write a <command>notify</command> script which directed notifications
-        elsewhere, but to make this easy, cvsnt allows you to associate a
-        notification address for each user. To do so create a file
-        <command>users</command> in <command>CVSROOT</command> with a line for
-        each user in the format
-        <varname>user</varname>:<varname>value</varname>. Then instead of
-        passing the name of the user to be notified to
-        <command>notify</command>, cvsnt will pass the
-        <varname>value</varname> (normally an email address on some other
-        machine).</para>
-
-        <para>CVSNT does not notify you for your own changes. Currently this
-        check is done based on whether the user name of the person taking the
-        action which triggers notification matches the user name of the person
-        getting notification. In fact, in general, the watches features only
-        track one edit by each user. It probably would be more useful if
-        watches tracked each working directory separately, so this behavior
-        might be worth changing.</para>
-
-        <para>You can also pass information about the notification to the
-        script, using the following substitution variables:</para>
-
-        <para><command>%s</command> user being notified, or email (see
-        above).</para>
-
-        <para><command>%b</command> bug being edited.</para>
-
-        <para><command>%m</command> reason for edit as supplied by
-        user.</para>
-
-        <para><command>%d</command> date and time of edit.</para>
-
-        <para><command>%u</command> username of user performing the unedit
-        (may not be the same as %s).</para>
-
-        <para><command>%t</command> tag or branch being edited.</para>
-      </sect2>
-
-      <sect2 id="Editing-files">
-        <title>How to edit a file which is being watched</title>
-
-        <para><indexterm>
-            <primary>Checkout, as term for getting ready to edit</primary>
-          </indexterm>Since a file which is being watched is checked out
-        read-only, you cannot simply edit it. To make it read-write, and
-        inform others that you are planning to edit it, use the <command>cvs
-        edit</command> command. Some systems call this a
-        <firstterm>checkout</firstterm>, but cvsnt uses that term for
-        obtaining a copy of the sources (<xref
-        linkend="Getting-the-source" />), an operation which those systems
-        call a <firstterm>get</firstterm> or a
-        <firstterm>fetch</firstterm>.</para>
-
-        <para><indexterm>
-            <primary>edit</primary>
-          </indexterm><function>cvs edit</function> [options] files ...
-        <indexterm role="fn">
-            <primary>cvs edit</primary>
-          </indexterm> Prepare to edit the working files
-        <varname>files</varname>. cvsnt makes the <varname>files</varname>
-        read-write, and notifies users who have requested
-        <command>edit</command> notification for any of
-        <varname>files</varname>.</para>
-
-        <para>The <command>cvs edit</command> command accepts the same
-        <varname>options</varname> as the <command>cvs watch add</command>
-        command, and establishes a temporary watch for the user on
-        <varname>files</varname>; cvsnt will remove the watch when
-        <varname>files</varname> are <command>unedit</command>ed or
-        <command>commit</command>ted. If the user does not wish to receive
-        notifications, she should specify <command>-a none</command>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para>If the <command>-c</command> option is given, then the file is
-        checked for existing editors before the edit can proceed. In this way
-        a reasonable facsimile of 'reserved edits' can be achieved (note
-        however this is a suboptimal way to use cvsnt).</para>
-
-        <para>If the <command>-x</command> is given, then the edit is marked
-        as exclusive on the server, and other users will be prevented from
-        creating further edits. This option will also prevent commits to the
-        file by their users. (Implies -c).</para>
-
-        <para>The <command>-z</command> option stores the edited base revision
-        in a compressed form. This is useful if you are using an IDE which
-        tends to pick up the base revisions while searching files. Its also
-        saves quite a bit of disk space on large edits.</para>
-
-        <para>Normally edits apply only to the branch that you are currently
-        using. The <command>-w</command> causes the edit to apply to all
-        branches within the file (which is the behaviour for pre-2.0.55
-        CVSNT).</para>
-
-        <para>The <command>-b</command> marks this edit as belonging to a
-        specific bug. This information is stored and also sent to the
-        <command>CVSROOT/notify</command> script.</para>
-
-        <para>The <command>-m</command> sets a reason message for this edit.
-        This can be processed by the <command>CVSROOT/notify</command>
-        script.</para>
-
-        <para>Normally when you are done with a set of changes, you use the
-        <command>cvs commit</command> command, which checks in your changes
-        and returns the watched files to their usual read-only state. But if
-        you instead decide to abandon your changes, or not to make any
-        changes, you can use the <command>cvs unedit</command> command.</para>
-
-        <para><indexterm>
-            <primary>unedit</primary>
-          </indexterm> <indexterm>
-            <primary>Abandoning work</primary>
-          </indexterm> <indexterm>
-            <primary>Reverting to repository version</primary>
-          </indexterm> <indexterm role="fn">
-            <primary>cvs unedit</primary>
-          </indexterm> <function>cvs unedit</function> [-lR] [-r] [-u user]
-        [-w] [-b bug] [-m message] [files...]</para>
-
-        <para>Abandon work on the working files <varname>files</varname>, and
-        revert them to the repository versions on which they are based. CVSNT
-        by default also makes the files read only. Use the -w option to
-        override this.. CVSNT then notifies users who have requested
-        <command>unedit</command> notification for any of
-        <varname>files</varname>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para>If watches are not in use, the <command>unedit</command> command
-        probably does not work, and the way to revert to the repository
-        version is to remove the file and then use <command>cvs
-        update</command> to get a new copy. The meaning is not precisely the
-        same; removing and updating may also bring in some changes which have
-        been made in the repository since the last time you updated.</para>
-
-        <para>The reason message passed to this function is passed directly to
-        the <command>CVSROOT/Notify</command> script. If the
-        <command>-b</command> option is used then only those files edited
-        under a specific bug are unedited.</para>
-
-        <para>Repository administrators can use the 'unedit others' option
-        <command>-u</command>. Only use this as a last resort as it only does
-        the server side of the unedit.</para>
-      </sect2>
-
-      <sect2 id="Watch-information">
-        <title>Information about who is watching and editing</title>
-
-        <para><indexterm>
-            <primary>watchers</primary>
-          </indexterm><function>cvs watchers</function>
-        [<command>-lR</command>] files ... <indexterm role="fn">
-            <primary>cvs watchers</primary>
-          </indexterm> List the users currently watching changes to
-        <varname>files</varname>. The report includes the files being watched,
-        and the mail address of each watcher.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para><indexterm>
-            <primary>editors</primary>
-          </indexterm> <function>cvs editors</function>
-        [<command>-lR</command>] [<command>-a</command>] files ... <indexterm
-            role="fn">
-            <primary>cvs editors</primary>
-          </indexterm> List the users currently working on
-        <varname>files</varname>. The report includes the mail address of each
-        user, the time when the user began working with the file, and the host
-        and path of the working directory containing the file.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-      </sect2>
-
-      <sect2 id="Watches-Compatibility">
-        <title>Using watches with old versions of CVS</title>
-
-        <para><indexterm>
-            <primary>CVS 1.6, and watches</primary>
-          </indexterm>If you use the watch features on a repository, it
-        creates <command>CVS</command> directories in the repository and
-        stores the information about watches in that directory. If you attempt
-        to use cvsnt 1.6 or earlier with the repository, you get an error
-        message such as the following (all on one line):</para>
-
-        <para><screen>cvs update: cannot open CVS/Entries for reading:
-No such file or directory
-</screen></para>
-
-        <para>and your operation will likely be aborted. To use the watch
-        features, you must upgrade all copies of cvsnt which use that
-        repository in local or server mode. If you cannot upgrade, use the
-        <command>watch off</command> and <command>watch remove</command>
-        commands to remove all watches, and that will restore the repository
-        to a state which cvsnt 1.6 can cope with.</para>
-      </sect2>
-    </sect1>
-
     <sect1 id="Choosing-a-model">
       <title>Choosing between reserved or unreserved checkouts</title>
 
@@ -5914,16 +5471,6 @@ No such file or directory
       data format, then resolving conflicts is going to be unpleasant enough
       that you generally will be better off to simply avoid the conflicts
       instead, by using reserved checkouts.</para>
-
-      <para>The watches features described above in <xref linkend="Watches" />
-      can be considered to be an intermediate model between reserved checkouts
-      and unreserved checkouts. When you go to edit a file, it is possible to
-      find out who else is editing it. And rather than having the system
-      simply forbid both people editing the file, it can tell you what the
-      situation is and let you figure out whether it is a problem in that
-      particular case or not. Therefore, for some groups it can be considered
-      the best of both the reserved checkout and unreserved checkout
-      worlds.</para>
     </sect1>
   </chapter>
 
@@ -6441,22 +5988,6 @@ $ cvs commit -fm "Change substitution mode"
 
       <variablelist>
         <varlistentry>
-          <term>c</term>
-
-          <listitem>
-            <para>Enforce cooperative edits (edit -c) for the file.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>x</term>
-
-          <listitem>
-            <para>Enforce reserved edit (edit -x) for the file.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
           <term>k</term>
 
           <listitem>
@@ -6567,6 +6098,10 @@ $ cvs commit -fm "Change substitution mode"
           </listitem>
         </varlistentry>
       </variablelist>
+
+      <para>Older versions had the flags <command>c</command> and
+      <command>x</command>. These flags have no effect. RCS files that carry
+      them still parse.</para>
     </sect1>
 
     <sect1 id="Log-keyword">
@@ -7291,8 +6826,7 @@ cvs -z6
             <para>Make new working files read-only. Same effect as if the
             <command>$CVSREAD</command> environment variable is set (<xref
             linkend="Environment-variables" />). The default is to make
-            working files writable, unless watches are on (<xref
-            linkend="Watches" />).</para>
+            working files writable.</para>
           </listitem>
         </varlistentry>
 
@@ -7549,13 +7083,10 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
             <para>Available with the following commands:
             <command>annotate</command>, <command>checkout</command>,
             <command>commit</command>, <command>diff</command>,
-            <command>edit</command>, <command>editors</command>,
             <command>export</command>, <command>log</command>,
             <command>rdiff</command>, <command>remove</command>,
             <command>rtag</command>, <command>status</command>,
-            <command>tag</command>, <command>unedit</command>,
-            <command>update</command>, <command>watch</command>, and
-            <command>watchers</command>.</para>
+            <command>tag</command>, and <command>update</command>.</para>
 
             <para><indexterm>
                 <primary>Editor, avoiding invocation of</primary>
@@ -7627,12 +7158,10 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
             <para>Available with the following commands:
             <command>annotate</command>, <command>checkout</command>,
             <command>commit</command>, <command>diff</command>,
-            <command>edit</command>, <command>editors</command>,
             <command>export</command>, <command>rdiff</command>,
             <command>remove</command>, <command>rtag</command>,
-            <command>status</command>, <command>tag</command>,
-            <command>unedit</command>, <command>update</command>,
-            <command>watch</command>, and <command>watchers</command>.</para>
+            <command>status</command>, <command>tag</command>, and
+            <command>update</command>.</para>
           </listitem>
         </varlistentry>
 
@@ -7825,9 +7354,6 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
               <varname>rev</varname> is omitted, lock the latest revision on
               the default branch. There can be no space between
               <command>-l</command> and its argument.</para>
-
-              <para>This command is depreciated in favour of the 'edit -c'
-              command, which gives pseudo reserved checkouts.</para>
 
               <para><indexterm>
                   <primary>Changing a log message</primary>
@@ -8302,10 +7828,9 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
 
       <para>The files created by <command>checkout</command> are created
       read-write, unless the <command>-r</command> option to cvsnt (<xref
-      linkend="Global-options" />) is specified, the
+      linkend="Global-options" />) is specified, or the
       <command>CVSREAD</command> environment variable is specified (<xref
-      linkend="Environment-variables" />), or a watch is in effect for that
-      file (<xref linkend="Watches" />).</para>
+      linkend="Environment-variables" />).</para>
 
       <para>Note that running <command>checkout</command> on a directory that
       was already built by a prior <command>checkout</command> is also
@@ -8792,20 +8317,11 @@ $ cvs commit -r 1.8 <varname>file</varname>
           </varlistentry>
 
           <varlistentry>
-            <term>-c</term>
-
-            <listitem>
-              <para>Check for a valid edit on the file before committing. See
-              'cvs edit'.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term>-b <varname>bugid</varname></term>
 
             <listitem>
-              <para>Only commit files that have been edited and marked with
-              bug <varname>bugid</varname>.</para>
+              <para>Only commit files that are marked with bug
+              <varname>bugid</varname>.</para>
             </listitem>
           </varlistentry>
 
@@ -8815,15 +8331,6 @@ $ cvs commit -r 1.8 <varname>file</varname>
             <listitem>
               <para>Mark committed files as belonging to bug
               <varname>bugid</varname>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>-e</term>
-
-            <listitem>
-              <para>Keep files edited after commit - supresses the automatic
-              unedit that normally follows a commit.</para>
             </listitem>
           </varlistentry>
 
@@ -9113,263 +8620,6 @@ $ cvs diff -c -r RELEASE_1_0 -r RELEASE_1_1 &gt; diffs
         <para><screen>
 $ cvs diff -u | less
 </screen></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="edit">
-      <title>edit--Mark files for editing</title>
-
-      <indexterm>
-        <primary>edit</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, sandbox.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: Current directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>This is command is used to mark files for editing in a
-      reserved or semi-reserved scenario. When used with bug identifiers it
-      also marks which users are currently working on which bugs, and which
-      files are affected by those bugs.</para>
-
-      <para>cvs is primarily designed as a cooperative system, as experience
-      has shown that this is the most productive way for teams of developers
-      to work. The reserved models implemented by this command do not replace
-      proper configuration management processes - the correct model to use
-      should be decided after due consideration of the advantages and
-      disadvantages of each. See also <xref linkend="Watches" /></para>
-
-      <para>The default working model is a cooperative multiple-editors model.
-      Any number of people may be editing a file at any time and anyone may
-      commit changes. This is very similar to the standard cooperative model
-      except that the server keeps track of the editors.</para>
-
-      <para>Using the <command>edit -c</command> option creates a
-      semi-reserved or cooperative reserved system. The edit command checks
-      that there are no editors before editing the file, however its
-      cooperative nature does not prevent other users editing if they wish
-      to.</para>
-
-      <para>For a stricter model the <command>-kc</command> and
-      <command>-kx</command> expansion options create a mandatory reserved
-      system on individual files. Users are prevented from editing or
-      committing a file unless they are the only editor of that file.</para>
-
-      <sect2>
-        <title>edit options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-A</term>
-
-              <listitem>
-                <para>Modify filesystem ACL on edited file (Win32 only,
-                Experimental).</para>
-
-                <para>In shared sandbox scenarios this command is designed to
-                stop other users from being able to modify the edited file -
-                it create an access control list that disallows write access
-                to anyone but the editor.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-a</term>
-
-              <listitem>
-                <para>Specify actions for the temporary watch that is created
-                during an edit. This may be one of
-                edit,unedit,commit,all,none.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-b bugid</term>
-
-              <listitem>
-                <para>Mark the edited file with a bug identifier. This marks
-                the editor as not only using the file, but also working on a
-                particular bug on that file. Specify multiple -b options for
-                multiple bugs.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-c</term>
-
-              <listitem>
-                <para>Check that working files are unedited before appying the
-                edit.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-f</term>
-
-              <listitem>
-                <para>Edit even if working files are already edited by someone
-                else (default).</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Do not recurse into subdirectories.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-m message</term>
-
-              <listitem>
-                <para>Specify a reason for this edit. This message is made
-                available as an option to the trigger libraries and notify
-                script.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively (default).</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-w</term>
-
-              <listitem>
-                <para>Edit the whole file, not just the current branch.
-                Normally edits only apply to the branch that is current at the
-                time of the edit. If you wish to stop anyone changing other
-                branches then this option allow this.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-x</term>
-
-              <listitem>
-                <para>Exclusive edit. Attempt to stop other users editing the
-                file even if they do not use the <command>-c</command>
-                option.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-z</term>
-
-              <listitem>
-                <para>Edit creates copies of the original files in the
-                <filename>CVS/Base</filename> directory. With this option
-                those copies are gzip compressed, which saves disk space and
-                stops the copies being found by text searches of the
-                sandbox.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="editors">
-      <title>editors--Find out who is editing a file</title>
-
-      <indexterm>
-        <primary>editors</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, sandbox.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: nothing.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>This command queries the server for everyone editing a
-      file or group of files. It can also optionally show which bugs are being
-      worked on.</para>
-
-      <para>The server only knows the last reported state of each client. In a
-      controlled environment this is very likely to be accurate, however it is
-      possible to leave edits on the server and not on the client (for example
-      my deleting the sandbox without using commit/unedit).</para>
-
-      <para>The normal editors output is as follows:</para>
-
-      <para><screen>components.dir/TEST.xml   tmh   Fri Dec  3 16:15:00 2004 GMT   tucker   c:\temp\repos\components.dir
-rep/version_no.h          tmh   Thu Nov  4 17:37:43 2004 GMT   tucker   D:\t\test\rep</screen></para>
-
-      <para>If you list edits for all branches and bug identifiers you get an
-      extra columns. The full output is as follows:</para>
-
-      <para><screen>components.dir/TEST.xml   tmh   Fri Dec  3 16:15:00 2004 GMT   tucker   c:\temp\repos\components.dir   3465   HEAD
-rep/version_no.h          tmh   Thu Nov  4 17:37:43 2004 GMT   tucker   D:\t\test\rep                         HEAD</screen></para>
-
-      <para>The first output is designed to be compatible with older cvs
-      versions that did not support the full cvsnt feature set.</para>
-
-      <sect2>
-        <title>editors options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-a</term>
-
-              <listitem>
-                <para>Show all branches, not just the current branch.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-c</term>
-
-              <listitem>
-                <para>Check whether edit on the selected files would actually
-                succeed. This can be used by frontends to verify an edit
-                without actually performing it.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process this directory only</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively (default).</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-v</term>
-
-              <listitem>
-                <para>Show active bugs within the output.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
       </sect2>
     </sect1>
 
@@ -11799,103 +11049,6 @@ File: cvs.dbk           Status: Up-to-date</screen></para>
       </sect2>
     </sect1>
 
-    <sect1 id="unedit">
-      <title>unedit--Mark edit as finished without committing</title>
-
-      <indexterm>
-        <primary>unedit</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>Discard any changes made and finish editing a file
-      without committing. It may also be necessary to run an
-      <command>update</command> command to retrieve the latest version of the
-      file.</para>
-
-      <para>Unediting also sends out a notification to other users if the
-      server is configured to do this. It will mark the working directory file
-      as read only. See also <xref linkend="Watches" /></para>
-
-      <sect2>
-        <title>unedit options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-b bugid</term>
-
-              <listitem>
-                <para>Unedit only files marked as edited with
-                <command>bugid</command>.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process local directory only.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-m message</term>
-
-              <listitem>
-                <para>Specify the reason for this unedit. The message is sent
-                to the <command>trigger</command> and
-                <command>notify</command> programs on the server.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-r</term>
-
-              <listitem>
-                <para>Revert file only. Do not perform unedit. This merely
-                copies the unedited copy back onto the working copy.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-u username</term>
-
-              <listitem>
-                <para>(repository administrators only) perform an unedit for
-                another user.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-w</term>
-
-              <listitem>
-                <para>Leave working directory file writable after the
-                unedit.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
     <sect1 id="update">
       <title>update--Bring work tree in sync with repository</title>
 
@@ -12082,17 +11235,6 @@ File: cvs.dbk           Status: Up-to-date</screen></para>
               the repository (the modified file is saved in
               <command>.#<varname>file</varname>.<varname>revision</varname></command>,
               however).</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>-c</term>
-
-            <listitem>
-              <para>If the file is edited, update the base revision copy to
-              the latest revision. If this option is not used an unedit will
-              always revert to the same revision that is edited, not the
-              latest revision in the repository.</para>
             </listitem>
           </varlistentry>
 
@@ -12356,107 +11498,6 @@ File: cvs.dbk           Status: Up-to-date</screen></para>
               <listitem>
                 <para>Display only the version number of the local client, not
                 other information.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="watch">
-      <title>watch--Watch for changes in a file</title>
-
-      <indexterm>
-        <primary>watch</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: repository.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>Add yourself to the list of watchers for a file.
-      Watchers are notified via the <command>notify</command> script whenever
-      an action they are interested in happens. See <xref
-      linkend="Watches" /></para>
-
-      <sect2>
-        <title>watch options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process local directory only.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-a</term>
-
-              <listitem>
-                <para>Specify what actions to watch. One of
-                edit,unedit,commit,all,none.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="watchers">
-      <title>watchers--list watched files</title>
-
-      <indexterm>
-        <primary>watchers</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: nothing.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>Display the list of files that are being watched, and
-      what is being watched about them. See <xref linkend="Watches" /></para>
-
-      <sect2>
-        <title>watchers options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process local directory only.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively.</para>
               </listitem>
             </varlistentry>
           </variablelist></para>
@@ -13182,7 +12223,7 @@ and value is a single-quote delimited value.</screen></para>
         <para>In addition, a file pattern of <command>*.*</command> or just
         <command>*</command> will be used as a default where no wrappers
         exist. This pattern may also contain addive or subtractive wrapper
-        options (eg -k+x), in which case it will always be applied.</para>
+        options (eg -k+o), in which case it will always be applied.</para>
       </sect2>
     </sect1>
 
@@ -13328,15 +12369,6 @@ and value is a single-quote delimited value.</screen></para>
         </varlistentry>
 
         <varlistentry>
-          <term>notify</term>
-
-          <listitem>
-            <para>When required this file is called durin a commit, and also
-            during edit/unedit.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
           <term>keywords</term>
 
           <listitem>
@@ -13379,16 +12411,11 @@ and value is a single-quote delimited value.</screen></para>
             tag</para>
           </listitem>
         </varlistentry>
-
-        <varlistentry>
-          <term>notify_email</term>
-
-          <listitem>
-            <para>Define templates for automatic sending of emails during
-            notify</para>
-          </listitem>
-        </varlistentry>
       </variablelist>
+
+      <para>Older versions of cvsnt also had the files
+      <command>notify</command> and <command>notify_email</command>. Current
+      cvsnt does not use them.</para>
 
       <sect2 id="syntax">
         <title>The common syntax</title>
@@ -14275,83 +13302,6 @@ Release Tags: release_tag</screen> Next, separated by an empty line, is the
       update your working directory.</para>
     </sect1>
 
-    <sect1 id="notify">
-      <title>notify</title>
-
-      <indexterm>
-        <primary>notify</primary>
-      </indexterm>
-
-      <para>The notify file is called whenever a watched file is changed
-      during commit, edit or unedit. See also <xref linkend="Watches" /> for
-      more details.</para>
-
-      <para>In addition to the formatting strings in the common syntax, the
-      following formatting strings are available:<variablelist>
-          <varlistentry>
-            <term>%m</term>
-
-            <listitem>
-              <para>Message supplied by user.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%b</term>
-
-            <listitem>
-              <para>Bug identifier</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%p</term>
-
-            <listitem>
-              <para>Directory name relative to current root</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%s</term>
-
-            <listitem>
-              <para>User being notified</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%t</term>
-
-            <listitem>
-              <para>Tag or branch of file being notified</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%y</term>
-
-            <listitem>
-              <para>Type of notification</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%f</term>
-
-            <listitem>
-              <para>File being notified about</para>
-            </listitem>
-          </varlistentry>
-        </variablelist></para>
-
-      <para>By default the notify file has a string designed to be compatible
-      with older versions of cvs passed in its standard input:<screen>%&lt;&lt; %p %f
----
-Triggered %y watch on %r
-By %u</screen></para>
-    </sect1>
-
     <sect1 id="User-Defined-Keywords">
       <title>keywords</title>
 
@@ -14543,7 +13493,7 @@ By %u</screen></para>
       </indexterm>
 
       <para>CVSNT contains a trigger library which is capable of sending
-      notification emails on commit, tag or notify. It allows you to put any
+      notification emails on commit or tag. It allows you to put any
       contents in the emails, but the output format is fairly simple - it is
       no substitute for a purpose designed notification program.</para>
 
@@ -14553,10 +13503,9 @@ By %u</screen></para>
       <sect2>
         <title>Configure the commit support files</title>
 
-        <para>The commit support files <command>commit_email</command>,
-        <command>tag_email</command> and <command>notify_email</command>
-        contain the names of the template files to use for commit, tag and
-        notify respectively. Each line in these files is a regular expression
+        <para>The commit support files <command>commit_email</command> and
+        <command>tag_email</command> contain the names of the template files
+        to use for commit and tag respectively. Each line in these files is a regular expression
         followed by a filename. The filename is always relative to the CVSROOT
         directory and may not be an absolute path for security reasons.</para>
 
@@ -14815,37 +13764,6 @@ Log message:
 
               <listitem>
                 <para>File revision that is being tagged.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </sect3>
-
-        <sect3>
-          <title>notify emails</title>
-
-          <variablelist>
-            <varlistentry>
-              <term>[bugid]</term>
-
-              <listitem>
-                <para>Bug identifier(s) associated with this
-                notification.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>[tag]</term>
-
-              <listitem>
-                <para>Tag name of file</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>[notify_type]</term>
-
-              <listitem>
-                <para>Notification type</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -15153,7 +14071,6 @@ taginfo(message,directory, file_array, action, tag)
 verifymsg(directory, filename)
 loginfo(message, status, directory, change_array)
 history(history_type, workdir, revs, name, bugid, message, dummy)
-notify(message, bugid, directory, notify_user, tag, notify_type, file)
 precommit(name_list, message, directory)
 postcommit(directory)
 precommand(argument_list)
@@ -15566,13 +14483,7 @@ cvs -s TESTDIR=/work/local/tests
           <term>Watcher=<varname>name</varname></term>
 
           <listitem>
-            <para>Set a watcher who sees all edit/unedit/commit notifications
-            via the <command>CVSROOT/notify</command> script. The watcher sees
-            all notificaitons regardless of an existing edit/watch on the
-            file, which for a large commit could be a lot of files. It is
-            therefore recommended that the notify script completes as fast a
-            possible. Using a custom trigger library or COM interface is
-            recommended for best efficiency.</para>
+            <para>This key is accepted and ignored.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -15938,9 +14849,7 @@ cvs -s TESTDIR=/work/local/tests
     working directory with cvsnt 1.3.</para>
 
     <para>Support for the Entries.Extra file varies between versions, however
-    this should not normally affect client operations. Client versions of
-    CVSNT before 2.0.55 used a <command>Baserev</command> file to store edit
-    information. If downgrading a client existing edits may be lost.</para>
+    this should not normally affect client operations.</para>
 
     <para>The remote protocol is interoperable going back to cvsnt 1.5, but no
     further (1.5 was the first official release with the remote protocol, but

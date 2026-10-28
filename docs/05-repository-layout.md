@@ -24,7 +24,6 @@
 │   ├── keywords          custom keyword definitions
 │   ├── triggers          trigger plugin list
 │   ├── checkoutlist      extra admin files to keep checked out
-│   ├── notify            watch notification trigger
 │   ├── history           the history log
 │   └── val-tags          cache of known-valid tags
 │
@@ -39,7 +38,7 @@
 │
 └── mymodule/                          <- an actual module
     ├── CVS/                           <- per-directory repository metadata
-    │   └── fileattr.xml               watchers, ACLs, edit state (legacy name: fileattr)
+    │   └── fileattr.xml               directory owner and ACLs (legacy name: fileattr)
     ├── src/
     │   ├── main.cpp,v                 RCS file (text, normal deltas)
     │   └── Attic/                     ,v files whose head trunk revision is dead
@@ -117,8 +116,6 @@ myworkdir/
 │   ├── Entries.Static        marks a directory checked out non-recursively
 │   ├── Tag                   sticky tag/date for this directory
 │   ├── Template              cached log message template
-│   ├── Notify                pending watch notifications
-│   ├── Base/                 pristine copies of files opened with `cvs edit`
 │   ├── Rename                pending renames
 │   └── Repository.Virtual    virtual repository mapping, if used
 ├── src/

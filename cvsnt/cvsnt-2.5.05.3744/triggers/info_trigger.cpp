@@ -50,7 +50,6 @@
 #define CVSROOT_COMMITINFO	"CVSROOT/commitinfo"
 #define CVSROOT_HISTORYINFO "CVSROOT/historyinfo"
 #define	CVSROOT_LOGINFO		"CVSROOT/loginfo"
-#define CVSROOT_NOTIFY		"CVSROOT/notify"
 #define CVSROOT_POSTCOMMAND "CVSROOT/postcommand"
 #define CVSROOT_POSTCOMMIT	"CVSROOT/postcommit"
 #define CVSROOT_POSTMODULE	"CVSROOT/postmodule"
@@ -522,34 +521,6 @@ options postmodule_options[] =
 	{ 0 }
 };
 
-//notify
-//
-// %<< [predefined]
-struct notify_information
-{
-	const char *message; // %m - message supplied on command line
-	const char *bugid; // %b - bug identifier
-	const char *directory; // %p - directory name
-	const char *notify_user; // %s -  user being notified
-	const char *tag; // %t - tag or branch being edited
-	const char *type; // %y - notification type
-	const char *file; // %f - file being notified
-};
-
-notify_information notif_info;
-
-options notify_options[] =
-{
-	{ 'm', &notif_info.message },
-	{ 'b', &notif_info.bugid },
-	{ 'p', &notif_info.directory },
-	{ 's', &notif_info.notify_user },
-	{ 't', &notif_info.tag },
-	{ 'y', &notif_info.type },
-	{ 'f', &notif_info.file },
-	{ 0 }
-};
-
 //keywords
 //
 // Author	%a
@@ -739,21 +710,6 @@ int history(const struct trigger_interface_t* cb, char type, const char *workdir
     hist_info.directory=directory;
 
 	return parse_info(CVSROOT_HISTORYINFO,"%t|%d|%u|%w|%s|%v","",NULL,generic_options,history_options);
-}
-
-int notify(const struct trigger_interface_t* cb, const char *message, const char *bugid, const char *directory, const char *notify_user, const char *tag, const char *type, const char *file)
-{
-	cvs::string msg;
-
-	notif_info.message=message;
-	notif_info.bugid=bugid;
-	notif_info.directory=directory;
-	notif_info.notify_user=notify_user;
-	notif_info.tag=tag;
-	notif_info.type=type;
-	notif_info.file=file;
-
-	return parse_info(CVSROOT_NOTIFY,"","%<< %p %f\\n---\\nTriggered %y watch on %r\\nBy %u",directory,generic_options,notify_options);
 }
 
 int precommit(const struct trigger_interface_t* cb, int name_list_count, const char **name_list, const char *message, const char *directory)
@@ -1749,7 +1705,7 @@ static trigger_interface callbacks =
 	verifymsg,
 	loginfo,
 	history,
-	notify,
+	NULL,
 	precommit,
 	postcommit,
 	precommand,

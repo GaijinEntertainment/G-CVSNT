@@ -56,7 +56,6 @@
 #define CVSROOT_USERS		"CVSROOT/users"
 #define CVSROOT_LOGINFO		"CVSROOT/commit_email"
 #define CVSROOT_TAGINFO		"CVSROOT/tag_email"
-#define CVSROOT_NOTIFY		"CVSROOT/notify_email"
 
 #ifdef _WIN32
 HMODULE g_hInst;
@@ -109,22 +108,9 @@ struct taginfo_change_list_t : public std::vector<taginfo_change_t>
 typedef std::map<cvs::filename, taginfo_change_list_t> taginfo_list_t;
 typedef std::map<cvs::filename, taginfo_list_t> taginfo_t;
 
-struct notify_change_t
-{
-	cvs::string filename;
-	cvs::string bugid;
-	cvs::string tag;
-	cvs::string type;
-};
-typedef std::vector<notify_change_t> notify_change_list_t;
-typedef std::map<cvs::filename, notify_change_list_t> notify_dir_list_t;
-typedef std::map<cvs::username, notify_dir_list_t> notify_list_t;
-typedef std::map<cvs::filename, notify_list_t> notify_t;
-
 
 loginfo_t loginfo_data;
 taginfo_t taginfo_data;
-notify_t notify_data;
 cvs::string loginfo_message;
 cvs::string last_module;
 
@@ -292,41 +278,6 @@ int history(const struct trigger_interface_t* cb, char type, const char *workdir
 	return 0;
 }
 
-int notify(const struct trigger_interface_t* cb, const char *message, const char *bugid, const char *directory, const char *notify_user, const char *tag, const char *type, const char *file)
-{
-	cvs::string nfile,tmp;
-	static bool cache_valid = false;
-	static std::vector<cvs::string> cache;
-
-	if(!parse_emailinfo(CVSROOT_NOTIFY,directory,nfile,cache_valid,cache))
-		return 0;
-
-	if(CFileAccess::absolute(nfile.c_str()) || CFileAccess::uplevel(nfile.c_str())>0)
-	{
-		CServerIo::error("notify_email: Template file '%s' has invalid path.\n",nfile.c_str());
-		return 1;
-	}
-	cvs::sprintf(tmp,80,"%s/CVSROOT/%s",gen_info.physical_repository,nfile.c_str());
-	if(!CFileAccess::exists(tmp.c_str()))
-	{
-		CServerIo::error("notify_email: Template file '%s' does not exist.\n",nfile.c_str());
-		return 0;
-	}
-
-	// Notify is per-user as well
-	notify_change_list_t& change = notify_data[nfile.c_str()][notify_user][directory];
-	size_t n = change.size();
-	change.resize(n+1);
-	change[n].bugid=bugid;
-	change[n].filename=file;
-	change[n].tag=tag;
-	change[n].type=type;
-	loginfo_message = message?message:"";
-
-	CServerIo::trace(3,"Notify array modified, size=%d, count=%d",notify_data.size(),change.size());
-	return 0;
-}
-
 int precommit(const struct trigger_interface_t* cb, int name_list_count, const char **name_list, const char *message, const char *directory)
 {
 	return 0;
@@ -341,7 +292,6 @@ int precommand(const struct trigger_interface_t* cb, int argc, const char **argv
 {
 	loginfo_data.clear();
 	taginfo_data.clear();
-	notify_data.clear();
 	return 0;
 }
 
@@ -650,99 +600,8 @@ int postcommand(const struct trigger_interface_t* cb, const char *directory, int
 		}
 	}
 
-	for(notify_t::const_iterator i = notify_data.begin(); i!=notify_data.end(); ++i)
-	{
-		for(notify_list_t::const_iterator j = i->second.begin(); j!=i->second.end(); ++j)
-		{
-			std::vector<cvs::string> cache;
-			cvs::string from;
-			std::vector<cvs::string> to;
-			cvs::string user = map_username(j->first.c_str());
-			if(read_template(i->first.c_str(),cache, from, to))
-			{
-				size_t dir_repeat = 0;
-				size_t file_repeat = 0;
-				notify_change_list_t::const_iterator file_iterator;
-				notify_dir_list_t::const_iterator directory_iterator;
-				for(size_t n=0; n<to.size(); n++)
-				{
-					if(!strcmp(to[n].c_str(),"[to_user]"))
-					    to[n]=user;
-				}
-				start_mail(from.c_str(),to);
-				for(size_t n=0; n<cache.size(); n++)
-				{
-					cvs::string& line = cache[n]; 
-
-					while((pos=line.find("[to_user]"))!=cvs::string::npos)
-						line.replace(pos,10,user);
-
-					// repeating
-					if(line=="[begin_directory]")
-					{
-						dir_repeat = n;
-						directory_iterator = j->second.begin();
-						continue;
-					}
-					if(line=="[end_directory]" && dir_repeat)
-					{
-						++directory_iterator;
-						if(directory_iterator == j->second.end())
-							dir_repeat = 0;
-						else
-							n=dir_repeat;
-						file_repeat = 0;
-						continue;
-					}
-					if(line=="[begin_file]")
-					{
-						if(!dir_repeat)
-						{
-							CServerIo::error("commit_email: [begin_file] not within [begin_directory] block");
-							return 1;
-						}
-						file_repeat = n;
-						file_iterator = directory_iterator->second.begin();
-						continue;
-					}
-					if(line=="[end_file]" && file_repeat)
-					{
-						++file_iterator;
-						if(file_iterator == directory_iterator->second.end())
-							file_repeat = 0;
-						else
-							n=file_repeat;
-						continue;
-					}
-
-					if(dir_repeat)
-					{
-						while((pos=line.find("[directory]"))!=cvs::string::npos)
-							line.replace(pos,11,directory_iterator->first.c_str());
-					}
-					if(file_repeat)
-					{
-						while((pos=line.find("[filename]"))!=cvs::string::npos)
-							line.replace(pos,10,file_iterator->filename);
-						while((pos=line.find("[bugid]"))!=cvs::string::npos)
-							line.replace(pos,7,file_iterator->bugid);
-						while((pos=line.find("[tag]"))!=cvs::string::npos)
-							line.replace(pos,5,file_iterator->tag);
-						while((pos=line.find("[notify_type]"))!=cvs::string::npos)
-							line.replace(pos,13,file_iterator->type);
-					}
-					send_mail_line(line.c_str());
-				}
-				end_mail();
-			}
-			else
-				CServerIo::trace(3,"read_template() failed");
-		}
-	}
-
 	loginfo_data.clear();
 	taginfo_data.clear();
-	notify_data.clear();
 	return 0;
 }
 
@@ -1152,7 +1011,7 @@ static trigger_interface callbacks =
 	verifymsg,
 	loginfo,
 	history,
-	notify,
+	NULL,
 	precommit,
 	postcommit,
 	precommand,

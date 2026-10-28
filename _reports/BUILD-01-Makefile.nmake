@@ -332,7 +332,7 @@ CVSNT_SRC = \
 	"$(S)\src\checkin.cpp" "$(S)\src\checkout.cpp" "$(S)\src\chown.cpp" \
 	"$(S)\src\classify.cpp" "$(S)\src\client.cpp" "$(S)\src\commit.cpp" \
 	"$(S)\src\create_adm.cpp" "$(S)\src\cvsrc.cpp" "$(S)\src\cvsrcs.cpp" \
-	"$(S)\src\diff.cpp" "$(S)\src\download_blob_to.cpp" "$(S)\src\edit.cpp" \
+	"$(S)\src\diff.cpp" "$(S)\src\download_blob_to.cpp" \
 	"$(S)\src\entries.cpp" "$(S)\src\error.cpp" "$(S)\src\expand_path.cpp" \
 	"$(S)\src\fileattr.cpp" "$(S)\src\find_names.cpp" "$(S)\src\hash.cpp" \
 	"$(S)\src\history.cpp" "$(S)\src\ignore.cpp" "$(S)\src\import.cpp" \
@@ -347,7 +347,7 @@ CVSNT_SRC = \
 	"$(S)\src\scramble.cpp" "$(S)\src\server.cpp" "$(S)\src\sha256\sha256.c" \
 	"$(S)\src\status.cpp" "$(S)\src\subr.cpp" "$(S)\src\switch.cpp" "$(S)\src\tag.cpp" \
 	"$(S)\src\update.cpp" "$(S)\src\version.cpp" "$(S)\src\vers_ts.cpp" \
-	"$(S)\src\watch.cpp" "$(S)\src\wrapper.cpp" "$(S)\src\xdiff.cpp" \
+	"$(S)\src\wrapper.cpp" "$(S)\src\xdiff.cpp" \
 	"$(S)\src\xgetwd.cpp" "$(S)\src\zlib.cpp" "$(S)\src\zstd_buffer.cpp" \
 	"$(S)\windows-NT\filesubr.cpp" "$(S)\windows-NT\mkdir.cpp" "$(S)\windows-NT\pwd.cpp" \
 	"$(S)\windows-NT\setuid.cpp" "$(S)\windows-NT\sockerror.cpp" \

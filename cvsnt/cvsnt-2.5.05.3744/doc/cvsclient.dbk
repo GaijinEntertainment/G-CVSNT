@@ -545,9 +545,6 @@
       <para>The <command>Mod-time</command> response and
       <command>Checkin-time</command> request use RFC 822/1123 format (see the
       descriptions of that response and request for details).</para>
-
-      <para>For <command>Notify</command>, see the description of that
-      request.</para>
     </sect1>
 
     <sect1 id="Request-intro">
@@ -988,10 +985,7 @@ C: update
             instead of <command>Modified</command> with no known change in
             behavior are: <command>admin</command>, <command>diff</command>
             (if and only if two <command>-r</command> or <command>-D</command>
-            options are specified), <command>watch-on</command>,
-            <command>watch-off</command>, <command>watch-add</command>,
-            <command>watch-remove</command>, <command>watchers</command>,
-            <command>editors</command>, <command>log</command>, and
+            options are specified), <command>log</command>, and
             <command>annotate</command>.</para>
 
             <para>For the <command>status</command> command, one can send
@@ -1055,65 +1049,15 @@ C: update
           \n</command></term>
 
           <listitem>
-            <para>Response expected: no. Tell the server that an
-            <command>edit</command> or <command>unedit</command> command has
-            taken place. The server needs to send a
-            <command>Notified</command> response, but such response is
-            deferred until the next time that the server is sending responses.
+            <para>Response expected: no. Older clients sent this request
+            after an edit or unedit command. The server reads one line of
+            additional data and ignores it. It records nothing. The next time
+            that the server sends responses, it sends the error "edit and
+            watch are not supported by this server" and a
+            <command>Notified</command> response.
             The <varname>filename</varname> is a file within the most recent
             directory sent with <command>Directory</command>; it must not
-            contain <command>/</command>. Additional data: <screen>
-<varname>notification-type</varname> \t <varname>time</varname> \t <varname>clienthost</varname> \t
-<varname>working-dir</varname> \t <varname>watches</varname> \n
-</screen> where <varname>notification-type</varname> is <command>E</command>
-            for edit, <command>U</command> for unedit, undefined behavior if
-            <command>C</command>, and all other letters should be silently
-            ignored for future expansion. <varname>time</varname> is the time
-            at which the edit or unedit took place, in a user-readable format
-            of the client's choice (the server should treat the time as an
-            opaque string rather than interpreting it).
-            <varname>clienthost</varname> is the name of the host on which the
-            edit or unedit took place, and <varname>working-dir</varname> is
-            the pathname of the working directory where the edit or unedit
-            took place. <varname>watches</varname> are the temporary watches,
-            zero or more of the following characters in the following order:
-            <command>E</command> for edit, <command>U</command> for unedit,
-            <command>C</command> for commit, and all other letters should be
-            silently ignored for future expansion. If
-            <varname>notification-type</varname> is <command>E</command> the
-            temporary watches are set; if it is <command>U</command> they are
-            cleared. If <varname>watches</varname> is followed by \t then the
-            \t and the rest of the line should be ignored, for future
-            expansion.</para>
-
-            <para>The <varname>time</varname>, <varname>clienthost</varname>,
-            and <varname>working-dir</varname> fields may not contain the
-            characters <command>+</command>, <command>,</command>,
-            <command>&gt;</command>, <command>;</command>, or
-            <command>=</command>.</para>
-
-            <para>Note that a client may be capable of performing an
-            <command>edit</command> or <command>unedit</command> operation
-            without connecting to the server at that time, and instead
-            connecting to the server when it is convenient (for example, when
-            a laptop is on the net again) to send the
-            <command>Notify</command> requests. Even if a client is capable of
-            deferring notifications, it should attempt to send them
-            immediately (one can send <command>Notify</command> requests
-            together with a <command>noop</command> request, for example),
-            unless perhaps if it can know that a connection would be
-            impossible.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term><command>NotifyUser <varname>user</varname>
-          \n</command></term>
-
-          <listitem>
-            <para>Response expected: no. Tell the server that the notification
-            is being done on behalf of another user. Used for forced unedits.
-            Only repository administrators can send this request.</para>
+            contain <command>/</command>.</para>
           </listitem>
         </varlistentry>
 
@@ -1247,19 +1191,6 @@ C: update
           <listitem>
             <para>Response expected: yes. Return the server side cvsignore
             file immediately for the client to process.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term><command>Error-If-Reader <varname>error-text</varname>
-          \n</command></term>
-
-          <listitem>
-            <para>Response expected: no. If the user is listed in the
-            'readers' file or otherwise has no permission to write to the
-            repository, generate an error whose text is equal to the supplied
-            error-text. If the user has write access then this command does
-            nothing.</para>
           </listitem>
         </varlistentry>
 
@@ -1417,10 +1348,6 @@ S: ok
           <term><command>admin \n</command></term>
 
           <term><command>history \n</command></term>
-
-          <term><command>watchers \n</command></term>
-
-          <term><command>editors \n</command></term>
 
           <term><command>annotate \n</command></term>
 
@@ -1766,15 +1693,16 @@ S: ok
 
           <term><command>watch-remove \n</command></term>
 
+          <term><command>watchers \n</command></term>
+
+          <term><command>editors \n</command></term>
+
+          <term><command>editors-edit \n</command></term>
+
           <listitem>
-            <para>Response expected: yes. Actually do the <command>cvs watch
-            on</command>, <command>cvs watch off</command>, <command>cvs watch
-            add</command>, and <command>cvs watch remove</command> commands,
-            respectively. This uses any previous <command>Argument</command>,
-            <command>Directory</command>, <command>Entry</command>, or
-            <command>Modified</command> requests, if they have been sent. The
-            last <command>Directory</command> sent specifies the working
-            directory at the time of the operation.</para>
+            <para>Response expected: yes. The server answers each of these
+            requests with the error "edit and watch are not supported by this
+            server".</para>
           </listitem>
         </varlistentry>
 
@@ -2261,8 +2189,9 @@ S: ok
           \n</command></term>
 
           <listitem>
-            <para>Indicate to the client that the notification for
-            <varname>pathname</varname> has been done. There should be one
+            <para>Tell the client that the server received the
+            <command>Notify</command> request for <varname>pathname</varname>
+            and discarded it, so the client can forget it. There should be one
             such response for every <command>Notify</command> request; if
             there are several <command>Notify</command> requests for a single
             file, the requests should be processed in order; the first
@@ -2720,10 +2649,8 @@ S: ok
       <listitem>
         <para>The <command>Modified</command> request could be speeded up by
         sending diffs rather than entire files. The client would need some way
-        to keep the version of the file which was originally checked out;
-        probably requiring the use of "cvs edit" in this case is the most
-        sensible course (the "cvs edit" could be handled by a package like VC
-        for emacs). This would also allow local operation of <command>cvs
+        to keep the version of the file which was originally checked out.
+        This would also allow local operation of <command>cvs
         diff</command> without arguments.</para>
       </listitem>
 

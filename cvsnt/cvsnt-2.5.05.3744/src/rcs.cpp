@@ -9,7 +9,6 @@
  */
 
 #include "cvs.h"
-#include "edit.h"
 #include "hardlink.h"
 #include "../cvsdelta/cvsdelta.h"
 #include "sha_blob_reference.h"
@@ -55,8 +54,9 @@ const kflag_t kflag_encoding[] =
 
 const kflag_t kflag_flags[] =
 {
-  { 'c', NULL, NULL, 0, 0, KFLAG_RESERVED_EDIT, KFLAG_CVSNT, 0 },
-  { 'x', NULL, NULL, 0, 0, KFLAG_RESERVED_EDIT|KFLAG_EXCLUSIVE_EDIT, KFLAG_CVSNT, 0 },
+  /* Old reserved edit flags; no effect */
+  { 'c', NULL, NULL, 0, 0, 0, KFLAG_CVSNT, 0 },
+  { 'x', NULL, NULL, 0, 0, 0, KFLAG_CVSNT, 0 },
   { 'k', NULL, NULL, 0, 0, KFLAG_KEYWORD, KFLAG_LEGACY, 0 },
   { 'v', NULL, NULL, 0, 0, KFLAG_VALUE, KFLAG_LEGACY, 0 },
   { 'V', NULL, NULL, 0, 0, KFLAG_VALUE_LOGONLY, KFLAG_INTERNAL, 0 }, /* internal use only */
@@ -3370,8 +3370,6 @@ bool RCS_get_kflags(const char *arg, bool err, kflag& result)
       "u\tUnicode (UCS-2) file with BOM.\n",
 	  "{encoding}\tExtended encoding type\n",
       "Followed by any of:\n",
-	  "c\tForce reserved edit.\n",
-	  "x\tForce exclusive edit.\n",
       "k\tSubstitute keyword.\n",
       "v\tSubstiture value.\n",
       "l\tGenerate lockers name.\n",
@@ -3578,13 +3576,6 @@ char *RCS_rebuild_options(kflag* kf, char *options)
 		*(p++)='M';
 	if(kf->flags&KFLAG_COMPRESS_DELTA)
 		*(p++)='z';
-	if(kf->flags&KFLAG_RESERVED_EDIT)
-	{
-		if(kf->flags&KFLAG_EXCLUSIVE_EDIT)
-			*(p++)='x';
-		else
-			*(p++)='c';
-	}
 	if(kf->flags&KFLAG_STATIC)
 		*(p++)='s';
 	if(kf->flags&KFLAG_SINGLE)

@@ -12,7 +12,7 @@
  *          the client), removed (client told to delete it), diff and rdiff
  *          (one record per revision read), annotate, log
  *   write: add, modify, remove (commit), import, tag, branch, untag,
- *          edit, unedit, admin
+ *          admin
  *
  * Configured in CVSROOT/config:
  *   AccessLog=yes                       enable (off by default)

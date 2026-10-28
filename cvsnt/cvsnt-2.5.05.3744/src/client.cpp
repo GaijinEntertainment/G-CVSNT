@@ -22,7 +22,6 @@
 
 #include "cvs.h"
 #include "getline.h"
-#include "edit.h"
 #include "buffer.h"
 #include "sha_blob_reference.h"
 #include <../keyValueServer/include/blobs_encryption.h>
@@ -88,7 +87,6 @@ static void handle_entries_extra(char *, int);
 static void handle_m(char *, int);
 static void handle_e(char *, int);
 static void handle_f(char *, int);
-static void handle_notified(char *, int);
 
 /* We need to keep track of the list of directories we've sent to the
    server.  This list, along with the current CVSROOT, will help us
@@ -1455,9 +1453,7 @@ static void register_with_extra (List *ent_list, const char *filename, const cha
 {
 	char *cp, *merge_tag1 = NULL, *merge_tag2 = NULL;
 	time_t rcs_timestamp = (time_t)-1;
-	char *edit_revision = "*";
-	char *edit_tag = NULL;
-	char *edit_bugid = NULL;
+	char *bugid = NULL;
 	char *md5 = NULL;
 
 	while(extra_entry && extra_entry[0]=='/')
@@ -1488,21 +1484,11 @@ static void register_with_extra (List *ent_list, const char *filename, const cha
 		if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
 			rcs_timestamp=(time_t)-1;
 
-		edit_revision = cp;
-		if ((cp = strchr (edit_revision, '/')) == NULL)
-		{
-			edit_revision="*"; /* Revision was unseen by client */
+		/* Skip two unused slots */
+		if ((cp = strchr (cp, '/')) == NULL || (cp = strchr (cp + 1, '/')) == NULL)
 			break;
-		}
-		*cp++ = '\0';
-
-		edit_tag = cp;
-		if ((cp = strchr (edit_tag, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		edit_bugid = cp;
-		if ((cp = strchr (edit_bugid, '/')) == NULL)
+		bugid = ++cp;
+		if ((cp = strchr (bugid, '/')) == NULL)
 			break;
 		*cp++ = '\0';
 
@@ -1514,7 +1500,7 @@ static void register_with_extra (List *ent_list, const char *filename, const cha
 		break;
 	}
 
-	Register (ent_list, filename, vn, ts, options, tag, date, conflict, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+	Register (ent_list, filename, vn, ts, options, tag, date, conflict, merge_tag1, merge_tag2, rcs_timestamp, bugid, md5);
 }
 
 /* Update the Entries line for this file.  */
@@ -2102,20 +2088,7 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
 	    local_timestamp = "dummy timestamp";
 	else if (local_timestamp == NULL)
-	{
 	    local_timestamp = file_timestamp;
-
-	    /* Checking for command_name of "commit" doesn't seem like
-	       the cleanest way to handle this, but it seem to roughly
-	       parallel what the :local: code which calls
-	       mark_up_to_date ends up amounting to.  Some day, should
-	       think more about what the Checked-in response means
-	       vis-a-vis both Entries and Base and clarify
-	       cvsclient.texi accordingly.  */
-
-	    if (!strcmp (command_name, "commit"))
-			mark_up_to_date (filename);
-	}
 
 	register_with_extra (ent_list, filename, vn, local_timestamp,
 		  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
@@ -2550,20 +2523,7 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
     if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
         local_timestamp = "dummy timestamp";
     else if (local_timestamp == NULL)
-    {
       local_timestamp = file_timestamp;
-
-      /* Checking for command_name of "commit" doesn't seem like
-         the cleanest way to handle this, but it seem to roughly
-         parallel what the :local: code which calls
-         mark_up_to_date ends up amounting to.  Some day, should
-         think more about what the Checked-in response means
-         vis-a-vis both Entries and Base and clarify
-         cvsclient.texi accordingly.  */
-
-      if (!strcmp (command_name, "commit"))
-  		mark_up_to_date (filename);
-    }
 
     register_with_extra (ent_list, filename, vn, local_timestamp,
     	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
@@ -2706,20 +2666,7 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
     if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
         local_timestamp = "dummy timestamp";
     else if (local_timestamp == NULL)
-    {
       local_timestamp = file_timestamp;
-
-      /* Checking for command_name of "commit" doesn't seem like
-         the cleanest way to handle this, but it seem to roughly
-         parallel what the :local: code which calls
-         mark_up_to_date ends up amounting to.  Some day, should
-         think more about what the Checked-in response means
-         vis-a-vis both Entries and Base and clarify
-         cvsclient.texi accordingly.  */
-
-      if (!strcmp (command_name, "commit"))
-  		mark_up_to_date (filename);
-    }
 
     register_with_extra (ent_list, filename, vn, local_timestamp,
     	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
@@ -2853,51 +2800,6 @@ static void handle_blob_otp(char *args, int len)
 	blob_has_otp = true;
 }
 
-static void update_baserev(char *data, List *ent_list, char *short_pathname, char *filename)
-{
-	char *type;
-	char *basepath = (char*)xmalloc(sizeof(CVSADM_BASE)+strlen(filename)+10);
-	char *basepathgz = (char*)xmalloc(sizeof(CVSADM_BASE)+strlen(filename)+10);
-
-	sprintf(basepath,"%s/%s",CVSADM_BASE,filename);
-	sprintf(basepathgz,"%s/%s.gz",CVSADM_BASE,filename);
-
-	read_line(&type);
-
-	TRACE(3,"Updating base revision %s [%c]",basepath,type[0]);
-	switch(type[0])
-	{
-	case 'C':
-		if(isfile(basepathgz))
-			copy_and_zip_file(filename,basepath,1,1);
-		else
-			copy_file(filename,basepath,1,1);
-		break;
-	case 'R':
-		CVS_UNLINK(basepath);
-		CVS_UNLINK(basepathgz);
-		break;
-	case 'U':
-		read_counted_file(basepath,basepath);
-		if(isfile(basepathgz))
-		{
-			copy_and_zip_file(basepath,basepathgz,1,1);
-			CVS_UNLINK(basepath);
-		}
-		break;
-	default:
-		error(0,0,"Unsupported base update option '%c'",type[0]);
-		break;
-	}
-
-	xfree(basepathgz);
-	xfree(basepath);
-}
-
-static void handle_update_baserev(char *args, int len)
-{
-	call_in_directory(args, update_baserev, NULL);
-}
 
 static void remove_entry (char *data, List *ent_list, char *short_pathname, char *filename)
 {
@@ -3862,7 +3764,6 @@ struct response responses[] =
     RSP_LINE("Merged", handle_merged, response_type_normal, rs_essential),
     RSP_LINE("Patched", handle_patched, response_type_normal, rs_optional),
     RSP_LINE("Rcs-diff", handle_rcs_diff, response_type_normal, rs_optional),
-    RSP_LINE("Update-baserev", handle_update_baserev, response_type_normal, rs_optional),
     RSP_LINE("Mode", handle_mode, response_type_normal, rs_optional),
     RSP_LINE("Mod-time", handle_mod_time, response_type_normal, rs_optional),
     RSP_LINE("Removed", handle_removed, response_type_normal, rs_essential),
@@ -3881,7 +3782,6 @@ struct response responses[] =
        rs_optional),
     RSP_LINE("Template", handle_template, response_type_normal,
        rs_optional),
-    RSP_LINE("Notified", handle_notified, response_type_normal, rs_optional),
     RSP_LINE("Module-expansion", handle_module_expansion, response_type_normal,
        rs_optional),
     RSP_LINE("Wrapper-rcsOption", handle_wrapper_rcs_option,
@@ -5056,12 +4956,9 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 		send_to_server(vers->entdata->merge_from_tag_2,0);
 		send_to_server ("/", 0);
 		/* No point in sending RCS checkin time - we know it already */
-		send_to_server ("/", 0);
-		send_to_server (vers->entdata->edit_revision,0);
-		send_to_server ("/", 0);
-		send_to_server (vers->entdata->edit_tag,0);
-		send_to_server ("/", 0);
-		send_to_server (vers->entdata->edit_bugid,0);
+		/* Two empty slots keep the field layout */
+		send_to_server ("///", 0);
+		send_to_server (vers->entdata->bugid,0);
 		send_to_server ("/", 0);
 		send_to_server (vers->entdata->md5,0);
 		send_to_server ("/\n", 0);
@@ -5806,143 +5703,6 @@ client_import_done ()
     send_repository ("", toplevel_repos, ".");
 }
 
-static void notified_a_file (char *data, List *ent_list, char *short_pathname, char *filename)
-{
-    FILE *fp;
-    FILE *newf;
-    size_t line_len = 8192;
-    char *line = (char*)xmalloc (line_len);
-    char *cp;
-    int nread;
-    int nwritten;
-    char *p;
-
-    fp = open_file (CVSADM_NOTIFY, "r");
-	if(!fp)
-	{
-		if(!existence_error(errno))
-			error(0,errno,"cannot read %s", CVSADM_NOTIFY);
-		goto error_exit;
-	}
-	
-    if (getline (&line, &line_len, fp) < 0)
-    {
-		if (feof (fp))
-			error (0, 0, "cannot read %s: end of file", CVSADM_NOTIFY);
-		else
-			error (0, errno, "cannot read %s", CVSADM_NOTIFY);
-		goto error_exit;
-    }
-    cp = strchr (line, '\t');
-    if (cp == NULL)
-    {
-		error (0, 0, "malformed %s file", CVSADM_NOTIFY);
-		goto error_exit;
-    }
-    *cp = '\0';
-    if (strcmp (filename, line + 1) != 0)
-    {
-	error (0, 0, "protocol error: notified %s, expected %s", filename,
-	       line + 1);
-    }
-
-    if (getline (&line, &line_len, fp) < 0)
-    {
-	if (feof (fp))
-	{
-	    xfree (line);
-	    if (fclose (fp) < 0)
-		error (0, errno, "cannot close %s", CVSADM_NOTIFY);
-	    if ( CVS_UNLINK (CVSADM_NOTIFY) < 0)
-		error (0, errno, "cannot remove %s", CVSADM_NOTIFY);
-	    return;
-	}
-	else
-	{
-	    error (0, errno, "cannot read %s", CVSADM_NOTIFY);
-	    goto error_exit;
-	}
-    }
-    newf = open_file (CVSADM_NOTIFYTMP, "w");
-    if (fputs (line, newf) < 0)
-    {
-	error (0, errno, "cannot write %s", CVSADM_NOTIFYTMP);
-	goto error2;
-    }
-    while ((nread = fread (line, 1, line_len, fp)) > 0)
-    {
-	p = line;
-	while ((nwritten = fwrite (p, 1, nread, newf)) > 0)
-	{
-	    nread -= nwritten;
-	    p += nwritten;
-	}
-	if (ferror (newf))
-	{
-	    error (0, errno, "cannot write %s", CVSADM_NOTIFYTMP);
-	    goto error2;
-	}
-    }
-    if (ferror (fp))
-    {
-	error (0, errno, "cannot read %s", CVSADM_NOTIFY);
-	goto error2;
-    }
-    if (fclose (newf) < 0)
-    {
-	error (0, errno, "cannot close %s", CVSADM_NOTIFYTMP);
-	goto error_exit;
-    }
-    xfree (line);
-    if (fclose (fp) < 0)
-    {
-	error (0, errno, "cannot close %s", CVSADM_NOTIFY);
-	return;
-    }
-
-    {
-        /* In this case, we want rename_file() to ignore noexec. */
-        int saved_noexec = noexec;
-        noexec = 0;
-        rename_file (CVSADM_NOTIFYTMP, CVSADM_NOTIFY);
-        noexec = saved_noexec;
-    }
-
-    return;
-  error2:
-    if(newf) fclose (newf);
-  error_exit:
-    xfree (line);
-    if(fp) fclose (fp);
-}
-
-static void handle_notified (char *args, int len)
-{
-    call_in_directory (args, notified_a_file, NULL);
-}
-
-void
-client_notify (char *repository, char *update_dir, char *filename,
-    int notif_type, char *val, char *user)
-{
-    char buf[2];
-
-    send_a_repository ("", repository, update_dir);
-	if(user && supported_request("NotifyUser"))
-	{
-		send_to_server("NotifyUser ", 0);
-		send_to_server(user, 0);
-		send_to_server("\n", 1);
-	}
-    send_to_server ("Notify ", 0);
-    send_to_server (filename, 0);
-    send_to_server ("\n", 1);
-    buf[0] = notif_type;
-    buf[1] = '\0';
-    send_to_server (buf, 1);
-    send_to_server ("\t", 1);
-    send_to_server (val, 0);
-}
 
 /*
  * Send an option with an argument, dealing correctly with newlines in

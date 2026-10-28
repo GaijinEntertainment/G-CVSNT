@@ -351,11 +351,6 @@ int historyaudit(const struct trigger_interface_t* cb, char type, const char *wo
 	return 0;
 }
 
-int notifyaudit(const struct trigger_interface_t* cb, const char *message, const char *bugid, const char *directory, const char *notify_user, const char *tag, const char *type, const char *file)
-{
-	return 0;
-}
-
 int precommitaudit(const struct trigger_interface_t* cb, int name_list_count, const char **name_list, const char *message, const char *directory)
 {
 	return 0;
@@ -474,7 +469,7 @@ static trigger_interface callbacks =
 	verifymsgaudit,
 	loginfoaudit,
 	historyaudit,
-	notifyaudit,
+	NULL,
 	precommitaudit,
 	postcommitaudit,
 	precommandaudit,

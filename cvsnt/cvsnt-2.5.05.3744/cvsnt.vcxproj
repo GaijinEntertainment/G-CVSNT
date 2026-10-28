@@ -408,12 +408,6 @@
       </PrecompiledHeader>
     </ClCompile>
     <ClCompile Include="src\download_blob_to.cpp" />
-    <ClCompile Include="src\edit.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\entries.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
@@ -655,12 +649,6 @@
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
       </PrecompiledHeader>
     </ClCompile>
-    <ClCompile Include="src\watch.cpp">
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
-      </PrecompiledHeader>
-      <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|x64'">
-      </PrecompiledHeader>
-    </ClCompile>
     <ClCompile Include="src\wrapper.cpp">
       <PrecompiledHeader Condition="'$(Configuration)|$(Platform)'=='Release|Win32'">
       </PrecompiledHeader>
@@ -728,7 +716,6 @@
     <ClInclude Include="src\client.h" />
     <ClInclude Include="src\access_log.h" />
     <ClInclude Include="src\cvs.h" />
-    <ClInclude Include="src\edit.h" />
     <ClInclude Include="src\fileattr.h" />
     <ClInclude Include="src\hash.h" />
     <ClInclude Include="src\mapping.h" />
@@ -738,7 +725,6 @@
     <ClInclude Include="src\server.h" />
     <ClInclude Include="src\streaming_compressors.h" />
     <ClInclude Include="src\update.h" />
-    <ClInclude Include="src\watch.h" />
     <ClInclude Include="version_fu.h" />
     <ClInclude Include="version_no.h" />
     <ClInclude Include="windows-NT\config.h" />

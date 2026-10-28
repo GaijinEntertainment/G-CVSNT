@@ -61,7 +61,6 @@ cvsnt_SOURCES = \
 	cvsrc.cpp \
 	cvsrcs.cpp \
 	diff.cpp \
-	edit.cpp \
 	entries.cpp \
 	error.cpp \
 	expand_path.cpp \
@@ -109,7 +108,6 @@ cvsnt_SOURCES = \
 	update.cpp \
 	version.cpp \
 	vers_ts.cpp \
-	watch.cpp \
 	wrapper.cpp \
 	xgetwd.cpp \
 	xdiff.cpp \
@@ -118,7 +116,6 @@ cvsnt_SOURCES = \
 	buffer.h \
 	client.h \
 	cvs.h \
-	edit.h \
 	error.h \
 	fileattr.h \
 	hardlink.h \
@@ -129,8 +126,7 @@ cvsnt_SOURCES = \
 	rcs.h \
 	savecwd.h \
 	server.h \
-	update.h \
-	watch.h
+	update.h
 
 cvsnt_LDADD = \
 	-L$(DESTDIR)/$(libdir) \

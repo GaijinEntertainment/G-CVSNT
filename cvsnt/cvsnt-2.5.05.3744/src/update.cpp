@@ -35,9 +35,6 @@
 
 #include "cvs.h"
 #include "savecwd.h"
-#include "watch.h"
-#include "fileattr.h"
-#include "edit.h"
 #include "getline.h"
 #include "buffer.h"
 #include "hardlink.h"
@@ -86,7 +83,6 @@ static int update_filesdone_proc (void *callerdat, int err,
 					 List *entries);
 static void write_letter (struct file_info *finfo, int letter);
 static void join_file (struct file_info *finfo, Vers_TS *vers_ts);
-static int baserev_update(struct file_info *finfo, Vers_TS *vers, Ctype status);
 
 static const char *options;
 static const char *tag;
@@ -101,7 +97,6 @@ static const char *merge_bugid;
 static int rewrite_tag;
 static int nonbranch;
 static int run_module_prog = 1;
-static int update_baserev;
 static int inverse_merges;
 
 /* If we set the tag or date for a subdirectory, we use this to undo
@@ -131,8 +126,6 @@ static int rcs_diff_patches ;
 static List *ignlist = (List *) NULL;
 static time_t last_register_time;
 static List *renamed_file_list;
-static int edit_modified,file_is_edited;
-static const char *edit_modified_bugid;
 
 extern int client_overwrite_existing;
 
@@ -145,10 +138,8 @@ static const char *const update_usage[] =
 	"\t-B bugid\tPerform -j Merge bounded by bug.\n",
 	"\t-b\tPerform -j merge from branch point.\n",
     "\t-C\tOverwrite locally modified files with clean repository copies.\n",
-	"\t-c\tUpdate base revision copies.\n",
     "\t-D date\tSet date to update from (is sticky).\n",
     "\t-d\tBuild directories, like checkout does.\n",
-	"\t-e[bugid]\tAutomatically edit modified/merged files.\n",
     "\t-f\tForce a head revision match if tag/date not found.\n",
        "\t-i\tUse bidirectional mergepoints (A->B == B->A).\n",
     "\t-I ign\tMore files to ignore (! to reset).\n",
@@ -196,7 +187,7 @@ int update (int argc, char **argv)
 
     optind = 0;
     int options_index = 0;//not used
-	while ((c = getopt_long (argc, argv, "+AB:pCcPflRQqdnuk:r:D:j:bmI:W:3Stxe::i", long_update_options, &options_index)) != EOF)
+	while ((c = getopt_long (argc, argv, "+AB:pCPflRQqdnuk:r:D:j:bmI:W:3Stxi", long_update_options, &options_index)) != EOF)
     {
 	switch (c)
 	{
@@ -226,9 +217,6 @@ int update (int argc, char **argv)
 		break;
         case 4:			/* --recreate-entries */
 		recreate_entries = 1;
-		break;
-		case 'c':
-		update_baserev = 1;
 		break;
 	    case 'I':
 		ign_add (optarg, 0);
@@ -316,10 +304,6 @@ int update (int argc, char **argv)
 		case 't':
 			force_checkout_time = 1;
 			break;
-		case 'e':
-			edit_modified = 1;
-			edit_modified_bugid = optarg;
-			break;
 	    case '?':
 	    default:
 		usage (update_usage);
@@ -380,15 +364,6 @@ int update (int argc, char **argv)
 			send_arg("-3");
 		if (force_checkout_time)
 			send_arg("-t");
-		if (update_baserev)
-			send_arg("-c");
-		if (edit_modified)
-		{
-			if(edit_modified_bugid)
-				option_with_arg("-e", edit_modified_bugid);
-			else
-				send_arg("-e");
-		}
 		ign_send ();
 	    wrap_send ();
 		if (merge_from_branchpoint)
@@ -686,40 +661,6 @@ int do_update (int argc, char **argv, const char *xoptions, const char *xtag, co
     return (err);
 }
 
-/* This is called to automatically edit a merged file */
-static void edit_modified_file(file_info *finfo, Vers_TS *vers)
-{
-	bool exclusive_edit;
-
-	if(is_rcs || !edit_modified)
-		return;
-
-	TRACE(3,"Automatic edit of %s revision %s",PATCH_NULL(fn_root(finfo->file)),PATCH_NULL(vers->vn_rcs));
-
-	kflag kftmp;
-	RCS_get_kflags(vers->options,false,kftmp);
-	if(kftmp.flags&KFLAG_EXCLUSIVE_EDIT)
-		exclusive_edit = true;
-	else
-		exclusive_edit = false;
-
-	if(notify_do('E',finfo->file,CVS_Username,global_session_time,remote_host_name,finfo->update_dir,"",finfo->repository,vers->tag,exclusive_edit?"X":"",edit_modified_bugid,NULL))
-	{
-		error(0,0,"Unable to perform automatic edit of file '%s'",fn_root(finfo->file));
-	}
-	else
-	{
-		xfree(vers->edit_bugid);
-		xfree(vers->edit_revision);
-		xfree(vers->edit_tag);
-		vers->edit_bugid = xstrdup(edit_modified_bugid?edit_modified_bugid:"");
-		vers->edit_revision = xstrdup(vers->vn_rcs?vers->vn_rcs:vers->vn_user?vers->vn_user:"");
-		vers->edit_tag = xstrdup(vers->tag?vers->tag:"");
-		file_is_edited = 1;
-	}
-}
-
-
 /*
  * This is the callback proc for update.  It is called for each file in each
  * directory by the recursion code.  The current directory is the local
@@ -736,8 +677,6 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
     int retval;
     Ctype status;
     Vers_TS *vers;
-
-	file_is_edited = 0;
 
     status = Classify_File (finfo, tag, date, options, force_tag_match,
 			    aflag, &vers, pipeout, 0, 0);
@@ -816,15 +755,11 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 		case T_CONFLICT:		/* old punt-type errors */
 			retval = 1;
 			write_letter (finfo, 'C');
-			edit_modified_file(finfo,vers);
-			baserev_update(finfo, vers, status);
 			break;
 		case T_NEEDS_MERGE:		/* needs merging */
 			if (! toss_local_changes)
 			{
-				edit_modified_file(finfo,vers);
 				retval = merge_file (finfo, vers);
-				baserev_update(finfo, vers, status);
 				break;
 			}
 		/* else FALL THROUGH */
@@ -889,7 +824,7 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
                         Register (finfo->entries, finfo->file, 
                                     vers->vn_rcs, vers->ts_rcs,
                                     vers->options, vers->tag,
-									vers->date, (char *)0, NULL, NULL, vers->tt_rcs, update_baserev?vers->vn_rcs:vers->edit_revision, update_baserev?vers->tag:vers->edit_tag, vers->edit_bugid, NULL);
+									vers->date, (char *)0, NULL, NULL, vers->tt_rcs, vers->bugid, NULL);
                     }
                 }
                 if (!retval)
@@ -907,8 +842,6 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 		    mode_t mode;
 			CMD5Calc md5;
 
-			edit_modified_file(finfo,vers);
-
 		    retval = patch_file (finfo,
 					 vers, &docheckout,
 					 mode, &md5);
@@ -917,7 +850,6 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 		        if (server_active && retval == 0)
 					server_updated (finfo, vers, (rcs_diff_patches? SERVER_RCS_DIFF : SERVER_PATCHED),
 					    mode, &md5,(struct buffer *) NULL);
-				baserev_update(finfo, vers, status);
 				break;
 		    }
 		}
@@ -927,10 +859,7 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 		   and applying patches.  */
 		/* Fall through.  */
 	    case T_CHECKOUT:		/* needs checkout */
-		edit_modified_file(finfo,vers);
 		retval = checkout_file (finfo, vers, 0, 0, 1, is_rcs, is_rcs, NULL, NULL);
-		if(!is_rcs)
-			baserev_update(finfo, vers, status);
 		break;
 	    case T_ADDED:		/* added but not committed */
 		/* Regegister to take into account new options/tags */
@@ -940,7 +869,7 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 			if(vers->tag && isdigit(vers->tag[0]))
 				error(1,0,"Numeric revision '%s' illegal for new file",vers->tag);
 			Register(finfo->entries, finfo->file, "0", vers->ts_user,
-				  vers->options, vers->tag, NULL, NULL, NULL, NULL, (time_t)-1, vers->edit_revision, vers->edit_tag, vers->edit_bugid, NULL);
+				  vers->options, vers->tag, NULL, NULL, NULL, NULL, (time_t)-1, vers->bugid, NULL);
 #ifdef SERVER_SUPPORT
 			if (server_active)
 			{
@@ -960,7 +889,6 @@ static int update_fileproc (void *callerdat, struct file_info *finfo)
 		break;
 	    case T_REMOVE_ENTRY:	/* needs to be un-registered */
 		retval = scratch_file (finfo, vers);
-		baserev_update(finfo, vers, status);
 		break;
 	    default:			/* can't ever happen :-) */
 		error (0, 0,
@@ -1752,15 +1680,10 @@ VERS: ", 0);
 	if (!pipeout)
 	{
 	    Vers_TS *xvers_ts;
-		kflag kftmp;
-
-		RCS_get_kflags(vers_ts->options,false,kftmp);
 
 		if (!is_rcs
 		&& cvswrite
-		&& !file_is_dead
-		&& !fileattr_iswatched(xfile)
-		&& !(kftmp.flags&KFLAG_RESERVED_EDIT))
+		&& !file_is_dead)
 		{
 			if (newrevbuf == NULL)
 				xchmod (xfile, 1);
@@ -1835,7 +1758,7 @@ VERS: ", 0);
 				adding ? "0" : xvers_ts->vn_rcs,
 				xvers_ts->ts_user, xvers_ts->options,
 				xvers_ts->tag, xvers_ts->date,
-				(char *)0, merge_rev1, merge_rev2, xvers_ts->tt_rcs, update_baserev?xvers_ts->vn_rcs:vers_ts->edit_revision, update_baserev?vers_ts->tag:vers_ts->edit_tag, vers_ts->edit_bugid, NULL); /* Clear conflict flag on fresh checkout */
+				(char *)0, merge_rev1, merge_rev2, xvers_ts->tt_rcs, vers_ts->bugid, NULL); /* Clear conflict flag on fresh checkout */
 			TRACE(3,"checkout_file() call to Register complete");
 		}
 
@@ -1857,7 +1780,7 @@ VERS: ", 0);
 		{
 			TRACE(3,"If this is really Update and not Checkout, recode history.");
 			history_write ('U', finfo->update_dir, xvers_ts->vn_rcs, xfile,
-				finfo->repository, xvers_ts->edit_bugid, NULL);
+				finfo->repository, xvers_ts->bugid, NULL);
 		}
 		TRACE(3,"free xvers_ts");
 		freevers_ts (&xvers_ts);
@@ -2117,9 +2040,7 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 		md5->Final();
     }	  
 
-    if (cvswrite
-	&& !fileattr_iswatched(finfo->file)
-	&& !(kf.flags&KFLAG_RESERVED_EDIT))
+    if (cvswrite)
 	{
 		mode = modify_mode(mode,
 				  ((mode & S_IRUSR) ? S_IWUSR : 0)
@@ -2176,9 +2097,7 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 	    char buf[sizeof BINARY];
 	    unsigned int c;
 
-   	    if (cvswrite
-			&& !fileattr_iswatched(finfo->file)
-			&& !(kf.flags&KFLAG_RESERVED_EDIT))
+   	    if (cvswrite)
 		{
 			xchmod (finfo->file, 1);
 		}
@@ -2214,7 +2133,7 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 
 	Register (finfo->entries, finfo->file, xvers_ts->vn_rcs,
 		  xvers_ts->ts_user, xvers_ts->options,
-		  xvers_ts->tag, xvers_ts->date, NULL, NULL, NULL, xvers_ts->tt_rcs, update_baserev?xvers_ts->vn_rcs:vers_ts->edit_revision, update_baserev?vers_ts->tag:vers_ts->edit_tag, vers_ts->edit_bugid, NULL);
+		  xvers_ts->tag, xvers_ts->date, NULL, NULL, NULL, xvers_ts->tt_rcs, vers_ts->bugid, NULL);
 
 	if (CVS_STAT (finfo->file, &file_info) < 0)
 	    error (1, errno, "could not stat %s", finfo->file);
@@ -2222,7 +2141,7 @@ static int patch_file (struct file_info *finfo, Vers_TS *vers_ts, int *docheckou
 	/* If this is really Update and not Checkout, recode history */
 	if (is_update_command ())
 	    history_write ('P', finfo->update_dir, xvers_ts->vn_rcs, finfo->file,
-			   finfo->repository, xvers_ts->edit_bugid, NULL);
+			   finfo->repository, xvers_ts->bugid, NULL);
 
 	freevers_ts (&xvers_ts);
 
@@ -2341,7 +2260,6 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     int retcode = 0;
     int retval;
 	kflag kf;
-	kflag kftmp;
 	mode_t mode = 0644; /* stupid default! */
 
     /*
@@ -2403,7 +2321,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 	write_letter (finfo, 'C');
 
 	history_write ('C', finfo->update_dir, vers->vn_rcs, finfo->file,
-		       finfo->repository, vers->edit_bugid, NULL);
+		       finfo->repository, vers->bugid, NULL);
 	retval = 0;
 	goto out;
     }
@@ -2424,12 +2342,8 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 		goto out;
 	}
 
-	RCS_get_kflags(vers->options,false,kftmp);
-
 	if (!is_rcs
-		&& cvswrite
-		&& !fileattr_iswatched(finfo->file)
-		&& !(kftmp.flags&KFLAG_RESERVED_EDIT))
+		&& cvswrite)
 	{
 		mode = modify_mode(mode,
 				  ((mode & S_IRUSR) ? S_IWUSR : 0)
@@ -2461,7 +2375,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 		}
 		Register (finfo->entries, finfo->file, vers->vn_rcs,
 			"Result of merge", vers->options, vers->tag,
-			vers->date, cp, NULL, NULL, vers->tt_rcs, update_baserev?vers->vn_rcs:vers->edit_revision, update_baserev?vers->tag:vers->edit_tag, vers->edit_bugid, NULL);
+			vers->date, cp, NULL, NULL, vers->tt_rcs, vers->bugid, NULL);
 		if (cp)
 			xfree (cp);
     }
@@ -2499,7 +2413,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 	cvs_output ("\n", 1);
 
 	history_write ('G', finfo->update_dir, vers->vn_rcs, finfo->file,
-		       finfo->repository,vers->edit_bugid, NULL);
+		       finfo->repository, vers->bugid, NULL);
 	retval = 0;
 	goto out;
     }
@@ -2510,7 +2424,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
 
 	write_letter (finfo, 'C');
 
-	history_write ('C', finfo->update_dir, vers->vn_rcs, finfo->file, finfo->repository, vers->edit_bugid, NULL);
+	history_write ('C', finfo->update_dir, vers->vn_rcs, finfo->file, finfo->repository, vers->bugid, NULL);
 
     }
     else if (retcode == -1)
@@ -2522,7 +2436,7 @@ static int merge_file (struct file_info *finfo, Vers_TS *vers)
     {
 	write_letter (finfo, 'M');
 	history_write ('G', finfo->update_dir, vers->vn_rcs, finfo->file,
-		       finfo->repository, vers->edit_bugid, NULL);
+		       finfo->repository, vers->bugid, NULL);
     }
     retval = 0;
  out:
@@ -2965,7 +2879,6 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	/* save the rev since server_updated might invalidate it */
 	mrev = (char*)xmalloc (strlen (vers->vn_user) + 2);
 	sprintf (mrev, "-%s", vers->vn_user);
-	edit_modified_file(finfo,vers);
 #ifdef SERVER_SUPPORT
 	if (server_active)
 	{
@@ -2976,7 +2889,7 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 #endif
 	TRACE(3,"join_file() call Register (client or server)");
 	Register(finfo->entries, finfo->file, mrev, vers->ts_rcs,
-		vers->options, vers->tag, vers->date, vers->ts_conflict, merge_bugid?NULL:(join_rev2?rev1:rev2), merge_bugid?NULL:(join_rev2?rev2:NULL), vers->tt_rcs, update_baserev?vers->vn_rcs:vers->edit_revision, update_baserev?vers->tag:vers->edit_tag, vers->edit_bugid, NULL);
+		vers->options, vers->tag, vers->date, vers->ts_conflict, merge_bugid?NULL:(join_rev2?rev1:rev2), merge_bugid?NULL:(join_rev2?rev2:NULL), vers->tt_rcs, vers->bugid, NULL);
 	xfree (mrev);
 	/* We need to check existence_error here because if we are
            running as the server, and the file is up to date in the
@@ -3016,7 +2929,6 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 			Vers_TS *xvers;
 			const char *saved_options = options;
 
-			edit_modified_file(finfo,vers);
 			xvers = Version_TS (finfo, options, jrev2, jdate2, 1, 0, 0);
 
 			options = xvers->options;
@@ -3095,8 +3007,6 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	return;
     }
 
-	edit_modified_file(finfo,vers);
-
     t_options = xstrdup(vers->options);
 	RCS_get_kflags(t_options, false, kf);
 	if(kf.flags&KFLAG_VALUE)
@@ -3171,9 +3081,7 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 		write permissions, and we carefully put them back.  But
 		until someone gets around to fixing it, that seems like the
 		easiest way to get what would seem to be the right mode.
-		I don't check CVSWRITE or _watched; I haven't thought about
-		that in great detail, but it seems like a watched file should
-		be checked out (writable) after a merge.  */
+		I don't check CVSWRITE; a merged file is left writable.  */
 		xchmod (finfo->file, 1);
 
 		/* Traditionally, the text file case prints a whole bunch of
@@ -3205,9 +3113,7 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	   write permissions, and we carefully put them back.  But
 	   until someone gets around to fixing it, that seems like the
 	   easiest way to get what would seem to be the right mode.
-	   I don't check CVSWRITE or _watched; I haven't thought about
-	   that in great detail, but it seems like a watched file should
-	   be checked out (writable) after a merge.  */
+	   I don't check CVSWRITE; a merged file is left writable.  */
 	xchmod (finfo->file, 1);
 
 	/* Hmm.  We don't give them REV1 anywhere.  I guess most people
@@ -3246,13 +3152,8 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 		return;
 	}
 
-	kflag kftmp;
-	RCS_get_kflags(vers->options,false,kftmp);
-
 	if (!is_rcs
-		&& cvswrite
-		&& !fileattr_iswatched(finfo->file)
-		&& !(kftmp.flags&KFLAG_RESERVED_EDIT))
+		&& cvswrite)
 	{
 		mode = modify_mode(mode,
 				  ((mode & S_IRUSR) ? S_IWUSR : 0)
@@ -3300,7 +3201,7 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 	}
 	Register (finfo->entries, finfo->file,
 		  vers->vn_rcs ? vers->vn_rcs : "0", "Result of merge",
-		  vers->options, vers->tag, vers->date, cp, join_rev2?rev1:rev2, join_rev2?rev2:NULL, vers->tt_rcs, update_baserev?vers->vn_rcs:vers->edit_revision, update_baserev?vers->tag:vers->edit_tag, vers->edit_bugid, NULL);
+		  vers->options, vers->tag, vers->date, cp, join_rev2?rev1:rev2, join_rev2?rev2:NULL, vers->tt_rcs, vers->bugid, NULL);
 	if (cp)
 	    xfree(cp);
     }
@@ -3323,7 +3224,6 @@ static void join_file (struct file_info *finfo, Vers_TS *vers)
 #endif
     xfree (backup);
 	xfree (t_options);
-	baserev_update(finfo, vers, T_NEEDS_MERGE);
 }
 
 /*
@@ -3430,95 +3330,5 @@ void set_global_update_options(int _merge_from_branchpoint, int _conflict_3way, 
 	conflict_3way=_conflict_3way;
 	case_sensitive=_case_sensitive;
 	force_checkout_time=_force_checkout_time;
-}
-
-static int baserev_update(struct file_info *finfo, Vers_TS *vers, Ctype status)
-{
-	char *basefile, *basefilegz;
-	int gzip = 0;
-
-	if(noexec)
-		return 0;
-	if(!update_baserev && !file_is_edited)
-		return 0;
-
-	make_directories(CVSADM_BASE);
-
-	basefile = (char*)xmalloc(strlen(finfo->fullname)+sizeof(CVSADM_BASE)+10);
-	basefilegz = (char*)xmalloc(strlen(finfo->fullname)+sizeof(CVSADM_BASE)+15);
-	sprintf(basefile,"%s/%s",CVSADM_BASE,finfo->file);
-	sprintf(basefilegz,"%s/%s.gz",CVSADM_BASE,finfo->file);
-	if(isfile(basefilegz))
-		gzip=1;
-
-	switch(status)
-	{
-		case T_UNKNOWN:			
-		case T_UPTODATE:			
-		case T_CONFLICT:		
-		case T_MODIFIED:		
-		case T_ADDED:			
-		case T_REMOVED:	
-		case T_TITLE:	
-			/* Do nothing */
-			break;
-		case T_NEEDS_MERGE:
-			/* Checkout new baserev */
-		    RCS_checkout (vers->srcfile,
-				   basefile,
-				   vers->vn_rcs, vers->vn_tag,
-				   vers->options, RUN_TTY,
-				   NULL, NULL, NULL);
-			if(!server_active)
-			{
-				if(gzip)
-				{
-					copy_and_zip_file(basefile,basefilegz,1,1);
-					CVS_UNLINK(basefile);
-				}
-			}
-#ifdef SERVER_SUPPORT
-			else
-				server_send_baserev(finfo, basefile, "U");
-#endif
-			break;
-		case T_REMOVE_ENTRY:
-			if(!server_active)
-			{
-				/* Remove baserev */
-				CVS_UNLINK(basefile);
-				CVS_UNLINK(basefilegz);
-			}
-#ifdef SERVER_SUPPORT
-			else
-				server_send_baserev(finfo, basefile, "R");
-#endif
-			break;
-		case T_CHECKOUT:
-		case T_PATCH:
-			if(!server_active)
-			{
-				/* Copy baserev from new file */
-				if(gzip)
-					copy_and_zip_file(finfo->file,basefilegz,1,1);
-				else
-					copy_file(finfo->file,basefile,1,1);
-			}
-#ifdef SERVER_SUPPORT
-			else
-				server_send_baserev(finfo, basefile, "C");
-#endif
-			break;
-	}
-
-	xfree(basefile);
-	xfree(basefilegz);
-
-	xfree(vers->edit_revision);
-	xfree(vers->edit_tag);
-
-	vers->edit_revision = xstrdup(vers->vn_rcs);
-	vers->edit_tag = xstrdup(vers->vn_tag);
-	return 0;
 }
 

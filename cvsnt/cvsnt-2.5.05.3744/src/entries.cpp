@@ -41,9 +41,7 @@ static Entnode *Entnode_Create(
 	const char *merge_from_tag_1,
 	const char *merge_from_tag_2,
 	time_t rcs_timestamp,
-	const char *edit_revision,
-	const char *edit_tag,
-	const char *edit_bugid,
+	const char *bugid,
 	const char *md5)
 {
     Entnode *ent;
@@ -64,9 +62,7 @@ static Entnode *Entnode_Create(
 	ent->rcs_timestamp = rcs_timestamp;
     ent->merge_from_tag_1 = xstrdup(merge_from_tag_1?merge_from_tag_1:"");
     ent->merge_from_tag_2 = xstrdup(merge_from_tag_2?merge_from_tag_2:"");
-	ent->edit_revision = xstrdup(edit_revision?edit_revision:"");
-	ent->edit_tag = xstrdup(edit_tag?edit_tag:"");
-	ent->edit_bugid = xstrdup(edit_bugid?edit_bugid:"");
+	ent->bugid = xstrdup(bugid?bugid:"");
 	ent->md5 = xstrdup(md5?md5:"");
 	}
 	TRACE(4,"Entnode_Create() finished");
@@ -88,9 +84,7 @@ static void Entnode_Destroy (Entnode *ent)
     xfree (ent->conflict);
     xfree (ent->merge_from_tag_1);
     xfree (ent->merge_from_tag_2);
-	xfree (ent->edit_revision);
-	xfree (ent->edit_tag);
-	xfree (ent->edit_bugid);
+	xfree (ent->bugid);
 	xfree (ent->md5);
 
     xfree (ent);
@@ -319,13 +313,12 @@ void Rename_Entry (List *list, const char *from, const char *to)
 /* Just create an entry in the entries file, do nothing else */
 Node *Fast_Register (List *list, const char *fname, const char *vn,  const char *ts, const char *options, const char *tag,
     const char *date, const char *ts_conflict, const char *merge_from_tag_1,
-	const char *merge_from_tag_2, time_t rcs_timestamp, 
-	const char *edit_revision, const char *edit_tag, const char *edit_bugid, const char *md5)
+	const char *merge_from_tag_2, time_t rcs_timestamp, const char *bugid, const char *md5)
 {
 	Entnode *entnode;
 	Node *node;
     entnode = Entnode_Create(ENT_FILE, fname, vn, ts, options, tag, date,
-			      ts_conflict,merge_from_tag_1,merge_from_tag_2,rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+			      ts_conflict,merge_from_tag_1,merge_from_tag_2,rcs_timestamp, bugid, md5);
     node = AddEntryNode (list, entnode);
 	return node;
 }
@@ -336,8 +329,7 @@ Node *Fast_Register (List *list, const char *fname, const char *vn,  const char 
  */
 void Register (List *list, const char *fname, const char *vn, const char *ts, const char *options, const char *tag,
     const char *date, const char *ts_conflict, const char *merge_from_tag_1,
-	const char *merge_from_tag_2, time_t rcs_timestamp, 
-	const char *edit_revision, const char *edit_tag, const char *edit_bugid, const char *md5)
+	const char *merge_from_tag_2, time_t rcs_timestamp, const char *bugid, const char *md5)
 {
     Entnode *entnode;
     Node *node;
@@ -350,22 +342,20 @@ void Register (List *list, const char *fname, const char *vn, const char *ts, co
 
 #ifdef SERVER_SUPPORT
     if (server_active)
-		server_register (fname, vn, ts, options, tag, date, ts_conflict, merge_from_tag_1, merge_from_tag_2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+		server_register (fname, vn, ts, options, tag, date, ts_conflict, merge_from_tag_1, merge_from_tag_2, rcs_timestamp, bugid, md5);
 #endif
 
-	TRACE(1,"Register(%s, %s, %s%s%s, %s, %s %s, %s, %s, %s, %s, %s)",
+	TRACE(1,"Register(%s, %s, %s%s%s, %s, %s %s, %s, %s, %s, %s)",
 			PATCH_NULL(fname), PATCH_NULL(vn), ts ? ts : "",
 			ts_conflict ? "+" : "", ts_conflict ? ts_conflict : "",
 			PATCH_NULL(options), tag ? tag : "", date ? date : "",
 			merge_from_tag_1 ? merge_from_tag_1:"",
-			merge_from_tag_2 ? merge_from_tag_2:"", 
-			edit_revision ? edit_revision:"",
-			edit_tag ? edit_tag:"",
-			edit_bugid ? edit_bugid:"",
+			merge_from_tag_2 ? merge_from_tag_2:"",
+			bugid ? bugid:"",
 			md5?md5:"");
 
     entnode = Entnode_Create(ENT_FILE, fname, vn, ts, options, tag, date,
-			      ts_conflict,merge_from_tag_1,merge_from_tag_2,rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+			      ts_conflict,merge_from_tag_1,merge_from_tag_2,rcs_timestamp, bugid, md5);
 	if (!entnode){
 		error (0, errno, "Cannot create file node for \"%s\"", PATCH_NULL(fname));
 		return;
@@ -547,7 +537,7 @@ static Entnode *fgetentent(FILE *fpin, char *cmd, int *sawdir,
 	}
 
 	ent = Entnode_Create (type, user, vn, ts, options, tag, date,
-			      ts_conflict, NULL, NULL, (time_t)-1, NULL, NULL, NULL, NULL);
+			      ts_conflict, NULL, NULL, (time_t)-1, NULL, NULL);
 	break;
     }
 
@@ -564,7 +554,7 @@ static int fgetententex(List *entries, FILE *fpin, char *cmd,
     Entnode *ent;
 	Node *node;
     register char *cp;
-    char *l, *user, *tag1, *tag2, *rcs_timestamp_string, *edit_revision, *edit_tag, *edit_bugid, *md5;
+    char *l, *user, *tag1, *tag2, *rcs_timestamp_string, *bugid, *md5;
     int line_length;
 
     ent = NULL;
@@ -636,35 +626,23 @@ static int fgetententex(List *entries, FILE *fpin, char *cmd,
 	if(!*cp)
 		break;
 
-	edit_revision=cp;
-	if ((cp = strchr (edit_revision, '/')) == NULL)
+	/* Skip two unused slots */
+	if ((cp = strchr (cp, '/')) == NULL)
 		continue;
-	*cp++ = '\0';
-
-	xfree(ent->edit_revision);
-	ent->edit_revision=xstrdup(edit_revision);
-
-	if(!*cp)
+	if(!*++cp)
+		break;
+	if ((cp = strchr (cp, '/')) == NULL)
+		continue;
+	if(!*++cp)
 		break;
 
-	edit_tag=cp;
-	if ((cp = strchr (edit_tag, '/')) == NULL)
+	bugid=cp;
+	if ((cp = strchr (bugid, '/')) == NULL)
 		continue;
 	*cp++ = '\0';
 
-	xfree(ent->edit_tag);
-	ent->edit_tag=xstrdup(edit_tag);
-
-	if(!*cp)
-		break;
-
-	edit_bugid=cp;
-	if ((cp = strchr (edit_bugid, '/')) == NULL)
-		continue;
-	*cp++ = '\0';
-
-	xfree(ent->edit_bugid);
-	ent->edit_bugid=xstrdup(edit_bugid);
+	xfree(ent->bugid);
+	ent->bugid=xstrdup(bugid);
 
 	if(!*cp)
 		break;
@@ -750,7 +728,8 @@ int fputententex(FILE *fp, Entnode *p)
 	{
 		fprintf (fp, "%" TIME_T_SPRINTF "d", p->rcs_timestamp);
 	}
-	fprintf(fp,"/%s/%s/%s/%s/\n",p->edit_revision?p->edit_revision:"",p->edit_tag?p->edit_tag:"",p->edit_bugid?p->edit_bugid:"",p->md5?p->md5:"");
+	/* Two empty slots keep the field layout */
+	fprintf(fp,"///%s/%s/\n",p->bugid?p->bugid:"",p->md5?p->md5:"");
 
     return 0;
 }
@@ -989,24 +968,6 @@ static Node *AddEntryNode(List *list, Entnode *entdata)
     if ((p  = findnode_fn (list, entdata->user)) != NULL)
     {
 		TRACE(3,"AddEntryNode() was it already there? -- apparently yes");
-		/* Special case... if new entry contains an edit revision of '*', then
-		   we copy the edit data from the old revision */
-		if(p->data && entdata->edit_revision && !strcmp(entdata->edit_revision,"*"))
-		{
-			TRACE(3,"AddEntryNode() Special case... if new entry contains an edit revision of '*', then");
-			TRACE(3,"               we copy the edit data from the old revision ");
-			Entnode *oldent = (Entnode*)p->data;
-
-			xfree(entdata->edit_revision);
-			xfree(entdata->edit_tag);
-			xfree(entdata->edit_bugid);
-			entdata->edit_revision = oldent->edit_revision;
-			entdata->edit_tag = oldent->edit_tag;
-			entdata->edit_bugid = oldent->edit_bugid;
-			oldent->edit_revision = NULL;
-			oldent->edit_tag = NULL;
-			oldent->edit_bugid = NULL;
-		}
 		/* take it out */
 		TRACE(3,"AddEntryNode() take it out ");
 		delnode (p);
@@ -1304,7 +1265,7 @@ static Entnode *subdir_record (int cmd, const char *parent, const char *dir)
     entnode = Entnode_Create (ENT_SUBDIR, dir, "", "", "",
 			      (char *) NULL, (char *) NULL,
 			      (char *) NULL, (char *) NULL,
-			      (char *) NULL, (time_t) -1, NULL, NULL, NULL, NULL);
+			      (char *) NULL, (time_t) -1, NULL, NULL);
 
     if (!noexec)
     {

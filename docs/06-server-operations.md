@@ -132,7 +132,7 @@ Parsed by `src/parseinfo.cpp`. Keys recognised by this build:
 | `LogHistory` | letters | Which record types to write to `CVSROOT/history` |
 | `AtomicCommits` | `yes`/`no` | |
 | `RereadLogAfterVerify` | `no`/`never`/`yes`/`always`/`stat` | |
-| `Watcher` | | Watch/notify configuration |
+| `Watcher` | | Accepted and ignored: edit and watch are removed |
 
 ## Triggers
 
@@ -142,7 +142,7 @@ Server-side hooks are shared libraries implementing `trigger_interface`
 
 | Trigger | Source | Purpose |
 | --- | --- | --- |
-| `info` | `triggers/info_trigger.cpp` | Implements the classic file-driven hooks: `loginfo`, `commitinfo`, `taginfo`, `verifymsg`, `historyinfo`, `precommand`, `postcommand`, `premodule`, `postmodule`, `postcommit`, `notify`, `rcsinfo`, `keywords` (`triggers/info_trigger.cpp:50`) |
+| `info` | `triggers/info_trigger.cpp` | Implements the classic file-driven hooks: `loginfo`, `commitinfo`, `taginfo`, `verifymsg`, `historyinfo`, `precommand`, `postcommand`, `premodule`, `postmodule`, `postcommit`, `rcsinfo`, `keywords` (`triggers/info_trigger.cpp:50`) |
 | `script` | `triggers/script_trigger.cpp` | Runs a scripting-language hook |
 | `audit` | `triggers/audit_trigger.cpp` | Writes an audit trail to a SQL database (`triggers/sql/`) |
 | `email` | `triggers/email_trigger.cpp` | Commit notification mail |

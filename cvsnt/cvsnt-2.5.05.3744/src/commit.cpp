@@ -18,8 +18,6 @@
 #include "cvs.h"
 #include "access_log.h"
 #include "getline.h"
-#include "edit.h"
-#include "fileattr.h"
 #include "hardlink.h"
 
 /* From update */
@@ -78,10 +76,6 @@ struct master_lists
     List *cilist;			/* list with commit_info structs */
 };
 
-int commit_keep_edits = 0;
-
-
-static int check_valid_edit = 0;
 static int force_ci = 0;
 static int force_modified = 0;
 static int got_message;
@@ -107,10 +101,8 @@ static const char *const commit_usage[] =
     "Usage: %s %s [DnRlf] [-B bug | -b bug ] [-m msg | -F logfile] files...\n",
 	"\t-b bugid\tOnly commit files related to bug.\n",
 	"\t-B bugid\tMark files with bug.\n",
-	"\t-c\t\tCheck for valid edits before committing.\n",
 	"\t-D\t\tAssume all files are modified.\n",
 	"\t-F logfile\tRead the log message from file.\n",
-	"\t-e\t\tKeep edited files.\n",
 	"\t-f\t\tForce the file to be committed; disables recursion.\n",
 //	"\t-i\t\tIgnore keyword differences (EXPERIMENTAL).\n",
     "\t-n\t\tDo not run the module program (if any).\n",
@@ -318,7 +310,7 @@ static int find_fileproc(void *callerdat, struct file_info *finfo)
     data = (struct logfile_info *) xmalloc (sizeof (struct logfile_info));
     data->type = status;
     data->tag = xstrdup (vers->tag);
-	data->bugid = xstrdup (bugid.size()?bugid.c_str():(vers?vers->edit_bugid:NULL));
+	data->bugid = xstrdup (bugid.size()?bugid.c_str():(vers?vers->bugid:NULL));
     data->rev_old = data->rev_new = NULL;
     data->kflags_flags = 0;
 	if (vers && vers->options)
@@ -399,7 +391,7 @@ int commit (int argc, char **argv)
 #endif /* CVS_BADROOT */
 
     optind = 0;
-	while ((c = getopt (argc, argv, "+cnlRm:M:fF:Db:B:eTi")) != -1)
+	while ((c = getopt (argc, argv, "+nlRm:M:fF:Db:B:Ti")) != -1)
     {
 	switch (c)
 	{
@@ -425,9 +417,6 @@ int commit (int argc, char **argv)
 			bugid+=",";
 		bugid+=optarg;
 		break;
-    case 'c':
-        check_valid_edit = 1;
-        break;
 	case 'n':
 		run_module_prog = 0;
 		break;
@@ -454,7 +443,6 @@ int commit (int argc, char **argv)
 		break;
 	case 'f':
 		force_ci = 1;
-        check_valid_edit = -1;
 		local = 1;		/* also disable recursion */
 		break;
 	case 'F':
@@ -468,10 +456,6 @@ int commit (int argc, char **argv)
 	case 'D':
 			force_modified = 1;
 			break;
-	case 'e':
-			commit_keep_edits = 1;
-			break;
-	    case '?':
 		case 'T':
 			slide_tags = 1;
 			break;
@@ -566,9 +550,6 @@ int commit (int argc, char **argv)
 	   which can leave the message NULL.  */
 	option_with_arg ("-m", saved_message);
 
-	if(commit_keep_edits)
-		send_arg("-e");
-
 	if(slide_tags)
 		send_arg("-T");
 
@@ -577,24 +558,12 @@ int commit (int argc, char **argv)
 
 	if(bugid.size())
 	{
-		if(!only_bug)
+		char *bg = xstrdup(bugid.c_str()),*p=NULL;
+		while((p=strtok(p?NULL:bg,","))!=NULL)
 		{
-			char *bg = xstrdup(bugid.c_str()),*p=NULL;
-			while((p=strtok(p?NULL:bg,","))!=NULL)
-			{
-				option_with_arg("-B", p);
-			}
-			xfree(bg);
+			option_with_arg(only_bug?"-b":"-B", p);
 		}
-		else
-		{
-			char *bg = xstrdup(bugid.c_str()),*p=NULL;
-			while((p=strtok(p?NULL:bg,","))!=NULL)
-			{
-				option_with_arg("-b", p);
-			}
-			xfree(bg);
-		}
+		xfree(bg);
 	}
 
 	/* OK, now process all the questionable files we have been saving
@@ -644,8 +613,6 @@ int commit (int argc, char **argv)
 	    send_arg("-f");
 	if (!run_module_prog)
 	    send_arg("-n");
-	if (check_valid_edit>0)
-	    send_arg("-c");
 	send_arg("--");
 
 	void send_blob_files(List * list);
@@ -834,7 +801,6 @@ static int check_fileproc (void *callerdat, struct file_info *finfo)
     Vers_TS *vers;
     struct commit_info *ci;
     struct logfile_info *li;
-	kflag kftmp;
 
     size_t cvsroot_len = strlen (current_parsed_root->directory);
 
@@ -858,7 +824,7 @@ static int check_fileproc (void *callerdat, struct file_info *finfo)
     status = classify_file_internal (finfo, &vers);
 
 	/* Implement -b */
-	if(only_bug && bugid.size() && (!vers->edit_bugid || !bugid_in(bugid.c_str(),vers->edit_bugid)))
+	if(only_bug && bugid.size() && (!vers->bugid || !bugid_in(bugid.c_str(),vers->bugid)))
 	{
 		freevers_ts(&vers);
 		return 0;
@@ -877,7 +843,7 @@ static int check_fileproc (void *callerdat, struct file_info *finfo)
 		vers->ts_rcs[0] && strcmp(vers->ts_user,vers->ts_rcs))
 	{
 	    Register (finfo->entries, finfo->file, vers->vn_rcs, vers->ts_user,
-		      vers->options, vers->tag, vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, vers->edit_revision, vers->edit_tag, vers->edit_bugid, NULL);
+		      vers->options, vers->tag, vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, vers->bugid, NULL);
 #ifdef SERVER_SUPPORT
 		if(server_active)
 		{
@@ -1023,39 +989,6 @@ warning: file `%s' seems to still contain conflict indicators",
 		}
 	    }
 
-		RCS_get_kflags(vers->options,false,kftmp);
-		if ( (check_can_edit(finfo->repository, finfo->file, CVS_Username, vers->tag) ||
-			(check_valid_edit>=0 && (check_valid_edit || 
-				kftmp.flags&KFLAG_RESERVED_EDIT) )) && ( status == T_MODIFIED || status == T_REMOVED ) )
-	    {
-			CXmlNodePtr handle = fileattr_getroot();
-			handle->xpathVariable("name",finfo->file);
-			handle->xpathVariable("user",CVS_Username);
-			if(!handle->Lookup("file[cvs:filename(@name,$name)]/editor[cvs:username(@name,$user)]"))
-			  handle=NULL;
-			while(handle)
-			{
-				const char *edittag = fileattr_getvalue(handle,"tag");
-				if(!edittag)
-					break;
-				if(!vers->tag && !strcmp(edittag,"HEAD"))
-					break;
-				if(vers->tag && !strcmp(edittag,vers->tag))
-					break;
-
-				if(!handle->XPathResultNext())
-				  handle = NULL;
-			}
-			if(!handle)
-			{
-				error( 0, 0,
-					"user '%s' is not a valid editor of the file '%s'",
-				getcaller(), fn_root(finfo->fullname) );
-				freevers_ts( &vers );
-				return 1;
-			}
-	    }
-
 	    /* done with consistency checks; now, to get on with the commit */
 	    if (finfo->update_dir[0] == '\0')
 		xdir = ".";
@@ -1094,7 +1027,7 @@ warning: file `%s' seems to still contain conflict indicators",
 	    li->type = status;
 	    li->tag = xstrdup (vers->tag);
 	    li->rev_old = xstrdup (vers->vn_rcs);
-		li->bugid = xstrdup(bugid.size()?bugid.c_str():vers->edit_bugid);
+		li->bugid = xstrdup(bugid.size()?bugid.c_str():vers->bugid);
         li->kflags_flags = 0;
     	if (vers && vers->options)
     	{
@@ -1393,7 +1326,7 @@ static int commit_fileproc (void *callerdat, struct file_info *finfo)
 					Vers_TS * vers = Version_TS(finfo,ci->options,ci->tag,NULL,0,0,0);
 					checkout_file(finfo,vers,0,0,1,0,0,NULL,NULL);
 					Register(finfo->entries, finfo->file, vers->vn_rcs, vers->ts_rcs,
-						vers->options, vers->tag, vers->date, vers->ts_conflict, NULL, NULL, (time_t)-1, NULL, NULL, NULL, NULL);
+						vers->options, vers->tag, vers->date, vers->ts_conflict, NULL, NULL, (time_t)-1, NULL, NULL);
 					freevers_ts(&vers);
 
 					RCS_rewrite(finfo->rcs,NULL,NULL,0);
@@ -1417,7 +1350,7 @@ static int commit_fileproc (void *callerdat, struct file_info *finfo)
     else if (ci->status == T_ADDED)
     {
 	if (checkaddfile (finfo->file, finfo->mapped_file, finfo->update_dir, finfo->repository, ci->tag, options,
-			  &finfo->rcs, NULL, bugid.size()?bugid.c_str():(ent?ent->edit_bugid:NULL)) != 0)
+			  &finfo->rcs, NULL, bugid.size()?bugid.c_str():(ent?ent->bugid:NULL)) != 0)
 	{
 	    fixaddfile (finfo->file, finfo->repository);
 	    err = 1;
@@ -1440,7 +1373,7 @@ static int commit_fileproc (void *callerdat, struct file_info *finfo)
 		xfree (ci->rev);
 	    ci->rev = RCS_whatbranch (finfo->rcs, ci->tag);
 	    err = Checkin ('A', finfo, finfo->rcs->path, ci->rev,
-			ci->tag, options, saved_message, ent?ent->merge_from_tag_1:NULL, ent?ent->merge_from_tag_2:NULL, NULL, bugid.size()?bugid.c_str():(ent?ent->edit_bugid:NULL), NULL, NULL, NULL);
+			ci->tag, options, saved_message, ent?ent->merge_from_tag_1:NULL, ent?ent->merge_from_tag_2:NULL, NULL, bugid.size()?bugid.c_str():(ent?ent->bugid:NULL));
 	    if (err != 0)
 	    {
 			unlockrcs (finfo->rcs);
@@ -1478,7 +1411,7 @@ static int commit_fileproc (void *callerdat, struct file_info *finfo)
 	}
 
 	/* XXX - an added file with symbolic -r should add tag as well */
-	err = finaladd (finfo, ci->rev ? ci->rev : xrev, ci->tag, options, ent?ent->merge_from_tag_1:NULL, ent?ent->merge_from_tag_2:NULL,bugid.size()?bugid.c_str():(ent?ent->edit_bugid:NULL));
+	err = finaladd (finfo, ci->rev ? ci->rev : xrev, ci->tag, options, ent?ent->merge_from_tag_1:NULL, ent?ent->merge_from_tag_2:NULL,bugid.size()?bugid.c_str():(ent?ent->bugid:NULL));
 	if (xrev)
 	    xfree (xrev);
     }
@@ -1509,10 +1442,7 @@ static int commit_fileproc (void *callerdat, struct file_info *finfo)
 
 		err = Checkin ('M', finfo,
 		       finfo->rcs->path, ci->rev, ci->tag,
-			   force_ci?options:ci->options, saved_message, ent?ent->merge_from_tag_1:NULL, ent?ent->merge_from_tag_2:NULL, NULL, bugid.size()?bugid.c_str():(ent?ent->edit_bugid:NULL),
-			   commit_keep_edits?(ent?ent->edit_revision:NULL):NULL,
-			   commit_keep_edits?(ent?ent->edit_tag:NULL):NULL,
-			   commit_keep_edits?(ent?ent->edit_bugid:NULL):NULL);
+			   force_ci?options:ci->options, saved_message, ent?ent->merge_from_tag_1:NULL, ent?ent->merge_from_tag_2:NULL, NULL, bugid.size()?bugid.c_str():(ent?ent->bugid:NULL));
 
 		(void) time (&last_register_time);
 
@@ -1540,11 +1470,6 @@ static int commit_fileproc (void *callerdat, struct file_info *finfo)
 	}
 #endif
     }
-
-    /* Clearly this is right for T_MODIFIED.  I haven't thought so much
-       about T_ADDED or T_REMOVED.  */
-	if(!commit_keep_edits)
-		err += notify_do ('C', finfo->file, getcaller (), NULL, NULL, NULL, NULL, finfo->repository, ci->tag, NULL, NULL, NULL);
 
 	do_unlock_file(ci->lockId);
 
@@ -2001,7 +1926,7 @@ static int finaladd(struct file_info *finfo, char *rev, char *tag, char *options
 	assert(opt);
 
     rcs = locate_rcs (finfo->file, finfo->repository);
-    ret = Checkin('A', finfo, rcs, rev, tag, opt, saved_message, merge_tag1, merge_tag2, NULL, bugid, NULL, NULL, NULL);
+    ret = Checkin('A', finfo, rcs, rev, tag, opt, saved_message, merge_tag1, merge_tag2, NULL, bugid);
     if (ret == 0)
     {
 		char *tmp = (char*)xmalloc (strlen (finfo->file) + sizeof (CVSADM)
@@ -2349,8 +2274,6 @@ int checkaddfile (const char *file, const char *mapped_file, const char *dir, co
 	    *rcsnode = rcsfile;
 	}
     }
-
-    fileattr_newfile (file);
 
     /* At this point, we used to set the file mode of the RCS file
        based on the mode of the file in the working directory.  If we

@@ -394,7 +394,7 @@ static void sticky_ck (struct file_info *finfo, int aflag, Vers_TS *vers)
 	    ((entdate && !vers->date) || (!entdate && vers->date)))
 	{
 	    Register (finfo->entries, finfo->file, vers->vn_user, vers->ts_rcs,
-		      vers->options, vers->tag, vers->date, vers->ts_conflict, NULL, NULL, vers->tt_rcs, vers->edit_revision, vers->edit_tag, vers->edit_bugid, NULL);
+		      vers->options, vers->tag, vers->date, vers->ts_conflict, NULL, NULL, vers->tt_rcs, vers->bugid, NULL);
 
 #ifdef SERVER_SUPPORT
 	    if (server_active)

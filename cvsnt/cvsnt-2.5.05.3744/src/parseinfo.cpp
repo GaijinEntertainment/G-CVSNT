@@ -376,7 +376,6 @@ int parse_config (const char *cvsroot)
 	}
 	else if (strcasecmp (line, "Watcher") == 0)
 	{
-		global_watcher = xstrdup(p);
 	}
 	else
 	{

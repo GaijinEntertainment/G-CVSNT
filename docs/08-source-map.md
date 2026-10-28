@@ -26,24 +26,23 @@ sending requests) and the server half (executing against the repository), separa
 
 | File | Lines | Role |
 | --- | ---: | --- |
-| `rcs.cpp` | 7615 | RCS `,v` parsing, revision extraction, symbol/branch manipulation, rewriting. The most delicate file in the tree |
-| `server.cpp` | 7227 | Server request loop, request table (`requests[]`), response emission |
-| `client.cpp` | 6261 | Client request emission, response table (`responses[]`), response handlers |
-| `update.cpp` | 3480 | `update`: classification, checkout, merge, join |
-| `commit.cpp` | 2516 | `commit` |
-| `rcs_checkin.cpp` | 2236 | Writing a new revision into a `,v` file |
-| `import.cpp` | 1960 | `import` |
-| `log.cpp` | 1884 | `log` / `rlog` |
-| `main.cpp` | 1873 | Entry point, global options (`:736`), command table (`:159`) |
-| `buffer.cpp` | 1790 | The buffered-I/O abstraction the whole protocol sits on |
-| `mapping.cpp` | 1636 | Path/name mapping and virtual repositories |
-| `tag.cpp` | 1611 | `tag` / `rtag`, including branch creation |
-| `subr.cpp` | 1571 | Assorted helpers |
-| `edit.cpp` | 1546 | `edit`/`unedit`/`watch` |
-| `recurse.cpp` | 1527 | `start_recursion` — the directory walker every command uses |
-| `mkmodules.cpp` | 1456 | `CVSROOT` administrative file handling |
-| `entries.cpp` | 1429 | `CVS/Entries` reading and writing |
-| `history.cpp` | 1410 | `CVSROOT/history` |
+| `rcs.cpp` | 7693 | RCS `,v` parsing, revision extraction, symbol/branch manipulation, rewriting. The most delicate file in the tree |
+| `server.cpp` | 6684 | Server request loop, request table (`requests[]`), response emission |
+| `client.cpp` | 5750 | Client request emission, response table (`responses[]`), response handlers |
+| `update.cpp` | 3334 | `update`: classification, checkout, merge, join |
+| `commit.cpp` | 2442 | `commit` |
+| `rcs_checkin.cpp` | 2235 | Writing a new revision into a `,v` file |
+| `import.cpp` | 2045 | `import` |
+| `log.cpp` | 1887 | `log` / `rlog` |
+| `main.cpp` | 1847 | Entry point, global options (`long_options[]`), command table (`cmds[]`) |
+| `buffer.cpp` | 1457 | The buffered-I/O abstraction the whole protocol sits on |
+| `mapping.cpp` | 1637 | Path/name mapping and virtual repositories |
+| `tag.cpp` | 1640 | `tag` / `rtag`, including branch creation |
+| `subr.cpp` | 1634 | Assorted helpers |
+| `recurse.cpp` | 1540 | `start_recursion` — the directory walker every command uses |
+| `mkmodules.cpp` | 1419 | `CVSROOT` administrative file handling |
+| `entries.cpp` | 1373 | `CVS/Entries` reading and writing |
+| `history.cpp` | 1497 | `CVSROOT/history` |
 | `checkout.cpp` | 1388 | `checkout` / `export` |
 | `filesubr.cpp` | 1320 | POSIX filesystem helpers (Windows equivalents are in `windows-NT/`) |
 | `lock.cpp` | 1316 | Repository locking, both file-based and lock-server |

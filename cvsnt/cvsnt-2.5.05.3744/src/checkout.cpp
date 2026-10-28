@@ -1277,7 +1277,7 @@ static int checkout_proc(int argc, char **argv, const char *where_orig,
 		Register (entries, finfo.file,
 			  vers->vn_rcs ? vers->vn_rcs : "0",
 			  line, vers->options, vers->tag,
-			  vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, vers->edit_revision, vers->edit_tag, vers->edit_bugid, NULL);
+			  vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, vers->bugid, NULL);
 		xfree (line);
 	    }
 	    freevers_ts (&vers);

@@ -11,7 +11,6 @@
 #include "cvs.h"
 #include "savecwd.h"
 #include "fileattr.h"
-#include "edit.h"
 #include <getline.h>
 
 static int do_dir_proc(Node * p, void *closure);
@@ -805,13 +804,6 @@ static int do_recursion (struct recursion_frame *frame, int top_level)
 	/* read lock it if necessary */
 	if (should_readlock && mapped_repository && Reader_Lock (mapped_repository) != 0)
 	    error (1, 0, "read lock failed - giving up");
-
-	/* For the server, we handle notifications in a completely different
-	   place (server_notify).  For local, we can't do them here--we don't
-	   have writelocks in place, and there is no way to get writelocks
-	   here.  */
-	if (current_parsed_root->isremote)
-	    client_notify_check (repository, update_dir);
 
 	finfo_struct.repository = mapped_repository;
 	finfo_struct.update_dir = update_dir;

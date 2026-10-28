@@ -626,7 +626,7 @@ same name already exists in the repository.");
 						fn_root(finfo.fullname), vers->vn_rcs);
 				}
 				Register (entries, finfo.file, "0", vers->ts_user, vers->options,
-						vers->tag, NULL, NULL, NULL, NULL, (time_t)-1, NULL, NULL, bugid.c_str(), NULL);
+						vers->tag, NULL, NULL, NULL, NULL, (time_t)-1, bugid.c_str(), NULL);
 				++added_files;
 			}
 			else
@@ -701,7 +701,7 @@ cannot resurrect %s; RCS file removed by second party", fn_root(finfo.fullname))
 		    (void) sprintf (tmp, "Resurrected %s", fn_root(finfo.file));
 		    Register (entries, finfo.file, vers->vn_user, tmp,
 			      vers->options,
-			      vers->tag, vers->date, vers->ts_conflict, NULL, NULL, (time_t)-1, NULL, NULL, bugid.c_str(), NULL);
+			      vers->tag, vers->date, vers->ts_conflict, NULL, NULL, (time_t)-1, bugid.c_str(), NULL);
 		    xfree (tmp);
 
 		    /* XXX - bugs here; this really resurrect the head */
@@ -733,7 +733,7 @@ cannot resurrect %s; RCS file removed by second party", fn_root(finfo.fullname))
 		    (void) sprintf (tmp, "Added %s", fn_root(finfo.file));
 		    Register (entries, finfo.file, vers->vn_user, tmp,
 			      vers->options,
-			      vers->tag, vers->date, vers->ts_conflict, NULL, NULL, (time_t)-1, NULL, NULL, bugid.c_str(), NULL);
+			      vers->tag, vers->date, vers->ts_conflict, NULL, NULL, (time_t)-1, bugid.c_str(), NULL);
 		    xfree (tmp);
 		}
 		else
@@ -812,14 +812,12 @@ static int add_directory (struct file_info *finfo)
     List *entries = finfo->entries;
     const char *dir = finfo->file;
 	int err = 0;
-	CXmlNodePtr  node;
 
     char *rcsdir = NULL;
     struct saved_cwd cwd;
     char *message = NULL;
     const char *tag, *date;
     int nonbranch;
-    CXmlNodePtr  attrs;
 
     if (strchr (dir, '/') != NULL)
     {
@@ -846,12 +844,6 @@ static int add_directory (struct file_info *finfo)
 		nonbranch = 0;
 		date = NULL;
 	}
-
-    /* Remember the default attributes from this directory, so we can apply
-       them to the new directory.  */
-    fileattr_startdir (repository);
-	attrs = fileattr_copy(fileattr_find(NULL, "directory/default"));
-    fileattr_free ();
 
     /* now, remember where we were, so we can get back */
     if (save_cwd (&cwd))
@@ -928,18 +920,6 @@ static int add_directory (struct file_info *finfo)
 	    (void) umask (omask);
 	   fileattr_startdir(rcsdir);
        change_owner(CVS_Username);
-
-		/* Now set the default file attributes to the ones we inherited
-		from the parent directory.  */
-		node = fileattr_getroot();
-		if(!node->GetChild("directory")) node->NewNode("directory");
-		if(!node->GetChild("default")) node->NewNode("default");
-		if(attrs)
-		{
-			fileattr_paste(node, attrs);
-			fileattr_prune(node);
-			fileattr_free_subtree(attrs);
-		}
 		fileattr_write ();
 		fileattr_free ();
 	}
@@ -1027,7 +1007,7 @@ static int build_entry (const char *repository, const char *user, const char *op
      */
     line = (char*)xmalloc (strlen (user) + 20);
     (void) sprintf (line, "Initial %s", user);
-    Register (entries, user, "0", line, options, tag, (char *) 0, (char *) 0, NULL, NULL, (time_t)-1, NULL, NULL, bugid.c_str(), NULL);
+    Register (entries, user, "0", line, options, tag, (char *) 0, (char *) 0, NULL, NULL, (time_t)-1, bugid.c_str(), NULL);
     xfree (line);
     return (0);
 }

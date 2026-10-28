@@ -9,8 +9,6 @@
    GNU General Public License for more details.  */
 
 #include "cvs.h"
-#include "watch.h"
-#include "edit.h"
 #include "fileattr.h"
 #include "getline.h"
 #include "buffer.h"
@@ -2461,47 +2459,17 @@ static void server_write_renames()
 }
 
 struct notify_note {
-    /* Directory in which this notification happens.  malloc'd*/
     char *dir;
-
-    /* malloc'd.  */
     char *filename;
-
-    /* The following three all in one malloc'd block, pointed to by TYPE.
-       Each '\0' terminated.  */
-    /* "E" or "U".  */
-    char *type;
-	char *time;
-	char *hostname;
-	char *pathname;
-    char *watches;
-	char *tag;
-	char *flags;
-	char *bugid;
-	char *message;
-
-	/* User doing notify */
-	char *user;
-
     struct notify_note *next;
 };
 
 static struct notify_note *notify_list;
-/* Used while building list, to point to the last node that already exists.  */
 static struct notify_note *last_node;
-
-static char *notify_user;
-
-static void serve_notify_user(char *arg)
-{
-	if(!verify_admin())
-	  error(1,0,"Only repository administrators can unedit other users.");
-	notify_user = xstrdup(arg);
-}
 
 static void serve_notify (char *arg)
 {
-    struct notify_note *pnew = NULL;
+    struct notify_note *pnew;
     char *data = NULL;
     int status;
 
@@ -2509,145 +2477,40 @@ static void serve_notify (char *arg)
 	return;
 
     if (dir_name == NULL)
-	goto error;
-
-    pnew = (struct notify_note *) xmalloc (sizeof (struct notify_note));
-    if (pnew == NULL)
-    {
-		error(1,ENOMEM,"Alloc failed");
-    }
-    pnew->dir = (char*)xmalloc (strlen (dir_name) + 1);
-    pnew->filename = (char*)xmalloc (strlen (arg) + 1);
-    if (pnew->dir == NULL || pnew->filename == NULL)
-    {
-		if (pnew->dir != NULL)
-			xfree (pnew->dir);
-		xfree (pnew);
-		error(1,ENOMEM,"Alloc failed");
-		return;
-    }
-    strcpy (pnew->dir, dir_name);
-    strcpy (pnew->filename, arg);
-	pnew->user = notify_user?xstrdup(notify_user):xstrdup(getcaller());
+	error(1,0,"Protocol error; misformed Notify request");
 
     status = server_read_line (buf_from_net, &data, (int *) NULL);
-    if (status != 0)
-    {
-		if (status == -2)
-			error(1,ENOMEM,"Alloc failed");
-		else
-		{
-			if (status == -1)
-				error(1,0,"end of file reading notification for %s", arg);
-			else
-				error(1,0,"error reading notification for %s", arg);
-		}
-		xfree (pnew->filename);
-		xfree (pnew->dir);
-		xfree (pnew->user);
-		xfree (pnew);
-    }
+    if (status == -2)
+	error(1,ENOMEM,"Alloc failed");
+    else if (status == -1)
+	error(1,0,"end of file reading notification for %s", arg);
+    else if (status != 0)
+	error(1,0,"error reading notification for %s", arg);
+    xfree (data);
+
+    pnew = (struct notify_note *) xmalloc (sizeof (struct notify_note));
+    pnew->dir = xstrdup (dir_name);
+    pnew->filename = xstrdup (arg);
+    pnew->next = NULL;
+
+    if (last_node == NULL)
+	notify_list = pnew;
     else
-    {
-	char *cp;
-
-	pnew->type = data;
-
-	if (data[1] != '\t')
-	    goto error;
-	data[1] = '\0';
-	cp = data + 2;
-	pnew->time = cp;
-	cp = strchr (cp, '\t');
-	if (cp == NULL)
-	    goto error;
-	*(cp++)='\0';
-	pnew->hostname = cp;
-	cp = strchr (cp, '\t');
-	if (cp == NULL)
-	    goto error;
-	*(cp++)='\0';
-	pnew->pathname = cp;
-	cp = strchr (cp, '\t');
-	if (cp == NULL)
-	    goto error;
-	*cp++ = '\0';
-	pnew->watches = cp;
-	cp = strchr (cp, '\t');
-	if (cp != NULL) /* Old-style notifies stopped here */
-	{
-		*(cp++)='\0';
-		pnew->tag = cp;
-		cp = strchr (cp, '\t');
-		if (cp == NULL)
-			goto error;
-		*(cp++)='\0';
-		pnew->flags = cp;
-		cp = strchr (cp, '\t');
-		if (cp == NULL)
-			goto error;
-		*cp++ = '\0';
-		pnew->bugid = cp;
-		cp = strchr (cp, '\t');
-		if (cp == NULL)
-			goto error;
-		*cp++ = '\0';
-		pnew->message = cp;
-		cp = strchr (cp, '\t');
-		if (cp != NULL)
-		{
-			*(cp++)='\0';
-		}
-		if(!*pnew->bugid)
-			pnew->bugid=NULL;
-		if(!*pnew->tag)
-			pnew->tag=NULL;
-	}
-	else
-	{
-		pnew->flags = NULL;
-		pnew->tag = NULL;
-		pnew->bugid = NULL;
-		pnew->message = NULL;
-	}
-
-	pnew->next = NULL;
-
-	if (last_node == NULL)
-	{
-	    notify_list = pnew;
-	}
-	else
-	    last_node->next = pnew;
-	last_node = pnew;
-    }
-    return;
-  error:
-	xfree (data);
-	xfree (pnew);
-	error(1,0,"Protocol error; misformed Notify request");
+	last_node->next = pnew;
+    last_node = pnew;
 }
 
-/* Process all the Notify requests that we have stored up.  Returns 0
-   if successful, if not prints error message (via error()) and
-   returns negative value.  */
+/* Old clients resend unacked notifications.  */
 static int server_notify ()
 {
     struct notify_note *p;
     char *repos;
 	const char *mapped_repos;
-	int can_notify;
-	int err = 0;
 
 	if(!notify_list)
 	   return 0;
 
-	can_notify = check_command_legal_p("edit"); /* Readers can't notify */
-	err = 0;
-
-	/* For edit/unedit these are sent without a prior command */
-	if(!server_command_name)
-		server_command_name=(*notify_list->type=='U')?"unedit":"edit";
+	error (0, 0, "edit and watch are not supported by this server");
 
 	while (notify_list != NULL)
     {
@@ -2661,17 +2524,7 @@ static int server_notify ()
 		xfree(repos);
 		repos = (char*)mapped_repos;
 
-		if (can_notify)
-		{
-			lock_dir_for_write (repos);
-
-			fileattr_startdir (repos);
-
-			err += notify_do (*notify_list->type, notify_list->filename, notify_list->user,
-				notify_list->time, notify_list->hostname, notify_list->pathname, notify_list->watches, repos, notify_list->tag, notify_list->flags, notify_list->bugid, notify_list->message);
-
-		}
-buf_output0 (buf_to_net, "Notified ");
+		buf_output0 (buf_to_net, "Notified ");
 		{
 			char *dir = notify_list->dir + strlen (server_temp_dir) + 1;
 			if (dir[0] == '\0')
@@ -2687,28 +2540,15 @@ buf_output0 (buf_to_net, "Notified ");
 		buf_append_char (buf_to_net, '\n');
 		xfree (repos);
 
-		if (can_notify)
-		{
-			fileattr_write ();
-			fileattr_free ();
-
-			Lock_Cleanup ();
-		}
-
 		p = notify_list->next;
-		xfree (notify_list->type); /* Start of buffer, all other pointers are relative to this */
+		xfree (notify_list->dir);
+		xfree (notify_list->filename);
 		xfree (notify_list);
 		notify_list = p;
     }
 
     last_node = NULL;
-	xfree(notify_user);
-
-    /* The code used to call fflush (stdout) here, but that is no
-       longer necessary.  The data is now buffered in buf_to_net,
-       which will be flushed by the caller, do_cvs_command.  */
-
-    return err;
+    return 0;
 }
 
 static int argument_count;
@@ -2877,12 +2717,6 @@ error ENOMEM Virtual memory exhausted.\n";
  */
 static int check_command_legal_p (const char *cmd_name)
 {
-/*
- * GAIJIN: disable watch
- */
-if (cmd_name && (strcmp(cmd_name, "edit")==0 || strcmp(cmd_name, "unedit")==0 || strcmp(cmd_name, "watch")==0))
-    return 0;
-
     /* Right now, only pserver notices illegal commands -- namely,
      * write attempts by a read-only user.  Therefore, if CVS_Username
      * is not set, this just returns 1, because CVS_Username unset
@@ -3059,6 +2893,16 @@ static void do_cvs_command (const char *cmd_name, int (*command)(int argc, char 
 
     server_write_entries();
 	server_write_renames();
+    server_notify ();
+
+    if (!command)
+    {
+	buf_output0 (buf_to_net, "E ");
+	buf_output0 (buf_to_net, program_name);
+	buf_output0 (buf_to_net, " [server aborted]: edit and watch are not supported by this server\n\
+error  \n");
+	goto free_args_and_return;
+    }
 
     /* Global `command_name' is probably "server" right now -- only
        serve_export() sets it to anything else.  So we will use local
@@ -3077,8 +2921,6 @@ error  \n");
 
 	server_command_name = cmd_name; /* This is set in server_main too... just to be safe */
 
-    server_notify ();
-
 	/* Flush out any pending data.  */
     buf_flush (buf_to_net, 1);
 
@@ -3086,8 +2928,6 @@ error  \n");
 
     buf_flush(stderr_buf, 1);
     buf_flush(stdout_buf, 1);
-
-    server_notify ();
 
 	lib.CloseAllTriggers(); /* This command has finished */
 	tf_loaded=false;
@@ -3308,8 +3148,7 @@ static int kill_scratched_file;
 
 void server_register(const char *name, const char *version, const char *timestamp, const char *options,
 				const char *tag, const char *date, const char *conflict, const char *merge_from_tag_1,
-				const char *merge_from_tag_2, time_t rcs_timestamp,
-				const char *edit_revision, const char *edit_tag, const char *edit_bugid, const char *md5)
+				const char *merge_from_tag_2, time_t rcs_timestamp, const char *bugid, const char *md5)
 {
     int len;
 	char *temp_options;
@@ -3317,15 +3156,13 @@ void server_register(const char *name, const char *version, const char *timestam
     if (options == NULL)
 		options = "";
 
-	TRACE(1,"server_register(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
+	TRACE(1,"server_register(%s, %s, %s, %s, %s, %s, %s, %s, %s, %s, %s)",
 			PATCH_NULL(name), PATCH_NULL(version), timestamp ? timestamp : "", PATCH_NULL(options),
 			tag ? tag : "", date ? date : "",
-			conflict ? conflict : "", 
+			conflict ? conflict : "",
 			merge_from_tag_1 ? merge_from_tag_1 : "",
 			merge_from_tag_2 ? merge_from_tag_2 : "",
-			edit_revision?edit_revision:"",
-			edit_tag?edit_tag:"",
-			edit_bugid?edit_bugid:"",
+			bugid?bugid:"",
 			md5?md5:"");
 
     if (entries_line != NULL)
@@ -3363,6 +3200,8 @@ void server_register(const char *name, const char *version, const char *timestam
 	len += strlen (timestamp);
 	if(md5)
 	len += strlen(md5);
+	if(bugid)
+	len += strlen(bugid);
 
 	len += 128; // This is for patching the md5 in later...
     
@@ -3399,7 +3238,8 @@ void server_register(const char *name, const char *version, const char *timestam
 	sprintf (entries_ex_line, "/%s/%s/%s/", name, merge_from_tag_1 ? merge_from_tag_1 : "",merge_from_tag_2 ? merge_from_tag_2 : "");
 	if(rcs_timestamp!=(time_t)-1)
 		sprintf (entries_ex_line+strlen(entries_ex_line), "%" TIME_T_SPRINTF "d", rcs_timestamp);
-	sprintf(entries_ex_line+strlen(entries_ex_line),"/%s/%s/%s/%s/", edit_revision?edit_revision:"",edit_tag?edit_tag:"",edit_bugid?edit_bugid:"",md5?md5:"");
+	/* Two empty slots keep the field layout */
+	sprintf(entries_ex_line+strlen(entries_ex_line),"///%s/%s/", bugid?bugid:"", md5?md5:"");
 }
 
 void server_scratch (const char *fname)
@@ -3684,40 +3524,9 @@ static void serve_release (char *arg)
     do_cvs_command ("release", release);
 }
 
-static void serve_watch_on (char *arg)
+static void serve_edit_watch (char *arg)
 {
-    do_cvs_command ("watch", watch_on);
-}
-
-static void serve_watch_off (char *arg)
-{
-    do_cvs_command ("watch", watch_off);
-}
-
-static void serve_watch_add (char *arg)
-{
-    do_cvs_command ("watch", watch_add);
-}
-
-static void serve_watch_remove (char *arg)
-{
-    do_cvs_command ("watch", watch_remove);
-}
-
-static void serve_watchers (char *arg)
-{
-    do_cvs_command ("watchers", watchers);
-}
-
-static void serve_editors (char *arg)
-{
-    do_cvs_command ("editors", editors);
-}
-
-static void serve_editors_edit (char *arg)
-{
-	serve_argument("-c");
-    do_cvs_command ("editors", editors);
+    do_cvs_command ("watch", NULL);
 }
 
 static void serve_rename(char *arg)
@@ -3899,21 +3708,12 @@ static void serve_expand_modules(char *arg)
 
 static void serve_noop (char *arg)
 {
-	/* edit/unedit notifications are logged from here, not from a command routed
-	   through do_cvs_command, so name the command "noop" rather than leaving
-	   $cmd as the preceding command. */
-	const char *saved_command_name = server_command_name;
-	server_command_name = "noop";
-
     server_write_entries();
 	server_write_renames();
 	if(server_notify ())
 		buf_output0 (buf_to_net, "error \n");
 	else
 		buf_output0 (buf_to_net, "ok\n");
-	access_log_flush (); /* server_notify may have logged edit/unedit records */
-
-	server_command_name = saved_command_name;
     buf_flush (buf_to_net, 1);
 }
 
@@ -4057,12 +3857,6 @@ static void serve_read_cvswrappers(char *arg)
 static void serve_read_cvsignore(char *arg)
 {
 	serve_read_generic(CVSROOTADM_IGNORE);
-}
-
-static void serve_error_if_reader(char *arg)
-{
-  if(!check_command_legal_p("edit"))
-    error(1,0,"%s",arg);
 }
 
 static void serve_init (char *arg)
@@ -4797,7 +4591,6 @@ struct request requests[] =
   REQ_LINE("UseUnchanged", serve_enable_unchanged, RQ_ENABLEME | RQ_ROOTLESS),
   REQ_LINE("Unchanged", serve_unchanged, RQ_ESSENTIAL),
   REQ_LINE("Notify", serve_notify, 0),
-  REQ_LINE("NotifyUser", serve_notify_user, 0),
   REQ_LINE("Questionable", serve_questionable, 0),
   REQ_LINE("Utf8", serve_utf8, RQ_ROOTLESS), /* Depreciated, but checked for option support by server */
   REQ_LINE("Case", NULL, 0), /* Deprecated but we send it for older clients */
@@ -4840,13 +4633,13 @@ struct request requests[] =
   REQ_LINE("export", serve_export, 0),
   REQ_LINE("history", serve_history, 0),
   REQ_LINE("release", serve_release, 0),
-  REQ_LINE("watch-on", serve_watch_on, 0),
-  REQ_LINE("watch-off", serve_watch_off, 0),
-  REQ_LINE("watch-add", serve_watch_add, 0),
-  REQ_LINE("watch-remove", serve_watch_remove, 0),
-  REQ_LINE("watchers", serve_watchers, 0),
-  REQ_LINE("editors", serve_editors, 0),
-  REQ_LINE("editors-edit", serve_editors_edit, 0),
+  REQ_LINE("watch-on", serve_edit_watch, 0),
+  REQ_LINE("watch-off", serve_edit_watch, 0),
+  REQ_LINE("watch-add", serve_edit_watch, 0),
+  REQ_LINE("watch-remove", serve_edit_watch, 0),
+  REQ_LINE("watchers", serve_edit_watch, 0),
+  REQ_LINE("editors", serve_edit_watch, 0),
+  REQ_LINE("editors-edit", serve_edit_watch, 0),
   REQ_LINE("init", serve_init, 0),
   REQ_LINE("annotate", serve_annotate, 0),
   REQ_LINE("rannotate", serve_rannotate, 0),
@@ -4860,7 +4653,6 @@ struct request requests[] =
   REQ_LINE("read-cvsrc2", serve_read_cvsrc2, 0),
   REQ_LINE("read-cvsignore", serve_read_cvsignore, 0),
   REQ_LINE("read-cvswrappers", serve_read_cvswrappers, 0),
-  REQ_LINE("Error-If-Reader", serve_error_if_reader, 0),
   REQ_LINE("server-codepage", serve_server_codepage, 0),
   REQ_LINE("client-version", serve_client_version, 0),
 
@@ -6739,39 +6531,6 @@ char *normalise_options(const char *options, int quiet, const char *file)
 	return temp_options;
 #endif /* Server_support */
 }
-
-#ifdef SERVER_SUPPORT
-void server_send_baserev(struct file_info *finfo, const char *basefile, const char *type)
-{
-	FILE *f;
-	unsigned long len;
-	cvs_direct_response_begin ();
-buf_output0(buf_to_net,"Update-baserev ");
-	output_dir (finfo->update_dir, finfo->repository);
-	server_buf_output0(buf_to_net,finfo->file);
-	buf_output0(buf_to_net,"\n");
-	buf_output0(buf_to_net,type);
-	buf_output0(buf_to_net,"\n");
-	if(type[0]=='U')
-	{
-		f = fopen(basefile,"rb");
-		if(!f)
-			buf_output0(buf_to_net,"0\n");
-		else
-		{
-			char tmp[BUFSIZ];
-			fseek(f,0,SEEK_END);
-			len = (unsigned long)ftell(f);
-			fseek(f,0,0);
-			snprintf(tmp,sizeof(tmp),"%lu\n",len);
-			buf_output0(buf_to_net,tmp);
-			while((len=fread(tmp,1,sizeof(tmp),f))>0)
-				buf_output(buf_to_net,tmp,(int)len);
-			fclose(f);
-		}
-	}
-}
-#endif
 
 int precommand_proc(void *param, const trigger_interface *cb)
 {

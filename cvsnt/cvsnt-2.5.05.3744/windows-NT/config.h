@@ -555,6 +555,4 @@ extern int win32_global_codepage;
 }
 #endif
 
-int win32_set_edit_acl(const char *filename);
-
 #endif

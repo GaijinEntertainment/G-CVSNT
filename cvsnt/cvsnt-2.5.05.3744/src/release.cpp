@@ -243,24 +243,6 @@ int release (int argc, char **argv)
 			}
 		}
 
-		if (!(current_parsed_root->isremote
-			&& (!supported_request ("noop")
-				|| !supported_request ("Notify")))
-	    )
-		{
-			/* We are chdir'ed into the directory in question.  
-			So don't pass args to unedit.  */
-			int argc = 1;
-			char *argv[3];
-			argv[0] = "dummy";
-			argv[1] = NULL;
-			err += unedit (argc, argv);
-			/* Unedit will have killed our lockserver connection */
-			if(!current_parsed_root->isremote)
-				lock_register_client(CVS_Username,current_parsed_root->directory);
-
-		}
-
         if (current_parsed_root->isremote)
         {
 			send_to_server ("Argument ", 0);

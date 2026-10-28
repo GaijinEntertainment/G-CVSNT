@@ -225,7 +225,7 @@ cannot remove file `%s' which has a sticky tag of `%s'",
 	(void) strcpy (fname, "-");
 	(void) strcat (fname, vers->vn_user);
 	Register (finfo->entries, finfo->file, fname, vers->ts_rcs, vers->options,
-		  vers->tag, vers->date, vers->ts_conflict, NULL, NULL, vers->tt_rcs, vers->edit_revision, vers->edit_tag, vers->edit_bugid, NULL);
+		  vers->tag, vers->date, vers->ts_conflict, NULL, NULL, vers->tt_rcs, vers->bugid, NULL);
 	if (!quiet)
 	    error (0, 0, "scheduling `%s' for removal", fn_root(finfo->fullname));
 	removed_files++;

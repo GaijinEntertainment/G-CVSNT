@@ -228,32 +228,6 @@ static const char *const cvswrappers_contents[] = {
     NULL
 };
 
-static const char *const notify_contents[] = {
-    "# The \"notify\" file controls where notifications from watches set by\n",
-    "# \"cvs watch add\" or \"cvs edit\" are sent.  The first entry on a line is\n",
-    "# a regular expression which is tested against the directory that the\n",
-    "# change is being made to, relative to the $CVSROOT.  If it matches,\n",
-    "# then the remainder of the line is a filter program that should contain\n",
-    "# one occurrence of %s for the user to notify, and information on its\n",
-    "# standard input.\n",
-    "#\n",
-    "# \"ALL\" or \"DEFAULT\" can be used in place of the regular expression.\n",
-    "#\n",
-    "# You may specify a format string as part of the\n",
-    "# filter.  The format characters are:\n",
-    "#\n",
-    "#   s = user being notified\n",
-    "#   b = Bug identifier\n",
-    "#   m = Message supplied on command line\n",
-    "#   d = Date of action\n",
-    "#   u = User performing the unedit\n",
-	"#   t = tag or branch being edited\n",
-    "#\n",
-    "# For example:\n",
-    "#ALL mail %s -s \"CVS notification for bug %b\"\n",
-    NULL
-};
-
 static const char *const modules_contents[] = {
     "# Three different line formats are valid:\n",
     "#	key	-a    aliases...\n",
@@ -346,10 +320,6 @@ static const char *const config_contents[] = {
     "#   'always' or 'yes' to always reread the log regardless\n",
     "#   'never' or 'no' (default) to never reread the log\n",
     "#RereadLogAfterVerify=no\n",
-	"\n",
-	"# Set 'Watcher' to set a user who gets all notify events within the repository whether\n",
-	"# or not the ifle is watched.\n",
-	"#Watcher=watch_user",
     NULL
 };
 
@@ -477,20 +447,6 @@ static const char *const tag_email_contents[] = {
     NULL
 };
 
-static const char *const notify_email_contents[] = {
-    "# The \"notify_email\" file is used to control templates for emails sent\n",
-    "# when notifying users.\n",
-    "#\n",
-    "# The first entry on a line is a regular expression which is tested\n",
-    "# against the directory that the change is being made to, relative to the\n",
-    "# $CVSROOT.  For the first match that is found, then the remainder of the\n",
-    "# line is the name of the file that contains the template.\n",
-    "#\n",
-    "# If the repository name does not match any of the regular expressions in this\n",
-    "# file, the \"DEFAULT\" line is used, if it is specified.\n",
-    NULL
-};
-
 static const char *const shadow_contents[] = {
     "# The \"shadow\" file is used to control automatic checkouts.\n",
     "#\n",
@@ -548,9 +504,6 @@ static const struct admin_file filelist[] = {
     {CVSROOTADM_WRAPPER,
 	"a %s file can be used to specify files to treat as wrappers",
 	cvswrappers_contents},
-    {CVSROOTADM_NOTIFY,
-	"a %s file can be used to specify where notifications go",
-	notify_contents},
     {CVSROOTADM_MODULES,
 	/* modules is special-cased in mkmodules.  */
 	NULL,
@@ -630,9 +583,6 @@ static const struct admin_file filelist[] = {
 	{"tag_email",
 	"a %s file contains the list of templates for tag emails",
 	tag_email_contents},
-	{"notify_email",
-	"a %s file contains the list of templates for notify emails",
-	notify_email_contents},
 	{"shadow",
 	"a %s file contains the list of files to checkout after a successful commit",
 	shadow_contents},

@@ -1106,331 +1106,44 @@ def t_server_pipeout_order(r):
               % (i_body, i_tail, out))
 
 
-def fresh_checkout(r, sub, module="m"):
-    # One home for the throwaway-checkout idiom the watch tests share.
-    wcroot = os.path.join(r.root, sub)
-    os.makedirs(wcroot)
-    r.cvs(["checkout", module], cwd=wcroot)
-    return os.path.join(wcroot, module)
-
-
-@test("a watched file checks out read-only, an unwatched one writable")
-def t_watched_readonly(r):
-    # "Is this file watched?" is answered per checked-out file from the
-    # repository's CVS/fileattr.xml.  The lookup must be per file (w.txt
-    # watched, n.txt not) and must use fncmp semantics: on Windows a
-    # case-variant name attribute still matches.
-    r.import_tree("m", {"w.txt": "watched\n", "n.txt": "not watched\n"})
-    attrdir = os.path.join(r.repo, "m", "CVS")
-    attr = os.path.join(attrdir, "fileattr.xml")
-
-    write(attr, '<?xml version="1.0"?>\n<fileattr>\n'
-                '  <file name="w.txt">\n    <watched/>\n  </file>\n'
-                '</fileattr>\n')
-    wc = fresh_checkout(r, "wcA")
-    check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
-          "watched w.txt checked out writable")
-    check(os.access(os.path.join(wc, "n.txt"), os.W_OK),
-          "unwatched n.txt checked out read-only")
-
-    # The update path answers the same question when re-creating a file.
-    os.chmod(os.path.join(wc, "w.txt"), 0o644)
-    os.remove(os.path.join(wc, "w.txt"))
-    r.cvs(["update"], cwd=wc)
-    check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
-          "watched w.txt restored writable by update")
-
-    if sys.platform == "win32":
-        write(attr, '<?xml version="1.0"?>\n<fileattr>\n'
-                    '  <file name="W.TXT">\n    <watched/>\n  </file>\n'
-                    '</fileattr>\n')
-        wc = fresh_checkout(r, "wcB")
-        check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
-              "case-variant watched name not honoured on Windows")
-
-    os.remove(attr)
-    wc = fresh_checkout(r, "wcC")
-    check(os.access(os.path.join(wc, "w.txt"), os.W_OK),
-          "w.txt still read-only after the watch attribute was removed")
-
-
-@test("watch on persists to the repository and watch off reverts it")
-def t_watch_on_off_persist(r):
-    # The companion to the test above, which writes fileattr.xml by hand.
-    # "watch on"/"watch off" mutate the fileattr tree directly with
-    # NewNode/Delete rather than through fileattr_setvalue, so they have to
-    # raise fileattr's modified flag themselves; without it fileattr_write()
-    # early-returns and the command is a silent no-op.  The observable
-    # effect is on a *fresh* checkout: watch on makes it read-only, watch
-    # off makes it writable again.
+@test("a fileattr.xml with an old server's watch nodes checks out writable and commits")
+def t_old_watch_data_ignored(r):
     r.import_tree("m", {"w.txt": "watched\n"})
+    write(os.path.join(r.repo, "m", "CVS", "fileattr.xml"),
+          '<?xml version="1.0"?>\n<fileattr>\n'
+          '  <directory><default><watched/></default></directory>\n'
+          '  <file name="w.txt">\n    <watched/>\n'
+          '    <editor name="someone"><time>x</time><hostname>h</hostname></editor>\n'
+          '  </file>\n</fileattr>\n')
     wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["watch", "on"], cwd=wc)
-    if check(os.path.isfile(attr), "watch on wrote no " + attr):
-        check("<watched" in read(attr),
-              "watch on wrote no <watched/> node:\n" + read(attr))
-    check(not os.access(os.path.join(fresh_checkout(r, "wcOn"), "w.txt"), os.W_OK),
-          "w.txt checked out writable after watch on")
-
-    r.cvs(["watch", "off"], cwd=wc)
-    if os.path.isfile(attr):
-        check("<watched" not in read(attr),
-              "watch off left the <watched/> node behind:\n" + read(attr))
-    check(os.access(os.path.join(fresh_checkout(r, "wcOff"), "w.txt"), os.W_OK),
-          "w.txt still checked out read-only after watch off")
-
-    # A directory with no files reaches only onoff_filesdoneproc, so this
-    # pins the doneproc's own modified-flag raising: without it the
-    # directory default is never written.
-    os.makedirs(os.path.join(wc, "empty"))
-    r.cvs(["add", "empty"], cwd=wc)
-    r.cvs(["watch", "on"], cwd=os.path.join(wc, "empty"))
-    subattr = os.path.join(r.repo, "m", "empty", "CVS", "fileattr.xml")
-    if check(os.path.isfile(subattr),
-             "watch on in a files-free directory wrote no " + subattr):
-        content = read(subattr)
-        check("<default" in content and "<watched" in content,
-              "directory default watched node not persisted:\n" + content)
-
-    # Explicit file arguments keep setting_default at 0, so the doneproc
-    # never runs and only the file-proc flag can trigger the write.
-    r.cvs(["watch", "on", "w.txt"], cwd=wc)
-    check("<watched" in read(attr),
-          "per-file watch on did not persist:\n" + read(attr))
-    r.cvs(["watch", "off", "w.txt"], cwd=wc)
-    check("<watched" not in read(attr),
-          "per-file watch off left the watched node:\n" + read(attr))
-
-    # watch off on a never-watched file must write nothing: the bare
-    # <file> node created for the lookup carries no flag.  cvs add
-    # legitimately writes a fileattr.xml (directory owner, an empty
-    # file node), so the pin is that watch off leaves it byte-identical.
-    virgin = os.path.join(wc, "virgin")
-    os.makedirs(virgin)
-    r.cvs(["add", "virgin"], cwd=wc)
-    write(os.path.join(virgin, "v.txt"), "v\n")
-    r.cvs(["add", "v.txt"], cwd=virgin)
-    r.cvs(["commit", "-m", "add v"], cwd=virgin)
-    vattr = os.path.join(r.repo, "m", "virgin", "CVS", "fileattr.xml")
-    before = read(vattr) if os.path.isfile(vattr) else None
-    r.cvs(["watch", "off", "v.txt"], cwd=virgin)
-    after = read(vattr) if os.path.isfile(vattr) else None
-    check_eq(after, before,
-             "watch off on a never-watched file rewrote fileattr.xml")
-
-    # The discriminating case: an argument-less watch off over a watched
-    # file and a never-watched one.  The watched file raises the per-tree
-    # flag, so a bare <file> node made for the never-watched lookup would
-    # be persisted along with it.  cvs add may already have written a
-    # node for v.txt, so the pin is that watch off adds none.
-    write(os.path.join(virgin, "u.txt"), "u" + chr(10))
-    r.cvs(["add", "u.txt"], cwd=virgin)
-    r.cvs(["commit", "-m", "add u"], cwd=virgin)
-    r.cvs(["watch", "on", "u.txt"], cwd=virgin)
-    v_nodes = read(vattr).count('name="v.txt"')
-    r.cvs(["watch", "off"], cwd=virgin)
-    content = read(vattr)
-    check("<watched" not in content,
-          "argument-less watch off left a watched node:" + chr(10) + content)
-    check_eq(content.count('name="v.txt"'), v_nodes,
-             "watch off created a bare <file> node for never-watched v.txt:"
-             + chr(10) + content)
+    check(os.access(os.path.join(wc, "w.txt"), os.W_OK),
+          "w.txt checked out read-only from old watch data")
+    write(os.path.join(wc, "w.txt"), "changed\n")
+    write(os.path.join(wc, "n.txt"), "new\n")
+    r.cvs(["add", "n.txt"], cwd=wc)
+    r.cvs(["commit", "-m", "change"], cwd=wc)
+    check("changed" in read(os.path.join(r.repo, "m", "w.txt,v")), "the commit did not reach w.txt,v")
+    check(os.access(os.path.join(wc, "n.txt"), os.W_OK), "n.txt read-only from the old directory default")
+    rc, out = r.cvs(["watch", "on"], cwd=wc, expect_ok=False)
+    check(rc != 0 and "Unknown command: `watch'" in out, "cvs watch is still a command:\n" + out)
 
 
-@test("watch add persists a watcher that cvs watchers reports")
-def t_watch_add_persist(r):
-    # watch_modify_watchers builds the <watcher> node with NewNode/
-    # NewAttribute, which likewise has to mark the tree modified for
-    # fileattr_write() to write anything out.
+@test("the server acks an old client's Notify and refuses watch requests")
+def t_server_edit_watch_compat(r):
     r.import_tree("m", {"a.txt": "one\n"})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
+    root = r.repo.replace(os.sep, "/")
+    notify = ["Directory .", root + "/m", "Notify a.txt", "E\tThu Jan  1 00:00:00 2026 GMT\thost\t/wc\tEUC"]
+    out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES]
+                         + notify + ["noop"] + notify + ["Argument a.txt", "watch-on"])[1]
+    lines = out.split("\n")
 
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    if check(os.path.isfile(attr), "watch add wrote no " + attr):
-        check("<watcher" in read(attr),
-              "watch add wrote no <watcher> node:\n" + read(attr))
-
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check([l for l in out.splitlines() if "a.txt" in l and "edit" in l],
-          "cvs watchers does not report the edit watcher just added:\n" + out)
-
-    # Re-add to the existing watcher: the lookup must find the existing
-    # <watcher> (a dangling else once made that lookup dead and every
-    # re-add appended a duplicate node), so the persisted tree holds ONE
-    # watcher carrying both actions.
-    r.cvs(["watch", "add", "-a", "commit", "a.txt"], cwd=wc)
-    content = read(attr)
-    check("<commit" in content,
-          "re-add did not persist the commit action:\n" + content)
-    check_eq(content.count("<watcher"), 1,
-             "re-add duplicated the watcher node:\n" + content)
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check([l for l in out.splitlines() if "a.txt" in l and "commit" in l],
-          "cvs watchers does not report the commit action just added:\n" + out)
-
-    # Same-action re-add: the presence guard keeps one <edit> child.
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    content = read(attr)
-    check_eq(content.count("<edit"), 1,
-             "same-action re-add duplicated the edit node:\n" + content)
-
-    # -a none adds nothing, so it must not rewrite the tree or persist
-    # an empty watcher.
-    before = read(attr)
-    r.cvs(["watch", "add", "-a", "none", "a.txt"], cwd=wc)
-    check_eq(read(attr), before,
-             "-a none rewrote fileattr.xml without changing anything")
-
-    # ... and against a never-watched file it must not persist an empty
-    # <watcher> husk either: the creation block raises no flag.
-    write(os.path.join(wc, "b.txt"), "b" + chr(10))
-    r.cvs(["add", "b.txt"], cwd=wc)
-    r.cvs(["commit", "-m", "add b"], cwd=wc)
-    before = read(attr)
-    r.cvs(["watch", "add", "-a", "none", "b.txt"], cwd=wc)
-    after = read(attr)
-    check_eq(after, before,
-             "-a none on a never-watched file rewrote fileattr.xml")
-
-    # Argument-less adds go through the directory-default branch of the
-    # braces fix; the re-add must find the existing default watcher.
-    r.cvs(["watch", "add", "-a", "edit"], cwd=wc)
-    r.cvs(["watch", "add", "-a", "commit"], cwd=wc)
-    content = read(attr)
-    check_eq(content.count("<default"), 1,
-             "argument-less add duplicated the default node:\n" + content)
-    check_eq(content.count("<watcher"), 3,  # a.txt, b.txt, directory default
-             "argument-less re-add duplicated a watcher node:\n" + content)
-
-
-@test("edit persists temp watches; unedit and commit remove them again")
-def t_watch_temp_records(r):
-    # cvs edit notifies 'E', which records a temp_edit/temp_commit/
-    # temp_unedit watcher for the editor; unedit ('U') and commit ('C')
-    # hand remove_temp to watch_modify_watchers.  Before the persistence
-    # fix neither half reached the file.  The emptied <watcher> and the
-    # bare <file> node it hung on must go with the last action.
-    r.import_tree("m", {"a.txt": "one" + chr(10), "b.txt": "two" + chr(10)})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["edit", "a.txt"], cwd=wc)
-    r.cvs(["edit", "b.txt"], cwd=wc)
-    if not check(os.path.isfile(attr) and "<temp_edit" in read(attr),
-                 "cvs edit persisted no temp watch record"):
-        return
-    check_eq(read(attr).count("<temp_edit"), 2,
-             "temp_edit records after editing two files:" + chr(10) + read(attr))
-
-    write(os.path.join(wc, "a.txt"), "one more" + chr(10))
-    r.cvs(["commit", "-m", "edit a"], cwd=wc)
-    content = read(attr)
-    check('name="a.txt"' not in content,
-          "commit left the temp watcher or a bare <file> node for a.txt:"
-          + chr(10) + content)
-    check("<temp_edit" in content,
-          "committing a.txt dropped b.txt's temp record too:" + chr(10) + content)
-
-    r.cvs(["unedit", "b.txt"], cwd=wc)
-    content = read(attr)
-    check("<watcher" not in content,
-          "unedit left a temp watcher behind:" + chr(10) + content)
-
-
-@test("watch remove takes the watcher back out again")
-def t_watch_remove(r):
-    # watch_modify_watchers looks for an existing <watcher> for this user
-    # before deciding whether to create one.  Two control-flow bugs broke
-    # that search: a dangling else overwrote a successful per-file lookup
-    # with a directory/default one that cannot match, and the "nothing
-    # here to remove" guard tested the handle instead of its absence.
-    # Together they sent "watch remove" down the create-a-watcher branch,
-    # where it appended a fresh empty <watcher> and deleted nothing, so
-    # the watcher it was asked to drop survived.
-    r.import_tree("m", {"a.txt": "one\n"})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    # Fields are tab separated: name, user, then one per watched action.
-    # Match on whole fields so a repository path that happens to contain
-    # the word cannot stand in for a watcher line.
-    added = [l for l in out.splitlines() if "edit" in l.split("\t")]
-    if not check(added, "precondition: watch add registered no watcher:\n" + out):
-        return
-    # Take the user from the output rather than assuming what CVS_Username
-    # resolved to on this machine.
-    user = added[0].split("\t")[1]
-
-    r.cvs(["watch", "remove", "-a", "edit", "a.txt"], cwd=wc)
-
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check(not [l for l in out.splitlines() if user in l.split("\t")],
-          "cvs watchers still reports %s after watch remove:\n%s" % (user, out))
-    # A watcher with no actions left is not a watcher; it must not survive
-    # in the file either, or the next watchers/notify pass finds it again.
-    if os.path.isfile(attr):
-        check("<watcher" not in read(attr),
-              "watch remove left a <watcher> node behind:\n" + read(attr))
-
-
-@test("re-adding a watched file leaves one file node, and watch off clears it")
-def t_watch_readd_single_node(r):
-    # fileattr_newfile appended a <file> node unconditionally, so a
-    # remove+re-add left two <file name="X"> nodes.  Per-file mutations act
-    # on the first match only, so watch off could leave the re-added file
-    # watched (read-only on a fresh checkout).  Pin one node per name.
-    r.import_tree("m", {"a.txt": "one" + chr(10)})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-    r.cvs(["watch", "on", "a.txt"], cwd=wc)
-    r.cvs(["remove", "-f", "a.txt"], cwd=wc)
-    r.cvs(["commit", "-m", "rm"], cwd=wc)
-    write(os.path.join(wc, "a.txt"), "again" + chr(10))
-    r.cvs(["add", "a.txt"], cwd=wc)
-    r.cvs(["commit", "-m", "re-add"], cwd=wc)
-    if os.path.isfile(attr):
-        check_eq(read(attr).count('name="a.txt"'), 1,
-                 "re-add left duplicate <file> nodes:" + chr(10) + read(attr))
-    r.cvs(["watch", "on", "a.txt"], cwd=wc)
-    check(not os.access(os.path.join(fresh_checkout(r, "wcReOn"), "a.txt"), os.W_OK),
-          "re-added a.txt not read-only after watch on")
-    r.cvs(["watch", "off", "a.txt"], cwd=wc)
-    check("<watched" not in read(attr),
-          "watch off left a watched node after re-add:" + chr(10) + read(attr))
-    check(os.access(os.path.join(fresh_checkout(r, "wcReOff"), "a.txt"), os.W_OK),
-          "re-added a.txt still read-only after watch off")
-
-
-@test("watch add twice leaves a single watcher node")
-def t_watch_add_twice(r):
-    # The same existence search on the adding path: with it broken the
-    # check never matched, so every "watch add" appended another <watcher>
-    # for the same user instead of reusing the one already there.
-    r.import_tree("m", {"a.txt": "one\n"})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-
-    if check(os.path.isfile(attr), "watch add wrote no " + attr):
-        check_eq(read(attr).count("<watcher"), 1,
-                 "watcher nodes after adding the same watcher twice:\n"
-                 + read(attr))
-        # ...and the action inside it must not pile up either, now that
-        # the second add reuses the node the first one made.
-        check_eq(read(attr).count("<edit/>"), 1,
-                 "edit nodes after adding the same action twice:\n"
-                 + read(attr))
-
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check_eq(len([l for l in out.splitlines() if "edit" in l.split("\t")]), 1,
-             "cvs watchers lines reporting the edit watcher:\n" + out)
+    acks = [i for i, l in enumerate(lines) if l == "Notified ./"]
+    if check_eq(len(acks), 2, "Notified acks (before noop, before watch-on):\n" + out):
+        check(all(lines[a + 1].endswith("/m/a.txt") for a in acks), "Notified names the wrong file:\n" + out)
+        check(lines[acks[0] + 2] == "ok", "noop did not end with ok:\n" + out)
+    refusals = [l for l in lines if l.startswith("E ") and "edit and watch are not supported" in l]
+    check_eq(len(refusals), 3, "edit/watch refusals (two Notify, watch-on):\n" + out)
+    check(lines[-2:] == ["error  ", ""], "watch-on did not end with error:\n" + out)
 
 
 @test("repository operations append well-formed history records")
@@ -1628,6 +1341,38 @@ def t_unicode_text_line_endings(r):
     got = raw[2:].decode("utf-16-le").splitlines()
     check(got == lines, "-ku file lines after checkout: expected %s, got %s"
           % (ascii(lines), ascii(got)))
+
+
+@test("add -b carries its bug id to the commit, and commit -b selects by it")
+def t_add_bugid(r):
+    r.import_tree("m", {"a.txt": "one\n"})
+    shim = PserverShim(r.repo.replace(os.sep, "/"))
+    try:
+        for name, root in (("local", r.repo), ("pserver", shim.root())):
+            wcroot = os.path.join(r.root, "wc-" + name)
+            os.makedirs(wcroot)
+            rc, out = run(["-d", root, "checkout", "m"], cwd=wcroot, expect_ok=False)
+            if not check_eq(rc, 0, "%s checkout failed:\n%s" % (name, out)):
+                continue
+            wc = os.path.join(wcroot, "m")
+            first, second = name + "-b.txt", name + "-c.txt"
+            write(os.path.join(wc, first), "b\n")
+            write(os.path.join(wc, second), "c\n")
+            run(["add", "-b", "BUG7", first], cwd=wc)
+            run(["add", "-b", "BUG8", second], cwd=wc)
+            run(["commit", "-b", "BUG7", "-m", "fix"], cwd=wc)
+            check(os.path.isfile(os.path.join(r.repo, "m", first + ",v")),
+                  "%s: commit -b BUG7 did not commit %s, which has bug BUG7" % (name, first))
+            check(not os.path.isfile(os.path.join(r.repo, "m", second + ",v")),
+                  "%s: commit -b BUG7 committed %s, which has bug BUG8" % (name, second))
+            run(["commit", "-m", "rest"], cwd=wc)
+            for f, bug in ((first, "BUG7;"), (second, "BUG8;")):
+                rcs = os.path.join(r.repo, "m", f + ",v")
+                check(os.path.isfile(rcs) and ["bugid", bug] in [l.split() for l in read(rcs).splitlines()],
+                      "%s: %s committed without bug %s" % (name, f, bug))
+    finally:
+        run(["-d", shim.root(), "logout"], cwd=r.root, expect_ok=False)
+        shim.close()
 
 @test("binary content is detected on add and import by content, not by name")
 def t_add_binary_by_content(r):
