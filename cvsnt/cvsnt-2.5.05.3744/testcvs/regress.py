@@ -1146,6 +1146,56 @@ def t_server_edit_watch_compat(r):
     check(lines[-2:] == ["error  ", ""], "watch-on did not end with error:\n" + out)
 
 
+@test("the server refuses an old client's removed commit and update options")
+def t_server_removed_edit_options(r):
+    root = r.repo.replace(os.sep, "/")
+    for req, opt in (("ci", "-c"), ("ci", "-e"), ("update", "-c"), ("update", "-e")):
+        out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES,
+                                 "Argument " + opt, "Directory .", root + "/m", req])[1]
+        check(out.endswith("error  \n") and "E Usage:" in out,
+              "%s %s did not end with its usage and error:\n%s" % (req, opt, out))
+
+
+@test("the server refuses every watch and editor request of an old client")
+def t_server_watch_requests_refused(r):
+    root = r.repo.replace(os.sep, "/")
+    for req in ("watch-on", "watch-off", "watch-add", "watch-remove", "watchers", "editors", "editors-edit"):
+        out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES,
+                                 "Directory .", root + "/m", "Argument a.txt", req])[1]
+        check(out.endswith("edit and watch are not supported by this server\nerror  \n"),
+              "%s was not refused:\n%s" % (req, out))
+
+
+@test("CVSROOT/config accepts the old Watcher key and ignores it")
+def t_watcher_key_ignored(r):
+    cfg = os.path.join(r.repo, "CVSROOT", "config")
+    os.chmod(cfg, 0o644)
+    write(cfg, read(cfg) + "Watcher=someone\n")
+    rc, out = r.cvs(["ls"], expect_ok=False)
+    check(rc == 0 and "Watcher" not in out, "ls with Watcher in the config:\n" + out)
+
+
+@test("RCS files with the old reserved edit flags c and x check out writable")
+def t_old_reserved_edit_kflags(r):
+    r.import_tree("m", {"c.txt": "cee\n", "x.txt": "ex\n"})
+    for name, flags in (("c.txt", "kvc"), ("x.txt", "kvx")):
+        path = os.path.join(r.repo, "m", name + ",v")
+        os.chmod(path, 0o644)
+        write(path, read(path).replace("kopt   kv;", "kopt   %s;" % flags))
+    wc = r.checkout("m")
+    for name, text in (("c.txt", "cee\n"), ("x.txt", "ex\n")):
+        check_eq(read(os.path.join(wc, name)), text, name + " content")
+        check(os.access(os.path.join(wc, name), os.W_OK), name + " checked out read-only")
+
+
+@test("a root with no method, or with a removed one, is refused")
+def t_removed_methods_refused(r):
+    for root in ("user@127.0.0.1:/nowhere", ":ssh:user@127.0.0.1:/nowhere", ":sspi:127.0.0.1:/nowhere"):
+        rc, out = run(["-d", root, "ls"], cwd=r.root, expect_ok=False)
+        check(rc != 0 and "access method is not available" in out,
+              "%s was not refused:\n%s" % (root, out))
+
+
 @test("repository operations append well-formed history records")
 def t_history_records(r):
     # History logging is enabled by the presence of CVSROOT/history (a full
