@@ -81,8 +81,8 @@
         protocol expects a reliable transport that is transparent (that is,
         there is no translation of characters, including characters such as
         such as linefeeds or carriage returns), and can transmit all 256
-        octets (for example for proper handling of binary files, compression,
-        and encryption). The encoding of characters specified by the protocol
+        octets (for example for proper handling of binary files and
+        compression). The encoding of characters specified by the protocol
         (the names of requests and so on) is the invariant ISO 646 character
         set (a subset of most popular character sets including ASCII and
         others). For more details on running the protocol over the TCP
@@ -145,11 +145,12 @@
           <para>If the client has a way to execute commands on the server, and
           provide input to the commands and output from them, then it can
           connect that way. This could be the usual rsh (port 514) protocol,
-          Kerberos rsh, SSH, or any similar mechanism. The client may allow
+          SSH, or any similar mechanism. The client may allow
           the user to specify the name of the server program; the default is
           <command>cvs</command>. It is invoked with one argument,
           <command>server</command>. Once it invokes the server, the client
-          proceeds to start the cvs protocol.</para>
+          proceeds to start the cvs protocol. The cvsnt client has no access
+          method that connects this way.</para>
         </listitem>
       </varlistentry>
 
@@ -273,18 +274,6 @@
           of I LOVE YOU the connection is closed rather than
           continuing.</para>
 
-          <para>Another mechanism is GSSAPI authentication. GSSAPI is a
-          generic interface to security services such as kerberos. GSSAPI is
-          specified in RFC2078 (GSSAPI version 2) and RFC1508 (GSSAPI version
-          1); we are not aware of differences between the two which affect the
-          protocol in incompatible ways, so we make no attempt to specify one
-          version or the other. The procedure here is to start with
-          <command>BEGIN GSSAPI REQUEST</command>. GSSAPI authentication
-          information is then exchanged between the client and the server.
-          Each packet of information consists of a two byte big endian length,
-          followed by that many bytes of data. After the GSSAPI authentication
-          is complete, the server continues with the responses described above
-          (<command>I LOVE YOU</command>, etc.).</para>
         </listitem>
       </varlistentry>
 
@@ -315,14 +304,6 @@
 
     <itemizedlist mark="bullet">
       <listitem>
-        <para><command>BEGIN GSSAPI REQUEST</command></para>
-
-        <para>Connection is authenticated using GSSAPI/Kerberos5. No
-        <command>END</command> or username/password/root strings are
-        sent.</para>
-      </listitem>
-
-      <listitem>
         <para><command>BEGIN AUTH REQUEST</command></para>
 
         <para>Connection is authenticated using the traditional cvs pserver.
@@ -336,34 +317,6 @@
         <para>As pserver, but the server drops the link as soon as username
         authentication is finished. Terminated with <command>END VERIFICATION
         REQUEST</command></para>
-      </listitem>
-
-      <listitem>
-        <para><command>BEGIN SSL AUTH REQUEST</command></para>
-
-        <para>As pserver, but the entire session from the
-        <command>BEGIN</command> until the termination of the connection is
-        encrypted using SSL.</para>
-      </listitem>
-
-      <listitem>
-        <para><command>BEGIN SSL VERIFICATION REQUEST</command></para>
-
-        <para>As pserver, but the server drops the link as soon as username
-        authentication is finished. Terminated with <command>END SSL
-        VERIFICATION REQUEST</command></para>
-      </listitem>
-
-      <listitem>
-        <para><command>BEGIN SSPI</command></para>
-
-        <para>Authentication is provided by the SSPI subsystem on win32
-        systems. The begin sequence is followed by a comma separated list of
-        SSPI authentication mechanisms. The server then replies with the list
-        of mechanisms it supports. The current implementation uses the SSPI
-        Negotiate mechanism if it's available, otherwise uses NTLM. No
-        username/password it sent during the login as the subsystem handles
-        the authentication.</para>
       </listitem>
     </itemizedlist>
   </chapter>
@@ -1269,57 +1222,6 @@ C: update
         </varlistentry>
 
         <varlistentry>
-          <term><command>Kerberos-encrypt \n</command></term>
-
-          <term><command>Gssapi-encrypt \n</command></term>
-
-          <term><command>Protocol-encrypt \n</command></term>
-
-          <listitem>
-            <para>Response expected: no. Use encryption to encrypt all further
-            communication between the client and the server. This will only
-            work if the connection was made using a protocol that supports
-            encryption in the first place. If both the
-            <command>Gzip-stream</command> and the
-            <command>Protocol-encrypt</command> requests are used, the
-            <command>Protocol-encrypt</command> request should be used first.
-            This will make the client and server encrypt the compressed data,
-            as opposed to compressing the encrypted data. Encrypted data is
-            generally incompressible.</para>
-
-            <para>Note that this request does not fully prevent an attacker
-            from hijacking the connection, in the sense that it does not
-            prevent hijacking the connection between the initial
-            authentication and the <command>Protocol-encrypt</command>
-            request.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term><command>Gssapi-authenticate \n</command></term>
-
-          <term><command>Protocol-authenticate \n</command></term>
-
-          <listitem>
-            <para>Response expected: no. Use GSSAPI authentication to
-            authenticate all further communication between the client and the
-            server. This will only work if the connection was made using a
-            protocol that supports authentication in the first place.
-            Encrypted data is automatically authenticated, so using both
-            <command>Protocol-authenticate</command> and
-            <command>Protocol-encrypt</command> has no effect beyond that of
-            <command>Protocol-encrypt</command>. Unlike encrypted data, it is
-            reasonable to compress authenticated data.</para>
-
-            <para>Note that this request does not fully prevent an attacker
-            from hijacking the connection, in the sense that it does not
-            prevent hijacking the connection between the initial
-            authentication and the <command>Protocol-authenticate</command>
-            request.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
           <term><command>read-cvsrc2 \n</command></term>
 
           <listitem>
@@ -1396,14 +1298,6 @@ C: update
         </varlistentry>
 
         <varlistentry>
-          <term><command>Authentication-Requested \n</command></term>
-
-          <term><command>Authentication-Required \n</command></term>
-
-          <term><command>Encryption-Requested \n</command></term>
-
-          <term><command>Encryption-Required \n</command></term>
-
           <term><command>Compression-Requested \n</command></term>
 
           <term><command>Compresison-Required \n</command></term>
@@ -2840,10 +2734,7 @@ S: ok
         clean solution is to defer the error until the client has issued a
         request which expects a response. To some extent this might relate to
         the next item (in terms of how easy it is to skip a whole bunch of
-        requests until we get to one that expects a response). I know that the
-        kerberos code doesn't wait in this fashion, but that probably can
-        cause network deadlocks and perhaps future problems running over a
-        transport which is more transaction oriented than TCP. On the other
+        requests until we get to one that expects a response). On the other
         hand I'm not sure it is wise to make the client conduct a lengthy
         upload only to find there is an authentication failure.</para>
       </listitem>

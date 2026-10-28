@@ -389,11 +389,6 @@ extern char *sock_strerror (int errnum);
 #define strncasecmp strnicmp
 //#define snprintf _snprintf
 
-#define HAVE_GSSAPI_GSSAPI_H
-#define HAVE_GSSAPI_GSSAPI_GENERIC_H
-#define HAVE_KRB5_H
-#define GSS_C_NT_HOSTBASED_SERVICE gss_nt_service_name
-
 #define HAVE_GETADDRINFO /* Provided by platform SDK */
 #define HAVE_INET_ATON
 

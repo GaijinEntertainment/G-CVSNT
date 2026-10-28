@@ -13,10 +13,8 @@
 
 #ifdef SERVER_SUPPORT
 extern int server_active;
-extern int proxy_active;
 #else
 #define server_active 0
-#define proxy_active 0
 #endif
 
 #ifdef SERVER_SUPPORT

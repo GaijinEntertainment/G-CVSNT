@@ -4,8 +4,6 @@ bash configure  \
     --enable-pam \
     --enable-server \
     --enable-pserver \
-    --enable-sspi \
-    --enable-ext \
     --disable-mysql \
     --disable-postgres \
     --disable-sqlite \

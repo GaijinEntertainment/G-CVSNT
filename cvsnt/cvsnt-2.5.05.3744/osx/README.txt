@@ -139,8 +139,7 @@ It should say :
 The ability of cvsnt to manage Mac formats work *only* in client
 mode. IT WON'T WORK IN LOCAL MODE.
 
-This means that you should have your CVSROOT to use either :pserver:,
-:rsh:, :ext: (ssh), :kserver: (Kerberos).
+This means that you should have your CVSROOT to use :pserver:.
 
 See the cvsnt doc for more details on how to set-up a client session.
 

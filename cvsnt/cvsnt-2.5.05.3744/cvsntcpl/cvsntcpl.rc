@@ -170,40 +170,27 @@ BEGIN
     PUSHBUTTON      "S&top",IDC_STOP2,321,180,29,14
 END
 
-IDD_NEWROOT DIALOGEX 0, 0, 284, 193
-STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP | 
+IDD_NEWROOT DIALOGEX 0, 0, 284, 106
+STYLE DS_SETFONT | DS_MODALFRAME | DS_3DLOOK | DS_CENTER | WS_POPUP |
     WS_CAPTION | WS_SYSMENU
 CAPTION "Repository Settings"
 FONT 8, "MS Sans Serif", 0, 0, 0x0
 BEGIN
-    LTEXT           "Type",IDC_STATIC,23,8,17,8
-    COMBOBOX        IDC_TYPE,49,7,223,47,CBS_DROPDOWNLIST | WS_VSCROLL | 
-                    WS_TABSTOP
-    LTEXT           "Location",IDC_STATIC,14,25,28,8
-    EDITTEXT        IDC_ROOT,49,23,196,14,ES_AUTOHSCROLL
-    PUSHBUTTON      "...",IDC_SELECT,250,23,22,14
-    LTEXT           "Name",IDC_STATIC,21,42,20,8
-    EDITTEXT        IDC_NAME,49,40,223,14,ES_AUTOHSCROLL
-    LTEXT           "Description",IDC_STATIC,7,59,36,8
-    EDITTEXT        IDC_DESCRIPTION,49,57,223,14,ES_AUTOHSCROLL
+    LTEXT           "Location",IDC_STATIC,14,9,28,8
+    EDITTEXT        IDC_ROOT,49,7,196,14,ES_AUTOHSCROLL
+    PUSHBUTTON      "...",IDC_SELECT,250,7,22,14
+    LTEXT           "Name",IDC_STATIC,21,26,20,8
+    EDITTEXT        IDC_NAME,49,24,223,14,ES_AUTOHSCROLL
+    LTEXT           "Description",IDC_STATIC,7,43,36,8
+    EDITTEXT        IDC_DESCRIPTION,49,41,223,14,ES_AUTOHSCROLL
     CONTROL         "Publish Repository",IDC_PUBLISH,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,49,75,74,10
-    CONTROL         "Default Repository",IDC_DEFAULT,"Button",
-                    BS_AUTOCHECKBOX | WS_TABSTOP,49,86,76,8
-    CONTROL         "Online",IDC_ONLINE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,167,75,36,10
-    CONTROL         "Read/Write",IDC_READWRITE,"Button",BS_AUTOCHECKBOX | 
-                    WS_TABSTOP,167,86,53,10
-    GROUPBOX        "Remote server details",IDC_REMOTEGROUP,47,98,230,68
-    LTEXT           "Server",IDC_SERVERTEXT,69,113,22,8
-    EDITTEXT        IDC_SERVER,95,110,166,14,ES_AUTOHSCROLL
-    LTEXT           "Repository",IDC_REPOSITORYTEXT,57,130,34,8
-    EDITTEXT        IDC_REPOSITORY,95,127,166,14,ES_AUTOHSCROLL
-    LTEXT           "Passphrase",IDC_PASSPHRASETEXT,53,147,38,8
-    EDITTEXT        IDC_PASSPHRASE,95,144,167,14,ES_PASSWORD | 
-                    ES_AUTOHSCROLL
-    DEFPUSHBUTTON   "OK",IDOK,90,172,50,14
-    PUSHBUTTON      "Cancel",IDCANCEL,142,172,50,14
+                    BS_AUTOCHECKBOX | WS_TABSTOP,49,59,74,10
+    CONTROL         "Online",IDC_ONLINE,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,167,59,36,10
+    CONTROL         "Read/Write",IDC_READWRITE,"Button",BS_AUTOCHECKBOX |
+                    WS_TABSTOP,167,70,53,10
+    DEFPUSHBUTTON   "OK",IDOK,90,86,50,14
+    PUSHBUTTON      "Cancel",IDCANCEL,142,86,50,14
 END
 
 IDD_PAGE2 DIALOGEX 0, 0, 409, 209
@@ -231,14 +218,11 @@ BEGIN
     CONTROL         "",IDC_SPIN2,"msctls_updown32",UDS_SETBUDDYINT | 
                     UDS_ALIGNRIGHT | UDS_AUTOBUDDY | UDS_ARROWKEYS | 
                     UDS_NOTHOUSANDS,193,78,11,14
-    LTEXT           "Encryption",IDC_STATIC,31,103,34,8
-    COMBOBOX        IDC_ENCRYPTION,76,100,103,54,CBS_DROPDOWNLIST | 
+    LTEXT           "Compression",IDC_STATIC,31,103,41,8
+    COMBOBOX        IDC_COMPRESSION,76,100,103,60,CBS_DROPDOWNLIST |
                     WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Compression",IDC_STATIC,31,119,41,8
-    COMBOBOX        IDC_COMPRESSION,76,116,103,60,CBS_DROPDOWNLIST | 
-                    WS_VSCROLL | WS_TABSTOP
-    LTEXT           "Anonymous User",IDC_STATIC,15,139,54,8
-    EDITTEXT        IDC_ANONUSER,76,136,194,14,ES_AUTOHSCROLL
+    LTEXT           "Anonymous User",IDC_STATIC,15,123,54,8
+    EDITTEXT        IDC_ANONUSER,76,120,194,14,ES_AUTOHSCROLL
 END
 
 IDD_PAGE3 DIALOGEX 0, 0, 409, 207
@@ -374,7 +358,7 @@ BEGIN
         LEFTMARGIN, 7
         RIGHTMARGIN, 277
         TOPMARGIN, 7
-        BOTTOMMARGIN, 186
+        BOTTOMMARGIN, 99
     END
 
     IDD_PAGE2, DIALOG
@@ -476,14 +460,6 @@ BEGIN
     IDC_DEFAULTDOMAIN, 0x403, 20, 0
 0x6e45, 0x7263, 0x7079, 0x6974, 0x6e6f, 0x5220, 0x7165, 0x6975, 0x6572, 
 0x0064, 
-    IDC_ENCRYPTION, 0x403, 9, 0
-0x704f, 0x6974, 0x6e6f, 0x6c61, "\000" 
-    IDC_ENCRYPTION, 0x403, 24, 0
-0x7541, 0x6874, 0x6e65, 0x6974, 0x6163, 0x6974, 0x6e6f, 0x5220, 0x7165, 
-0x6975, 0x6572, 0x0064, 
-    IDC_ENCRYPTION, 0x403, 20, 0
-0x6e45, 0x7263, 0x7079, 0x6974, 0x6e6f, 0x5220, 0x7165, 0x6975, 0x6572, 
-0x0064, 
     IDC_COMPRESSION, 0x403, 9, 0
 0x704f, 0x6974, 0x6e6f, 0x6c61, "\000" 
     IDC_COMPRESSION, 0x403, 9, 0
@@ -536,7 +512,6 @@ BEGIN
     IDC_EDIT1               "Directory that CVS uses for its temporary files.  This directory should have read/write access for all users that need CVS access, plus LocalSystem."
     IDC_PSERVERPORT         "Port that CVS service listens on.  Normally 2401."
     IDC_LOCKSERVERPORT      "Port that lock server listens on.  Normally 2402."
-    IDC_ENCRYPTION          "Encryption settings\n\nOptional (Default) - Allow clients to connect without encryption.\nRequest Authentication - Request that clients use authenticated packets if available.\nRequest Encryption - Request that clients use encrypted packets if available\nRequire Authentication - Require that clients use authenticated or encrypted packets.\nRequire encryption - Require that clients use encrypted packets."
     IDC_DEFAULTDOMAIN       "Default domain that server is a member of."
     IDC_COMPRESSION         "Compression settings\n\nOptional (Default) - Allow clients to use compressed packets\nRequest Compression - Request that clients use compression when available.\nRequire Compression - Require that clients use compression."
     IDC_RUNASUSER           "You can execute the server either as the client user, or as a specific fixed user."

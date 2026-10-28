@@ -72,7 +72,6 @@ BOOL CALLBACK DllMain(HMODULE hModule, DWORD ul_reason_for_call, LPVOID lpReserv
 ** Translation Table as described in RFC1113
 */
 static const unsigned char cb64[65]="ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789+/";
-enum PIPES { PIPE_READ = 0, PIPE_WRITE = 1 };
 
 static const struct server_interface *_current_server;
 static int tcp_fd;
@@ -101,38 +100,6 @@ static void encodeblock(const unsigned char *in, unsigned char *out, int len )
     out[3] = len > 2 ? cb64[ in[2] & 0x3f ] : '=';
 }
 
-static unsigned char de64(unsigned char b)
-{
-  const unsigned char *p=(const unsigned char *)memchr(cb64,b,64);
-  if(p) return p-cb64;
-  else return 0;
-}
-
-/*
-** decodeblock
-**
-** decode 4 '6-bit' characters into 3 8-bit binary bytes
- */
-static int decodeblock(const unsigned char *in, unsigned char *out)
-{   
-    int l=0;
-    unsigned char in0, in1, in2, in3;
-    in0=de64(in[0]);
-    in1=de64(in[1]);
-    in2=de64(in[2]);
-    in3=de64(in[3]);
-    out[l++] = in0 << 2 | in1 >> 4;
-    if(in[2]!='=')
-    {
-      out[l++] = in1 << 4 | in2 >> 2;
-      if(in[3]!='=')
-      {
-        out[l++] = ((in2 << 6) & 0xc0) | in3;
-      }
-    }
-    return l;
-}
-
 int base64enc(const unsigned char *in, unsigned char *out, int len)
 {
 	int l=0;
@@ -145,34 +112,6 @@ int base64enc(const unsigned char *in, unsigned char *out, int len)
 	}
 	*out='\0';
 	return l;
-}
-
-int base64dec(const unsigned char *in, unsigned char *out, int len)
-{
-	int l=0,b;
-	for(;len>0; len-=4)
-	{
-		b=decodeblock(in, out);
-		out+=b;
-		l+=b;
-		in+=4;
-	}
-	return l;
-}
-
-int get_tcp_fd()
-{
-	return tcp_fd;
-}
-
-const char *enum_protocols(int *context, enum proto_type type)
-{
-	return _current_server->enumerate_protocols(_current_server,context,type);
-}
-
-int set_encrypted_channel(int encrypt)
-{
-	return _current_server->set_encrypted_channel(_current_server,encrypt);
 }
 
 int server_error(int fatal, const char *fmt, ...)
@@ -715,25 +654,16 @@ int tcp_readline(char* buffer, int buffer_len)
 	return l;
 }
 
-int server_getc(const struct protocol_interface *protocol)
+int server_getc()
 {
 	char c;
 
-	if(protocol->server_read_data)
-	{
-		if(protocol->server_read_data(protocol,&c,1)<1)
-			return EOF;
-		return c;
-	}
-	else
-	{
-		if(read(_current_server->in_fd,&c,1)<1)
-			return EOF;
-		return c;
-	}
+	if(read(_current_server->in_fd,&c,1)<1)
+		return EOF;
+	return c;
 }
 
-int server_getline(const struct protocol_interface *protocol, char** buffer, int buffer_max)
+int server_getline(char** buffer, int buffer_max)
 {
 	char *p;
 	int l,c=0;
@@ -745,7 +675,7 @@ int server_getline(const struct protocol_interface *protocol, char** buffer, int
 	l=0;
 	p=*buffer;
 	*p='\0';
-	while(l<buffer_max-1 && (c=server_getc(protocol))!=EOF)
+	while(l<buffer_max-1 && (c=server_getc())!=EOF)
 	{
 		if(c=='\n')
 			break;
@@ -758,183 +688,6 @@ int server_getline(const struct protocol_interface *protocol, char** buffer, int
 	return l;
 	
 }
-
-int server_printf(const char *fmt, ...)
-{
-	char temp[1024];
-	va_list va;
-
-	va_start(va,fmt);
-
-	vsnprintf(temp,sizeof(temp),fmt,va);
-
-	va_end(va);
-
-	return write(_current_server->out_fd,temp,strlen(temp));
-}
-
-#ifdef _WIN32
-int run_command(const char *cmd, int* in_fd, int* out_fd, int *err_fd)
-{
-	TCHAR *c;
-	TCHAR szComSpec[_MAX_PATH];
-	OSVERSIONINFO osv;
-	STARTUPINFO si= { sizeof(STARTUPINFO) };
-	SECURITY_ATTRIBUTES sa = { sizeof(SECURITY_ATTRIBUTES), NULL, TRUE };
-	PROCESS_INFORMATION pi = { 0 };
-	HANDLE hReadPipeClient,hWritePipeClient,hErrorPipeClient;
-	HANDLE hReadPipeServer,hWritePipeServer,hErrorPipeServer;
-	HANDLE hReadPipeTmp,hWritePipeTmp,hErrorPipeTmp;
-
-	CreatePipe(&hReadPipeClient,&hWritePipeTmp,&sa,0);
-	CreatePipe(&hReadPipeTmp,&hWritePipeClient,&sa,0);
-	if(err_fd)
-		CreatePipe(&hErrorPipeTmp,&hErrorPipeClient,&sa,0);
-
-	DuplicateHandle(GetCurrentProcess(),hReadPipeTmp,GetCurrentProcess(),&hReadPipeServer,0,FALSE,DUPLICATE_SAME_ACCESS);
-	DuplicateHandle(GetCurrentProcess(),hWritePipeTmp,GetCurrentProcess(),&hWritePipeServer,0,FALSE,DUPLICATE_SAME_ACCESS);
-	if(err_fd)
-		DuplicateHandle(GetCurrentProcess(),hErrorPipeTmp,GetCurrentProcess(),&hErrorPipeServer,0,FALSE,DUPLICATE_SAME_ACCESS);
-
-	CloseHandle(hReadPipeTmp);
-	CloseHandle(hWritePipeTmp);
-	if(err_fd)
-		CloseHandle(hErrorPipeTmp);
-	else
-		DuplicateHandle(GetCurrentProcess(),hWritePipeClient,GetCurrentProcess(),&hErrorPipeClient,0,TRUE,DUPLICATE_SAME_ACCESS);
-
-	si.dwFlags=STARTF_USESTDHANDLES|STARTF_USESHOWWINDOW;
-	si.hStdInput=hReadPipeClient;
-	si.hStdOutput=hWritePipeClient;
-	si.hStdError=hErrorPipeClient;
-	si.wShowWindow=SW_HIDE;
-
-	c=(TCHAR*)malloc(strlen(cmd)+128);
-	osv.dwOSVersionInfoSize = sizeof(OSVERSIONINFO);
-	GetVersionEx(&osv);
-	if (osv.dwPlatformId == VER_PLATFORM_WIN32_WINDOWS)
-		strcpy(c,cmd); // In Win9x we have to execute directly
-	else
-	{
-		if(!GetEnvironmentVariable("COMSPEC",szComSpec,sizeof(szComSpec)))
-			strcpy(szComSpec,"cmd.exe"); 
-		sprintf(c,"%s /c \"%s\"",szComSpec,cmd);
-	}
-
-	if(!CreateProcess(NULL,c,NULL,NULL,TRUE,0,NULL,NULL,&si,&pi))
-	{
-		free(c);
-		return -1;
-	}
-
-	free(c);
-
-	CloseHandle(hReadPipeClient);
-	CloseHandle(hWritePipeClient);
-	CloseHandle(hErrorPipeClient);
-
-	WaitForInputIdle(pi.hProcess,100);
-
-	CloseHandle(pi.hThread);
-	CloseHandle(pi.hProcess);
-
-	if(out_fd)
-		*out_fd = _open_osfhandle((long)hReadPipeServer, O_RDONLY|O_BINARY);
-	else
-		CloseHandle(hReadPipeServer);
-	if(in_fd)
-		*in_fd = _open_osfhandle((long)hWritePipeServer, O_WRONLY|O_BINARY);
-	else
-		CloseHandle(hWritePipeServer);
-	if(err_fd)
-		*err_fd = _open_osfhandle((long)hErrorPipeServer, O_RDONLY|O_BINARY);
-
-	return 0;
-}
-#else
-int run_command(const char *cmd, int* in_fd, int* out_fd, int* err_fd)
-{
-  const char **argv;
-  char *argbuf;
-  int pid;
-  int to_child_pipe[2];
-  int from_child_pipe[2];
-  int err_child_pipe[2];
-
-  argv=(const char**)malloc(256*sizeof(char*));
-  argbuf=(char*)malloc(strlen(cmd)+128); 
-  argv[0]="/bin/sh";
-  argv[1]="-c";
-  argv[2]=(char*)cmd;
-  argv[3]=NULL;
-
-  if (pipe (to_child_pipe) < 0)
-      server_error (1, "cannot create pipe");
-  if (pipe (from_child_pipe) < 0)
-      server_error (1, "cannot create pipe");
-  if (pipe (err_child_pipe) <0)
-      server_error (1, "cannot create pipe");
-
-#ifdef USE_SETMODE_BINARY
-  setmode (to_child_pipe[0], O_BINARY);
-  setmode (to_child_pipe[1], O_BINARY);
-  setmode (from_child_pipe[0], O_BINARY);
-  setmode (from_child_pipe[1], O_BINARY);
-  setmode (err_child_pipe[0], O_BINARY);
-  setmode (err_child_pipe[1], O_BINARY);
-#endif
-
-#ifdef HAVE_VFORK
-  pid = vfork ();
-#else
-  pid = fork ();
-#endif
-  if (pid < 0)
-      server_error (1, "cannot fork");
-  if (pid == 0)
-  {
-      if (close (to_child_pipe[1]) < 0)
-          server_error (1, "cannot close pipe");
-      if (in_fd && dup2 (to_child_pipe[0], 0) < 0)
-          server_error (1, "cannot dup2 pipe");
-      if (close (from_child_pipe[0]) < 0)
-          server_error (1, "cannot close pipe");
-      if (out_fd && dup2 (from_child_pipe[1], 1) < 0)
-          server_error (1, "cannot dup2 pipe");
-      if (close (err_child_pipe[0]) < 0)
-          server_error (1, "cannot close pipe");
-      if (err_fd && dup2 (err_child_pipe[1], 2) < 0)
-          server_error (1, "cannot dup2 pipe");
-
-      execvp (argv[0], (char * const*)argv);
-      server_error (1, "cannot exec %s", cmd);
-  }
-  if (close (to_child_pipe[0]) < 0)
-      server_error (1, "cannot close pipe");
-  if (close (from_child_pipe[1]) < 0)
-      server_error (1, "cannot close pipe");
-  if (close (err_child_pipe[1]) < 0)
-      server_error (1, "cannot close pipe");
-
-  if(in_fd)
-	*in_fd = to_child_pipe[1];
-  else
-	  close(to_child_pipe[1]);
-  if(out_fd)
-	*out_fd = from_child_pipe[0];
-  else
-	  close(from_child_pipe[0]);
-  if(err_fd)
-	*err_fd = err_child_pipe[0];
-  else
-	  close(err_child_pipe[0]);
-
-  free(argv);
-  free(argbuf);
-
-  return 0;
-}
-#endif
 
 #ifdef _WIN32
 const char* get_username(const cvsroot* current_root)

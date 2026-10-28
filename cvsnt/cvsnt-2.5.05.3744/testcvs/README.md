@@ -55,11 +55,12 @@ register the repository in the machine-global settings, which needs privileges a
 require.
 
 One case, the `-ku` line-ending test, has to go through a real client/server session because only
-the client-side write path is affected. It uses the `:ext:` protocol with `CVS_EXT` set to a Python
-pass-through and `CVS_SERVER` set to `<cvs> --allow-root=<repo> server`, so it needs the `ext`
-protocol plugin as `<libdir>/protocols/ext.<so|dll>` and nothing registered anywhere. When the
-plugin is missing the case prints a skip note instead of failing. On Windows the standalone
-makefile in `_reports/BUILD-01-Makefile.nmake` builds it with `mk.bat plugins`.
+the client-side write path is affected. It connects over `:pserver:` to `PserverShim`, a listener
+on 127.0.0.1 that accepts any login and pipes the session into `<cvs> --allow-root=<repo> server`,
+so it needs the `pserver` protocol plugin as `<libdir>/protocols/pserver.<so|dll>` and nothing
+registered anywhere. When the plugin is missing the case fails. On
+Windows the standalone makefile in `_reports/BUILD-01-Makefile.nmake` builds it with
+`mk.bat plugins`.
 
 ## `testcvs.py`
 

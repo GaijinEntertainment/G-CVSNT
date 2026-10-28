@@ -499,7 +499,7 @@ char *Name_Root (const char *dir, const char *update_dir);
 void free_cvsroot_t(cvsroot *root_in);
 cvsroot *parse_cvsroot (const char *root_in);
 cvsroot *new_cvsroot_t();
-cvsroot *local_cvsroot (const char *dir, const char *real_dir, bool readwrite, RootType type, const char *remote_serv, const char *remote_repos, const char *proxy_repos, const char *remote_pass);
+cvsroot *local_cvsroot (const char *dir, const char *real_dir, bool readwrite);
 void Create_Root(const char *dir, const char *rootdir);
 
 typedef struct
@@ -509,14 +509,10 @@ typedef struct
 	bool online;
 	bool readwrite;
 	bool proxypasswd;
-	RootType repotype;
-	cvs::string remote_server;
-	cvs::string remote_repository;
 	cvs::string proxy_repository;
-	cvs::string remote_passphrase;
 } root_allow_struct;
 
-void root_allow_add(const char *root, const char *name, bool online, bool readwrite, bool proxypasswd, RootType type, const char *remote_serv, const char *remote_repos, const char *proxy_repos, const char *remote_pass);
+void root_allow_add(const char *root, const char *name, bool online, bool readwrite, bool proxypasswd, const char *proxy_repos);
 void root_allow_free();
 bool root_allow_ok (const char *root, const root_allow_struct*& found_root, const char *&real_root, bool authuse);
 

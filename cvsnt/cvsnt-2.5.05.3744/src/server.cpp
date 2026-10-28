@@ -56,8 +56,6 @@ const char *serv_client_version = NULL;
 
 extern int server_io_socket;
 
-static bool have_local_root = true;
-
 // Avoid doing cleanup twice. This occasionally happened on some
 // errors and signals when main_cleanup() was called after server_cleanup()
 // and tried to error() which would call server_cleanup() too. This has
@@ -180,22 +178,10 @@ static char *valid_rcsoptions;
 /* Nonzero if we should keep the temp directory around after we exit.  */
 static int dont_delete_temp;
 
-#define PROTOCOL_ENCRYPTION 2
-#define PROTOCOL_AUTHENTICATION 1
-
-/* This is set when encryption or authentication is enabled,
-   It will be set to 0, PROTOCOL_ENCRYPTION, or PROTOCOL_AUTHENTICATION
-   depending on what protocol-specific encryption/authentication requests
-   are received.
- */
-static int protocol_encryption_enabled = 0;
-
 // Set to 1 if the data stream is compressed
 static int protocol_compression_enabled = 0;
 
-/* This is set to request/force encryption/compression */
-/* 0=Any, 1=Request auth., 2=Request Encr., 3=Require Auth., 4=Require Encr. */
-int encryption_level = 0; 
+/* This is set to request/force compression */
 /* 0=Any, 1=Request compr., 2=Require compr. */
 int compression_level = 0;
 
@@ -220,7 +206,6 @@ struct fd_buffer
 static int check_command_legal_p (const char *cmd_name);
 
 int server_main(const char *cmd_name, int (*command)(int argc, char **argv));
-int proxy_main(const char *cmd_name, int (*command)(int argc, char **argv));
 
 static void do_chroot();
 
@@ -231,7 +216,7 @@ static int fd_buffer_flush(void *);
 static int fd_buffer_block(void *, int);
 static int fd_buffer_shutdown(void *);
 
-static struct buffer *client_protocol_buffer_initialize(const struct protocol_interface *, int, void (*) (struct buffer *));
+static struct buffer *client_protocol_buffer_initialize(int, void (*) (struct buffer *));
 static int client_protocol_buffer_input(void *, char *, int, int, int *);
 static int client_protocol_buffer_output(void *, const char *, int, int *);
 static int client_protocol_buffer_flush(void *);
@@ -552,21 +537,18 @@ static int fd_buffer_shutdown (void *closure)
     return 0;
 }
 
-/* Initialize a buffer built on a custom client protocol.  protocol is the 
-   descriptor.  INPUT is nonzero if this is for input, zero if this is
-   for output.  MEMORY is the function to call when a memory error
-   occurs.  */
+/* Initialize a buffer built on the server socket.  INPUT is nonzero if
+   this is for input, zero if this is for output.  MEMORY is the function
+   to call when a memory error occurs.  */
 
 struct client_protocol_data
 {
-	const struct protocol_interface *protocol;
 	int server_io_socket;
 };
 
-static struct buffer *client_protocol_buffer_initialize (const struct protocol_interface *protocol, int input, void (*memory)(struct buffer *))
+static struct buffer *client_protocol_buffer_initialize (int input, void (*memory)(struct buffer *))
 {
 	client_protocol_data *data = new client_protocol_data;
-	data->protocol = protocol;
 	data->server_io_socket = server_io_socket;
     return buf_initialize (input ? client_protocol_buffer_input : NULL,
 			   input ? NULL : client_protocol_buffer_output,
@@ -582,12 +564,7 @@ static struct buffer *client_protocol_buffer_initialize (const struct protocol_i
 static int client_protocol_buffer_input (void *closure, char *data, int need, int size, int *got)
 {
 	client_protocol_data *dat = (client_protocol_data*)closure;
-	int nbytes;
-
-	if(dat->protocol && dat->protocol->server_read_data)
-		nbytes = dat->protocol->server_read_data(dat->protocol, data, size);
-	else
-		nbytes = read_with_timeout(dat->server_io_socket, data, size);
+	int nbytes = read_with_timeout(dat->server_io_socket, data, size);
 
     if (nbytes > 0)
     {
@@ -630,12 +607,7 @@ static int client_protocol_buffer_output (void *closure, const char *data, int h
 
     while (have > 0)
     {
-	int nbytes;
-
-	if(dat->protocol && dat->protocol->server_write_data)
-		nbytes = dat->protocol->server_write_data (dat->protocol, data, have);
-	else
-		nbytes = write_with_timeout(dat->server_io_socket?dat->server_io_socket:STDOUT_FILENO, data, have);
+	int nbytes = write_with_timeout(dat->server_io_socket?dat->server_io_socket:STDOUT_FILENO, data, have);
 
 	if (nbytes <= 0)
 	{
@@ -660,10 +632,6 @@ static int client_protocol_buffer_output (void *closure, const char *data, int h
 /*ARGSUSED*/
 static int client_protocol_buffer_flush (void *closure)
 {
-	client_protocol_data *data = (client_protocol_data*)closure;
-	if (data) if(data->protocol && data->protocol->server_flush_data)
-		data->protocol->server_flush_data(data->protocol);
-
     return 0;
 }
 
@@ -682,10 +650,7 @@ static int client_protocol_buffer_block (void *closure, int block)
 static int client_protocol_buffer_shutdown (void *closure)
 {
 	client_protocol_data *data = (client_protocol_data*)closure;
-	if(data->protocol && data->protocol->server_shutdown)
-    {
-		data->protocol->server_shutdown(data->protocol);
-	} else if(data->server_io_socket)
+	if(data->server_io_socket)
 	{
 #ifdef _WIN32
 		shutdown(_get_osfhandle(data->server_io_socket),2);
@@ -696,7 +661,6 @@ static int client_protocol_buffer_shutdown (void *closure)
 #endif
         data->server_io_socket = -1;
 	}
-    data->protocol = NULL;
     return 0;
 }
 
@@ -1047,15 +1011,7 @@ static void serve_valid_responses (char *arg)
 static void serve_root (char *arg)
 {
     char *path;
-	const char *real_repository,*repository_name;
-	
-    if(protocol_encryption_enabled != PROTOCOL_ENCRYPTION && client_protocol && client_protocol->valid_elements&flagAlwaysEncrypted)
-    {
-		buf_flush(stderr_buf,1);
-		buf_flush(stdout_buf,1);
-		protocol_encryption_enabled = PROTOCOL_ENCRYPTION;
-    }
-
+	const char *real_repository;
 
     if (!isabsolute (arg))
     {
@@ -1093,16 +1049,10 @@ static void serve_root (char *arg)
     if (current_parsed_root != NULL)
 		free_cvsroot_t (current_parsed_root);
 
-	/* For gserver, which doesn't pass a root as part of its protocol, check for a valid root here */
-	/* For other protocols (pserver, ntserver) this is harmless duplication */
-	/* We can be called with 'cvs server' one of two ways.  Either directly, from
-		a script or inetd, or from a wrapper which sets the allow-root directives. */
+	/* pserver checked the root while authenticating.  'cvs server' is run
+		directly, from a script or inetd, with the allow-root directives. */
 	real_repository = arg;
-	repository_name = arg;
 	const root_allow_struct *found_root = NULL;
-
-	if(server_protocol && server_protocol->auth_proxyname)
-		repository_name = server_protocol->auth_proxyname;
 
 	if(!root_allow_ok(arg,found_root,real_repository,false))
 	{
@@ -1113,39 +1063,18 @@ static void serve_root (char *arg)
 	{
 		error(1,0,"%s: repository is offline", real_repository);
 	}
-	
-	current_parsed_root = local_cvsroot(repository_name,real_repository,found_root->readwrite,found_root->repotype,found_root->remote_server.c_str(),found_root->remote_repository.c_str(),found_root->proxy_repository.c_str(),found_root->remote_passphrase.c_str());
-   
-	umask(0); 
+
+	current_parsed_root = local_cvsroot(arg,real_repository,found_root->readwrite);
+
+	umask(0);
 	do_chroot();
 
-	if (!server_protocol || !server_protocol->auth_repository )
+	if (!server_protocol)
 	{
 	    parse_config( current_parsed_root->directory );
 	}
 
-    /* For pserver, this will already have happened, and the call will do
-       nothing.  But for other protocols, we need to do it now.  */
-	if(server_protocol && !server_protocol->auth_repository)
-	{
-		char *host_user;
-
-		/* If we haven't verified the user before, then do it here.  The password will be NULL but we pass
-		   it anyway just in case this changes in the future. */
-		host_user = check_password (server_protocol->auth_username, server_protocol->auth_password,
-									current_parsed_root->directory, /*user_token*/NULL);
-
-		if(!host_user)
-		{
-			CServerIo::log(CServerIo::logAuth,"login failure for %s on %s", server_protocol->auth_username, server_protocol->auth_repository);
-			error (1, 0,
-				"authorization failed: server %s rejected access to %s for user %s",
-				hostname, current_parsed_root->unparsed_directory, server_protocol->auth_username);
-		}
-		xfree(host_user);
-	}
-
-	if(current_parsed_root->type!=RootTypeProxyAll && current_parsed_root->directory && *current_parsed_root->directory)
+	if(current_parsed_root->directory && *current_parsed_root->directory)
 	{
 		path = (char*)xmalloc (strlen (current_parsed_root->directory)
 			+ sizeof (CVSROOTADM)
@@ -1163,10 +1092,7 @@ static void serve_root (char *arg)
 		xfree (path);
 
 		lock_register_client(CVS_Username,current_parsed_root->directory);
-		have_local_root = true;
 	}
-	else
-		have_local_root = false;
 
 #ifdef HAVE_PUTENV
 	cvs_putenv(CVSROOT_ENV, current_parsed_root->directory);
@@ -1498,67 +1424,6 @@ static void dirswitch (char *dir, char *repos)
 		error(1,errno,"cannot close %s",CVSADM_ENTEXT);
 		return;
     }
-}
-
-static void
-serve_protocol_encrypt(char *arg)
-{
-	if(protocol_encryption_enabled)
-		return;
-
-	if(server_protocol && !server_protocol->wrap && !(server_protocol->valid_elements&flagAlwaysEncrypted))
-	{
-		error(1,0,"Requested protocol does not support encryption");
-		return;
-	}
-
-	buf_flush(stderr_buf, 1);
-	buf_flush(stdout_buf, 1);
-
-	if(server_protocol->wrap)
-	{
-		buf_to_net = cvs_encrypt_wrap_buffer_initialize (server_protocol, buf_to_net, 0,
-														1,
-														buf_to_net->memory_error);
-		buf_from_net = cvs_encrypt_wrap_buffer_initialize (server_protocol, buf_from_net, 1,
-														1,
-														buf_from_net->memory_error);
-		cvs_protocol_wrap_set_buffer(stdout_buf, buf_to_net);
-		cvs_protocol_wrap_set_buffer(stderr_buf, buf_to_net);
-	}
-
-	protocol_encryption_enabled = PROTOCOL_ENCRYPTION;
-}
-
-static void
-serve_protocol_authenticate(char *arg)
-{
-	if(protocol_encryption_enabled)
-		return;
-
-	if(!server_protocol->wrap && !(server_protocol->valid_elements&flagAlwaysEncrypted))
-	{
-		error(1,0,"Requested protocol does not support authentication");
-		return;
-	}
-
-	buf_flush(stderr_buf, 1);
-	buf_flush(stdout_buf, 1);
-
-	if(server_protocol->wrap)
-	{
-		buf_to_net = cvs_encrypt_wrap_buffer_initialize (server_protocol, buf_to_net, 0,
-														0,
-														buf_to_net->memory_error);
-		buf_from_net = cvs_encrypt_wrap_buffer_initialize (server_protocol, buf_from_net, 1,
-														0,
-														buf_from_net->memory_error);
-
-		cvs_protocol_wrap_set_buffer(stdout_buf, buf_to_net);
-		cvs_protocol_wrap_set_buffer(stderr_buf, buf_to_net);
-	}
-
-	protocol_encryption_enabled = PROTOCOL_AUTHENTICATION;
 }
 
 static void serve_directory (char *arg)
@@ -2967,38 +2832,6 @@ static void serve_utf8 (char *arg)
 {
 }
 
-static void authentication_requested(char *flag)
-{
-	if(encryption_level == 1 && server_protocol && server_protocol->wrap)
-		*flag = 1;
-	else
-		*flag = 0;
-}
-
-static void encryption_requested(char *flag)
-{
-	if(encryption_level == 2 && server_protocol && server_protocol->wrap)
-		*flag = 1;
-	else
-		*flag = 0;
-}
-
-static void authentication_required(char *flag)
-{
-	if(encryption_level == 3)
-		*flag = 1;
-	else
-		*flag = 0;
-}
-
-static void encryption_required(char *flag)
-{
-	if(encryption_level == 4)
-		*flag = 1;
-	else
-		*flag = 0;
-}
-
 static void compression_requested(char *flag)
 {
 	if(compression_level == 1)
@@ -3078,16 +2911,11 @@ if (cmd_name && (strcmp(cmd_name, "edit")==0 || strcmp(cmd_name, "unedit")==0 ||
          *    Else read-write access for user.
          */
 
-		/* Local repositories obey the read write flags from the server configuration */
-		/* Remote repositories don't - it's up to the remote server to reject if required */
-		  if(current_parsed_root->type==RootTypeStandard)
-		  {
-			  if(read_only_server) /* Server is running read only */
-				  return 0;
-
-			if(!current_parsed_root->readwrite) /* Repository is running read only */
+		  if(read_only_server) /* Server is running read only */
 			  return 0;
-		  }
+
+		  if(!current_parsed_root->readwrite) /* Repository is running read only */
+			  return 0;
 
          char *linebuf = NULL;
          int num_red = 0;
@@ -3254,24 +3082,7 @@ error  \n");
 	/* Flush out any pending data.  */
     buf_flush (buf_to_net, 1);
 
-	switch(current_parsed_root->type)
-	{
-		case RootTypeStandard:
-			errs = server_main(cmd_name, command);
-			break;
-		case RootTypeProxyAll:
-			errs = proxy_main(cmd_name, command);
-			break;
-		case RootTypeProxyWrite:
-			if(lookup_command_attribute (cmd_name) & CVS_CMD_MODIFIES_REPOSITORY)
-				errs = proxy_main(cmd_name, command);
-			else
-				errs = server_main(cmd_name, command);
-			break;
-		default:
-			error(1,0, "Unknown root type - cannot continue");
-	}
-
+	errs = server_main(cmd_name, command);
 
     buf_flush(stderr_buf, 1);
     buf_flush(stdout_buf, 1);
@@ -4956,20 +4767,6 @@ static void serve_valid_requests(char *arg);
  * but the client doesn't need to know about the handler
  * functions.
  */
-/* The code lets all RQ_ROOTLESS requests pass through unencrypted
- * and unsigned even when message encryption/authentication is required
- * (option "MessageProtection"). This was done for compatibility with
- * CVS 1.11.1.1p1 and earlier (which send the encryption/authentication
- * request after Root, UseUnchanged, and the gzip requests). Those requests
- * are "safe enough" to not require encryption or authentication (although
- * CVSNT 1.11.1.4+ will try to encrypt the Root request because I suppose
- * it might be sensitive). If any RQ_ROOTLESS requests are added
- * that need to be encrypted, additional flags will need to be introduced
- * to identify which commands may be safely processed without integrity
- * checks. Similarly, if CVS 1.11.1.1p1 compatibility is not required,
- * then the additional flags could be added to require that Root, etc.
- * come after the encryption/authentication request.
- */
 #define GAIJIN_RQ_ESSENTIAL RQ_ESSENTIAL//define to 0, if you want to support old clients
 struct request requests[] =
 {
@@ -5058,12 +4855,7 @@ struct request requests[] =
 
   /* The client should never actually send this request */
   REQ_LINE("Rootless-stream-modification", serve_noop, 0),
-  
-  REQ_LINE("Kerberos-encrypt", serve_protocol_encrypt, RQ_ROOTLESS),
-  REQ_LINE("Gssapi-encrypt", serve_protocol_encrypt, RQ_ROOTLESS),
-  REQ_LINE("Protocol-encrypt", serve_protocol_encrypt, RQ_ROOTLESS),
-  REQ_LINE("Gssapi-authenticate", serve_protocol_authenticate, RQ_ROOTLESS),
-  REQ_LINE("Protocol-authenticate", serve_protocol_authenticate, RQ_ROOTLESS),
+
   REQ_LINE("read-cvsrc", serve_read_cvsrc, 0),
   REQ_LINE("read-cvsrc2", serve_read_cvsrc2, 0),
   REQ_LINE("read-cvsignore", serve_read_cvsignore, 0),
@@ -5072,10 +4864,6 @@ struct request requests[] =
   REQ_LINE("server-codepage", serve_server_codepage, 0),
   REQ_LINE("client-version", serve_client_version, 0),
 
-  REQ_LINE("Authentication-Requested", authentication_requested, RQ_SERVER_REQUEST),
-  REQ_LINE("Authentication-Required", authentication_required, RQ_SERVER_REQUEST),
-  REQ_LINE("Encryption-Requested", encryption_requested, RQ_SERVER_REQUEST),
-  REQ_LINE("Encryption-Required", encryption_required, RQ_SERVER_REQUEST),
   REQ_LINE("Compression-Requested", compression_requested, RQ_SERVER_REQUEST),
   REQ_LINE("Compression-Required", compression_required, RQ_SERVER_REQUEST),
 
@@ -5197,7 +4985,6 @@ void server_cleanup (int sig)
 
 int server_active = 0;
 int pserver_active = 0;
-int proxy_active = 0;
 
 int server (int argc, char **argv)
 {
@@ -5454,10 +5241,6 @@ error ENOMEM Virtual memory exhausted.\n");
 				if(!default_client_codepage && !server_codepage_sent && !CGlobalSettings::GetGlobalValue("cvsnt","PServer","DefaultClientCodepage",buf,sizeof(buf)))
 					default_client_codepage = xstrdup(buf); // Yeah we leak this at shutdown, but it doesn't really matter
 
-				if(encryption_level==4 && protocol_encryption_enabled!=PROTOCOL_ENCRYPTION)
-					error(1,0,"This server requires an encrypted connection");
-				if(encryption_level==3 && protocol_encryption_enabled==0)
-					error(1,0,"This server reqires a signed or encrypted connection");
 				if(compression_level==2 && protocol_compression_enabled==0)
 					error(1,0,"This server requries a compressed connection");
 
@@ -5499,7 +5282,7 @@ error ENOMEM Virtual memory exhausted.\n");
 
 #if defined (SERVER_SUPPORT)
 
-static void switch_to_user(const char *, int username_switch);
+static void switch_to_user(const char *username, void *user_token);
 
 #ifndef _WIN32 // Win32 has a totally different authentication mechanism
 
@@ -5550,7 +5333,7 @@ static void do_chroot()
       }
 }
 
-static void switch_to_user (const char *username, int username_switch, void *user_token)
+static void switch_to_user (const char *username, void *user_token)
 {
     struct passwd *pw;
 
@@ -5665,42 +5448,28 @@ static void switch_to_user (const char *username, int username_switch, void *use
 
 static void do_chroot() { }
 
-/* If username_switch is set, then we don't used any cached credential information.  This
-   lets us become any arbitrary user */
-static void switch_to_user (const char *username, int username_switch, void *user_token)
+static void switch_to_user (const char *username, void *user_token)
 {
-	if(!username_switch && server_protocol->impersonate)
+	switch(win32switchtouser(username, user_token))
 	{
-		TRACE(3,"Impersonating preauthenticated user using protocol specific impersionation");
-		if(server_protocol->impersonate(client_protocol, username, NULL)!=CVSPROTO_SUCCESS)
-		{
-			printf ("E Fatal error, aborting.\nerror 0 %s: Impersonation for :%s: protocol failed.\n", username, server_protocol->name);
-			error_exit();
-		}
-	}
-	else
-	{
-		switch(win32switchtouser(username, user_token))
-		{
-		case 4: // No such domain
-			printf ("E Fatal error, aborting.\nerror 0 %s: no such domain\n", username);
-			error_exit ();
-			break;
-		case 3: // Account disabled
-			printf ("E Fatal error, aborting.\nerror 0 %s: user account disabled\n", username);
-			error_exit ();
-			break;
-		case 2: // No such user
-			printf ("E Fatal error, aborting.\nerror 0 %s: no such user\n", username);
-			error_exit ();
-			break;
-		case 1: // Not enough privileges
-			printf ("E Fatal error, aborting.\nerror 0 %s: Switch to user failed due to configuration error.  Contact your System Administrator.\n", username);
-			error_exit ();
-			break;
-		case 0: // Ok
-			break;
-		}
+	case 4: // No such domain
+		printf ("E Fatal error, aborting.\nerror 0 %s: no such domain\n", username);
+		error_exit ();
+		break;
+	case 3: // Account disabled
+		printf ("E Fatal error, aborting.\nerror 0 %s: user account disabled\n", username);
+		error_exit ();
+		break;
+	case 2: // No such user
+		printf ("E Fatal error, aborting.\nerror 0 %s: no such user\n", username);
+		error_exit ();
+		break;
+	case 1: // Not enough privileges
+		printf ("E Fatal error, aborting.\nerror 0 %s: Switch to user failed due to configuration error.  Contact your System Administrator.\n", username);
+		error_exit ();
+		break;
+	case 0: // Ok
+		break;
 	}
 #ifdef SERVER_SUPPORT
     /* Make sure our CVS_Username has been set. */
@@ -5849,8 +5618,8 @@ static int check_repository_password (const char *username, const char *password
             host_user_tmp = (char*)username;
 
         /* Verify blank passwords directly, otherwise use crypt(). */
-        if ((found_password == NULL) || (password==NULL)
-#ifdef _WIN32 // NTServer mode sets password==NULL for authentication
+        if ((found_password == NULL)
+#ifdef _WIN32
 	    || (found_password[0]=='!' && win32_valid_user(username,password,found_password+1, user_token))
 #endif
 		|| !CCrypt::compare(password, found_password))
@@ -6073,13 +5842,6 @@ static char *check_password (const char *username, const char *password, const c
         /* host_user already set by reference, so just return. */
         goto handle_return;
     }
-    else if (rc == 0 && system_auth && !password)
-    {
-       /* ntserver/sspi uses password=NULL */
-       host_user=xstrdup(username);
-       TRACE(3,"System password already validated by authentication mechanism");
-       goto handle_return;
-    }
     else if (rc == 0 && system_auth)
     {
 #ifdef HAVE_PAM
@@ -6154,15 +5916,15 @@ void server_authenticate_connection ()
 		TRACE(3,"io_getline failed");
 	/* We want errors to go over the server protocol channel, so create a fake
 		io buffer */
-	buf_from_net = client_protocol_buffer_initialize (NULL, 1, outbuf_memory_error);
-	buf_to_net = client_protocol_buffer_initialize (NULL, 0, outbuf_memory_error);
+	buf_from_net = client_protocol_buffer_initialize (1, outbuf_memory_error);
+	buf_to_net = client_protocol_buffer_initialize (0, outbuf_memory_error);
 
 	TRACE(3,"Client sent '%s'",tmp);
 
 	bool badauth;
 	CProtocolLibrary lib;
 
-	server_protocol = lib.FindProtocol(tmp,badauth,server_io_socket,encryption_level==4,&temp_protocol);
+	server_protocol = lib.FindProtocol(tmp,badauth,server_io_socket,&temp_protocol);
 	if(badauth)
 		goto i_hate_you;
 
@@ -6180,14 +5942,7 @@ void server_authenticate_connection ()
 	win32_sanitize_username((const char **)&server_protocol->auth_username);
 #endif
 
-	/* If we're now in 'wrap' mode, setup a wrap buffer for the relevant I/O */
-	((client_protocol_data*)buf_from_net->closure)->protocol=server_protocol;
-	((client_protocol_data*)buf_to_net->closure)->protocol=server_protocol;
-
-	if(server_protocol->auth_repository)
 	{
-		// If no repository is sent, we can't work out where the passwd, config, etc. file
-		//   are until the first 'Root' command
 		const root_allow_struct *found_root = NULL;
 
 		if (!root_allow_ok (server_protocol->auth_repository,found_root,real_repository,true))
@@ -6207,23 +5962,18 @@ void server_authenticate_connection ()
 			CServerIo::log(CServerIo::logAuth,"login failure for %s on %s", server_protocol->auth_username, server_protocol->auth_repository);
 			goto i_hate_you;
 		}
-
-		// OK, now parse the config file, so we can use it to control how
-		//   to check passwords.  If there was an error parsing the config
-		//   file, parse_config already printed an error.  We keep going.
-		//   Why?  Because if we didn't, then there would be no way to check
-		//   in a new CVSROOT/config file to fix the broken one! 
-		parse_config (real_repository);
-
-		// We need the real cleartext before we hash it. 
-		host_user = check_password (server_protocol->auth_username, server_protocol->auth_password,
-									real_repository, &user_token);
 	}
-	else 
-	{
-		if(server_protocol->auth_username)
-			host_user = xstrdup(server_protocol->auth_username);
-	}
+
+	// OK, now parse the config file, so we can use it to control how
+	//   to check passwords.  If there was an error parsing the config
+	//   file, parse_config already printed an error.  We keep going.
+	//   Why?  Because if we didn't, then there would be no way to check
+	//   in a new CVSROOT/config file to fix the broken one!
+	parse_config (real_repository);
+
+	// We need the real cleartext before we hash it.
+	host_user = check_password (server_protocol->auth_username, server_protocol->auth_password,
+								real_repository, &user_token);
 
     if (host_user == NULL)
     {
@@ -6257,9 +6007,9 @@ void server_authenticate_connection ()
 
 	/* Switch to run as this user. */
     if(runas_user && *runas_user)
-		switch_to_user (runas_user, 1, NULL);
+		switch_to_user (runas_user, NULL);
     else
-		switch_to_user (host_user, 0, user_token);
+		switch_to_user (host_user, user_token);
     xfree (host_user);
 
     TRACE(3,"I LOVE YOU");
@@ -6295,120 +6045,13 @@ void server_authenticate_connection ()
 
 #endif /* SERVER_SUPPORT */ 
 
-/* This global variable is non-zero if the user requests encryption on
-   the command line.  */
-int cvsencrypt;
-
-/* This global variable is non-zero if the user requests authentication on
-   the command line.  */
-int cvsauthenticate;
-
-/* An buffer interface.  This is built on top of a
-   packetizing buffer.  */
-
-/* This structure is the closure field of the protocol wrapping.  */
-
-struct cvs_encrypt_wrap_data
-{
-	int encrypt; /* 1 = wrap & encrypt, 0 = wrap only */
-	const struct protocol_interface *protocol;
-};
-
 struct cvs_protocol_wrap_data
 {
 	char prefix; /* 'E' or 'M' */
 	int last_was_linefeed;
 };
 
-static int cvs_encrypt_wrap_input(void *, const char *, char *, int);
-static int cvs_encrypt_wrap_output(void *, const char *, char *, int, int *);
-
 static int cvs_protocol_wrap_output(void *, const char *, char *, int, int *);
-
-/* Create a protocol wrapping buffer.  We use a packetizing buffer. */
-
-struct buffer *cvs_encrypt_wrap_buffer_initialize (const struct protocol_interface *protocol, struct buffer *buf,
-     int input, int encrypt, void (*memory)(struct buffer *))
-{
-    struct cvs_encrypt_wrap_data *ed;
-
-    ed = (struct cvs_encrypt_wrap_data *) xmalloc (sizeof *ed);
-    ed->encrypt = encrypt;
-	ed->protocol = protocol;
-
-    return (packetizing_buffer_initialize
-            (buf,
-             input ? cvs_encrypt_wrap_input : NULL,
-             input ? NULL : cvs_encrypt_wrap_output,
-             ed,
-             memory));
-}
-
-/* Unwrap data using GSSAPI.  */
-
-static int cvs_encrypt_wrap_input (void *fnclosure, const char *input, char *output, int size)
-{
-    struct cvs_encrypt_wrap_data *ed =
-        (struct cvs_encrypt_wrap_data *) fnclosure;
-	const struct protocol_interface *protocol = ed->protocol; 
-	int newsize;
-
-	if(protocol && protocol->wrap)
-	{
-		if(protocol->wrap(protocol, 1, ed->encrypt, input, size, output, &newsize))
-		{
-			error(1, 0, "cvs_encrypt_wrap_input failed: error");
-		}
-
-		if (newsize > size)
-		{
-			error(1, 0, "cvs_encrypt_wrap_input failed: newsize > size");
-		}
-	}
-	else
-	{
-		/* We're being called from 'cvs server', which means encryption is being handled by
-		   an external protocol (probably ssh).  Just act as a passthrough. */
-		memcpy(output,input,size);
-	}
-
-    return 0;
-}
-
-/* Wrap data using GSSAPI.  */
-
-static int
-cvs_encrypt_wrap_output (void *fnclosure, const char *input, char *output, int size, int *translated)
-{
-    struct cvs_encrypt_wrap_data *ed =
-        (struct cvs_encrypt_wrap_data *) fnclosure;
-	const struct protocol_interface *protocol = ed->protocol; 
-	int newsize;
-
-
-	if(protocol)
-	{
-		if(protocol->wrap(protocol, 0, ed->encrypt, input, size, output, &newsize))
-		{
-			error(1, 0, "cvs_encrypt_wrap_output failed: error");
-		}
-
-		if (newsize > size + 100)
-		{
-			error(1, 0, "cvs_encrypt_wrap_output failed: newsize > size + 100");
-		}
-	}
-	else
-	{
-		/* External protocol - just passthrough */
-		memcpy(output,input,size);
-		newsize=size;
-	}
-
-    *translated = newsize;
-
-    return 0;
-}
 
 struct buffer *cvs_protocol_wrap_buffer_initialize (struct buffer *buf, char prefix)
 {
@@ -6420,7 +6063,6 @@ struct buffer *cvs_protocol_wrap_buffer_initialize (struct buffer *buf, char pre
 
     return (nonpacketizing_buffer_initialize
             (buf,
-             NULL,
              cvs_protocol_wrap_output,
              ed,
              NULL));
@@ -6472,9 +6114,7 @@ int cvs_output_raw(const char *str, size_t len, bool flush)
 	if(!len)
 		return 0;
 
-	if(temp_protocol && temp_protocol->server_write_data)
-		len = temp_protocol->server_write_data(temp_protocol,str,len);
-    else if (server_active)
+    if (server_active)
 	{
 		buf_output (buf_to_net, str, len);
 		if(flush) buf_flush(buf_to_net,1);
@@ -6511,9 +6151,7 @@ int cvs_output (const char *str, size_t len)
 	if(!len)
 		return 0;
 #ifdef SERVER_SUPPORT
-	if(temp_protocol && temp_protocol->server_write_data)
-		len = temp_protocol->server_write_data(temp_protocol,str,len?len:strlen(str));
-    else if (server_active)
+    if (server_active)
     {
 		char *ostr=NULL;
 		size_t olen=0;
@@ -6686,8 +6324,6 @@ int cvs_output_binary (char *str, size_t len)
 		buf_output (buf_to_net, str, len);
 		return len;
     }
-	else if(temp_protocol && temp_protocol->server_write_data)
-		return temp_protocol->server_write_data(temp_protocol,str,len?len:strlen(str));
     else
 #endif
 	if(CCvsgui::Active())
@@ -6754,9 +6390,7 @@ int cvs_outerr (const char *str, size_t len)
 		return 0;
 
 #ifdef SERVER_SUPPORT
-    if(temp_protocol && temp_protocol->server_write_data)
-	return temp_protocol->server_write_data(temp_protocol,str,len);
-    else if (server_active && (stderr_buf || buf_to_net))
+    if (server_active && (stderr_buf || buf_to_net))
     {
 		char *ostr=NULL;
 		size_t olen=0;
@@ -6858,8 +6492,6 @@ cvs_flusherr ()
 	if(stderr_buf)
 		buf_flush (stderr_buf, 0);
     }
-	else if(temp_protocol && temp_protocol->server_flush_data)
-		temp_protocol->server_flush_data(temp_protocol);
     else
 #endif
     {
@@ -6876,9 +6508,7 @@ void
 cvs_flushout ()
 {
 #ifdef SERVER_SUPPORT
-	if(temp_protocol && temp_protocol->server_flush_data)
-		temp_protocol->server_flush_data(temp_protocol);
-    else if (server_active)
+    if (server_active)
     {
 		/* Flush what we can to the network, but don't block.  */
 		if(stdout_buf)
@@ -6908,7 +6538,7 @@ cvs_flushout ()
 void cvs_flushout_perfile ()
 {
 #ifdef SERVER_SUPPORT
-	if (server_active && !(temp_protocol && temp_protocol->server_flush_data))
+	if (server_active)
 	{
 		if ((!stdout_buf || buf_empty_p (stdout_buf))
 		    && (!stderr_buf || buf_empty_p (stderr_buf))
@@ -7003,105 +6633,6 @@ int server_main(const char *cmd_name, int (*command)(int argc, char **argv))
 	args.retval = exitstatus;
 	run_trigger(&args, postcommand_proc);
 	xfree(last_repository);
-
-	return exitstatus;
-}
-
-/* Send the request off to the proxy server instead */
-int proxy_main(const char *cmd_name, int (*command)(int argc, char **argv))
-{
-	int exitstatus = -1;
-
-	TRACE(3,"proxy_main started");
-	/*
-	 * Set this in .bashrc if you want to give yourself time to attach
-	 * to the subprocess with a debugger.
-	 */
-	if (CProtocolLibrary::GetEnvironment ("CVS_SERVER_SLEEP"))
-	{
-	    int secs = atoi (CProtocolLibrary::GetEnvironment ("CVS_SERVER_SLEEP"));
-	    sleep (secs);
-	}
-
-
-	server_command_name = cmd_name;
-
-	cvsroot *oldroot = current_parsed_root;
-
-	/* Construct a root as if we were the client */
-	TRACE(3,"proxy main -Construct a root as if we were the client- phys repos=(%s,%s,%s)."
-				,PATCH_NULL(oldroot->directory)
-				,PATCH_NULL(oldroot->proxy_repository_root)
-				,PATCH_NULL(oldroot->unparsed_directory));
-
-	current_parsed_root = new_cvsroot_t();
-	current_parsed_root->original = xstrdup(oldroot->directory);
-	current_parsed_root->directory = xstrdup(oldroot->unparsed_directory);
-	//current_parsed_root->directory = xstrdup(oldroot->proxy_repository_root);
-	current_parsed_root->unparsed_directory = xstrdup(oldroot->unparsed_directory);
-	current_parsed_root->isremote = true;
-	strcpy(current_parsed_root->method,"sync");
-	current_parsed_root->hostname = xstrdup(oldroot->remote_server);
-	if(!strncmp(oldroot->remote_passphrase,"$1$",3))
-		current_parsed_root->password = xstrdup(oldroot->remote_passphrase);
-	else
-	{
-		CCrypt crypt;
-		current_parsed_root->password = xstrdup(crypt.crypt(oldroot->remote_passphrase));
-	}
-	current_parsed_root->username = xstrdup(CVS_Username);
-	current_parsed_root->optional_1 = xstrdup(oldroot->unparsed_directory);
-	current_parsed_root->optional_2 = xstrdup(CVS_Username);
-	current_parsed_root->optional_3 = xstrdup("proxy");
-	current_parsed_root->remote_repository = xstrdup(oldroot->remote_repository);
-	current_parsed_root->proxy_repository_root = xstrdup(oldroot->proxy_repository_root);
-
-	CProtocolLibrary lib;
-	client_protocol = lib.LoadProtocol("sync");
-	if(!client_protocol)
-	{
-		error(0, 0, "Sync protocol not available.  Cannot start proxy");
-		exitstatus = 1;
-		goto finish_command;
-	}
-
-	lib.SetupServerInterface(current_parsed_root, server_io_socket);
-
-	precommand_args_t args;
-	args.argc = argument_count-1;
-	args.argv = (const char **)argument_vector+1;
-	args.command = server_command_name;
-	args.retval = 0;
-	if(have_local_root)
-	{
-		TRACE(3,"run precommand proc server");
-		if(run_trigger(&args, precommand_proc))
-		{
-			error (0, 0, "Pre-command check failed");
-			exitstatus = 1;
-			goto finish_command;
-		}
-	}
-
-	start_server(2);
-	proxy_active = 1;
-
-	/* Run the command in client mode */
-	/* The condition server_active == true and current_parsed_root->isremote == true is unique to the proxy */
-	exitstatus = (*command) (argument_count, argument_vector);
-
-finish_command:
-	TRACE(3,"proxy main - change current parsed root to the 'original' one.");
-	current_parsed_root = oldroot;
-	lib.SetupServerInterface(current_parsed_root, server_io_socket);
-
-	if(have_local_root)
-	{
-		args.retval = exitstatus;
-		TRACE(3,"run postcommand proc server (proxy)");
-		run_trigger(&args, postcommand_proc);
-		xfree(last_repository);
-	}
 
 	return exitstatus;
 }

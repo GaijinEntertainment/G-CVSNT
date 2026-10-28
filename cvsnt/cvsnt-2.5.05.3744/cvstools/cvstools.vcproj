@@ -309,26 +309,6 @@
 			</File>
 		</Filter>
 		<Filter
-			Name="Zeroconf"
-			>
-			<Filter
-				Name="Header Files"
-				>
-				<File
-					RelativePath=".\ServerInfo.h"
-					>
-				</File>
-			</Filter>
-			<Filter
-				Name="Source Files"
-				>
-				<File
-					RelativePath=".\ServerInfo.cpp"
-					>
-				</File>
-			</Filter>
-		</Filter>
-		<Filter
 			Name="Common Dialogs"
 			>
 			<Filter

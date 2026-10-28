@@ -9,9 +9,9 @@ needs `cafs_server` (or a proxy backed by it) reachable from every client.
 
 ### 1. The CVS server
 
-The same `cvs` binary, invoked as `cvs server` (over `ext`/`ssh`) or `cvs authserver` /
-`cvs pserver` (direct TCP). Traditionally started from `inetd`/`xinetd` (a sample is in
-`cvsnt/cvsnt.xinetd`) or, on Windows, by the `cvsservice` NT service.
+The same `cvs` binary, invoked as `cvs authserver` / `cvs pserver` (direct TCP). Traditionally started from `inetd`/`xinetd` (a sample is in
+`cvsnt/cvsnt.xinetd`) or, on Windows, by the `cvsservice` NT service. `cvs server` reads the protocol
+from standard input with no login; the tests start it through a pipe.
 
 Default port for `pserver` is 2401.
 

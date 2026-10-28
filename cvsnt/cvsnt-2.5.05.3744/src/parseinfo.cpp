@@ -82,20 +82,9 @@ int run_trigger(void *param, CALLPROC callproc)
 		}
 
 		TRACE(3,"LoadTrigger info trigger, phys repos=%s.",(current_parsed_root)?PATCH_NULL(current_parsed_root->directory):"no current_parsed_root");
-		if (strcmp((current_parsed_root->method)?current_parsed_root->method:"","sync")==0)
-		{
-		TRACE(3,"LoadTrigger info trigger, phys repos is proxy=%s.",(current_parsed_root)?PATCH_NULL(current_parsed_root->proxy_repository_root):"no current_parsed_root");
-		if(!lib.LoadTrigger("info" SHARED_LIBRARY_EXTENSION,server_active?server_command_name:command_name,global_session_time,remote_host_name?remote_host_name:hostname,CVS_Username,current_parsed_root->unparsed_directory,current_parsed_root->proxy_repository_root,global_session_id,Editor,count_uservar,count_uservar?&uservar[0]:NULL,count_uservar?&userval[0]:NULL,cv,codep))
-		{
-			error(1,errno,"Couldn't open default trigger library");
-		}
-		}
-		else
-		{
 		if(!lib.LoadTrigger("info" SHARED_LIBRARY_EXTENSION,server_active?server_command_name:command_name,global_session_time,remote_host_name?remote_host_name:hostname,CVS_Username,current_parsed_root->unparsed_directory,current_parsed_root->directory,global_session_id,Editor,count_uservar,count_uservar?&uservar[0]:NULL,count_uservar?&userval[0]:NULL,cv,codep))
 		{
 			error(1,errno,"Couldn't open default trigger library");
-		}
 		}
 
 		CDirectoryAccess da;

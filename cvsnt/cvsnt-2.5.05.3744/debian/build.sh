@@ -8,7 +8,6 @@ autoreconf -if
 	    --enable-pam \
 	    --enable-server \
 	    --enable-pserver \
-	    --enable-ext \
 	    --disable-mdns \
 	    --disable-mysql \
 	    --disable-postgres \

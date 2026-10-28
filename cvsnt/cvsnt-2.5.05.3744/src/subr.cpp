@@ -1154,7 +1154,7 @@ void cvs_trace(int level, const char *fmt, ...)
 			OutputDebugStringA(str);
 			OutputDebugStringW(L"\r\n");
 #endif
-			fprintf(stderr,"%-8.8s: %c -> ", ctime(&t)+11, proxy_active?'P':server_active?'S':' ');
+			fprintf(stderr,"%-8.8s: %c -> ", ctime(&t)+11, server_active?'S':' ');
 			fprintf(stderr,"%s\n",str);
 		}
 
@@ -1166,7 +1166,7 @@ void cvs_trace(int level, const char *fmt, ...)
 				xfree(trace_file);
 			else
 			{
-				fprintf(trace_file_fp,"%-8.8s: %c -> ", ctime(&t)+11, proxy_active?'P':server_active?'S':' ');
+				fprintf(trace_file_fp,"%-8.8s: %c -> ", ctime(&t)+11, server_active?'S':' ');
 				fprintf(trace_file_fp,"%s\n",str);
 				fflush(trace_file_fp);
 			}

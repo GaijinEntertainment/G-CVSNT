@@ -481,20 +481,14 @@
                                 <Environment Id="SetPath" Name="Path" Value="[CVSNT_INSTALLDIR]" Separator=";" Action="set" Part="last" />
                                 <File Id="cvs.exe" Name="cvs.exe" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\cvs.exe" />
                                 <File Id="cvsdiag.exe" Name="cvsdiag.exe" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\cvsdiag.exe" />
-                                <File Id="extnt.exe" Name="extnt.exe" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\extnt.exe" />
                                 <File Id="cvsservice.dll" Name="cvsservice.dll" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\cvsservice.dll" />
-                                <File Id="libssl_1_1.dll" Name="libssl-1_1-x64.dll" DiskId="1" Source="cvsnt-2.5.05.3744\external_libs\x64\dll\libssl-1_1-x64.dll" />
                                 <File Id="libcrypto_1_1.dll" Name="libcrypto-1_1-x64.dll" DiskId="1" Source="cvsnt-2.5.05.3744\external_libs\x64\dll\libcrypto-1_1-x64.dll" />
                             </Component>
                             <Component Id="CommandLineIniFiles" Guid="{81446A48-4FB4-4C15-9ED3-D21C4557FDA8}" NeverOverwrite="yes">
-                                <File Id="extnt.ini" Name="extnt.ini" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\extnt.ini" />
-                                <File Id="protocol_map.ini" Name="protocol_map.ini" ShortName="g8cefz6c.ini" DiskId="1" Source="cvsnt-2.5.05.3744\protocol_map.ini" />
+                                <File Id="protocol_map.ini" Name="protocol_map.ini" ShortName="g8cefz6c.ini" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\protocol_map.ini" />
                             </Component>
                             <Component Id="CommandLineLock" Guid="{C5E7B7C6-4FCD-4F44-8245-BD95AB1F1498}">
                                 <File Id="cvslock.exe" Name="cvslock.exe" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\cvslock.exe" />
-                            </Component>
-                            <Component Id="SshPlink" Guid="{F80E5626-C96B-4FA1-873D-B7B18218547D}">
-                                <File Id="ssh_plink.dll" Name="plink.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\plink.dll" />
                             </Component>
                             <Component Id="CvsntStartMenuDoc" Guid="{398ACBE2-6BF2-4532-B9D8-41E598F58005}">
                                 <File Id="cvsntwiki.url" Name="cvsnt-wiki.url" ShortName="2gco9qtl.url" DiskId="1" Source="msi_tools\extras\File\cvsntwiki.url" />
@@ -510,30 +504,6 @@
                             <Directory Id="CvsntProtoFolder" Name="protocols" ShortName="g9xnxlh8">
                                 <Component Id="PServer" Guid="{33E45A18-1891-42B7-9339-7052E4297C65}">
                                     <File Id="pserver_protocol.dll" Name="pserver.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\pserver.dll" />
-                                </Component>
-                                <Component Id="SServer" Guid="{14382272-091D-43BB-8766-5EC67676BF7D}">
-                                    <File Id="sserver_protocol.dll" Name="sserver.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\sserver.dll" />
-                                </Component>
-                                <Component Id="GServer" Guid="{940D540B-6967-4136-9185-35D8B3D8C8E6}">
-                                    <File Id="gserver_protocol.dll" Name="gserver.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\gserver.dll" />
-                                </Component>
-                                <Component Id="RServer" Guid="{F49EF116-EC09-4B7F-A5B4-2EB131BD527E}">
-                                    <File Id="server_protocol.dll" Name="server.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\server.dll" />
-                                </Component>
-                                <Component Id="Ext" Guid="{17C896CE-C639-43BC-B171-4BAA0EA79172}">
-                                    <File Id="ext_protocol.dll" Name="ext.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\ext.dll" />
-                                </Component>
-                                <Component Id="Ssh" Guid="{2A885DC9-08B0-4CE0-B68B-7AB3DBCDD756}">
-                                    <File Id="ssh_protocol.dll" Name="ssh.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\ssh.dll" />
-                                </Component>
-                                <Component Id="Sspi" Guid="{4702FCF5-169D-448C-BFED-1F586F9A049D}">
-                                    <File Id="sspi_protocol.dll" Name="sspi.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\sspi.dll" />
-                                </Component>
-                                <Component Id="Fork" Guid="{0561B14F-5B17-4E30-86E3-F3FB9017A114}">
-                                    <File Id="fork_protocol.dll" Name="fork.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\fork.dll" />
-                                </Component>
-                                <Component Id="Enum" Guid="{0561B14F-5B17-4E31-86E3-F3FB9017A114}">
-                                    <File Id="enum_protocol.dll" Name="enum.dll" KeyPath="yes" DiskId="1" Source="cvsnt-2.5.05.3744\Releasex64\protocols\enum.dll" />
                                 </Component>
                             </Directory>
                             <Directory Id="CvsntMdnsStuff" Name="mdns">
@@ -879,31 +849,6 @@
             <Feature Id="Protocols" AllowAdvertise="no" Description="Client/Server Connection Protocols" Level="3" Title="Protocols">
                 <Feature Id="PServer" AllowAdvertise="no" Description=":pserver: protocol" Level="3" Title="PServer">
                     <ComponentRef Id="PServer" />
-                </Feature>
-                <Feature Id="SServer" AllowAdvertise="no" Description=":sserver: protocol" Level="3" Title="SServer">
-                    <ComponentRef Id="SServer" />
-                </Feature>
-                <Feature Id="GServer" AllowAdvertise="no" Description=":gserver: protocol" Level="3" Title="GServer">
-                    <ComponentRef Id="GServer" />
-                </Feature>
-                <Feature Id="RServer" AllowAdvertise="no" Description=":server: protocol" Level="3" Title="Server">
-                    <ComponentRef Id="RServer" />
-                </Feature>
-                <Feature Id="Sspi" AllowAdvertise="no" Description=":sspi: protocol" Level="3" Title="Sspi">
-                    <ComponentRef Id="Sspi" />
-                </Feature>
-                <Feature Id="Ext" AllowAdvertise="no" Description=":ext: protocol" Level="3" Title="Ext">
-                    <ComponentRef Id="Ext" />
-                </Feature>
-                <Feature Id="Ssh" AllowAdvertise="no" Description=":ssh: protocol" Level="3" Title="Ssh">
-                    <ComponentRef Id="Ssh" />
-                    <ComponentRef Id="SshPlink" />
-                </Feature>
-                <Feature Id="Fork" AllowAdvertise="no" Description=":fork: protocol" Level="4" Title="Fork">
-                    <ComponentRef Id="Fork" />
-                </Feature>
-                <Feature Id="Enum" AllowAdvertise="no" Description=":enum: protocol" Level="4" Title="Enum">
-                    <ComponentRef Id="Enum" />
                 </Feature>
             </Feature>
             <Feature Id="Mdns" AllowAdvertise="no" Description="Handlers for zeroconf server discovery" Level="3" Title="Mdns handlers">

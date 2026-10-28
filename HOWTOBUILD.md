@@ -50,8 +50,6 @@ bash configure \
     --enable-pam \
     --enable-server \
     --enable-pserver \
-    --enable-sspi \
-    --enable-ext \
     --disable-mysql \
     --disable-postgres \
     --disable-sqlite \
@@ -92,9 +90,7 @@ installed by the main `make install`), compiles with `clang++ -O3 -msse4.1`, and
 | --- | --- |
 | `--enable-server` / `--enable-pserver` | Build the server halves |
 | `--enable-pam` | PAM authentication |
-| `--enable-sserver` / `--disable-sserver` | The `:sserver:` TLS protocol (on by default when OpenSSL is found, `configure.in:919`) |
 | `--with-ssl=DIR` | Where to look for OpenSSL if it is not in the default paths (`configure.in:146`) |
-| `--enable-gserver` / `--enable-sspi` | GSSAPI / SSPI methods |
 | `--enable-64bit` | 64-bit build |
 | `--disable-avx512` | Build BLAKE3 **without** AVX-512 kernels. AVX-512 is **on by default** on non-macOS targets (`configure.in:735`). AMD CPUs older than Zen 4 do not have it and will die with an illegal instruction, so use this flag if any target machine might be one (commit `2cd984a`) |
 | `--with-config-dir=DIR` | Where global settings live; defaults to `${sysconfdir}/cvsnt` |
@@ -128,8 +124,7 @@ What it does:
    the machine-wide OpenSSL setup can change for other software. It handles both the Intel
    (`/usr/local/opt`) and Apple Silicon (`/opt/homebrew/opt`) prefixes, but the library links use
    a nonexistent `libopenssl.*` stem for everything except `libcrypto`
-   (`cvsnt/build-macosx:31-39`); `libssl` itself is never linked, so configure's `SSL_CTX_new`
-   probe can fail on a clean machine and silently disable `:sserver:`.
+   (`cvsnt/build-macosx:31-39`); `libssl` itself is never linked.
 3. `autoreconf -i --force`.
 4. Builds and installs the in-tree `zstd`.
 5. Runs `osx/build-mac`, which configures with clang for the chosen architecture and produces
@@ -147,7 +142,7 @@ The target architecture and deployment target come from `BUILD_ARCH` at the top 
 
 The macOS build is a **client-only** build: `osx/build-mac:44` passes `--disable-server`, along with
 `--disable-hfs --with-internal-zlib --disable-ltdl --disable-odbc --disable-postgres
---disable-mysql --disable-sspi --disable-sqlite --enable-64bit`.
+--disable-mysql --disable-sqlite --enable-64bit`.
 
 Two flags in that list are historical no-ops: `configure` recognises neither `--with-internal-zlib`
 nor `--disable-ltdl`, and discards both with an "unrecognized options" warning. ltdl is actually
@@ -190,7 +185,7 @@ Prebuilt macOS packages for x64 and arm64 are published under
 cvsnt\cvsnt-2.5.05.3744\cvsnt.sln
 ```
 
-Open it, pick `Release|x64` (or `Release|Win32`), and build the solution. All 58 projects in the
+Open it, pick `Release|x64` (or `Release|Win32`), and build the solution. All 46 projects in the
 solution are marked to build; `cvsnt` produces `cvs.exe`. The solution has no `cafs_server`
 project — build the Windows blob server separately with
 `keyValueServer/server/build_server_cafs.cmd`; the solution's `cafs_proxy` project produces
@@ -202,7 +197,7 @@ The main client/server project (`cvsnt.vcxproj`) is configured with:
 * Character set: Unicode
 * Include directories: `zstd`, `external_libs`, `windows-NT`, `src`, `lib`, `diff`, `zlib`,
   `cvsgui`, `expat\lib`, `xmlapi`, `cvsapi\lib`, `cvsapi`, `cvstools`, `libxml\include`
-* Libraries: `libssl.lib libcrypto.lib comctl32.lib wsock32.lib netapi32.lib mpr.lib ole32.lib
+* Libraries: `libcrypto.lib comctl32.lib wsock32.lib netapi32.lib mpr.lib ole32.lib
   libiconv.lib wininet.lib dbghelp.lib`
 
 ### Installer
@@ -239,13 +234,11 @@ The dependency order that works is: `blake3`, `zlib`, `zstd`, `pcre`, `libxml2`,
 
 Two things to know:
 
-* `libcrypto-1_1-x64.dll` from `external_libs/x64/dll/` must sit next to `cvs.exe` for it to start —
-  it is the only one of the two the binary actually imports. Copy `libssl-1_1-x64.dll` as well; a
-  build that enables `:sserver:` will need it.
+* `libcrypto-1_1-x64.dll` from `external_libs/x64/dll/` must sit next to `cvs.exe` for it to start.
 * `cvs init` needs the trigger plugin (`triggers/info_triggers.vcxproj`); without it you get
   `Couldn't open default trigger library`. Client commands work without it. The makefile's
-  `plugins` target builds it as `bin\triggers\info.dll`, together with the `pserver` and `ext`
-  protocol plugins under `bin\protocols\`; run the client with `-L <bin>` to use them.
+  `plugins` target builds it as `bin\triggers\info.dll`, together with the `pserver` protocol
+  plugin under `bin\protocols\`; run the client with `-L <bin>` to use them.
 
 `_reports/BUILD-01-windows-toolchain.md` (in the analysis-reports slice of this audit series) has
 the full environment setup, the makefile, the exact dependency graph and every problem encountered

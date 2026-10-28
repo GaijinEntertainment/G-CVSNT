@@ -22,22 +22,9 @@ public:
 	CString m_szInstallPath;
 	CString m_szDescription;
 	bool m_bPublish;
-	bool m_bDefault;
 	bool m_bOnline;
 	bool m_bReadWrite;
 	bool m_bSyncName;
-	int m_nType;
-	CComboBox m_cbType;
-	CString m_szRemoteServer;
-	CString m_szRemoteRepository;
-	CString m_szRemotePassphrase;
-	CStatic m_stRemoteGroup;
-	CStatic m_stServerText;
-	CStatic m_stRepositoryText;
-	CStatic m_stPassphraseText;
-	CButton m_btReadWrite;
-	CEdit m_edLocation;
-	CButton m_btSelect;
 
 // Dialog Data
 	//{{AFX_DATA(CNewRootDialog)
@@ -56,7 +43,6 @@ public:
 protected:
 	void UpdateName();
 	BOOL DeepCreateDirectory(LPTSTR lpPathName, LPSECURITY_ATTRIBUTES lpSecurityAttributes);
-	void EnableWindowsForType();
 
 	// Generated message map functions
 	//{{AFX_MSG(CNewRootDialog)
@@ -68,7 +54,6 @@ protected:
 	afx_msg void OnEnChangeDescription();
 	afx_msg void OnPublish();
 	afx_msg void OnBnClickedOnline();
-	afx_msg void OnCbnSelendokType();
 	//}}AFX_MSG
 
 	DECLARE_MESSAGE_MAP()

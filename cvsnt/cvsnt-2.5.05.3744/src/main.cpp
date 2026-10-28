@@ -80,9 +80,6 @@ int atomic_checkouts = 0;
 LineType crlf_mode = CRLF_DEFAULT;
 
 #ifdef SERVER_SUPPORT
-/* This is set to request/force encryption/compression */
-/* 0=Any, 1=Request auth., 2=Require auth., 3=Require Auth. Request Encr., 4=Request Encr., 5=Require Encr. */
-extern int encryption_level; 
 /* 0=Any, 1=Request compr., 2=Require compr. */
 extern int compression_level;
 
@@ -335,9 +332,6 @@ static const char *const opt_usage[] =
     "    -z #            Use compression level '#' for net traffic.\n",
     "    -j #            Concurrency download level. Use 0 to download in main thread.\n",
 	"    -c              Checksum files as they are sent to the server.\n",
-    "    -x              Encrypt all net traffic (fail if not encrypted).  Implies -a.\n",
-    "    -y              Encrypt all net traffic (if supported by protocol).  Implies -a.\n",
-	"    -a              Authenticate/sign all net traffic.\n",
 	"    -N              Supress network share error. (UNSUPPORTED OPTION)\n",
     "    -s VAR=VAL      Set CVS user variable.\n",
     "    -L              Override cvs library directory\n",
@@ -349,8 +343,6 @@ static const char *const opt_usage[] =
 	"\n",
     "    --blob_url url   Blob download|upload url, each url can be in form of 127.0.0.1/something@80 (@80 - means port). 'def' means master. (examples: http://cvs-proxy.lan@8080 or localhost@2403|cvs-master.lan@2403)\n",
     "    --version       CVS version and copyright.\n",
-    "    --encrypt       Encrypt all net traffic (if supported by protocol).\n",
-    "    --authenticate  Authenticate all net traffic (if supported by protocol).\n",
     "    --readonly      Server is read only for all users.\n",
     "    --cr            Use Mac (cr) line endings by default.\n",
     "    --lf            Use Unix (lf) line endings by default.\n",
@@ -592,9 +584,6 @@ static void read_global_config(void)
 			lock_server = xstrdup("127.0.0.1:2402");
 		}
 
-		if(!CGlobalSettings::GetGlobalValue("cvsnt","PServer","EncryptionLevel",buffer,sizeof(buffer)))
-			encryption_level = atoi(buffer);
-
 		if(!CGlobalSettings::GetGlobalValue("cvsnt","PServer","CompressionLevel",buffer,sizeof(buffer)))
 			compression_level = atoi(buffer);
 		
@@ -611,7 +600,7 @@ static void read_global_config(void)
 			remote_init_root = xstrdup(buffer);
 
 		n=0;
-		char proxy_repos[256], remote_repos[256], remote_serv[256], remote_pass[256];
+		char proxy_repos[256];
 		while(!CGlobalSettings::EnumGlobalValues("cvsnt","PServer",n++,token,sizeof(token),buffer,sizeof(buffer)))
 		{
 			if(!strncasecmp(token,"Repository",10) && isdigit(token[10]) && isdigit(token[strlen(token)-1]))
@@ -625,25 +614,17 @@ static void read_global_config(void)
 					buffer[strlen(buffer)-1]='\0';
 				if(*buffer2 && ISDIRSEP(buffer2[strlen(buffer2)-1]))
 					buffer2[strlen(buffer2)-1]='\0';
-				int online = 1, readwrite = 1, repotype = 1, proxypasswd = 0;
-				proxy_repos[0]=remote_repos[0]=remote_serv[0]=remote_pass[0]='\0';
+				int online = 1, readwrite = 1, proxypasswd = 0;
+				proxy_repos[0]='\0';
 				snprintf(tmp,sizeof(tmp),"Repository%dOnline",prefixnum);
 				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,online);
 				snprintf(tmp,sizeof(tmp),"Repository%dReadWrite",prefixnum);
 				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,readwrite);
-				snprintf(tmp,sizeof(tmp),"Repository%dType",prefixnum);
-				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,repotype);
-				snprintf(tmp,sizeof(tmp),"Repository%dRemoteServer",prefixnum);
-				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,remote_serv,sizeof(remote_serv));
-				snprintf(tmp,sizeof(tmp),"Repository%dRemoteRepository",prefixnum);
-				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,remote_repos,sizeof(remote_repos));
 				snprintf(tmp,sizeof(tmp),"Repository%dProxyPhysicalFiles",prefixnum);
 				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,proxy_repos,sizeof(proxy_repos));
 				snprintf(tmp,sizeof(tmp),"Repository%dProxyPasswdFiles",prefixnum);
 				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,proxypasswd);
-				snprintf(tmp,sizeof(tmp),"Repository%dRemotePassphrase",prefixnum);
-				CGlobalSettings::GetGlobalValue("cvsnt","PServer",tmp,remote_pass,sizeof(remote_pass));
-				root_allow_add(buffer,buffer2,online?true:false,readwrite?true:false,proxypasswd?true:false,(RootType)repotype,remote_serv,remote_repos,proxy_repos,remote_pass);
+				root_allow_add(buffer,buffer2,online?true:false,readwrite?true:false,proxypasswd?true:false,proxy_repos);
 			}
 		}
 	}
@@ -735,13 +716,11 @@ int main (int argc, char **argv)
     int help = 0;		/* Has the user asked for help?  This
 				   lets us support the `cvs -H cmd'
 				   convention to give help for cmd. */
-	static const char short_options[] = "+QqrwtnlvT:e:d:HfF:z:s:axyNRo::OL:C:cj:";
+	static const char short_options[] = "+QqrwtnlvT:e:d:HfF:z:s:NRo::OL:C:cj:";
     static struct option long_options[] =
     {
 		{"help", 0, NULL, 'H'},
 		{"version", 0, NULL, 'v'},
-		{"encrypt", 0, NULL, 'x'},
-		{"authenticate", 0, NULL, 'a'},
 		{"readonly",0,NULL,257},
 		{"utf8",0,NULL,258},
 		{"help-commands", 0, NULL, 1},
@@ -928,7 +907,7 @@ int main (int argc, char **argv)
 				*(p++)='\0';
 			else
 				p=optarg;
-			root_allow_add (optarg,p,true,true,true,RootTypeStandard,NULL,NULL,NULL,NULL);
+			root_allow_add (optarg,p,true,true,true,NULL);
 		}
 		break;
 	    case 'Q':
@@ -1036,24 +1015,6 @@ int main (int argc, char **argv)
 		break;
 	    case 'C':
 			CGlobalSettings::SetConfigDirectory(optarg);
-		break;
-	    case 'x':
-			if(cvsauthenticate)
-				error(1, 0,
-					"Cannot have both -a and -x at the same time");
-	        cvsencrypt = 1;
-		break;
-	    case 'y':
-			if(cvsauthenticate)
-				error(1, 0,
-					"Cannot have both -a and -y at the same time");
-	        cvsencrypt = -1;
-		break;
-	    case 'a':
-			if(cvsencrypt)
-				error(1, 0,
-					"Cannot have both -a and -x/-y at the same time");
-	        cvsauthenticate = 1;
 		break;
 		case 'R':
 			break; /* Reserved for remapping code */
@@ -1670,7 +1631,7 @@ int main (int argc, char **argv)
 
 		if (use_cvsrc)
 			read_cvsrc (&argc, &argv, command_name);
-		if(!server_active && !proxy_active && current_parsed_root && !current_parsed_root->isremote)
+		if(!server_active && current_parsed_root && !current_parsed_root->isremote)
 		{
 			precommand_args_t args;
 			args.command=command_name;
@@ -1686,8 +1647,8 @@ int main (int argc, char **argv)
 
 		if(!err)
 			err = (*(cm->func)) (argc, argv);
-	
-		if(!server_active && !proxy_active && current_parsed_root && !current_parsed_root->isremote)
+
+		if(!server_active && current_parsed_root && !current_parsed_root->isremote)
 		{
 			precommand_args_t args;
 			args.command=command_name;
@@ -1699,7 +1660,7 @@ int main (int argc, char **argv)
 		}
 		xfree(last_repository);
 
-		if(!server_active && !proxy_active)
+		if(!server_active)
 		{
 			CTriggerLibrary lib;
 			lib.CloseAllTriggers(); /* This command has finished */

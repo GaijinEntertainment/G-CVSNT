@@ -1,7 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?><Wix xmlns="http://schemas.microsoft.com/wix/2006/wi">
     <Fragment Id="server">
 
-        <CustomAction Id="RunGenkey" Impersonate="yes" FileKey="genkey.exe" ExeCommand="&quot;[CVSNT_INSTALLDIR]cvsnt-default.pem&quot;" Execute="immediate" />
         <CustomAction Id="RunPostinst" Impersonate="yes" FileKey="postinst.exe" ExeCommand="" Execute="immediate" />
 
         <DirectoryRef Id="SystemFolder" FileSource="$(var.CVSNT_BASE)\">
@@ -118,7 +117,6 @@
             </Component>
             <Component Id="CommandLineServerFiles" Guid="32baa066-a64a-46ba-9274-7912dbff7bf9" DiskId="1">
                 <File Id="postinst.exe" Name="postinst.exe" />
-                <File Id="genkey.exe" Name="genkey.exe" />
             </Component>
             <Directory Id="CvsntXdiffStuff" Name="xdiff" FileSource="$(var.CVSNT_BASE)\xdiff\">
                 <Component Id="ext_xdiff" Guid="D89436EF-1912-4bf8-B52D-30EF52A12773" DiskId="1">
@@ -133,26 +131,11 @@
                 <File Id="co.exe" Name="co.exe" />
                 <File Id="co.dll" Name="co.dll" />
             </Component>
-            <Directory Id="CvsntProtoStuff" Name="protocols" FileSource="$(var.CVSNT_BASE)\protocols\">
-                <Component Id="Enum" Guid="B8538524-CF3A-4abb-B0EC-92D99E841B25" DiskId="1">
-                    <File Id="enum_protocol.dll" Name="enum.dll" />
-                </Component>
-            </Directory>
-            <Component Id="SServer_Registry" Guid="1b58b18d-c07f-4807-b0ad-4cc888731b7c" DiskId="1">
-                <Condition>SSERVERKEYS=0 And &amp;ServerComponents=3 and $SServer_Registry=3</Condition>
-                <RegistryValue Id="CertificateFile" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="CertificateFile" Type="string" Value="[CVSNT_INSTALLDIR]cvsnt-default.pem" />
-                <RegistryValue Id="PrivateKeyFile" Root="HKLM" Key="SOFTWARE\Cvs\PServer" Name="PrivateKeyFile" Type="string" Value="[CVSNT_INSTALLDIR]cvsnt-default.pem" />
-            </Component>
         </DirectoryRef>
         <DirectoryRef Id="CvsntProtoFolder" FileSource="$(var.CVSNT_BASE)\protocols\">
         </DirectoryRef>
 
         <FeatureRef Id="Cvsnt">
-                <FeatureRef Id="Protocols">
-	            <Feature Id="Enum" Title="Enum" Description="CVSNT Remote enumeration protocol" AllowAdvertise="no" Level="3">
-        	        <ComponentRef Id="Enum" />
-	            </Feature>
-                </FeatureRef>
             <Feature Id="ServerComponents" Title="CVSNT Server" Description="CVSNT Low Performance Server components" AllowAdvertise="no" Level="3">
                 <Condition Level="0">(Not Privileged) Or (SERVER=0)</Condition>
                 <Condition Level="4">SERVER=3</Condition>
@@ -165,7 +148,6 @@
                 <ComponentRef Id="ServiceSysFiles" />
                 <ComponentRef Id="ServiceSysFiles64" />
                 <ComponentRef Id="DefaultTrigger" />
-                <ComponentRef Id="SServer_Registry" />
                 <ComponentRef Id="CvsntStartMenuFolder" />
 
                 <Feature Id="Triggers" Title="Extension libraries" Description="Server extension libraries" AllowAdvertise="no" Level="3">
@@ -225,14 +207,6 @@
         </FeatureRef>
 
         <Icon Id="cvsnt.exe" SourceFile="$(var.CVSNT_BASE)\cvsntcpl.dll" />
-
-        <Property Id="SSERVERKEYS" Value="0">
-            <RegistrySearch Id="SSKeysExist" Root="HKLM" Key="SOFTWARE\CVS\PServer" Name="PrivateKeyFile" Type="raw" />
-        </Property>
-
-        <InstallExecuteSequence>
-            <Custom Action="RunGenkey" After="RunPostinst">&amp;ServerComponents=3 and $SServer_Registry=3</Custom>
-        </InstallExecuteSequence>
 
     </Fragment>
 </Wix>

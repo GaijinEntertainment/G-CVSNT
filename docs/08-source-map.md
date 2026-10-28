@@ -27,8 +27,8 @@ sending requests) and the server half (executing against the repository), separa
 | File | Lines | Role |
 | --- | ---: | --- |
 | `rcs.cpp` | 7615 | RCS `,v` parsing, revision extraction, symbol/branch manipulation, rewriting. The most delicate file in the tree |
-| `server.cpp` | 7227 | Server request loop, request table (`:4908`), response emission |
-| `client.cpp` | 6261 | Client request emission, response table (`:4022`), response handlers |
+| `server.cpp` | 7227 | Server request loop, request table (`requests[]`), response emission |
+| `client.cpp` | 6261 | Client request emission, response table (`responses[]`), response handlers |
 | `update.cpp` | 3480 | `update`: classification, checkout, merge, join |
 | `commit.cpp` | 2516 | `commit` |
 | `rcs_checkin.cpp` | 2236 | Writing a new revision into a `,v` file |
@@ -101,11 +101,11 @@ Small and self-contained. Read it in full before touching anything blob-related.
 | Path | Role |
 | --- | --- |
 | `cvsapi/` (~26 kLoC) | C++ support library: sockets, HTTP, TLS, `CLibraryAccess` (dynamic loading), XML, codepage conversion, `db/` back-ends (MySQL, PostgreSQL, SQLite, ODBC, Oracle, MSSQL, DB2), `mdns/`, `unix/` and `win32/` platform layers |
-| `cvstools/` (~6 kLoC) | `CGlobalSettings`, `CProtocolLibrary`, `CTriggerLibrary`, `EntriesParser`, `RootSplitter`, `Scramble`, `ServerConnection`, `ServerInfo`, plugin-interface headers |
+| `cvstools/` (~6 kLoC) | `CGlobalSettings`, `CProtocolLibrary`, `CTriggerLibrary`, `EntriesParser`, `RootSplitter`, `Scramble`, `ServerConnection`, plugin-interface headers |
 | `lib/` (~11 kLoC) | GNU portability layer: `getline`, `getdelim`, `fnmatch`, `getopt_long`, `regcomp`, `getaddrinfo`/`getnameinfo`, `timegm`, `waitpid`. (`xmalloc` is `src/subr.cpp:67`, `savecwd` is `src/savecwd.cpp`, MD5 is `cvsapi/lib/md5.c`) |
 | `diff/` (~8.5 kLoC) | GNU diff |
 | `xdiff/` | Pluggable external and XML diff back-ends |
-| `windows-NT/` | Windows implementations of `filesubr`, `mkdir`, `pwd`, `setuid`, `waitpid`, plus `cvsdiag`, `gss-ad`, `setuid` helpers |
+| `windows-NT/` | Windows implementations of `filesubr`, `mkdir`, `pwd`, `setuid`, `waitpid`, plus `cvsdiag` and `setuid` helpers |
 | `osx/` | macOS packaging and build scripts |
 
 ### Vendored third-party code
@@ -116,7 +116,6 @@ Small and self-contained. Read it in full before touching anything blob-related.
 | `zlib/`, `zstd/` | Compression libraries |
 | `pcre/` | Perl-compatible regex |
 | `libxml/` | libxml2 |
-| `plink/` | PuTTY's plink, for the built-in `ssh` method |
 | `ufc-crypt/` | `crypt()` implementation |
 | `external_libs/` | Prebuilt OpenSSL / iconv / dnssd import libraries and headers for Windows |
 | `tools/tsl/` | Sparse hash map/set used by the maintenance tools |
@@ -125,14 +124,14 @@ Small and self-contained. Read it in full before touching anything blob-related.
 
 | Path | Produces |
 | --- | --- |
-| `protocols/` | One shared library per connection method |
+| `protocols/` | The `pserver` connection method |
 | `triggers/` | One shared library per server-side hook family |
 | `lockservice/` | `cvslockd` |
 | `cvsservice/`, `cvsntcpl/`, `control-panel/` | Windows NT service and control-panel applet |
 | `cvsagent/` | Credential agent |
 | `cvsgui/` | GUI integration protocol (used by WinCVS/TortoiseCVS) |
 | `cvsdelta/`, `rcs/`, `rcs_convert.vcxproj` | Auxiliary RCS tools (`co`, `rlog`, `rcsdiff`) |
-| `mdnsclient/`, `extnt/`, `su/`, `genkey/`, `genbuild/`, `postinst/`, `uninsthlp/` | Small helper executables |
+| `mdnsclient/`, `su/`, `genbuild/`, `postinst/`, `uninsthlp/` | Small helper executables |
 | `tools/` | `cvtblob`, `gc-blobs`, `repack-blobs`, `blake3-calc`. (`simplelock.cpp`, `unlock.cpp` and `sha256_calc.cpp` are present but appear in no build file) |
 
 ### Build system
@@ -149,7 +148,7 @@ Small and self-contained. Read it in full before touching anything blob-related.
 1. `src/main.cpp` — the command table and global options; how a command is dispatched.
 2. `src/recurse.cpp` — `start_recursion`, the walker every command is built on.
 3. `src/update.cpp` — the most-used command, and the clearest example of the client/server split.
-4. `src/server.cpp:4908` and `src/client.cpp:4022` — the two protocol tables side by side.
+4. `requests[]` in `src/server.cpp` and `responses[]` in `src/client.cpp` — the two protocol tables side by side.
 5. `keyValueServer/include/blob_push_protocol.h` — the blob protocol, in one file.
 6. `ca_blobs_fs/content_addressed_fs.h` and `ca_blobs_fs/src/content_addressed_fs.cpp` — the store.
 7. `src/rcs.cpp` — last, and carefully. Everything about repository integrity lives here.

@@ -243,11 +243,6 @@ Overrides the setting of the
 .SM CVSREAD
 environment variable.
 .TP
-.B \-x
-Encrypt all communication between the client and the server.  As of
-this writing, this is only implemented when using a Kerberos
-connection.
-.TP
 \fB\-z\fP \fIcompression\-level\fP
 When transferring files across the network use
 .B gzip
@@ -2055,23 +2050,6 @@ is used.
 If this variable is set then
 .B cvs
 will ignore all references to remote repositories in the CVS/Root file.
-.TP
-.SM CVS_RSH
-.B cvs
-uses the contents of this variable to determine the name of the
-remote shell command to use when starting a
-.B cvs
-server.  If this variable is not set then
-.` "rsh"
-is used.
-.TP
-.SM CVS_SERVER
-.B cvs 
-uses the contents of this variable to determine the name of the
-.B cvs
-server command.  If this variable is not set then
-.` "cvs"
-is used.
 .TP
 .SM CVSWRAPPERS
 This variable is used by the

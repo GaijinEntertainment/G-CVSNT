@@ -1091,10 +1091,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\windows-NT\rcmd.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\rcs.h"
 				>
 			</File>

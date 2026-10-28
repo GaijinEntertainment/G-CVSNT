@@ -37,7 +37,6 @@
 #include "TriggerLibrary.h"
 #include "Cvsgui.h"
 #include "Scramble.h"
-#include "ServerInfo.h"
 #include "RootSplitter.h"
 #include "ServerConnection.h"
 #include "EntriesParser.h"

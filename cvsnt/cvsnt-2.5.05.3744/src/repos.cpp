@@ -238,15 +238,4 @@ void Sanitize_Repository_Name (char **repository)
     {
 	(*repository)[len - 2] = '\0';
     }
-
-	/* If we're proxying, makes sure we always use the alias name to communicate */
-	if(proxy_active && strlen(*repository)>strlen(current_parsed_root->original) &&
-		!strncmp(*repository,current_parsed_root->original,strlen(current_parsed_root->original)) &&
-		ISDIRSEP((*repository)[strlen(current_parsed_root->original)]))
-	{
-		char *newrep = (char*)xmalloc(strlen(current_parsed_root->directory) + strlen(*repository));
-		sprintf(newrep,"%s%s",current_parsed_root->directory,(*repository)+strlen(current_parsed_root->original));
-		xfree(*repository);
-		*repository = newrep;
-	}
 }

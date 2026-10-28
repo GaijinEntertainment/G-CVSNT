@@ -66,13 +66,5 @@ if INSTALL_SERVER
 	$(mkinstalldirs) $(DESTDIR)$(cvs_config_dir)
 	$(INSTALL_DATA) $(top_srcdir)/doc/PServer.example $(DESTDIR)$(cvs_config_dir)
 	$(INSTALL_DATA) $(top_srcdir)/doc/Plugins.example $(DESTDIR)$(cvs_config_dir)
-	if [ -f $(DESTDIR)$(cvs_config_dir)/ca.pem ]; then \
-	  $(INSTALL_DATA) $(top_srcdir)/ca.pem $(DESTDIR)$(cvs_config_dir)/ca.pem.example; \
-	else \
-	  $(INSTALL_DATA) $(top_srcdir)/ca.pem $(DESTDIR)$(cvs_config_dir); \
-	fi
 endif
-
-testkey:
-	sh $(DESTDIR)$(top_srcdir)/contrib/genkey
 

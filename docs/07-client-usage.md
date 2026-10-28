@@ -15,8 +15,8 @@ cvs -d :pserver:user@cvs.example.lan:/cvs checkout mymodule
 :method[;keyword=value...]:[user[:password]@]host[:port]:/path
 ```
 
-Common methods: `pserver`, `sserver` (TLS), `sspi` (Windows integrated), `gserver` (GSSAPI),
-`ssh`, `ext`, `server`, `fork`. See [02-architecture.md](02-architecture.md#connection-methods-protocol-plugins).
+The only remote method is `pserver`; `:local:` (or a plain path) opens a repository directly. See
+[02-architecture.md](02-architecture.md#connection-methods-protocol-plugins).
 
 Log in once per root:
 
@@ -33,8 +33,6 @@ Run `cvs --help-options` for the full list. The ones specific to, or important f
 | `-j N` | Number of blob download worker threads. When not given, the default is `min(8, max(1, cpu_count - 1))` (`src/download_blob_to.cpp:241`). The single biggest client-side knob for update speed on binary-heavy trees (`src/main.cpp:1013`). `-j 0` is documented as "download in the main thread" but is currently a no-op — `src/client.cpp:2210` treats 0 as "unset", so the default applies |
 | `--blob_url <spec>` | Override the advertised blob download list with a single URL `host[@port]` (a `/path` is not parsed out and breaks name resolution, `src/client.cpp:2123`). The master URL is still appended as a fallback (`src/download_blob_to.cpp:258,283`), and uploads ignore the override — they always go to the master. The `\|`-separated list and `def` shown in `cvs --help-options` are not implemented — only the first `@` is parsed (`src/client.cpp:2123`) |
 | `-z <0-9>` | Stream compression level for the CVS connection (gzip or zstd, negotiated) |
-| `-x` / `-y` | Require / request encryption of the CVS connection |
-| `-a` | Authenticate (sign) all traffic |
 | `-q` / `-Q` | Quiet / very quiet — worth using on huge trees, output formatting is not free |
 | `@response-file` | Read the remaining arguments from a file, one per line. Must be the last argument. Use this instead of chunking long file lists to dodge the Windows ~8 KB command-line limit |
 | `-t` | Trace execution; `-t -t` and more increase the trace level. Invaluable for diagnosing blob-fetch problems |

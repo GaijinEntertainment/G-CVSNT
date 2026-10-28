@@ -524,7 +524,8 @@ Are you sure you want to release (and delete) directory `tc': y
     <para>If the access method is omitted, then if the repository does not
     contain <command>@</command>, then <command>:local:</command> is assumed.
     If it does contain <command>@</command> then <command>:ext:</command> is
-    assumed. For example, if you have a local repository in
+    assumed. The <command>:ext:</command> access method is not available, so
+    cvsnt refuses such a repository. For example, if you have a local repository in
     <command>/usr/local/cvsroot</command>, you can use
     <command>/usr/local/cvsroot</command> instead of
     <command>:local:/usr/local/cvsroot</command>.</para>
@@ -775,10 +776,7 @@ export CVSROOT
         <para>Note that using the client/server cvsnt (<xref
         linkend="Remote-repositories" />), there is no good way to set
         <command>CVSUMASK</command>; the setting on the client machine has no
-        effect. If you are connecting with <command>ssh</command>, you can set
-        <command>CVSUMASK</command> in <command>.bashrc</command> or
-        <command>.cshrc</command>, as described in the documentation for your
-        operating system. This behavior might change in future versions of
+        effect. This behavior might change in future versions of
         cvsnt; do not rely on the setting of <command>CVSUMASK</command> on
         the client having no effect.</para>
 
@@ -804,7 +802,7 @@ export CVSROOT
         protection against only accidental lapses; anyone who is trying to
         circumvent the measure will be able to do so, and depending on how you
         have set it up may gain access to more than just cvsnt. You may wish
-        to instead consider pserver or sserver. They shares some of the same
+        to instead consider pserver. It shares some of the same
         attributes, in terms of possibly providing a false sense of security
         or opening security holes wider than the ones you are trying to fix,
         so read the documentation on pserver security carefully if you are
@@ -1713,15 +1711,6 @@ cvs update
           <primary>pserver (client/server connection method), port
           specification</primary>
         </indexterm><indexterm>
-          <primary>sspi (client/server connection method), port
-          specification</primary>
-        </indexterm><indexterm>
-          <primary>gserver (client/server connection method), port
-          specification</primary>
-        </indexterm><indexterm>
-          <primary>sserver (client/server connection method), port
-          specification</primary>
-        </indexterm><indexterm>
           <primary>port, specifying for remote repositories</primary>
         </indexterm> Your working copy of the sources can be on a different
       machine than the repository. Using cvsnt in this manner is known as
@@ -1750,11 +1739,18 @@ cvs update
       <para>The details of exactly what needs to be set up depend on how you
       are connecting to the server.</para>
 
+      <para>The only access method for a remote repository is
+      <command>pserver</command>. The methods <command>ext</command>,
+      <command>fork</command>, <command>server</command>,
+      <command>ssh</command>, <command>sserver</command>,
+      <command>gserver</command>, <command>sspi</command> and
+      <command>ntserver</command> are not available. A repository cannot
+      forward its requests to another server.</para>
+
       <para>If <varname>method</varname> is not specified, and the repository
-      name contains <command>:</command>, then the default is
-      <command>ext</command> or <command>server</command>, depending on your
-      platform; both are described in <xref
-      linkend="Connecting-via-ssh" />.</para>
+      name contains <command>@</command>, then the default is
+      <command>ext</command>. Because <command>ext</command> is not
+      available, cvsnt refuses the repository.</para>
 
       <sect2 id="Server-requirements">
         <title>Server requirements</title>
@@ -1805,174 +1801,11 @@ cvs update
         linkend="Creating-a-repository" />.</para>
       </sect2>
 
-      <sect2 id="Connecting-via-ssh">
-        <title>Connecting with ssh</title>
-
-        <para><indexterm>
-            <primary>ssh</primary>
-          </indexterm>cvsnt uses the <command>ssh</command> protocol to
-        perform these operations, so the remote user host needs to have a
-        <command>.rhosts</command> file which grants access to the local
-        user.</para>
-
-        <para>For example, suppose you are the user <command>mozart</command>
-        on the local machine <command>toe.example.com</command>, and the
-        server machine is <command>faun.example.org</command>. On faun, put
-        the following line into the file <command>.rhosts</command> in
-        <command>bach</command>'s home directory:</para>
-
-        <para><screen>toe.example.com  mozart
-</screen></para>
-
-        <para>Then test that <command>ssh</command> is working with</para>
-
-        <para><screen>
-ssh -l bach faun.example.org 'echo $PATH'
-</screen></para>
-
-        <para>There is no need to edit <command>inetd.conf</command> or start
-        a cvsnt server process.</para>
-
-        <para><indexterm>
-            <primary>:ssh:, setting up</primary>
-          </indexterm>On some versions of cvsnt :ssh: protocol is available.
-        This is a builtin ssh client which integrates cvs authentication with
-        ssh security.</para>
-
-        <para>At its simplest, this is used like :pserver:, as in:</para>
-
-        <para><screen>
-cvs -d :ssh:user@machine.example.org:/usr/local/cvs login
-Password: *****
-cvs -d :ssh:user@machine.example.org:/usr/local/cvs co myproject
-</screen></para>
-
-        <para>However you can also register your private key with cvs, which
-        it will use instead of a password:</para>
-
-        <para><screen>
-cvs -d :ssh;key='c:\user.ppk':user@machine.example.org:/usr/local/cvs login
-Password: ******** (if your key has no passphrase, just press enter here)
-cvs -d :ssh:user@machine.example.org:/usr/local/cvs co myproject
-</screen></para>
-
-        <para>The keys should be in the putty private key format. You can use
-        PuttyGen to convert an existing Openssh private key to this
-        format.</para>
-
-        <para><indexterm>
-            <primary>:server:, setting up</primary>
-          </indexterm><indexterm>
-            <primary>:ext:, setting up</primary>
-          </indexterm><indexterm>
-            <primary>Kerberos, using kerberized rsh</primary>
-          </indexterm><indexterm>
-            <primary>ssh replacements (Kerberized RSH, &amp;c)</primary>
-          </indexterm><command>:ext:</command> specifies an external ssh
-        program. By default this is <command>ssh</command> but you may specify
-        another program in the CVSROOT using the optional :ext:{program}
-        command. You may alternatively set the <command>CVS_EXT</command>
-        environment variable to invoke another program which can access the
-        remote server (for example, <command>remsh</command> on HP-UX 9
-        because <command>rsh</command> is something different). It must be a
-        program which can transmit data to and from the server without
-        modifying it</para>
-
-        <para>Continuing our example, supposing you want to access the module
-        <command>foo</command> in the repository
-        <command>/usr/local/cvsroot/</command>, on machine
-        <command>faun.example.org</command>, you are ready to go:</para>
-
-        <para><screen>cvs -d :ext:bach@faun.example.org/usr/local/cvsroot checkout foo</screen></para>
-
-        <para>(The <command>bach@</command> can be omitted if the username is
-        the same on both the local and remote hosts.)</para>
-      </sect2>
-
-      <sect2 id="extnt">
-        <title>Using 3rd party clients via the extnt wrapper</title>
-
-        <para><indexterm>
-            <primary>extnt.exe</primary>
-          </indexterm> <indexterm>
-            <primary>extnt.ini</primary>
-          </indexterm> <indexterm>
-            <primary>Using CVSNT protocols with 3rd party clients</primary>
-          </indexterm> (Windows only at present) The extnt.exe program is a
-        wrapper client which allows 3rd-party clients to use CVSNT protocols
-        to access a CVSNT server. It uses the :ext: protocol on the client so
-        should be compatible with all existing clients.</para>
-
-        <para>The program takes a number of optional parameters, which may or
-        may not be defined by the client. A standard cvs client will only
-        usually pass the -l (username) option.<variablelist>
-            <varlistentry>
-              <term>-l username</term>
-
-              <listitem>
-                <para>Username to use.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-p protocol</term>
-
-              <listitem>
-                <para>protocol to use. Default comes from the protocol= line
-                in extnt.ini. If that is absent uses sspi.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-d directory</term>
-
-              <listitem>
-                <para>repository directory. Default comes from the directory=
-                line in extnt.ini</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-P password</term>
-
-              <listitem>
-                <para>Password to use. Default comes from the password= line
-                in extnt.ini</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-
-        <para>Unless all parameters are passed on the command line by the
-        client, you need to setup extnt.ini with the correct details. This
-        file is laid out as a standard windows .ini file, with the section
-        name based on the hostname to connect to.<screen>[cvs.myserver.org]
-protocol=sspi
-directory=/cvs</screen></para>
-
-        <para>You can define multiple connections to the same host by using
-        the hostname= entry, eg:</para>
-
-        <screen>[cvs-1]
-protocol=sspi
-directory=/cvs-repo-1
-hostname=cvs.myserver.org
-
-[cvs-2]
-protocol=sspi
-directory=/cvs-repo-2
-hostname=cvs.myserver.org</screen>
-
-        <para>Configuring the client to call extnt.exe as its :ext:
-        application is client specific.</para>
-      </sect2>
-
       <sect2 id="Password-authenticated">
         <title>Direct connection with password authentication</title>
 
-        <para>The cvsnt client can also connect to the server using a password
-        protocol. This is particularly useful if using <command>ssh</command>
-        is not feasible (for example, the server is behind a firewall), and
-        Kerberos also is not available.</para>
+        <para>The cvsnt client connects to the server using a password
+        protocol.</para>
 
         <para>To use this method, it is necessary to make some adjustments on
         both the server and client sides.</para>
@@ -2176,7 +2009,7 @@ sussman:1sOp854gDF3DY
           linkend="Authentication-security" /> for more on this.</para>
 
           <para>You can setup the passwd file by logging in to cvs using
-          another method (local, sserver, gserver, ssh, sspi) and using the
+          another method (local) and using the
           cvsnt passwd command to add new users.</para>
         </sect3>
 
@@ -2189,20 +2022,12 @@ sussman:1sOp854gDF3DY
               <primary>Authenticated client, using</primary>
             </indexterm><indexterm>
               <primary>:pserver:, setting up</primary>
-            </indexterm><indexterm>
-              <primary>:sserver:, setting up</primary>
-            </indexterm><indexterm>
-              <primary>:sspi:, setting up</primary>
             </indexterm>To run a cvsnt command on a remote repository via the
           password-authenticating server, one specifies the protocol, optional
           username, repository host, an optional port number, and path to the
           repository. For example:</para>
 
           <para><screen>cvs -d :pserver:faun.example.org:/usr/local/cvsroot checkout someproj
-
-cvs -d :sserver:faun.example.org:/usr/local/cvsroot checkout someproj
-
-cvs -d :sspi:faun.example.org:/usr/local/cvsroot checkout someproj
 </screen></para>
 
           <para>With certain protcols, unless you're connecting to a
@@ -2254,9 +2079,9 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
           login</command>).</para>
 
           <para>Note that if the <command>:pserver:</command> were not present
-          in the repository specification, cvsnt would assume it should use
-          <command>ssh</command> to connect with the server instead (<xref
-          linkend="Connecting-via-ssh" />).</para>
+          in the repository specification, cvsnt would assume
+          <command>:ext:</command>. It would refuse the repository, because
+          the <command>:ext:</command> access method is not available.</para>
 
           <para>Of course, once you have a working copy checked out and are
           running cvsnt commands from within it, there is no longer any need
@@ -2276,33 +2101,16 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
 
           <para><indexterm>
               <primary>Security, of pserver</primary>
-            </indexterm><indexterm>
-              <primary>Security, of sserver</primary>
-            </indexterm><indexterm>
-              <primary>Security, of sspi</primary>
-            </indexterm><indexterm>
-              <primary>Secutiry, of ntserver</primary>
-            </indexterm> With pserver and sserver, the passwords are stored on
+            </indexterm> With pserver, the passwords are stored on
           the client side in a trivial encoding of the cleartext and in the
           pserver case transmitted in the same encoding. The encoding is done
           only to prevent inadvertent password compromises (i.e., a system
           administrator accidentally looking at the file), and will not
           prevent even a naive attacker from gaining the password.</para>
 
-          <para>With sserver, the client/server connection is encrypted using
-          SSL, and the risk of the password being sniffed 'on the wire' is
-          very low.</para>
-
-          <para>With sspi, if cvsnt login is used to gain access to a remote
-          server, the passwords are stored on the client side in the same
-          manner as pserver. However the passwords are never transmitted
-          insecurely over the internet.</para>
-
-          <para>With pserver and sserver, the separate cvsnt password file
+          <para>With pserver, the separate cvsnt password file
           (<xref linkend="Authentication-server" />) allows people to use a
-          different password for repository access than for login access. With
-          other protocols the system passwords are used and the password field
-          in the passwd file is ignored.</para>
+          different password for repository access than for login access.</para>
 
           <para>Once a user has non-read-only access to the repository, she
           can execute programs on the server system through a variety of
@@ -2326,92 +2134,8 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
 
           <para>With pserver, the password is available to anyone who can
           sniff network packets or read a protected (i.e., user read-only)
-          file. Other protocols do not have this problem.</para>
+          file.</para>
         </sect3>
-      </sect2>
-
-      <sect2 id="GSSAPI-authenticated">
-        <title>Direct connection with GSSAPI</title>
-
-        <para><indexterm>
-            <primary>GSSAPI</primary>
-          </indexterm><indexterm>
-            <primary>Security, GSSAPI</primary>
-          </indexterm><indexterm>
-            <primary>:gserver:, setting up</primary>
-          </indexterm><indexterm>
-            <primary>Kerberos, using :gserver:</primary>
-          </indexterm>GSSAPI is a generic interface to network security
-        systems such as Kerberos 5. If you have a working GSSAPI library, you
-        can have cvsnt connect via a direct tcp connection, authenticating
-        with GSSAPI.</para>
-
-        <para>To do this, cvsnt needs to be compiled with GSSAPI support; when
-        configuring cvsnt it tries to detect whether GSSAPI libraries using
-        kerberos version 5 are present. You can also use the
-        <command>-with-gssapi</command> flag to configure.</para>
-
-        <para>The connection is authenticated using GSSAPI, but the message
-        stream is <emphasis>not</emphasis> authenticated by default. You must
-        use the <command>-a</command> global option to request stream
-        authentication.</para>
-
-        <para>The data transmitted is <emphasis>not</emphasis> encrypted by
-        default. Encryption support must be compiled into both the client and
-        the server; use the <command>-enable-encrypt</command> configure
-        option to turn it on. You must then use the <command>-x</command>
-        global option to request encryption.</para>
-
-        <para>GSSAPI connections are handled on the server side by the same
-        server which handles the password authentication server; see <xref
-        linkend="Authentication-server" />. If you are using a GSSAPI
-        mechanism such as Kerberos which provides for strong authentication,
-        you will probably want to disable the ability to authenticate via
-        cleartext passwords. To do so, create an empty
-        <command>CVSROOT/passwd</command> password file, and set
-        <command>SystemAuth=no</command> in the config file (<xref
-        linkend="config" />).</para>
-
-        <para>The GSSAPI server uses a principal name of
-        cvs/<varname>hostname</varname>, where <varname>hostname</varname> is
-        the canonical name of the server host. You will have to set this up as
-        required by your GSSAPI mechanism.</para>
-
-        <para>To connect using GSSAPI, use <command>:gserver:</command>. For
-        example,</para>
-
-        <para><screen>cvs -d :gserver:faun.example.org:/usr/local/cvsroot checkout foo
-</screen></para>
-      </sect2>
-
-      <sect2 id="Connecting-via-fork">
-        <title>Connecting with fork</title>
-
-        <para><indexterm>
-            <primary>fork, access method</primary>
-          </indexterm><indexterm>
-            <primary>:fork:, setting up</primary>
-          </indexterm>This access method allows you to connect to a repository
-        on your local disk via the remote protocol. In other words it does
-        pretty much the same thing as <command>:local:</command>, but various
-        quirks, bugs and the like are those of the remote cvsnt rather than
-        the local cvsnt.</para>
-
-        <para>For day-to-day operations you might prefer either
-        <command>:local:</command> or <command>:fork:</command>, depending on
-        your preferences. Of course <command>:fork:</command> comes in
-        particularly handy in testing or debugging <command>cvsnt</command>
-        and the remote protocol. Specifically, we avoid all of the
-        network-related setup/configuration, timeouts, and authentication
-        inherent in the other remote access methods but still create a
-        connection which uses the remote protocol.</para>
-
-        <para>To connect using the <command>fork</command> method, use
-        <command>:fork:</command> and the pathname to your local repository.
-        For example:</para>
-
-        <para><screen>cvs -d :fork:/usr/local/cvsroot checkout foo
-</screen></para>
       </sect2>
 
       <sect2 id="Repository-Alias">
@@ -2438,123 +2162,6 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
         to avoid exposing NT drive letters to the clients.</para>
       </sect2>
     </sect1>
-
-
-    <sect1 id="Replicating-a-repository">
-      <title>Replicating a repository and Repository Caching</title>
-
-      <para><indexterm>
-          <primary>Repository, replicting</primary>
-        </indexterm><indexterm>
-          <primary>Replicating a repository</primary>
-        </indexterm><indexterm>
-          <primary>Caching a repository</primary>
-        </indexterm> Repository replication and caching may be configured so 
-      that remote locations can have fast access for read operations while 
-      keeping changes stored in a master repository.  If the master repositoryy
-      goes offline then people at the remote location can continue to work
-      or one of the remote caches can be re-configured to be the new master.</para>
-
-      <para>The fisrt thing to consider is whether replication and caching 
-      are needed at all.  CVS was designed for networks that were much slower
-      and less reliable that are available today, so even without replication
-      and caching it should perform adequately for large remote teams using a
-      central repository located in the same or a distant continent.  If you
-      are considering repository replication and caching primarily to improve
-      performance then you should instead address the causes of the performance
-      issues first by contacting the CVSNT Newsgroup or purchasing commercial
-      support from the project sponsor (<xref linkend="BUGS" />).</para>
-
-
-
-      <sect2 id="Overview-Replicating-a-repository">
-        <title>Overview</title>
-
-        <para>After much analysis and discussion internally the CVSNT developers
-        could not see any benefit for repository replication and caching since
-        the CVSNT protocol was designed for telecommunications networks far 
-        slower and less reliable that what is commonly available today.</para>
-
-        <para>Secondly in hypotheticals about 'if we did do multi-repos' - we could
-        not see any benefit in a quorum based system where the changes on
-        one repository are mulitcast to several servers simultaneously, since the
-        quorum needs to be tracked and the 'excluded members' of the quorum are
-        just as incapable of accepting patches as is a single repository shadow.</para>
-
-        <para>The solution we have come up with is a 'master' repository and multiple
-        shadows.  If you like  you can change which is the 'master' at any time
-        you like.  </para>
-
-        <para>The CVSNT developers have been using the 2.5.04 repostiory cache feature since 2007
-        internally between Manchester UK and Sydney Australia and it works very well - and if you have
-        large binaries in the repository or your processes require 'fresh checkouts'
-        rather than 'updates' then installng a shadow does improve performance.</para>
-
-
-        <para>Changing your procedures to use 'udpate' would do the same thing and
-        requires much less effort than setting up repository replication.</para>
-
-        <para>It cannot be stressed enough just how unnecessary repository replication and
-        caching is for 99.9% of organisations as teams - if you are experiencing multi
-        site performance problems there are probably much 'better' ways to fix
-        it that using repository replication and caching.</para>
-
-        <para>If you want more info on repository replication please see the
-        previous newsgroup posts:</para>
-
-    <itemizedlist mark="bullet">
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030637.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030642.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030653.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030655.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030659.html</screen> .</para>
-      </listitem>
-
-
-    </itemizedlist>
-
-      </sect2>
-
-      <sect2 id="Into-Replicating-a-repository">
-        <title>Introduction</title>
-
-        <para>CVSNT provides the following specific repository replication an caching features:</para>
-    <itemizedlist mark="bullet">
-      <listitem>
-        <para>The SYNC protocol to 'pass through' changes form a local cache to the master server, and</para>
-      </listitem>
-
-      <listitem>
-        <para>The UNISON port on the Master server to allow caching clients to obtain delta copies of the repository (Unison is included in the quality assured CVS Suite only)</para>
-      </listitem>
-
-      <listitem>
-        <para>Triggers to automatically activate synchronising changes from the master server back to the local cache (the quality assured CVS Suite includes a SYNC trigger)</para>
-      </listitem>
-
-        <para>It is also necessary to configure the synchronise to occur at intervals when the caching server is inactive (the quality assured CVS Suite includes a SYNC scheduler)</para>
-
-
-    </itemizedlist>
-
-      </sect2>
-
-    </sect1>
-
-
   </chapter>
 
   <chapter id="Security">
@@ -2585,9 +2192,8 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
       accessing the any file unless they are specifically granted access by an
       access control entry</para>
 
-      <para>On a secure system it is recommended that pserver is not used, as
-      it sends its passwords in a trivially decryptable form. On Windows
-      systems use encrypted SSPI, and on Unix ssh is recommended.</para>
+      <para>The pserver method sends its passwords in a trivially decryptable
+      form. No other remote access method is available.</para>
     </sect1>
 
     <sect1 id="User-maintenance">
@@ -7469,26 +7075,6 @@ cvs -z6
             linkend="Authentication-server" />.</para>
 
             <para><indexterm>
-                <primary>Authentication, stream</primary>
-              </indexterm><indexterm>
-                <primary>Stream authentication</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>-a</term>
-
-          <term>--authenticate</term>
-
-          <listitem>
-            <para>Authenticate all communication between the client and the
-            server. Only has an effect on the cvsnt client. Authentication
-            prevents certain sorts of attacks involving hijacking the active
-            tcp connection. Enabling authentication does not enable
-            encryption.</para>
-
-            <para><indexterm>
                 <primary>rcsBIN, overriding</primary>
               </indexterm><indexterm>
                 <primary>Overriding rcsBIN</primary>
@@ -7766,21 +7352,6 @@ cvs -z6
             the <command>$CVSREAD</command> environment variable. Files are
             created read-write by default, unless <command>$CVSREAD</command>
             is set or <command>-r</command> is given.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>-x</term>
-
-          <term>--encrypt</term>
-
-          <listitem>
-            <para><indexterm>
-                <primary>Encryption</primary>
-              </indexterm>Encrypt all communication between the client and the
-            server. Only has an effect on the cvsnt client. Enabling
-            encryption implies that message traffic is also
-            authenticated.</para>
           </listitem>
         </varlistentry>
 
@@ -10656,14 +10227,7 @@ rep/version_no.h          tmh   Thu Nov  4 17:37:43 2004 GMT   tucker   D:\t\tes
 Available protocols:
 
 local               (internal)
-ext                 ext 2.0.62.1872
-fork                fork 2.0.62.1872 
-gserver             gserver 2.0.62.1872 (Active Directory)
-ntserver            ntserver 2.0.62.1872
-pserver             pserver 2.0.62.1872
-server              server 2.0.62.1872
-ssh                 ssh 2.0.62.1872
-sspi                sspi 2.0.62.1872</screen>For information about an
+pserver             pserver 2.0.62.1872</screen>For information about an
       individual protocol specify the prototocol name on the command
       line.</para>
 
@@ -10678,8 +10242,6 @@ Syntax:             :pserver[;keyword=value...]:[username[:password]@]host[:port
 Client:             Yes
 Server:             Yes
 Login:              Yes
-Encryption:         No
-Impersonation:      CVS Builtin
 
 Keywords available:
 
@@ -10721,7 +10283,7 @@ proxypassword       Proxy passsord (alias: proxy_password)</screen>The format
               <listitem>
                 <para>Return server-side information. Returns protocols that a
                 client can use to communicate with the server. This does not
-                include local or external protocols.</para>
+                include the local protocol.</para>
               </listitem>
             </varlistentry>
 
@@ -10732,39 +10294,6 @@ proxypassword       Proxy passsord (alias: proxy_password)</screen>The format
                 <para>(Where supported) list available cvsnt servers on the
                 local network. This currently requires mdns support on the
                 client.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-r server</term>
-
-              <listitem>
-                <para>Find out as much as possible about a remote cvsnt
-                server. For this command to succeed the remote server must
-                support the cvsnt enumeration protocol.</para>
-
-                <para><screen>$ cvs info -r cvs.cvsnt.org
-Server: CVSNT Public Repository
-Version: Concurrent Versions System (CVSNT) 2.5.01 (Travis) Build 2010
-
-Protocols:
-  gserver
-  pserver
-  sserver
-  sspi
-
-Repositories:
-  /usr/local/cvs                CVSNT Main repository
-
-Anonymous username: cvs
-Anonymous protocol: pserver
-Default repository: /usr/local/cvs
-
-Anonymous login: :pserver:cvs@cvs.cvsnt.org:/usr/local/cvs
-Recommended login: :sspi:cvs.cvsnt.org:/usr/local/cvs</screen>The layout will
-                remain the same as much as possible in future revisions to
-                facilitate automatic parsing. Parsers should ignore elements
-                that they do not understand.</para>
               </listitem>
             </varlistentry>
           </variablelist></para>
@@ -13405,7 +12934,7 @@ $
         <para>For checkout, rtag, and export, the program is server-based, and
         as such the following applies:-</para>
 
-        <para>If using remote access methods (pserver, ext, etc.), cvsnt will
+        <para>If using the remote access method (pserver), cvsnt will
         execute this program on the server from a temporary directory. The
         path is searched for this program.</para>
 
@@ -16222,45 +15751,6 @@ cvs -s TESTDIR=/work/local/tests
           to <command>\joe</command>. On Windows 95, you'll probably need to
           set <command>HOMEDRIVE</command> and <command>HOMEPATH</command>
           yourself.</para>
-
-          <para><indexterm>
-              <primary>CVS_EXT, environment variable</primary>
-            </indexterm></para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>$CVS_EXT</term>
-
-        <listitem>
-          <para><indexterm>
-              <primary>CVS_RSH, environment variable</primary>
-            </indexterm></para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>$CVS_RSH</term>
-
-        <listitem>
-          <para>Specifies the external program which cvsnt connects with, when
-          <command>:ext:</command> access method is specified. This replaces
-          the <command>CVS_RSH</command> environment used in older
-          implementations of cvs.</para>
-
-          <para>The <command>CVS_EXT</command> variable parsed as a formatting
-          string specifying the command to pass to invoke the remote server.
-          The default string is: <command>ssh -l %u %h</command> The
-          <command>%u</command> parameter is replaced with the username
-          specified in the CVSROOT (or the current username if none is
-          specified) and the <command>%h</command> parameter is replaced with
-          the hostname specified in the CVSROOT.</para>
-
-          <para>The CVS_EXT string has the string ' cvs server' appended to
-          it, and this is then passed to the command processor for
-          execution.</para>
-
-          <para><xref linkend="Connecting-via-ssh" />.</para>
         </listitem>
       </varlistentry>
 
@@ -16269,7 +15759,7 @@ cvs -s TESTDIR=/work/local/tests
 
         <listitem>
           <para>Used in client-server mode when accessing the server via
-          Kerberos, GSSAPI, or cvsnt's password authentication if the port is
+          cvsnt's password authentication if the port is
           not specified in $CVSROOT. <xref
           linkend="Remote-repositories" /></para>
 
@@ -16740,12 +16230,8 @@ cvs -s TESTDIR=/work/local/tests
           <term>end of file from server (consult above messages if any)</term>
 
           <listitem>
-            <para>The most common cause for this message is if you are using
-            an external <command>rsh</command> program and it exited with an
-            error. In this case the <command>rsh</command> program should have
-            printed a message, which will appear before the above message. For
-            more information on setting up a cvsnt client and server, see
-            <xref linkend="Remote-repositories" />.</para>
+            <para>For more information on setting up a cvsnt client and
+            server, see <xref linkend="Remote-repositories" />.</para>
           </listitem>
         </varlistentry>
 
@@ -16967,16 +16453,7 @@ Only one of [exEX3] allowed
           cvs server</term>
 
           <listitem>
-            <para>If <varname>text</varname> contains a valid response (such
-            as <command>ok</command>) followed by an extra carriage return
-            character (on many systems this will cause the second part of the
-            message to overwrite the first part), then it probably means that
-            you are using the <command>:ext:</command> access method with a
-            version of rsh, such as most non-unix rsh versions, which does not
-            by default provide a transparent data stream. In such cases you
-            probably want to try <command>:server:</command> instead of
-            <command>:ext:</command>. If <varname>text</varname> is something
-            else, this may signify a problem with your cvsnt server.
+            <para>This may signify a problem with your cvsnt server.
             Double-check your installation against the instructions for
             setting up the cvsnt server.</para>
           </listitem>
@@ -17031,37 +16508,8 @@ exit 0
 
       <variablelist>
         <title><indexterm>
-            <primary>:ext:, troubleshooting</primary>
+            <primary>:pserver:, troubleshooting</primary>
           </indexterm></title>
-
-        <varlistentry>
-          <term>:ext:</term>
-
-          <listitem>
-            <para>Try running the ssh program from the command line. For
-            example: "ssh servername cvs -v" should print cvsnt version
-            information. If this doesn't work, you need to fix it before you
-            can worry about cvsnt problems.</para>
-
-            <para><indexterm>
-                <primary>:server:, troubleshooting</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>:server:</term>
-
-          <listitem>
-            <para>You don't need a command line rsh program to use this access
-            method, but if you have an rsh program around, it may be useful as
-            a debugging tool. Follow the directions given for :ext:.</para>
-
-            <para><indexterm>
-                <primary>:pserver:, troubleshooting</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
 
         <varlistentry>
           <term>:pserver:</term>
@@ -17157,26 +16605,6 @@ cvs [server aborted]: can't chdir(/root): Permission denied
             the rate limit (some versions of inetd have a single rate limit,
             others allow you to set the limit for each service
             separately.)</para>
-
-            <indexterm>
-              <primary>:gserver:, troublshooting</primary>
-            </indexterm>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>:gserver:</term>
-
-          <listitem>
-            <para>If you cannot connect using gserver, ensure that your
-            kerberos installation is correctly configured. You will need a
-            working PAM configuraiton if your system uses that, and
-            nsswitch.conf may need to be configured to recognise kerberos
-            users.</para>
-
-            <para>Kerberos is rather difficult to configure, and it is beyond
-            the scope of this manual. There are many resources on the internet
-            to help you with this.</para>
           </listitem>
         </varlistentry>
       </variablelist>

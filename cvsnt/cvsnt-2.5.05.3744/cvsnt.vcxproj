@@ -139,7 +139,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libssl.lib;libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)cvs.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -192,7 +192,7 @@
       <Culture>0x0409</Culture>
     </ResourceCompile>
     <Link>
-      <AdditionalDependencies>libssl.lib;libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)cvs.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -242,7 +242,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libssl.lib;libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)cvs.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -295,7 +295,7 @@
     </ResourceCompile>
     <Link>
       <AdditionalOptions>%(AdditionalOptions)</AdditionalOptions>
-      <AdditionalDependencies>libssl.lib;libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
+      <AdditionalDependencies>libcrypto.lib;comctl32.lib;wsock32.lib;netapi32.lib;mpr.lib;ole32.lib;libiconv.lib;wininet.lib;dbghelp.lib;%(AdditionalDependencies)</AdditionalDependencies>
       <OutputFile>$(OutDir)cvs.exe</OutputFile>
       <SuppressStartupBanner>true</SuppressStartupBanner>
       <GenerateDebugInformation>true</GenerateDebugInformation>
@@ -743,7 +743,6 @@
     <ClInclude Include="version_no.h" />
     <ClInclude Include="windows-NT\config.h" />
     <ClInclude Include="windows-NT\pwd.h" />
-    <ClInclude Include="windows-NT\rcmd.h" />
     <ClInclude Include="windows-NT\resource.h" />
   </ItemGroup>
   <ItemGroup>
@@ -812,16 +811,8 @@
       <Project>{5cd43033-b004-4886-8e4d-3a622a7ad677}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="extnt\extnt.vcxproj">
-      <Project>{adc6aa27-c931-4c72-934b-7c3e81929f07}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="genbuild\genbuild.vcxproj">
       <Project>{e634de84-6c6c-4111-90af-cc9ee0be9ec9}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="genkey\genkey.vcxproj">
-      <Project>{c2cd3641-0f72-4c10-852b-caa694d28e86}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="keyValueServer\clientLib\clientLib.vcxproj">
@@ -843,36 +834,12 @@
       <Project>{61d75468-3718-47ee-bf14-7b1ca51bbad6}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="plink\plink.vcxproj">
-      <Project>{fe571818-1b67-41fb-b49d-850d650cf661}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="postinst\postinst.vcxproj">
       <Project>{e55f4833-f513-4f88-89ab-bcc2e39f81d8}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
-    <ProjectReference Include="protocols\enum_protocol.vcxproj">
-      <Project>{2f90c820-cd6e-4ba2-a6a1-339147e508aa}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="protocols\fork_protocol.vcxproj">
-      <Project>{5d695560-5dd9-4ef5-9b2e-d609d1a05324}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
     <ProjectReference Include="protocols\pserver_protocol.vcxproj">
       <Project>{68d18485-174e-46bb-a1fc-132ddccc2ee0}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="protocols\server_protocol.vcxproj">
-      <Project>{6fed639c-5fe8-4fdf-abe8-f720947ac9a1}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="protocols\ssh_protocol.vcxproj">
-      <Project>{a8630794-5c8b-4b7f-af1b-df12fd6c397f}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="protocols\sspi_protocol.vcxproj">
-      <Project>{aff96908-cc5e-40d2-94fc-78090d420832}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="rcs\co.vcxproj">
@@ -917,10 +884,6 @@
     </ProjectReference>
     <ProjectReference Include="windows-NT\cvsdiag\cvsdiag.vcxproj">
       <Project>{cce61c64-ac44-40e2-8e75-034c8f60834f}</Project>
-      <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
-    </ProjectReference>
-    <ProjectReference Include="windows-NT\gss-ad\gss-ad.vcxproj">
-      <Project>{44d20481-5119-4d1b-a194-a7b5aef9c23c}</Project>
       <ReferenceOutputAssembly>false</ReferenceOutputAssembly>
     </ProjectReference>
     <ProjectReference Include="windows-NT\installer\installer.vcxproj">

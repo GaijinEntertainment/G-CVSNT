@@ -151,7 +151,6 @@ void CSettingsPage::DoDataExchange(CDataExchange* pDX)
 	//{{AFX_DATA_MAP(CSettingsPage)
 	DDX_Control(pDX, IDC_EDIT1, m_edTempDir);
 	DDX_Control(pDX, IDC_LOCKSERVER, m_edLockServer);
-	DDX_Control(pDX, IDC_ENCRYPTION, m_cbEncryption);
 	DDX_Control(pDX, IDC_COMPRESSION, m_cbCompression);
 	DDX_Control(pDX, IDC_SPIN1, m_sbServerPort);
 	DDX_Control(pDX, IDC_SPIN2, m_sbLockPort);
@@ -167,7 +166,6 @@ BEGIN_MESSAGE_MAP(CSettingsPage, CTooltipPropertyPage)
 	ON_BN_CLICKED(IDC_CHANGETEMP, OnChangetemp)
 	ON_EN_CHANGE(IDC_PSERVERPORT, OnChangePserverport)
 	ON_EN_CHANGE(IDC_LOCKSERVERPORT, OnChangeLockserverport)
-	ON_CBN_SELENDOK(IDC_ENCRYPTION, OnCbnSelendokEncryption)
 	ON_CBN_SELENDOK(IDC_COMPRESSION, OnCbnSelendokCompression)
 	ON_CBN_SELENDOK(IDC_DEFAULTDOMAIN, OnCbnSelendokDefaultdomain)
 	ON_CBN_SELENDOK(IDC_RUNASUSER, OnCbnSelendokRunasuser)
@@ -228,18 +226,11 @@ BOOL CSettingsPage::OnInitDialog()
 
 	m_edTempDir.SetWindowText((LPCTSTR)buf);
 
-	m_cbEncryption.ResetContent();
-	m_cbEncryption.SetItemData(m_cbEncryption.AddString(_T("Optional")),0);
-	m_cbEncryption.SetItemData(m_cbEncryption.AddString(_T("Request Authentication")),1);
-	m_cbEncryption.SetItemData(m_cbEncryption.AddString(_T("Request Encryption")),2);
-	m_cbEncryption.SetItemData(m_cbEncryption.AddString(_T("Require Authentication")),3);
-	m_cbEncryption.SetItemData(m_cbEncryption.AddString(_T("Require Encryption")),4);
 	m_cbCompression.ResetContent();
 	m_cbCompression.SetItemData(m_cbCompression.AddString(_T("Optional")),0);
 	m_cbCompression.SetItemData(m_cbCompression.AddString(_T("Request Compression")),1);
 	m_cbCompression.SetItemData(m_cbCompression.AddString(_T("Require Compression")),2);
 
-	m_cbEncryption.SetCurSel((t=QueryDword(_T("EncryptionLevel")))>=0?t:0);
 	m_cbCompression.SetCurSel((t=QueryDword(_T("CompressionLevel")))>=0?t:0);
 
 	/* Migrate the old setting */
@@ -292,7 +283,6 @@ BOOL CSettingsPage::OnInitDialog()
 	{
 		m_edTempDir.EnableWindow(FALSE);
 		m_edLockServer.EnableWindow(FALSE);
-		m_cbEncryption.EnableWindow(FALSE);
 		m_cbCompression.EnableWindow(FALSE);
 		m_sbServerPort.EnableWindow(FALSE);
 		m_sbLockPort.EnableWindow(FALSE);
@@ -358,10 +348,6 @@ BOOL CSettingsPage::OnApply()
 	if(RegSetValueEx(g_hServerKey,_T("CompressionLevel"),NULL,REG_DWORD,(BYTE*)&dwVal,sizeof(DWORD)))
 		AfxMessageBox(_T("RegSetValueEx failed"),MB_ICONSTOP);
 
-	dwVal = m_cbEncryption.GetItemData(m_cbEncryption.GetCurSel());
-	if(RegSetValueEx(g_hServerKey,_T("EncryptionLevel"),NULL,REG_DWORD,(BYTE*)&dwVal,sizeof(DWORD)))
-		AfxMessageBox(_T("RegSetValueEx failed"),MB_ICONSTOP);
-
 	m_cbDefaultDomain.GetWindowText(fn,sizeof(fn));
 	if(fn[0]=='(')
 		RegDeleteValue(g_hServerKey,_T("DefaultDomain"));
@@ -414,11 +400,6 @@ void CSettingsPage::OnChangePserverport()
 }
 
 void CSettingsPage::OnChangeLockserverport()
-{
-	SetModified();
-}
-
-void CSettingsPage::OnCbnSelendokEncryption()
 {
 	SetModified();
 }

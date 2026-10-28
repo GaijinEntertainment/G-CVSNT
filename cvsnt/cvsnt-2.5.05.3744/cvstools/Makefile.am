@@ -21,8 +21,6 @@ libcvstools_la_SOURCES = \
 	Scramble.h \
 	ServerConnection.cpp \
 	ServerConnection.h \
-	ServerInfo.cpp \
-	ServerInfo.h \
 	trigger_interface.h \
 	TriggerLibrary.cpp \
 	TriggerLibrary.h \

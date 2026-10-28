@@ -50,13 +50,10 @@
                     <File Id="cvs.exe" Name="cvs.exe" />
                     <File Id="cvs.dll" Name="cvs.dll" />
                     <File Id="cvsdiag.exe" Name="cvsdiag.exe" />
-                    <File Id="extnt.exe" Name="extnt.exe" />
-                    <File Id="extnt.dll" Name="extnt.dll" />
                     <Environment Id="SetPath" Name="Path" Action="set" Part="last" Value="[CVSNT_INSTALLDIR]" />
                 </Component>
                 <Component Id="CommandLineIniFiles" Guid="81446A48-4FB4-4C15-9ED3-D21C4557FDA8" NeverOverwrite="yes" DiskId="1">
-                    <File Id="extnt.ini" Name="extnt.ini" KeyPath="yes" />
-                    <File Id="protocol_map.ini" Name="protocol_map.ini" />
+                    <File Id="protocol_map.ini" Name="protocol_map.ini" KeyPath="yes" />
                 </Component>
                 <Component Id="CommandLineLock" Guid="C5E7B7C6-4FCD-4f44-8245-BD95AB1F1498" DiskId="1">
                     <File Id="cvslock.exe" Name="cvslock.exe" />
@@ -65,27 +62,6 @@
                 <Directory Id="CvsntProtoFolder" Name="protocols">
                     <Component Id="PServer" Guid="33E45A18-1891-42b7-9339-7052E4297C65" DiskId="1">
                         <File Id="pserver_protocol.dll" Name="pserver.dll" />
-                    </Component>
-                    <Component Id="SServer" Guid="14382272-091D-43bb-8766-5EC67676BF7D" DiskId="1">
-                        <File Id="sserver_protocol.dll" Name="sserver.dll" />
-                    </Component>
-                    <Component Id="GServer" Guid="940D540B-6967-4136-9185-35D8B3D8C8E6" DiskId="1">
-                        <File Id="gserver_protocol.dll" Name="gserver.dll" />
-                    </Component>
-                    <Component Id="RServer" Guid="F49EF116-EC09-4b7f-A5B4-2EB131BD527E" DiskId="1">
-                        <File Id="server_protocol.dll" Name="server.dll" />
-                    </Component>
-                    <Component Id="Ext" Guid="17C896CE-C639-43bc-B171-4BAA0EA79172" DiskId="1">
-                        <File Id="ext_protocol.dll" Name="ext.dll" />
-                    </Component>
-                    <Component Id="Ssh" Guid="2A885DC9-08B0-4ce0-B68B-7AB3DBCDD756" DiskId="1">
-                        <File Id="ssh_protocol.dll" Name="ssh.dll" />
-                    </Component>
-                    <Component Id="Sspi" Guid="4702FCF5-169D-448c-BFED-1F586F9A049D" DiskId="1">
-                        <File Id="sspi_protocol.dll" Name="sspi.dll" />
-                    </Component>
-                    <Component Id="Fork" Guid="0561B14F-5B17-4e30-86E3-F3FB9017A114" DiskId="1">
-                        <File Id="fork_protocol.dll" Name="fork.dll" />
                     </Component>
                 </Directory>
                 <Directory Id="CvsntMdnsStuff" Name="mdns">
@@ -96,9 +72,6 @@
                         <File Id="mini.dll" Name="mini.dll" />
                     </Component>
                 </Directory>
-                <Component Id="SshPlink" Guid="f80e5626-c96b-4fa1-873d-b7b18218547d" DiskId="1">
-                    <File Id="ssh_plink.dll" Name="plink.dll" />
-                </Component>
                 <Component Id="CvsntStartMenuDoc" Guid="398ACBE2-6BF2-4532-B9D8-41E598F58005" DiskId="1">
 		    <RegistryValue Id="keyCvsntStartMenuDoc" Root="HKCU" Key="SOFTWARE\March Hare Software Ltd\Msi" Name="CvsntStartMenuDoc" Type="string" Value="1" KeyPath="yes" />
                     <File Id="marchhare.url" Name="march-hare.url" Source="./march-hare.url">
@@ -146,28 +119,6 @@
             <Feature Id="Protocols" Title="Protocols" Description="Client/Server Connection Protocols" AllowAdvertise="no" Level="3">
                 <Feature Id="PServer" Title="PServer" Description=":pserver: protocol" AllowAdvertise="no" Level="3">
                     <ComponentRef Id="PServer" />
-                </Feature>
-                <Feature Id="SServer" Title="SServer" Description=":sserver: protocol" AllowAdvertise="no" Level="3">
-                    <ComponentRef Id="SServer" />
-                </Feature>
-                <Feature Id="GServer" Title="GServer" Description=":gserver: protocol" AllowAdvertise="no" Level="3">
-                    <ComponentRef Id="GServer" />
-                </Feature>
-                <Feature Id="RServer" Title="Server" Description=":server: protocol" AllowAdvertise="no" Level="3">
-                    <ComponentRef Id="RServer" />
-                </Feature>
-                <Feature Id="Sspi" Title="Sspi" Description=":sspi: protocol" AllowAdvertise="no" Level="3">
-                    <ComponentRef Id="Sspi" />
-                </Feature>
-                <Feature Id="Ext" Title="Ext" Description=":ext: protocol" AllowAdvertise="no" Level="3">
-                    <ComponentRef Id="Ext" />
-                </Feature>
-                <Feature Id="Ssh" Title="Ssh" Description=":ssh: protocol" AllowAdvertise="no" Level="3">
-                    <ComponentRef Id="Ssh" />
-                    <ComponentRef Id="SshPlink" />
-                </Feature>
-                <Feature Id="Fork" Title="Fork" Description=":fork: protocol" AllowAdvertise="no" Level="4">
-                    <ComponentRef Id="Fork" />
                 </Feature>
             </Feature>
             <Feature Id="Mdns" Title="Mdns handlers" Description="Handlers for zeroconf server discovery" AllowAdvertise="no" Level="3">

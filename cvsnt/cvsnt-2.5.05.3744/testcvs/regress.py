@@ -20,9 +20,11 @@ import argparse
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
+import threading
 
 CVS = None
 LIBDIR = None
@@ -50,7 +52,7 @@ def run(args, cwd, expect_ok=True, env=None):
         full_env = dict(os.environ)
         full_env.update(env)
     p = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, env=full_env,
-                       stderr=subprocess.STDOUT, universal_newlines=True)
+                       stderr=subprocess.STDOUT, universal_newlines=True, timeout=600)
     if VERBOSE and p.stdout:
         print("      " + p.stdout.rstrip().replace("\n", "\n      "))
     if expect_ok and p.returncode != 0:
@@ -73,6 +75,76 @@ def check_eq(got, want, what):
         fail("%s: expected %r, got %r" % (what, want, got))
         return False
     return True
+
+
+class PserverShim:
+    """A :pserver: endpoint on 127.0.0.1 that accepts any login and pipes
+    each session into `cvs server` for REPO, so a client/server session
+    needs no system account and no installed server."""
+
+    def __init__(self, repo):
+        self.repo = repo
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind(("127.0.0.1", 0))
+        self.sock.listen(4)
+        self.port = self.sock.getsockname()[1]
+        threading.Thread(target=self._accept, daemon=True).start()
+
+    def root(self):
+        sep = "" if self.repo.startswith("/") else ":"
+        return ":pserver:shim:shim@127.0.0.1:%d%s%s" % (self.port, sep, self.repo)
+
+    def close(self):
+        self.sock.close()
+
+    def _accept(self):
+        while True:
+            try:
+                conn, _ = self.sock.accept()
+            except OSError:
+                return
+            self._serve(conn)
+
+    def _serve(self, conn):
+        # Bytewise, so no request data is consumed.
+        line = b""
+        while line not in (b"END AUTH REQUEST", b"END VERIFICATION REQUEST"):
+            line = b""
+            while not line.endswith(b"\n"):
+                c = conn.recv(1)
+                if not c:
+                    conn.close()
+                    return
+                line += c
+            line = line.rstrip(b"\r\n")
+        conn.sendall(b"I LOVE YOU\n")
+        cmd = [CVS] + (["-L", LIBDIR] if LIBDIR else []) + ["--allow-root=" + self.repo, "server"]
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.DEVNULL)
+
+        def to_server():
+            try:
+                while True:
+                    data = conn.recv(65536)
+                    if not data:
+                        break
+                    p.stdin.write(data)
+                    p.stdin.flush()
+            except OSError:
+                pass
+            p.stdin.close()
+
+        threading.Thread(target=to_server, daemon=True).start()
+        try:
+            while True:
+                data = p.stdout.read1(65536)
+                if not data:
+                    break
+                conn.sendall(data)
+        except OSError:
+            p.kill()
+        p.wait()
+        conn.close()
 
 
 def write(path, text):
@@ -1527,11 +1599,9 @@ def t_unicode_text_line_endings(r):
     # as U+0A0D, so decoding and comparing the lines catches it.
     #
     # Only the client side writes through that path (update_entries), so
-    # the checkout goes through a real client/server session: :ext: with
-    # CVS_EXT as a pass-through transport and CVS_SERVER naming this cvs
-    # with --allow-root, which is how the server accepts a repository that
-    # is not registered in the machine settings.  The source is UTF-8 with
-    # a BOM, which is what makes the encoder convert at all.
+    # the checkout goes through a real client/server session over :pserver:
+    # (PserverShim).  The source is UTF-8 with a BOM, which is what makes
+    # the encoder convert at all.
     lines = ["first line, long enough to leave a conversion buffer behind",
              "", "third", "", "x", "last line"]
     imp = os.path.join(r.root, "impuni")
@@ -1540,23 +1610,16 @@ def t_unicode_text_line_endings(r):
         f.write(b"\xef\xbb\xbf" + ("\n".join(lines) + "\n").encode("utf-8"))
     r.cvs(["import", "-m", "uni", "-kukv", "mu", "VENDOR", "REL0"], cwd=imp)
 
-    repo = r.repo.replace(os.sep, "/")
-    # The transport is a Python pass-through that just runs the rest of
-    # its command line, so every path can be quoted the same way on
-    # Windows (cmd.exe) and POSIX (sh).
-    helper = os.path.join(r.root, "passthru.py")
-    write(helper, "import subprocess, sys\nsys.exit(subprocess.call(sys.argv[1:]))\n")
-    q = lambda s: '"%s"' % s
-    server = q(CVS) + (" -L " + q(LIBDIR) if LIBDIR else "") + " " + q("--allow-root=" + repo)
-    env = {"CVS_EXT": q(sys.executable) + " " + q(helper), "CVS_SERVER": server}
-    wc = os.path.join(r.root, "extwc")
+    shim = PserverShim(r.repo.replace(os.sep, "/"))
+    wc = os.path.join(r.root, "pswc")
     os.makedirs(wc)
-    rc, out = run(["-d", ":ext:localhost:" + repo, "checkout", "mu"], cwd=wc,
-                  expect_ok=False, env=env)
-    if rc != 0 and "protocol" in out.lower() and "ext" in out.lower():
-        print("          (skipped: the :ext: protocol plugin is not available here)")
-        return
-    if not check_eq(rc, 0, "checkout over :ext: failed:\n" + out):
+    try:
+        rc, out = run(["-d", shim.root(), "checkout", "mu"], cwd=wc, expect_ok=False)
+    finally:
+        # The root's password was saved; remove it.
+        run(["-d", shim.root(), "logout"], cwd=wc, expect_ok=False)
+        shim.close()
+    if not check_eq(rc, 0, "checkout over :pserver: failed:\n" + out):
         return
     raw = open(os.path.join(wc, "mu", "u.txt"), "rb").read()
     if not check(raw[:2] == b"\xff\xfe" and len(raw) % 2 == 0,

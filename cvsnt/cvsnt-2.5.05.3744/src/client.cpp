@@ -3835,161 +3835,70 @@ static void handle_notranslateend(char *args, int len)
 		server_codepage_translation=1;
 }
 
-static void proxy_line1(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	cmd=NULL;
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-#endif
-}
-
-static void proxy_line2(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	cmd=NULL;
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	xfree(cmd);
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-#endif
-}
-
-static void proxy_updated(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	int size,n;
-	char *buf;
-
-	proxy_line2(cmd);
-	cmd=NULL;
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-	read_line(&cmd);
-	size = atoi(cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-
-	if(size)
-	{
-		buf = (char*)xmalloc(size);
-		while (size > 0)
-		{
-			n = try_read_from_server (buf, size);
-			size -= n;
-		        cvs_output_raw(buf,n,size?false:true);
-		}
-		xfree(buf);
-	}
-#endif
-}
-
-static void proxy_file(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	int size,n;
-	char *buf;
-
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	cmd=NULL;
-	read_line(&cmd);
-	size = atoi(cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-
-	if(size)
-	{
-		buf = (char*)xmalloc(size);
-		while (size > 0)
-		{
-			n = try_read_from_server (buf, size);
-			size -= n;
-			cvs_output_raw(buf,n,size?false:true);
-		}
-		xfree(buf);
-	}
-#endif
-}
-
 #define GAIJIN_rs_essential rs_essential//define to rs_optional if you want to support old server
 /* This table must be writeable if the server code is included.  */
 struct response responses[] =
 {
-#define RSP_LINE(n, f, p, t, s) {n, f, p, t, s}
+#define RSP_LINE(n, f, t, s) {n, f, t, s}
 
-    RSP_LINE("ok", handle_ok, NULL, response_type_ok, rs_essential),
-    RSP_LINE("error", handle_error, NULL, response_type_error, rs_essential),
-    RSP_LINE("Valid-requests", handle_valid_requests, NULL, response_type_normal,
+    RSP_LINE("ok", handle_ok, response_type_ok, rs_essential),
+    RSP_LINE("error", handle_error, response_type_error, rs_essential),
+    RSP_LINE("Valid-requests", handle_valid_requests, response_type_normal,
        rs_essential),
-    RSP_LINE("Checked-in", handle_checked_in, proxy_line2, response_type_normal,
+    RSP_LINE("Checked-in", handle_checked_in, response_type_normal,
        rs_essential),
-    RSP_LINE("New-entry", handle_new_entry, proxy_line2, response_type_normal, rs_optional),
-    RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
-    RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, GAIJIN_rs_essential),
-    RSP_LINE("Blob-ref-created", handle_created_blobs_refs, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Blob-OTP", handle_blob_otp, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Blob-url", handle_blob_url, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
-    RSP_LINE("Updated-meta", handle_updated_meta, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Created", handle_created, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Update-existing", handle_update_existing, proxy_updated, response_type_normal,
+    RSP_LINE("New-entry", handle_new_entry, response_type_normal, rs_optional),
+    RSP_LINE("Checksum", handle_checksum, response_type_normal, rs_optional),
+    RSP_LINE("Copy-file", handle_copy_file, response_type_normal, rs_optional),
+    RSP_LINE("Blob-ref", handle_updated_blobs_refs, response_type_normal, GAIJIN_rs_essential),
+    RSP_LINE("Blob-ref-created", handle_created_blobs_refs, response_type_normal, rs_optional),
+    RSP_LINE("Blob-OTP", handle_blob_otp, response_type_normal, rs_optional),
+    RSP_LINE("Blob-url", handle_blob_url, response_type_normal, rs_optional),
+    RSP_LINE("Updated", handle_updated, response_type_normal, rs_essential),
+    RSP_LINE("Updated-meta", handle_updated_meta, response_type_normal, rs_optional),
+    RSP_LINE("Created", handle_created, response_type_normal, rs_optional),
+    RSP_LINE("Update-existing", handle_update_existing, response_type_normal,
        rs_optional),
-    RSP_LINE("Merged", handle_merged, proxy_updated, response_type_normal, rs_essential),
-    RSP_LINE("Patched", handle_patched, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Rcs-diff", handle_rcs_diff, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Update-baserev", handle_update_baserev, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Mode", handle_mode, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Mod-time", handle_mod_time, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Removed", handle_removed, NULL, response_type_normal, rs_essential),
-	RSP_LINE("Renamed", handle_renamed, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Remove-entry", handle_remove_entry, NULL, response_type_normal,
+    RSP_LINE("Merged", handle_merged, response_type_normal, rs_essential),
+    RSP_LINE("Patched", handle_patched, response_type_normal, rs_optional),
+    RSP_LINE("Rcs-diff", handle_rcs_diff, response_type_normal, rs_optional),
+    RSP_LINE("Update-baserev", handle_update_baserev, response_type_normal, rs_optional),
+    RSP_LINE("Mode", handle_mode, response_type_normal, rs_optional),
+    RSP_LINE("Mod-time", handle_mod_time, response_type_normal, rs_optional),
+    RSP_LINE("Removed", handle_removed, response_type_normal, rs_essential),
+	RSP_LINE("Renamed", handle_renamed, response_type_normal, rs_optional),
+    RSP_LINE("Remove-entry", handle_remove_entry, response_type_normal,
        rs_optional),
-    RSP_LINE("Set-static-directory", handle_set_static_directory, proxy_line1,
+    RSP_LINE("Set-static-directory", handle_set_static_directory,
        response_type_normal,
        rs_optional),
-    RSP_LINE("Clear-static-directory", handle_clear_static_directory, proxy_line1,
+    RSP_LINE("Clear-static-directory", handle_clear_static_directory,
        response_type_normal,
        rs_optional),
-    RSP_LINE("Set-sticky", handle_set_sticky, proxy_line2, response_type_normal,
+    RSP_LINE("Set-sticky", handle_set_sticky, response_type_normal,
        rs_optional),
-    RSP_LINE("Clear-sticky", handle_clear_sticky, proxy_line1, response_type_normal, 
+    RSP_LINE("Clear-sticky", handle_clear_sticky, response_type_normal,
        rs_optional),
-    RSP_LINE("Template", handle_template, proxy_file, response_type_normal,
+    RSP_LINE("Template", handle_template, response_type_normal,
        rs_optional),
-    RSP_LINE("Notified", handle_notified, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Module-expansion", handle_module_expansion, NULL, response_type_normal, 
+    RSP_LINE("Notified", handle_notified, response_type_normal, rs_optional),
+    RSP_LINE("Module-expansion", handle_module_expansion, response_type_normal,
        rs_optional),
-    RSP_LINE("Wrapper-rcsOption", handle_wrapper_rcs_option, NULL,
+    RSP_LINE("Wrapper-rcsOption", handle_wrapper_rcs_option,
        response_type_normal,
        rs_optional),
-    RSP_LINE("Clear-rename", handle_clear_rename, NULL, response_type_normal, rs_optional),
-	RSP_LINE("Rename", handle_rename, NULL, response_type_normal, rs_optional), 
-	RSP_LINE("EntriesExtra", handle_entries_extra, NULL, response_type_normal, rs_optional), 
-    RSP_LINE("M", handle_m, NULL, response_type_normal, rs_essential), 
-    RSP_LINE("Mbinary", handle_mbinary, proxy_file, response_type_normal, rs_optional),
-    RSP_LINE("E", handle_e, NULL, response_type_normal, rs_essential),
-    RSP_LINE("F", handle_f, NULL, response_type_normal, rs_optional),
-    RSP_LINE("MT", handle_mt, NULL, response_type_normal, rs_optional),
-	RSP_LINE("NoTranslateBegin", handle_notranslatebegin, NULL, response_type_normal, rs_optional),
-	RSP_LINE("NoTranslateEnd", handle_notranslateend, NULL, response_type_normal, rs_optional),
+    RSP_LINE("Clear-rename", handle_clear_rename, response_type_normal, rs_optional),
+	RSP_LINE("Rename", handle_rename, response_type_normal, rs_optional),
+	RSP_LINE("EntriesExtra", handle_entries_extra, response_type_normal, rs_optional),
+    RSP_LINE("M", handle_m, response_type_normal, rs_essential),
+    RSP_LINE("Mbinary", handle_mbinary, response_type_normal, rs_optional),
+    RSP_LINE("E", handle_e, response_type_normal, rs_essential),
+    RSP_LINE("F", handle_f, response_type_normal, rs_optional),
+    RSP_LINE("MT", handle_mt, response_type_normal, rs_optional),
+	RSP_LINE("NoTranslateBegin", handle_notranslatebegin, response_type_normal, rs_optional),
+	RSP_LINE("NoTranslateEnd", handle_notranslateend, response_type_normal, rs_optional),
     /* Possibly should be response_type_error.  */
-    RSP_LINE(NULL, NULL, NULL, response_type_normal, rs_essential)
+    RSP_LINE(NULL, NULL, response_type_normal, rs_essential)
 
 #undef RSP_LINE
 };
@@ -4116,38 +4025,11 @@ int get_server_responses ()
 		     * matched "ok".
 		     */
 		    continue;
-#ifdef SERVER_SUPPORT
-		if(proxy_active)
-		{
-			// We are proxying for a client.  Don't execute this commmand, proxy it
-			if(rs->proxy)
-				(*rs->proxy) (cmd);
-			else
-			{
-				cvs_output_raw(cmd,0,false);
-				cvs_output_raw("\n",1,true);
-			}
-		}
-		else
-#endif
-		{
-			// Local command
-			(*rs->func) (cmd + cmdlen, len - cmdlen);
-		}
+		(*rs->func) (cmd + cmdlen, len - cmdlen);
 		break;
 	    }
 	if (rs->name == NULL)
 	    /* It's OK to print just to the first '\0'.  */
-	    /* We might want to handle control characters and the like
-	       in some other way other than just sending them to stdout.
-	       One common reason for this error is if people use :ext:
-	       with a version of rsh which is doing CRLF translation or
-	       something, and so the client gets "ok^M" instead of "ok".
-	       Right now that will tend to print part of this error
-	       message over the other part of it.  It seems like we could
-	       do better (either in general, by quoting or omitting all
-	       control characters, and/or specifically, by detecting the CRLF
-	       case and printing a specific error message).  */
 	    error (0, 0,
 		   "warning: unrecognized response `%s' from cvs server",
 		   cmd);
@@ -4187,22 +4069,9 @@ int get_server_responses ()
     return 0;
 }
 
-int get_server_responses_noproxy()
-{
-#ifdef SERVER_SUPPORT
-	int _prox=proxy_active;
-	proxy_active=0;
-#endif
-	int ret = get_server_responses();
-#ifdef SERVER_SUPPORT
-	proxy_active=_prox;
-#endif
-	return ret;
-}
-
 /*
  * Flag var; we'll set it in start_server() and not one of its
- * callees, such as start_rsh_server().  This means that there might
+ * callees.  This means that there might
  * be a small window between the starting of the server and the
  * setting of this var, but all the code in that window shouldn't care
  * because it's busy checking return values to see if the server got
@@ -4379,9 +4248,9 @@ int start_server (int verify_only)
 				current_parsed_root->hostname, current_parsed_root->directory);
 		}
 	}
-	else if(connect_state!=CVSPROTO_SUCCESS && connect_state!=CVSPROTO_SUCCESS_NOPROTOCOL)
+	else if(connect_state!=CVSPROTO_SUCCESS)
 		error(1,0,"Connection to server failed");
-	else if(connect_state==CVSPROTO_SUCCESS)
+	else
 	{
 		/* Loop, getting responses from the server.  */
 		TRACE(2,"client start - Loop, getting responses from the server.");
@@ -4556,9 +4425,6 @@ int start_server (int verify_only)
 
 	for (rs = responses; rs->name != NULL; ++rs)
 	{
-		// If we are proxying then we remove things our client doesn't want
-		if(verify_only==2 && rs->status == rs_not_supported)
-			continue;
 	    send_to_server (" ", 0);
 	    send_to_server (rs->name, 0);
 	}
@@ -4580,68 +4446,18 @@ int start_server (int verify_only)
 
 	if(gzip_level<0 && (supported_request("Compression-Requested") || supported_request("Compression-Required")))
 		gzip_level = 1; /* gzip_level doesn't actually make much difference */
-	if(supported_request("Encryption-Requested") || supported_request("Encryption-Required"))
-		cvsencrypt = -1;
-	else if(supported_request("Authentication-Requested") || supported_request("Authentication-Required"))
-		cvsauthenticate = -1;
 
     if (!rootless_encryption)
     {
 		TRACE(2,"client start - !rootless_encryption.");
 		send_to_server ("Root ", 0);
-		if(server_active)
-			send_to_server (current_parsed_root->remote_repository, 0);
-		else
-			send_to_server (current_parsed_root->directory, 0);
+		send_to_server (current_parsed_root->directory, 0);
 		send_to_server ("\n", 1);
     }
 
     status = buf_flush (to_server, 1);
     if (status != 0)
 		error (1, status, "writing to server");
-
-	if (cvsencrypt && rootless_encryption)
-	{
-		/* Turn on encryption before turning on compression.  We do
-		not want to try to compress the encrypted stream.  Instead,
-		we want to encrypt the compressed stream.  If we can't turn
-		on encryption, bomb out; don't let the user think the data
-		is being encrypted when it is not.  */
-		TRACE(2,"client start - cvsencrypt && rootless_encryption.");
-	if (client_protocol->wrap)
-	{
-		if(supported_request("Protocol-encrypt")) // CVSNT specific protocol encryption
-		{
-			send_to_server ("Protocol-encrypt\n", 0);
-		}
-		else if(!strcasecmp(current_parsed_root->method,"kserver") && supported_request("Kerberos-encrypt"))
-		{
-			send_to_server ("Kerberos-encrypt\n", 0);
-		}
-		else if(!strcasecmp(current_parsed_root->method,"gserver") && supported_request("Gssapi-encrypt"))
-		{
-			send_to_server ("Gssapi-encrypt\n", 0);
-		}
-		else
-			error (1, 0, "This server does not support encryption");
-
-		to_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, to_server, 0,
-													1,
-													((BUFMEMERRPROC)
-														NULL));
-		from_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, from_server, 1,
-														1,
-														((BUFMEMERRPROC)
-														NULL));
-
-		TRACE(1,"Encryption enabled");
-	}
-	else
-	{
-		if(cvsencrypt>0 && !(client_protocol->valid_elements&flagAlwaysEncrypted))
-			error (1, 0, "This protocol does not support encryption");
-	}
-	}
 
 	if (gzip_level>0 && rootless_encryption)
 	{
@@ -4692,52 +4508,11 @@ int start_server (int verify_only)
 	}
 	}
 
-	if (cvsauthenticate && !cvsencrypt && rootless_encryption)
-	{
-		/* Turn on authentication after turning on compression, so
-		that we can compress the authentication information.  We
-		assume that encrypted data is always authenticated--the
-		ability to decrypt the data stream is itself a form of
-		authentication.  */
-	TRACE(2,"client start - cvsauthenticate && !cvsencrypt && rootless_encryption.");
-	if (client_protocol->wrap)
-	{
-		if(supported_request("Protocol-authenticate")) // CVSNT specific protocol authentication
-		{
-			send_to_server ("Protocol-encrypt\n", 0);
-		}
-		else if(!strcasecmp(current_parsed_root->method,"gserver") && supported_request("Gssapi-authenticate"))
-		{
-			send_to_server ("Gssapi-authenticate\n", 0);
-		}
-		else
-			error (1, 0, "This server does not support authentication");
-
-		to_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, to_server, 0,
-													0,
-													((BUFMEMERRPROC)
-														NULL));
-		from_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, from_server, 1,
-														0,
-														((BUFMEMERRPROC)
-														NULL));
-		TRACE(1,"Authentication enabled");
-	}
-	else
-	{
-		if(cvsauthenticate>0 && !(client_protocol->valid_elements&flagAlwaysEncrypted))
-			error (1, 0, "This protocol does not support authentication");
-	}
-	}
-
     if (rootless_encryption)
     {
 		TRACE(2,"client start - rootless_encryption.");
 		send_to_server ("Root ", 0);
-		if(server_active)
-			send_to_server (current_parsed_root->remote_repository, 0);
-		else
-			send_to_server (current_parsed_root->directory, 0);
+		send_to_server (current_parsed_root->directory, 0);
 		send_to_server ("\n", 1);
     }
 
