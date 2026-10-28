@@ -111,6 +111,33 @@ def entries_of(wcdir):
     return out
 
 
+VALID_RESPONSES = (
+    "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+    "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+    "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+    "Mod-time Removed Remove-entry Set-static-directory "
+    "Clear-static-directory Set-sticky Clear-sticky Template "
+    "Notified Module-expansion Clear-rename Rename EntriesExtra "
+    "M Mbinary E F MT")
+
+
+def server_session(r, reqs):
+    """Pipe REQS, request lines or raw bytes, into `cvs server` for r.repo.
+    Return (exit code, stdout, stderr); a timeout kills the server and raises."""
+    if not isinstance(reqs, bytes):
+        reqs = "".join(s + "\n" for s in reqs).encode("utf-8")
+    cmd = [CVS] + (["-L", LIBDIR] if LIBDIR else []) + ["--allow-root=" + r.repo, "server"]
+    p = subprocess.Popen(cmd, cwd=tempfile.mkdtemp(dir=r.root), stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+    try:
+        out_b, err_b = p.communicate(reqs, timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        raise
+    return p.returncode, out_b.decode("utf-8", "replace"), err_b.decode("utf-8", "replace")
+
+
 class Repo:
     """A throwaway repository plus a working copy."""
 
@@ -919,17 +946,9 @@ def t_server_session(r):
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "sub content\n"})
     root = r.repo.replace(os.sep, "/")
 
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT")
-    reqs = "".join(s + "\n" for s in [
+    rc, out, _ = server_session(r, [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES,
         "valid-requests",
         "UseUnchanged",
         "Argument m",
@@ -941,24 +960,7 @@ def t_server_session(r):
         "rlog",
     ])
 
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "srvwc")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill()
-        p.communicate()
-        fail("server session did not complete within 120s (stalled flush?)")
-        return
-    out = out_b.decode("utf-8", "replace")
-
-    check_eq(p.returncode, 0, "server exit status (output:\n%s)" % out)
+    check_eq(rc, 0, "server exit status (output:\n%s)" % out)
     lines = out.split("\n")
     check_eq(len([l for l in lines if l == "ok"]), 4,
              "one ok per command (valid-requests, co, noop, rlog):\n" + out)
@@ -999,40 +1001,15 @@ def t_server_pipeout_order(r):
     r.import_tree("m", {"p.txt": body})
     root = r.repo.replace(os.sep, "/")
 
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT NoTranslateBegin NoTranslateEnd")
-    reqs = "".join(s + "\n" for s in [
+    out = server_session(r, [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES + " NoTranslateBegin NoTranslateEnd",
         "valid-requests",
         "UseUnchanged",
         "Argument -p",
         "Argument m/p.txt",
         "co",
-    ])
-
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "psrvwc")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, _ = p.communicate(reqs.encode("utf-8"), timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill()
-        p.communicate()
-        fail("server session did not complete within 120s")
-        return
-    out = out_b.decode("utf-8", "replace")
+    ])[1]
 
     i_begin = out.find("NoTranslateBegin")
     i_body = out.find("M alpha")
@@ -1798,17 +1775,9 @@ def t_import_binary_over_text_server(r):
     v0 = open(vpath, "rb").read()
     root = r.repo.replace(os.sep, "/")
     nul = bytes(range(256)) * 3
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT")
     head = "".join(x + chr(10) for x in [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES,
         "valid-requests",
         "UseUnchanged",
         "Directory .",
@@ -1821,20 +1790,8 @@ def t_import_binary_over_text_server(r):
         "Argument msrv", "Argument VENDOR", "Argument REL1",
         "import",
     ])
-    reqs = head.encode() + modhdr.encode() + nul + tail.encode()
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "srvimp")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, err_b = p.communicate(reqs, timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill(); p.communicate(); fail("server import did not complete within 120s"); return
-    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    _, out, err = server_session(r, head.encode() + modhdr.encode() + nul + tail.encode())
+    out += err
     check("binary content" in out,
           "server did not refuse the binary re-import:" + chr(10) + out)
     check_eq(open(vpath, "rb").read(), v0,
@@ -1851,17 +1808,9 @@ def t_add_binary_kopt_protocol(r):
     # server half of that contract.
     r.import_tree("m", {"a.txt": "one" + chr(10), "sub/b.txt": "two" + chr(10)})
     root = r.repo.replace(os.sep, "/")
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT")
-    reqs = "".join(s + chr(10) for s in [
+    rc, out, err = server_session(r, [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES,
         "valid-requests",
         "UseUnchanged",
         "Directory .",
@@ -1883,23 +1832,8 @@ def t_add_binary_kopt_protocol(r):
         "Argument sub/deep.txt",
         "add",
     ])
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "srvadd")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill()
-        p.communicate()
-        fail("server add did not complete within 120s")
-        return
-    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
-    check_eq(p.returncode, 0, "server exit status (output:" + chr(10) + out + ")")
+    out += err
+    check_eq(rc, 0, "server exit status (output:" + chr(10) + out + ")")
     check(not any(l.startswith("error") for l in out.split(chr(10))),
           "server reported an error:" + chr(10) + out)
     # In server mode the entry carries no timestamp, and a client that has
