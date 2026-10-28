@@ -175,11 +175,36 @@ static bool excl_walk (std::string abs, const char *path)
     return false;
 }
 
+static std::map<std::string, std::string> excl_inside_memo;
+
+/* The directory that an enclosing working directory excludes and that the
+   absolute directory DIR is or lies inside, or an empty string.  */
+static const std::string &excl_inside (const std::string &dir)
+{
+    std::string key = excl_key (dir.c_str ());
+    std::map<std::string, std::string>::iterator it = excl_inside_memo.find (key);
+    if (it != excl_inside_memo.end ())
+        return it->second;
+    std::string where;
+    size_t slash = excl_last_sep (dir);
+    if (slash != std::string::npos && slash > 0)
+    {
+        std::string up = dir.substr (0, slash);
+        std::string name = dir.substr (slash + 1);
+        if (!name.empty () && isdir (excl_join (up, CVSADM).c_str ()))
+            where = excl_name_abs (up, name.c_str ()) ? dir : excl_inside (up);
+    }
+    return excl_inside_memo[key] = where;
+}
+
+/* NAME, a path relative to the current directory, is excluded, or the
+   current directory itself is inside an excluded directory.  */
 int excl_name_here (const char *name)
 {
     if (!excl_active || name == NULL)
         return 0;
-    return excl_name_abs (excl_cwd (), name);
+    std::string cwd = excl_cwd ();
+    return excl_walk (cwd, name) || !excl_inside (cwd).empty ();
 }
 
 int excl_name_in (const char *dir, const char *name)
@@ -376,22 +401,13 @@ static void excl_check_ancestors ()
 {
     if (!isdir (CVSADM))
         return;
-    std::string cur = excl_cwd ();
-    for (;;)
-    {
-        size_t slash = excl_last_sep (cur);
-        if (slash == std::string::npos || slash == 0)
-            break;
-        std::string parent = cur.substr (0, slash);
-        std::string name = cur.substr (slash + 1);
-        if (parent.size () == 2 && parent[1] == ':')
-            parent += "/";
-        if (name.empty () || !isdir (excl_join (parent, CVSADM).c_str ()))
-            break;
-        if (excl_name_abs (parent, name.c_str ()))
-            error (1, 0, "%s is excluded by %s in %s", cur.c_str (), CVSDOTEXCLUDE, parent.c_str ());
-        cur = parent;
-    }
+    std::string where = excl_inside (excl_cwd ());
+    if (where.empty ())
+        return;
+    std::string parent = where.substr (0, excl_last_sep (where));
+    if (parent.size () == 2 && parent[1] == ':')
+        parent += "/";
+    error (1, 0, "%s is excluded by %s in %s", where.c_str (), CVSDOTEXCLUDE, parent.c_str ());
 }
 
 void excl_setup (int uses_work_dir)
@@ -414,5 +430,6 @@ void excl_close ()
 {
     excl_global.clear ();
     excl_dirs.clear ();
+    excl_inside_memo.clear ();
     excl_active = false;
 }
