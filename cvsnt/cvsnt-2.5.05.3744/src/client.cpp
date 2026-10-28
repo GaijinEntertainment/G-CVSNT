@@ -1449,6 +1449,74 @@ time_t get_file_mtime(const char *filename)
 }
 static char *time_stamp (time_t mtime, int local);
 
+/* Register with the last EntriesExtra fields */
+static void register_with_extra (List *ent_list, const char *filename, const char *vn, const char *ts,
+	const char *options, const char *tag, const char *date, const char *conflict)
+{
+	char *cp, *merge_tag1 = NULL, *merge_tag2 = NULL;
+	time_t rcs_timestamp = (time_t)-1;
+	char *edit_revision = "*";
+	char *edit_tag = NULL;
+	char *edit_bugid = NULL;
+	char *md5 = NULL;
+
+	while(extra_entry && extra_entry[0]=='/')
+	{
+		char *fn, *tag1, *tag2, *rcs_timestamp_string;
+
+		fn = extra_entry  + 1;
+		if ((cp = strchr (fn, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+		if(fncmp(fn, filename))
+			break;
+		tag1 = cp;
+		if ((cp = strchr (tag1, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+		tag2=cp;
+		if ((cp = strchr (tag2, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+		merge_tag1 = tag1;
+		merge_tag2 = tag2;
+		rcs_timestamp_string=cp;
+		if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+
+		if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
+			rcs_timestamp=(time_t)-1;
+
+		edit_revision = cp;
+		if ((cp = strchr (edit_revision, '/')) == NULL)
+		{
+			edit_revision="*"; /* Revision was unseen by client */
+			break;
+		}
+		*cp++ = '\0';
+
+		edit_tag = cp;
+		if ((cp = strchr (edit_tag, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+
+		edit_bugid = cp;
+		if ((cp = strchr (edit_bugid, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+
+		md5 = cp;
+		if ((cp = strchr (md5, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+
+		break;
+	}
+
+	Register (ent_list, filename, vn, ts, options, tag, date, conflict, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+}
+
 /* Update the Entries line for this file.  */
 static void update_entries (char *data_arg, List *ent_list, char *short_pathname, char *filename)
 {
@@ -1469,12 +1537,6 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     char *scratch_entries = NULL;
 	bool open_binary,encode;
 	CCodepage::Encoding encoding;
-	char *merge_tag1, *merge_tag2;
-	time_t rcs_timestamp;
-	char *edit_revision = "*";
-	char *edit_tag = NULL;
-	char *edit_bugid = NULL;
-	char *md5 = NULL;
 
 #ifdef UTIME_EXPECTS_WRITABLE
     int change_it_back = 0;
@@ -2055,65 +2117,8 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 			mark_up_to_date (filename);
 	}
 
-	/* Get the data for Entries.Extra */
-	merge_tag1 = merge_tag2 = NULL;
-	rcs_timestamp = (time_t)-1;
-	while(extra_entry && extra_entry[0]=='/')
-	{
-		char *fn, *tag1, *tag2, *rcs_timestamp_string;
-		
-		fn = extra_entry  + 1;
-		if ((cp = strchr (fn, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-		if(fncmp(fn, filename))
-			break;
-		tag1 = cp;
-		if ((cp = strchr (tag1, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-		tag2=cp;
-		if ((cp = strchr (tag2, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-		merge_tag1 = tag1;
-		merge_tag2 = tag2;
-		rcs_timestamp_string=cp;
-		if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
-			rcs_timestamp=(time_t)-1;
-
-		edit_revision = cp;
-		if ((cp = strchr (edit_revision, '/')) == NULL)
-		{
-			edit_revision="*"; /* Revision was unseen by client */
-			break;
-		}
-		*cp++ = '\0';
-
-		edit_tag = cp;
-		if ((cp = strchr (edit_tag, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		edit_bugid = cp;
-		if ((cp = strchr (edit_bugid, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		md5 = cp;
-		if ((cp = strchr (md5, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		break;
-	}
-
-	Register (ent_list, filename, vn, local_timestamp,
-		  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+	register_with_extra (ent_list, filename, vn, local_timestamp,
+		  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
 
 	if (file_timestamp)
 	    xfree (file_timestamp);
@@ -2337,12 +2342,6 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
   char *date = NULL;
   char *tag_or_date;
   char *scratch_entries = NULL;
-  char *merge_tag1, *merge_tag2;
-  time_t rcs_timestamp;
-  char *edit_revision = "*";
-  char *edit_tag = NULL;
-  char *edit_bugid = NULL;
-  char *md5 = NULL;
 
 #ifdef UTIME_EXPECTS_WRITABLE
   int change_it_back = 0;
@@ -2566,64 +2565,8 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
   		mark_up_to_date (filename);
     }
 
-    /* Get the data for Entries.Extra */
-    merge_tag1 = merge_tag2 = NULL;
-    rcs_timestamp = (time_t)-1;
-    while(extra_entry && extra_entry[0]=='/')
-    {
-      char *fn, *tag1, *tag2, *rcs_timestamp_string;
-      fn = extra_entry  + 1;
-      if ((cp = strchr (fn, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      if(fncmp(fn, filename))
-      	break;
-      tag1 = cp;
-      if ((cp = strchr (tag1, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      tag2=cp;
-      if ((cp = strchr (tag2, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      merge_tag1 = tag1;
-      merge_tag2 = tag2;
-      rcs_timestamp_string=cp;
-      if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
-      	rcs_timestamp=(time_t)-1;
-
-      edit_revision = cp;
-      if ((cp = strchr (edit_revision, '/')) == NULL)
-      {
-      	edit_revision="*"; /* Revision was unseen by client */
-      	break;
-      }
-      *cp++ = '\0';
-
-      edit_tag = cp;
-      if ((cp = strchr (edit_tag, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      edit_bugid = cp;
-      if ((cp = strchr (edit_bugid, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      md5 = cp;
-      if ((cp = strchr (md5, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      break;
-    }
-
-    Register (ent_list, filename, vn, local_timestamp,
-    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+    register_with_extra (ent_list, filename, vn, local_timestamp,
+    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
 
     if (file_timestamp)
         xfree (file_timestamp);
@@ -2649,12 +2592,6 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
   char *date = NULL;
   char *tag_or_date;
   char *scratch_entries = NULL;
-  char *merge_tag1, *merge_tag2;
-  time_t rcs_timestamp;
-  char *edit_revision = "*";
-  char *edit_tag = NULL;
-  char *edit_bugid = NULL;
-  char *md5 = NULL;
 
 #ifdef UTIME_EXPECTS_WRITABLE
   int change_it_back = 0;
@@ -2784,64 +2721,8 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
   		mark_up_to_date (filename);
     }
 
-    /* Get the data for Entries.Extra */
-    merge_tag1 = merge_tag2 = NULL;
-    rcs_timestamp = (time_t)-1;
-    while(extra_entry && extra_entry[0]=='/')
-    {
-      char *fn, *tag1, *tag2, *rcs_timestamp_string;
-      fn = extra_entry  + 1;
-      if ((cp = strchr (fn, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      if(fncmp(fn, filename))
-      	break;
-      tag1 = cp;
-      if ((cp = strchr (tag1, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      tag2=cp;
-      if ((cp = strchr (tag2, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      merge_tag1 = tag1;
-      merge_tag2 = tag2;
-      rcs_timestamp_string=cp;
-      if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
-      	rcs_timestamp=(time_t)-1;
-
-      edit_revision = cp;
-      if ((cp = strchr (edit_revision, '/')) == NULL)
-      {
-      	edit_revision="*"; /* Revision was unseen by client */
-      	break;
-      }
-      *cp++ = '\0';
-
-      edit_tag = cp;
-      if ((cp = strchr (edit_tag, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      edit_bugid = cp;
-      if ((cp = strchr (edit_bugid, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      md5 = cp;
-      if ((cp = strchr (md5, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      break;
-    }
-
-    Register (ent_list, filename, vn, local_timestamp,
-    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+    register_with_extra (ent_list, filename, vn, local_timestamp,
+    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
 
     if (file_timestamp)
         xfree (file_timestamp);
