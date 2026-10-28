@@ -250,8 +250,10 @@ A `.cvsexclude` file has the `.cvsignore` syntax and, like it, applies to the di
 happens to a matching file or directory that exists in the repository:
 
 * it is never downloaded or updated, and never sent to the server;
-* if it is present in the working copy it is removed on the next command, together with its
-  `CVS/Entries` line; a file with local changes is kept and reported instead;
+* if it is present in the working copy the next `update` removes it, together with its
+  `CVS/Entries` line; a file with local changes is kept and reported instead. Other commands
+  that work through a server leave it in place and skip it; against a `:local:` root only
+  `update`, `checkout` and `commit` apply the list;
 * `update`, `status` and `-n` do not report it as missing, unknown or needing checkout.
 
 The list is local: the server never sees it, and `.cvsexclude` itself is always excluded, so it is

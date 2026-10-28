@@ -13,8 +13,8 @@
  *
  * A .cvsexclude file has the .cvsignore syntax and applies to the working
  * directory it is in; ~/.cvsexclude and $CVSEXCLUDE apply everywhere.  A
- * file or directory whose name matches is kept out of the working copy: it
- * is removed locally unless it has local changes, it is never sent to the
+ * file or directory whose name matches is kept out of the working copy:
+ * update removes it unless it has local changes, it is never sent to the
  * server, and nothing the server sends about it is written or shown.  The
  * server never learns about the list.  .cvsexclude itself is always
  * excluded, so it can neither be checked in nor overwritten from the server.
@@ -272,11 +272,13 @@ static void excl_report_kept (const char *what)
     error (0, 0, "%s is excluded by %s but has local changes; not removed", what, CVSDOTEXCLUDE);
 }
 
-/* Take the excluded file FINFO out of the working copy.  A file the server
-   knows nothing about is left alone; a modified file is kept and reported.  */
+/* During update, take the excluded file FINFO out of the working copy.  A
+   file the server knows nothing about is left alone; a modified file is kept
+   and reported.  */
 void excl_remove_file (struct file_info *finfo, Vers_TS *vers)
 {
-    if (!excl_active || noexec || vers->vn_user == NULL || finfo->entries == NULL)
+    if (!excl_active || strcmp (command_name, "update") != 0 || noexec || vers->vn_user == NULL
+        || finfo->entries == NULL)
         return;
     if (vers->ts_user == NULL || fncmp (finfo->file, CVSDOTEXCLUDE) == 0)
     {
@@ -376,11 +378,11 @@ static int excl_remove_tree (const char *dir, const char *update_dir, List *pare
     return 1;
 }
 
-/* Take the excluded directory DIR (UPDATE_DIR for messages) out of the
-   working copy; ENTRIES is the list of the directory holding it.  */
+/* During update, take the excluded directory DIR (UPDATE_DIR for messages)
+   out of the working copy; ENTRIES is the list of the directory holding it.  */
 void excl_remove_dir (const char *dir, const char *update_dir, List *entries)
 {
-    if (!excl_active || noexec)
+    if (!excl_active || strcmp (command_name, "update") != 0 || noexec)
         return;
     if (!isdir (dir))
     {
