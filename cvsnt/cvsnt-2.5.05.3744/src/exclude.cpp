@@ -29,8 +29,16 @@
 
 typedef std::vector<std::string> excl_list;
 
+/* What a directory's .cvsexclude contributes: its own patterns, and whether a
+   "!" in it cleared the global patterns for that directory.  */
+struct excl_dir
+{
+    bool reset;
+    excl_list own;
+};
+
 static excl_list excl_global;
-static std::map<std::string, excl_list> excl_dirs;
+static std::map<std::string, excl_dir> excl_dirs;
 static bool excl_active;
 
 /* Directory keys must compare equal whatever separator or case a caller used.  */
@@ -67,7 +75,7 @@ static size_t excl_last_sep (const std::string &path)
     return std::string::npos;
 }
 
-static void excl_add_line (excl_list &list, const char *line)
+static void excl_add_line (excl_list &list, bool *reset, const char *line)
 {
     if (line == NULL)
         return;
@@ -77,14 +85,18 @@ static void excl_add_line (excl_list &list, const char *line)
         if (tok == NULL)
             break;
         if (tok[0] == '!' && tok[1] == 0)
+        {
             list.clear ();
+            if (reset != NULL)
+                *reset = true;
+        }
         else if (tok[0] != 0)
             list.push_back (tok);
         xfree (tok);
     }
 }
 
-static void excl_add_file (excl_list &list, const char *file)
+static void excl_add_file (excl_list &list, bool *reset, const char *file)
 {
     FILE *fp = fopen (file, "r");
     char *line = NULL;
@@ -93,39 +105,43 @@ static void excl_add_file (excl_list &list, const char *file)
     if (fp == NULL)
         return;
     while (getline (&line, &line_allocated, fp) >= 0)
-        excl_add_line (list, line);
+        excl_add_line (list, reset, line);
     if (ferror (fp))
         error (0, errno, "cannot read %s", file);
     fclose (fp);
     xfree (line);
 }
 
-/* Patterns in force for the entries of the absolute directory ABSDIR.  */
-static const excl_list &excl_patterns (const std::string &absdir)
+/* The .cvsexclude of the absolute directory ABSDIR, read once.  */
+static const excl_dir &excl_dir_at (const std::string &absdir)
 {
     std::string key = excl_key (absdir.c_str ());
-    std::map<std::string, excl_list>::iterator it = excl_dirs.find (key);
+    std::map<std::string, excl_dir>::iterator it = excl_dirs.find (key);
     if (it != excl_dirs.end ())
         return it->second;
-    excl_list &list = excl_dirs[key];
-    list = excl_global;
-    excl_add_file (list, excl_join (absdir, CVSDOTEXCLUDE).c_str ());
-    return list;
+    excl_dir &dir = excl_dirs[key];
+    excl_add_file (dir.own, &dir.reset, excl_join (absdir, CVSDOTEXCLUDE).c_str ());
+    return dir;
 }
 
-static bool excl_match (const excl_list &list, const char *name)
+static bool excl_match_list (const excl_list &list, const char *name)
 {
-    if (fncmp (name, CVSDOTEXCLUDE) == 0)
-        return true;
     for (size_t i = 0; i < list.size (); ++i)
         if (CVS_FNMATCH (list[i].c_str (), name, CVS_CASEFOLD) == 0)
             return true;
     return false;
 }
 
+static bool excl_match (const excl_dir &dir, const char *name)
+{
+    if (fncmp (name, CVSDOTEXCLUDE) == 0)
+        return true;
+    return (!dir.reset && excl_match_list (excl_global, name)) || excl_match_list (dir.own, name);
+}
+
 static bool excl_name_abs (const std::string &absdir, const char *name)
 {
-    return excl_match (excl_patterns (absdir), name);
+    return excl_match (excl_dir_at (absdir), name);
 }
 
 static std::string excl_cwd ()
@@ -438,8 +454,8 @@ void excl_setup (int uses_work_dir)
 
     char *home_dir = get_homedir ();
     if (home_dir)
-        excl_add_file (excl_global, excl_join (home_dir, CVSDOTEXCLUDE).c_str ());
-    excl_add_line (excl_global, CProtocolLibrary::GetEnvironment (EXCLUDE_ENV));
+        excl_add_file (excl_global, NULL, excl_join (home_dir, CVSDOTEXCLUDE).c_str ());
+    excl_add_line (excl_global, NULL, CProtocolLibrary::GetEnvironment (EXCLUDE_ENV));
 
     if (uses_work_dir)
         excl_check_ancestors ();
