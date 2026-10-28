@@ -249,7 +249,10 @@ A `.cvsexclude` file has the `.cvsignore` syntax and, like it, applies to the di
 `~/.cvsexclude` and `$CVSEXCLUDE` apply everywhere, and `!` clears the list. The difference is what
 happens to a matching file or directory that exists in the repository:
 
-* it is never downloaded or updated, and never sent to the server;
+* it is never written to the working copy, and the blob of a `-kB` file is never downloaded;
+  inline content the server still sends is read and dropped;
+* its local state is never sent to the server, and `commit` leaves it out with a warning
+  (`src/commit.cpp`);
 * if it is present in the working copy the next `update` removes it, together with its
   `CVS/Entries` line; a file with local changes is kept and reported instead. Other commands
   that work through a server leave it in place and skip it; against a `:local:` root only
@@ -260,7 +263,9 @@ happens to a matching file or directory that exists in the repository:
 
 The list is local: the server never sees it, and `.cvsexclude` itself is always excluded, so it is
 never checked in and never overwritten from the repository. A command started inside an excluded
-directory is refused. Removing the pattern and running `update` (with `-d` for a directory) brings the content
+directory is refused, and so is a command that sends working-copy files when an excluded path is
+named on its command line (`src/client.cpp`); `checkout` and `export` take module names and only
+warn. Removing the pattern and running `update` (with `-d` for a directory) brings the content
 back, except that a file scheduled for removal stays scheduled until `cvs add` undoes it
 (`src/exclude.cpp`).
 
