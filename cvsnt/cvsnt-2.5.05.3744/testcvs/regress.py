@@ -193,14 +193,19 @@ VALID_RESPONSES = (
     "M Mbinary E F MT")
 
 
-def server_session(r, reqs):
+def server_session(r, reqs, env=None):
     """Pipe REQS, request lines or raw bytes, into `cvs server` for r.repo.
-    Return (exit code, stdout, stderr); a timeout kills the server and raises."""
+    Return (exit code, stdout, stderr); a timeout kills the server and raises.
+    env adds to (or overrides) the inherited environment."""
     if not isinstance(reqs, bytes):
         reqs = "".join(s + "\n" for s in reqs).encode("utf-8")
     cmd = [CVS] + (["-L", LIBDIR] if LIBDIR else []) + ["--allow-root=" + r.repo, "server"]
+    full_env = None
+    if env:
+        full_env = dict(os.environ)
+        full_env.update(env)
     p = subprocess.Popen(cmd, cwd=tempfile.mkdtemp(dir=r.root), stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=full_env)
     try:
         out_b, err_b = p.communicate(reqs, timeout=120)
     except subprocess.TimeoutExpired:
@@ -1194,6 +1199,30 @@ def t_removed_methods_refused(r):
         rc, out = run(["-d", root, "ls"], cwd=r.root, expect_ok=False)
         check(rc != 0 and "access method is not available" in out,
               "%s was not refused:\n%s" % (root, out))
+
+
+@test("a server with EncryptionLevel 3 or 4 refuses every session")
+def t_encryption_level_refused(r):
+    if os.name == "nt":
+        # The server reads PServer from the registry there, not from CVSCONF.
+        print("          (skipped: PServer settings come from the registry here)")
+        return
+    root = r.repo.replace(os.sep, "/")
+    conf = os.path.join(r.root, "conf")
+    # CVSCONF replaces the whole PServer file, LockServer included.
+    cfg = os.path.join(r.repo, "CVSROOT", "config")
+    os.chmod(cfg, 0o644)
+    write(cfg, read(cfg) + "\nLockServer=none\n")
+    for level, refused in ((2, False), (3, True), (4, True)):
+        write(os.path.join(conf, "PServer"), "EncryptionLevel=%d\n" % level)
+        out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES,
+                                 "valid-requests", "version"], env={"CVSCONF": conf})[1]
+        if refused:
+            check(out.endswith("error  \n") and "EncryptionLevel=%d" % level in out,
+                  "EncryptionLevel=%d did not refuse the session:\n%s" % (level, out))
+        else:
+            check(out.endswith("ok\n") and "\nM " in out,
+                  "EncryptionLevel=%d refused the session:\n%s" % (level, out))
 
 
 @test("repository operations append well-formed history records")

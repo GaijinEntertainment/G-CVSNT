@@ -80,6 +80,8 @@ int atomic_checkouts = 0;
 LineType crlf_mode = CRLF_DEFAULT;
 
 #ifdef SERVER_SUPPORT
+/* EncryptionLevel: 3=Require auth., 4=Require encr.; pserver has neither */
+extern int encryption_level;
 /* 0=Any, 1=Request compr., 2=Require compr. */
 extern int compression_level;
 
@@ -573,6 +575,9 @@ static void read_global_config(void)
 			xfree(lock_server);
 			lock_server = xstrdup("127.0.0.1:2402");
 		}
+
+		if(!CGlobalSettings::GetGlobalValue("cvsnt","PServer","EncryptionLevel",buffer,sizeof(buffer)))
+			encryption_level = atoi(buffer);
 
 		if(!CGlobalSettings::GetGlobalValue("cvsnt","PServer","CompressionLevel",buffer,sizeof(buffer)))
 			compression_level = atoi(buffer);
