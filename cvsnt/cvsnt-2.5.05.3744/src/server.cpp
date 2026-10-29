@@ -179,6 +179,9 @@ static int dont_delete_temp;
 // Set to 1 if the data stream is compressed
 static int protocol_compression_enabled = 0;
 
+/* EncryptionLevel: 3=Require auth., 4=Require encr.; pserver has neither */
+int encryption_level = 0;
+
 /* This is set to request/force compression */
 /* 0=Any, 1=Request compr., 2=Require compr. */
 int compression_level = 0;
@@ -5033,6 +5036,8 @@ error ENOMEM Virtual memory exhausted.\n");
 				if(!default_client_codepage && !server_codepage_sent && !CGlobalSettings::GetGlobalValue("cvsnt","PServer","DefaultClientCodepage",buf,sizeof(buf)))
 					default_client_codepage = xstrdup(buf); // Yeah we leak this at shutdown, but it doesn't really matter
 
+				if(encryption_level>=3)
+					error(1,0,"This server requires a signed or encrypted connection (EncryptionLevel=%d), which pserver does not provide",encryption_level);
 				if(compression_level==2 && protocol_compression_enabled==0)
 					error(1,0,"This server requries a compressed connection");
 
