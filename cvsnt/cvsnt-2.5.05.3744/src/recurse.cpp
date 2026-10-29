@@ -571,7 +571,11 @@ int start_recursion (FILEPROC fileproc, FILESDONEPROC filesdoneproc,
 	    /* populate it */
 	    i = 0;
 	    for (p = head->next; p != head; p = p->next)
-		our_argv[i++] = xstrdup (p->key);
+		if (!excl_path (p->key))
+		    our_argv[i++] = xstrdup (p->key);
+	    if (i == 0)
+		error (1, 0, "every directory here is excluded by %s", CVSDOTEXCLUDE);
+	    our_argc = i;
 	}
 
 	/* We don't want to expand widcards, since we've just created

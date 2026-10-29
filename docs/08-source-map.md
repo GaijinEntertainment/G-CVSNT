@@ -27,28 +27,29 @@ sending requests) and the server half (executing against the repository), separa
 | File | Lines | Role |
 | --- | ---: | --- |
 | `rcs.cpp` | 7693 | RCS `,v` parsing, revision extraction, symbol/branch manipulation, rewriting. The most delicate file in the tree |
-| `server.cpp` | 6684 | Server request loop, request table (`requests[]`), response emission |
-| `client.cpp` | 5750 | Client request emission, response table (`responses[]`), response handlers |
-| `update.cpp` | 3334 | `update`: classification, checkout, merge, join |
-| `commit.cpp` | 2442 | `commit` |
+| `server.cpp` | 6682 | Server request loop, request table (`requests[]`), response emission |
+| `client.cpp` | 6052 | Client request emission, response table (`responses[]`), response handlers |
+| `update.cpp` | 3348 | `update`: classification, checkout, merge, join |
+| `commit.cpp` | 2472 | `commit` |
 | `rcs_checkin.cpp` | 2235 | Writing a new revision into a `,v` file |
 | `import.cpp` | 2045 | `import` |
 | `log.cpp` | 1887 | `log` / `rlog` |
-| `main.cpp` | 1847 | Entry point, global options (`long_options[]`), command table (`cmds[]`) |
+| `main.cpp` | 1849 | Entry point, global options (`long_options[]`), command table (`cmds[]`) |
 | `buffer.cpp` | 1457 | The buffered-I/O abstraction the whole protocol sits on |
 | `mapping.cpp` | 1637 | Path/name mapping and virtual repositories |
 | `tag.cpp` | 1640 | `tag` / `rtag`, including branch creation |
 | `subr.cpp` | 1634 | Assorted helpers |
-| `recurse.cpp` | 1540 | `start_recursion` — the directory walker every command uses |
+| `recurse.cpp` | 1544 | `start_recursion` — the directory walker every command uses |
 | `mkmodules.cpp` | 1419 | `CVSROOT` administrative file handling |
 | `entries.cpp` | 1373 | `CVS/Entries` reading and writing |
 | `history.cpp` | 1497 | `CVSROOT/history` |
 | `checkout.cpp` | 1388 | `checkout` / `export` |
 | `filesubr.cpp` | 1320 | POSIX filesystem helpers (Windows equivalents are in `windows-NT/`) |
 | `lock.cpp` | 1316 | Repository locking, both file-based and lock-server |
-| `root.cpp` | 1176 | `CVSROOT` string parsing, protocol plugin selection |
+| `root.cpp` | 1052 | `CVSROOT` string parsing, protocol plugin selection |
 | `modules.cpp` | | Module database |
 | `classify.cpp`, `vers_ts.cpp` | | Deciding a file's state (up-to-date / modified / needs merge / …) |
+| `exclude.cpp` | | Local-only `.cvsexclude` filtering of the working copy (client side) |
 | `hash.cpp` | 521 | The `List`/`Node` container used pervasively for entries, files, directories |
 | `httplib.h` | 6707 | Vendored single-header HTTP client, used by the HTTP blob back-end |
 

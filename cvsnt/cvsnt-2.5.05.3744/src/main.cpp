@@ -1616,6 +1616,7 @@ int main (int argc, char **argv)
 		if(current_parsed_root != NULL)
 		{
 			ign_setup();
+			excl_setup (cm->attr & CVS_CMD_USES_WORK_DIR);
 			wrap_setup();
 		}
 
@@ -1672,6 +1673,7 @@ int main (int argc, char **argv)
 	    Lock_Cleanup ();
 		wrap_close();
 		ign_close();
+		excl_close ();
 
 		argc = saved_argc;
 		argv = saved_argv;
