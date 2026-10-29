@@ -135,7 +135,7 @@ int ls(int argc, char **argv)
 				send_file_names(argc,argv,SEND_EXPAND_WILD);
 				client_module_expansion.clear();
 				send_to_server("expand-modules\n",0);
-				err = get_server_responses_noproxy();
+				err = get_server_responses();
 				if(err)
 					return err;
 

@@ -28,7 +28,7 @@ WORKDIR /src
 RUN scl enable gcc-toolset-9 -- bash -eu -c ' \
       autoreconf -fi && \
       ./configure --prefix=/usr/local/cvsnt \
-          --enable-pam --enable-server --enable-pserver --enable-sspi --enable-ext \
+          --enable-pam --enable-server --enable-pserver \
           --disable-mysql --disable-postgres --disable-sqlite --enable-64bit \
           --disable-avx512 && \
       export LD_LIBRARY_PATH=/src/ca_blobs_fs/.libs:/src/blake3/.libs && \

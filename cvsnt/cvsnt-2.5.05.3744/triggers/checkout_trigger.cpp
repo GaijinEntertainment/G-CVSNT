@@ -136,11 +136,6 @@ int history(const struct trigger_interface_t* cb, char type, const char *workdir
 	return 0;
 }
 
-int notify(const struct trigger_interface_t* cb, const char *message, const char *bugid, const char *directory, const char *notify_user, const char *tag, const char *type, const char *file)
-{
-	return 0;
-}
-
 int precommit(const struct trigger_interface_t* cb, int name_list_count, const char **name_list, const char *message, const char *directory)
 {
 	return 0;
@@ -316,7 +311,7 @@ static trigger_interface callbacks =
 	verifymsg,
 	loginfo,
 	history,
-	notify,
+	NULL,
 	precommit,
 	postcommit,
 	precommand,

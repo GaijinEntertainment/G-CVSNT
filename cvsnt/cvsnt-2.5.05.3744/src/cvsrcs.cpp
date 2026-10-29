@@ -35,7 +35,7 @@ int cvsrcs(int argc, char **argv)
 		return 0;
 	}
 
-	current_parsed_root = local_cvsroot(NULL,NULL,true,RootTypeStandard,NULL,NULL,NULL,NULL);
+	current_parsed_root = local_cvsroot(NULL,NULL,true);
 
 	if(!strcmp(argv[0],"co"))
 	{

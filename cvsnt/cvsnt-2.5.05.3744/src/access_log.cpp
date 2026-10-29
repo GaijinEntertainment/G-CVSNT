@@ -1,7 +1,7 @@
 /*
  * Server-side access log: records every file a client reads from or
  * writes to the repository (checkout, update, export, diff, annotate,
- * log, commit, import, tag, edit, admin), with who, from where and what,
+ * log, commit, import, tag, admin), with who, from where and what,
  * so repository access can be audited and shipped to a log collector.
  * One record per file, formatted from a configurable template (JSON
  * lines by default).

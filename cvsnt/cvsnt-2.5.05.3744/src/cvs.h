@@ -147,11 +147,6 @@ typedef std::map<cvs::string,cvs::string> variable_list_t;
 #define	CVSADM_REP	"CVS/Repository"
 #define	CVSADM_ROOT	"CVS/Root"
 #define	CVSADM_TAG	"CVS/Tag"
-#define CVSADM_NOTIFY	"CVS/Notify"
-#define CVSADM_NOTIFYTMP "CVS/Notify.tmp"
-/* A directory in which we store base versions of files we currently are
-   editing with "cvs edit".  */
-#define CVSADM_BASE     "CVS/Base"
 /* File which contains the template for use in log messages.  */
 #define CVSADM_TEMPLATE "CVS/Template"
 #define CVSADM_RENAME	"CVS/Rename"
@@ -187,8 +182,6 @@ typedef std::map<cvs::string,cvs::string> variable_list_t;
 #define	CVSROOTADM_IGNORE	"cvsignore"
 #define	CVSROOTADM_CHECKOUTLIST "checkoutlist"
 #define CVSROOTADM_WRAPPER	"cvswrappers"
-#define CVSROOTADM_NOTIFY	"notify"
-#define CVSROOTADM_USERS	"users"
 #define CVSROOTADM_READERS	"readers"
 #define CVSROOTADM_WRITERS	"writers"
 #define CVSROOTADM_PASSWD	"passwd"
@@ -344,11 +337,8 @@ struct entnode
 	/* Data in Entries.Extra or "" if none */
 	char *merge_from_tag_1;
 	char *merge_from_tag_2;
-
-	/* Data associated with current edit */
-	char *edit_revision;
-	char *edit_tag;
-	char *edit_bugid;
+	/* Bug id from 'add -b' */
+	char *bugid;
 
     /* Last commit date from RCS file */
 	time_t rcs_timestamp;
@@ -501,7 +491,7 @@ char *Name_Root (const char *dir, const char *update_dir);
 void free_cvsroot_t(cvsroot *root_in);
 cvsroot *parse_cvsroot (const char *root_in);
 cvsroot *new_cvsroot_t();
-cvsroot *local_cvsroot (const char *dir, const char *real_dir, bool readwrite, RootType type, const char *remote_serv, const char *remote_repos, const char *proxy_repos, const char *remote_pass);
+cvsroot *local_cvsroot (const char *dir, const char *real_dir, bool readwrite);
 void Create_Root(const char *dir, const char *rootdir);
 
 typedef struct
@@ -511,14 +501,10 @@ typedef struct
 	bool online;
 	bool readwrite;
 	bool proxypasswd;
-	RootType repotype;
-	cvs::string remote_server;
-	cvs::string remote_repository;
 	cvs::string proxy_repository;
-	cvs::string remote_passphrase;
 } root_allow_struct;
 
-void root_allow_add(const char *root, const char *name, bool online, bool readwrite, bool proxypasswd, RootType type, const char *remote_serv, const char *remote_repos, const char *proxy_repos, const char *remote_pass);
+void root_allow_add(const char *root, const char *name, bool online, bool readwrite, bool proxypasswd, const char *proxy_repos);
 void root_allow_free();
 bool root_allow_ok (const char *root, const root_allow_struct*& found_root, const char *&real_root, bool authuse);
 
@@ -662,12 +648,10 @@ char *xgetwd();
 List *Find_Names (const char *repository, int which, int aflag, List **optentries, const char *virtual_repository);
 Node *Fast_Register (List *list, const char *fname, const char *vn,  const char *ts, const char *options, const char *tag,
     const char *date, const char *ts_conflict, const char *merge_from_tag_1,
-	const char *merge_from_tag_2, time_t rcs_timestamp, 
-	const char *edit_revision, const char *edit_tag, const char *edit_bugid, const char *md5);
+	const char *merge_from_tag_2, time_t rcs_timestamp, const char *bugid, const char *md5);
 void Register (List *list, const char *fname, const char *vn,  const char *ts, const char *options, const char *tag,
     const char *date, const char *ts_conflict, const char *merge_from_tag_1,
-	const char *merge_from_tag_2, time_t rcs_timestamp,
-	const char *edit_revision, const char *edit_tag, const char *edit_bugid, const char *md5);
+	const char *merge_from_tag_2, time_t rcs_timestamp, const char *bugid, const char *md5);
 void Update_Logfile (const char *repository, const char *xmessage, FILE *xlogfp, List *xchanges, const char *xbugid);
 void do_editor (const char *dir, char **messagep, const char *repository, List *changes);
 
@@ -791,10 +775,8 @@ struct vers_ts
        ->vn_rcs.  */
     char *vn_tag;
 
-	/* The edit data from the entries.extra, if available */
-	char *edit_revision;
-	char *edit_tag;
-	char *edit_bugid;
+	/* Bug id from Entries.Extra, if any */
+	char *bugid;
 
     /* This is the timestamp from stating the file in the working directory.
        It is NULL if there is no file in the working directory.  It is
@@ -866,8 +848,7 @@ void assign_options(char **existing_options, const char *options);
 
 int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
     char *options, char *message, const char *merge_from_tag1, const char *merge_from_tag2,
-	RCSCHECKINPROC callback, const char *bugid, const char *edit_revision, const char *edit_tag,
-	const char *edit_bugid);
+	RCSCHECKINPROC callback, const char *bugid);
 int No_Difference (struct file_info *finfo, Vers_TS *vers, int force_nodiff, int ignore_keywords);
 /* TODO: can the finfo argument to special_file_mismatch be changed? -twp */
 int special_file_mismatch (struct file_info *finfo, const char *rev1, const char *rev2);
@@ -950,19 +931,6 @@ extern variable_list_t variable_list;
 
 void variable_set (const char *nameval);
 const char *variable_get(const char *nameval);
-
-int watch(int argc, char **argv);
-int edit(int argc, char **argv);
-int unedit(int argc, char **argv);
-int editors(int argc, char **argv);
-int watchers(int argc, char **argv);
-int check_can_edit(const char *repository, const char *filename, const char *who, const char *tag);
-
-/* Global watcher */
-extern const char *global_watcher;
-
-/* Set to 1 to to stop automatic unedit */
-extern int commit_keep_edits;
 
 bool bugid_in(const char *bugid, const char *bugs);
 

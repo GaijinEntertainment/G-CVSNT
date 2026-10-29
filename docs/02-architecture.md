@@ -31,7 +31,7 @@ Three independent network services:
 
 | Service | Default port | Purpose |
 | --- | --- | --- |
-| CVS server | 2401 (`pserver`), or via `ext`/`sserver`/`sspi`/`gserver` | Command processing, metadata, RCS storage |
+| CVS server | 2401 (`pserver`) | Command processing, metadata, RCS storage |
 | `cvslockd` | 2402 | Advisory read/write locks shared between concurrent CVS server processes (`src/lock.cpp:190`) |
 | `cafs_server` / `cafs_proxy_server` | 2403 | Content-addressed blob storage (`keyValueServer/server/cafs_server.cpp`) |
 
@@ -43,30 +43,24 @@ The blob channel is deliberately separate. It carries no revision or path semant
 
 `cvs`/`cvs.exe` is both client and server. `src/main.cpp` dispatches on `argv[1]` through the command
 table at `src/main.cpp:159`; the `server`, `authserver`/`pserver` entries put the same binary into
-server mode (`src/server.cpp`). Which half of a source file runs is guarded by `server_active` and by
+server mode (`src/server.cpp`). `authserver` runs the `:pserver:` login first; `server` skips it and
+serves whoever feeds its standard input, which is how the test suites drive the server. Which half of a source file runs is guarded by `server_active` and by
 the `SERVER_SUPPORT` / `CLIENT_SUPPORT` compile-time macros — most command files (`update.cpp`,
 `commit.cpp`, `tag.cpp`) contain both the client-side argument parsing and the server-side execution.
 
 ## Connection methods (protocol plugins)
 
 The transport is a **loadable shared library**, resolved from the `:method:` part of `CVSROOT` by
-`CProtocolLibrary::LoadProtocol` (`cvstools/ProtocolLibrary.cpp:168`), called from `parse_cvsroot`
-(`src/root.cpp:618`). Each plugin lives in `protocols/` and exports a `protocol_interface`:
-
-| Method | Source | Notes |
-| --- | --- | --- |
-| `pserver` | `protocols/pserver.cpp` | Cleartext password auth over TCP |
-| `sserver` | `protocols/sserver.cpp` | `pserver` inside TLS |
-| `sspi` | `protocols/sspi.cpp` | Windows SSPI / NTLM / Kerberos |
-| `gserver` | `protocols/gserver.cpp` | GSSAPI |
-| `ssh` | `protocols/ssh.cpp` | Built-in SSH client (`plink/`) |
-| `ext` | `protocols/ext.cpp` | External `rsh`/`ssh` command |
-| `server` | `protocols/server.cpp` | `:server:` — spawn via rsh |
-| `fork` | `protocols/fork.cpp` | Local child process, used for testing |
-| `enum` | `protocols/enum.cpp` | Answers the `BEGIN ENUM` query with the server name, its supported protocols and its repository list (client side: `cvstools/ServerInfo.cpp:41`) |
+`CProtocolLibrary::LoadProtocol` (`cvstools/ProtocolLibrary.cpp`), called from `parse_cvsroot`
+(`src/root.cpp`). The only supported method is `pserver` (`protocols/pserver.cpp`): cleartext
+password authentication over TCP. A root without a method, such as `user@host:/path`, means `ext`
+as in upstream CVSNT, and is refused. `CProtocolLibrary::LoadProtocol` loads `pserver` and nothing
+else, so a stale plugin of a removed method in the library directory is never loaded. The plugin structs in
+`cvstools/protocol_interface.h` keep the slots of the removed methods (`unused_*`), so an installed
+`pserver` plugin still matches a newer `cvs`.
 
 Protocol plugins are discovered in the **library** directory, configured at build time with
-`--with-protocol-dir` (`configure.in:812`, which sets `cvs_library_dir`) and overridden at run time
+`--with-protocol-dir` (`configure.in:795`, which sets `cvs_library_dir`) and overridden at run time
 with the global `-L` option (`src/main.cpp:1022`). The global `-C` option overrides the *config*
 directory, which is a different thing.
 
@@ -107,12 +101,12 @@ directory, which is a different thing.
 1. **Client** (`src/update.cpp:165` → `src/client.cpp`) parses options, walks the working copy with
    `start_recursion` (`src/recurse.cpp`), and for each directory sends `Directory`, `Entry`,
    and `Modified`/`Unchanged`/`Is-modified` requests, then `update`.
-2. **Server** (`src/server.cpp`, request table at `src/server.cpp:4908`) reconstructs a temporary
+2. **Server** (`src/server.cpp`, request table `requests[]`) reconstructs a temporary
    working directory from those requests, then runs the same `update` code with `server_active`
    set.
 3. For each file the server compares the client's revision against the repository
    (`src/classify.cpp`, `src/vers_ts.cpp`) and emits a response
-   (`Updated`, `Merged`, `Patched`, `Rcs-diff`, `Removed`, …; table at `src/client.cpp:4022`).
+   (`Updated`, `Merged`, `Patched`, `Rcs-diff`, `Removed`, …; table `responses[]` in `src/client.cpp`).
 4. For a `-kB` file the server emits **`Blob-ref`** instead of file content — the 71-byte reference
    only. The client then fetches the actual bytes over the blob channel
    (`src/download_blob_to.cpp`), optionally with several worker threads (`cvs -j N`).

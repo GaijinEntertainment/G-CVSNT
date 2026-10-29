@@ -19,28 +19,11 @@ Define the name of your repository X. This is the name that the clients need to 
 .B RepositoryXDescription=\fI<description>\fP
 A short description of your repository X.
 .TP
-.B RepositoryXDefault=\fI0|1\fP
-Set the repository X as the default repository.
-
-.I Note:
-Exactly one repository must set this flag to 1, all others need to set it to 0.
-.TP
 .B RepositoryXPublish=\fI0|1\fP
 Publish repository X using Zeroconf.
 .TP
 .B RepositoryXOnline=\fI0|1\fP
 Set a repository (temporarily) on- or offline setting this flag to 1 or 0 respectively.
-.TP
-.B EncryptionLevel=\fI0|1|2|3|4\fP
-0 = Don't force encryption
-
-1 = Request authentication
-
-2 = Request encryption
-
-3 = Require authentication
-
-4 = Require encryption
 .TP
 .B CompressionLevel=\fI0|1|2\fP
 0 = Don't force compression
@@ -48,12 +31,6 @@ Set a repository (temporarily) on- or offline setting this flag to 1 or 0 respec
 1 = Request compression
 
 2 = Require compression
-.TP
-.B CertificateFile=\fI/etc/ssh/cvsnt.pem\fP
-PEM certificate for use with sserver
-.TP
-.B PrivateKeyFile=\fI/etc/ssh/cvsnt.pem\fP
-PEM certificate for use with sserver
 .TP
 .B NoReverseDns=\fI0|1\fP
 Disable Reverse lookups by the server to help broken DNS setups.  This causes LockServer to report bare IP addresses. It is recommended that the DNS is fixed rather than using this option.
@@ -92,9 +69,6 @@ X = 0 - Legacy cvs (cvshome.org cvs, eclipse)
 
 X = 1 - cvsnt (cvsnt client, wincvs, tortoisecvs, etc.)
 .TP
-.B WinbindWrapper=\fI/usr/bin/ntlm_auth --helper-protocol=squid-2.5-ntlmssp\fP
-Enable SSPI server functionality by using the winbind authentication wrapper.
-.TP
 .B Chroot=\fI/usr/local/cvs-jail\fP
 Force all user operations within chroot jail.
 .TP
@@ -129,21 +103,6 @@ Regular expression of client versions allowed to connect. Legacy CVS and CVSNT v
 .TP
 .B RemoteInit=\fI0|1\fP
 Allow repository administrators to issue remote 'cvs init' commands.  This has security implications.
-.TP
-.B AnonymousUsername=\fI<user>\fP
-Username that anonymous logins are allowed with, if any.
-.TP
-.B AnonymousProtocol=\fI<protocol>\fP
-Protocol that anonymous logins use. Defaults to pserver.
-.TP
-.B CertificatesOnly=\fI0|1|2\fP
-Require a valid client certificate for sserver.
-
-0 - Require a password only
-
-1 - Require a certificate only
-
-2 - Require a password and a certificate
 
 .SH AUDIT PLUGIN SETTINGS
 The audit plugin settings are only valid, if

@@ -201,8 +201,8 @@ jobs:
         working-directory: src/${{ env.SRC }}
         run: |
           $out = "Releasex64"
-          Copy-Item external_libs\x64\dll\libcrypto-1_1-x64.dll, external_libs\x64\dll\libssl-1_1-x64.dll $out
-          foreach ($f in "cvs.exe", "cvsapi.dll", "cvstools.dll", "protocols\pserver.dll", "protocols\ext.dll", "protocols\server.dll", "triggers\info.dll") {
+          Copy-Item external_libs\x64\dll\libcrypto-1_1-x64.dll $out
+          foreach ($f in "cvs.exe", "cvsapi.dll", "cvstools.dll", "protocols\pserver.dll", "triggers\info.dll") {
             if (-not (Test-Path "$out\$f")) { throw "$f was not built" }
           }
           $v = & "$out\cvs.exe" --version
@@ -272,7 +272,7 @@ jobs:
         run: |
           $stage = Join-Path $env:RUNNER_TEMP "cvsnt-$env:VERSION-win-x64"
           New-Item -ItemType Directory -Force -Path "$stage\protocols", "$stage\triggers" | Out-Null
-          foreach ($f in "cvs.exe", "cvsapi.dll", "cvstools.dll", "libcrypto-1_1-x64.dll", "libssl-1_1-x64.dll") { Copy-Item "Releasex64\$f" $stage }
+          foreach ($f in "cvs.exe", "cvsapi.dll", "cvstools.dll", "libcrypto-1_1-x64.dll") { Copy-Item "Releasex64\$f" $stage }
           if (Test-Path "Releasex64\cafs_proxy.exe") { Copy-Item "Releasex64\cafs_proxy.exe" $stage }
           Copy-Item Releasex64\protocols\*.dll "$stage\protocols"
           Copy-Item Releasex64\triggers\*.dll "$stage\triggers"

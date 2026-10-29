@@ -112,10 +112,7 @@ struct buffer *stdio_buffer_initialize(FILE *, int, void (*) (struct buffer *));
 
 struct buffer *zstd_buffer_initialize(struct buffer *, int, int, void (*) (struct buffer *));
 struct buffer *compress_buffer_initialize(struct buffer *, int, int, void (*) (struct buffer *));
-struct buffer *packetizing_buffer_initialize(struct buffer *, int (*) (void *, const char *, char *, int),
-	 int (*) (void *, const char *, char *, int, int *), void *,
-	 void (*) (struct buffer *));
-struct buffer *nonpacketizing_buffer_initialize(struct buffer *, int (*) (void *, const char *, char *, int),
+struct buffer *nonpacketizing_buffer_initialize(struct buffer *,
 	 int (*) (void *, const char *, char *, int, int *), void *,
 	 void (*) (struct buffer *));
 void packetizing_buffer_set_wrap(struct buffer *buf, struct buffer *wrap);

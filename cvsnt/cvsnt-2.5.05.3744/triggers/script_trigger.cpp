@@ -465,24 +465,6 @@ int history(const struct trigger_interface_t* cb, char type, const char *workdir
 	return CallDispatch(L"history",args,sizeof(args)/sizeof(args[0]));
 }
 
-int notify(const struct trigger_interface_t* cb, const char *message, const char *bugid, const char *directory, const char *notify_user, const char *tag, const char *type, const char *file)
-{
-	if(!g_pEngine)
-		return 0;
-
-	variant_t args[7];
-
-	args[0]=_ubstr_t(message).Detach();
-	args[1]=_ubstr_t(bugid).Detach();
-	args[2]=_ubstr_t(directory).Detach();
-	args[3]=_ubstr_t(notify_user).Detach();
-	args[4]=_ubstr_t(tag).Detach();
-	args[5]=_ubstr_t(type).Detach();
-	args[6]=_ubstr_t(file).Detach();
-
-	return CallDispatch(L"notify",args,sizeof(args)/sizeof(args[0]));
-}
-
 int precommit(const struct trigger_interface_t* cb, int name_list_count, const char **name_list, const char *message, const char *directory)
 {
 	if(!g_pEngine)
@@ -831,7 +813,7 @@ static trigger_interface callbacks =
 	verifymsg,
 	loginfo,
 	history,
-	notify,
+	NULL,
 	precommit,
 	postcommit,
 	precommand,

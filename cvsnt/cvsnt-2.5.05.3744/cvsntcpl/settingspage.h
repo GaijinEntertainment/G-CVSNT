@@ -33,7 +33,6 @@ public:
 	enum { IDD = IDD_PAGE2 };
 	CEdit	m_edTempDir;
 	CEdit	m_edLockServer;
-	CComboBox m_cbEncryption;
 	CComboBox m_cbCompression;
 	CComboBox m_cbDefaultDomain;
 	CComboBox m_cbRunAsUser;
@@ -59,7 +58,6 @@ protected:
 	virtual BOOL OnInitDialog();
 	afx_msg void OnChangePserverport();
 	afx_msg void OnChangeLockserverport();
-	afx_msg void OnCbnSelendokEncryption();
 	afx_msg void OnCbnSelendokCompression();
 	afx_msg void OnCbnSelendokDefaultdomain();
 	afx_msg void OnCbnSelendokRunasuser();

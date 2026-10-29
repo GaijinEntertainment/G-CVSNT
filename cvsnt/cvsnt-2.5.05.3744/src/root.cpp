@@ -180,7 +180,7 @@ void Create_Root (const char *dir, const char *rootdir)
 
 static std::vector<root_allow_struct> root_allow_vector;
 
-void root_allow_add(const char *root, const char *name, bool online, bool readwrite, bool proxypasswd, RootType repotype, const char *remote_serv, const char *remote_repos, const char *proxy_repos, const char *remote_pass)
+void root_allow_add(const char *root, const char *name, bool online, bool readwrite, bool proxypasswd, const char *proxy_repos)
 {
 	root_allow_struct r;
 
@@ -189,11 +189,7 @@ void root_allow_add(const char *root, const char *name, bool online, bool readwr
 	r.online = online;
 	r.readwrite = readwrite;
 	r.proxypasswd = proxypasswd;
-	r.repotype = repotype;
-	r.remote_server = remote_serv?remote_serv:"";
-	r.remote_repository = remote_repos?remote_repos:"";
 	r.proxy_repository = proxy_repos?proxy_repos:"";
-	r.remote_passphrase = remote_pass?remote_pass:"";
 
 	root_allow_vector.push_back(r);
 }
@@ -296,11 +292,6 @@ cvsroot *new_cvsroot_t()
 	newroot->proxypassword = NULL;
     newroot->isremote = false;
 	newroot->password_used = false;
-	newroot->type = RootTypeStandard;
-	newroot->remote_server = NULL;
-	newroot->remote_repository = NULL;
-	newroot->proxy_repository_root = NULL;
-	newroot->remote_passphrase = NULL;
 
     return newroot;
 }
@@ -339,10 +330,6 @@ void free_cvsroot_t (cvsroot *root)
 	xfree(root->proxyuser);
 	xfree(root->proxypassword);
 	xfree(root->mapped_directory);
-	xfree(root->remote_server);
-	xfree(root->remote_repository);
-	xfree(root->proxy_repository_root);
-	xfree(root->remote_passphrase);
     xfree (root);
 }
 
@@ -470,15 +457,6 @@ static int parse_keyword(char *keyword, char **p, cvsroot *newroot)
 		if(*value)
 			newroot->proxypassword = xstrdup(value);
 	}
-	else if(client_protocol && client_protocol->validate_keyword)
-	{
-		int res = client_protocol->validate_keyword(client_protocol,newroot,keyword,value);
-		if(res==CVSPROTO_FAIL || res==CVSPROTO_BADPARMS || res==CVSPROTO_AUTHFAIL)
-		{
-			error(0,0,"Bad CVSROOT: Unknown keyword '%s'",keyword);
-			return -1;
-		}
-	}
 	else
 	{
 		error(0,0,"Bad CVSROOT: Unknown keyword '%s'",keyword);
@@ -552,10 +530,8 @@ cvsroot *parse_cvsroot (const char *root_in)
 		char in_quote,escape;
 
 		/* Access method specified, as in
-		* "cvs -d :(gserver|kserver|pserver)[;params...]:[[user][:password]@]host[:[port]]/path",
-		* "cvs -d [:(ext|server)[;params...]:]{access_method}[[user]@]host[:]/path",
-		* "cvs -d :local[;params...]:e:\path",
-		* "cvs -d :fork[;params...]:/path".
+		* "cvs -d [:pserver[;params...]:][[user][:password]@]host[:[port]]/path",
+		* "cvs -d :local[;params...]:e:\path".
 		* We need to get past that part of CVSroot before parsing the
 		* rest of it.
 		*/
@@ -606,13 +582,13 @@ cvsroot *parse_cvsroot (const char *root_in)
 			newroot->method = NULL;
 			newroot->isremote=false;
 		}
-		else if(newroot->method && !*newroot->method)
+		else if(!*newroot->method)
 		{
-			xfree(newroot->method);
-			newroot->method = NULL;
-			newroot->isremote=true;
+			error (0, 0, "bad CVSroot: %s", root_in);
+			xfree (cvsroot_save);
+			goto error_exit;
 		}
-		else if(newroot->method)
+		else
 		{
 			CProtocolLibrary lib;
 			client_protocol = lib.LoadProtocol(newroot->method);
@@ -675,22 +651,6 @@ cvsroot *parse_cvsroot (const char *root_in)
 	 * this will allow some characters such as '@' & ':' to remain unquoted
 	 * in the path portion of the spec
 	 */
-
-	/* Optional data that goes before everything else.  The format is defined only by
-	   the protocol. For ext, it's an override for the CVS_RSH variable */
-	if(cvsroot_copy[0]=='{')
-	{
-		p = strchr(cvsroot_copy+1,'}');
-		if(p)
-		{
-			int len = p-cvsroot_copy-1;
-			char *s = (char*)xmalloc(len+1);
-			newroot->optional_1 = s;
-			strncpy(s,cvsroot_copy+1,len);
-			s[len]='\0';
-			cvsroot_copy = p+1;
-		}
-	}
 
 	p1=strchr(cvsroot_copy,'@');
 	if(!p1) p1=cvsroot_copy;
@@ -812,15 +772,7 @@ cvsroot *parse_cvsroot (const char *root_in)
 
     /* parse the path for all methods */
 	if(newroot->isremote)
-	{
-		if(!newroot->method)
-		{
-			newroot->hostname = xstrdup (cvsroot_copy);
-			cvsroot_copy=NULL;
-		}
-		else
-			newroot->directory = xstrdup (cvsroot_copy);
-	}
+		newroot->directory = xstrdup (cvsroot_copy);
 	else
 	{
 		const root_allow_struct *found_root = NULL;
@@ -872,78 +824,12 @@ new_root_ok:
     check_hostname = 0;
     no_password = 0;
     no_port = 0;
-    if(!newroot->method)
+    if (!newroot->method && (newroot->username || newroot->hostname || newroot->port || newroot->password))
     {
-		if (newroot->isremote && (newroot->username || newroot->port || newroot->password))
-		{
-			error (0, 0, "can't specify username or password in CVSROOT");
-			error (0, 0, "(\"%s\")", root_in);
-			error (0, 0, "when using anonymous access method");
-			goto error_exit;
-		}
-
-		if (!newroot->isremote && (newroot->username || newroot->hostname || newroot->port || newroot->password))
-		{
-			error (0, 0, "can't specify hostname and username in CVSROOT");
-			error (0, 0, "(\"%s\")", root_in);
-			error (0, 0, "when using local access method");
-			goto error_exit;
-		}
-	}
-
-	/* Anonymous access.  Fill in all the parameters from the remote server configuration */
-	if(newroot->isremote && !newroot->method)
-	{
-		CServerInfo si;
-		if(strchr(newroot->hostname,'/'))
-		{
-			// Global server
-			const char *root = si.getGlobalServerInfo(newroot->hostname);
-			if(!root)
-			{
-				error(0, 0, "Remote server '%s' not found",newroot->hostname);
-				goto error_exit;
-			}
-			free_cvsroot_t(newroot);
-			newroot = parse_cvsroot(root); // Recursive call to parse the new root
-		}
-		else
-		{
-			CServerInfo::remoteServerInfo rsi;
-			if(!si.getRemoteServerInfo(newroot->hostname, rsi))
-				goto error_exit;
-			if(!rsi.anon_protocol.size() || !rsi.anon_username.size() ||
-				!rsi.default_repository.size())
-			{
-				error(0, 0, "Remote server '%s' does not allow anonymous login",newroot->hostname);
-				goto error_exit;
-			}
-			if (strlen(rsi.anon_protocol.c_str())>20)
-			{
-				error(0, 0, "Remote server '%s' protocol too long",rsi.anon_protocol.c_str());
-				goto error_exit;
-			}
-			newroot->method = xstrdup(rsi.anon_protocol.c_str());
-			newroot->directory = xstrdup(rsi.default_repository.c_str());
-			newroot->username = xstrdup(rsi.anon_username.c_str());
-			newroot->password = xstrdup("");
-
-			CProtocolLibrary lib;
-			client_protocol = lib.LoadProtocol(newroot->method);
-			if(client_protocol==NULL)
-			{
-				error (0, 0, "Anonymous connection failed");
-				error (0, 0, "the :%s: access method is not available on this system", newroot->method);
-				goto error_exit;
-			}
-			if(!client_protocol->connect)
-			{
-				error (0, 0, "Anonymous connection failed");
-				error (0, 0, "the :%s: access method cannot be used to connect to other servers", newroot->method);
-				goto error_exit;
-			}
-			lib.SetupServerInterface(newroot,server_io_socket);
-		}
+		error (0, 0, "can't specify hostname and username in CVSROOT");
+		error (0, 0, "(\"%s\")", root_in);
+		error (0, 0, "when using local access method");
+		goto error_exit;
 	}
 
 	if (!newroot->directory || *newroot->directory == '\0')
@@ -1004,11 +890,6 @@ new_root_ok:
 		if(!(client_protocol->valid_elements&elemTunnel) && (newroot->proxyprotocol||newroot->proxy))
 		{
 			error(0,0,"bad CVSROOT - Cannot specify proxy: %s",root_in);
-			goto error_exit;
-		}
-		if(client_protocol->validate_details && client_protocol->validate_details(client_protocol, newroot))
-		{
-			error (0, 0, "bad CVSROOT: %s", root_in);
 			goto error_exit;
 		}
 	}
@@ -1086,7 +967,7 @@ char *normalize_cvsroot (const cvsroot *root)
 
 /* allocate and return a cvsroot structure set up as if we're using the local
  * repository DIR.  */
-cvsroot *local_cvsroot (const char *dir, const char *real_dir,bool readwrite, RootType type, const char *remote_serv, const char *remote_repos, const char *proxy_repos, const char *remote_pass)
+cvsroot *local_cvsroot (const char *dir, const char *real_dir,bool readwrite)
 {
     cvsroot *newroot = new_cvsroot_t();
 
@@ -1097,11 +978,6 @@ cvsroot *local_cvsroot (const char *dir, const char *real_dir,bool readwrite, Ro
 	newroot->unparsed_directory = xstrdup(newroot->original);
 
 	newroot->readwrite = readwrite;
-	newroot->type = type;
-	newroot->remote_server = xstrdup(remote_serv);
-	newroot->remote_repository = xstrdup(remote_repos);
-	newroot->proxy_repository_root = xstrdup(proxy_repos);
-	newroot->remote_passphrase = xstrdup(remote_pass);
 
 	if(real_dir && *real_dir)
     {

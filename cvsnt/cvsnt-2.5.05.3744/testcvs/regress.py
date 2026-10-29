@@ -20,9 +20,11 @@ import argparse
 import os
 import re
 import shutil
+import socket
 import subprocess
 import sys
 import tempfile
+import threading
 
 CVS = None
 LIBDIR = None
@@ -50,7 +52,7 @@ def run(args, cwd, expect_ok=True, env=None):
         full_env = dict(os.environ)
         full_env.update(env)
     p = subprocess.run(cmd, cwd=cwd, stdout=subprocess.PIPE, env=full_env,
-                       stderr=subprocess.STDOUT, universal_newlines=True)
+                       stderr=subprocess.STDOUT, universal_newlines=True, timeout=600)
     if VERBOSE and p.stdout:
         print("      " + p.stdout.rstrip().replace("\n", "\n      "))
     if expect_ok and p.returncode != 0:
@@ -73,6 +75,76 @@ def check_eq(got, want, what):
         fail("%s: expected %r, got %r" % (what, want, got))
         return False
     return True
+
+
+class PserverShim:
+    """A :pserver: endpoint on 127.0.0.1 that accepts any login and pipes
+    each session into `cvs server` for REPO, so a client/server session
+    needs no system account and no installed server."""
+
+    def __init__(self, repo):
+        self.repo = repo
+        self.sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        self.sock.bind(("127.0.0.1", 0))
+        self.sock.listen(4)
+        self.port = self.sock.getsockname()[1]
+        threading.Thread(target=self._accept, daemon=True).start()
+
+    def root(self):
+        sep = "" if self.repo.startswith("/") else ":"
+        return ":pserver:shim:shim@127.0.0.1:%d%s%s" % (self.port, sep, self.repo)
+
+    def close(self):
+        self.sock.close()
+
+    def _accept(self):
+        while True:
+            try:
+                conn, _ = self.sock.accept()
+            except OSError:
+                return
+            self._serve(conn)
+
+    def _serve(self, conn):
+        # Bytewise, so no request data is consumed.
+        line = b""
+        while line not in (b"END AUTH REQUEST", b"END VERIFICATION REQUEST"):
+            line = b""
+            while not line.endswith(b"\n"):
+                c = conn.recv(1)
+                if not c:
+                    conn.close()
+                    return
+                line += c
+            line = line.rstrip(b"\r\n")
+        conn.sendall(b"I LOVE YOU\n")
+        cmd = [CVS] + (["-L", LIBDIR] if LIBDIR else []) + ["--allow-root=" + self.repo, "server"]
+        p = subprocess.Popen(cmd, stdin=subprocess.PIPE, stdout=subprocess.PIPE,
+                             stderr=subprocess.DEVNULL)
+
+        def to_server():
+            try:
+                while True:
+                    data = conn.recv(65536)
+                    if not data:
+                        break
+                    p.stdin.write(data)
+                    p.stdin.flush()
+            except OSError:
+                pass
+            p.stdin.close()
+
+        threading.Thread(target=to_server, daemon=True).start()
+        try:
+            while True:
+                data = p.stdout.read1(65536)
+                if not data:
+                    break
+                conn.sendall(data)
+        except OSError:
+            p.kill()
+        p.wait()
+        conn.close()
 
 
 def write(path, text):
@@ -109,6 +181,38 @@ def entries_of(wcdir):
             else:
                 out[name] = body
     return out
+
+
+VALID_RESPONSES = (
+    "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
+    "Blob-ref Blob-ref-created Blob-OTP Blob-url "
+    "Updated Created Update-existing Merged Patched Rcs-diff Mode "
+    "Mod-time Removed Remove-entry Set-static-directory "
+    "Clear-static-directory Set-sticky Clear-sticky Template "
+    "Notified Module-expansion Clear-rename Rename EntriesExtra "
+    "M Mbinary E F MT")
+
+
+def server_session(r, reqs, env=None):
+    """Pipe REQS, request lines or raw bytes, into `cvs server` for r.repo.
+    Return (exit code, stdout, stderr); a timeout kills the server and raises.
+    env adds to (or overrides) the inherited environment."""
+    if not isinstance(reqs, bytes):
+        reqs = "".join(s + "\n" for s in reqs).encode("utf-8")
+    cmd = [CVS] + (["-L", LIBDIR] if LIBDIR else []) + ["--allow-root=" + r.repo, "server"]
+    full_env = None
+    if env:
+        full_env = dict(os.environ)
+        full_env.update(env)
+    p = subprocess.Popen(cmd, cwd=tempfile.mkdtemp(dir=r.root), stdin=subprocess.PIPE,
+                         stdout=subprocess.PIPE, stderr=subprocess.PIPE, env=full_env)
+    try:
+        out_b, err_b = p.communicate(reqs, timeout=120)
+    except subprocess.TimeoutExpired:
+        p.kill()
+        p.communicate()
+        raise
+    return p.returncode, out_b.decode("utf-8", "replace"), err_b.decode("utf-8", "replace")
 
 
 class Repo:
@@ -919,17 +1023,9 @@ def t_server_session(r):
     r.import_tree("m", {"a.txt": "one\n", "sub/b.txt": "sub content\n"})
     root = r.repo.replace(os.sep, "/")
 
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT")
-    reqs = "".join(s + "\n" for s in [
+    rc, out, _ = server_session(r, [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES,
         "valid-requests",
         "UseUnchanged",
         "Argument m",
@@ -941,24 +1037,7 @@ def t_server_session(r):
         "rlog",
     ])
 
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "srvwc")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill()
-        p.communicate()
-        fail("server session did not complete within 120s (stalled flush?)")
-        return
-    out = out_b.decode("utf-8", "replace")
-
-    check_eq(p.returncode, 0, "server exit status (output:\n%s)" % out)
+    check_eq(rc, 0, "server exit status (output:\n%s)" % out)
     lines = out.split("\n")
     check_eq(len([l for l in lines if l == "ok"]), 4,
              "one ok per command (valid-requests, co, noop, rlog):\n" + out)
@@ -999,40 +1078,15 @@ def t_server_pipeout_order(r):
     r.import_tree("m", {"p.txt": body})
     root = r.repo.replace(os.sep, "/")
 
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT NoTranslateBegin NoTranslateEnd")
-    reqs = "".join(s + "\n" for s in [
+    out = server_session(r, [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES + " NoTranslateBegin NoTranslateEnd",
         "valid-requests",
         "UseUnchanged",
         "Argument -p",
         "Argument m/p.txt",
         "co",
-    ])
-
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "psrvwc")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, _ = p.communicate(reqs.encode("utf-8"), timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill()
-        p.communicate()
-        fail("server session did not complete within 120s")
-        return
-    out = out_b.decode("utf-8", "replace")
+    ])[1]
 
     i_begin = out.find("NoTranslateBegin")
     i_body = out.find("M alpha")
@@ -1057,331 +1111,118 @@ def t_server_pipeout_order(r):
               % (i_body, i_tail, out))
 
 
-def fresh_checkout(r, sub, module="m"):
-    # One home for the throwaway-checkout idiom the watch tests share.
-    wcroot = os.path.join(r.root, sub)
-    os.makedirs(wcroot)
-    r.cvs(["checkout", module], cwd=wcroot)
-    return os.path.join(wcroot, module)
-
-
-@test("a watched file checks out read-only, an unwatched one writable")
-def t_watched_readonly(r):
-    # "Is this file watched?" is answered per checked-out file from the
-    # repository's CVS/fileattr.xml.  The lookup must be per file (w.txt
-    # watched, n.txt not) and must use fncmp semantics: on Windows a
-    # case-variant name attribute still matches.
-    r.import_tree("m", {"w.txt": "watched\n", "n.txt": "not watched\n"})
-    attrdir = os.path.join(r.repo, "m", "CVS")
-    attr = os.path.join(attrdir, "fileattr.xml")
-
-    write(attr, '<?xml version="1.0"?>\n<fileattr>\n'
-                '  <file name="w.txt">\n    <watched/>\n  </file>\n'
-                '</fileattr>\n')
-    wc = fresh_checkout(r, "wcA")
-    check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
-          "watched w.txt checked out writable")
-    check(os.access(os.path.join(wc, "n.txt"), os.W_OK),
-          "unwatched n.txt checked out read-only")
-
-    # The update path answers the same question when re-creating a file.
-    os.chmod(os.path.join(wc, "w.txt"), 0o644)
-    os.remove(os.path.join(wc, "w.txt"))
-    r.cvs(["update"], cwd=wc)
-    check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
-          "watched w.txt restored writable by update")
-
-    if sys.platform == "win32":
-        write(attr, '<?xml version="1.0"?>\n<fileattr>\n'
-                    '  <file name="W.TXT">\n    <watched/>\n  </file>\n'
-                    '</fileattr>\n')
-        wc = fresh_checkout(r, "wcB")
-        check(not os.access(os.path.join(wc, "w.txt"), os.W_OK),
-              "case-variant watched name not honoured on Windows")
-
-    os.remove(attr)
-    wc = fresh_checkout(r, "wcC")
-    check(os.access(os.path.join(wc, "w.txt"), os.W_OK),
-          "w.txt still read-only after the watch attribute was removed")
-
-
-@test("watch on persists to the repository and watch off reverts it")
-def t_watch_on_off_persist(r):
-    # The companion to the test above, which writes fileattr.xml by hand.
-    # "watch on"/"watch off" mutate the fileattr tree directly with
-    # NewNode/Delete rather than through fileattr_setvalue, so they have to
-    # raise fileattr's modified flag themselves; without it fileattr_write()
-    # early-returns and the command is a silent no-op.  The observable
-    # effect is on a *fresh* checkout: watch on makes it read-only, watch
-    # off makes it writable again.
+@test("a fileattr.xml with an old server's watch nodes checks out writable and commits")
+def t_old_watch_data_ignored(r):
     r.import_tree("m", {"w.txt": "watched\n"})
+    write(os.path.join(r.repo, "m", "CVS", "fileattr.xml"),
+          '<?xml version="1.0"?>\n<fileattr>\n'
+          '  <directory><default><watched/></default></directory>\n'
+          '  <file name="w.txt">\n    <watched/>\n'
+          '    <editor name="someone"><time>x</time><hostname>h</hostname></editor>\n'
+          '  </file>\n</fileattr>\n')
     wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["watch", "on"], cwd=wc)
-    if check(os.path.isfile(attr), "watch on wrote no " + attr):
-        check("<watched" in read(attr),
-              "watch on wrote no <watched/> node:\n" + read(attr))
-    check(not os.access(os.path.join(fresh_checkout(r, "wcOn"), "w.txt"), os.W_OK),
-          "w.txt checked out writable after watch on")
-
-    r.cvs(["watch", "off"], cwd=wc)
-    if os.path.isfile(attr):
-        check("<watched" not in read(attr),
-              "watch off left the <watched/> node behind:\n" + read(attr))
-    check(os.access(os.path.join(fresh_checkout(r, "wcOff"), "w.txt"), os.W_OK),
-          "w.txt still checked out read-only after watch off")
-
-    # A directory with no files reaches only onoff_filesdoneproc, so this
-    # pins the doneproc's own modified-flag raising: without it the
-    # directory default is never written.
-    os.makedirs(os.path.join(wc, "empty"))
-    r.cvs(["add", "empty"], cwd=wc)
-    r.cvs(["watch", "on"], cwd=os.path.join(wc, "empty"))
-    subattr = os.path.join(r.repo, "m", "empty", "CVS", "fileattr.xml")
-    if check(os.path.isfile(subattr),
-             "watch on in a files-free directory wrote no " + subattr):
-        content = read(subattr)
-        check("<default" in content and "<watched" in content,
-              "directory default watched node not persisted:\n" + content)
-
-    # Explicit file arguments keep setting_default at 0, so the doneproc
-    # never runs and only the file-proc flag can trigger the write.
-    r.cvs(["watch", "on", "w.txt"], cwd=wc)
-    check("<watched" in read(attr),
-          "per-file watch on did not persist:\n" + read(attr))
-    r.cvs(["watch", "off", "w.txt"], cwd=wc)
-    check("<watched" not in read(attr),
-          "per-file watch off left the watched node:\n" + read(attr))
-
-    # watch off on a never-watched file must write nothing: the bare
-    # <file> node created for the lookup carries no flag.  cvs add
-    # legitimately writes a fileattr.xml (directory owner, an empty
-    # file node), so the pin is that watch off leaves it byte-identical.
-    virgin = os.path.join(wc, "virgin")
-    os.makedirs(virgin)
-    r.cvs(["add", "virgin"], cwd=wc)
-    write(os.path.join(virgin, "v.txt"), "v\n")
-    r.cvs(["add", "v.txt"], cwd=virgin)
-    r.cvs(["commit", "-m", "add v"], cwd=virgin)
-    vattr = os.path.join(r.repo, "m", "virgin", "CVS", "fileattr.xml")
-    before = read(vattr) if os.path.isfile(vattr) else None
-    r.cvs(["watch", "off", "v.txt"], cwd=virgin)
-    after = read(vattr) if os.path.isfile(vattr) else None
-    check_eq(after, before,
-             "watch off on a never-watched file rewrote fileattr.xml")
-
-    # The discriminating case: an argument-less watch off over a watched
-    # file and a never-watched one.  The watched file raises the per-tree
-    # flag, so a bare <file> node made for the never-watched lookup would
-    # be persisted along with it.  cvs add may already have written a
-    # node for v.txt, so the pin is that watch off adds none.
-    write(os.path.join(virgin, "u.txt"), "u" + chr(10))
-    r.cvs(["add", "u.txt"], cwd=virgin)
-    r.cvs(["commit", "-m", "add u"], cwd=virgin)
-    r.cvs(["watch", "on", "u.txt"], cwd=virgin)
-    v_nodes = read(vattr).count('name="v.txt"')
-    r.cvs(["watch", "off"], cwd=virgin)
-    content = read(vattr)
-    check("<watched" not in content,
-          "argument-less watch off left a watched node:" + chr(10) + content)
-    check_eq(content.count('name="v.txt"'), v_nodes,
-             "watch off created a bare <file> node for never-watched v.txt:"
-             + chr(10) + content)
+    check(os.access(os.path.join(wc, "w.txt"), os.W_OK),
+          "w.txt checked out read-only from old watch data")
+    write(os.path.join(wc, "w.txt"), "changed\n")
+    write(os.path.join(wc, "n.txt"), "new\n")
+    r.cvs(["add", "n.txt"], cwd=wc)
+    r.cvs(["commit", "-m", "change"], cwd=wc)
+    check("changed" in read(os.path.join(r.repo, "m", "w.txt,v")), "the commit did not reach w.txt,v")
+    check(os.access(os.path.join(wc, "n.txt"), os.W_OK), "n.txt read-only from the old directory default")
+    rc, out = r.cvs(["watch", "on"], cwd=wc, expect_ok=False)
+    check(rc != 0 and "Unknown command: `watch'" in out, "cvs watch is still a command:\n" + out)
 
 
-@test("watch add persists a watcher that cvs watchers reports")
-def t_watch_add_persist(r):
-    # watch_modify_watchers builds the <watcher> node with NewNode/
-    # NewAttribute, which likewise has to mark the tree modified for
-    # fileattr_write() to write anything out.
+@test("the server acks an old client's Notify and refuses watch requests")
+def t_server_edit_watch_compat(r):
     r.import_tree("m", {"a.txt": "one\n"})
+    root = r.repo.replace(os.sep, "/")
+    notify = ["Directory .", root + "/m", "Notify a.txt", "E\tThu Jan  1 00:00:00 2026 GMT\thost\t/wc\tEUC"]
+    out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES]
+                         + notify + ["noop"] + notify + ["Argument a.txt", "watch-on"])[1]
+    lines = out.split("\n")
+
+    acks = [i for i, l in enumerate(lines) if l == "Notified ./"]
+    if check_eq(len(acks), 2, "Notified acks (before noop, before watch-on):\n" + out):
+        check(all(lines[a + 1].endswith("/m/a.txt") for a in acks), "Notified names the wrong file:\n" + out)
+        check(lines[acks[0] + 2] == "ok", "noop did not end with ok:\n" + out)
+    refusals = [l for l in lines if l.startswith("E ") and "edit and watch are not supported" in l]
+    check_eq(len(refusals), 3, "edit/watch refusals (two Notify, watch-on):\n" + out)
+    check(lines[-2:] == ["error  ", ""], "watch-on did not end with error:\n" + out)
+
+
+@test("the server refuses an old client's removed commit and update options")
+def t_server_removed_edit_options(r):
+    root = r.repo.replace(os.sep, "/")
+    for req, opt in (("ci", "-c"), ("ci", "-e"), ("update", "-c"), ("update", "-e")):
+        out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES,
+                                 "Argument " + opt, "Directory .", root + "/m", req])[1]
+        check(out.endswith("error  \n") and "E Usage:" in out,
+              "%s %s did not end with its usage and error:\n%s" % (req, opt, out))
+
+
+@test("the server refuses every watch and editor request of an old client")
+def t_server_watch_requests_refused(r):
+    root = r.repo.replace(os.sep, "/")
+    for req in ("watch-on", "watch-off", "watch-add", "watch-remove", "watchers", "editors", "editors-edit"):
+        out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES,
+                                 "Directory .", root + "/m", "Argument a.txt", req])[1]
+        check(out.endswith("edit and watch are not supported by this server\nerror  \n"),
+              "%s was not refused:\n%s" % (req, out))
+
+
+@test("CVSROOT/config accepts the old Watcher key and ignores it")
+def t_watcher_key_ignored(r):
+    cfg = os.path.join(r.repo, "CVSROOT", "config")
+    os.chmod(cfg, 0o644)
+    write(cfg, read(cfg) + "Watcher=someone\n")
+    rc, out = r.cvs(["ls"], expect_ok=False)
+    check(rc == 0 and "Watcher" not in out, "ls with Watcher in the config:\n" + out)
+
+
+@test("RCS files with the old reserved edit flags c and x check out writable")
+def t_old_reserved_edit_kflags(r):
+    r.import_tree("m", {"c.txt": "cee\n", "x.txt": "ex\n"})
+    for name, flags in (("c.txt", "kvc"), ("x.txt", "kvx")):
+        path = os.path.join(r.repo, "m", name + ",v")
+        os.chmod(path, 0o644)
+        write(path, read(path).replace("kopt   kv;", "kopt   %s;" % flags))
     wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    if check(os.path.isfile(attr), "watch add wrote no " + attr):
-        check("<watcher" in read(attr),
-              "watch add wrote no <watcher> node:\n" + read(attr))
-
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check([l for l in out.splitlines() if "a.txt" in l and "edit" in l],
-          "cvs watchers does not report the edit watcher just added:\n" + out)
-
-    # Re-add to the existing watcher: the lookup must find the existing
-    # <watcher> (a dangling else once made that lookup dead and every
-    # re-add appended a duplicate node), so the persisted tree holds ONE
-    # watcher carrying both actions.
-    r.cvs(["watch", "add", "-a", "commit", "a.txt"], cwd=wc)
-    content = read(attr)
-    check("<commit" in content,
-          "re-add did not persist the commit action:\n" + content)
-    check_eq(content.count("<watcher"), 1,
-             "re-add duplicated the watcher node:\n" + content)
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check([l for l in out.splitlines() if "a.txt" in l and "commit" in l],
-          "cvs watchers does not report the commit action just added:\n" + out)
-
-    # Same-action re-add: the presence guard keeps one <edit> child.
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    content = read(attr)
-    check_eq(content.count("<edit"), 1,
-             "same-action re-add duplicated the edit node:\n" + content)
-
-    # -a none adds nothing, so it must not rewrite the tree or persist
-    # an empty watcher.
-    before = read(attr)
-    r.cvs(["watch", "add", "-a", "none", "a.txt"], cwd=wc)
-    check_eq(read(attr), before,
-             "-a none rewrote fileattr.xml without changing anything")
-
-    # ... and against a never-watched file it must not persist an empty
-    # <watcher> husk either: the creation block raises no flag.
-    write(os.path.join(wc, "b.txt"), "b" + chr(10))
-    r.cvs(["add", "b.txt"], cwd=wc)
-    r.cvs(["commit", "-m", "add b"], cwd=wc)
-    before = read(attr)
-    r.cvs(["watch", "add", "-a", "none", "b.txt"], cwd=wc)
-    after = read(attr)
-    check_eq(after, before,
-             "-a none on a never-watched file rewrote fileattr.xml")
-
-    # Argument-less adds go through the directory-default branch of the
-    # braces fix; the re-add must find the existing default watcher.
-    r.cvs(["watch", "add", "-a", "edit"], cwd=wc)
-    r.cvs(["watch", "add", "-a", "commit"], cwd=wc)
-    content = read(attr)
-    check_eq(content.count("<default"), 1,
-             "argument-less add duplicated the default node:\n" + content)
-    check_eq(content.count("<watcher"), 3,  # a.txt, b.txt, directory default
-             "argument-less re-add duplicated a watcher node:\n" + content)
+    for name, text in (("c.txt", "cee\n"), ("x.txt", "ex\n")):
+        check_eq(read(os.path.join(wc, name)), text, name + " content")
+        check(os.access(os.path.join(wc, name), os.W_OK), name + " checked out read-only")
 
 
-@test("edit persists temp watches; unedit and commit remove them again")
-def t_watch_temp_records(r):
-    # cvs edit notifies 'E', which records a temp_edit/temp_commit/
-    # temp_unedit watcher for the editor; unedit ('U') and commit ('C')
-    # hand remove_temp to watch_modify_watchers.  Before the persistence
-    # fix neither half reached the file.  The emptied <watcher> and the
-    # bare <file> node it hung on must go with the last action.
-    r.import_tree("m", {"a.txt": "one" + chr(10), "b.txt": "two" + chr(10)})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
+@test("a root with no method, or with a removed one, is refused")
+def t_removed_methods_refused(r):
+    for root in ("user@127.0.0.1:/nowhere", ":ssh:user@127.0.0.1:/nowhere", ":sspi:127.0.0.1:/nowhere"):
+        rc, out = run(["-d", root, "ls"], cwd=r.root, expect_ok=False)
+        check(rc != 0 and "access method is not available" in out,
+              "%s was not refused:\n%s" % (root, out))
 
-    r.cvs(["edit", "a.txt"], cwd=wc)
-    r.cvs(["edit", "b.txt"], cwd=wc)
-    if not check(os.path.isfile(attr) and "<temp_edit" in read(attr),
-                 "cvs edit persisted no temp watch record"):
+
+@test("a server with EncryptionLevel 3 or 4 refuses every session")
+def t_encryption_level_refused(r):
+    if os.name == "nt":
+        # The server reads PServer from the registry there, not from CVSCONF.
+        print("          (skipped: PServer settings come from the registry here)")
         return
-    check_eq(read(attr).count("<temp_edit"), 2,
-             "temp_edit records after editing two files:" + chr(10) + read(attr))
-
-    write(os.path.join(wc, "a.txt"), "one more" + chr(10))
-    r.cvs(["commit", "-m", "edit a"], cwd=wc)
-    content = read(attr)
-    check('name="a.txt"' not in content,
-          "commit left the temp watcher or a bare <file> node for a.txt:"
-          + chr(10) + content)
-    check("<temp_edit" in content,
-          "committing a.txt dropped b.txt's temp record too:" + chr(10) + content)
-
-    r.cvs(["unedit", "b.txt"], cwd=wc)
-    content = read(attr)
-    check("<watcher" not in content,
-          "unedit left a temp watcher behind:" + chr(10) + content)
-
-
-@test("watch remove takes the watcher back out again")
-def t_watch_remove(r):
-    # watch_modify_watchers looks for an existing <watcher> for this user
-    # before deciding whether to create one.  Two control-flow bugs broke
-    # that search: a dangling else overwrote a successful per-file lookup
-    # with a directory/default one that cannot match, and the "nothing
-    # here to remove" guard tested the handle instead of its absence.
-    # Together they sent "watch remove" down the create-a-watcher branch,
-    # where it appended a fresh empty <watcher> and deleted nothing, so
-    # the watcher it was asked to drop survived.
-    r.import_tree("m", {"a.txt": "one\n"})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    # Fields are tab separated: name, user, then one per watched action.
-    # Match on whole fields so a repository path that happens to contain
-    # the word cannot stand in for a watcher line.
-    added = [l for l in out.splitlines() if "edit" in l.split("\t")]
-    if not check(added, "precondition: watch add registered no watcher:\n" + out):
-        return
-    # Take the user from the output rather than assuming what CVS_Username
-    # resolved to on this machine.
-    user = added[0].split("\t")[1]
-
-    r.cvs(["watch", "remove", "-a", "edit", "a.txt"], cwd=wc)
-
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check(not [l for l in out.splitlines() if user in l.split("\t")],
-          "cvs watchers still reports %s after watch remove:\n%s" % (user, out))
-    # A watcher with no actions left is not a watcher; it must not survive
-    # in the file either, or the next watchers/notify pass finds it again.
-    if os.path.isfile(attr):
-        check("<watcher" not in read(attr),
-              "watch remove left a <watcher> node behind:\n" + read(attr))
-
-
-@test("re-adding a watched file leaves one file node, and watch off clears it")
-def t_watch_readd_single_node(r):
-    # fileattr_newfile appended a <file> node unconditionally, so a
-    # remove+re-add left two <file name="X"> nodes.  Per-file mutations act
-    # on the first match only, so watch off could leave the re-added file
-    # watched (read-only on a fresh checkout).  Pin one node per name.
-    r.import_tree("m", {"a.txt": "one" + chr(10)})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-    r.cvs(["watch", "on", "a.txt"], cwd=wc)
-    r.cvs(["remove", "-f", "a.txt"], cwd=wc)
-    r.cvs(["commit", "-m", "rm"], cwd=wc)
-    write(os.path.join(wc, "a.txt"), "again" + chr(10))
-    r.cvs(["add", "a.txt"], cwd=wc)
-    r.cvs(["commit", "-m", "re-add"], cwd=wc)
-    if os.path.isfile(attr):
-        check_eq(read(attr).count('name="a.txt"'), 1,
-                 "re-add left duplicate <file> nodes:" + chr(10) + read(attr))
-    r.cvs(["watch", "on", "a.txt"], cwd=wc)
-    check(not os.access(os.path.join(fresh_checkout(r, "wcReOn"), "a.txt"), os.W_OK),
-          "re-added a.txt not read-only after watch on")
-    r.cvs(["watch", "off", "a.txt"], cwd=wc)
-    check("<watched" not in read(attr),
-          "watch off left a watched node after re-add:" + chr(10) + read(attr))
-    check(os.access(os.path.join(fresh_checkout(r, "wcReOff"), "a.txt"), os.W_OK),
-          "re-added a.txt still read-only after watch off")
-
-
-@test("watch add twice leaves a single watcher node")
-def t_watch_add_twice(r):
-    # The same existence search on the adding path: with it broken the
-    # check never matched, so every "watch add" appended another <watcher>
-    # for the same user instead of reusing the one already there.
-    r.import_tree("m", {"a.txt": "one\n"})
-    wc = r.checkout("m")
-    attr = os.path.join(r.repo, "m", "CVS", "fileattr.xml")
-
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-    r.cvs(["watch", "add", "-a", "edit", "a.txt"], cwd=wc)
-
-    if check(os.path.isfile(attr), "watch add wrote no " + attr):
-        check_eq(read(attr).count("<watcher"), 1,
-                 "watcher nodes after adding the same watcher twice:\n"
-                 + read(attr))
-        # ...and the action inside it must not pile up either, now that
-        # the second add reuses the node the first one made.
-        check_eq(read(attr).count("<edit/>"), 1,
-                 "edit nodes after adding the same action twice:\n"
-                 + read(attr))
-
-    _, out = r.cvs(["watchers", "a.txt"], cwd=wc)
-    check_eq(len([l for l in out.splitlines() if "edit" in l.split("\t")]), 1,
-             "cvs watchers lines reporting the edit watcher:\n" + out)
+    root = r.repo.replace(os.sep, "/")
+    conf = os.path.join(r.root, "conf")
+    # CVSCONF replaces the whole PServer file, LockServer included.
+    cfg = os.path.join(r.repo, "CVSROOT", "config")
+    os.chmod(cfg, 0o644)
+    write(cfg, read(cfg) + "\nLockServer=none\n")
+    for level, refused in ((2, False), (3, True), (4, True)):
+        write(os.path.join(conf, "PServer"), "EncryptionLevel=%d\n" % level)
+        out = server_session(r, ["Root " + root, "Valid-responses " + VALID_RESPONSES,
+                                 "valid-requests", "version"], env={"CVSCONF": conf})[1]
+        if refused:
+            check(out.endswith("error  \n") and "EncryptionLevel=%d" % level in out,
+                  "EncryptionLevel=%d did not refuse the session:\n%s" % (level, out))
+        else:
+            check(out.endswith("ok\n") and "\nM " in out,
+                  "EncryptionLevel=%d refused the session:\n%s" % (level, out))
 
 
 @test("repository operations append well-formed history records")
@@ -1550,11 +1391,9 @@ def t_unicode_text_line_endings(r):
     # as U+0A0D, so decoding and comparing the lines catches it.
     #
     # Only the client side writes through that path (update_entries), so
-    # the checkout goes through a real client/server session: :ext: with
-    # CVS_EXT as a pass-through transport and CVS_SERVER naming this cvs
-    # with --allow-root, which is how the server accepts a repository that
-    # is not registered in the machine settings.  The source is UTF-8 with
-    # a BOM, which is what makes the encoder convert at all.
+    # the checkout goes through a real client/server session over :pserver:
+    # (PserverShim).  The source is UTF-8 with a BOM, which is what makes
+    # the encoder convert at all.
     lines = ["first line, long enough to leave a conversion buffer behind",
              "", "third", "", "x", "last line"]
     imp = os.path.join(r.root, "impuni")
@@ -1563,23 +1402,16 @@ def t_unicode_text_line_endings(r):
         f.write(b"\xef\xbb\xbf" + ("\n".join(lines) + "\n").encode("utf-8"))
     r.cvs(["import", "-m", "uni", "-kukv", "mu", "VENDOR", "REL0"], cwd=imp)
 
-    repo = r.repo.replace(os.sep, "/")
-    # The transport is a Python pass-through that just runs the rest of
-    # its command line, so every path can be quoted the same way on
-    # Windows (cmd.exe) and POSIX (sh).
-    helper = os.path.join(r.root, "passthru.py")
-    write(helper, "import subprocess, sys\nsys.exit(subprocess.call(sys.argv[1:]))\n")
-    q = lambda s: '"%s"' % s
-    server = q(CVS) + (" -L " + q(LIBDIR) if LIBDIR else "") + " " + q("--allow-root=" + repo)
-    env = {"CVS_EXT": q(sys.executable) + " " + q(helper), "CVS_SERVER": server}
-    wc = os.path.join(r.root, "extwc")
+    shim = PserverShim(r.repo.replace(os.sep, "/"))
+    wc = os.path.join(r.root, "pswc")
     os.makedirs(wc)
-    rc, out = run(["-d", ":ext:localhost:" + repo, "checkout", "mu"], cwd=wc,
-                  expect_ok=False, env=env)
-    if rc != 0 and "protocol" in out.lower() and "ext" in out.lower():
-        print("          (skipped: the :ext: protocol plugin is not available here)")
-        return
-    if not check_eq(rc, 0, "checkout over :ext: failed:\n" + out):
+    try:
+        rc, out = run(["-d", shim.root(), "checkout", "mu"], cwd=wc, expect_ok=False)
+    finally:
+        # The root's password was saved; remove it.
+        run(["-d", shim.root(), "logout"], cwd=wc, expect_ok=False)
+        shim.close()
+    if not check_eq(rc, 0, "checkout over :pserver: failed:\n" + out):
         return
     raw = open(os.path.join(wc, "mu", "u.txt"), "rb").read()
     if not check(raw[:2] == b"\xff\xfe" and len(raw) % 2 == 0,
@@ -1588,6 +1420,38 @@ def t_unicode_text_line_endings(r):
     got = raw[2:].decode("utf-16-le").splitlines()
     check(got == lines, "-ku file lines after checkout: expected %s, got %s"
           % (ascii(lines), ascii(got)))
+
+
+@test("add -b carries its bug id to the commit, and commit -b selects by it")
+def t_add_bugid(r):
+    r.import_tree("m", {"a.txt": "one\n"})
+    shim = PserverShim(r.repo.replace(os.sep, "/"))
+    try:
+        for name, root in (("local", r.repo), ("pserver", shim.root())):
+            wcroot = os.path.join(r.root, "wc-" + name)
+            os.makedirs(wcroot)
+            rc, out = run(["-d", root, "checkout", "m"], cwd=wcroot, expect_ok=False)
+            if not check_eq(rc, 0, "%s checkout failed:\n%s" % (name, out)):
+                continue
+            wc = os.path.join(wcroot, "m")
+            first, second = name + "-b.txt", name + "-c.txt"
+            write(os.path.join(wc, first), "b\n")
+            write(os.path.join(wc, second), "c\n")
+            run(["add", "-b", "BUG7", first], cwd=wc)
+            run(["add", "-b", "BUG8", second], cwd=wc)
+            run(["commit", "-b", "BUG7", "-m", "fix"], cwd=wc)
+            check(os.path.isfile(os.path.join(r.repo, "m", first + ",v")),
+                  "%s: commit -b BUG7 did not commit %s, which has bug BUG7" % (name, first))
+            check(not os.path.isfile(os.path.join(r.repo, "m", second + ",v")),
+                  "%s: commit -b BUG7 committed %s, which has bug BUG8" % (name, second))
+            run(["commit", "-m", "rest"], cwd=wc)
+            for f, bug in ((first, "BUG7;"), (second, "BUG8;")):
+                rcs = os.path.join(r.repo, "m", f + ",v")
+                check(os.path.isfile(rcs) and ["bugid", bug] in [l.split() for l in read(rcs).splitlines()],
+                      "%s: %s committed without bug %s" % (name, f, bug))
+    finally:
+        run(["-d", shim.root(), "logout"], cwd=r.root, expect_ok=False)
+        shim.close()
 
 @test("binary content is detected on add and import by content, not by name")
 def t_add_binary_by_content(r):
@@ -1798,17 +1662,9 @@ def t_import_binary_over_text_server(r):
     v0 = open(vpath, "rb").read()
     root = r.repo.replace(os.sep, "/")
     nul = bytes(range(256)) * 3
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT")
     head = "".join(x + chr(10) for x in [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES,
         "valid-requests",
         "UseUnchanged",
         "Directory .",
@@ -1821,20 +1677,8 @@ def t_import_binary_over_text_server(r):
         "Argument msrv", "Argument VENDOR", "Argument REL1",
         "import",
     ])
-    reqs = head.encode() + modhdr.encode() + nul + tail.encode()
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "srvimp")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, err_b = p.communicate(reqs, timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill(); p.communicate(); fail("server import did not complete within 120s"); return
-    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
+    _, out, err = server_session(r, head.encode() + modhdr.encode() + nul + tail.encode())
+    out += err
     check("binary content" in out,
           "server did not refuse the binary re-import:" + chr(10) + out)
     check_eq(open(vpath, "rb").read(), v0,
@@ -1851,17 +1695,9 @@ def t_add_binary_kopt_protocol(r):
     # server half of that contract.
     r.import_tree("m", {"a.txt": "one" + chr(10), "sub/b.txt": "two" + chr(10)})
     root = r.repo.replace(os.sep, "/")
-    valid_responses = (
-        "ok error Valid-requests Checked-in New-entry Checksum Copy-file "
-        "Blob-ref Blob-ref-created Blob-OTP Blob-url "
-        "Updated Created Update-existing Merged Patched Rcs-diff Mode "
-        "Mod-time Removed Remove-entry Set-static-directory "
-        "Clear-static-directory Set-sticky Clear-sticky Template "
-        "Notified Module-expansion Clear-rename Rename EntriesExtra "
-        "M Mbinary E F MT")
-    reqs = "".join(s + chr(10) for s in [
+    rc, out, err = server_session(r, [
         "Root " + root,
-        "Valid-responses " + valid_responses,
+        "Valid-responses " + VALID_RESPONSES,
         "valid-requests",
         "UseUnchanged",
         "Directory .",
@@ -1883,23 +1719,8 @@ def t_add_binary_kopt_protocol(r):
         "Argument sub/deep.txt",
         "add",
     ])
-    cmd = [CVS]
-    if LIBDIR:
-        cmd += ["-L", LIBDIR]
-    cmd += ["--allow-root=" + r.repo, "server"]
-    wcdir = os.path.join(r.root, "srvadd")
-    os.makedirs(wcdir)
-    p = subprocess.Popen(cmd, cwd=wcdir, stdin=subprocess.PIPE,
-                         stdout=subprocess.PIPE, stderr=subprocess.PIPE)
-    try:
-        out_b, err_b = p.communicate(reqs.encode("utf-8"), timeout=120)
-    except subprocess.TimeoutExpired:
-        p.kill()
-        p.communicate()
-        fail("server add did not complete within 120s")
-        return
-    out = out_b.decode("utf-8", "replace") + err_b.decode("utf-8", "replace")
-    check_eq(p.returncode, 0, "server exit status (output:" + chr(10) + out + ")")
+    out += err
+    check_eq(rc, 0, "server exit status (output:" + chr(10) + out + ")")
     check(not any(l.startswith("error") for l in out.split(chr(10))),
           "server reported an error:" + chr(10) + out)
     # In server mode the entry carries no timestamp, and a client that has

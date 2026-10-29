@@ -19,7 +19,6 @@
 #include <cvsapi.h>
 #include "../GlobalSettings.h"
 #include "../RootSplitter.h"
-#include "../ServerInfo.h"
 #include "../ServerConnection.h"
 #include "CvsCommonDialogs.h"
 #include "resource.h"
@@ -349,52 +348,23 @@ void CBrowserDialog::OnItemExpanding(HWND hTree, LPNMTREEVIEW pnmtv)
 
 	if(!dir->level)
 	{
-		// Server level.  Initialise structure and get repository details.
-		CServerInfo si;
-		CServerInfo::remoteServerInfo rsi;
-		cvs::string tempServ = dir->server + ":" + dir->port;
-
-        if(dir->root.size() || !si.getRemoteServerInfo(tempServ.c_str(),rsi))
+		if(!dir->root.size())
+			return;
+		ServerConnectionInfo *newdir = new ServerConnectionInfo;
+		*newdir = *dir;
+		newdir->level = 1;
+		newdir->user=false;
+		newdir->enumerated=false;
+		newdir->anonymous=false;
+		cvs::string tmp = dir->directory;
+		if(newdir->module.size())
 		{
-			if(!dir->root.size())
-				return;
-			ServerConnectionInfo *newdir = new ServerConnectionInfo;
-			*newdir = *dir;
-			newdir->level = 1;
-			newdir->user=false;
-			newdir->enumerated=false;
-			newdir->anonymous=false;
-			cvs::string tmp = dir->directory;
-			if(newdir->module.size())
-			{
-				tmp+=" (";
-				tmp+=newdir->module;
-				tmp+=")";
-			}
-			hItem=InsertTreeItem(hTree,cvs::wide(tmp.c_str()),2,3,newdir,hParent);
-			InsertTreeItem(hTree,_T("__@@__"),0,0,NULL,hItem); 
+			tmp+=" (";
+			tmp+=newdir->module;
+			tmp+=")";
 		}
-		else
-		{
-			bool first = true;
-			for(CServerInfo::remoteServerInfo::repositories_t::const_iterator i = rsi.repositories.begin(); i!=rsi.repositories.end(); ++i)
-			{
-				ServerConnectionInfo *newdir = new ServerConnectionInfo;
-				*newdir = *dir;
-				newdir->level = 1;
-				newdir->user=false;
-				newdir->anonymous=false;
-				newdir->enumerated=true;
-				newdir->module="";
-				newdir->anon_user = rsi.anon_username;
-				newdir->anon_proto = rsi.anon_protocol;
-				newdir->default_proto = rsi.default_protocol;
-				newdir->directory = i->first;
-
-				hItem=InsertTreeItem(hTree,cvs::wide(i->second.c_str()),2,3,newdir,hParent);
-				InsertTreeItem(hTree,_T("__@@__"),0,0,NULL,hItem);
-			}
-		}
+		hItem=InsertTreeItem(hTree,cvs::wide(tmp.c_str()),2,3,newdir,hParent);
+		InsertTreeItem(hTree,_T("__@@__"),0,0,NULL,hItem);
 		return;
 	}
 	else if(dir->level>=1 && (dir->level==1 || m_flags&BDShowDirectories))
@@ -1040,26 +1010,8 @@ void CBrowserPasswordDialog::Expand()
 
 void CBrowserPasswordDialog::GetProtocols(HWND hCombo)
 {
-	CServerInfo inf;
-	CServerInfo::remoteServerInfo rsi;
-
 	SendMessage(hCombo,CB_RESETCONTENT,0,0);
-	if(!inf.getRemoteServerInfo(m_activedir->server.c_str(),rsi) || !rsi.protocols.size())
-	{
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("pserver"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("sserver"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("sspi"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ssh"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("gserver"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ext"));
-	}
-	else
-	{
-		for(CServerInfo::remoteServerInfo::protocols_t::const_iterator i = rsi.protocols.begin(); i!=rsi.protocols.end(); ++i)
-			SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)(LPCWSTR)cvs::wide(i->first.c_str()));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ssh"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ext"));
-	}
+	SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("pserver"));
 	SendMessage(hCombo,CB_SETCURSEL,SendMessage(hCombo,CB_FINDSTRINGEXACT,(WPARAM)-1,(LPARAM)(LPCWSTR)cvs::wide(m_activedir->protocol.c_str())),0);
 }
 
@@ -1158,16 +1110,8 @@ INT_PTR CBrowserRootDialog::dlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 			{
 				EnableWindow(GetDlgItem(hWnd,IDC_KEYWORDS),TRUE);
 				EnableWindow(GetDlgItem(hWnd,IDC_KEYWORDS_TEXT),TRUE);
-				if(!strcmp(m_activedir->protocol.c_str(),"ext"))
-				{
-					EnableWindow(GetDlgItem(hWnd,IDC_PORT),FALSE);
-					EnableWindow(GetDlgItem(hWnd,IDC_PORT_TEXT),FALSE);
-				}
-				else
-				{
-					EnableWindow(GetDlgItem(hWnd,IDC_PORT),TRUE);
-					EnableWindow(GetDlgItem(hWnd,IDC_PORT_TEXT),TRUE);
-				}
+				EnableWindow(GetDlgItem(hWnd,IDC_PORT),TRUE);
+				EnableWindow(GetDlgItem(hWnd,IDC_PORT_TEXT),TRUE);
 				EnableWindow(GetDlgItem(hWnd,IDC_MODULE),m_flags&BRDShowModule?TRUE:FALSE);
 				EnableWindow(GetDlgItem(hWnd,IDC_MODULE_TEXT),m_flags&BRDShowModule?TRUE:FALSE);
 				SetDlgItemText(hWnd,IDC_DIRECTORY_TEXT,_T("Repository"));
@@ -1181,13 +1125,8 @@ INT_PTR CBrowserRootDialog::dlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 				m_activedir->srvname = cvs::narrow(tmp);
 				GetDlgItemText(hWnd,IDC_SERVER,tmp,sizeof(tmp));
 				m_activedir->server = cvs::narrow(tmp);
-				if(strcmp(m_activedir->protocol.c_str(),"ext"))
-				{
-					GetDlgItemText(hWnd,IDC_PORT,tmp,sizeof(tmp));
-					m_activedir->port = cvs::narrow(tmp);
-				}
-				else
-					m_activedir->port="";
+				GetDlgItemText(hWnd,IDC_PORT,tmp,sizeof(tmp));
+				m_activedir->port = cvs::narrow(tmp);
 				if(m_bCollapsed)
 				{
 					CRootSplitter split;
@@ -1216,22 +1155,8 @@ INT_PTR CBrowserRootDialog::dlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 					}
 					else
 					{
-						CServerInfo inf;
-						CServerInfo::remoteServerInfo rsi;
-						if(!inf.getRemoteServerInfo(m_activedir->server.c_str(),rsi))
-						{
-							MessageBox(hWnd,_T("Server does not support automatic configuration.\nPlease choose a protocol manually."),_T("New server entry"),MB_ICONSTOP|MB_OK);
-							return TRUE;
-						}
-						m_activedir->root="";
-						m_activedir->protocol="";
-						m_activedir->username="";
-						m_activedir->password="";
-						m_activedir->keywords="";
-						m_activedir->directory="";
-						m_activedir->module="";
-						m_activedir->enumerated = false;
-						m_activedir->user = true;
+						MessageBox(hWnd,_T("Server does not support automatic configuration.\nPlease choose a protocol manually."),_T("New server entry"),MB_ICONSTOP|MB_OK);
+						return TRUE;
 					}
 
 				}
@@ -1319,16 +1244,8 @@ INT_PTR CBrowserRootDialog::dlgProc(HWND hWnd, UINT uMsg, WPARAM wParam, LPARAM 
 							EnableWindow(GetDlgItem(hWnd,IDC_MODULE_TEXT),m_flags&BRDShowModule?TRUE:FALSE);
 							EnableWindow(GetDlgItem(hWnd,IDC_KEYWORDS),TRUE);
 							EnableWindow(GetDlgItem(hWnd,IDC_KEYWORDS_TEXT),TRUE);
-							if(!_tcscmp(tmp,_T("ext")))
-							{
-								EnableWindow(GetDlgItem(hWnd,IDC_PORT),FALSE);
-								EnableWindow(GetDlgItem(hWnd,IDC_PORT_TEXT),FALSE);
-							}
-							else
-							{
-								EnableWindow(GetDlgItem(hWnd,IDC_PORT),TRUE);
-								EnableWindow(GetDlgItem(hWnd,IDC_PORT_TEXT),TRUE);
-							}
+							EnableWindow(GetDlgItem(hWnd,IDC_PORT),TRUE);
+							EnableWindow(GetDlgItem(hWnd,IDC_PORT_TEXT),TRUE);
 							SetDlgItemText(hWnd,IDC_DIRECTORY_TEXT,_T("Repository"));
 						}
 						return TRUE;
@@ -1427,34 +1344,12 @@ void CBrowserRootDialog::Expand()
 
 void CBrowserRootDialog::GetProtocols(HWND hCombo)
 {
-	CServerInfo inf;
-	CServerInfo::remoteServerInfo rsi;
-
 	SendMessage(hCombo,CB_RESETCONTENT,0,0);
 	if(!(m_flags&BRDRequireModule))
 		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("automatic"));
 	if(m_flags&BRDShowFtp)
 		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ftp"));
-	HCURSOR hOldCursor = GetCursor();
-	SetCursor(LoadCursor(NULL,IDC_WAIT));
-	if(!m_activedir->server.size() || !inf.getRemoteServerInfo(m_activedir->server.c_str(),rsi) || !rsi.protocols.size())
-	{
-		SetCursor(hOldCursor);
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("pserver"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("sserver"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("sspi"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ssh"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("gserver"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ext"));
-	}
-	else
-	{
-		SetCursor(hOldCursor);
-		for(CServerInfo::remoteServerInfo::protocols_t::const_iterator i = rsi.protocols.begin(); i!=rsi.protocols.end(); ++i)
-			SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)(LPCWSTR)cvs::wide(i->first.c_str()));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ssh"));
-		SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("ext"));
-	}
+	SendMessage(hCombo,CB_ADDSTRING,0,(LPARAM)_T("pserver"));
 	if(!m_activedir->protocol.size())
 		SendMessage(hCombo,CB_SETCURSEL,0,0);
 	else

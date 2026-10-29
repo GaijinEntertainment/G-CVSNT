@@ -263,7 +263,6 @@
     <ClCompile Include="RootSplitter.cpp" />
     <ClCompile Include="Scramble.cpp" />
     <ClCompile Include="ServerConnection.cpp" />
-    <ClCompile Include="ServerInfo.cpp" />
     <ClCompile Include="TriggerLibrary.cpp" />
     <ClCompile Include="trigger_i.c" />
     <ClCompile Include="win32\CvsCommonDialogs.cpp" />
@@ -283,7 +282,6 @@
     <ClInclude Include="RootSplitter.h" />
     <ClInclude Include="Scramble.h" />
     <ClInclude Include="ServerConnection.h" />
-    <ClInclude Include="ServerInfo.h" />
     <ClInclude Include="TriggerLibrary.h" />
     <ClInclude Include="trigger_interface.h" />
     <ClInclude Include="win32\CvsCommonDialogs.h" />

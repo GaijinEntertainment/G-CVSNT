@@ -62,7 +62,6 @@ cat > /srv/cvsnt/conf/PServer <<EOF
 Repository0=/cvs/main
 Repository0Name=/main
 Repository0Description=main repository
-Repository0Default=1
 Repository0Online=1
 
 # lock server, by container name on the docker network created in step 5
@@ -80,10 +79,8 @@ BlobEncryptedURL0=cvs.example.com@2403
 # shared secret with the blob server
 BlobOTP=$BLOB_SECRET
 
-# The pserver hands each client a blob token over this connection. With
-# EncryptionLevel=0 that connection is plain text, so either raise the
-# level to have clients encrypt it, or keep port 2401 on a trusted network.
-EncryptionLevel=0
+# The pserver hands each client a blob token over this connection. That
+# connection is plain text, so keep port 2401 on a trusted network.
 CompressionLevel=0
 EOF
 ```

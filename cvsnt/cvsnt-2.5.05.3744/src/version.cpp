@@ -83,39 +83,32 @@ int version (int argc, char **argv)
 	switch(quick)
 	{
 	case 1:
-		if(!proxy_active)
-			fputs(CVSNT_PRODUCTVERSION_SHORT, stdout);
+		fputs(CVSNT_PRODUCTVERSION_SHORT, stdout);
 		break;
 	case 2:
 		sprintf(fancystr,"%d",CVSNT_PRODUCT_BUILD);
-		if(!proxy_active)
-			fputs(fancystr, stdout);
+		fputs(fancystr, stdout);
 		break;
 	case 3:
 		sprintf(fancystr,"%s (%d)",CVSNT_PRODUCT_NAME,CVSNT_PRODUCT_BUILD);
-		if(!proxy_active)
-			fputs(fancystr, stdout);
+		fputs(fancystr, stdout);
 		break;
 	default:
 		if(compat[compat_level].return_fake_version)
 			version_string = "Concurrent Versions System (CVS) 1.11.2";
 
-		if(!proxy_active)
-		{
-			if (current_parsed_root && current_parsed_root->isremote)
-				(void) fputs ("Client: ", stdout);
+		if (current_parsed_root && current_parsed_root->isremote)
+			(void) fputs ("Client: ", stdout);
 
-			/* Having the year here is a good idea, so people have
-			some idea of how long ago their version of CVS was
-			released.  */
-			(void) fputs (version_string, stdout);
-			(void) fputs (config_string, stdout);
-		}
+		/* Having the year here is a good idea, so people have
+		some idea of how long ago their version of CVS was
+		released.  */
+		(void) fputs (version_string, stdout);
+		(void) fputs (config_string, stdout);
 
 		if (current_parsed_root && current_parsed_root->isremote)
 		{
-			if(!proxy_active)
-				fputs ("Server: ", stdout);
+			fputs ("Server: ", stdout);
 			if (supported_request ("version"))
 				send_to_server ("version\n", 0);
 			else

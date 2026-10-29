@@ -42,11 +42,7 @@ int Create_Admin (const char *dir, const char *update_dir, const char *repositor
     else
 		strcpy (tmp, CVSADM);
     if (isfile (tmp))
-	{
-		if(proxy_active)
-			return 0; // This is more a workaround than a fix...
 		error (1, 0, "there is a version in %s already", update_dir);
-	}
 
     if (CVS_MKDIR (tmp, 0777) < 0)
     {

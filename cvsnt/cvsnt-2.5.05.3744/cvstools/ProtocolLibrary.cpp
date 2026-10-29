@@ -44,7 +44,6 @@ namespace
 		void *library;
 		int refcount;
 	};
-	CProtocolLibrary m_lib;
 
 	int server_error(const server_interface *server, int fatal, const char *text)
 	{
@@ -54,82 +53,8 @@ namespace
 			exit(-1);
 		return 0;
 	}
-	int server_getpass(const server_interface *server, char *password, int max_length, const char *prompt) /* return 1 OK, 0 Cancel */
-	{
-		if(m_lib.PromptForPassword(prompt,password,max_length))
-			return 1;
-		return 0;
-	}
-	int server_yesno(const server_interface *server, const char *message, const char *title, int withcancel) /* Return -1 cancel, 0 No, 1 Yes */
-	{
-		switch(m_lib.PromptForAnswer(message,title,withcancel?true:false))
-		{
-			case 'y':
-				return 1;
-			case 'n':
-				return 0;
-			case 'c':
-			default:
-				return -1;
-		}
-	}
-	int server_set_encrypted_channel(const server_interface *server, int encrypt)
-	{
-		return 0;
-	}
-	const char *server_enumerate_protocols(const server_interface *server, int *context, enum proto_type type)
-	{
-		CServerIo::trace(3,"server_enumerate_protocols(%d,%d)",context?*context:0,(int)type);
-		do
-		{
-			const char *proto = m_lib.EnumerateProtocols(context);
-			if(proto && type!=ptAny)
-			{
-				const protocol_interface *protocol=m_lib.LoadProtocol(proto);
-				if(!protocol)
-					continue;
-				if(type == ptServer)
-				{
-					if((!protocol->auth_protocol_connect || !protocol->connect))
-					{
-						CServerIo::trace(3,"%s has no server component",proto);
-						m_lib.UnloadProtocol(protocol);
-						continue;
-					}
-					if(protocol->auth_protocol_connect && protocol->plugin.key)
-					{
-						char value[64];
-						int val = 1;
 
-						CServerIo::trace(3,"Checking key %s",protocol->plugin.key);
-
-						if(!CGlobalSettings::GetGlobalValue("cvsnt","Plugins",protocol->plugin.key,value,sizeof(value)))
-							val = atoi(value);
-						if(!val)
-						{
-							CServerIo::trace(3,"%s is disabled",proto);
-							m_lib.UnloadProtocol(protocol);
-							continue;
-						}
-					}
-				}
-				if(type == ptClient && !protocol->connect)
-				{
-					CServerIo::trace(3,"$s has no client component",proto);
-					m_lib.UnloadProtocol(protocol);
-					continue;
-				}
-				m_lib.UnloadProtocol(protocol);
-			}
-			if(proto)
-				CServerIo::trace(3,"Returning protocol :%s:",proto);
-			else
-				CServerIo::trace(3,"No more protocols");
-			return proto;
-		} while(1);
-	}
-
-	struct server_interface cvs_interface = 
+	struct server_interface cvs_interface =
 	{
 		NULL, /* Current root */
 		NULL, /* Library directory */
@@ -137,12 +62,12 @@ namespace
 		NULL, /* cvs command */
 		0,	  /* Input FD */
 		1,	  /* Output FD */
-		
+
 		server_error,
-		server_getpass,
-		server_yesno,
-		server_set_encrypted_channel,
-		server_enumerate_protocols
+		NULL, /* getpass */
+		NULL, /* yesno */
+		NULL, /* set_encrypted_channel */
+		NULL  /* enumerate_protocols */
 	};
 };
 
@@ -174,6 +99,10 @@ const protocol_interface *CProtocolLibrary::LoadProtocol(const char *protocol)
 	protocol_interface *proto_interface;
 	plugin_interface *plug_interface;
 	protocol_interface_data *dat;
+
+	/* Old plugins of other methods call removed callbacks */
+	if(strcasecmp(protocol,"pserver"))
+		return NULL;
 
 	proto_interface = m_loaded_protocols[protocol];
 	if(proto_interface)
@@ -276,100 +205,50 @@ bool CProtocolLibrary::UnloadProtocol(const protocol_interface *protocol)
 	return true;
 }
 
-const protocol_interface *CProtocolLibrary::FindProtocol(const char *tagline, bool& badauth,int io_socket, bool secure, const protocol_interface **temp_protocol)
+bool CProtocolLibrary::IsEnabled(const protocol_interface *protocol)
 {
-	int context;
-	const char *proto;
+	char value[64];
+
+	if(!protocol->plugin.key || CGlobalSettings::GetGlobalValue("cvsnt","Plugins",protocol->plugin.key,value,sizeof(value)))
+		return true;
+	return atoi(value)!=0;
+}
+
+const protocol_interface *CProtocolLibrary::FindProtocol(const char *tagline, bool& badauth,int io_socket, const protocol_interface **temp_protocol)
+{
 	const protocol_interface *protocol;
 	int res;
-	
+
 	badauth=false;
 	CServerIo::trace(3,"FindPrototocol(%s)",tagline?tagline:"");
 
-	context=0;
-	while((proto=EnumerateProtocols(&context))!=NULL)
+	protocol=LoadProtocol("pserver");
+	if(!protocol)
+		return NULL;
+	if(!protocol->auth_protocol_connect || !IsEnabled(protocol))
 	{
-		protocol=LoadProtocol(proto);
-		if(!protocol)
-			continue;
-		CServerIo::trace(3,"Checking protocol %s",proto);
-		if(secure && !protocol->wrap && !(protocol->valid_elements&flagAlwaysEncrypted))
-		{
-			CServerIo::trace(3,"%s protocol disabled as it does not support encryption.",proto);
-			UnloadProtocol(protocol);
-			continue;
-		}
-		if(protocol->auth_protocol_connect)
-		{
-			if(protocol->plugin.key)
-			{
-				char value[64];
-				int val = 1;
-
-				CServerIo::trace(3,"Checking key %s",protocol->plugin.key);
-
-				if(!CGlobalSettings::GetGlobalValue("cvsnt","Plugins",protocol->plugin.key,value,sizeof(value)))
-					val = atoi(value);
-				if(!val)
-				{
-					CServerIo::trace(3,"%s is disabled",proto);
-					UnloadProtocol(protocol);
-					continue;
-				}
-			}
-			SetupServerInterface(NULL,io_socket);
-			if(temp_protocol)
-				*temp_protocol = protocol;
-			res = protocol->auth_protocol_connect(protocol,tagline);
-			if(res==CVSPROTO_SUCCESS)
-				return protocol; /* Correctly authenticated */
-			if(res == CVSPROTO_AUTHFAIL)
-			{
-				badauth=true;
-				return protocol;
-			}
-
-			if(res !=CVSPROTO_NOTME && res!=CVSPROTO_NOTIMP)
-			{
-				CServerIo::error("Authentication protocol rejected access\n");
-				if(temp_protocol)
-					*temp_protocol = NULL;
-				UnloadProtocol(protocol);
-				return NULL; /* Protocol was recognised, but failed */
-			}
-			if(temp_protocol)
-				*temp_protocol = NULL;
-			UnloadProtocol(protocol);
-		}
-		else
-			UnloadProtocol(protocol);
-	}
-	return NULL;
-}
-
-const char *CProtocolLibrary::EnumerateProtocols(int *context)
-{
-	if(!*context)
-	{
-		CServerIo::trace(3,"EnumerateProtocols: %s",CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDProtocols));
-		m_acc.close();
-		if(!m_acc.open(CGlobalSettings::GetLibraryDirectory(CGlobalSettings::GLDProtocols),"*" SHARED_LIBRARY_EXTENSION))
-		{
-			CServerIo::trace(3,"EnumeratePrototocols failed");
-			return NULL;
-		}
-		*context=1;
-	}
-
-	if(!m_acc.next(m_inf))
-	{
-		*context=2;
-		m_acc.close();
+		CServerIo::trace(3,"pserver is disabled");
+		UnloadProtocol(protocol);
 		return NULL;
 	}
+	SetupServerInterface(NULL,io_socket);
+	if(temp_protocol)
+		*temp_protocol = protocol;
+	res = protocol->auth_protocol_connect(protocol,tagline);
+	if(res==CVSPROTO_SUCCESS)
+		return protocol; /* Correctly authenticated */
+	if(res == CVSPROTO_AUTHFAIL)
+	{
+		badauth=true;
+		return protocol;
+	}
 
-	m_inf.filename.resize(m_inf.filename.find_last_of('.'));
-	return m_inf.filename.c_str();
+	if(res !=CVSPROTO_NOTME && res!=CVSPROTO_NOTIMP)
+		CServerIo::error("Authentication protocol rejected access\n");
+	if(temp_protocol)
+		*temp_protocol = NULL;
+	UnloadProtocol(protocol);
+	return NULL;
 }
 
 bool CProtocolLibrary::PromptForPassword(const char *prompt, char *buffer, int max_length)

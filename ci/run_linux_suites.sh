@@ -14,7 +14,7 @@ if [ -n "$EXPECTED_BUILD" ]; then
   cvs --version | grep -F "Build $EXPECTED_BUILD" >/dev/null || {
     echo "::error::cvs --version does not report Build $EXPECTED_BUILD"; exit 1; }
 fi
-ls "$PREFIX/lib/cvsnt/protocols/ext.so" >/dev/null
+ls "$PREFIX/lib/cvsnt/protocols/pserver.so" >/dev/null
 
 if [ ! -f "$SRC/testcvs/regress.py" ]; then
   echo "::error::$SRC/testcvs/regress.py not found — this tree has no test suites yet (they arrive with an audit branch, e.g. audit/02-analysis-reports-and-fixes); pass a base/prs combination that includes testcvs/"

@@ -41,16 +41,12 @@
 void set_current_server(const struct server_interface *_cs);
 const struct server_interface *current_server();
 
-const char *enum_protocols(int *context, enum proto_type type);
 int server_error(int fatal, const char *fmt, ...);
-int server_getc(const struct protocol_interface *protocol);
-int server_getline(const struct protocol_interface *protocol, char** buffer, int buffer_max);
-int server_printf(const char *fmt, ...);
+int server_getc();
+int server_getline(char** buffer, int buffer_max);
 const char *get_default_port(const cvsroot *root);
-int set_encrypted_channel(int encrypt);
 
 /* TCP/IP helper functions */
-int get_tcp_fd();
 int tcp_printf(const char *fmt, ...);
 int tcp_connect(const cvsroot *cvsroot);
 int tcp_connect_bind(const char *servername, const char *remote_port, int min_local_port, int max_local_port);
@@ -60,11 +56,9 @@ int tcp_write(const void *data, int length);
 int tcp_shutdown();
 int tcp_readline(char* buffer, int buffer_len);
 
-int run_command(const char *cmd, int* in_fd, int* out_fd, int* err_fd);
 const char* get_username(const cvsroot* current_root);
 
 int base64enc(const unsigned char *in, unsigned char *out, int len);
-int base64dec(const unsigned char *in, unsigned char *out, int len);
 
 #ifdef _WIN32
 extern HMODULE g_hInst;

@@ -14,8 +14,8 @@ terminated by `ok` or `error`. Both sides negotiate capabilities up front: the c
 `Valid-responses` with the list *it* supports. Anything not in the other side's list is simply not
 used, which is how new features stay backward compatible.
 
-* Request table: `src/server.cpp:4908` (`struct request requests[]`)
-* Response table: `src/client.cpp:4022` (`struct response responses[]`)
+* Request table: `struct request requests[]` in `src/server.cpp`
+* Response table: `struct response responses[]` in `src/client.cpp`
 * Reference for the base protocol: `doc/cvsclient.dbk`
 
 ### Typical `update` exchange
@@ -60,7 +60,7 @@ The client then fetches `3fa91c2e...` over the blob connection and writes `tex.d
 `Blob-transfer` is marked `GAIJIN_RQ_ESSENTIAL`, and `Blob-ref` is marked `GAIJIN_rs_essential`.
 Both are aliases for the ordinary `RQ_ESSENTIAL`/`rs_essential`, with a comment saying to redefine
 them to `0`/`rs_optional` if you need to interoperate with a pre-blob peer
-(`src/server.cpp:4907`, `src/client.cpp:4020`). As shipped, therefore, **this build does not talk to
+(above `requests[]` in `src/server.cpp` and `responses[]` in `src/client.cpp`). As shipped, therefore, **this build does not talk to
 an old client or an old server** — the blob extensions are mandatory.
 
 `Blob-ref-transfer` is the fast path: the client pushes the blob directly to the CAFS server, then
@@ -96,8 +96,7 @@ plus the current page number, both hex-encoded (`src/server.cpp:3380`). The clie
 authenticate to the CAFS server without ever seeing the shared secret. The response rides the
 ordinary CVS stream (`buf_to_net`, `src/server.cpp:3402-3405`), so over a cleartext method such as
 `:pserver:` a network observer can read the OTP page and present it to the blob server for the
-page window — a `BlobOTP` deployment needs an encrypted CVS transport (`-x`, `sserver`, ssh) or an
-equivalently private path for that response.
+page window — a `BlobOTP` deployment needs a private network path for that response.
 
 ### Client-side override
 

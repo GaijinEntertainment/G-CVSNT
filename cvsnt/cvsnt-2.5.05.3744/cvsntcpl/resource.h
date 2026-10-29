@@ -45,15 +45,12 @@
 #define IDC_GLOBALSCRIPT                1041
 #define IDC_EDIT1                       2002
 #define IDC_CHANGETEMP                  2003
-#define IDC_REPOSITORY                  2003
 #define IDC_PSERVERPORT                 2004
 #define IDC_EDIT3                       2004
-#define IDC_PASSPHRASE                  2004
 #define IDC_LOCKSERVERPORT              2005
 #define IDC_PRIVATEKEY                  2006
 #define IDC_SPIN1                       2007
 #define IDC_SPIN2                       2008
-#define IDC_ENCRYPTION                  2009
 #define IDC_DEFAULTDOMAIN               2010
 #define IDC_COMPRESSION                 2011
 #define IDC_SSLCERT                     2012
@@ -65,7 +62,6 @@
 #define IDC_PUBLISH                     2018
 #define IDC_OLDVERSION_NONCVSNT         2019
 #define IDC_SERVERNAME                  2020
-#define IDC_DEFAULT                     2021
 #define IDC_OLDCHECKOUT_NONCVSNT        2022
 #define IDC_ALLOWEDCLIENTS              2023
 #define IDC_ANONUSER                    2024
@@ -89,12 +85,6 @@
 #define IDC_ONLINE                      2040
 #define IDC_REPLICATIONPORT             2040
 #define IDC_REPLICATIONPORT_TEXT        2041
-#define IDC_TYPE                        2042
-#define IDC_SERVER                      2043
-#define IDC_REMOTEGROUP                 2044
-#define IDC_SERVERTEXT                  2045
-#define IDC_REPOSITORYTEXT              2046
-#define IDC_PASSPHRASETEXT              2047
 #define IDC_CVSNTVERSION                2048
 #define IDC_REGISTRATION                2049
 #define IDC_HOSTOS                      2050

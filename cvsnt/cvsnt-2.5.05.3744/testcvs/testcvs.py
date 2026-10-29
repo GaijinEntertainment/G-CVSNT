@@ -247,8 +247,6 @@ def s_init_import_checkout():
   file_exists(current_physroot+'/CVSROOT/loginfo,v')
   file_exists(current_physroot+'/CVSROOT/modules')
   file_exists(current_physroot+'/CVSROOT/modules,v')
-  file_exists(current_physroot+'/CVSROOT/notify')
-  file_exists(current_physroot+'/CVSROOT/notify,v')
   file_exists(current_physroot+'/CVSROOT/rcsinfo')
   file_exists(current_physroot+'/CVSROOT/rcsinfo,v')
   file_exists(current_physroot+'/CVSROOT/taginfo')

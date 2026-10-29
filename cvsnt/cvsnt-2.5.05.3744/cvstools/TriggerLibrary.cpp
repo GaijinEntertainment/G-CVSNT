@@ -164,13 +164,6 @@ namespace
 			return i->i4->history(type,_ubstr_t(workdir),_ubstr_t(revs),_ubstr_t(name));
 	}
 
-	int COM_notify(const struct trigger_interface_t* cb, const char *message, const char *bugid, const char *directory, const char *notify_user, const char *tag, const char *type, const char *file)
-	{
-		CTriggerLibrary::trigger_info_t *inf = (CTriggerLibrary::trigger_info_t*)cb->plugin.__cvsnt_reserved;
-		CTriggerLibrary::InfoStruct *i = &inf->is;
-		return i->i4->notify(_ubstr_t(message),_ubstr_t(bugid),_ubstr_t(directory),_ubstr_t(notify_user),_ubstr_t(tag),_ubstr_t(type),_ubstr_t(file));
-	}
-
 	int COM_precommit(const struct trigger_interface_t* cb, int name_list_count, const char **name_list, const char *message, const char *directory)
 	{
 		CTriggerLibrary::trigger_info_t *inf = (CTriggerLibrary::trigger_info_t*)cb->plugin.__cvsnt_reserved;
@@ -398,7 +391,7 @@ const trigger_interface *CTriggerLibrary::LoadTrigger(const char *library, const
 		cb->init=COM_init;
 		cb->close=COM_close;
 		cb->history=COM_history;
-		cb->notify=COM_notify;
+		cb->notify=NULL;
 		cb->precommand=COM_precommand;
 		cb->postcommand=COM_postcommand;
 		cb->premodule=COM_premodule;

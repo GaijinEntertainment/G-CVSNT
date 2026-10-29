@@ -401,18 +401,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\edit.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\src\entries.cpp"
 				>
 				<FileConfiguration
@@ -998,18 +986,6 @@
 				</FileConfiguration>
 			</File>
 			<File
-				RelativePath=".\src\watch.cpp"
-				>
-				<FileConfiguration
-					Name="Release|Win32"
-					>
-					<Tool
-						Name="VCCLCompilerTool"
-						UsePrecompiledHeader="0"
-					/>
-				</FileConfiguration>
-			</File>
-			<File
 				RelativePath=".\windows-NT\win32.cpp"
 				>
 			</File>
@@ -1067,10 +1043,6 @@
 				>
 			</File>
 			<File
-				RelativePath=".\src\edit.h"
-				>
-			</File>
-			<File
 				RelativePath=".\src\fileattr.h"
 				>
 			</File>
@@ -1088,10 +1060,6 @@
 			</File>
 			<File
 				RelativePath=".\windows-NT\pwd.h"
-				>
-			</File>
-			<File
-				RelativePath=".\windows-NT\rcmd.h"
 				>
 			</File>
 			<File
@@ -1124,10 +1092,6 @@
 			</File>
 			<File
 				RelativePath=".\version_no.h"
-				>
-			</File>
-			<File
-				RelativePath=".\src\watch.h"
 				>
 			</File>
 		</Filter>

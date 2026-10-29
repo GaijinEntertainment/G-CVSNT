@@ -17,13 +17,10 @@
 
 #include "cvs.h"
 #include "access_log.h"
-#include "fileattr.h"
-#include "edit.h"
 
 int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
     char *options, char *message, const char *merge_from_tag1, const char *merge_from_tag2,
-	RCSCHECKINPROC callback, const char *bugid, const char *edit_revision, const char *edit_tag,
-	const char *edit_bugid)
+	RCSCHECKINPROC callback, const char *bugid)
 {
     Vers_TS *vers;
     int set_time;
@@ -107,7 +104,7 @@ int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
 	     * If we want read-only files, muck the permissions here, before
 	     * getting the file time-stamp.
 	     */
-	    if (!(commit_keep_edits && edit_revision) && (!cvswrite || fileattr_iswatched(finfo->file) || (kf.flags&KFLAG_RESERVED_EDIT)))
+	    if (!cvswrite)
 			xchmod (finfo->file, 0);
 
 	    /* Re-register with the new data.  */
@@ -142,7 +139,7 @@ int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
 			}
 #endif
 			Register (finfo->entries, finfo->file, vers->vn_rcs, vers->ts_user,
-				vers->options, vers->tag, vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, edit_revision, edit_tag, edit_bugid, md5?md5->Final():NULL); 
+				vers->options, vers->tag, vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, NULL, md5?md5->Final():NULL);
 
 			if(md5)
 				delete md5;
@@ -187,9 +184,7 @@ int Checkin (int type, struct file_info *finfo, char *rcs, char *rev, char *tag,
 	else
 	    server_checked_in (finfo->file, finfo->update_dir, finfo->repository);
     }
-    else
 #endif
-	mark_up_to_date (finfo->file);
 
     freevers_ts (&vers);
     return (0);

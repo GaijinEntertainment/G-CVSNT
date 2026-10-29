@@ -768,23 +768,6 @@ AM_CONDITIONAL(WITH_SERVER_AND_TOOLS, test "x$acx_mac_build" != "xyes" )
 AM_CONDITIONAL(BUILD_ARM64, test "x$acx_mac_build_arm64" = "xyes" )
 AM_CONDITIONAL(BUILD_AVX512, test "x$acx_build_avx512" = "xyes" )
 
-saved_libs="$LIBS"
-LIBS=""
-ACX_WITH_GSSAPI
-GSSAPI_LIBS="$LIBS"
-AC_SUBST(GSSAPI_LIBS)
-LIBS="$saved_libs"
-
-saved_libs="$LIBS"
-LIBS=""
-AC_SEARCH_LIBS(ERR_get_error,crypto libeay32)
-AC_SEARCH_LIBS(SSL_CTX_new, ssl ssleay32, [AC_MSG_CHECKING([for openssl])
-     AC_LINK_IFELSE([AC_LANG_PROGRAM([[#include <openssl/ssl.h>]], [[int i;]])],[ac_cv_have_ssl="yes"],[])
-     AC_MSG_RESULT($ac_cv_have_ssl)], ac_cv_have_ssl="no")
-SSL_LIBS="$LIBS"
-AC_SUBST(SSL_LIBS)
-LIBS="$saved_libs"
-
 AC_CHECK_HEADER(security/pam_appl.h)
 AC_CHECK_HEADER(pam/pam_appl.h)
 saved_libs="$LIBS"
@@ -862,115 +845,6 @@ if test x$acx_pserver = xyes; then
   AC_DEFINE(PSERVER_PROTOCOL_SUPPORT, [], [Support for :pserver:])
 fi
 AC_MSG_RESULT($acx_pserver)
-
-AC_MSG_CHECKING(support for ext protocol)
-AC_ARG_ENABLE(ext,
-[  --enable-ext            Enable :ext: protocol (default)
-  --disable-ext           Disable :ext: protocol],
-  acx_ext=$enableval,
-  acx_ext="yes")
-AM_CONDITIONAL(EXT_PROTOCOL_SUPPORT, test "$acx_ext" = "yes")
-if test x$acx_ext = xyes; then
-  AC_DEFINE(EXT_PROTOCOL_SUPPORT, [], [Support for :ext:])
-fi
-AC_MSG_RESULT($acx_ext)
-
-AC_MSG_CHECKING(support for fork protocol)
-AC_ARG_ENABLE(fork,
-[  --enable-fork           Enable :fork: protocol 
-  --disable-fork          Disable :fork: protocol (default)],
-  acx_fork=$enableval,
-  acx_fork="no")
-AM_CONDITIONAL(FORK_PROTOCOL_SUPPORT, test "$acx_fork" = "yes")
-if test x$acx_fork = xyes; then
-  AC_DEFINE(FORK_PROTOCOL_SUPPORT, [], [Support for :fork:])
-fi
-AC_MSG_RESULT($acx_fork)
-
-AC_MSG_CHECKING(support for rsh server protocol)
-AC_ARG_ENABLE(rsh,
-[  --enable-rsh            Enable rsh :server: protocol (default)
-  --disable-rsh           Disable rsh :server: protocol],
-  acx_rsh=$enableval,
-  acx_rsh="yes")
-AM_CONDITIONAL(SERVER_PROTOCOL_SUPPORT, test "$acx_rsh" = "yes")
-if test x$acx_rsh = xyes; then
-  AC_DEFINE(SERVER_PROTOCOL_SUPPORT, [], [Support for :server:])
-fi
-AC_MSG_RESULT($acx_rsh)
-
-AC_MSG_CHECKING(support for gserver protocol)
-AC_ARG_ENABLE(gserver,
-[  --enable-gserver        Enable :gserver: protocol (default)
-  --disable-gserve        Disable :gserver: protocol],
-  acx_gserver=$enableval,
-[if test "x$acx_gssapi_cv_gssapi" = "xno"; then
-    acx_gserver="no"
- else
-    acx_gserver="yes"
-fi])
-AM_CONDITIONAL(GSERVER_PROTOCOL_SUPPORT, test "$acx_gserver" = "yes")
-if test x$acx_gserver = xyes; then
-  AC_DEFINE(GSERVER_PROTOCOL_SUPPORT, [], [Support for :gserver:])
-fi
-AC_MSG_RESULT($acx_gserver)
-
-AC_MSG_CHECKING(support for sserver protocol)
-AC_ARG_ENABLE(sserver,
-[  --enable-sserver        Enable :sserver: protocol (default)
-  --disable-sserver       Disable :sserver: protocol],
-  acx_sserver=$enableval,
-[if test "$ac_cv_have_ssl" = yes; then
-    acx_sserver="yes"
- else
-    acx_sserver="no"
-fi])
-AM_CONDITIONAL(SSERVER_PROTOCOL_SUPPORT, test $acx_sserver = "yes")
-if test x$acx_sserver = xyes; then
-  AC_DEFINE(SSERVER_PROTOCOL_SUPPORT, [], [Support for :sserver:])
-fi
-AC_MSG_RESULT($acx_sserver)
-
-#AC_MSG_CHECKING(support for sync protocol)
-#AC_ARG_ENABLE(sync,
-#[  --enable-sync           Enable server synchronisation protocol (default)
-#  --disable-sync          Disable server synchronisation protocol],
-#  acx_sync=$enableval,
-#[if test "$ac_cv_have_ssl" = yes; then
-#    acx_sync="yes"
-# else
-#    acx_sync="no"
-#fi])
-#AM_CONDITIONAL(SYNC_PROTOCOL_SUPPORT, test $acx_sync = "yes")
-#if test x$acx_sync = xyes; then
-#  AC_DEFINE(SYNC_PROTOCOL_SUPPORT, [], [Support for server synchronisation])
-#fi
-#AC_MSG_RESULT($acx_sync)
-
-AC_MSG_CHECKING(support for sspi protocol)
-AC_ARG_ENABLE(sspi,
-[  --enable-sspi           Enable :sspi: protocol (default)
-  --disable-sspi          Disable :sspi: protocol],
-  acx_sspi=$enableval,
-  acx_sspi="yes")
-AM_CONDITIONAL(SSPI_PROTOCOL_SUPPORT, test $acx_sspi = "yes")
-if test x$acx_sspi = xyes; then
-  AC_DEFINE(SSPI_PROTOCOL_SUPPORT, [], [Support for :sspi:])
-  AC_CONFIG_SUBDIRS(protocols/ntlm)
-fi
-AC_MSG_RESULT($acx_sspi)
-
-AC_MSG_CHECKING(support for enum protocol)
-AC_ARG_ENABLE(sspi,
-[  --enable-enum           Enable :enum: protocol (default)
-  --disable-enum          Disable :enum: protocol],
-  acx_enum=$enableval,
-  acx_enum="yes")
-AM_CONDITIONAL(ENUM_PROTOCOL_SUPPORT, test $acx_enum = "yes")
-if test x$acx_enum = xyes; then
-  AC_DEFINE(ENUM_PROTOCOL_SUPPORT, [], [Support for remote enumerationi protocol])
-fi
-AC_MSG_RESULT($acx_enum)
 
 AC_MSG_CHECKING(whether to compile RCS tools)
 AC_ARG_ENABLE(rcs,

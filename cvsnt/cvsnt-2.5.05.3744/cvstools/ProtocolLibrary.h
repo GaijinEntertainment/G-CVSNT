@@ -31,16 +31,14 @@ public:
 	CVSTOOLS_EXPORT server_interface *GetServerInterface();
 	CVSTOOLS_EXPORT const protocol_interface *LoadProtocol(const char *protocol);
 	CVSTOOLS_EXPORT bool UnloadProtocol(const protocol_interface *protocol);
-	CVSTOOLS_EXPORT const protocol_interface *FindProtocol(const char *tagline, bool& badauth,int io_socket, bool secure, const protocol_interface **temp_protocol);
-	CVSTOOLS_EXPORT const char *EnumerateProtocols(int *context);
+	CVSTOOLS_EXPORT const protocol_interface *FindProtocol(const char *tagline, bool& badauth,int io_socket, const protocol_interface **temp_protocol);
+	CVSTOOLS_EXPORT static bool IsEnabled(const protocol_interface *protocol);
 
 	CVSTOOLS_EXPORT static bool PromptForPassword(const char *prompt, char *buffer, int max_length);
 	CVSTOOLS_EXPORT static char PromptForAnswer(const char *message, const char *title, bool withcancel);
 	CVSTOOLS_EXPORT static const char *GetEnvironment(const char *env);
 
 protected:
-	CDirectoryAccess m_acc;
-	DirectoryAccessInfo m_inf;
 	typedef std::map<cvs::string, protocol_interface*> loaded_protocols_t;
 	static loaded_protocols_t m_loaded_protocols;
 

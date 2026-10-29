@@ -38,12 +38,7 @@ config.guess
 *./config.h.in
 *./config.guess
 *./config.sub
-protocols/ntlm/test-driver
 stamp-h1.in
-protocols/ntlm/libntlm.pc
-protocols/ntlm/libntlm.spec
-protocols/ntlm/ntlm.h
-protocols/ntlm/INSTALL
 redhat/cvsnt.spec
 Releasex64/*
 Debugx64/*

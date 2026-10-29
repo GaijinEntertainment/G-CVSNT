@@ -279,11 +279,7 @@ jobs:
         shell: cmd
         working-directory: ${{ env.SRC }}
         run: msbuild cvsnt.vcxproj %MSB%
-      - name: Build the ext protocol plugin (cvsnt.vcxproj does not reference it)
-        shell: cmd
-        working-directory: ${{ env.SRC }}
-        run: msbuild protocols\ext_protocol.vcxproj %MSB%
-      - name: Pack client zip (protocols pserver, sspi, ssh, server, fork, enum, ext; the info trigger)
+      - name: Pack client zip (the pserver protocol and the info trigger)
         shell: pwsh
         working-directory: ${{ env.SRC }}
         env:
@@ -296,15 +292,13 @@ jobs:
             if (-not $hit) { throw "$f not found" }
             Copy-Item $hit.FullName $stage
           }
-          Copy-Item external_libs\x64\dll\libcrypto-1_1-x64.dll, external_libs\x64\dll\libssl-1_1-x64.dll $stage
+          Copy-Item external_libs\x64\dll\libcrypto-1_1-x64.dll $stage
           # the protocol and trigger plugins cvsnt.vcxproj builds; cvs init needs the info trigger
           Get-ChildItem -Recurse -Filter *.dll -File | Where-Object FullName -match 'Releasex64\\protocols\\' |
             ForEach-Object { Copy-Item $_.FullName "$stage\protocols" }
           Get-ChildItem -Recurse -Filter *.dll -File | Where-Object FullName -match 'Releasex64\\triggers\\' |
             ForEach-Object { Copy-Item $_.FullName "$stage\triggers" }
-          foreach ($p in "pserver", "sspi", "ssh", "server", "fork", "enum", "ext") {
-            if (-not (Test-Path "$stage\protocols\$p.dll")) { throw "protocol plugin $p.dll not built" }
-          }
+          if (-not (Test-Path "$stage\protocols\pserver.dll")) { throw "protocol plugin pserver.dll not built" }
           if (-not (Test-Path "$stage\triggers\info.dll")) { throw "trigger plugin info.dll not built" }
           Copy-Item COPYING "$stage\COPYING"
           Set-Content -Path "$stage\THIRD-PARTY.txt" -Value @'

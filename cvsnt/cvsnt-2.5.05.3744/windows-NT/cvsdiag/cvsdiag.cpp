@@ -426,12 +426,6 @@ void diag(FILE *output)
 	fprintf(output,"LockService installed: %s\n",service_installed("CvsLock")?"Yes":"No");
 	fprintf(output,"\n");
 	fprintf(output,":pserver: installed: %s\n",protocol_installed("pserver")?"Yes":"No");
-	fprintf(output,":sserver: installed: %s\n",protocol_installed("sserver")?"Yes":"No");
-	fprintf(output,":gserver: installed: %s\n",protocol_installed("gserver")?"Yes":"No");
-	fprintf(output,":server: installed: %s\n",protocol_installed("server")?"Yes":"No");
-	fprintf(output,":ssh: installed: %s\n",protocol_installed("ssh")?"Yes":"No");
-	fprintf(output,":sspi: installed: %s\n",protocol_installed("sspi")?"Yes":"No");
-	fprintf(output,":ext: installed: %s\n",protocol_installed("ext")?"Yes":"No");
 	fprintf(output,"\n");
 	fprintf(output,"Installation Path: %s\n",get_reg_string("InstallPath"));
 	fprintf(output,"Repository 0 Path: %s\n",get_reg_string("Repository0"));
@@ -443,8 +437,6 @@ void diag(FILE *output)
 	fprintf(output,"Repository 3 Path: %s\n",get_reg_string("Repository3"));
 	fprintf(output,"Repository 3 Name: %s\n",get_reg_string("Repository3Name"));
 	fprintf(output,"CVS Temp directory: %s\n",get_reg_string("TempDir"));
-	fprintf(output,"CA Certificate File: %s\n",get_reg_string("CertificateFile"));
-	fprintf(output,"Private Key File: %s\n",get_reg_string("PrivateKeyFile"));
 	fprintf(output,"Local Users Only: %s\n",get_reg_int("DontUseDomain")?"Yes":"No");
 	fprintf(output,"Default LockServer: %s\n",get_reg_string("LockServer"));
 	fprintf(output,"Disable Reverse DNS: %s\n",get_reg_int("NoReverseDns")?"Yes":"No");

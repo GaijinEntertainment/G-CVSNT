@@ -29,18 +29,6 @@ else
   mac_hfs_lib =
 endif
 
-if GSERVER_PROTOCOL_SUPPORT
-  gssapi_lib = @GSSAPI_LIBS@
-else
-  gssapi_lib =
-endif
-
-if SSERVER_PROTOCOL_SUPPORT
-  ssl_lib = @SSL_LIBS@
-else
-  ssl_lib =
-endif
-
 AM_CPPFLAGS = -I$(top_srcdir)/lib -I$(top_srcdir)/cvsapi -I$(top_srcdir)/cvstools -I$(top_srcdir)/diff -I$(top_srcdir)/cvsapi $(zlib_inc) $(includeopt) $(mac_hfs_inc) -pthread
 AM_LDFLAGS = -pthread
 
@@ -73,7 +61,6 @@ cvsnt_SOURCES = \
 	cvsrc.cpp \
 	cvsrcs.cpp \
 	diff.cpp \
-	edit.cpp \
 	entries.cpp \
 	error.cpp \
 	exclude.cpp \
@@ -122,7 +109,6 @@ cvsnt_SOURCES = \
 	update.cpp \
 	version.cpp \
 	vers_ts.cpp \
-	watch.cpp \
 	wrapper.cpp \
 	xgetwd.cpp \
 	xdiff.cpp \
@@ -131,7 +117,6 @@ cvsnt_SOURCES = \
 	buffer.h \
 	client.h \
 	cvs.h \
-	edit.h \
 	error.h \
 	fileattr.h \
 	hardlink.h \
@@ -142,8 +127,7 @@ cvsnt_SOURCES = \
 	rcs.h \
 	savecwd.h \
 	server.h \
-	update.h \
-	watch.h
+	update.h
 
 cvsnt_LDADD = \
 	-L$(DESTDIR)/$(libdir) \

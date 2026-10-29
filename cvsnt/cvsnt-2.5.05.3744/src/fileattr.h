@@ -13,29 +13,8 @@
 #ifndef FILEATTR_H
 #define FILEATTR_H 
 
-/* XML File containing per-file attributes.  
-   Builtin attributes:
+/* Directory owner and ACLs, as XML.  */
 
-   <watched />: Present means the file is watched and should be checked out
-   read-only.
-
-   <watchers>: Users with watches for this file.  Value is
-   <watcher name=WATCHER>
-   <TYPE />
-   </watcher>
-   where WATCHER is a username, and TYPE is edit,unedit or commit (or nothing if none; there is no "none" or "all" keyword).
-
-   <editors>: Users editing this file.  Value is
-   <editor name=EDITOR>
-   <time>TIME</time>
-   <hostname>HOSTNAME</hostname>
-   <pathname>PATHNAME</pathname>
-   </editor>
-   where EDITOR is a username, 
-   TIME is when the "cvs edit" command happened,
-   and HOSTNAME and PATHNAME are for the working directory.  */
-
-#define CVSREP_OLDFILEATTR "CVS/fileattr"
 #define CVSREP_OLDOWNER "/.owner"
 #define CVSREP_OLDPERMS "/.perms"
 #define CVSREP_FILEATTR "CVS/fileattr.xml"
@@ -50,29 +29,11 @@ CXmlNodePtr fileattr_find(CXmlNodePtr root, const char *exp, ...);
 
 CXmlNodePtr fileattr_getroot();
 
-/* Nonzero if FILENAME has a <watched/> node; matches with fncmp
-   semantics like the cvs:filename XPath function.  */
-int fileattr_iswatched(const char *filename);
-
 /* Return the next node on this level with this name, for walking lists */
 CXmlNodePtr fileattr_next(CXmlNodePtr node);
 
-/* Delete a value under the node. */
-void fileattr_delete(CXmlNodePtr root, const char *exp, ...);
-
-/* Delete a value under the node. */
-void fileattr_delete_child(CXmlNodePtr root, CXmlNodePtr child);
-
 /* Delete the node and its subtree now, and mark the tree modified. */
 void fileattr_batch_delete(CXmlNodePtr root);
-
-/* Create NAME under PARENT (NULL: the tree root), with one optional
-   attribute, and mark the tree modified.  Returns the new node. */
-CXmlNodePtr fileattr_newnode(CXmlNodePtr parent, const char *name, const char *attr = NULL, const char *value = NULL);
-
-/* Add child NAME under PARENT unless it is there already.  Returns
-   whether a node landed; the tree is marked modified only then. */
-bool fileattr_addchild(CXmlNodePtr parent, const char *name);
 
 /* If this node has no children, delete it & recurse upwards.  Rinse. Wash. Repeat. */
 void fileattr_prune(CXmlNodePtr node);
@@ -80,27 +41,11 @@ void fileattr_prune(CXmlNodePtr node);
 /* Get a single value from a node.  Pass null to get value of this node. */
 const char *fileattr_getvalue(CXmlNodePtr root, const char *name);
 
-/* Set a single value for a node.  Pass null to set value of this node. */
-void fileattr_setvalue(CXmlNodePtr root, const char *name, const char *value);
-
-/* Set the attributes for file FILENAME in whatever manner is appropriate
-   for a newly created file.  */
-void fileattr_newfile(const char *filename);
-
 /* Write out all modified attributes.  */
 void fileattr_write();
 
 /* Free all memory allocated by fileattr_*.  */
 void fileattr_free();
-
-/* Create a copy of a subtree */
-CXmlNodePtr fileattr_copy(CXmlNodePtr root);
-
-/* Copy a subtree into an existing tree */
-void fileattr_paste(CXmlNodePtr root, CXmlNodePtr source);
-
-/* Free a copied subtree */
-void fileattr_free_subtree(CXmlNodePtr& root);
 
 /* Force modified */
 void fileattr_modified();

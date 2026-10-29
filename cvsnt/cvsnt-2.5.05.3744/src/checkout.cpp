@@ -357,7 +357,7 @@ int checkout (int argc, char **argv)
 		send_file_names(argc,argv,SEND_EXPAND_WILD);
 		client_module_expansion.clear();
 		send_to_server("expand-modules\n",0);
-		err = get_server_responses_noproxy();
+		err = get_server_responses();
 		if(err)
 			return err;
 
@@ -1277,7 +1277,7 @@ static int checkout_proc(int argc, char **argv, const char *where_orig,
 		Register (entries, finfo.file,
 			  vers->vn_rcs ? vers->vn_rcs : "0",
 			  line, vers->options, vers->tag,
-			  vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, vers->edit_revision, vers->edit_tag, vers->edit_bugid, NULL);
+			  vers->date, (char *) 0, NULL, NULL, vers->tt_rcs, vers->bugid, NULL);
 		xfree (line);
 	    }
 	    freevers_ts (&vers);

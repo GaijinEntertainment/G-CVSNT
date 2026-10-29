@@ -315,7 +315,7 @@ $(BIN)\cvstools.dll: dirs $(GEN)\cvstools\trigger_h.h $(BIN)\cvsapi.dll $(LIBD)\
 		"$(S)\cvstools\Cvsgui.cpp" "$(S)\cvstools\EntriesParser.cpp" \
 		"$(S)\cvstools\ProtocolLibrary.cpp" "$(S)\cvstools\RootSplitter.cpp" \
 		"$(S)\cvstools\Scramble.cpp" "$(S)\cvstools\ServerConnection.cpp" \
-		"$(S)\cvstools\ServerInfo.cpp" "$(S)\cvstools\TriggerLibrary.cpp" \
+		"$(S)\cvstools\TriggerLibrary.cpp" \
 		"$(GEN)\cvstools\trigger_i.c" "$(S)\cvstools\win32\CvsCommonDialogs.cpp" \
 		"$(S)\cvstools\win32\GlobalSettings.cpp" "$(S)\cvstools\win32\InfoPanel.cpp"
 	cd /d "$(S)\cvstools" && $(RC) /nologo /d "NDEBUG" /I "$(GEN)\cvstools" /I "$(S)\cvstools\win32" /fo"$(OBJ)\cvstools\cvstools.res" win32\cvstools.rc
@@ -332,7 +332,7 @@ CVSNT_SRC = \
 	"$(S)\src\checkin.cpp" "$(S)\src\checkout.cpp" "$(S)\src\chown.cpp" \
 	"$(S)\src\classify.cpp" "$(S)\src\client.cpp" "$(S)\src\commit.cpp" \
 	"$(S)\src\create_adm.cpp" "$(S)\src\cvsrc.cpp" "$(S)\src\cvsrcs.cpp" \
-	"$(S)\src\diff.cpp" "$(S)\src\download_blob_to.cpp" "$(S)\src\edit.cpp" \
+	"$(S)\src\diff.cpp" "$(S)\src\download_blob_to.cpp" \
 	"$(S)\src\entries.cpp" "$(S)\src\error.cpp" "$(S)\src\expand_path.cpp" \
 	"$(S)\src\fileattr.cpp" "$(S)\src\find_names.cpp" "$(S)\src\hash.cpp" \
 	"$(S)\src\history.cpp" "$(S)\src\ignore.cpp" "$(S)\src\import.cpp" \
@@ -347,7 +347,7 @@ CVSNT_SRC = \
 	"$(S)\src\scramble.cpp" "$(S)\src\server.cpp" "$(S)\src\sha256\sha256.c" \
 	"$(S)\src\status.cpp" "$(S)\src\subr.cpp" "$(S)\src\switch.cpp" "$(S)\src\tag.cpp" \
 	"$(S)\src\update.cpp" "$(S)\src\version.cpp" "$(S)\src\vers_ts.cpp" \
-	"$(S)\src\watch.cpp" "$(S)\src\wrapper.cpp" "$(S)\src\xdiff.cpp" \
+	"$(S)\src\wrapper.cpp" "$(S)\src\xdiff.cpp" \
 	"$(S)\src\xgetwd.cpp" "$(S)\src\zlib.cpp" "$(S)\src\zstd_buffer.cpp" \
 	"$(S)\windows-NT\filesubr.cpp" "$(S)\windows-NT\mkdir.cpp" "$(S)\windows-NT\pwd.cpp" \
 	"$(S)\windows-NT\setuid.cpp" "$(S)\windows-NT\sockerror.cpp" \
@@ -373,19 +373,19 @@ $(BIN)\cvs.exe: cvsnt_objs $(LIBD)\gnulib.lib $(LIBD)\libdiff.lib $(LIBD)\zlib.l
 		"$(LIBD)\clientLib.lib" "$(LIBD)\blob_sockets.lib" "$(LIBD)\ufccrypt.lib" \
 		"$(LIBD)\cvsdelta.lib" "$(LIBD)\libsuid.lib" \
 		"$(LIBD)\cvsapi.lib" "$(LIBD)\cvstools.lib" \
-		/LIBPATH:"$(EXTLIB)" libssl.lib libcrypto.lib comctl32.lib wsock32.lib ws2_32.lib \
+		/LIBPATH:"$(EXTLIB)" libcrypto.lib comctl32.lib wsock32.lib ws2_32.lib \
 		netapi32.lib mpr.lib ole32.lib oleaut32.lib libiconv.lib wininet.lib dbghelp.lib \
 		advapi32.lib user32.lib shell32.lib gdi32.lib crypt32.lib secur32.lib
 
 # --------------------------------------------------------------------------- plugins (x64)
 # Layout the client expects under "-L <libdir>": protocols\<name>.dll, triggers\info.dll.
-# pserver is what a real client needs; info lets "cvs init" (and so regress.py) run out of
-# the build tree; ext is what the client/server case in regress.py connects through.
+# pserver is what a real client needs, and the client/server case in regress.py connects
+# through it; info lets "cvs init" (and so regress.py) run out of the build tree.
 PLUGIN_INC = /I "$(S)\external_libs" /I "$(S)\cvsapi\win32" /I "$(S)\cvsapi" /I "$(S)\cvstools" \
 	/I "$(S)\libxml\include" /I "$(S)"
 PLUGIN_LIBS = "$(LIBD)\cvsapi.lib" "$(LIBD)\cvstools.lib" ws2_32.lib wsock32.lib advapi32.lib user32.lib
 
-plugins: $(BIN)\protocols\pserver.dll $(BIN)\protocols\ext.dll $(BIN)\triggers\info.dll
+plugins: $(BIN)\protocols\pserver.dll $(BIN)\triggers\info.dll
 
 $(BIN)\protocols\pserver.dll: $(BIN)\cvsapi.dll $(BIN)\cvstools.dll
 	@if not exist "$(OBJ)\pserver" mkdir "$(OBJ)\pserver"
@@ -394,14 +394,6 @@ $(BIN)\protocols\pserver.dll: $(BIN)\cvsapi.dll $(BIN)\cvstools.dll
 		/Fo"$(OBJ)\pserver\\" /Fd"$(OBJ)\pserver\a.pdb" "$(S)\protocols\common.cpp" "$(S)\protocols\pserver.cpp"
 	cd /d "$(S)\protocols" && $(RC) /nologo /d "NDEBUG" /fo"$(OBJ)\pserver\proto_resource.res" proto_resource.rc
 	$(LINK) /nologo /DLL /OUT:$@ /DEBUG /INCREMENTAL:NO "$(OBJ)\pserver\*.obj" "$(OBJ)\pserver\proto_resource.res" $(PLUGIN_LIBS)
-
-$(BIN)\protocols\ext.dll: $(BIN)\cvsapi.dll $(BIN)\cvstools.dll
-	@if not exist "$(OBJ)\ext" mkdir "$(OBJ)\ext"
-	@if not exist "$(BIN)\protocols" mkdir "$(BIN)\protocols"
-	$(CC) $(CFLAGS_COMMON) /EHsc /D "_WINDOWS" /D "_USRDLL" /D "ext_PROTOCOL_EXPORTS" $(PLUGIN_INC) \
-		/Fo"$(OBJ)\ext\\" /Fd"$(OBJ)\ext\a.pdb" "$(S)\protocols\common.cpp" "$(S)\protocols\ext.cpp"
-	cd /d "$(S)\protocols" && $(RC) /nologo /d "NDEBUG" /fo"$(OBJ)\ext\proto_resource.res" proto_resource.rc
-	$(LINK) /nologo /DLL /OUT:$@ /DEBUG /INCREMENTAL:NO "$(OBJ)\ext\*.obj" "$(OBJ)\ext\proto_resource.res" $(PLUGIN_LIBS)
 
 $(BIN)\triggers\info.dll: $(BIN)\cvsapi.dll $(BIN)\cvstools.dll
 	@if not exist "$(OBJ)\info" mkdir "$(OBJ)\info"

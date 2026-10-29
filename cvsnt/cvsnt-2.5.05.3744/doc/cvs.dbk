@@ -524,7 +524,8 @@ Are you sure you want to release (and delete) directory `tc': y
     <para>If the access method is omitted, then if the repository does not
     contain <command>@</command>, then <command>:local:</command> is assumed.
     If it does contain <command>@</command> then <command>:ext:</command> is
-    assumed. For example, if you have a local repository in
+    assumed. The <command>:ext:</command> access method is not available, so
+    cvsnt refuses such a repository. For example, if you have a local repository in
     <command>/usr/local/cvsroot</command>, you can use
     <command>/usr/local/cvsroot</command> instead of
     <command>:local:/usr/local/cvsroot</command>.</para>
@@ -767,18 +768,14 @@ export CVSROOT
         in the repository. <command>CVSUMASK</command> does not affect the
         file permissions in the working directory; such files have the
         permissions which are typical for newly created files, except that
-        sometimes cvsnt creates them read-only (see the sections on watches,
-        <xref linkend="Setting-a-watch" />; -r, <xref
+        sometimes cvsnt creates them read-only (see -r, <xref
         linkend="Global-options" />; or <command>CVSREAD</command>, <xref
         linkend="Environment-variables" />).</para>
 
         <para>Note that using the client/server cvsnt (<xref
         linkend="Remote-repositories" />), there is no good way to set
         <command>CVSUMASK</command>; the setting on the client machine has no
-        effect. If you are connecting with <command>ssh</command>, you can set
-        <command>CVSUMASK</command> in <command>.bashrc</command> or
-        <command>.cshrc</command>, as described in the documentation for your
-        operating system. This behavior might change in future versions of
+        effect. This behavior might change in future versions of
         cvsnt; do not rely on the setting of <command>CVSUMASK</command> on
         the client having no effect.</para>
 
@@ -804,7 +801,7 @@ export CVSROOT
         protection against only accidental lapses; anyone who is trying to
         circumvent the measure will be able to do so, and depending on how you
         have set it up may gain access to more than just cvsnt. You may wish
-        to instead consider pserver or sserver. They shares some of the same
+        to instead consider pserver. It shares some of the same
         attributes, in terms of possibly providing a false sense of security
         or opening security holes wider than the ones you are trying to fix,
         so read the documentation on pserver security carefully if you are
@@ -852,8 +849,7 @@ export CVSROOT
         silently ignore additional files.</para>
 
         <para>The format of the fileattr.xml file is a series of XML entries
-        describing the edit state of each file, and any access permissions
-        that are current.</para>
+        describing the access permissions that are current.</para>
       </sect2>
 
       <sect2 id="Locks">
@@ -1287,11 +1283,9 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
             <para>The format of the lines is:</para>
 
             <para><symbol> /name/saved
-            mergepoint/filler1/rcstime/edit_revision/edit_tag/edit_bugid/
+            mergepoint/filler1/rcstime/filler2/filler3/bugid/md5/
             </symbol></para>
 
-            <para>If there are any extra fields after rcstime these should be
-            ignored.</para>
 
             <para>The second field is the saved tag from an update -j, which
             is recorded the next time the file is committed to store the
@@ -1303,9 +1297,9 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
             expressed as a time_t. Do not assume that this value will fit into
             a 32bit variable, as this will cause problems in 2038.</para>
 
-            <para>The fifth, sixth and seventh fields define the revision,
-            tag/branch and bug identifier of the last <command>cvs
-            edit</command> that was invoked by the client.</para>
+            <para>The fifth and sixth fields are unused. The seventh field
+            is the bug identifier given to <command>cvs add -b</command>,
+            which the next commit of the file uses.</para>
           </listitem>
         </varlistentry>
 
@@ -1376,60 +1370,6 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
             numeric tag.</para>
 
             <para><indexterm>
-                <primary>Notify file, in CVS directory</primary>
-              </indexterm><indexterm>
-                <primary>CVS/Notify file</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Notify</term>
-
-          <listitem>
-            <para>This file stores notifications (for example, for
-            <command>edit</command> or <command>unedit</command>) which have
-            not yet been sent to the server. Its format is not yet documented
-            here.</para>
-
-            <para><indexterm>
-                <primary>Notify.tmp file, in CVS directory</primary>
-              </indexterm><indexterm>
-                <primary>CVS/Notify.tmp file</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Notify.tmp</term>
-
-          <listitem>
-            <para>This file is to <command>Notify</command> as
-            <command>Entries.Backup</command> is to
-            <command>Entries</command>. That is, to write
-            <command>Notify</command>, first write the new contents to
-            <command>Notify.tmp</command> and then (atomically where
-            possible), rename it to <command>Notify</command>.</para>
-
-            <para><indexterm>
-                <primary>Base directory, in CVS directory</primary>
-              </indexterm><indexterm>
-                <primary>CVS/Base directory</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>Base</term>
-
-          <listitem>
-            <para>If watches are in use, then an <command>edit</command>
-            command stores the original copy of the file in the
-            <command>Base</command> directory. This allows the
-            <command>unedit</command> command to operate even if it is unable
-            to communicate with the server.</para>
-
-            <para><indexterm>
                 <primary>Template file, in CVS directory</primary>
               </indexterm><indexterm>
                 <primary>CVS/Template file</primary>
@@ -1448,6 +1388,11 @@ D/<varname>name</varname>/<varname>filler1</varname>/<varname>filler2</varname>/
           </listitem>
         </varlistentry>
       </variablelist>
+
+      <para>Older versions of cvsnt also stored the files
+      <command>Notify</command> and <command>Notify.tmp</command> and the
+      directory <command>Base</command> here. Current cvsnt does not use
+      them.</para>
     </sect1>
 
     <sect1 id="Intro-administrative-files">
@@ -1713,15 +1658,6 @@ cvs update
           <primary>pserver (client/server connection method), port
           specification</primary>
         </indexterm><indexterm>
-          <primary>sspi (client/server connection method), port
-          specification</primary>
-        </indexterm><indexterm>
-          <primary>gserver (client/server connection method), port
-          specification</primary>
-        </indexterm><indexterm>
-          <primary>sserver (client/server connection method), port
-          specification</primary>
-        </indexterm><indexterm>
           <primary>port, specifying for remote repositories</primary>
         </indexterm> Your working copy of the sources can be on a different
       machine than the repository. Using cvsnt in this manner is known as
@@ -1750,11 +1686,18 @@ cvs update
       <para>The details of exactly what needs to be set up depend on how you
       are connecting to the server.</para>
 
+      <para>The only access method for a remote repository is
+      <command>pserver</command>. The methods <command>ext</command>,
+      <command>fork</command>, <command>server</command>,
+      <command>ssh</command>, <command>sserver</command>,
+      <command>gserver</command>, <command>sspi</command> and
+      <command>ntserver</command> are not available. A repository cannot
+      forward its requests to another server.</para>
+
       <para>If <varname>method</varname> is not specified, and the repository
-      name contains <command>:</command>, then the default is
-      <command>ext</command> or <command>server</command>, depending on your
-      platform; both are described in <xref
-      linkend="Connecting-via-ssh" />.</para>
+      name contains <command>@</command>, then the default is
+      <command>ext</command>. Because <command>ext</command> is not
+      available, cvsnt refuses the repository.</para>
 
       <sect2 id="Server-requirements">
         <title>Server requirements</title>
@@ -1805,174 +1748,11 @@ cvs update
         linkend="Creating-a-repository" />.</para>
       </sect2>
 
-      <sect2 id="Connecting-via-ssh">
-        <title>Connecting with ssh</title>
-
-        <para><indexterm>
-            <primary>ssh</primary>
-          </indexterm>cvsnt uses the <command>ssh</command> protocol to
-        perform these operations, so the remote user host needs to have a
-        <command>.rhosts</command> file which grants access to the local
-        user.</para>
-
-        <para>For example, suppose you are the user <command>mozart</command>
-        on the local machine <command>toe.example.com</command>, and the
-        server machine is <command>faun.example.org</command>. On faun, put
-        the following line into the file <command>.rhosts</command> in
-        <command>bach</command>'s home directory:</para>
-
-        <para><screen>toe.example.com  mozart
-</screen></para>
-
-        <para>Then test that <command>ssh</command> is working with</para>
-
-        <para><screen>
-ssh -l bach faun.example.org 'echo $PATH'
-</screen></para>
-
-        <para>There is no need to edit <command>inetd.conf</command> or start
-        a cvsnt server process.</para>
-
-        <para><indexterm>
-            <primary>:ssh:, setting up</primary>
-          </indexterm>On some versions of cvsnt :ssh: protocol is available.
-        This is a builtin ssh client which integrates cvs authentication with
-        ssh security.</para>
-
-        <para>At its simplest, this is used like :pserver:, as in:</para>
-
-        <para><screen>
-cvs -d :ssh:user@machine.example.org:/usr/local/cvs login
-Password: *****
-cvs -d :ssh:user@machine.example.org:/usr/local/cvs co myproject
-</screen></para>
-
-        <para>However you can also register your private key with cvs, which
-        it will use instead of a password:</para>
-
-        <para><screen>
-cvs -d :ssh;key='c:\user.ppk':user@machine.example.org:/usr/local/cvs login
-Password: ******** (if your key has no passphrase, just press enter here)
-cvs -d :ssh:user@machine.example.org:/usr/local/cvs co myproject
-</screen></para>
-
-        <para>The keys should be in the putty private key format. You can use
-        PuttyGen to convert an existing Openssh private key to this
-        format.</para>
-
-        <para><indexterm>
-            <primary>:server:, setting up</primary>
-          </indexterm><indexterm>
-            <primary>:ext:, setting up</primary>
-          </indexterm><indexterm>
-            <primary>Kerberos, using kerberized rsh</primary>
-          </indexterm><indexterm>
-            <primary>ssh replacements (Kerberized RSH, &amp;c)</primary>
-          </indexterm><command>:ext:</command> specifies an external ssh
-        program. By default this is <command>ssh</command> but you may specify
-        another program in the CVSROOT using the optional :ext:{program}
-        command. You may alternatively set the <command>CVS_EXT</command>
-        environment variable to invoke another program which can access the
-        remote server (for example, <command>remsh</command> on HP-UX 9
-        because <command>rsh</command> is something different). It must be a
-        program which can transmit data to and from the server without
-        modifying it</para>
-
-        <para>Continuing our example, supposing you want to access the module
-        <command>foo</command> in the repository
-        <command>/usr/local/cvsroot/</command>, on machine
-        <command>faun.example.org</command>, you are ready to go:</para>
-
-        <para><screen>cvs -d :ext:bach@faun.example.org/usr/local/cvsroot checkout foo</screen></para>
-
-        <para>(The <command>bach@</command> can be omitted if the username is
-        the same on both the local and remote hosts.)</para>
-      </sect2>
-
-      <sect2 id="extnt">
-        <title>Using 3rd party clients via the extnt wrapper</title>
-
-        <para><indexterm>
-            <primary>extnt.exe</primary>
-          </indexterm> <indexterm>
-            <primary>extnt.ini</primary>
-          </indexterm> <indexterm>
-            <primary>Using CVSNT protocols with 3rd party clients</primary>
-          </indexterm> (Windows only at present) The extnt.exe program is a
-        wrapper client which allows 3rd-party clients to use CVSNT protocols
-        to access a CVSNT server. It uses the :ext: protocol on the client so
-        should be compatible with all existing clients.</para>
-
-        <para>The program takes a number of optional parameters, which may or
-        may not be defined by the client. A standard cvs client will only
-        usually pass the -l (username) option.<variablelist>
-            <varlistentry>
-              <term>-l username</term>
-
-              <listitem>
-                <para>Username to use.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-p protocol</term>
-
-              <listitem>
-                <para>protocol to use. Default comes from the protocol= line
-                in extnt.ini. If that is absent uses sspi.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-d directory</term>
-
-              <listitem>
-                <para>repository directory. Default comes from the directory=
-                line in extnt.ini</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-P password</term>
-
-              <listitem>
-                <para>Password to use. Default comes from the password= line
-                in extnt.ini</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-
-        <para>Unless all parameters are passed on the command line by the
-        client, you need to setup extnt.ini with the correct details. This
-        file is laid out as a standard windows .ini file, with the section
-        name based on the hostname to connect to.<screen>[cvs.myserver.org]
-protocol=sspi
-directory=/cvs</screen></para>
-
-        <para>You can define multiple connections to the same host by using
-        the hostname= entry, eg:</para>
-
-        <screen>[cvs-1]
-protocol=sspi
-directory=/cvs-repo-1
-hostname=cvs.myserver.org
-
-[cvs-2]
-protocol=sspi
-directory=/cvs-repo-2
-hostname=cvs.myserver.org</screen>
-
-        <para>Configuring the client to call extnt.exe as its :ext:
-        application is client specific.</para>
-      </sect2>
-
       <sect2 id="Password-authenticated">
         <title>Direct connection with password authentication</title>
 
-        <para>The cvsnt client can also connect to the server using a password
-        protocol. This is particularly useful if using <command>ssh</command>
-        is not feasible (for example, the server is behind a firewall), and
-        Kerberos also is not available.</para>
+        <para>The cvsnt client connects to the server using a password
+        protocol.</para>
 
         <para>To use this method, it is necessary to make some adjustments on
         both the server and client sides.</para>
@@ -2176,7 +1956,7 @@ sussman:1sOp854gDF3DY
           linkend="Authentication-security" /> for more on this.</para>
 
           <para>You can setup the passwd file by logging in to cvs using
-          another method (local, sserver, gserver, ssh, sspi) and using the
+          another method (local) and using the
           cvsnt passwd command to add new users.</para>
         </sect3>
 
@@ -2189,20 +1969,12 @@ sussman:1sOp854gDF3DY
               <primary>Authenticated client, using</primary>
             </indexterm><indexterm>
               <primary>:pserver:, setting up</primary>
-            </indexterm><indexterm>
-              <primary>:sserver:, setting up</primary>
-            </indexterm><indexterm>
-              <primary>:sspi:, setting up</primary>
             </indexterm>To run a cvsnt command on a remote repository via the
           password-authenticating server, one specifies the protocol, optional
           username, repository host, an optional port number, and path to the
           repository. For example:</para>
 
           <para><screen>cvs -d :pserver:faun.example.org:/usr/local/cvsroot checkout someproj
-
-cvs -d :sserver:faun.example.org:/usr/local/cvsroot checkout someproj
-
-cvs -d :sspi:faun.example.org:/usr/local/cvsroot checkout someproj
 </screen></para>
 
           <para>With certain protcols, unless you're connecting to a
@@ -2254,9 +2026,9 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
           login</command>).</para>
 
           <para>Note that if the <command>:pserver:</command> were not present
-          in the repository specification, cvsnt would assume it should use
-          <command>ssh</command> to connect with the server instead (<xref
-          linkend="Connecting-via-ssh" />).</para>
+          in the repository specification, cvsnt would assume
+          <command>:ext:</command>. It would refuse the repository, because
+          the <command>:ext:</command> access method is not available.</para>
 
           <para>Of course, once you have a working copy checked out and are
           running cvsnt commands from within it, there is no longer any need
@@ -2276,33 +2048,16 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
 
           <para><indexterm>
               <primary>Security, of pserver</primary>
-            </indexterm><indexterm>
-              <primary>Security, of sserver</primary>
-            </indexterm><indexterm>
-              <primary>Security, of sspi</primary>
-            </indexterm><indexterm>
-              <primary>Secutiry, of ntserver</primary>
-            </indexterm> With pserver and sserver, the passwords are stored on
+            </indexterm> With pserver, the passwords are stored on
           the client side in a trivial encoding of the cleartext and in the
           pserver case transmitted in the same encoding. The encoding is done
           only to prevent inadvertent password compromises (i.e., a system
           administrator accidentally looking at the file), and will not
           prevent even a naive attacker from gaining the password.</para>
 
-          <para>With sserver, the client/server connection is encrypted using
-          SSL, and the risk of the password being sniffed 'on the wire' is
-          very low.</para>
-
-          <para>With sspi, if cvsnt login is used to gain access to a remote
-          server, the passwords are stored on the client side in the same
-          manner as pserver. However the passwords are never transmitted
-          insecurely over the internet.</para>
-
-          <para>With pserver and sserver, the separate cvsnt password file
+          <para>With pserver, the separate cvsnt password file
           (<xref linkend="Authentication-server" />) allows people to use a
-          different password for repository access than for login access. With
-          other protocols the system passwords are used and the password field
-          in the passwd file is ignored.</para>
+          different password for repository access than for login access.</para>
 
           <para>Once a user has non-read-only access to the repository, she
           can execute programs on the server system through a variety of
@@ -2326,92 +2081,8 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
 
           <para>With pserver, the password is available to anyone who can
           sniff network packets or read a protected (i.e., user read-only)
-          file. Other protocols do not have this problem.</para>
+          file.</para>
         </sect3>
-      </sect2>
-
-      <sect2 id="GSSAPI-authenticated">
-        <title>Direct connection with GSSAPI</title>
-
-        <para><indexterm>
-            <primary>GSSAPI</primary>
-          </indexterm><indexterm>
-            <primary>Security, GSSAPI</primary>
-          </indexterm><indexterm>
-            <primary>:gserver:, setting up</primary>
-          </indexterm><indexterm>
-            <primary>Kerberos, using :gserver:</primary>
-          </indexterm>GSSAPI is a generic interface to network security
-        systems such as Kerberos 5. If you have a working GSSAPI library, you
-        can have cvsnt connect via a direct tcp connection, authenticating
-        with GSSAPI.</para>
-
-        <para>To do this, cvsnt needs to be compiled with GSSAPI support; when
-        configuring cvsnt it tries to detect whether GSSAPI libraries using
-        kerberos version 5 are present. You can also use the
-        <command>-with-gssapi</command> flag to configure.</para>
-
-        <para>The connection is authenticated using GSSAPI, but the message
-        stream is <emphasis>not</emphasis> authenticated by default. You must
-        use the <command>-a</command> global option to request stream
-        authentication.</para>
-
-        <para>The data transmitted is <emphasis>not</emphasis> encrypted by
-        default. Encryption support must be compiled into both the client and
-        the server; use the <command>-enable-encrypt</command> configure
-        option to turn it on. You must then use the <command>-x</command>
-        global option to request encryption.</para>
-
-        <para>GSSAPI connections are handled on the server side by the same
-        server which handles the password authentication server; see <xref
-        linkend="Authentication-server" />. If you are using a GSSAPI
-        mechanism such as Kerberos which provides for strong authentication,
-        you will probably want to disable the ability to authenticate via
-        cleartext passwords. To do so, create an empty
-        <command>CVSROOT/passwd</command> password file, and set
-        <command>SystemAuth=no</command> in the config file (<xref
-        linkend="config" />).</para>
-
-        <para>The GSSAPI server uses a principal name of
-        cvs/<varname>hostname</varname>, where <varname>hostname</varname> is
-        the canonical name of the server host. You will have to set this up as
-        required by your GSSAPI mechanism.</para>
-
-        <para>To connect using GSSAPI, use <command>:gserver:</command>. For
-        example,</para>
-
-        <para><screen>cvs -d :gserver:faun.example.org:/usr/local/cvsroot checkout foo
-</screen></para>
-      </sect2>
-
-      <sect2 id="Connecting-via-fork">
-        <title>Connecting with fork</title>
-
-        <para><indexterm>
-            <primary>fork, access method</primary>
-          </indexterm><indexterm>
-            <primary>:fork:, setting up</primary>
-          </indexterm>This access method allows you to connect to a repository
-        on your local disk via the remote protocol. In other words it does
-        pretty much the same thing as <command>:local:</command>, but various
-        quirks, bugs and the like are those of the remote cvsnt rather than
-        the local cvsnt.</para>
-
-        <para>For day-to-day operations you might prefer either
-        <command>:local:</command> or <command>:fork:</command>, depending on
-        your preferences. Of course <command>:fork:</command> comes in
-        particularly handy in testing or debugging <command>cvsnt</command>
-        and the remote protocol. Specifically, we avoid all of the
-        network-related setup/configuration, timeouts, and authentication
-        inherent in the other remote access methods but still create a
-        connection which uses the remote protocol.</para>
-
-        <para>To connect using the <command>fork</command> method, use
-        <command>:fork:</command> and the pathname to your local repository.
-        For example:</para>
-
-        <para><screen>cvs -d :fork:/usr/local/cvsroot checkout foo
-</screen></para>
       </sect2>
 
       <sect2 id="Repository-Alias">
@@ -2438,123 +2109,6 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
         to avoid exposing NT drive letters to the clients.</para>
       </sect2>
     </sect1>
-
-
-    <sect1 id="Replicating-a-repository">
-      <title>Replicating a repository and Repository Caching</title>
-
-      <para><indexterm>
-          <primary>Repository, replicting</primary>
-        </indexterm><indexterm>
-          <primary>Replicating a repository</primary>
-        </indexterm><indexterm>
-          <primary>Caching a repository</primary>
-        </indexterm> Repository replication and caching may be configured so 
-      that remote locations can have fast access for read operations while 
-      keeping changes stored in a master repository.  If the master repositoryy
-      goes offline then people at the remote location can continue to work
-      or one of the remote caches can be re-configured to be the new master.</para>
-
-      <para>The fisrt thing to consider is whether replication and caching 
-      are needed at all.  CVS was designed for networks that were much slower
-      and less reliable that are available today, so even without replication
-      and caching it should perform adequately for large remote teams using a
-      central repository located in the same or a distant continent.  If you
-      are considering repository replication and caching primarily to improve
-      performance then you should instead address the causes of the performance
-      issues first by contacting the CVSNT Newsgroup or purchasing commercial
-      support from the project sponsor (<xref linkend="BUGS" />).</para>
-
-
-
-      <sect2 id="Overview-Replicating-a-repository">
-        <title>Overview</title>
-
-        <para>After much analysis and discussion internally the CVSNT developers
-        could not see any benefit for repository replication and caching since
-        the CVSNT protocol was designed for telecommunications networks far 
-        slower and less reliable that what is commonly available today.</para>
-
-        <para>Secondly in hypotheticals about 'if we did do multi-repos' - we could
-        not see any benefit in a quorum based system where the changes on
-        one repository are mulitcast to several servers simultaneously, since the
-        quorum needs to be tracked and the 'excluded members' of the quorum are
-        just as incapable of accepting patches as is a single repository shadow.</para>
-
-        <para>The solution we have come up with is a 'master' repository and multiple
-        shadows.  If you like  you can change which is the 'master' at any time
-        you like.  </para>
-
-        <para>The CVSNT developers have been using the 2.5.04 repostiory cache feature since 2007
-        internally between Manchester UK and Sydney Australia and it works very well - and if you have
-        large binaries in the repository or your processes require 'fresh checkouts'
-        rather than 'updates' then installng a shadow does improve performance.</para>
-
-
-        <para>Changing your procedures to use 'udpate' would do the same thing and
-        requires much less effort than setting up repository replication.</para>
-
-        <para>It cannot be stressed enough just how unnecessary repository replication and
-        caching is for 99.9% of organisations as teams - if you are experiencing multi
-        site performance problems there are probably much 'better' ways to fix
-        it that using repository replication and caching.</para>
-
-        <para>If you want more info on repository replication please see the
-        previous newsgroup posts:</para>
-
-    <itemizedlist mark="bullet">
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030637.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030642.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030653.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030655.html</screen> And</para>
-      </listitem>
-
-      <listitem>
-        <para>1. <screen>http://www.cvsnt.org/pipermail/cvsnt/2008-May/030659.html</screen> .</para>
-      </listitem>
-
-
-    </itemizedlist>
-
-      </sect2>
-
-      <sect2 id="Into-Replicating-a-repository">
-        <title>Introduction</title>
-
-        <para>CVSNT provides the following specific repository replication an caching features:</para>
-    <itemizedlist mark="bullet">
-      <listitem>
-        <para>The SYNC protocol to 'pass through' changes form a local cache to the master server, and</para>
-      </listitem>
-
-      <listitem>
-        <para>The UNISON port on the Master server to allow caching clients to obtain delta copies of the repository (Unison is included in the quality assured CVS Suite only)</para>
-      </listitem>
-
-      <listitem>
-        <para>Triggers to automatically activate synchronising changes from the master server back to the local cache (the quality assured CVS Suite includes a SYNC trigger)</para>
-      </listitem>
-
-        <para>It is also necessary to configure the synchronise to occur at intervals when the caching server is inactive (the quality assured CVS Suite includes a SYNC scheduler)</para>
-
-
-    </itemizedlist>
-
-      </sect2>
-
-    </sect1>
-
-
   </chapter>
 
   <chapter id="Security">
@@ -2585,9 +2139,8 @@ cvs -d :pserver:bach@faun.example.org:/usr/local/cvsroot checkout foo
       accessing the any file unless they are specifically granted access by an
       access control entry</para>
 
-      <para>On a secure system it is recommended that pserver is not used, as
-      it sends its passwords in a trivially decryptable form. On Windows
-      systems use encrypted SSPI, and on Unix ssh is recommended.</para>
+      <para>The pserver method sends its passwords in a trivially decryptable
+      form. No other remote access method is available.</para>
     </sect1>
 
     <sect1 id="User-maintenance">
@@ -5083,12 +4636,7 @@ $ mv <varname>old-dir</varname> <varname>new-dir</varname>
       (<xref linkend="loginfo" />). To log commits, checkouts, exports, and
       tags, respectively, you can also use the <command>-i</command>,
       <command>-o</command>, <command>-e</command>, and <command>-t</command>
-      options in the modules file. For a more flexible way of giving
-      notifications to various users, which requires less in the way of
-      keeping centralized scripts up to date, use the <command>cvs watch
-      add</command> command (<xref linkend="Getting-Notified" />); this
-      command is useful even if you are not using <command>cvs watch
-      on</command>.</para>
+      options in the modules file.</para>
 
       <sect2 id="taginfo">
         <title>The taginfo file</title>
@@ -5392,12 +4940,7 @@ $ cvs commit -fm "make it binary" kotest
     to edit each file at a time. This is the only solution with some version
     control systems, including rcs and sccs. Currently the usual way to get
     reserved checkouts with cvsnt is the <command>cvs admin -l</command>
-    command (<xref linkend="admin-options" />). This is not as nicely
-    integrated into cvsnt as the watch features, described below, but it seems
-    that most people with a need for reserved checkouts find it adequate. It
-    also may be possible to use the watches features described below, together
-    with suitable procedures (not enforced by software), to avoid having two
-    people edit at the same time.</para>
+    command (<xref linkend="admin-options" />).</para>
 
     <para>The default model with cvsnt is known as <firstterm>unreserved
     checkouts</firstterm>. In this model, developers can edit their own
@@ -5408,9 +4951,9 @@ $ cvs commit -fm "make it binary" kotest
     working copy up to date with the repository revision. This process is
     almost automatic.</para>
 
-    <para>cvsnt also supports mechanisms which facilitate various kinds of
-    communication, without actually enforcing rules like reserved checkouts
-    do.</para>
+    <para>The commands <command>edit</command>, <command>unedit</command>,
+    <command>watch</command>, <command>editors</command> and
+    <command>watchers</command> are not available.</para>
 
     <para>The rest of this chapter describes how these various models work,
     and some of the issues involved in choosing between them.</para>
@@ -5888,386 +5431,6 @@ cvs ci a/two.c b/three.c
       updated.</para>
     </sect1>
 
-    <sect1 id="Watches">
-      <title>Mechanisms to track who is editing files</title>
-
-      <para><indexterm>
-          <primary>Watches</primary>
-        </indexterm> For many groups, use of cvsnt in its default mode is
-      perfectly satisfactory. Users may sometimes go to check in a
-      modification only to find that another modification has intervened, but
-      they deal with it and proceed with their check in. Other groups prefer
-      to be able to know who is editing what files, so that if two people try
-      to edit the same file they can choose to talk about who is doing what
-      when rather than be surprised at check in time. The features in this
-      section allow such coordination, while retaining the ability of two
-      developers to edit the same file at the same time.</para>
-
-      <para>For maximum benefit developers should use <command>cvs
-      edit</command> (not <command>chmod</command>) to make files read-write
-      to edit them, and <command>cvs release</command> (not
-      <command>rm</command>) to discard a working directory which is no longer
-      in use, but cvsnt is not able to enforce this behavior.</para>
-
-      <sect2 id="Setting-a-watch">
-        <title>Setting up cooperative edits</title>
-
-        <para><indexterm>
-            <primary>watch on</primary>
-          </indexterm><function>cvs watch ro</function>
-        [<command>-lR</command>] files ... <indexterm role="fn">
-            <primary>cvs watch ro</primary>
-          </indexterm><indexterm role="fn">
-            <primary>cvs watch on</primary>
-          </indexterm> <indexterm>
-            <primary>Read-only files, and watches</primary>
-          </indexterm>Specify that developers should run <command>cvs
-        edit</command> before editing <varname>files</varname>. cvsnt will
-        create working copies of <varname>files</varname> read-only, to remind
-        developers to run the <command>cvs edit</command> command before
-        working on them.</para>
-
-        <para>If <varname>files</varname> includes the name of a directory,
-        cvsnt sets up cooperative edits for all files added to the
-        corresponding repository directory, and sets a default for files added
-        in the future; this allows the user to set notification policies on a
-        per-directory basis. The contents of the directory are processed
-        recursively, unless the <command>-l</command> option is given. The
-        <command>-R</command> option can be used to force recursion if the
-        <command>-l</command> option is set in <command>~/.cvsrc</command>
-        (<xref linkend="cvsrc" />).</para>
-
-        <para>If <varname>files</varname> is omitted, it defaults to the
-        current directory.</para>
-
-        <para><indexterm>
-            <primary>watch rw</primary>
-          </indexterm><indexterm>
-            <primary>watch off</primary>
-          </indexterm> <function>cvs watch rw</function>
-        [<command>-lR</command>] files ... <indexterm role="fn">
-            <primary>cvs watch off</primary>
-          </indexterm> Do not create <varname>files</varname> read-only on
-        checkout; thus, developers will not be reminded to use <command>cvs
-        edit</command> and <command>cvs unedit</command>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        <command>cvs watch ro</command>.</para>
-      </sect2>
-
-      <sect2 id="Getting-Notified">
-        <title>Telling CVS to notify you when someone modifies a file</title>
-
-        <para>You can tell cvsnt that you want to receive notifications about
-        various actions taken on a file. You can do this without using
-        <command>cvs watch ro</command> for the file, however generally you
-        will want to use <command>cvs watch ro</command>, so that developers
-        are reminded to use the <command>cvs edit</command> command.</para>
-
-        <para><indexterm>
-            <primary>watch add</primary>
-          </indexterm><function>cvs watch add</function>
-        [<command>-a</command> action] [<command>-lR</command>] files ...
-        <indexterm role="fn">
-            <primary>cvs watch add</primary>
-          </indexterm> Add the current user to the list of people to receive
-        notification of work done on <varname>files</varname>.</para>
-
-        <para>The <command>-a</command> option specifies what kinds of events
-        cvsnt should notify the user about. <varname>action</varname> is one
-        of the following:</para>
-
-        <variablelist>
-          <varlistentry>
-            <term>edit</term>
-
-            <listitem>
-              <para>Another user has applied the <command>cvs edit</command>
-              command (described below) to a file.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>unedit</term>
-
-            <listitem>
-              <para>Another user has applied the <command>cvs unedit</command>
-              command (described below) or the <command>cvs release</command>
-              command to a file, or has deleted the file and allowed
-              <command>cvs update</command> to recreate it.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>commit</term>
-
-            <listitem>
-              <para>Another user has committed changes to a file.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>all</term>
-
-            <listitem>
-              <para>All of the above.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>none</term>
-
-            <listitem>
-              <para>None of the above. (This is useful with <command>cvs
-              edit</command>, described below.)</para>
-            </listitem>
-          </varlistentry>
-        </variablelist>
-
-        <para>The <command>-a</command> option may appear more than once, or
-        not at all. If omitted, the action defaults to
-        <command>all</command>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para><indexterm>
-            <primary>watch remove</primary>
-          </indexterm> <function>cvs watch remove</function>
-        [<command>-a</command> action] [<command>-lR</command>] files ...
-        <indexterm role="fn">
-            <primary>cvs watch remove</primary>
-          </indexterm> Remove a notification request established using
-        <command>cvs watch add</command>; the arguments are the same. If the
-        <command>-a</command> option is present, only watches for the
-        specified actions are removed.</para>
-
-        <para><indexterm>
-            <primary>notify (admin file)</primary>
-          </indexterm>When the conditions exist for notification, cvsnt calls
-        the <command>notify</command> administrative file. Edit
-        <command>notify</command> as one edits the other administrative files
-        (<xref linkend="Intro-administrative-files" />). This file follows the
-        usual conventions for administrative files (<xref
-        linkend="syntax" />), where each line is a regular expression followed
-        by a command to execute. The command should contain a single
-        occurrence of <command>%s</command> which will be replaced by the user
-        to notify; the rest of the information regarding the notification will
-        be supplied to the command on standard input. A common thing to put in
-        the <command>notify</command> file is the single line:</para>
-
-        <para><screen>
-ALL mail %s -s "CVS notification for bug %b"
-</screen></para>
-
-        <para>This causes users to be notified by electronic mail (assuming
-        the command 'mail' exists).</para>
-
-        <para><indexterm>
-            <primary>users (admin file)</primary>
-          </indexterm>Note that if you set this up in the straightforward way,
-        users receive notifications on the server machine. One could of course
-        write a <command>notify</command> script which directed notifications
-        elsewhere, but to make this easy, cvsnt allows you to associate a
-        notification address for each user. To do so create a file
-        <command>users</command> in <command>CVSROOT</command> with a line for
-        each user in the format
-        <varname>user</varname>:<varname>value</varname>. Then instead of
-        passing the name of the user to be notified to
-        <command>notify</command>, cvsnt will pass the
-        <varname>value</varname> (normally an email address on some other
-        machine).</para>
-
-        <para>CVSNT does not notify you for your own changes. Currently this
-        check is done based on whether the user name of the person taking the
-        action which triggers notification matches the user name of the person
-        getting notification. In fact, in general, the watches features only
-        track one edit by each user. It probably would be more useful if
-        watches tracked each working directory separately, so this behavior
-        might be worth changing.</para>
-
-        <para>You can also pass information about the notification to the
-        script, using the following substitution variables:</para>
-
-        <para><command>%s</command> user being notified, or email (see
-        above).</para>
-
-        <para><command>%b</command> bug being edited.</para>
-
-        <para><command>%m</command> reason for edit as supplied by
-        user.</para>
-
-        <para><command>%d</command> date and time of edit.</para>
-
-        <para><command>%u</command> username of user performing the unedit
-        (may not be the same as %s).</para>
-
-        <para><command>%t</command> tag or branch being edited.</para>
-      </sect2>
-
-      <sect2 id="Editing-files">
-        <title>How to edit a file which is being watched</title>
-
-        <para><indexterm>
-            <primary>Checkout, as term for getting ready to edit</primary>
-          </indexterm>Since a file which is being watched is checked out
-        read-only, you cannot simply edit it. To make it read-write, and
-        inform others that you are planning to edit it, use the <command>cvs
-        edit</command> command. Some systems call this a
-        <firstterm>checkout</firstterm>, but cvsnt uses that term for
-        obtaining a copy of the sources (<xref
-        linkend="Getting-the-source" />), an operation which those systems
-        call a <firstterm>get</firstterm> or a
-        <firstterm>fetch</firstterm>.</para>
-
-        <para><indexterm>
-            <primary>edit</primary>
-          </indexterm><function>cvs edit</function> [options] files ...
-        <indexterm role="fn">
-            <primary>cvs edit</primary>
-          </indexterm> Prepare to edit the working files
-        <varname>files</varname>. cvsnt makes the <varname>files</varname>
-        read-write, and notifies users who have requested
-        <command>edit</command> notification for any of
-        <varname>files</varname>.</para>
-
-        <para>The <command>cvs edit</command> command accepts the same
-        <varname>options</varname> as the <command>cvs watch add</command>
-        command, and establishes a temporary watch for the user on
-        <varname>files</varname>; cvsnt will remove the watch when
-        <varname>files</varname> are <command>unedit</command>ed or
-        <command>commit</command>ted. If the user does not wish to receive
-        notifications, she should specify <command>-a none</command>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para>If the <command>-c</command> option is given, then the file is
-        checked for existing editors before the edit can proceed. In this way
-        a reasonable facsimile of 'reserved edits' can be achieved (note
-        however this is a suboptimal way to use cvsnt).</para>
-
-        <para>If the <command>-x</command> is given, then the edit is marked
-        as exclusive on the server, and other users will be prevented from
-        creating further edits. This option will also prevent commits to the
-        file by their users. (Implies -c).</para>
-
-        <para>The <command>-z</command> option stores the edited base revision
-        in a compressed form. This is useful if you are using an IDE which
-        tends to pick up the base revisions while searching files. Its also
-        saves quite a bit of disk space on large edits.</para>
-
-        <para>Normally edits apply only to the branch that you are currently
-        using. The <command>-w</command> causes the edit to apply to all
-        branches within the file (which is the behaviour for pre-2.0.55
-        CVSNT).</para>
-
-        <para>The <command>-b</command> marks this edit as belonging to a
-        specific bug. This information is stored and also sent to the
-        <command>CVSROOT/notify</command> script.</para>
-
-        <para>The <command>-m</command> sets a reason message for this edit.
-        This can be processed by the <command>CVSROOT/notify</command>
-        script.</para>
-
-        <para>Normally when you are done with a set of changes, you use the
-        <command>cvs commit</command> command, which checks in your changes
-        and returns the watched files to their usual read-only state. But if
-        you instead decide to abandon your changes, or not to make any
-        changes, you can use the <command>cvs unedit</command> command.</para>
-
-        <para><indexterm>
-            <primary>unedit</primary>
-          </indexterm> <indexterm>
-            <primary>Abandoning work</primary>
-          </indexterm> <indexterm>
-            <primary>Reverting to repository version</primary>
-          </indexterm> <indexterm role="fn">
-            <primary>cvs unedit</primary>
-          </indexterm> <function>cvs unedit</function> [-lR] [-r] [-u user]
-        [-w] [-b bug] [-m message] [files...]</para>
-
-        <para>Abandon work on the working files <varname>files</varname>, and
-        revert them to the repository versions on which they are based. CVSNT
-        by default also makes the files read only. Use the -w option to
-        override this.. CVSNT then notifies users who have requested
-        <command>unedit</command> notification for any of
-        <varname>files</varname>.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para>If watches are not in use, the <command>unedit</command> command
-        probably does not work, and the way to revert to the repository
-        version is to remove the file and then use <command>cvs
-        update</command> to get a new copy. The meaning is not precisely the
-        same; removing and updating may also bring in some changes which have
-        been made in the repository since the last time you updated.</para>
-
-        <para>The reason message passed to this function is passed directly to
-        the <command>CVSROOT/Notify</command> script. If the
-        <command>-b</command> option is used then only those files edited
-        under a specific bug are unedited.</para>
-
-        <para>Repository administrators can use the 'unedit others' option
-        <command>-u</command>. Only use this as a last resort as it only does
-        the server side of the unedit.</para>
-      </sect2>
-
-      <sect2 id="Watch-information">
-        <title>Information about who is watching and editing</title>
-
-        <para><indexterm>
-            <primary>watchers</primary>
-          </indexterm><function>cvs watchers</function>
-        [<command>-lR</command>] files ... <indexterm role="fn">
-            <primary>cvs watchers</primary>
-          </indexterm> List the users currently watching changes to
-        <varname>files</varname>. The report includes the files being watched,
-        and the mail address of each watcher.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-
-        <para><indexterm>
-            <primary>editors</primary>
-          </indexterm> <function>cvs editors</function>
-        [<command>-lR</command>] [<command>-a</command>] files ... <indexterm
-            role="fn">
-            <primary>cvs editors</primary>
-          </indexterm> List the users currently working on
-        <varname>files</varname>. The report includes the mail address of each
-        user, the time when the user began working with the file, and the host
-        and path of the working directory containing the file.</para>
-
-        <para>The <varname>files</varname> and options are processed as for
-        the <command>cvs watch</command> commands.</para>
-      </sect2>
-
-      <sect2 id="Watches-Compatibility">
-        <title>Using watches with old versions of CVS</title>
-
-        <para><indexterm>
-            <primary>CVS 1.6, and watches</primary>
-          </indexterm>If you use the watch features on a repository, it
-        creates <command>CVS</command> directories in the repository and
-        stores the information about watches in that directory. If you attempt
-        to use cvsnt 1.6 or earlier with the repository, you get an error
-        message such as the following (all on one line):</para>
-
-        <para><screen>cvs update: cannot open CVS/Entries for reading:
-No such file or directory
-</screen></para>
-
-        <para>and your operation will likely be aborted. To use the watch
-        features, you must upgrade all copies of cvsnt which use that
-        repository in local or server mode. If you cannot upgrade, use the
-        <command>watch off</command> and <command>watch remove</command>
-        commands to remove all watches, and that will restore the repository
-        to a state which cvsnt 1.6 can cope with.</para>
-      </sect2>
-    </sect1>
-
     <sect1 id="Choosing-a-model">
       <title>Choosing between reserved or unreserved checkouts</title>
 
@@ -6308,16 +5471,6 @@ No such file or directory
       data format, then resolving conflicts is going to be unpleasant enough
       that you generally will be better off to simply avoid the conflicts
       instead, by using reserved checkouts.</para>
-
-      <para>The watches features described above in <xref linkend="Watches" />
-      can be considered to be an intermediate model between reserved checkouts
-      and unreserved checkouts. When you go to edit a file, it is possible to
-      find out who else is editing it. And rather than having the system
-      simply forbid both people editing the file, it can tell you what the
-      situation is and let you figure out whether it is a problem in that
-      particular case or not. Therefore, for some groups it can be considered
-      the best of both the reserved checkout and unreserved checkout
-      worlds.</para>
     </sect1>
   </chapter>
 
@@ -6835,22 +5988,6 @@ $ cvs commit -fm "Change substitution mode"
 
       <variablelist>
         <varlistentry>
-          <term>c</term>
-
-          <listitem>
-            <para>Enforce cooperative edits (edit -c) for the file.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>x</term>
-
-          <listitem>
-            <para>Enforce reserved edit (edit -x) for the file.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
           <term>k</term>
 
           <listitem>
@@ -6961,6 +6098,10 @@ $ cvs commit -fm "Change substitution mode"
           </listitem>
         </varlistentry>
       </variablelist>
+
+      <para>Older versions had the flags <command>c</command> and
+      <command>x</command>. These flags have no effect. RCS files that carry
+      them still parse.</para>
     </sect1>
 
     <sect1 id="Log-keyword">
@@ -7469,26 +6610,6 @@ cvs -z6
             linkend="Authentication-server" />.</para>
 
             <para><indexterm>
-                <primary>Authentication, stream</primary>
-              </indexterm><indexterm>
-                <primary>Stream authentication</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>-a</term>
-
-          <term>--authenticate</term>
-
-          <listitem>
-            <para>Authenticate all communication between the client and the
-            server. Only has an effect on the cvsnt client. Authentication
-            prevents certain sorts of attacks involving hijacking the active
-            tcp connection. Enabling authentication does not enable
-            encryption.</para>
-
-            <para><indexterm>
                 <primary>rcsBIN, overriding</primary>
               </indexterm><indexterm>
                 <primary>Overriding rcsBIN</primary>
@@ -7705,8 +6826,7 @@ cvs -z6
             <para>Make new working files read-only. Same effect as if the
             <command>$CVSREAD</command> environment variable is set (<xref
             linkend="Environment-variables" />). The default is to make
-            working files writable, unless watches are on (<xref
-            linkend="Watches" />).</para>
+            working files writable.</para>
           </listitem>
         </varlistentry>
 
@@ -7766,21 +6886,6 @@ cvs -z6
             the <command>$CVSREAD</command> environment variable. Files are
             created read-write by default, unless <command>$CVSREAD</command>
             is set or <command>-r</command> is given.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>-x</term>
-
-          <term>--encrypt</term>
-
-          <listitem>
-            <para><indexterm>
-                <primary>Encryption</primary>
-              </indexterm>Encrypt all communication between the client and the
-            server. Only has an effect on the cvsnt client. Enabling
-            encryption implies that message traffic is also
-            authenticated.</para>
           </listitem>
         </varlistentry>
 
@@ -7978,13 +7083,10 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
             <para>Available with the following commands:
             <command>annotate</command>, <command>checkout</command>,
             <command>commit</command>, <command>diff</command>,
-            <command>edit</command>, <command>editors</command>,
             <command>export</command>, <command>log</command>,
             <command>rdiff</command>, <command>remove</command>,
             <command>rtag</command>, <command>status</command>,
-            <command>tag</command>, <command>unedit</command>,
-            <command>update</command>, <command>watch</command>, and
-            <command>watchers</command>.</para>
+            <command>tag</command>, and <command>update</command>.</para>
 
             <para><indexterm>
                 <primary>Editor, avoiding invocation of</primary>
@@ -8056,12 +7158,10 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
             <para>Available with the following commands:
             <command>annotate</command>, <command>checkout</command>,
             <command>commit</command>, <command>diff</command>,
-            <command>edit</command>, <command>editors</command>,
             <command>export</command>, <command>rdiff</command>,
             <command>remove</command>, <command>rtag</command>,
-            <command>status</command>, <command>tag</command>,
-            <command>unedit</command>, <command>update</command>,
-            <command>watch</command>, and <command>watchers</command>.</para>
+            <command>status</command>, <command>tag</command>, and
+            <command>update</command>.</para>
           </listitem>
         </varlistentry>
 
@@ -8254,9 +7354,6 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
               <varname>rev</varname> is omitted, lock the latest revision on
               the default branch. There can be no space between
               <command>-l</command> and its argument.</para>
-
-              <para>This command is depreciated in favour of the 'edit -c'
-              command, which gives pseudo reserved checkouts.</para>
 
               <para><indexterm>
                   <primary>Changing a log message</primary>
@@ -8731,10 +7828,9 @@ $ cvs diff -D "1 hour ago" cvs.texinfo
 
       <para>The files created by <command>checkout</command> are created
       read-write, unless the <command>-r</command> option to cvsnt (<xref
-      linkend="Global-options" />) is specified, the
+      linkend="Global-options" />) is specified, or the
       <command>CVSREAD</command> environment variable is specified (<xref
-      linkend="Environment-variables" />), or a watch is in effect for that
-      file (<xref linkend="Watches" />).</para>
+      linkend="Environment-variables" />).</para>
 
       <para>Note that running <command>checkout</command> on a directory that
       was already built by a prior <command>checkout</command> is also
@@ -9221,20 +8317,11 @@ $ cvs commit -r 1.8 <varname>file</varname>
           </varlistentry>
 
           <varlistentry>
-            <term>-c</term>
-
-            <listitem>
-              <para>Check for a valid edit on the file before committing. See
-              'cvs edit'.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
             <term>-b <varname>bugid</varname></term>
 
             <listitem>
-              <para>Only commit files that have been edited and marked with
-              bug <varname>bugid</varname>.</para>
+              <para>Only commit files that are marked with bug
+              <varname>bugid</varname>.</para>
             </listitem>
           </varlistentry>
 
@@ -9244,15 +8331,6 @@ $ cvs commit -r 1.8 <varname>file</varname>
             <listitem>
               <para>Mark committed files as belonging to bug
               <varname>bugid</varname>.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>-e</term>
-
-            <listitem>
-              <para>Keep files edited after commit - supresses the automatic
-              unedit that normally follows a commit.</para>
             </listitem>
           </varlistentry>
 
@@ -9542,263 +8620,6 @@ $ cvs diff -c -r RELEASE_1_0 -r RELEASE_1_1 &gt; diffs
         <para><screen>
 $ cvs diff -u | less
 </screen></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="edit">
-      <title>edit--Mark files for editing</title>
-
-      <indexterm>
-        <primary>edit</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, sandbox.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: Current directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>This is command is used to mark files for editing in a
-      reserved or semi-reserved scenario. When used with bug identifiers it
-      also marks which users are currently working on which bugs, and which
-      files are affected by those bugs.</para>
-
-      <para>cvs is primarily designed as a cooperative system, as experience
-      has shown that this is the most productive way for teams of developers
-      to work. The reserved models implemented by this command do not replace
-      proper configuration management processes - the correct model to use
-      should be decided after due consideration of the advantages and
-      disadvantages of each. See also <xref linkend="Watches" /></para>
-
-      <para>The default working model is a cooperative multiple-editors model.
-      Any number of people may be editing a file at any time and anyone may
-      commit changes. This is very similar to the standard cooperative model
-      except that the server keeps track of the editors.</para>
-
-      <para>Using the <command>edit -c</command> option creates a
-      semi-reserved or cooperative reserved system. The edit command checks
-      that there are no editors before editing the file, however its
-      cooperative nature does not prevent other users editing if they wish
-      to.</para>
-
-      <para>For a stricter model the <command>-kc</command> and
-      <command>-kx</command> expansion options create a mandatory reserved
-      system on individual files. Users are prevented from editing or
-      committing a file unless they are the only editor of that file.</para>
-
-      <sect2>
-        <title>edit options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-A</term>
-
-              <listitem>
-                <para>Modify filesystem ACL on edited file (Win32 only,
-                Experimental).</para>
-
-                <para>In shared sandbox scenarios this command is designed to
-                stop other users from being able to modify the edited file -
-                it create an access control list that disallows write access
-                to anyone but the editor.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-a</term>
-
-              <listitem>
-                <para>Specify actions for the temporary watch that is created
-                during an edit. This may be one of
-                edit,unedit,commit,all,none.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-b bugid</term>
-
-              <listitem>
-                <para>Mark the edited file with a bug identifier. This marks
-                the editor as not only using the file, but also working on a
-                particular bug on that file. Specify multiple -b options for
-                multiple bugs.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-c</term>
-
-              <listitem>
-                <para>Check that working files are unedited before appying the
-                edit.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-f</term>
-
-              <listitem>
-                <para>Edit even if working files are already edited by someone
-                else (default).</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Do not recurse into subdirectories.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-m message</term>
-
-              <listitem>
-                <para>Specify a reason for this edit. This message is made
-                available as an option to the trigger libraries and notify
-                script.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively (default).</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-w</term>
-
-              <listitem>
-                <para>Edit the whole file, not just the current branch.
-                Normally edits only apply to the branch that is current at the
-                time of the edit. If you wish to stop anyone changing other
-                branches then this option allow this.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-x</term>
-
-              <listitem>
-                <para>Exclusive edit. Attempt to stop other users editing the
-                file even if they do not use the <command>-c</command>
-                option.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-z</term>
-
-              <listitem>
-                <para>Edit creates copies of the original files in the
-                <filename>CVS/Base</filename> directory. With this option
-                those copies are gzip compressed, which saves disk space and
-                stops the copies being found by text searches of the
-                sandbox.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="editors">
-      <title>editors--Find out who is editing a file</title>
-
-      <indexterm>
-        <primary>editors</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, sandbox.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: nothing.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>This command queries the server for everyone editing a
-      file or group of files. It can also optionally show which bugs are being
-      worked on.</para>
-
-      <para>The server only knows the last reported state of each client. In a
-      controlled environment this is very likely to be accurate, however it is
-      possible to leave edits on the server and not on the client (for example
-      my deleting the sandbox without using commit/unedit).</para>
-
-      <para>The normal editors output is as follows:</para>
-
-      <para><screen>components.dir/TEST.xml   tmh   Fri Dec  3 16:15:00 2004 GMT   tucker   c:\temp\repos\components.dir
-rep/version_no.h          tmh   Thu Nov  4 17:37:43 2004 GMT   tucker   D:\t\test\rep</screen></para>
-
-      <para>If you list edits for all branches and bug identifiers you get an
-      extra columns. The full output is as follows:</para>
-
-      <para><screen>components.dir/TEST.xml   tmh   Fri Dec  3 16:15:00 2004 GMT   tucker   c:\temp\repos\components.dir   3465   HEAD
-rep/version_no.h          tmh   Thu Nov  4 17:37:43 2004 GMT   tucker   D:\t\test\rep                         HEAD</screen></para>
-
-      <para>The first output is designed to be compatible with older cvs
-      versions that did not support the full cvsnt feature set.</para>
-
-      <sect2>
-        <title>editors options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-a</term>
-
-              <listitem>
-                <para>Show all branches, not just the current branch.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-c</term>
-
-              <listitem>
-                <para>Check whether edit on the selected files would actually
-                succeed. This can be used by frontends to verify an edit
-                without actually performing it.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process this directory only</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively (default).</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-v</term>
-
-              <listitem>
-                <para>Show active bugs within the output.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
       </sect2>
     </sect1>
 
@@ -10656,14 +9477,7 @@ rep/version_no.h          tmh   Thu Nov  4 17:37:43 2004 GMT   tucker   D:\t\tes
 Available protocols:
 
 local               (internal)
-ext                 ext 2.0.62.1872
-fork                fork 2.0.62.1872 
-gserver             gserver 2.0.62.1872 (Active Directory)
-ntserver            ntserver 2.0.62.1872
-pserver             pserver 2.0.62.1872
-server              server 2.0.62.1872
-ssh                 ssh 2.0.62.1872
-sspi                sspi 2.0.62.1872</screen>For information about an
+pserver             pserver 2.0.62.1872</screen>For information about an
       individual protocol specify the prototocol name on the command
       line.</para>
 
@@ -10678,8 +9492,6 @@ Syntax:             :pserver[;keyword=value...]:[username[:password]@]host[:port
 Client:             Yes
 Server:             Yes
 Login:              Yes
-Encryption:         No
-Impersonation:      CVS Builtin
 
 Keywords available:
 
@@ -10721,7 +9533,7 @@ proxypassword       Proxy passsord (alias: proxy_password)</screen>The format
               <listitem>
                 <para>Return server-side information. Returns protocols that a
                 client can use to communicate with the server. This does not
-                include local or external protocols.</para>
+                include the local protocol.</para>
               </listitem>
             </varlistentry>
 
@@ -10732,39 +9544,6 @@ proxypassword       Proxy passsord (alias: proxy_password)</screen>The format
                 <para>(Where supported) list available cvsnt servers on the
                 local network. This currently requires mdns support on the
                 client.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-r server</term>
-
-              <listitem>
-                <para>Find out as much as possible about a remote cvsnt
-                server. For this command to succeed the remote server must
-                support the cvsnt enumeration protocol.</para>
-
-                <para><screen>$ cvs info -r cvs.cvsnt.org
-Server: CVSNT Public Repository
-Version: Concurrent Versions System (CVSNT) 2.5.01 (Travis) Build 2010
-
-Protocols:
-  gserver
-  pserver
-  sserver
-  sspi
-
-Repositories:
-  /usr/local/cvs                CVSNT Main repository
-
-Anonymous username: cvs
-Anonymous protocol: pserver
-Default repository: /usr/local/cvs
-
-Anonymous login: :pserver:cvs@cvs.cvsnt.org:/usr/local/cvs
-Recommended login: :sspi:cvs.cvsnt.org:/usr/local/cvs</screen>The layout will
-                remain the same as much as possible in future revisions to
-                facilitate automatic parsing. Parsers should ignore elements
-                that they do not understand.</para>
               </listitem>
             </varlistentry>
           </variablelist></para>
@@ -12270,103 +11049,6 @@ File: cvs.dbk           Status: Up-to-date</screen></para>
       </sect2>
     </sect1>
 
-    <sect1 id="unedit">
-      <title>unedit--Mark edit as finished without committing</title>
-
-      <indexterm>
-        <primary>unedit</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>Discard any changes made and finish editing a file
-      without committing. It may also be necessary to run an
-      <command>update</command> command to retrieve the latest version of the
-      file.</para>
-
-      <para>Unediting also sends out a notification to other users if the
-      server is configured to do this. It will mark the working directory file
-      as read only. See also <xref linkend="Watches" /></para>
-
-      <sect2>
-        <title>unedit options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-b bugid</term>
-
-              <listitem>
-                <para>Unedit only files marked as edited with
-                <command>bugid</command>.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process local directory only.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-m message</term>
-
-              <listitem>
-                <para>Specify the reason for this unedit. The message is sent
-                to the <command>trigger</command> and
-                <command>notify</command> programs on the server.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-r</term>
-
-              <listitem>
-                <para>Revert file only. Do not perform unedit. This merely
-                copies the unedited copy back onto the working copy.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-u username</term>
-
-              <listitem>
-                <para>(repository administrators only) perform an unedit for
-                another user.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-w</term>
-
-              <listitem>
-                <para>Leave working directory file writable after the
-                unedit.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
     <sect1 id="update">
       <title>update--Bring work tree in sync with repository</title>
 
@@ -12553,17 +11235,6 @@ File: cvs.dbk           Status: Up-to-date</screen></para>
               the repository (the modified file is saved in
               <command>.#<varname>file</varname>.<varname>revision</varname></command>,
               however).</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>-c</term>
-
-            <listitem>
-              <para>If the file is edited, update the base revision copy to
-              the latest revision. If this option is not used an unedit will
-              always revert to the same revision that is edited, not the
-              latest revision in the repository.</para>
             </listitem>
           </varlistentry>
 
@@ -12827,107 +11498,6 @@ File: cvs.dbk           Status: Up-to-date</screen></para>
               <listitem>
                 <para>Display only the version number of the local client, not
                 other information.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="watch">
-      <title>watch--Watch for changes in a file</title>
-
-      <indexterm>
-        <primary>watch</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: repository.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>Add yourself to the list of watchers for a file.
-      Watchers are notified via the <command>notify</command> script whenever
-      an action they are interested in happens. See <xref
-      linkend="Watches" /></para>
-
-      <sect2>
-        <title>watch options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process local directory only.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-a</term>
-
-              <listitem>
-                <para>Specify what actions to watch. One of
-                edit,unedit,commit,all,none.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist></para>
-      </sect2>
-    </sect1>
-
-    <sect1 id="watchers">
-      <title>watchers--list watched files</title>
-
-      <indexterm>
-        <primary>watchers</primary>
-      </indexterm>
-
-      <para><itemizedlist>
-          <listitem>
-            <para>Requires: repository, working directory.</para>
-          </listitem>
-
-          <listitem>
-            <para>Changes: nothing.</para>
-          </listitem>
-
-          <listitem>
-            <para>Synonyms:</para>
-          </listitem>
-        </itemizedlist>Display the list of files that are being watched, and
-      what is being watched about them. See <xref linkend="Watches" /></para>
-
-      <sect2>
-        <title>watchers options</title>
-
-        <para><variablelist>
-            <varlistentry>
-              <term>-l</term>
-
-              <listitem>
-                <para>Process local directory only.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>-R</term>
-
-              <listitem>
-                <para>Process directories recursively.</para>
               </listitem>
             </varlistentry>
           </variablelist></para>
@@ -13405,7 +11975,7 @@ $
         <para>For checkout, rtag, and export, the program is server-based, and
         as such the following applies:-</para>
 
-        <para>If using remote access methods (pserver, ext, etc.), cvsnt will
+        <para>If using the remote access method (pserver), cvsnt will
         execute this program on the server from a temporary directory. The
         path is searched for this program.</para>
 
@@ -13653,7 +12223,7 @@ and value is a single-quote delimited value.</screen></para>
         <para>In addition, a file pattern of <command>*.*</command> or just
         <command>*</command> will be used as a default where no wrappers
         exist. This pattern may also contain addive or subtractive wrapper
-        options (eg -k+x), in which case it will always be applied.</para>
+        options (eg -k+o), in which case it will always be applied.</para>
       </sect2>
     </sect1>
 
@@ -13799,15 +12369,6 @@ and value is a single-quote delimited value.</screen></para>
         </varlistentry>
 
         <varlistentry>
-          <term>notify</term>
-
-          <listitem>
-            <para>When required this file is called durin a commit, and also
-            during edit/unedit.</para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
           <term>keywords</term>
 
           <listitem>
@@ -13850,16 +12411,11 @@ and value is a single-quote delimited value.</screen></para>
             tag</para>
           </listitem>
         </varlistentry>
-
-        <varlistentry>
-          <term>notify_email</term>
-
-          <listitem>
-            <para>Define templates for automatic sending of emails during
-            notify</para>
-          </listitem>
-        </varlistentry>
       </variablelist>
+
+      <para>Older versions of cvsnt also had the files
+      <command>notify</command> and <command>notify_email</command>. Current
+      cvsnt does not use them.</para>
 
       <sect2 id="syntax">
         <title>The common syntax</title>
@@ -14746,83 +13302,6 @@ Release Tags: release_tag</screen> Next, separated by an empty line, is the
       update your working directory.</para>
     </sect1>
 
-    <sect1 id="notify">
-      <title>notify</title>
-
-      <indexterm>
-        <primary>notify</primary>
-      </indexterm>
-
-      <para>The notify file is called whenever a watched file is changed
-      during commit, edit or unedit. See also <xref linkend="Watches" /> for
-      more details.</para>
-
-      <para>In addition to the formatting strings in the common syntax, the
-      following formatting strings are available:<variablelist>
-          <varlistentry>
-            <term>%m</term>
-
-            <listitem>
-              <para>Message supplied by user.</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%b</term>
-
-            <listitem>
-              <para>Bug identifier</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%p</term>
-
-            <listitem>
-              <para>Directory name relative to current root</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%s</term>
-
-            <listitem>
-              <para>User being notified</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%t</term>
-
-            <listitem>
-              <para>Tag or branch of file being notified</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%y</term>
-
-            <listitem>
-              <para>Type of notification</para>
-            </listitem>
-          </varlistentry>
-
-          <varlistentry>
-            <term>%f</term>
-
-            <listitem>
-              <para>File being notified about</para>
-            </listitem>
-          </varlistentry>
-        </variablelist></para>
-
-      <para>By default the notify file has a string designed to be compatible
-      with older versions of cvs passed in its standard input:<screen>%&lt;&lt; %p %f
----
-Triggered %y watch on %r
-By %u</screen></para>
-    </sect1>
-
     <sect1 id="User-Defined-Keywords">
       <title>keywords</title>
 
@@ -15014,7 +13493,7 @@ By %u</screen></para>
       </indexterm>
 
       <para>CVSNT contains a trigger library which is capable of sending
-      notification emails on commit, tag or notify. It allows you to put any
+      notification emails on commit or tag. It allows you to put any
       contents in the emails, but the output format is fairly simple - it is
       no substitute for a purpose designed notification program.</para>
 
@@ -15024,10 +13503,9 @@ By %u</screen></para>
       <sect2>
         <title>Configure the commit support files</title>
 
-        <para>The commit support files <command>commit_email</command>,
-        <command>tag_email</command> and <command>notify_email</command>
-        contain the names of the template files to use for commit, tag and
-        notify respectively. Each line in these files is a regular expression
+        <para>The commit support files <command>commit_email</command> and
+        <command>tag_email</command> contain the names of the template files
+        to use for commit and tag respectively. Each line in these files is a regular expression
         followed by a filename. The filename is always relative to the CVSROOT
         directory and may not be an absolute path for security reasons.</para>
 
@@ -15286,37 +13764,6 @@ Log message:
 
               <listitem>
                 <para>File revision that is being tagged.</para>
-              </listitem>
-            </varlistentry>
-          </variablelist>
-        </sect3>
-
-        <sect3>
-          <title>notify emails</title>
-
-          <variablelist>
-            <varlistentry>
-              <term>[bugid]</term>
-
-              <listitem>
-                <para>Bug identifier(s) associated with this
-                notification.</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>[tag]</term>
-
-              <listitem>
-                <para>Tag name of file</para>
-              </listitem>
-            </varlistentry>
-
-            <varlistentry>
-              <term>[notify_type]</term>
-
-              <listitem>
-                <para>Notification type</para>
               </listitem>
             </varlistentry>
           </variablelist>
@@ -15624,7 +14071,6 @@ taginfo(message,directory, file_array, action, tag)
 verifymsg(directory, filename)
 loginfo(message, status, directory, change_array)
 history(history_type, workdir, revs, name, bugid, message, dummy)
-notify(message, bugid, directory, notify_user, tag, notify_type, file)
 precommit(name_list, message, directory)
 postcommit(directory)
 precommand(argument_list)
@@ -16037,13 +14483,7 @@ cvs -s TESTDIR=/work/local/tests
           <term>Watcher=<varname>name</varname></term>
 
           <listitem>
-            <para>Set a watcher who sees all edit/unedit/commit notifications
-            via the <command>CVSROOT/notify</command> script. The watcher sees
-            all notificaitons regardless of an existing edit/watch on the
-            file, which for a large commit could be a lot of files. It is
-            therefore recommended that the notify script completes as fast a
-            possible. Using a custom trigger library or COM interface is
-            recommended for best efficiency.</para>
+            <para>This key is accepted and ignored.</para>
           </listitem>
         </varlistentry>
       </variablelist>
@@ -16222,45 +14662,6 @@ cvs -s TESTDIR=/work/local/tests
           to <command>\joe</command>. On Windows 95, you'll probably need to
           set <command>HOMEDRIVE</command> and <command>HOMEPATH</command>
           yourself.</para>
-
-          <para><indexterm>
-              <primary>CVS_EXT, environment variable</primary>
-            </indexterm></para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>$CVS_EXT</term>
-
-        <listitem>
-          <para><indexterm>
-              <primary>CVS_RSH, environment variable</primary>
-            </indexterm></para>
-        </listitem>
-      </varlistentry>
-
-      <varlistentry>
-        <term>$CVS_RSH</term>
-
-        <listitem>
-          <para>Specifies the external program which cvsnt connects with, when
-          <command>:ext:</command> access method is specified. This replaces
-          the <command>CVS_RSH</command> environment used in older
-          implementations of cvs.</para>
-
-          <para>The <command>CVS_EXT</command> variable parsed as a formatting
-          string specifying the command to pass to invoke the remote server.
-          The default string is: <command>ssh -l %u %h</command> The
-          <command>%u</command> parameter is replaced with the username
-          specified in the CVSROOT (or the current username if none is
-          specified) and the <command>%h</command> parameter is replaced with
-          the hostname specified in the CVSROOT.</para>
-
-          <para>The CVS_EXT string has the string ' cvs server' appended to
-          it, and this is then passed to the command processor for
-          execution.</para>
-
-          <para><xref linkend="Connecting-via-ssh" />.</para>
         </listitem>
       </varlistentry>
 
@@ -16269,7 +14670,7 @@ cvs -s TESTDIR=/work/local/tests
 
         <listitem>
           <para>Used in client-server mode when accessing the server via
-          Kerberos, GSSAPI, or cvsnt's password authentication if the port is
+          cvsnt's password authentication if the port is
           not specified in $CVSROOT. <xref
           linkend="Remote-repositories" /></para>
 
@@ -16448,9 +14849,7 @@ cvs -s TESTDIR=/work/local/tests
     working directory with cvsnt 1.3.</para>
 
     <para>Support for the Entries.Extra file varies between versions, however
-    this should not normally affect client operations. Client versions of
-    CVSNT before 2.0.55 used a <command>Baserev</command> file to store edit
-    information. If downgrading a client existing edits may be lost.</para>
+    this should not normally affect client operations.</para>
 
     <para>The remote protocol is interoperable going back to cvsnt 1.5, but no
     further (1.5 was the first official release with the remote protocol, but
@@ -16740,12 +15139,8 @@ cvs -s TESTDIR=/work/local/tests
           <term>end of file from server (consult above messages if any)</term>
 
           <listitem>
-            <para>The most common cause for this message is if you are using
-            an external <command>rsh</command> program and it exited with an
-            error. In this case the <command>rsh</command> program should have
-            printed a message, which will appear before the above message. For
-            more information on setting up a cvsnt client and server, see
-            <xref linkend="Remote-repositories" />.</para>
+            <para>For more information on setting up a cvsnt client and
+            server, see <xref linkend="Remote-repositories" />.</para>
           </listitem>
         </varlistentry>
 
@@ -16967,16 +15362,7 @@ Only one of [exEX3] allowed
           cvs server</term>
 
           <listitem>
-            <para>If <varname>text</varname> contains a valid response (such
-            as <command>ok</command>) followed by an extra carriage return
-            character (on many systems this will cause the second part of the
-            message to overwrite the first part), then it probably means that
-            you are using the <command>:ext:</command> access method with a
-            version of rsh, such as most non-unix rsh versions, which does not
-            by default provide a transparent data stream. In such cases you
-            probably want to try <command>:server:</command> instead of
-            <command>:ext:</command>. If <varname>text</varname> is something
-            else, this may signify a problem with your cvsnt server.
+            <para>This may signify a problem with your cvsnt server.
             Double-check your installation against the instructions for
             setting up the cvsnt server.</para>
           </listitem>
@@ -17031,37 +15417,8 @@ exit 0
 
       <variablelist>
         <title><indexterm>
-            <primary>:ext:, troubleshooting</primary>
+            <primary>:pserver:, troubleshooting</primary>
           </indexterm></title>
-
-        <varlistentry>
-          <term>:ext:</term>
-
-          <listitem>
-            <para>Try running the ssh program from the command line. For
-            example: "ssh servername cvs -v" should print cvsnt version
-            information. If this doesn't work, you need to fix it before you
-            can worry about cvsnt problems.</para>
-
-            <para><indexterm>
-                <primary>:server:, troubleshooting</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>:server:</term>
-
-          <listitem>
-            <para>You don't need a command line rsh program to use this access
-            method, but if you have an rsh program around, it may be useful as
-            a debugging tool. Follow the directions given for :ext:.</para>
-
-            <para><indexterm>
-                <primary>:pserver:, troubleshooting</primary>
-              </indexterm></para>
-          </listitem>
-        </varlistentry>
 
         <varlistentry>
           <term>:pserver:</term>
@@ -17157,26 +15514,6 @@ cvs [server aborted]: can't chdir(/root): Permission denied
             the rate limit (some versions of inetd have a single rate limit,
             others allow you to set the limit for each service
             separately.)</para>
-
-            <indexterm>
-              <primary>:gserver:, troublshooting</primary>
-            </indexterm>
-          </listitem>
-        </varlistentry>
-
-        <varlistentry>
-          <term>:gserver:</term>
-
-          <listitem>
-            <para>If you cannot connect using gserver, ensure that your
-            kerberos installation is correctly configured. You will need a
-            working PAM configuraiton if your system uses that, and
-            nsswitch.conf may need to be configured to recognise kerberos
-            users.</para>
-
-            <para>Kerberos is rather difficult to configure, and it is beyond
-            the scope of this manual. There are many resources on the internet
-            to help you with this.</para>
           </listitem>
         </varlistentry>
       </variablelist>

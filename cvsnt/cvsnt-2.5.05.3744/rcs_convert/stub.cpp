@@ -140,7 +140,7 @@ int annotate_width = 8;
 
 int trace = 0, noexec = 0, atomic_checkouts = 0, allow_trace = 0, quiet = 0;
 #ifdef SERVER_SUPPORT
-int server_active = 0, proxy_active = 0;
+int server_active = 0;
 #endif
 FILE *trace_file_fp = NULL;
 const char *CVS_Username = "rcs_cvt";

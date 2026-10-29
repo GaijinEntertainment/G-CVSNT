@@ -210,13 +210,13 @@ int pserver_auth_protocol_connect(const struct protocol_interface *protocol, con
 
     /* Get the three important pieces of information in order. */
     /* See above comment about error handling.  */
-    server_getline (protocol, &pserver_protocol_interface.auth_repository, PATH_MAX);
-    server_getline (protocol, &pserver_protocol_interface.auth_username, PATH_MAX);
-    server_getline (protocol, &pserver_protocol_interface.auth_password, PATH_MAX);
+    server_getline (&pserver_protocol_interface.auth_repository, PATH_MAX);
+    server_getline (&pserver_protocol_interface.auth_username, PATH_MAX);
+    server_getline (&pserver_protocol_interface.auth_password, PATH_MAX);
 
     /* ... and make sure the protocol ends on the right foot. */
     /* See above comment about error handling.  */
-    server_getline(protocol, &tmp, PATH_MAX);
+    server_getline(&tmp, PATH_MAX);
     if (strcmp (tmp,
 		pserver_protocol_interface.verify_only ?
 		"END VERIFICATION REQUEST" : "END AUTH REQUEST")

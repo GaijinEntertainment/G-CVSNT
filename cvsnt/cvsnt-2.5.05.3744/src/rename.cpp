@@ -189,7 +189,7 @@ int cvsrename(int argc, char **argv)
 			error(1,errno,"Couldn't chdir to %s",dir2);
 		ent2 = Entries_Open(0, NULL);
 		if(entnode->type==ENT_FILE)
-			Register(ent2,(char*)filename2,entnode->version,entnode->timestamp,entnode->options,entnode->tag,entnode->date,entnode->conflict,entnode->merge_from_tag_1,entnode->merge_from_tag_2,entnode->rcs_timestamp,entnode->edit_revision,entnode->edit_tag,entnode->edit_bugid,entnode->md5);
+			Register(ent2,(char*)filename2,entnode->version,entnode->timestamp,entnode->options,entnode->tag,entnode->date,entnode->conflict,entnode->merge_from_tag_1,entnode->merge_from_tag_2,entnode->rcs_timestamp,entnode->bugid,entnode->md5);
 		else if(entnode->type==ENT_SUBDIR)
 			Subdir_Register(ent2,NULL,filename2);
 		else

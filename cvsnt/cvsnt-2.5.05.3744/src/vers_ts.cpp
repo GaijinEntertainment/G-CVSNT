@@ -390,11 +390,7 @@ Vers_TS *Version_TS (struct file_info *finfo, const char *options, const char *t
 		}
 
 		if(entdata)
-		{
-			vers_ts->edit_revision = xstrdup(entdata->edit_revision);
-			vers_ts->edit_tag = xstrdup(entdata->edit_tag);
-			vers_ts->edit_bugid = xstrdup(entdata->edit_bugid);
-		}
+			vers_ts->bugid = xstrdup(entdata->bugid);
     }
 
     return (vers_ts);
@@ -535,9 +531,7 @@ void freevers_ts(Vers_TS **versp)
 		xfree ((*versp)->date);
 		xfree ((*versp)->ts_conflict);
 		xfree ((*versp)->filename);
-		xfree ((*versp)->edit_revision);
-		xfree ((*versp)->edit_tag);
-		xfree ((*versp)->edit_bugid);
+		xfree ((*versp)->bugid);
 		xfree (*versp);
 	}
 }

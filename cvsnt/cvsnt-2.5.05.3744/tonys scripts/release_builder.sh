@@ -124,11 +124,6 @@ if [ ! -x ReleaseWin32/cvsagent.exe ]; then
   read
   exit 1
 fi
-if [ ! -x ReleaseWin32/protocols/gserver.dll ]; then
-  echo GSERVER.DLL has not been successfully built - cannot continue
-  read
-  exit 1
-fi
 cd "$TOP"
 rm -f ../*
 if [ -f ../cvsapi.dll ]; then

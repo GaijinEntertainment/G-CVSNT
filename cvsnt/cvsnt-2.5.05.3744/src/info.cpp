@@ -28,11 +28,10 @@ struct protocol_interface local_protocol =
 
 static const char *const info_usage[] =
 {
-	"Usage: %s %s [-c|-s|-b|-r server] [cvswrappers|cvsignore|config|<protocol>]\n",
+	"Usage: %s %s [-c|-s|-b] [cvswrappers|cvsignore|config|<protocol>]\n",
 	"\t-c\t\tDescribe client (default)\n",
 	"\t-s\t\tDescribe server\n",
 	"\t-b\t\tBrowse local servers\n",
-	"\t-r server\tExamine public information from remote server\n",
 	"\t-v\t\tMore verbose output\n",
     "(Specify the --help global option for a list of other help options)\n",
     NULL
@@ -75,13 +74,10 @@ void show_config()
 int info(int argc, char **argv)
 {
     int c;
-	int context;
-	const char *proto;
 	const struct protocol_interface *protocol;
 	int use_server = server_active;
 	int browse = 0;
 	int uibrowse = 0;
-	const char *remote = NULL;
 	int verbose = 0;
 	int test = 0;
 
@@ -89,7 +85,7 @@ int info(int argc, char **argv)
 		usage (info_usage);
 
     optind = 0;
-	while ((c = getopt (argc, argv, "+csebr:I:W:vB")) != -1)
+	while ((c = getopt (argc, argv, "+csebI:W:vB")) != -1)
     {
 		switch (c)
 		{
@@ -104,9 +100,6 @@ int info(int argc, char **argv)
 			break;
 		case 'B':
 			uibrowse = 1;
-			break;
-		case 'r':
-			remote = optarg;
 			break;
 		case 'v':
 			verbose = 1;
@@ -126,7 +119,7 @@ int info(int argc, char **argv)
     argc -= optind;
     argv += optind;
 
-	if(argc>1 || ((remote||browse)&&((argc>0)||use_server)))
+	if(argc>1 || (browse&&((argc>0)||use_server)))
 	{
 		usage(info_usage);
 		return 1;
@@ -210,42 +203,6 @@ int info(int argc, char **argv)
 		}
 		return 0;
 	}
-	if(remote)
-	{
-		CServerInfo si;
-		CServerInfo::remoteServerInfo rsi;
-		if(!si.getRemoteServerInfo(remote,rsi))
-			return 0;
-
-		printf("Server: %s\n",rsi.server_name.size()?rsi.server_name.c_str():"(unknown)");
-		printf("Version: %s\n",rsi.server_version.size()?rsi.server_version.c_str():"(unknown)");
-		printf("\n");
-		printf("Protocols:\n");
-		for(std::map<cvs::string,int>::const_iterator i = rsi.protocols.begin(); i!=rsi.protocols.end(); ++i)
-			printf("  %s\n",i->first.c_str());
-		printf("\n");
-		printf("Repositories:\n");
-		for(std::map<cvs::string,cvs::string>::const_iterator i = rsi.repositories.begin(); i!=rsi.repositories.end(); ++i)
-		{
-			printf("  %-29s %s\n",i->first.c_str(),i->second.c_str());
-		}
-		printf("\n");
-		if(rsi.anon_username.size())
-		{
-			printf("Anonymous username: %s\n",rsi.anon_username.c_str());
-			printf("Anonymous protocol: %s\n",rsi.anon_protocol.c_str());
-		}
-		if(rsi.default_repository.size())
-			printf("Default repository: %s\n",rsi.default_repository.c_str());
-		if(rsi.anon_username.size() || rsi.default_repository.size())
-			printf("\n");
-		if(rsi.anon_username.size() && rsi.anon_protocol.size() && rsi.default_repository.size())
-			printf("Anonymous login: :%s:%s@%s:%s\n",rsi.anon_protocol.c_str(),rsi.anon_username.c_str(),remote,rsi.default_repository.c_str());
-		if(rsi.default_repository.size())
-			printf("Default login: :%s:%s:%s\n",rsi.default_protocol.c_str(),remote,rsi.default_repository.c_str());
-		
-		return 0;
-	}
 
 	if(current_parsed_root && current_parsed_root->isremote)
 		start_server(0);
@@ -278,28 +235,11 @@ int info(int argc, char **argv)
 		
 		if(!server_active)
 			printf("%-20.20s%s\n","local","(internal)");
-		context=0;
-		while((proto=lib.EnumerateProtocols(&context))!=NULL)
-		{
-			protocol=lib.LoadProtocol(proto);
-			if(protocol && ((use_server && protocol->auth_protocol_connect) || (!use_server && protocol->connect)) && !(protocol->required_elements&flagSystem))
-			{
-				if(use_server && protocol->plugin.key)
-				{
-					char value[64];
-					int val = 1;
-
-					if(!CGlobalSettings::GetGlobalValue("cvsnt","Plugins",protocol->plugin.key,value,sizeof(value)))
-						val = atoi(value);
-					if(val)
-						printf("%-20.20s%s\n",protocol->name,protocol->version);
-				}
-				else
-					printf("%-20.20s%s\n",protocol->name,protocol->version);
-			}
-			if(protocol)
-				lib.UnloadProtocol(protocol);
-		}
+		protocol=lib.LoadProtocol("pserver");
+		if(protocol && ((use_server && protocol->auth_protocol_connect && lib.IsEnabled(protocol)) || (!use_server && protocol->connect)))
+			printf("%-20.20s%s\n",protocol->name,protocol->version);
+		if(protocol)
+			lib.UnloadProtocol(protocol);
 	}
 	else
 	{
@@ -337,8 +277,6 @@ int info(int argc, char **argv)
 		printf("%-20s%s\n","Client:",protocol->connect?"Yes":"No");
 		printf("%-20s%s\n","Server:",protocol->auth_protocol_connect?"Yes":"No");
 		printf("%-20s%s\n","Login:",protocol->login?"Yes":"No");
-		printf("%-20s%s\n","Encryption:",protocol->valid_elements&flagAlwaysEncrypted?"Always":protocol->wrap?"Yes":"No");
-		printf("%-20s%s\n","Impersonation:",protocol->impersonate?"Native":"CVS Builtin");
 
 		printf("\nKeywords available:\n\n");
 		if(protocol->valid_elements&elemTunnel)
@@ -348,17 +286,6 @@ int info(int argc, char **argv)
 			printf("%-20s%s\n","tunnel","Proxy protocol (aliases: proxyprotocol,proxy_protocol)");
 			printf("%-20s%s\n","proxyuser","Proxy user (alias: proxy_user)");
 			printf("%-20s%s\n","proxypassword","Proxy passsord (alias: proxy_password)");
-		}
-		if(protocol->get_keyword_help)
-		{
-			const char *p;
-			p = protocol->get_keyword_help(protocol);
-			while(*p)
-			{
-				printf("%-20s%s\n",p,p+strlen(p)+1);
-				p+=strlen(p)+1;
-				p+=strlen(p)+1;
-			}
 		}
 		if(protocol && protocol!=&local_protocol)
 			lib.UnloadProtocol(protocol);

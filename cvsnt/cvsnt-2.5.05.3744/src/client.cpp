@@ -22,7 +22,6 @@
 
 #include "cvs.h"
 #include "getline.h"
-#include "edit.h"
 #include "buffer.h"
 #include "sha_blob_reference.h"
 #include <../keyValueServer/include/blobs_encryption.h>
@@ -102,7 +101,6 @@ static void handle_entries_extra(char *, int);
 static void handle_m(char *, int);
 static void handle_e(char *, int);
 static void handle_f(char *, int);
-static void handle_notified(char *, int);
 
 /* We need to keep track of the list of directories we've sent to the
    server.  This list, along with the current CVSROOT, will help us
@@ -1517,6 +1515,62 @@ time_t get_file_mtime(const char *filename)
 }
 static char *time_stamp (time_t mtime, int local);
 
+/* Register with the last EntriesExtra fields */
+static void register_with_extra (List *ent_list, const char *filename, const char *vn, const char *ts,
+	const char *options, const char *tag, const char *date, const char *conflict)
+{
+	char *cp, *merge_tag1 = NULL, *merge_tag2 = NULL;
+	time_t rcs_timestamp = (time_t)-1;
+	char *bugid = NULL;
+	char *md5 = NULL;
+
+	while(extra_entry && extra_entry[0]=='/')
+	{
+		char *fn, *tag1, *tag2, *rcs_timestamp_string;
+
+		fn = extra_entry  + 1;
+		if ((cp = strchr (fn, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+		if(fncmp(fn, filename))
+			break;
+		tag1 = cp;
+		if ((cp = strchr (tag1, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+		tag2=cp;
+		if ((cp = strchr (tag2, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+		merge_tag1 = tag1;
+		merge_tag2 = tag2;
+		rcs_timestamp_string=cp;
+		if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+
+		if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
+			rcs_timestamp=(time_t)-1;
+
+		/* Skip two unused slots */
+		if ((cp = strchr (cp, '/')) == NULL || (cp = strchr (cp + 1, '/')) == NULL)
+			break;
+		bugid = ++cp;
+		if ((cp = strchr (bugid, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+
+		md5 = cp;
+		if ((cp = strchr (md5, '/')) == NULL)
+			break;
+		*cp++ = '\0';
+
+		break;
+	}
+
+	Register (ent_list, filename, vn, ts, options, tag, date, conflict, merge_tag1, merge_tag2, rcs_timestamp, bugid, md5);
+}
+
 /* Update the Entries line for this file.  */
 static void update_entries (char *data_arg, List *ent_list, char *short_pathname, char *filename)
 {
@@ -1537,12 +1591,6 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
     char *scratch_entries = NULL;
 	bool open_binary,encode;
 	CCodepage::Encoding encoding;
-	char *merge_tag1, *merge_tag2;
-	time_t rcs_timestamp;
-	char *edit_revision = "*";
-	char *edit_tag = NULL;
-	char *edit_bugid = NULL;
-	char *md5 = NULL;
 
 #ifdef UTIME_EXPECTS_WRITABLE
     int change_it_back = 0;
@@ -2118,80 +2166,10 @@ static void update_entries (char *data_arg, List *ent_list, char *short_pathname
 	if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
 	    local_timestamp = "dummy timestamp";
 	else if (local_timestamp == NULL)
-	{
 	    local_timestamp = file_timestamp;
 
-	    /* Checking for command_name of "commit" doesn't seem like
-	       the cleanest way to handle this, but it seem to roughly
-	       parallel what the :local: code which calls
-	       mark_up_to_date ends up amounting to.  Some day, should
-	       think more about what the Checked-in response means
-	       vis-a-vis both Entries and Base and clarify
-	       cvsclient.texi accordingly.  */
-
-	    if (!strcmp (command_name, "commit"))
-			mark_up_to_date (filename);
-	}
-
-	/* Get the data for Entries.Extra */
-	merge_tag1 = merge_tag2 = NULL;
-	rcs_timestamp = (time_t)-1;
-	while(extra_entry && extra_entry[0]=='/')
-	{
-		char *fn, *tag1, *tag2, *rcs_timestamp_string;
-		
-		fn = extra_entry  + 1;
-		if ((cp = strchr (fn, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-		if(fncmp(fn, filename))
-			break;
-		tag1 = cp;
-		if ((cp = strchr (tag1, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-		tag2=cp;
-		if ((cp = strchr (tag2, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-		merge_tag1 = tag1;
-		merge_tag2 = tag2;
-		rcs_timestamp_string=cp;
-		if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
-			rcs_timestamp=(time_t)-1;
-
-		edit_revision = cp;
-		if ((cp = strchr (edit_revision, '/')) == NULL)
-		{
-			edit_revision="*"; /* Revision was unseen by client */
-			break;
-		}
-		*cp++ = '\0';
-
-		edit_tag = cp;
-		if ((cp = strchr (edit_tag, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		edit_bugid = cp;
-		if ((cp = strchr (edit_bugid, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		md5 = cp;
-		if ((cp = strchr (md5, '/')) == NULL)
-			break;
-		*cp++ = '\0';
-
-		break;
-	}
-
-	Register (ent_list, filename, vn, local_timestamp,
-		  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+	register_with_extra (ent_list, filename, vn, local_timestamp,
+		  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
 
 	if (file_timestamp)
 	    xfree (file_timestamp);
@@ -2415,12 +2393,6 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
   char *date = NULL;
   char *tag_or_date;
   char *scratch_entries = NULL;
-  char *merge_tag1, *merge_tag2;
-  time_t rcs_timestamp;
-  char *edit_revision = "*";
-  char *edit_tag = NULL;
-  char *edit_bugid = NULL;
-  char *md5 = NULL;
 
 #ifdef UTIME_EXPECTS_WRITABLE
   int change_it_back = 0;
@@ -2632,79 +2604,10 @@ static void update_blob_ref_entries (char *data_arg, List *ent_list, char *short
     if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
         local_timestamp = "dummy timestamp";
     else if (local_timestamp == NULL)
-    {
       local_timestamp = file_timestamp;
 
-      /* Checking for command_name of "commit" doesn't seem like
-         the cleanest way to handle this, but it seem to roughly
-         parallel what the :local: code which calls
-         mark_up_to_date ends up amounting to.  Some day, should
-         think more about what the Checked-in response means
-         vis-a-vis both Entries and Base and clarify
-         cvsclient.texi accordingly.  */
-
-      if (!strcmp (command_name, "commit"))
-  		mark_up_to_date (filename);
-    }
-
-    /* Get the data for Entries.Extra */
-    merge_tag1 = merge_tag2 = NULL;
-    rcs_timestamp = (time_t)-1;
-    while(extra_entry && extra_entry[0]=='/')
-    {
-      char *fn, *tag1, *tag2, *rcs_timestamp_string;
-      fn = extra_entry  + 1;
-      if ((cp = strchr (fn, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      if(fncmp(fn, filename))
-      	break;
-      tag1 = cp;
-      if ((cp = strchr (tag1, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      tag2=cp;
-      if ((cp = strchr (tag2, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      merge_tag1 = tag1;
-      merge_tag2 = tag2;
-      rcs_timestamp_string=cp;
-      if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
-      	rcs_timestamp=(time_t)-1;
-
-      edit_revision = cp;
-      if ((cp = strchr (edit_revision, '/')) == NULL)
-      {
-      	edit_revision="*"; /* Revision was unseen by client */
-      	break;
-      }
-      *cp++ = '\0';
-
-      edit_tag = cp;
-      if ((cp = strchr (edit_tag, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      edit_bugid = cp;
-      if ((cp = strchr (edit_bugid, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      md5 = cp;
-      if ((cp = strchr (md5, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      break;
-    }
-
-    Register (ent_list, filename, vn, local_timestamp,
-    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+    register_with_extra (ent_list, filename, vn, local_timestamp,
+    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
 
     if (file_timestamp)
         xfree (file_timestamp);
@@ -2730,12 +2633,6 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
   char *date = NULL;
   char *tag_or_date;
   char *scratch_entries = NULL;
-  char *merge_tag1, *merge_tag2;
-  time_t rcs_timestamp;
-  char *edit_revision = "*";
-  char *edit_tag = NULL;
-  char *edit_bugid = NULL;
-  char *md5 = NULL;
 
 #ifdef UTIME_EXPECTS_WRITABLE
   int change_it_back = 0;
@@ -2869,79 +2766,10 @@ static void update_meta_entries (char *data_arg, List *ent_list, char *short_pat
     if (vn[0] == '\0' || (vn[0] == '0' && vn[1] == '\0') || vn[0] == '-')
         local_timestamp = "dummy timestamp";
     else if (local_timestamp == NULL)
-    {
       local_timestamp = file_timestamp;
 
-      /* Checking for command_name of "commit" doesn't seem like
-         the cleanest way to handle this, but it seem to roughly
-         parallel what the :local: code which calls
-         mark_up_to_date ends up amounting to.  Some day, should
-         think more about what the Checked-in response means
-         vis-a-vis both Entries and Base and clarify
-         cvsclient.texi accordingly.  */
-
-      if (!strcmp (command_name, "commit"))
-  		mark_up_to_date (filename);
-    }
-
-    /* Get the data for Entries.Extra */
-    merge_tag1 = merge_tag2 = NULL;
-    rcs_timestamp = (time_t)-1;
-    while(extra_entry && extra_entry[0]=='/')
-    {
-      char *fn, *tag1, *tag2, *rcs_timestamp_string;
-      fn = extra_entry  + 1;
-      if ((cp = strchr (fn, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      if(fncmp(fn, filename))
-      	break;
-      tag1 = cp;
-      if ((cp = strchr (tag1, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      tag2=cp;
-      if ((cp = strchr (tag2, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-      merge_tag1 = tag1;
-      merge_tag2 = tag2;
-      rcs_timestamp_string=cp;
-      if ((cp = strchr (rcs_timestamp_string, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      if(sscanf(rcs_timestamp_string,"%" TIME_T_SPRINTF "d",&rcs_timestamp)!=1)
-      	rcs_timestamp=(time_t)-1;
-
-      edit_revision = cp;
-      if ((cp = strchr (edit_revision, '/')) == NULL)
-      {
-      	edit_revision="*"; /* Revision was unseen by client */
-      	break;
-      }
-      *cp++ = '\0';
-
-      edit_tag = cp;
-      if ((cp = strchr (edit_tag, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      edit_bugid = cp;
-      if ((cp = strchr (edit_bugid, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      md5 = cp;
-      if ((cp = strchr (md5, '/')) == NULL)
-      	break;
-      *cp++ = '\0';
-
-      break;
-    }
-
-    Register (ent_list, filename, vn, local_timestamp,
-    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL, merge_tag1, merge_tag2, rcs_timestamp, edit_revision, edit_tag, edit_bugid, md5);
+    register_with_extra (ent_list, filename, vn, local_timestamp,
+    	  options, tag, date, ts[0] == '+' ? file_timestamp : NULL);
 
     if (file_timestamp)
         xfree (file_timestamp);
@@ -3072,61 +2900,6 @@ static void handle_blob_otp(char *args, int len)
 	blob_has_otp = true;
 }
 
-static void update_baserev(char *data, List *ent_list, char *short_pathname, char *filename)
-{
-	char *type;
-	char *basepath = (char*)xmalloc(sizeof(CVSADM_BASE)+strlen(filename)+10);
-	char *basepathgz = (char*)xmalloc(sizeof(CVSADM_BASE)+strlen(filename)+10);
-
-	sprintf(basepath,"%s/%s",CVSADM_BASE,filename);
-	sprintf(basepathgz,"%s/%s.gz",CVSADM_BASE,filename);
-
-	read_line(&type);
-
-	if (excl_discard)
-	{
-		if (type[0] == 'U')
-			discard_counted_file ();
-		xfree (type);
-		xfree (basepathgz);
-		xfree (basepath);
-		return;
-	}
-
-	TRACE(3,"Updating base revision %s [%c]",basepath,type[0]);
-	switch(type[0])
-	{
-	case 'C':
-		if(isfile(basepathgz))
-			copy_and_zip_file(filename,basepath,1,1);
-		else
-			copy_file(filename,basepath,1,1);
-		break;
-	case 'R':
-		CVS_UNLINK(basepath);
-		CVS_UNLINK(basepathgz);
-		break;
-	case 'U':
-		read_counted_file(basepath,basepath);
-		if(isfile(basepathgz))
-		{
-			copy_and_zip_file(basepath,basepathgz,1,1);
-			CVS_UNLINK(basepath);
-		}
-		break;
-	default:
-		error(0,0,"Unsupported base update option '%c'",type[0]);
-		break;
-	}
-
-	xfree(basepathgz);
-	xfree(basepath);
-}
-
-static void handle_update_baserev(char *args, int len)
-{
-	call_in_directory(args, update_baserev, NULL);
-}
 
 static void remove_entry (char *data, List *ent_list, char *short_pathname, char *filename)
 {
@@ -4238,161 +4011,68 @@ static void handle_notranslateend(char *args, int len)
 		server_codepage_translation=1;
 }
 
-static void proxy_line1(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	cmd=NULL;
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-#endif
-}
-
-static void proxy_line2(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	cmd=NULL;
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	xfree(cmd);
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-#endif
-}
-
-static void proxy_updated(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	int size,n;
-	char *buf;
-
-	proxy_line2(cmd);
-	cmd=NULL;
-	read_line(&cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-	read_line(&cmd);
-	size = atoi(cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-
-	if(size)
-	{
-		buf = (char*)xmalloc(size);
-		while (size > 0)
-		{
-			n = try_read_from_server (buf, size);
-			size -= n;
-		        cvs_output_raw(buf,n,size?false:true);
-		}
-		xfree(buf);
-	}
-#endif
-}
-
-static void proxy_file(char *cmd)
-{
-#ifdef SERVER_SUPPORT
-	int size,n;
-	char *buf;
-
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,false);
-	cmd=NULL;
-	read_line(&cmd);
-	size = atoi(cmd);
-	cvs_output_raw(cmd,0,false);
-	cvs_output_raw("\n",1,true);
-	xfree(cmd);
-
-	if(size)
-	{
-		buf = (char*)xmalloc(size);
-		while (size > 0)
-		{
-			n = try_read_from_server (buf, size);
-			size -= n;
-			cvs_output_raw(buf,n,size?false:true);
-		}
-		xfree(buf);
-	}
-#endif
-}
-
 #define GAIJIN_rs_essential rs_essential//define to rs_optional if you want to support old server
 /* This table must be writeable if the server code is included.  */
 struct response responses[] =
 {
-#define RSP_LINE(n, f, p, t, s) {n, f, p, t, s}
+#define RSP_LINE(n, f, t, s) {n, f, t, s}
 
-    RSP_LINE("ok", handle_ok, NULL, response_type_ok, rs_essential),
-    RSP_LINE("error", handle_error, NULL, response_type_error, rs_essential),
-    RSP_LINE("Valid-requests", handle_valid_requests, NULL, response_type_normal,
+    RSP_LINE("ok", handle_ok, response_type_ok, rs_essential),
+    RSP_LINE("error", handle_error, response_type_error, rs_essential),
+    RSP_LINE("Valid-requests", handle_valid_requests, response_type_normal,
        rs_essential),
-    RSP_LINE("Checked-in", handle_checked_in, proxy_line2, response_type_normal,
+    RSP_LINE("Checked-in", handle_checked_in, response_type_normal,
        rs_essential),
-    RSP_LINE("New-entry", handle_new_entry, proxy_line2, response_type_normal, rs_optional),
-    RSP_LINE("Checksum", handle_checksum, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Copy-file", handle_copy_file, proxy_line1, response_type_normal, rs_optional),
-    RSP_LINE("Blob-ref", handle_updated_blobs_refs, proxy_updated, response_type_normal, GAIJIN_rs_essential),
-    RSP_LINE("Blob-ref-created", handle_created_blobs_refs, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Blob-OTP", handle_blob_otp, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Blob-url", handle_blob_url, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Updated", handle_updated, proxy_updated, response_type_normal, rs_essential),
-    RSP_LINE("Updated-meta", handle_updated_meta, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Created", handle_created, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Update-existing", handle_update_existing, proxy_updated, response_type_normal,
+    RSP_LINE("New-entry", handle_new_entry, response_type_normal, rs_optional),
+    RSP_LINE("Checksum", handle_checksum, response_type_normal, rs_optional),
+    RSP_LINE("Copy-file", handle_copy_file, response_type_normal, rs_optional),
+    RSP_LINE("Blob-ref", handle_updated_blobs_refs, response_type_normal, GAIJIN_rs_essential),
+    RSP_LINE("Blob-ref-created", handle_created_blobs_refs, response_type_normal, rs_optional),
+    RSP_LINE("Blob-OTP", handle_blob_otp, response_type_normal, rs_optional),
+    RSP_LINE("Blob-url", handle_blob_url, response_type_normal, rs_optional),
+    RSP_LINE("Updated", handle_updated, response_type_normal, rs_essential),
+    RSP_LINE("Updated-meta", handle_updated_meta, response_type_normal, rs_optional),
+    RSP_LINE("Created", handle_created, response_type_normal, rs_optional),
+    RSP_LINE("Update-existing", handle_update_existing, response_type_normal,
        rs_optional),
-    RSP_LINE("Merged", handle_merged, proxy_updated, response_type_normal, rs_essential),
-    RSP_LINE("Patched", handle_patched, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Rcs-diff", handle_rcs_diff, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Update-baserev", handle_update_baserev, proxy_updated, response_type_normal, rs_optional),
-    RSP_LINE("Mode", handle_mode, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Mod-time", handle_mod_time, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Removed", handle_removed, NULL, response_type_normal, rs_essential),
-	RSP_LINE("Renamed", handle_renamed, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Remove-entry", handle_remove_entry, NULL, response_type_normal,
+    RSP_LINE("Merged", handle_merged, response_type_normal, rs_essential),
+    RSP_LINE("Patched", handle_patched, response_type_normal, rs_optional),
+    RSP_LINE("Rcs-diff", handle_rcs_diff, response_type_normal, rs_optional),
+    RSP_LINE("Mode", handle_mode, response_type_normal, rs_optional),
+    RSP_LINE("Mod-time", handle_mod_time, response_type_normal, rs_optional),
+    RSP_LINE("Removed", handle_removed, response_type_normal, rs_essential),
+	RSP_LINE("Renamed", handle_renamed, response_type_normal, rs_optional),
+    RSP_LINE("Remove-entry", handle_remove_entry, response_type_normal,
        rs_optional),
-    RSP_LINE("Set-static-directory", handle_set_static_directory, proxy_line1,
+    RSP_LINE("Set-static-directory", handle_set_static_directory,
        response_type_normal,
        rs_optional),
-    RSP_LINE("Clear-static-directory", handle_clear_static_directory, proxy_line1,
+    RSP_LINE("Clear-static-directory", handle_clear_static_directory,
        response_type_normal,
        rs_optional),
-    RSP_LINE("Set-sticky", handle_set_sticky, proxy_line2, response_type_normal,
+    RSP_LINE("Set-sticky", handle_set_sticky, response_type_normal,
        rs_optional),
-    RSP_LINE("Clear-sticky", handle_clear_sticky, proxy_line1, response_type_normal, 
+    RSP_LINE("Clear-sticky", handle_clear_sticky, response_type_normal,
        rs_optional),
-    RSP_LINE("Template", handle_template, proxy_file, response_type_normal,
+    RSP_LINE("Template", handle_template, response_type_normal,
        rs_optional),
-    RSP_LINE("Notified", handle_notified, NULL, response_type_normal, rs_optional),
-    RSP_LINE("Module-expansion", handle_module_expansion, NULL, response_type_normal, 
+    RSP_LINE("Module-expansion", handle_module_expansion, response_type_normal,
        rs_optional),
-    RSP_LINE("Wrapper-rcsOption", handle_wrapper_rcs_option, NULL,
+    RSP_LINE("Wrapper-rcsOption", handle_wrapper_rcs_option,
        response_type_normal,
        rs_optional),
-    RSP_LINE("Clear-rename", handle_clear_rename, NULL, response_type_normal, rs_optional),
-	RSP_LINE("Rename", handle_rename, NULL, response_type_normal, rs_optional), 
-	RSP_LINE("EntriesExtra", handle_entries_extra, NULL, response_type_normal, rs_optional), 
-    RSP_LINE("M", handle_m, NULL, response_type_normal, rs_essential), 
-    RSP_LINE("Mbinary", handle_mbinary, proxy_file, response_type_normal, rs_optional),
-    RSP_LINE("E", handle_e, NULL, response_type_normal, rs_essential),
-    RSP_LINE("F", handle_f, NULL, response_type_normal, rs_optional),
-    RSP_LINE("MT", handle_mt, NULL, response_type_normal, rs_optional),
-	RSP_LINE("NoTranslateBegin", handle_notranslatebegin, NULL, response_type_normal, rs_optional),
-	RSP_LINE("NoTranslateEnd", handle_notranslateend, NULL, response_type_normal, rs_optional),
+    RSP_LINE("Clear-rename", handle_clear_rename, response_type_normal, rs_optional),
+	RSP_LINE("Rename", handle_rename, response_type_normal, rs_optional),
+	RSP_LINE("EntriesExtra", handle_entries_extra, response_type_normal, rs_optional),
+    RSP_LINE("M", handle_m, response_type_normal, rs_essential),
+    RSP_LINE("Mbinary", handle_mbinary, response_type_normal, rs_optional),
+    RSP_LINE("E", handle_e, response_type_normal, rs_essential),
+    RSP_LINE("F", handle_f, response_type_normal, rs_optional),
+    RSP_LINE("MT", handle_mt, response_type_normal, rs_optional),
+	RSP_LINE("NoTranslateBegin", handle_notranslatebegin, response_type_normal, rs_optional),
+	RSP_LINE("NoTranslateEnd", handle_notranslateend, response_type_normal, rs_optional),
     /* Possibly should be response_type_error.  */
-    RSP_LINE(NULL, NULL, NULL, response_type_normal, rs_essential)
+    RSP_LINE(NULL, NULL, response_type_normal, rs_essential)
 
 #undef RSP_LINE
 };
@@ -4519,38 +4199,11 @@ int get_server_responses ()
 		     * matched "ok".
 		     */
 		    continue;
-#ifdef SERVER_SUPPORT
-		if(proxy_active)
-		{
-			// We are proxying for a client.  Don't execute this commmand, proxy it
-			if(rs->proxy)
-				(*rs->proxy) (cmd);
-			else
-			{
-				cvs_output_raw(cmd,0,false);
-				cvs_output_raw("\n",1,true);
-			}
-		}
-		else
-#endif
-		{
-			// Local command
-			(*rs->func) (cmd + cmdlen, len - cmdlen);
-		}
+		(*rs->func) (cmd + cmdlen, len - cmdlen);
 		break;
 	    }
 	if (rs->name == NULL)
 	    /* It's OK to print just to the first '\0'.  */
-	    /* We might want to handle control characters and the like
-	       in some other way other than just sending them to stdout.
-	       One common reason for this error is if people use :ext:
-	       with a version of rsh which is doing CRLF translation or
-	       something, and so the client gets "ok^M" instead of "ok".
-	       Right now that will tend to print part of this error
-	       message over the other part of it.  It seems like we could
-	       do better (either in general, by quoting or omitting all
-	       control characters, and/or specifically, by detecting the CRLF
-	       case and printing a specific error message).  */
 	    error (0, 0,
 		   "warning: unrecognized response `%s' from cvs server",
 		   cmd);
@@ -4590,22 +4243,9 @@ int get_server_responses ()
     return 0;
 }
 
-int get_server_responses_noproxy()
-{
-#ifdef SERVER_SUPPORT
-	int _prox=proxy_active;
-	proxy_active=0;
-#endif
-	int ret = get_server_responses();
-#ifdef SERVER_SUPPORT
-	proxy_active=_prox;
-#endif
-	return ret;
-}
-
 /*
  * Flag var; we'll set it in start_server() and not one of its
- * callees, such as start_rsh_server().  This means that there might
+ * callees.  This means that there might
  * be a small window between the starting of the server and the
  * setting of this var, but all the code in that window shouldn't care
  * because it's busy checking return values to see if the server got
@@ -4782,9 +4422,9 @@ int start_server (int verify_only)
 				current_parsed_root->hostname, current_parsed_root->directory);
 		}
 	}
-	else if(connect_state!=CVSPROTO_SUCCESS && connect_state!=CVSPROTO_SUCCESS_NOPROTOCOL)
+	else if(connect_state!=CVSPROTO_SUCCESS)
 		error(1,0,"Connection to server failed");
-	else if(connect_state==CVSPROTO_SUCCESS)
+	else
 	{
 		/* Loop, getting responses from the server.  */
 		TRACE(2,"client start - Loop, getting responses from the server.");
@@ -4959,9 +4599,6 @@ int start_server (int verify_only)
 
 	for (rs = responses; rs->name != NULL; ++rs)
 	{
-		// If we are proxying then we remove things our client doesn't want
-		if(verify_only==2 && rs->status == rs_not_supported)
-			continue;
 	    send_to_server (" ", 0);
 	    send_to_server (rs->name, 0);
 	}
@@ -4983,68 +4620,18 @@ int start_server (int verify_only)
 
 	if(gzip_level<0 && (supported_request("Compression-Requested") || supported_request("Compression-Required")))
 		gzip_level = 1; /* gzip_level doesn't actually make much difference */
-	if(supported_request("Encryption-Requested") || supported_request("Encryption-Required"))
-		cvsencrypt = -1;
-	else if(supported_request("Authentication-Requested") || supported_request("Authentication-Required"))
-		cvsauthenticate = -1;
 
     if (!rootless_encryption)
     {
 		TRACE(2,"client start - !rootless_encryption.");
 		send_to_server ("Root ", 0);
-		if(server_active)
-			send_to_server (current_parsed_root->remote_repository, 0);
-		else
-			send_to_server (current_parsed_root->directory, 0);
+		send_to_server (current_parsed_root->directory, 0);
 		send_to_server ("\n", 1);
     }
 
     status = buf_flush (to_server, 1);
     if (status != 0)
 		error (1, status, "writing to server");
-
-	if (cvsencrypt && rootless_encryption)
-	{
-		/* Turn on encryption before turning on compression.  We do
-		not want to try to compress the encrypted stream.  Instead,
-		we want to encrypt the compressed stream.  If we can't turn
-		on encryption, bomb out; don't let the user think the data
-		is being encrypted when it is not.  */
-		TRACE(2,"client start - cvsencrypt && rootless_encryption.");
-	if (client_protocol->wrap)
-	{
-		if(supported_request("Protocol-encrypt")) // CVSNT specific protocol encryption
-		{
-			send_to_server ("Protocol-encrypt\n", 0);
-		}
-		else if(!strcasecmp(current_parsed_root->method,"kserver") && supported_request("Kerberos-encrypt"))
-		{
-			send_to_server ("Kerberos-encrypt\n", 0);
-		}
-		else if(!strcasecmp(current_parsed_root->method,"gserver") && supported_request("Gssapi-encrypt"))
-		{
-			send_to_server ("Gssapi-encrypt\n", 0);
-		}
-		else
-			error (1, 0, "This server does not support encryption");
-
-		to_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, to_server, 0,
-													1,
-													((BUFMEMERRPROC)
-														NULL));
-		from_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, from_server, 1,
-														1,
-														((BUFMEMERRPROC)
-														NULL));
-
-		TRACE(1,"Encryption enabled");
-	}
-	else
-	{
-		if(cvsencrypt>0 && !(client_protocol->valid_elements&flagAlwaysEncrypted))
-			error (1, 0, "This protocol does not support encryption");
-	}
-	}
 
 	if (gzip_level>0 && rootless_encryption)
 	{
@@ -5095,52 +4682,11 @@ int start_server (int verify_only)
 	}
 	}
 
-	if (cvsauthenticate && !cvsencrypt && rootless_encryption)
-	{
-		/* Turn on authentication after turning on compression, so
-		that we can compress the authentication information.  We
-		assume that encrypted data is always authenticated--the
-		ability to decrypt the data stream is itself a form of
-		authentication.  */
-	TRACE(2,"client start - cvsauthenticate && !cvsencrypt && rootless_encryption.");
-	if (client_protocol->wrap)
-	{
-		if(supported_request("Protocol-authenticate")) // CVSNT specific protocol authentication
-		{
-			send_to_server ("Protocol-encrypt\n", 0);
-		}
-		else if(!strcasecmp(current_parsed_root->method,"gserver") && supported_request("Gssapi-authenticate"))
-		{
-			send_to_server ("Gssapi-authenticate\n", 0);
-		}
-		else
-			error (1, 0, "This server does not support authentication");
-
-		to_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, to_server, 0,
-													0,
-													((BUFMEMERRPROC)
-														NULL));
-		from_server = cvs_encrypt_wrap_buffer_initialize (client_protocol, from_server, 1,
-														0,
-														((BUFMEMERRPROC)
-														NULL));
-		TRACE(1,"Authentication enabled");
-	}
-	else
-	{
-		if(cvsauthenticate>0 && !(client_protocol->valid_elements&flagAlwaysEncrypted))
-			error (1, 0, "This protocol does not support authentication");
-	}
-	}
-
     if (rootless_encryption)
     {
 		TRACE(2,"client start - rootless_encryption.");
 		send_to_server ("Root ", 0);
-		if(server_active)
-			send_to_server (current_parsed_root->remote_repository, 0);
-		else
-			send_to_server (current_parsed_root->directory, 0);
+		send_to_server (current_parsed_root->directory, 0);
 		send_to_server ("\n", 1);
     }
 
@@ -5699,12 +5245,9 @@ static int send_fileproc (void *callerdat, struct file_info *finfo)
 		send_to_server(vers->entdata->merge_from_tag_2,0);
 		send_to_server ("/", 0);
 		/* No point in sending RCS checkin time - we know it already */
-		send_to_server ("/", 0);
-		send_to_server (vers->entdata->edit_revision,0);
-		send_to_server ("/", 0);
-		send_to_server (vers->entdata->edit_tag,0);
-		send_to_server ("/", 0);
-		send_to_server (vers->entdata->edit_bugid,0);
+		/* Two empty slots keep the field layout */
+		send_to_server ("///", 0);
+		send_to_server (vers->entdata->bugid,0);
 		send_to_server ("/", 0);
 		send_to_server (vers->entdata->md5,0);
 		send_to_server ("/\n", 0);
@@ -6462,145 +6005,6 @@ client_import_done ()
     send_repository ("", toplevel_repos, ".");
 }
 
-static void notified_a_file (char *data, List *ent_list, char *short_pathname, char *filename)
-{
-    if (excl_discard)
-        return;
-    FILE *fp;
-    FILE *newf;
-    size_t line_len = 8192;
-    char *line = (char*)xmalloc (line_len);
-    char *cp;
-    int nread;
-    int nwritten;
-    char *p;
-
-    fp = open_file (CVSADM_NOTIFY, "r");
-	if(!fp)
-	{
-		if(!existence_error(errno))
-			error(0,errno,"cannot read %s", CVSADM_NOTIFY);
-		goto error_exit;
-	}
-	
-    if (getline (&line, &line_len, fp) < 0)
-    {
-		if (feof (fp))
-			error (0, 0, "cannot read %s: end of file", CVSADM_NOTIFY);
-		else
-			error (0, errno, "cannot read %s", CVSADM_NOTIFY);
-		goto error_exit;
-    }
-    cp = strchr (line, '\t');
-    if (cp == NULL)
-    {
-		error (0, 0, "malformed %s file", CVSADM_NOTIFY);
-		goto error_exit;
-    }
-    *cp = '\0';
-    if (strcmp (filename, line + 1) != 0)
-    {
-	error (0, 0, "protocol error: notified %s, expected %s", filename,
-	       line + 1);
-    }
-
-    if (getline (&line, &line_len, fp) < 0)
-    {
-	if (feof (fp))
-	{
-	    xfree (line);
-	    if (fclose (fp) < 0)
-		error (0, errno, "cannot close %s", CVSADM_NOTIFY);
-	    if ( CVS_UNLINK (CVSADM_NOTIFY) < 0)
-		error (0, errno, "cannot remove %s", CVSADM_NOTIFY);
-	    return;
-	}
-	else
-	{
-	    error (0, errno, "cannot read %s", CVSADM_NOTIFY);
-	    goto error_exit;
-	}
-    }
-    newf = open_file (CVSADM_NOTIFYTMP, "w");
-    if (fputs (line, newf) < 0)
-    {
-	error (0, errno, "cannot write %s", CVSADM_NOTIFYTMP);
-	goto error2;
-    }
-    while ((nread = fread (line, 1, line_len, fp)) > 0)
-    {
-	p = line;
-	while ((nwritten = fwrite (p, 1, nread, newf)) > 0)
-	{
-	    nread -= nwritten;
-	    p += nwritten;
-	}
-	if (ferror (newf))
-	{
-	    error (0, errno, "cannot write %s", CVSADM_NOTIFYTMP);
-	    goto error2;
-	}
-    }
-    if (ferror (fp))
-    {
-	error (0, errno, "cannot read %s", CVSADM_NOTIFY);
-	goto error2;
-    }
-    if (fclose (newf) < 0)
-    {
-	error (0, errno, "cannot close %s", CVSADM_NOTIFYTMP);
-	goto error_exit;
-    }
-    xfree (line);
-    if (fclose (fp) < 0)
-    {
-	error (0, errno, "cannot close %s", CVSADM_NOTIFY);
-	return;
-    }
-
-    {
-        /* In this case, we want rename_file() to ignore noexec. */
-        int saved_noexec = noexec;
-        noexec = 0;
-        rename_file (CVSADM_NOTIFYTMP, CVSADM_NOTIFY);
-        noexec = saved_noexec;
-    }
-
-    return;
-  error2:
-    if(newf) fclose (newf);
-  error_exit:
-    xfree (line);
-    if(fp) fclose (fp);
-}
-
-static void handle_notified (char *args, int len)
-{
-    call_in_directory (args, notified_a_file, NULL);
-}
-
-void
-client_notify (char *repository, char *update_dir, char *filename,
-    int notif_type, char *val, char *user)
-{
-    char buf[2];
-
-    send_a_repository ("", repository, update_dir);
-	if(user && supported_request("NotifyUser"))
-	{
-		send_to_server("NotifyUser ", 0);
-		send_to_server(user, 0);
-		send_to_server("\n", 1);
-	}
-    send_to_server ("Notify ", 0);
-    send_to_server (filename, 0);
-    send_to_server ("\n", 1);
-    buf[0] = notif_type;
-    buf[1] = '\0';
-    send_to_server (buf, 1);
-    send_to_server ("\t", 1);
-    send_to_server (val, 0);
-}
 
 /*
  * Send an option with an argument, dealing correctly with newlines in

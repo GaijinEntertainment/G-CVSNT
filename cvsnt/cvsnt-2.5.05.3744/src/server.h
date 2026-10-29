@@ -13,10 +13,8 @@
 
 #ifdef SERVER_SUPPORT
 extern int server_active;
-extern int proxy_active;
 #else
 #define server_active 0
-#define proxy_active 0
 #endif
 
 #ifdef SERVER_SUPPORT
@@ -41,8 +39,7 @@ void server_pathname_check (const char *path);
 /* We have a new Entries line for a file.  TAG or DATE can be NULL.  */
 void server_register(const char *name, const char *version, const char *timestamp, const char *options,
 				const char *tag, const char *date, const char *conflict, const char *merge_from_tag_1,
-				const char *merge_from_tag_2, time_t rcs_timestamp,
-				const char *edit_revision, const char *edit_tag, const char *edit_bugid, const char *md5);
+				const char *merge_from_tag_2, time_t rcs_timestamp, const char *bugid, const char *md5);
 
 /* Set the modification time of the next file sent.  This must be
    followed by a call to server_updated on the same file.  */
@@ -189,7 +186,6 @@ int send_rename_to_client(const char *oldfile, const char *newfile);
 int server_rename_file(const char *oldfile, const char *newfile);
 int client_can_rename();
 int reset_client_mapping(const char *update_dir, const char *repository);
-void server_send_baserev(struct file_info *finfo, const char *basefile, const char *type);
 
 int cvs_output_raw(const char *str, size_t len, bool flush);
 #endif

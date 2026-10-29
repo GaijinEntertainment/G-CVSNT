@@ -23,15 +23,10 @@ public:
 		std::wstring root;
 		std::wstring name;
 		std::wstring description;
-		std::wstring remote_server;
-		std::wstring remote_repository;
-		std::wstring remote_passphrase;
 		bool publish;
 		bool valid;
-		bool isdefault;
 		bool online;
 		bool readwrite;
-		int type;
 	};
 
 	CRepositoryPage();
