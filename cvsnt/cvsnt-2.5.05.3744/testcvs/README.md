@@ -54,13 +54,14 @@ Note that the tests initialise repositories with `cvs init -n`. Without `-n`, `i
 register the repository in the machine-global settings, which needs privileges a test should not
 require.
 
-One case, the `-ku` line-ending test, has to go through a real client/server session because only
-the client-side write path is affected. It connects over `:pserver:` to `PserverShim`, a listener
-on 127.0.0.1 that accepts any login and pipes the session into `<cvs> --allow-root=<repo> server`,
-so it needs the `pserver` protocol plugin as `<libdir>/protocols/pserver.<so|dll>` and nothing
-registered anywhere. When the plugin is missing the case fails. On
-Windows the standalone makefile in `_reports/BUILD-01-Makefile.nmake` builds it with
-`mk.bat plugins`.
+Two cases have to go through a real client/server session because only the client side is
+affected: the `-ku` line-ending test (the client-side write path) and the test that a client skips
+a `blobs/` directory left in its working copy (it must never send that directory to the server).
+They connect over `:pserver:` to `PserverShim`, a listener on 127.0.0.1 that accepts any login and
+pipes the session into `<cvs> --allow-root=<repo> server`, so they need the `pserver` protocol
+plugin as `<libdir>/protocols/pserver.<so|dll>` and nothing registered anywhere. When the plugin is
+missing these cases fail. On Windows the standalone makefile in `_reports/BUILD-01-Makefile.nmake`
+builds it with `mk.bat plugins`.
 
 ## `testcvs.py`
 

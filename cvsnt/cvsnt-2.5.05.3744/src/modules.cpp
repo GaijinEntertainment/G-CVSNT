@@ -292,6 +292,12 @@ int do_module (DBM *db, const char *mname, enum mtype m_type,  const char *msg, 
 	}
 	xfree (attic_file);
 
+	if (is_found && in_blob_store (current_parsed_root->directory, xmname))
+	{
+	    free_names (&modargc, modargv);
+	    is_found = 0;
+	}
+
 	if (is_found)
 	{
 	    assert (value == NULL);
