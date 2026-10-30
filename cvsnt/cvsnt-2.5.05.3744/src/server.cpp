@@ -3217,6 +3217,10 @@ void server_register(const char *name, const char *version, const char *timestam
 	len += strlen(md5);
 	if(bugid)
 	len += strlen(bugid);
+	if(merge_from_tag_1)
+	len += strlen(merge_from_tag_1);
+	if(merge_from_tag_2)
+	len += strlen(merge_from_tag_2);
 
 	len += 128; // This is for patching the md5 in later...
     
