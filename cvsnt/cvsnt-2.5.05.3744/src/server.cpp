@@ -1738,7 +1738,7 @@ static void serve_blob (char *arg)
     {
       char hash1Z[65];memcpy(hash1Z, arg, 64); hash1Z[64]=0;
       char hash2Z[65];memcpy(hash2Z, actual_hash, 64); hash2Z[64]=0;
-      error(1,0, "received hash %.64s, actual = %.64s.", hash1Z, hash2Z);
+      error(1,0, "received hash %s, actual = %s.", hash1Z, hash2Z);
     }
     if (res == caddressed_fs::PushResult::IO_ERROR)
       error(1,0,"io failed <%s>", arg);
@@ -4812,6 +4812,9 @@ int server (int argc, char **argv)
 		usage (msg);
     }
     /* Ignore argc and argv.  They might be from .cvsrc.  */
+
+	/* A Blob-transfer hash is the client's claim; check the content against it. */
+	caddressed_fs::set_allow_trust(false);
 
 	if(!buf_to_net)
 		buf_to_net = fd_buffer_initialize (STDOUT_FILENO, 0, outbuf_memory_error);

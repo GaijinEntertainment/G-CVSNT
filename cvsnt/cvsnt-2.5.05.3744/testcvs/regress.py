@@ -1171,6 +1171,15 @@ def t_blob_transfer_bad_hash(r):
     check(os.path.isfile(stored[0]) and open(stored[0], "rb").read() == body,
           "the pushed blob was not stored under its hash")
 
+    # A well-formed hash that is not the content's own is refused, and
+    # neither the blob nor its temp file is left in the store.
+    before = snapshot()
+    out = transfer("ab" * 32, blob)
+    check(any(l.startswith("error") for l in out.split("\n")),
+          "Blob-transfer of content under another hash was not refused:\n%s" % out)
+    created = sorted(p for p in snapshot() - before if os.path.isfile(p))
+    check(not created, "Blob-transfer under another hash left files: %r" % created)
+
 
 @test("a fileattr.xml with an old server's watch nodes checks out writable and commits")
 def t_old_watch_data_ignored(r):
