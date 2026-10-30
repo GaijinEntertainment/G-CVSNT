@@ -22,6 +22,7 @@ import os
 import re
 import shutil
 import socket
+import struct
 import subprocess
 import sys
 import tempfile
@@ -1112,6 +1113,74 @@ def t_server_pipeout_order(r):
               % (i_body, i_tail, out))
 
 
+@test("the server rejects a Blob-transfer whose hash is not 64 lowercase hex characters")
+def t_blob_transfer_bad_hash(r):
+    # Blob-transfer names the blob by its hash, which also places it in the
+    # blob store.  Any other argument must be refused before the store is
+    # touched, so no file appears anywhere.
+    blobs = os.path.join(r.repo, "blobs")
+    payload = b"blob body\n"
+    blob = struct.pack("<4sHHQ", b"NONE", 16, 0, len(payload)) + payload
+
+    def snapshot():
+        found = set()
+        for d, dirs, files in os.walk(r.root):
+            found.update(os.path.join(d, n) for n in dirs + files)
+        return found
+
+    def session_dir(p):
+        # server_session runs each server in a fresh empty directory of r.root.
+        return os.path.dirname(p) == r.root and os.path.isdir(p) and not os.listdir(p)
+
+    def transfer(arg, body):
+        reqs = "".join(s + "\n" for s in [
+            "Root " + r.repo.replace(os.sep, "/"),
+            "Valid-responses " + VALID_RESPONSES,
+            "UseUnchanged",
+            "Blob-transfer " + arg,
+            str(len(body)),
+        ]).encode("utf-8") + body
+        _, out, err = server_session(r, reqs)
+        return out + err
+
+    for arg in ("../." + "0" * 60, "...." + "0" * 60, "0" * 63, "0" * 65,
+                "A" * 64, "0" * 62 + "/x"):
+        before = snapshot()
+        out = transfer(arg, blob)
+        check(any(l.startswith("error") for l in out.split("\n")),
+              "Blob-transfer %r was not refused:\n%s" % (arg, out))
+        created = sorted(p for p in snapshot() - before if not session_dir(p))
+        check(not created, "Blob-transfer %r created files: %r" % (arg, created))
+
+    # A conforming hash is still accepted: a stored blob pushed back after
+    # its file is removed lands under its hash again.
+    imp = os.path.join(r.root, "impblob")
+    os.makedirs(imp)
+    with open(os.path.join(imp, "b.dat"), "wb") as f:
+        f.write(bytes(range(256)))
+    r.cvs(["import", "-kB", "-m", "i", "mb", "VENDOR", "REL0"], cwd=imp)
+    stored = [os.path.join(d, n) for d, _, files in os.walk(blobs) for n in files]
+    if not check_eq(len(stored), 1, "blobs stored by import -kB"):
+        return
+    with open(stored[0], "rb") as f:
+        body = f.read()
+    os.remove(stored[0])
+    out = transfer(os.path.basename(stored[0]), body)
+    check(not any(l.startswith("error") for l in out.split("\n")),
+          "a conforming Blob-transfer hash was refused:\n%s" % out)
+    check(os.path.isfile(stored[0]) and open(stored[0], "rb").read() == body,
+          "the pushed blob was not stored under its hash")
+
+    # A well-formed hash that is not the content's own is refused, and
+    # neither the blob nor its temp file is left in the store.
+    before = snapshot()
+    out = transfer("ab" * 32, blob)
+    check(any(l.startswith("error") for l in out.split("\n")),
+          "Blob-transfer of content under another hash was not refused:\n%s" % out)
+    created = sorted(p for p in snapshot() - before if os.path.isfile(p))
+    check(not created, "Blob-transfer under another hash left files: %r" % created)
+
+
 @test("a fileattr.xml with an old server's watch nodes checks out writable and commits")
 def t_old_watch_data_ignored(r):
     r.import_tree("m", {"w.txt": "watched\n"})
@@ -2049,6 +2118,44 @@ def t_add_binary_kopt_protocol(r):
     check(re.search(r"/deep\.txt/0/[^/]*/-k[bB]/", out) is not None,
           "the binary file in the second directory lost its Kopt:" + chr(10) + out)
 
+
+@test("the server fails cleanly on a repository path longer than MAX_PATH")
+def t_long_repository_path(r):
+    # A repository path far longer than MAX_PATH reaches the module-lookup
+    # code, which copies it into fixed-size buffers.  An over-long path must
+    # be rejected without the server dying.
+    root = r.repo.replace(os.sep, "/")
+    # 39-char components, each under NAME_MAX and with no "..", joined to a
+    # path well past MAX_PATH (4096 on Linux, 1024 here).
+    comp = "a" * 39
+    long_rel = "/".join([comp] * (20000 // (len(comp) + 1)))
+
+    def check_clean(what, reqs, expect_msg=None):
+        # A clean rejection: the server exits (no signal) and reports the
+        # problem, rather than dying on the over-long path.
+        rc, out, err = server_session(r, ["Root " + root,
+                                          "Valid-responses " + VALID_RESPONSES,
+                                          "UseUnchanged"] + reqs)
+        out += err
+        if not check(rc >= 0, "%s on an over-long repository path killed the server "
+                              "(rc=%r)" % (what, rc)):
+            return
+        if expect_msg is not None:
+            check(expect_msg in out, "%s did not report the over-long path (%r):\n%s"
+                                     % (what, expect_msg, out))
+        else:
+            check(any(l.startswith("error") or l.startswith("E ") for l in out.split("\n")),
+                  "%s on an over-long repository path did not report an error:\n%s"
+                  % (what, out))
+
+    # The repository path rides the second line of a Directory request while
+    # the first line stays short.
+    check_clean("update", ["Directory sub", root + "/" + long_rel,
+                           "Argument sub", "update"])
+    # The repository path rides the command argument; rlog reaches the
+    # module-lookup guard, which names the over-long path.
+    check_clean("rlog", ["Argument " + long_rel, "rlog"],
+                expect_msg="Repository path too long for module lookup")
 
 
 def main():

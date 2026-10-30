@@ -1704,6 +1704,12 @@ static void serve_blob (char *arg)
     error(1,0,"incorrect blob size<%s> == %d for %s", size_text, (int)size, arg);
   xfree (size_text);
 
+  if (strlen(arg) != hash_encoded_size || !is_encoded_hash(arg, hash_encoded_size))
+  {
+    error(1,0,"received hash is not a valid hash for blob %s", arg);
+    return;
+  }
+
   size_t sizeLeft = size;
   const bool exists = caddressed_fs::exists(caddressed_fs::get_default_ctx(), arg);
   caddressed_fs::PushData *pd = caddressed_fs::start_push(caddressed_fs::get_default_ctx(), arg);
@@ -1732,7 +1738,7 @@ static void serve_blob (char *arg)
     {
       char hash1Z[65];memcpy(hash1Z, arg, 64); hash1Z[64]=0;
       char hash2Z[65];memcpy(hash2Z, actual_hash, 64); hash2Z[64]=0;
-      error(1,0, "received hash %.64s, actual = %.64s.", hash1Z, hash2Z);
+      error(1,0, "received hash %s, actual = %s.", hash1Z, hash2Z);
     }
     if (res == caddressed_fs::PushResult::IO_ERROR)
       error(1,0,"io failed <%s>", arg);
@@ -3211,6 +3217,10 @@ void server_register(const char *name, const char *version, const char *timestam
 	len += strlen(md5);
 	if(bugid)
 	len += strlen(bugid);
+	if(merge_from_tag_1)
+	len += strlen(merge_from_tag_1);
+	if(merge_from_tag_2)
+	len += strlen(merge_from_tag_2);
 
 	len += 128; // This is for patching the md5 in later...
     
@@ -4802,6 +4812,9 @@ int server (int argc, char **argv)
 		usage (msg);
     }
     /* Ignore argc and argv.  They might be from .cvsrc.  */
+
+	/* A Blob-transfer hash is the client's claim; check the content against it. */
+	caddressed_fs::set_allow_trust(false);
 
 	if(!buf_to_net)
 		buf_to_net = fd_buffer_initialize (STDOUT_FILENO, 0, outbuf_memory_error);
