@@ -76,8 +76,10 @@ compatibility problems with CVS 1.5 or later.
 
 Installation:
 
-Please read the INSTALL file for installation instructions.  Brief summary:
+Run autoreconf -i first, then read the generated INSTALL file for
+installation instructions.  Brief summary:
 
+	$ autoreconf -i	(generates configure and INSTALL from a fresh checkout)
 	$ ./configure
 	$ make
 	(run the regression tests if desired)

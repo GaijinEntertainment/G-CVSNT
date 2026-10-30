@@ -6,7 +6,7 @@ AppWizard has created this cvsgui library project for you.
 No source files were created as part of your project.
 
 
-cvsgui.vcproj
+cvsgui.vcxproj
     This is the main project file for VC++ projects generated using an Application Wizard. 
     It contains information about the version of Visual C++ that generated the file, and 
     information about the platforms, configurations, and project features selected with the
