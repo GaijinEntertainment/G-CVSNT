@@ -1,18 +1,19 @@
 name: release
 
 # Manually triggered release build. Produces installable packages for every
-# platform as workflow artifacts and, when a tag is given, a *draft* GitHub
-# release holding them. Server container images go to ghcr.io on request.
+# platform as workflow artifacts and, on request, a *draft* GitHub release
+# holding them, tagged with the version the build computed. Server container
+# images go to ghcr.io on request.
 #
 # Nothing here runs on push.
 
 on:
   workflow_dispatch:
     inputs:
-      tag:
-        description: "Create a draft GitHub release under this tag (empty = artifacts only)"
-        required: false
-        default: ""
+      release:
+        description: "Create a draft GitHub release tagged with the computed version"
+        type: boolean
+        default: false
       images:
         description: "Server images: skip, build only, or push up to the given tag"
         type: choice
@@ -476,7 +477,7 @@ jobs:
   # --------------------------------------------------------------------------
   release:
     name: Draft GitHub release
-    if: ${{ inputs.tag != '' && !cancelled() && !contains(needs.*.result, 'failure') }}
+    if: ${{ inputs.release && !cancelled() && !contains(needs.*.result, 'failure') }}
     needs: [version, deb, rpm, macos, windows, docker, publish-images]
     runs-on: ubuntu-latest
     timeout-minutes: 15
@@ -500,7 +501,7 @@ jobs:
           echo "vsha=${{ needs.version.outputs.version }}-${GITHUB_SHA::7}" >> "$GITHUB_OUTPUT"
       - uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ inputs.tag }}
+          tag_name: ${{ needs.version.outputs.version }}
           name: cvsnt-${{ needs.version.outputs.version }}
           draft: true
           generate_release_notes: true

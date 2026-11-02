@@ -6,7 +6,7 @@ by hand; nothing here needs credentials.
 | Workflow | Trigger | What it does |
 | --- | --- | --- |
 | `.github/workflows/test.yml` | pull requests; `workflow_dispatch` with a PR list | builds base + PRs, runs every suite on Linux and Windows, runs the `:pserver:` scenario |
-| `.github/workflows/release.yml` | push of a `v*` tag; `workflow_dispatch` | builds deb/rpm/macOS/Windows packages and server images, drafts a GitHub release |
+| `.github/workflows/release.yml` | `workflow_dispatch` | builds deb/rpm/macOS/Windows packages and server images, drafts a GitHub release |
 
 ## Running a PR set
 
