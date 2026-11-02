@@ -1495,17 +1495,23 @@ def _blob_session(r, requests):
     return rc, out
 
 
-def _plant_blobs_wc_dir(wcroot, rel="blobs"):
-    # A store directory (rel, "/"-separated) in a root working copy, the way a
-    # checkout of "." made before the store was hidden left it.  Its parent
-    # must already be a working directory.
+def _plant_wc_dir(wcroot, rel, repos):
+    # A working directory (rel, "/"-separated, below wcroot) whose
+    # CVS/Repository holds repos, registered in its parent's Entries.  Its
+    # parent must already be a working directory.
     parts = rel.split("/")
     adm = os.path.join(wcroot, *parts + ["CVS"])
     write(os.path.join(adm, "Root"), read(os.path.join(wcroot, "CVS", "Root")))
-    write(os.path.join(adm, "Repository"), rel + "\n")
+    write(os.path.join(adm, "Repository"), repos + "\n")
     write(os.path.join(adm, "Entries"), "")
     with open(os.path.join(wcroot, *parts[:-1] + ["CVS", "Entries"]), "a", newline="\n") as f:
         f.write("D/%s////\n" % parts[-1])
+
+
+def _plant_blobs_wc_dir(wcroot, rel="blobs"):
+    # A store directory in a root working copy, the way a checkout of "."
+    # made before the store was hidden left it.
+    _plant_wc_dir(wcroot, rel, rel)
 
 
 def _decoys_in(top):
@@ -1762,6 +1768,263 @@ def t_blob_store_wc_dir_client(r):
         check(not _decoys_in(wcroot), "update -d fetched %s:\n%s" % (_decoys_in(wcroot), out))
         check(os.path.isfile(os.path.join(wcroot, "m", "blobs", "k.txt")),
               "update -d over :pserver: did not bring in m/blobs/k.txt:\n" + out)
+
+
+def _root_mapped_repo(r):
+    # Module proj with subdirectories, plus a second top-level module: a walk
+    # of the root under a working directory creates proj, other and CVSROOT.
+    r.import_tree("proj", {"top.txt": "top\n", "a/a.txt": "a\n",
+                           "content.hq/f.txt": "f\n", "z/z.txt": "z\n"})
+    r.import_tree("other", {"o.txt": "o\n"})
+
+
+@contextlib.contextmanager
+def _pserver_root(r):
+    # A PserverShim for r.repo; yields its :pserver: root.
+    shim = PserverShim(r.repo.replace(os.sep, "/"))
+    try:
+        yield shim.root()
+    finally:
+        # The root's password was saved; remove it.
+        run(["-d", shim.root(), "logout"], cwd=r.root, expect_ok=False)
+        shim.close()
+
+
+def _append_cvsroot(r, name, text):
+    # Append to the runtime copy of an administrative file; cvs init leaves
+    # it read-only.  Returns the previous content.
+    import stat
+    path = os.path.join(r.repo, "CVSROOT", name)
+    old = read(path) if os.path.exists(path) else ""
+    if os.path.exists(path):
+        os.chmod(path, stat.S_IREAD | stat.S_IWRITE)
+    write(path, old + "\n" + text)
+    return old
+
+
+def _root_mapped_msg(d):
+    return ("ignoring %s (its CVS/Repository maps it to the repository root; "
+            "fix %s/CVS/Repository)" % (d, d))
+
+
+def _root_walk_in(path):
+    # Top-level repository directories a root walk created under path.
+    return sorted(set(os.listdir(path)) & {"CVSROOT", "other", "proj"})
+
+
+def _tagged_in(r, module, tag):
+    # The ,v files under <repo>/module whose symbols carry tag.
+    top = os.path.join(r.repo, module)
+    return sorted(os.path.relpath(os.path.join(d, f), top) for d, _, fs in os.walk(top)
+                  for f in fs if f.endswith(",v") and "\t%s:" % tag in read(os.path.join(d, f)))
+
+
+def _commit_new_file(r, rel):
+    # Commit proj/<rel> from a local working copy of its own.
+    wc = os.path.join(r.wc, "proj")
+    if not os.path.isdir(wc):
+        r.checkout("proj")
+    d, name = os.path.split(os.path.join(wc, *rel.split("/")))
+    write(os.path.join(d, name), "new\n")
+    r.cvs(["add", name], cwd=d)
+    r.cvs(["commit", "-m", "new " + rel], cwd=d)
+
+
+@test("update, diff, status and tag refuse a nested working directory mapped to the repository root")
+def t_root_mapped_wc_dir_refused(r):
+    # A directory inside a working copy whose CVS/Repository names the
+    # root made every update walk the whole repository under it.
+    # The server judges the directories a real client sends, so the
+    # commands go through PserverShim.
+    _root_mapped_repo(r)
+    rootpath = r.repo.replace(os.sep, "/")
+    summary1 = ("skipped 1 directory mapped to the repository root; "
+                "fix CVS/Repository in the directory named above")
+    summary2 = ("skipped 2 directories mapped to the repository root; "
+                "fix CVS/Repository in the directories named above")
+
+    def refused(what, args, cwd, skipped, summary=None):
+        rc, out = run(args, cwd=cwd, expect_ok=False)
+        check(rc != 0, "%s exited 0:\n%s" % (what, out))
+        for d in skipped:
+            check(_root_mapped_msg(d) in out, "%s did not skip %s:\n%s" % (what, d, out))
+        if summary:
+            check(out.rstrip("\n").split("\n")[-1].endswith(summary),
+                  "%s did not end with %r:\n%s" % (what, summary, out))
+        return out
+
+    with _pserver_root(r) as root:
+        top = os.path.join(r.root, "wcbroken")
+        os.makedirs(top)
+        run(["-d", root, "checkout", "proj"], cwd=top)
+        wc = os.path.join(top, "proj")
+        x = os.path.join(wc, "content.hq", "x")
+        _plant_wc_dir(wc, "content.hq/x", ".")
+        # z is walked after content.hq/x.
+        _commit_new_file(r, "z/new.txt")
+
+        out = refused("update -d from the top", ["update", "-d"], wc, ["content.hq/x"], summary1)
+        check_eq(_root_walk_in(x), [], "root walk under content.hq/x after update -d")
+        check(os.path.isfile(os.path.join(wc, "z", "new.txt")),
+              "update -d stopped at the skipped directory, z/new.txt missing:\n" + out)
+
+        _plant_wc_dir(wc, "a/y", rootpath)
+        refused("update -d with a second, absolute root", ["update", "-d"], wc,
+                ["content.hq/x", "a/y"], summary2)
+        check_eq(_root_walk_in(os.path.join(wc, "a", "y")), [],
+                 "root walk under a/y after update -d")
+        refused("update -d from content.hq", ["update", "-d"],
+                os.path.join(wc, "content.hq"), ["x"], summary1)
+        check_eq(_root_walk_in(x), [], "root walk under content.hq/x after update -d in content.hq")
+
+        # Clean trees: diff and status must not drop the error.
+        refused("diff", ["diff"], wc, ["content.hq/x", "a/y"], summary2)
+        refused("status", ["status"], wc, ["content.hq/x", "a/y"], summary2)
+
+        out = refused("tag", ["tag", "T1"], wc, ["content.hq/x"])
+        check("correct the above errors first!" in out, "tag did not abort:\n" + out)
+        check_eq(_tagged_in(r, "proj", "T1"), [],
+                 "files tagged T1 on a tree with a root-mapped directory")
+
+        # checkout -d x . run inside a working copy leaves the same layout.
+        top = os.path.join(r.root, "wcnested")
+        os.makedirs(top)
+        run(["-d", root, "checkout", "-l", "proj"], cwd=top)
+        wc = os.path.join(top, "proj")
+        run(["-d", root, "checkout", "-l", "-d", "x", "."], cwd=wc)
+        refused("update -d around checkout -d x .", ["update", "-d"], wc, ["x"], summary1)
+        check_eq(_root_walk_in(os.path.join(wc, "x")), [],
+                 "root walk under x after update -d around checkout -d x .")
+
+
+@test("a nested directory mapped to the root through modules2, or under an unreadable root, is refused")
+def t_root_mapped_wc_dir_refused_config(r):
+    # Same PserverShim sessions as t_root_mapped_wc_dir_refused.  The
+    # modules2 alias reaches the root only after mapping.  A root the user
+    # cannot read must not turn the refusal into a silent skip, nor let
+    # tag's preflight pass.
+    import getpass
+    _root_mapped_repo(r)
+    _append_cvsroot(r, "modules2", "[root_alias]\n/ = .\n")
+
+    def refused(what, wc):
+        for args in (["update", "-d"], ["tag", "T1"]):
+            rc, out = run(args, cwd=wc, expect_ok=False)
+            cmd = "%s (%s)" % (" ".join(args), what)
+            check(rc != 0, "%s exited 0:\n%s" % (cmd, out))
+            check(_root_mapped_msg("content.hq/x") in out,
+                  "%s did not skip content.hq/x:\n%s" % (cmd, out))
+        check("correct the above errors first!" in out, "tag (%s) did not abort:\n%s" % (what, out))
+        check_eq(_tagged_in(r, "proj", "T1"), [], "files tagged T1 (%s)" % what)
+        check_eq(_root_walk_in(os.path.join(wc, "content.hq", "x")), [],
+                 "root walk under content.hq/x (%s)" % what)
+
+    with _pserver_root(r) as root:
+        wcs = []
+        for repos in ("root_alias", "."):
+            top = os.path.join(r.root, "wc%d" % len(wcs))
+            os.makedirs(top)
+            run(["-d", root, "checkout", "proj"], cwd=top)
+            wcs.append(os.path.join(top, "proj"))
+            _plant_wc_dir(wcs[-1], "content.hq/x", repos)
+
+        refused("modules2 alias", wcs[0])
+
+        write(os.path.join(r.repo, "CVSROOT", "admin"), getpass.getuser() + "\n")
+        r.cvs(["rchacl", "-a", "none", "."], cwd=r.root)
+        r.cvs(["rchacl", "-a", "all", "proj"], cwd=r.root)
+        refused("root ACL none", wcs[1])
+
+
+@test("the server skips a Directory mapped to the repository root below a module directory")
+def t_root_mapped_directory_protocol(r):
+    # The request stream of an update from a module working copy holding x,
+    # with each spelling of the root that reaches the server unchanged.
+    _root_mapped_repo(r)
+    root = r.repo.replace(os.sep, "/")
+    for repos in (root, root + "/", root + "/.", root + "/proj/.."):
+        rc, out = _blob_session(r, ["Directory .", root + "/proj", "version",
+                                    "Directory x", repos,
+                                    "Directory .", root + "/proj",
+                                    "Argument -d", "update", "version"])
+        lines = out.split("\n")
+        check(any(l.startswith("E ") and _root_mapped_msg("x") in l for l in lines),
+              "Directory x -> %s was not skipped:\n%s" % (repos, out))
+        # The trailing version must not inherit the update's skip count.
+        check_eq([l.rstrip() for l in lines if l == "ok" or l.startswith("error")],
+                 ["ok", "error", "ok"], "results of version, update and version with "
+                 "Directory x -> %s (output:\n%s)" % (repos, out))
+        walked = [l for l in lines if re.search(r"(^| )x/(CVSROOT|other|proj)\b", l)]
+        check_eq(walked, [], "responses under x for Directory x -> %s" % repos)
+        check("MT fname z/z.txt" in lines,
+              "update with Directory x -> %s did not walk the rest of proj:\n%s" % (repos, out))
+
+
+@test("whole-repository checkouts, checkout -d x . and container layouts still update")
+def t_root_mapped_wc_dir_kept(r):
+    # Layouts that legitimately map a working directory to the root: the
+    # parent is the root or Emptydir, or the directory is a top-level
+    # argument.  Same PserverShim sessions as t_root_mapped_wc_dir_refused.
+    _root_mapped_repo(r)
+    _append_cvsroot(r, "modules", "allx -d x .\nally -d y .\nworld2 -d group/x .\n")
+
+    def kept(what, args, cwd, delivered=()):
+        rc, out = run(args, cwd=cwd, expect_ok=False)
+        check_eq(rc, 0, "%s exit status (output:\n%s)" % (what, out))
+        check("maps it to the repository root" not in out,
+              "%s skipped a directory:\n%s" % (what, out))
+        for f in delivered:
+            check(os.path.isfile(os.path.join(cwd, *f.split("/"))),
+                  "%s did not deliver %s:\n%s" % (what, f, out))
+        return out
+
+    def mk(name):
+        d = os.path.join(r.root, name)
+        os.makedirs(d)
+        return d
+
+    with _pserver_root(r) as root:
+        whole, plain, mods, arg, group, tla = (
+            mk(n) for n in ("wcwhole", "wcplain", "wcmods", "wcarg", "wcgroup", "wctla"))
+        run(["-d", root, "checkout", "."], cwd=whole)
+        run(["-d", root, "checkout", "-d", "x", "."], cwd=plain)
+        run(["-d", root, "checkout", "allx", "ally"], cwd=mods)
+        run(["-d", root, "checkout", "proj"], cwd=arg)
+        run(["-d", root, "checkout", "world2"], cwd=group)
+        old = _append_cvsroot(r, "config", "TopLevelAdmin=yes\n")
+        run(["-d", root, "checkout", "-d", "x", "."], cwd=tla)
+        write(os.path.join(r.repo, "CVSROOT", "config"), old)
+        _commit_new_file(r, "a/new.txt")
+
+        kept("update -d in a checkout of .", ["update", "-d"], whole, ["proj/a/new.txt"])
+        kept("update .. from proj of a checkout of .", ["update", ".."],
+             os.path.join(whole, "proj"))
+
+        kept("update -d above checkout -d x .", ["-d", root, "update", "-d"], plain,
+             ["x/proj/a/new.txt"])
+        kept("update -d x above checkout -d x .", ["-d", root, "update", "-d", "x"], plain)
+        kept("update -d inside checkout -d x .", ["update", "-d"], os.path.join(plain, "x"))
+
+        kept("checkout allx ally again", ["-d", root, "checkout", "allx", "ally"], mods,
+             ["x/proj/a/new.txt", "y/proj/a/new.txt"])
+        # -l: a recursive walk of x/../y descends x/.. without end.
+        kept("update -l x x/../y", ["-d", root, "update", "-l", "x", "x/../y"], mods)
+
+        kept("update in a TopLevelAdmin parent of checkout -d x .", ["update"], tla,
+             ["x/proj/a/new.txt"])
+
+        kept("update above a -d group/x . module", ["-d", root, "update"], group,
+             ["group/x/proj/a/new.txt"])
+        kept("update inside group", ["update"], os.path.join(group, "group"))
+
+        # A named directory is walked, and commit sends explicit files only.
+        wc = os.path.join(arg, "proj")
+        _plant_wc_dir(wc, "content.hq/x", ".")
+        write(os.path.join(wc, "top.txt"), "top\nchanged\n")
+        out = kept("commit above a root-mapped directory", ["commit", "-m", "c"], wc)
+        check("new revision: 1.2" in out, "commit did not write top.txt 1.2:\n" + out)
+        kept("update -d naming the root-mapped directory", ["update", "-d", "content.hq/x"],
+             wc, ["content.hq/x/proj/a/new.txt"])
 
 
 @test("a -ku text file checks out with every line ending encoded")

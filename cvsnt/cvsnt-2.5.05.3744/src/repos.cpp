@@ -229,6 +229,35 @@ int in_blob_store (const char *root, const char *path)
     return found;
 }
 
+/* Does PATH resolve to ROOT itself? */
+int is_repository_root (const char *root, const char *path)
+{
+    size_t root_len = strlen (root);
+    size_t n;
+    int depth = 0;
+    const char *p;
+
+    while (root_len > 0 && ISDIRSEP (root[root_len - 1]))
+	--root_len;
+    if (fnncmp (path, root, root_len) != 0
+	|| (path[root_len] != '\0' && !ISDIRSEP (path[root_len])))
+	return 0;
+    for (p = path + root_len; *p; p += n)
+    {
+	while (ISDIRSEP (*p))
+	    ++p;
+	for (n = 0; p[n] != '\0' && !ISDIRSEP (p[n]); n++)
+	    ;
+	if (n == 0 || (n == 1 && p[0] == '.'))
+	    continue;
+	if (n == 2 && p[0] == '.' && p[1] == '.')
+	    --depth;
+	else
+	    ++depth;
+    }
+    return depth <= 0;
+}
+
 /* Sanitize the repository name (in place) by removing trailing
  * slashes and a trailing "." if present.  It should be safe for
  * callers to use strcat and friends to create repository names.

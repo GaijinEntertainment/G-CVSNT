@@ -46,6 +46,23 @@ struct recursion_frame {
 
 static int do_recursion(struct recursion_frame *frame, int top_level);
 
+/* Directories skipped because they map to the root; see do_dir_proc */
+int root_mapped_skipped = 0;
+
+/* Is REPOS the root, or the Emptydir checkout puts above it? */
+static int is_root_container (const char *repos)
+{
+    size_t len = strlen (current_parsed_root->directory);
+
+    if (repos == NULL)
+	return 0;
+    if (is_repository_root (current_parsed_root->directory, repos))
+	return 1;
+    return fnncmp (repos, current_parsed_root->directory, len) == 0
+	&& ISDIRSEP (repos[len])
+	&& fncmp (repos + len + 1, CVSROOTADM "/" CVSNULLREPOS) == 0;
+}
+
 /* I am half tempted to shove a struct file_info * into the struct
    recursion_frame (but then we would need to modify or create a
    recursion_frame for each file), or shove a struct recursion_frame *
@@ -63,6 +80,7 @@ struct frame_and_file {
 struct frame_and_entries {
     struct recursion_frame *frame;
     List *entries;
+    int top_level;
 };
 
 
@@ -870,6 +888,7 @@ static int do_recursion (struct recursion_frame *frame, int top_level)
 
 	frent.frame = frame;
 	frent.entries = entries;
+	frent.top_level = top_level;
 	err += walklist (dirlist, do_dir_proc, (void *) &frent);
     }
 	if (dirlist)
@@ -1004,6 +1023,7 @@ static int do_dir_proc (Node *p, void *closure)
 	int directory_opened = 0;
 	char *old_update_repos = NULL;
 	int directory_not_valid = 0;
+	int root_mapped = 0, has_wc_repos = 0;
 
     if (fncmp (dir, CVSADM) == 0
 		|| fncmp (dir, CVSDUMMY) == 0)
@@ -1073,7 +1093,10 @@ static int do_dir_proc (Node *p, void *closure)
 			char *d=(char*)xmalloc(strlen(dir)+strlen(CVSADM_REP)+32);
 			sprintf(d,"%s/%s",dir,CVSADM_REP);
 			if(isfile(d))
+			{
 				virtrepos = Name_Repository(dir,update_dir);
+				has_wc_repos = 1;
+			}
 			else
 			{
 				virtrepos = (char*)xmalloc (strlen (repository) + strlen (dir) + 5);
@@ -1114,11 +1137,26 @@ static int do_dir_proc (Node *p, void *closure)
 	}
     }
 
+#ifdef SERVER_SUPPORT
+    /* A working directory below another one, mapped to the root */
+    if (server_active && has_wc_repos && !frent->top_level
+	&& is_repository_root (current_parsed_root->directory, newrepos)
+	&& !is_root_container (mapped_repository))
+	root_mapped = 1;
+#endif
+
     if (in_blob_store (current_parsed_root->directory, newrepos))
     {
 	error (0, 0, "ignoring %s (%s is reserved for the blob store)",
 	       update_dir, fn_root (newrepos));
 	dir_return = R_SKIP_ALL;
+    }
+    else if (root_mapped)
+    {
+	error (0, 0, "ignoring %s (its %s maps it to the repository root; fix %s/%s)",
+	       update_dir, CVSADM_REP, update_dir, CVSADM_REP);
+	dir_return = R_ERROR;
+	root_mapped_skipped++;
     }
 
 	/* Check to see that the CVSADM directory, if it exists, seems to be
@@ -1425,7 +1463,7 @@ static int do_dir_proc (Node *p, void *closure)
     xfree (update_dir);
     update_dir = saved_update_dir;
 
-	if(dir_return == R_ERROR)
+	if(dir_return == R_ERROR || root_mapped)
 		err++;
 
     return (err);
