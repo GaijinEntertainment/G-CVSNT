@@ -54,11 +54,14 @@ Note that the tests initialise repositories with `cvs init -n`. Without `-n`, `i
 register the repository in the machine-global settings, which needs privileges a test should not
 require.
 
-Two cases have to go through a real client/server session because only the client side is
+Some cases have to go through a real client/server session. Two because only the client side is
 affected: the `-ku` line-ending test (the client-side write path) and the test that a client skips
 a `blobs/` directory left in its working copy (it must never send that directory to the server).
-They connect over `:pserver:` to `PserverShim`, a listener on 127.0.0.1 that accepts any login and
-pipes the session into `<cvs> --allow-root=<repo> server`, so they need the `pserver` protocol
+The tests of a nested working directory mapped to the repository root use one too, because the
+server judges the directories a real client sends from its working copy: the refused layouts, the
+`modules2` alias and root ACL variants, and the layouts that must keep working. They connect over
+`:pserver:` to `PserverShim`, a listener on 127.0.0.1 that accepts any login and pipes the session
+into `<cvs> --allow-root=<repo> server`, so they need the `pserver` protocol
 plugin as `<libdir>/protocols/pserver.<so|dll>` and nothing registered anywhere. When the plugin is
 missing these cases fail. On Windows the standalone makefile in `_reports/BUILD-01-Makefile.nmake`
 builds it with `mk.bat plugins`.

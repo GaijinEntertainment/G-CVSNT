@@ -168,6 +168,23 @@ up where `-d` applies**, and naming specific paths means anything outside them i
 is currently no way to say "update everything except X" — see
 `_reports/` for the design work on an exclusion option.
 
+### A nested directory mapped to the repository root
+
+A directory inside a module's working copy whose `CVS/Repository` names the repository root (`.`,
+empty, or the root path) is skipped by the server with
+`ignoring <dir> (its CVS/Repository maps it to the repository root; fix <dir>/CVS/Repository)`,
+and the command exits 1. If the directory belongs to the module and only its `CVS/Repository` is
+damaged, set that file to the directory's module path. If it is a whole-repository checkout made
+with `cvs checkout -d x .` inside the working copy, move it out, or update it by naming it as an
+argument or from inside it.
+A directory whose parent maps to the repository root or to the `CVSROOT/Emptydir` container is not
+skipped: `TopLevelAdmin` layouts, a `-d .` checkout directly inside a whole-repository checkout,
+and `-d group/x .` modules keep working.
+A module that nests a whole-repository module under its own directory through `&` (for example
+`mymod proj &allx` with `allx -d x .`) is refused the same way: checking it out again prints that
+message for `mymod/x` and exits 1, so update that directory by naming it (`cvs update mymod/x`) or
+from inside it.
+
 ## `checkout`
 
 ```

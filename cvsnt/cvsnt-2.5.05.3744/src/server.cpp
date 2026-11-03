@@ -6443,7 +6443,18 @@ int server_main(const char *cmd_name, int (*command)(int argc, char **argv))
 		exitstatus = 1;
 	}
 	else
+	{
+		root_mapped_skipped = 0;
 		exitstatus = (*command) (argument_count, argument_vector);
+		if (root_mapped_skipped)
+		{
+			error (0, 0, "skipped %d director%s mapped to the repository root; fix %s in the director%s named above",
+				root_mapped_skipped, root_mapped_skipped == 1 ? "y" : "ies",
+				CVSADM_REP, root_mapped_skipped == 1 ? "y" : "ies");
+			if (!exitstatus)
+				exitstatus = 1;
+		}
+	}
 
 	TRACE(3,"run postcommand proc server");
 	args.retval = exitstatus;
