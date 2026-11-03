@@ -113,6 +113,9 @@ BlobSocket start_blob_push_client(const char* url, int port, const char* root, i
   }
   raw_set_socket_def_options(raw_sockfd);
   raw_set_socket_no_delay(raw_sockfd, true);
+  //a stalled connection must error out instead of blocking in recv/send forever;
+  //generous enough for a proxy to fetch a missing blob from master on a cache miss
+  raw_send_recieve_sock_timeout(raw_sockfd, timeout_sec > 30 ? timeout_sec : 30);
 
   char greeting[greeting_length+1];
   if (raw_recv_exact(raw_sockfd, greeting, greeting_length) <= 0)
