@@ -2027,6 +2027,261 @@ def t_root_mapped_wc_dir_kept(r):
              wc, ["content.hq/x/proj/a/new.txt"])
 
 
+# A modules2 translation joined with the rest of the client's path can climb
+# out of the root: [root_alias] / = . maps root_alias/../outsider to
+# <root>/./../outsider.  outsider is a real module moved beside the root.
+
+OUTSIDER_SECRET = "OUTSIDER-SECRET"
+
+
+def _outsider_repo(r):
+    # _root_mapped_repo plus outsider beside the root, its content and log
+    # message carrying OUTSIDER_SECRET, and modules2 aliases to climb through.
+    _root_mapped_repo(r)
+    imp = os.path.join(r.root, "impoutsider")
+    write(os.path.join(imp, "secret.txt"), OUTSIDER_SECRET + " content\n")
+    r.cvs(["import", "-m", OUTSIDER_SECRET + " log", "outsider", "VENDOR", "REL0"], cwd=imp)
+    os.replace(os.path.join(r.repo, "outsider"), os.path.join(r.root, "outsider"))
+    _append_cvsroot(r, "modules2", "[root_alias]\n/ = .\n[deep]\nsub = proj\n"
+                                   "[a]\n/ = b\n[b]\n/ = .\n"
+                                   "[palias]\n/ = proj\n[part]\na = proj/a\n")
+
+
+def _outsider_state(r):
+    # Every path below outsider with its bytes, None for a directory.
+    top = os.path.join(r.root, "outsider")
+    state = {}
+    for d, ds, fs in os.walk(top):
+        for n in ds:
+            state[os.path.relpath(os.path.join(d, n), top)] = None
+        for n in fs:
+            with open(os.path.join(d, n), "rb") as f:
+                state[os.path.relpath(os.path.join(d, n), top)] = f.read()
+    return state
+
+
+def _outsider_leaked(out, top):
+    # Whether out, or a file below top, carries outsider content.
+    if OUTSIDER_SECRET in out:
+        return True
+    for d, _, fs in os.walk(top):
+        for n in fs:
+            with open(os.path.join(d, n), "rb") as f:
+                if OUTSIDER_SECRET.encode() in f.read():
+                    return True
+    return False
+
+
+def _maps_outside_msg(rel):
+    # The refusal names the requested path, <root>/rel.
+    return "/%s' maps outside the repository root" % rel
+
+
+@test("a modules2 path climbing out of the root is refused and reads nothing beside it")
+def t_modules2_dotdot_read_refused(r):
+    # checkout, rlog, rannotate, ls and update -d of a planted directory
+    # read outsider; a root alias, a subdirectory key and chained aliases
+    # each lead there.  PserverShim as in t_root_mapped_wc_dir_refused,
+    # plus one local checkout.
+    _outsider_repo(r)
+    before = _outsider_state(r)
+    rel = "root_alias/../outsider"
+
+    def refused(what, args, cwd, rel=rel):
+        os.makedirs(cwd, exist_ok=True)
+        rc, out = run(args, cwd=cwd, expect_ok=False)
+        check(rc != 0, "%s exited 0:\n%s" % (what, out))
+        check(_maps_outside_msg(rel) in out, "%s was not refused:\n%s" % (what, out))
+        check(not _outsider_leaked(out, cwd) and "secret.txt" not in out,
+              "%s read outsider:\n%s" % (what, out))
+        check_eq(_outsider_state(r), before, "outsider after " + what)
+
+    with _pserver_root(r) as root:
+        for i, path in enumerate((rel, "deep/sub/../../outsider", "a/../outsider")):
+            refused("checkout " + path, ["-d", root, "checkout", path],
+                    os.path.join(r.root, "wcco%d" % i), path)
+        for cmd in ("rlog", "rannotate", "ls"):
+            refused(cmd, ["-d", root, cmd, rel], os.path.join(r.root, "wc" + cmd))
+
+        wcs = []
+        for name in ("wcabove", "wcnamed"):
+            top = os.path.join(r.root, name)
+            os.makedirs(top)
+            run(["-d", root, "checkout", "proj"], cwd=top)
+            wcs.append(os.path.join(top, "proj"))
+            _plant_wc_dir(wcs[-1], "zz", rel)
+        # Refused-only: the unfixed server skips zz here as root-mapped.
+        refused("update -d above zz", ["update", "-d"], wcs[0])
+        refused("update -d zz", ["update", "-d", "zz"], wcs[1])
+
+    refused("local checkout", ["-d", r.repo, "checkout", rel], os.path.join(r.root, "wclocal"))
+
+
+@test("a modules2 module named ../outsider fails a root walk instead of walking beside the root")
+def t_modules2_dotdot_module_name_refused(r):
+    # The root listing includes every modules2 name, so a walk of the root
+    # descended <root>/..: rlog and ls read outsider, rtag tagged it.
+    _outsider_repo(r)
+    _append_cvsroot(r, "modules2", "[../outsider]\n/ = proj\n")
+    before = _outsider_state(r)
+    with _pserver_root(r) as root:
+        for args in (["rlog", "."], ["ls", "-R", "."], ["rtag", "T1", "."]):
+            what = " ".join(args)
+            rc, out = run(["-d", root] + args, cwd=r.wc, expect_ok=False)
+            check(rc != 0, "%s exited 0:\n%s" % (what, out))
+            check(_maps_outside_msg("..") in out, "%s was not refused:\n%s" % (what, out))
+            check(OUTSIDER_SECRET not in out and "secret.txt" not in out,
+                  "%s read outsider:\n%s" % (what, out))
+            check_eq(_outsider_state(r), before, "outsider after " + what)
+
+
+@test("commit, add, tag, rtag and import through a modules2 path climbing out of the root write nothing beside it")
+def t_modules2_dotdot_write_refused(r):
+    # A directory planted in a proj working copy with CVS/Repository
+    # root_alias/../outsider; zz is walked after the valid directories.
+    _outsider_repo(r)
+    before = _outsider_state(r)
+    rel = "root_alias/../outsider"
+
+    def refused(what, args, cwd, rel=rel):
+        rc, out = run(args, cwd=cwd, expect_ok=False)
+        check(rc != 0, "%s exited 0:\n%s" % (what, out))
+        check(_maps_outside_msg(rel) in out, "%s was not refused:\n%s" % (what, out))
+        check_eq(_outsider_state(r), before, "outsider after " + what)
+        return out
+
+    def modify_secret(text):
+        # A client edit of secret.txt; the hand-written entry stands in for
+        # the update -d the server now refuses.
+        write(os.path.join(zz, "secret.txt"), text)
+        if "secret.txt" not in entries_of(zz):
+            with open(os.path.join(zz, "CVS", "Entries"), "a", newline="\n") as f:
+                f.write("/secret.txt/1.1.1.1/Thu Jan  1 00:00:00 1970//\n")
+
+    with _pserver_root(r) as root:
+        top = os.path.join(r.root, "wcw")
+        os.makedirs(top)
+        run(["-d", root, "checkout", "proj"], cwd=top)
+        wc = os.path.join(top, "proj")
+        zz = os.path.join(wc, "zz")
+        _plant_wc_dir(wc, "zz", rel)
+
+        # Valid directory first: no part of the commit may land.
+        write(os.path.join(wc, "top.txt"), "top\nchanged\n")
+        modify_secret("changed 1\n")
+        refused("commit of the whole working copy", ["commit", "-m", "c1"], wc)
+        _, out = r.cvs(["rlog", "-h", "proj/top.txt"], cwd=r.root)
+        check("head: 1.1\n" in out, "commit wrote top.txt:\n" + out)
+        # Refused-only: the unfixed server's tag preflight skips zz as root-mapped.
+        refused("tag of the whole working copy", ["tag", "T1"], wc)
+        check_eq(_tagged_in(r, "proj", "T1"), [], "files tagged T1")
+
+        modify_secret("changed 2\n")
+        refused("commit in zz", ["commit", "-m", "c2", "secret.txt"], zz)
+
+        # Refused-only: the unfixed add just schedules; its commit wrote new.txt,v.
+        write(os.path.join(zz, "new.txt"), "new\n")
+        refused("add of a file", ["add", "new.txt"], zz, rel + "/new.txt")
+        if "new.txt" not in entries_of(zz):
+            with open(os.path.join(zz, "CVS", "Entries"), "a", newline="\n") as f:
+                f.write("/new.txt/0/Initial new.txt//\n")
+        refused("commit of an added file", ["commit", "-m", "c3", "new.txt"], zz)
+
+        os.makedirs(os.path.join(zz, "nd"))
+        refused("add of a directory", ["add", "nd"], zz, rel + "/nd")
+        refused("tag in zz", ["tag", "T2"], zz)
+        refused("rtag", ["-d", root, "rtag", "T3", rel], r.wc)
+
+        # The first import writes inside the root; the second updates
+        # the ,v files it maps to.
+        imp = os.path.join(r.root, "imp2")
+        write(os.path.join(imp, "secret.txt"), "imported\n")
+        run(["-d", root, "import", "-m", "i1", rel, "V2", "R1"], cwd=imp, expect_ok=False)
+        check_eq(_outsider_state(r), before, "outsider after the first import")
+        refused("second import", ["-d", root, "import", "-m", "i2", rel, "V2", "R2"], imp,
+                rel + "/secret.txt")
+
+
+@test("modules2 aliases of the root and of a module, and a .. that stays inside the root, still work")
+def t_modules2_alias_kept(r):
+    # Same aliases as the refused tests; must pass on an unfixed server too.
+    _outsider_repo(r)
+
+    def kept(what, args, cwd, delivered=()):
+        os.makedirs(cwd, exist_ok=True)
+        rc, out = run(args, cwd=cwd, expect_ok=False)
+        check_eq(rc, 0, "%s exit status (output:\n%s)" % (what, out))
+        check("maps outside the repository root" not in out, "%s was refused:\n%s" % (what, out))
+        check(not _outsider_leaked(out, cwd), "%s read outsider:\n%s" % (what, out))
+        for f in delivered:
+            check(os.path.isfile(os.path.join(cwd, *f.split("/"))),
+                  "%s did not deliver %s:\n%s" % (what, f, out))
+        return out
+
+    with _pserver_root(r) as root:
+        for i, (path, delivered) in enumerate((
+                ("root_alias", ["root_alias/proj/top.txt", "root_alias/proj/a/a.txt",
+                                "root_alias/other/o.txt"]),
+                ("root_alias/proj", ["root_alias/proj/top.txt", "root_alias/proj/a/a.txt"]),
+                ("palias", ["palias/top.txt", "palias/a/a.txt"]),
+                ("part", ["part/a/a.txt"]))):
+            top = os.path.join(r.root, "wck%d" % i)
+            kept("checkout " + path, ["-d", root, "checkout", path], top, delivered)
+            kept("update -d in " + path, ["update", "-d"], os.path.join(top, *path.split("/")))
+        for cmd in ("rlog", "ls"):
+            out = kept(cmd + " root_alias/proj/../other",
+                       ["-d", root, cmd, "root_alias/proj/../other"], r.wc)
+            check("o.txt" in out, "%s did not list o.txt:\n%s" % (cmd, out))
+
+
+@test("a backslash climb in a Directory or Entry path reads and writes nothing beside the root")
+def t_map_backslash_climb_refused(r):
+    # Windows also splits on \, which pathname_levels does not; there every
+    # form must be refused.  On POSIX the alias form is refused too, after
+    # do_module rewrites \ to /, and proj/.. hits the old `..' guard; the tag
+    # and Entry forms reach nothing of the fix there.
+    _outsider_repo(r)
+    before = _outsider_state(r)
+    root = r.repo.replace(os.sep, "/")
+    climb = "..\\..\\outsider"
+    for what, everywhere, reqs in (
+            ("update of root_alias/proj/" + climb, True,
+             ["Directory .", root + "/root_alias/proj/" + climb, "update"]),
+            ("update of proj/" + climb, False,
+             ["Directory .", root + "/proj/" + climb, "update"]),
+            ("tag of proj/" + climb, False,
+             ["Argument T1", "Directory .", root + "/proj/" + climb, "tag"]),
+            ("update of Entry %s\\secret.txt" % climb, False,
+             ["Directory .", root + "/proj", "Entry /%s\\secret.txt/1.1///" % climb, "update"])):
+        rc, out = _blob_session(r, reqs)
+        if everywhere or os.name == "nt":
+            check("maps outside the repository root" in out, "%s was not refused:\n%s" % (what, out))
+        check(OUTSIDER_SECRET not in out, "%s read outsider:\n%s" % (what, out))
+        check_eq(_outsider_state(r), before, "outsider after " + what)
+
+
+@test("a refusal inside the per-file walk ends the session and leaves no lock behind")
+def t_map_refusal_releases_locks(r):
+    # Entry .. in a directory mapped to the root maps to <root>/.. after the
+    # read lock is taken; file locks (LockServer=none) leave a stale lock
+    # visible.  Not an escape: the unfixed server reported a conflict.
+    # Windows keeps the default lock path: wnt_mkdir returns CreateDirectory's
+    # BOOL, so file locks cannot be taken there.
+    _root_mapped_repo(r)
+    if os.name != "nt":
+        _append_cvsroot(r, "config", "LockServer=none\n")
+    rc, out = _blob_session(r, ["Directory .", r.repo.replace(os.sep, "/"),
+                                "Entry /../1.1///", "update"])
+    lines = out.split("\n")
+    check(any(l.startswith("E ") and _maps_outside_msg("..") in l for l in lines),
+          "Entry .. was not refused:\n" + out)
+    check_eq([l.rstrip() for l in lines if l == "ok" or l.startswith("error")], ["error"],
+             "session result (output:\n%s)" % out)
+    locks = [os.path.join(d, n) for d, ds, fs in os.walk(r.repo) for n in ds + fs
+             if n.startswith("#cvs.")]
+    check_eq(locks, [], "lock files left after the refusal")
+
+
 @test("a -ku text file checks out with every line ending encoded")
 def t_unicode_text_line_endings(r):
     # The line-ending branch of OutputAsEncoded reused the buffer left by

@@ -59,7 +59,10 @@ affected: the `-ku` line-ending test (the client-side write path) and the test t
 a `blobs/` directory left in its working copy (it must never send that directory to the server).
 The tests of a nested working directory mapped to the repository root use one too, because the
 server judges the directories a real client sends from its working copy: the refused layouts, the
-`modules2` alias and root ACL variants, and the layouts that must keep working. They connect over
+`modules2` alias and root ACL variants, and the layouts that must keep working. So do the tests of a
+`modules2` path that climbs out of the root with `..` and of the aliases that must keep working,
+except the backslash case, which runs over a raw `cvs server` session and asserts the refusal of
+every form only on Windows. They connect over
 `:pserver:` to `PserverShim`, a listener on 127.0.0.1 that accepts any login and pipes the session
 into `<cvs> --allow-root=<repo> server`, so they need the `pserver` protocol
 plugin as `<libdir>/protocols/pserver.<so|dll>` and nothing registered anywhere. When the plugin is
