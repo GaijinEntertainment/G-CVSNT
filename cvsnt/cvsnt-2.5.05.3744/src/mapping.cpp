@@ -612,6 +612,34 @@ static int lookup_module2(const char *file, char *left, char *right, modules2_st
 	return ret?ret:renamed;
 }
 
+/* Refuse a path below the root that climbs above it */
+static void check_mapped_repository(const char *repository, const char *mapped)
+{
+	const char *root = current_parsed_root->directory;
+	size_t len = strlen(root), n;
+	const char *p;
+	int depth = 0;
+
+	while(len>0 && ISDIRSEP(root[len-1]))
+		--len;
+	if(fnncmp(mapped,root,len) || (mapped[len] && !ISDIRSEP(mapped[len])))
+		return;
+	for(p=mapped+len; *p; p+=n)
+	{
+		while(ISDIRSEP(*p))
+			++p;
+		for(n=0; p[n] && !ISDIRSEP(p[n]); n++)
+			;
+		if(n==2 && p[0]=='.' && p[1]=='.')
+		{
+			if(--depth<0)
+				error(1,0,"'%s' maps outside the repository root",fn_root(repository));
+		}
+		else if(n && !(n==1 && p[0]=='.'))
+			++depth;
+	}
+}
+
 char *map_repository(const char *repository)
 {
 	char left[MAX_PATH],right[MAX_PATH];
@@ -635,7 +663,7 @@ char *map_repository(const char *repository)
 	if(!strcmp(repository,current_parsed_root->directory))
 	{
 		if(r) return r;
-		else xstrdup(repository);
+		else return xstrdup(repository);
 	}
 
 	res = lookup_module2(relative_repos(repository),left,right, NULL, NULL);
@@ -646,6 +674,7 @@ char *map_repository(const char *repository)
 		TRACE(3,"map_repository - lookup_module2 returned res==1");
 		char *ret = (char*)xmalloc(strlen(current_parsed_root->directory)+strlen(left)+strlen(right)+10);
 		sprintf(ret,"%s/%s%s",current_parsed_root->directory,PATCH_NULL(left),PATCH_NULL(right));
+		check_mapped_repository(repository,ret);
 		xfree(r);
 		TRACE(3,"map_repository - return(ret) \"%s\"",PATCH_NULL(ret));
 		return ret;
@@ -664,6 +693,7 @@ char *map_repository(const char *repository)
 		/* Partial translation - use emptydir, or if the file/directory exists, use that */
 		char *ret = (char*)xmalloc(strlen(current_parsed_root->directory)+sizeof(CVSROOTADM)+sizeof(CVSNULLREPOS)+strlen(left)+strlen(right)+10);
 		sprintf(ret,"%s/%s%s",current_parsed_root->directory,PATCH_NULL(left),PATCH_NULL(right));
+		check_mapped_repository(repository,ret);
 		TRACE(3,"map_repository - look for %s",PATCH_NULL(ret));
 		if(!isfile(ret))
 			sprintf(ret,"%s/%s/%s",current_parsed_root->directory,CVSROOTADM,CVSNULLREPOS);
@@ -674,6 +704,7 @@ char *map_repository(const char *repository)
 
 	if(r) TRACE(3,"map_repository - return(r) \"%s\"",PATCH_NULL(r));
 	else TRACE(3,"map_repository - return(repository) \"%s\"",PATCH_NULL(repository));
+	check_mapped_repository(repository,repository);
 	if(r) return r;
 	else return xstrdup(repository);
 }
