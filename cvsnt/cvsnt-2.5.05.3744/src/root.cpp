@@ -787,7 +787,7 @@ new_root_ok:
 	// Wipe the password from the stored cvsroot string
 	if(password_begin && password_end && password_begin<password_end)
 	{
-		strcpy((char*)newroot->original+password_begin,newroot->original+password_end);
+		memmove((char*)newroot->original+password_begin,newroot->original+password_end,strlen(newroot->original+password_end)+1);
 		newroot->password_used = true;
 	}
 
