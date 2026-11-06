@@ -2027,6 +2027,21 @@ def t_root_mapped_wc_dir_kept(r):
              wc, ["content.hq/x/proj/a/new.txt"])
 
 
+@test("a password in the root is removed from CVS/Root intact at any root length")
+def t_root_password_removed(r):
+    # On Rocky 8, password "s" exposed an overlapping strcpy at more heap placements than "shim".
+    for pad in (16, 25, 34, 43):
+        p = Repo(os.path.join(r.root, "d" * pad))
+        p.import_tree("m", {"a.txt": "one\n"})
+        with _pserver_root(p) as root:
+            run(["-d", root.replace(":shim@", ":s@", 1), "checkout", "m"], cwd=p.wc)
+            wc = os.path.join(p.wc, "m")
+            # A garbled root can name a public address, so update must not use it.
+            if check_eq(read(os.path.join(wc, "CVS", "Root")),
+                        root.replace(":shim@", "@", 1) + "\n", "CVS/Root, %d path bytes more" % pad):
+                run(["update"], cwd=wc)
+
+
 @test("a -ku text file checks out with every line ending encoded")
 def t_unicode_text_line_endings(r):
     # The line-ending branch of OutputAsEncoded reused the buffer left by
