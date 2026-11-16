@@ -265,10 +265,13 @@ docker run -d --name cafs-proxy --restart unless-stopped -t \
     cvsnt-cafs-proxy
 ```
 
-`MASTER_URL` is the blob server's host name only; the proxy always
-connects to it on port 2403.
+`MASTER_URL` is the blob server's host name, optionally followed by
+`:port` or `@port` (`-e MASTER_URL=cvs.example.com:2404`); without a
+port the proxy connects to 2403. The proxy itself listens on 2403;
+`-e LISTEN_PORT=2404` moves it, and the `-p` mapping has to follow.
 
-Clients at that site then use `--blob_url <proxy host>@2403`, or
+Clients at that site then use `--blob_url <proxy host>@<port>`, the
+host port that `-p` publishes (2403 above), or
 `BlobEncryptedURL0` in a pserver configuration that points at the proxy.
 
 ## A blob proxy on the LAN
