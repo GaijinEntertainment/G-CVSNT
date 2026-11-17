@@ -47,7 +47,8 @@ static void test_master_url()
     check_master_url("::1@2404", "::1", 2404);
 
     const char *refused[] = {"", ":2404", "@2404", "cafs.lan:", "cafs.lan@", "cafs.lan:0",
-                             "cafs.lan:65536", "cafs.lan:24x", "cafs.lan:-1"};
+                             "cafs.lan:65536", "cafs.lan:24x", "cafs.lan:-1", "cafs.lan: 2404",
+                             "cafs.lan:+2404", "cafs.lan:2404 "};
     for (const char *s : refused) {
         check_master_url_refused(s);
     }
@@ -60,7 +61,8 @@ static void test_port()
     check(cafs_parse_port("1", port) && port == 1, "1 is the lowest port");
     check(cafs_parse_port("65535", port) && port == 65535, "65535 is the highest port");
 
-    const char *refused[] = {"", "0", "65536", "99999999999999999999", "abc", "24x", "-1"};
+    const char *refused[] = {"", "0", "00", "65536", "99999999999999999999", "abc", "24x", "-1",
+                             " 2404", "+2404", "2404 ", "\t2404", "0x10"};
     for (const char *s : refused) {
         port = 7;
         check(!cafs_parse_port(s, port) && port == 7, s);

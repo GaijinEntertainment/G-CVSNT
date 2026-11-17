@@ -1,11 +1,18 @@
-#include <stdlib.h>
 #include "cafs_proxy_args.h"
 
 bool cafs_parse_port(const char *s, int &port)
 {
-    char *end = nullptr;
-    const long v = strtol(s, &end, 10);
-    if (!*s || *end || v <= 0 || v > 65535) {
+    long v = 0;
+    for (const char *p = s; *p; ++p) {
+        if (*p < '0' || *p > '9') {
+            return false;
+        }
+        v = v * 10 + (*p - '0');
+        if (v > 65535) {
+            return false;
+        }
+    }
+    if (v == 0) {
         return false;
     }
     port = (int)v;
