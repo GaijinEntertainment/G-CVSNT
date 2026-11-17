@@ -5,7 +5,7 @@
 # ENCRYPTION=none runs without a secret; the proxy then refuses clients that authenticate.
 set -eu
 : "${MASTER_URL:?set MASTER_URL (host[:port] of the cafs server; port defaults to 2403)}"
-: "${LISTEN_PORT:=}"
+: "${PORT:=2403}"
 : "${CACHE_FOLDER:=/var/cache/cafs}"
 : "${VALIDATE_BLOBS:=}"
 : "${UPDATE_MTIME:=}"
@@ -20,7 +20,7 @@ case "$ENCRYPTION" in
     set -- "$ENCRYPTION" "$BLOB_OTP" ;;
   *) echo "ENCRYPTION must be none, encryption or mandatory_encryption" >&2; exit 1 ;;
 esac
-[ -z "$LISTEN_PORT" ] || set -- port "$LISTEN_PORT" "$@"
+set -- port "$PORT" "$@"
 : "${CACHE_SOFT_LIMIT_SIZE:=102400}"
 # shellcheck disable=SC2086
 exec /usr/local/cvsnt/bin/cafs_proxy_server "$MASTER_URL" "$CACHE_FOLDER" $VALIDATE_BLOBS $UPDATE_MTIME "$@" "$CACHE_SOFT_LIMIT_SIZE"
