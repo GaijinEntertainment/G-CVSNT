@@ -1,10 +1,11 @@
 #!/bin/bash
-# cafs_proxy_server master_url cache_folder [validate_blobs_from_master] [update_mtime_on_access] [encryption|mandatory_encryption secret] [cache_soft_limit_size_mb]
+# cafs_proxy_server master_url[:port] cache_folder [port listen_port] [validate_blobs_from_master] [update_mtime_on_access] [encryption|mandatory_encryption secret] [cache_soft_limit_size_mb]
 #
 # BLOB_OTP is the shared secret; SECRET is accepted as an alias.
 # ENCRYPTION=none runs without a secret; the proxy then refuses clients that authenticate.
 set -eu
-: "${MASTER_URL:?set MASTER_URL (host name of the cafs server; port is always 2403)}"
+: "${MASTER_URL:?set MASTER_URL (host[:port] of the cafs server; port defaults to 2403)}"
+: "${PORT:=2403}"
 : "${CACHE_FOLDER:=/var/cache/cafs}"
 : "${VALIDATE_BLOBS:=}"
 : "${UPDATE_MTIME:=}"
@@ -19,6 +20,7 @@ case "$ENCRYPTION" in
     set -- "$ENCRYPTION" "$BLOB_OTP" ;;
   *) echo "ENCRYPTION must be none, encryption or mandatory_encryption" >&2; exit 1 ;;
 esac
+set -- port "$PORT" "$@"
 : "${CACHE_SOFT_LIMIT_SIZE:=102400}"
 # shellcheck disable=SC2086
 exec /usr/local/cvsnt/bin/cafs_proxy_server "$MASTER_URL" "$CACHE_FOLDER" $VALIDATE_BLOBS $UPDATE_MTIME "$@" "$CACHE_SOFT_LIMIT_SIZE"

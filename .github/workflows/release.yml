@@ -415,6 +415,7 @@ jobs:
           docker run -d --name t-cafs  -t -e DIR_FOR_ROOTS=/tmp -e SECRET=0123456789abcdef "$P-cafs-server:$VERSION"
           docker run -d --name t-proxy -t -e MASTER_URL=localhost -e BLOB_OTP=0123456789abcdef "$P-cafs-proxy:$VERSION"
           docker run -d --name t-lproxy -t -e MASTER_URL=localhost -e ENCRYPTION=none "$P-cafs-proxy:$VERSION"
+          docker run -d --name t-pproxy -t -e MASTER_URL=localhost:2405 -e PORT=2404 -e ENCRYPTION=none "$P-cafs-proxy:$VERSION"
           # each server must accept a connection on its port within 30 s
           accepts() {
             ip=$(docker inspect -f '{{.NetworkSettings.IPAddress}}' "$1")
@@ -424,10 +425,11 @@ jobs:
             done
             echo "$1 does not accept connections on port $2"; docker logs "$1"; return 1
           }
-          accepts t-auth 2401 && accepts t-lock 2402 && accepts t-cafs 2403 && accepts t-proxy 2403 && accepts t-lproxy 2403
+          accepts t-auth 2401 && accepts t-lock 2402 && accepts t-cafs 2403 && accepts t-proxy 2403 && accepts t-lproxy 2403 && accepts t-pproxy 2404
           docker logs t-lproxy 2>&1 | grep -q 'local only'
-          for c in t-auth t-lock t-cafs t-proxy t-lproxy; do docker logs "$c" 2>&1 | tail -3; done
-          docker rm -f t-auth t-lock t-cafs t-proxy t-lproxy >/dev/null
+          docker logs t-pproxy 2>&1 | grep -qE 'listening at port 2404, master localhost:2405($|[^:0-9])'
+          for c in t-auth t-lock t-cafs t-proxy t-lproxy t-pproxy; do docker logs "$c" 2>&1 | tail -3; done
+          docker rm -f t-auth t-lock t-cafs t-proxy t-lproxy t-pproxy >/dev/null
           docker images "$P-*"
       - name: Push the per-commit tags
         if: ${{ startsWith(inputs.images, 'push') }}

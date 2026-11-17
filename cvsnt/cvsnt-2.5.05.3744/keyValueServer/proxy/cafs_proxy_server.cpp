@@ -2,9 +2,11 @@
 #include <stdlib.h>
 #include <stdint.h>
 #include <string.h>
+#include <string>
 #include "../include/blobs_encryption.h"
 #include "../include/blob_server.h"
 #include "../include/blob_sockets.h"//move init to out of line
+#include "cafs_proxy_args.h"
 #define BLOB_LOG_LEVEL LOG_WARNING
 #include "../sampleImplementation/def_log_printf.cpp"
 
@@ -16,7 +18,7 @@ int main(int argc, const char **argv)
 {
   if (argc < 3)
   {
-    printf("Usage is cafs_proxy_server master_url cache_folder [validate_blobs_from_master] [update_mtime_on_access] [encryption/mandatory_encryption secret] [cache_soft_limit_size (mb). default is 102400 == 100Gb]\n");
+    printf("Usage is cafs_proxy_server master_url[:port|@port](2403) cache_folder [port listen_port(2403)] [validate_blobs_from_master] [update_mtime_on_access] [encryption/mandatory_encryption secret] [cache_soft_limit_size (mb). default is 102400 == 100Gb]\n");
     return 1;
   }
   if (!blob_init_sockets())
@@ -28,6 +30,13 @@ int main(int argc, const char **argv)
   CafsServerEncryption encryption = CafsServerEncryption::Local;
   CafsClientAuthentication auth_on_master = CafsClientAuthentication::AllowNoAuthPrivate;
   bool update_mtimes = false, validate_blobs = false;
+  std::string master_host;
+  int master_port = cafs_default_port, listen_port = cafs_default_port;
+  if (!cafs_split_master_url(argv[1], master_host, master_port))
+  {
+    fprintf(stderr, "invalid master_url <%s>, expected host, host:port or host@port\n", argv[1]);
+    return 1;
+  }
   int pc = 3;
   for (; pc < argc;)
   {
@@ -55,15 +64,23 @@ int main(int argc, const char **argv)
     {
       validate_blobs = true;
       ++pc;
+    } else if (strcmp(argv[pc], "port") == 0)
+    {
+      if (argc <= pc + 1 || !cafs_parse_port(argv[pc+1], listen_port))
+      {
+        fprintf(stderr, "port has to be followed by a number in 1..65535\n");
+        return 1;
+      }
+      pc += 2;
     }
     else break;
   }
-  const int master_port = 2403;
-  init_proxy(argv[1], master_port, argv[2], argc>pc ? atoi(argv[pc]) : 100*1024, encryption_secret, auth_on_master, update_mtimes, validate_blobs);
-  printf("Starting %s%s server listening at port %d%s\n",
-    encryption == CafsServerEncryption::Public ? "optional " : " ", encryption_secret ? "encrypted" : "local only", master_port,
+  init_proxy(master_host.c_str(), master_port, argv[2], argc>pc ? atoi(argv[pc]) : 100*1024, encryption_secret, auth_on_master, update_mtimes, validate_blobs);
+  printf("Starting %s%s server listening at port %d, master %s:%d%s\n",
+    encryption == CafsServerEncryption::Public ? "optional " : " ", encryption_secret ? "encrypted" : "local only", listen_port,
+    master_host.c_str(), master_port,
     update_mtimes ? ", blob mtimes modified on access" : "");
-  const bool result = start_push_server(master_port, 1024, nullptr, encryption_secret, encryption);
+  const bool result = start_push_server(listen_port, 1024, nullptr, encryption_secret, encryption);
   printf("server quit %s", result ? "with error\n" :"normally\n");
   close_proxy();
   blob_close_sockets();

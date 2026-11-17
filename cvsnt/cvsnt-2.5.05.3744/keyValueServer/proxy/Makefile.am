@@ -2,6 +2,7 @@ AM_CPPFLAGS = -std=c++17
 cafs_proxy_server_SOURCES = \
 	free_disk_space.cpp \
     cafs_proxy_server.cpp \
+    cafs_proxy_args.cpp \
     proxy_file_lib.cpp \
     gc_proc_monitor.cpp \
     ../../ca_blobs_fs/src/fileio.cpp \

@@ -1,12 +1,30 @@
 # Tests
 
-Three suites, in increasing order of what they need to run.
+Four suites, in increasing order of what they need to run.
 
 | Suite | What it covers | Needs |
 | --- | --- | --- |
+| `unit/proxy_args_tests.cpp` | `cafs_proxy_server` command line: `master_url` forms and the listen port | A C++17 compiler |
 | `unit/unit_tests.cpp` | Header-resident blob code: header format, the streaming header accumulator, wire hash encoding | A C++17 compiler, zlib, zstd. No repository, no server, no socket |
 | `regress.py` | End-to-end behaviour against a **local** repository: import, checkout, commit, tag, branch, sticky tags, `-C`/`-n` backups, pruning | A built `cvs` and its plugin directory |
 | `testcvs.py` | The original CVSNT acceptance suite: 17 scenarios including `-kB` binary delta and the `*info` triggers | A built `cvs`, and `test_data/` |
+
+## `unit/proxy_args_tests.cpp`
+
+Built with the proxy's own `cafs_proxy_args.cpp`.
+
+```bash
+cd testcvs/unit
+c++ -std=c++17 proxy_args_tests.cpp ../../keyValueServer/proxy/cafs_proxy_args.cpp -o proxy_args_tests
+./proxy_args_tests
+```
+
+On Windows:
+
+```
+cl /nologo /EHsc /std:c++17 proxy_args_tests.cpp ..\..\keyValueServer\proxy\cafs_proxy_args.cpp ^
+   /Fe:proxy_args_tests.exe
+```
 
 ## `unit/unit_tests.cpp`
 

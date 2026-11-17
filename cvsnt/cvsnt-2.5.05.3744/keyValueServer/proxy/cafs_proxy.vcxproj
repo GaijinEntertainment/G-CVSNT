@@ -320,6 +320,7 @@
   <ItemGroup>
     <ClCompile Include="..\serverLib\blob_push_proc.cpp" />
     <ClCompile Include="..\serverLib\blob_push_server.cpp" />
+    <ClCompile Include="cafs_proxy_args.cpp" />
     <ClCompile Include="cafs_proxy_server.cpp" />
     <ClCompile Include="free_disk_space.cpp" />
     <ClCompile Include="gc_thread_monitor.cpp" />
