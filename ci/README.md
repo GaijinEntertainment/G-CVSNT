@@ -30,8 +30,8 @@ is overridden to a private repository.
   deterministic build number into `build.h`.
 - **`linux-server-tests`** (`ubuntu-latest`) — builds the server, runs the suites, brings up a
   throwaway `:pserver:` contour, runs the smoke scenario.
-- **`windows-client`** (`windows-2022`) — builds the client, runs `unit_tests`, `regress.py`,
-  `testcvs.bat`, uploads the client tree as an artifact.
+- **`windows-client`** (`windows-2022`) — builds the client, runs `unit_tests`,
+  `proxy_args_tests`, `regress.py`, `testcvs.bat`, uploads the client tree as an artifact.
 
 A failing suite does not stop its job: every later step still runs, so one broken case cannot
 hide the rest of the result. Each step is gated on the step it actually needs — the suites gate
@@ -106,4 +106,4 @@ commit's committer date, not the build time, so Linux and Windows agree for the 
 ## Known limitations
 
 - No macOS job.
-- `unit_tests` runs on Windows only; there is no Linux/`Makefile.am` entry for it.
+- `unit_tests` and `proxy_args_tests` run on Windows only; there is no Linux/`Makefile.am` entry for them.

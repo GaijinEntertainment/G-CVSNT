@@ -230,6 +230,19 @@ jobs:
           .\unit_tests.exe
           if ($LASTEXITCODE -ne 0) { throw "unit_tests failed" }
 
+      - name: proxy_args_tests (testcvs/unit, cafs_proxy_server command line)
+        if: ${{ !cancelled() }}
+        shell: pwsh
+        working-directory: src/${{ env.SRC }}/testcvs
+        run: |
+          if (-not (Test-Path unit/proxy_args_tests.cpp)) { throw "testcvs/unit/proxy_args_tests.cpp not found — this tree predates it; pass a base/prs combination that includes it" }
+          cd unit
+          $vs = & "${env:ProgramFiles(x86)}\Microsoft Visual Studio\Installer\vswhere.exe" -latest -products * -requires Microsoft.VisualStudio.Component.VC.Tools.x86.x64 -property installationPath
+          cmd /c "call `"$vs\VC\Auxiliary\Build\vcvars64.bat`" && cl /nologo /EHsc /std:c++17 proxy_args_tests.cpp ..\..\keyValueServer\proxy\cafs_proxy_args.cpp /Fe:proxy_args_tests.exe"
+          if ($LASTEXITCODE -ne 0) { throw "proxy_args_tests did not compile" }
+          .\proxy_args_tests.exe
+          if ($LASTEXITCODE -ne 0) { throw "proxy_args_tests failed" }
+
       - name: regress.py
         if: ${{ !cancelled() && steps.stage.outcome == 'success' }}
         shell: bash

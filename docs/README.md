@@ -30,7 +30,7 @@ command set, the RCS format, ACLs, triggers — is unchanged.
 | --- | --- |
 | [../known_issues.md](../known_issues.md) | The defects still open, ordered by severity, and — more usefully — the ones where the obvious fix is wrong and why |
 | [../suggested_optimizations.md](../suggested_optimizations.md) | Why `update` and `tag` scale with file count rather than data volume, and a ranked plan |
-| [../cvsnt/cvsnt-2.5.05.3744/testcvs/README.md](../cvsnt/cvsnt-2.5.05.3744/testcvs/README.md) | The three test suites and what each needs to run |
+| [../cvsnt/cvsnt-2.5.05.3744/testcvs/README.md](../cvsnt/cvsnt-2.5.05.3744/testcvs/README.md) | The test suites and what each needs to run |
 
 ## Analysis reports
 

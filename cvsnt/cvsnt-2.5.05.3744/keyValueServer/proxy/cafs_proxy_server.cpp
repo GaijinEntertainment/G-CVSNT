@@ -6,44 +6,13 @@
 #include "../include/blobs_encryption.h"
 #include "../include/blob_server.h"
 #include "../include/blob_sockets.h"//move init to out of line
+#include "cafs_proxy_args.h"
 #define BLOB_LOG_LEVEL LOG_WARNING
 #include "../sampleImplementation/def_log_printf.cpp"
 
 void init_proxy(const char *url, int port, const char *cache, uint64_t sz, const char *encryption_secret, CafsClientAuthentication auth_on_master, bool update_mtimes, bool validate_blobs);
 void close_proxy();
 extern bool proxy_allow_push;
-
-static const int default_port = 2403;
-
-static bool parse_port(const char *s, int &port)
-{
-  char *end = nullptr;
-  const long v = strtol(s, &end, 10);
-  if (!*s || *end || v <= 0 || v > 65535)
-    return false;
-  port = (int)v;
-  return true;
-}
-
-static bool split_master_url(const char *arg, std::string &host, int &port)
-{
-  host = arg;
-  port = default_port;
-  size_t sep = host.rfind('@');
-  if (sep == std::string::npos)
-  {
-    const size_t colon = host.find(':');
-    if (colon != std::string::npos && host.find(':', colon + 1) == std::string::npos)
-      sep = colon;
-  }
-  if (sep != std::string::npos)
-  {
-    if (!parse_port(host.c_str() + sep + 1, port))
-      return false;
-    host.resize(sep);
-  }
-  return !host.empty();
-}
 
 int main(int argc, const char **argv)
 {
@@ -62,8 +31,8 @@ int main(int argc, const char **argv)
   CafsClientAuthentication auth_on_master = CafsClientAuthentication::AllowNoAuthPrivate;
   bool update_mtimes = false, validate_blobs = false;
   std::string master_host;
-  int master_port = default_port, listen_port = default_port;
-  if (!split_master_url(argv[1], master_host, master_port))
+  int master_port = cafs_default_port, listen_port = cafs_default_port;
+  if (!cafs_split_master_url(argv[1], master_host, master_port))
   {
     fprintf(stderr, "invalid master_url <%s>, expected host, host:port or host@port\n", argv[1]);
     return 1;
@@ -97,7 +66,7 @@ int main(int argc, const char **argv)
       ++pc;
     } else if (strcmp(argv[pc], "port") == 0)
     {
-      if (argc <= pc + 1 || !parse_port(argv[pc+1], listen_port))
+      if (argc <= pc + 1 || !cafs_parse_port(argv[pc+1], listen_port))
       {
         fprintf(stderr, "port has to be followed by a number in 1..65535\n");
         return 1;
